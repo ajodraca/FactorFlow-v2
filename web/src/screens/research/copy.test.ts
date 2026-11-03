@@ -638,3 +638,46 @@ describe("copy.ts completeness and keying", () => {
     expect(copy.SHELL_ROUTES.followedStocks).toBe("/instruments");
   });
 });
+
+// CAP-002-E4-S9 T011: the set history dialog's controls (Open Gap 3; DEC-0172).
+describe("copy.ts set history controls", () => {
+  it("names the paging and closing controls", () => {
+    expect(copy.SCORE_SET.showMore).toBe("Show more");
+    expect(copy.SCORE_SET.close).toBe("Close");
+  });
+});
+
+// CAP-002-E4-S9 T011: the Research screen's title, the h1 before a count exists (DEC-0170).
+describe("copy.ts Research screen strings", () => {
+  it("names the screen", () => {
+    expect(copy.RESULTS.title).toBe("Research");
+    expect(copy.RESULTS.sortLabels).toEqual({
+      symbol: "symbol",
+      value: "value",
+      growth: "growth",
+      momentum: "momentum",
+    });
+  });
+});
+
+// CAP-002-E4-S9 T011 / Open Gap 2: one sentence per latest-download state (DEC-0171).
+describe("copy.ts latest download sentences", () => {
+  const started = "2026-10-15 17:30 CDT";
+  const ended = "2026-10-15 18:30 CDT";
+
+  it("reads one sentence per run state, partial never as Complete", () => {
+    expect(copy.RESULTS.latestDownloadCancelling(started)).toBe(
+      `The latest download, started ${started}, is Cancelling`,
+    );
+    expect(copy.RESULTS.latestDownloadPartial(started, ended)).toBe(
+      `The latest download, started ${started}, ended Partial at ${ended}`,
+    );
+    expect(copy.RESULTS.latestDownloadCancelled(started, ended)).toBe(
+      `The latest download, started ${started}, ended Cancelled at ${ended}`,
+    );
+    expect(copy.RESULTS.latestDownloadAbandoned(started, ended)).toBe(
+      `The latest download, started ${started}, ended Abandoned at ${ended}`,
+    );
+    expect(copy.RESULTS.latestDownloadPartial(started, ended)).not.toContain("Complete");
+  });
+});

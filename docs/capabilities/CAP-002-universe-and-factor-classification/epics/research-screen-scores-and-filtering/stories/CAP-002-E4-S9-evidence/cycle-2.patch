@@ -1,0 +1,702 @@
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index a957159..7be5590 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -646,3 +646,16 @@ describe("copy.ts set history controls", () => {
+     expect(copy.SCORE_SET.close).toBe("Close");
+   });
+ });
++
++// CAP-002-E4-S9 T011: the Research screen's title, the h1 before a count exists (DEC-0170).
++describe("copy.ts Research screen strings", () => {
++  it("names the screen", () => {
++    expect(copy.RESULTS.title).toBe("Research");
++    expect(copy.RESULTS.sortLabels).toEqual({
++      symbol: "symbol",
++      value: "value",
++      growth: "growth",
++      momentum: "momentum",
++    });
++  });
++});
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 4646f4b..2497d8b 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -436,6 +436,18 @@ export const SORT = {
+ 
+ /** The results header and the nothing-found and never-scored bodies (UX 1.1, 1.4). */
+ export const RESULTS = {
++  /**
++   * The screen title, which the h1 reads until a scored result gives it a count
++   * and in the never-populated state (UX design 1.1; CAP-002-E4-S9 Open Gap 1,
++   * DEC-0170).
++   */
++  title: "Research",
++  /**
++   * The as-of line's *sorted by* labels: the Symbol column, or a factor by
++   * name for both its percentile and standardised-score keys (UX design 0 and
++   * 1.2; CAP-002-E4-S9 Open Gap 8).
++   */
++  sortLabels: { symbol: "symbol", value: "value", growth: "growth", momentum: "momentum" },
+   /** The results table's two text column headers (UX 1.1 column table; CAP-002-E4-S6, DEC-0239). */
+   columns: { symbol: "Symbol", name: "Name" },
+   stocksMatch: (count: number): string => `${count} stocks match`,
+diff --git a/web/src/screens/research/results-pane.test.tsx b/web/src/screens/research/results-pane.test.tsx
+new file mode 100644
+index 0000000..964e9e3
+--- /dev/null
++++ b/web/src/screens/research/results-pane.test.tsx
+@@ -0,0 +1,469 @@
++import { readFileSync } from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import { act, render, screen, waitFor, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { type JSX, useState } from "react";
++import { MemoryRouter } from "react-router-dom";
++import { beforeEach, describe, expect, it, vi } from "vitest";
++import { listClassifications } from "../../api/classification-client";
++import type {
++  ClassificationList,
++  ClassificationSummary,
++  CurrentSet,
++  FactorCell,
++  FactorSummary,
++  LaterSet,
++  StockRow,
++} from "../../api/classification-types";
++import { DEFAULT_RESEARCH_QUERY, type ResearchQuery } from "../../api/research-query";
++import { CELL, REGIONS, RESULTS, SCORE_SET } from "./copy";
++import { ResultsPane, type ResultsPaneProps } from "./results-pane";
++
++vi.mock("../../api/classification-client", async () => {
++  const actual = await vi.importActual<typeof import("../../api/classification-client")>(
++    "../../api/classification-client",
++  );
++  return { ...actual, listClassifications: vi.fn(), createUniverse: vi.fn() };
++});
++
++const listMock = vi.mocked(listClassifications);
++
++// --- Fixtures (classification-api section 2.7) --------------------------------
++
++function cell(percentile: string): FactorCell {
++  return {
++    status: "classified",
++    score: "0.50",
++    percentile,
++    reasonCode: null,
++    reasonInput: null,
++    reasonDetail: null,
++    restatedPossible: false,
++  };
++}
++
++function stock(symbol: string): StockRow {
++  return {
++    symbol,
++    name: `${symbol} Incorporated`,
++    lifecycle: "active",
++    factors: { value: cell("84"), growth: cell("61"), momentum: cell("27") },
++  };
++}
++
++function rows(count: number): StockRow[] {
++  return Array.from({ length: count }, (_, index) => stock(`SYM${String(index).padStart(4, "0")}`));
++}
++
++function factorSummary(): FactorSummary {
++  return { qualifiedCount: 2846, ranked: true, minPeerSetSize: 30 };
++}
++
++const SET: CurrentSet = {
++  setId: "set-1",
++  classificationDate: "2026-10-15",
++  runId: "run-1",
++  runStartedAt: "2026-10-15T22:30:00Z",
++  runOutcome: "succeeded",
++  state: "complete",
++  startedAt: "2026-10-15T22:40:00Z",
++  endedAt: "2026-10-15T22:46:00Z",
++  latestTradingDay: "2026-10-15",
++  activeInstruments: 2846,
++  notCurrent: false,
++};
++
++const BUILDING: LaterSet = {
++  setId: "set-2",
++  state: "building",
++  startedAt: "2026-10-16T22:40:00Z",
++  endedAt: null,
++  failureReason: null,
++  runId: "run-2",
++  runStartedAt: "2026-10-16T22:30:00Z",
++};
++
++const FAILED: LaterSet = {
++  ...BUILDING,
++  state: "failed",
++  endedAt: "2026-10-16T22:41:00Z",
++  failureReason: "Factor engine could not read prices",
++};
++
++function list(
++  stocks: StockRow[],
++  overrides: Partial<Omit<ClassificationList, "stocks">> = {},
++): ClassificationList {
++  return {
++    neverClassified: false,
++    set: SET,
++    later: null,
++    factors: { value: factorSummary(), growth: factorSummary(), momentum: factorSummary() },
++    matchCount: stocks.length,
++    stocks,
++    unknownSymbols: [],
++    nextCursor: null,
++    ...overrides,
++  };
++}
++
++function summaryOf(set: CurrentSet | null, later: LaterSet | null): ClassificationSummary {
++  return {
++    neverClassified: set === null,
++    set,
++    later,
++    factors: { value: factorSummary(), growth: factorSummary(), momentum: factorSummary() },
++    stocksCurrent: null,
++  };
++}
++
++// --- Harness ------------------------------------------------------------------
++
++type PaneOverrides = Partial<ResultsPaneProps> & { initialChecked?: string[] };
++
++function Harness({ initialChecked = [], ...overrides }: PaneOverrides): JSX.Element {
++  const [result, setResult] = useState<ResultsPaneProps["result"]>(null);
++  const [selected, setSelected] = useState<string | null>(null);
++  const [checked, setChecked] = useState<string[]>(initialChecked);
++  const props: ResultsPaneProps = {
++    query: DEFAULT_RESEARCH_QUERY,
++    onQueryChange: () => undefined,
++    onClear: () => undefined,
++    refreshKey: 0,
++    result,
++    onResult: (page) => setResult(page),
++    summary: null,
++    checkedAt: null,
++    pollFailed: false,
++    onTryAgain: () => undefined,
++    announcement: null,
++    selected,
++    onSelect: setSelected,
++    checked,
++    onCheckedChange: setChecked,
++    onAddToUniverse: () => undefined,
++    onOpenEarlierSets: () => undefined,
++    onNotify: () => undefined,
++    ...overrides,
++  };
++  return <ResultsPane {...props} />;
++}
++
++function renderPane(overrides: PaneOverrides = {}): ReturnType<typeof render> {
++  return render(
++    <MemoryRouter>
++      <Harness {...overrides} />
++    </MemoryRouter>,
++  );
++}
++
++const h1 = (): HTMLElement => screen.getByRole("heading", { level: 1 });
++const resultsSection = (): HTMLElement => screen.getByRole("region", { name: REGIONS.results });
++const footnotes = (): HTMLElement[] => screen.queryAllByText(CELL.coverageStatement);
++
++beforeEach(() => {
++  listMock.mockReset();
++});
++
++// Implements TC-COMP-144 (T002): DAC-E4-3, DAC-E4-S9-2.
++describe("TC-COMP-144: the heading shows the server's matchCount", () => {
++  it("reads 3000 for a first page of 50 rows with more to come", async () => {
++    listMock.mockResolvedValue(list(rows(50), { matchCount: 3000, nextCursor: "c1" }));
++    renderPane();
++    await waitFor(() => expect(h1()).toHaveTextContent(RESULTS.stocksMatch(3000)));
++    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
++    expect(h1().textContent).not.toContain("50 stocks");
++  });
++
++  it("follows the count for a changed query, a short page and a zero count", async () => {
++    listMock.mockResolvedValue(list(rows(3), { matchCount: 12, nextCursor: "c1" }));
++    const view = renderPane();
++    await waitFor(() => expect(h1()).toHaveTextContent(RESULTS.stocksMatch(12)));
++
++    listMock.mockResolvedValue(list(rows(3), { matchCount: 7 }));
++    const changed: ResearchQuery = { ...DEFAULT_RESEARCH_QUERY, hideIncomplete: true };
++    view.rerender(
++      <MemoryRouter>
++        <Harness query={changed} />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(h1()).toHaveTextContent(RESULTS.stocksMatch(7)));
++
++    listMock.mockResolvedValue(list([], { matchCount: 0 }));
++    const empty: ResearchQuery = { ...DEFAULT_RESEARCH_QUERY, symbol: "ZZ" };
++    view.rerender(
++      <MemoryRouter>
++        <Harness query={empty} />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(h1()).toHaveTextContent(RESULTS.stocksMatch(0)));
++  });
++
++  it("reads the screen title before any result exists", () => {
++    listMock.mockReturnValue(new Promise(() => undefined));
++    renderPane();
++    expect(h1()).toHaveTextContent(RESULTS.title);
++    expect(h1().textContent).not.toMatch(/stocks match/);
++  });
++
++  it("reads the screen title for a never-populated result", async () => {
++    listMock.mockResolvedValue(list([], { neverClassified: true, set: null, matchCount: 0 }));
++    renderPane();
++    await waitFor(() => expect(listMock).toHaveBeenCalled());
++    await act(async () => undefined);
++    expect(h1()).toHaveTextContent(RESULTS.title);
++    expect(h1().textContent).not.toMatch(/stocks match/);
++  });
++});
++
++// Implements TC-COMP-099 (T005): DAC-E4-S9-5, AC-12.
++describe("TC-COMP-099: the absence-judges-presence footnote appears once", () => {
++  it("is one element after the table and before the tray, in the Results section", async () => {
++    listMock.mockResolvedValue(list(rows(5)));
++    renderPane({ initialChecked: ["SYM0000", "SYM0001"] });
++    await screen.findByRole("table");
++    expect(footnotes()).toHaveLength(1);
++    const footnote = footnotes()[0] as HTMLElement;
++    expect(footnote).toHaveClass("text-xs", "text-muted-foreground");
++    expect(resultsSection()).toContainElement(footnote);
++    const table = within(resultsSection()).getByRole("table");
++    const tray = within(resultsSection()).getByRole("region", { name: REGIONS.selection });
++    expect(table.compareDocumentPosition(footnote) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    expect(footnote.compareDocumentPosition(tray) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++  });
++
++  it("stays one after a sort, a 3000-row count and a refresh", async () => {
++    listMock.mockResolvedValue(list(rows(50), { matchCount: 3000, nextCursor: "c1" }));
++    const view = renderPane();
++    await screen.findByRole("table");
++    expect(footnotes()).toHaveLength(1);
++    const sorted: ResearchQuery = {
++      ...DEFAULT_RESEARCH_QUERY,
++      sort: { key: "growth_percentile", order: "desc" },
++    };
++    view.rerender(
++      <MemoryRouter>
++        <Harness query={sorted} refreshKey={1} />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
++    expect(footnotes()).toHaveLength(1);
++  });
++
++  it("is present for a single match", async () => {
++    listMock.mockResolvedValue(list(rows(1)));
++    renderPane();
++    await screen.findByRole("table");
++    expect(footnotes()).toHaveLength(1);
++  });
++
++  it("is absent when nothing is found", async () => {
++    listMock.mockResolvedValue(list([], { matchCount: 0 }));
++    renderPane();
++    await screen.findByText(RESULTS.noMatch);
++    expect(footnotes()).toHaveLength(0);
++  });
++});
++
++// T006: AC-11, AC-14, AC-20, AC-21, DAC-E4-4, DAC-E4-S9-1; Open Gap 1.
++describe("results pane states and props", () => {
++  it("(a) orders banner, header, table, footnote and tray inside the Results section", async () => {
++    listMock.mockResolvedValue(list(rows(3), { later: BUILDING }));
++    renderPane({ summary: summaryOf(SET, BUILDING), checkedAt: "2026-10-16T22:45:10Z" });
++    await screen.findByRole("table");
++    const section = resultsSection();
++    const banner = within(section).getByTestId("not-current-banner");
++    const heading = within(section).getByRole("heading", { level: 1 });
++    const asOf = within(section).getByTestId("as-of-line");
++    const table = within(section).getByRole("table");
++    const footnote = within(section).getByText(CELL.coverageStatement);
++    const follows = (a: Element, b: Element): boolean =>
++      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
++    expect(follows(banner, heading)).toBe(true);
++    expect(follows(heading, asOf)).toBe(true);
++    expect(follows(asOf, table)).toBe(true);
++    expect(follows(table, footnote)).toBe(true);
++  });
++
++  it("(a) pins the tray after the footnote on the foreground fill", async () => {
++    listMock.mockResolvedValue(list(rows(3)));
++    renderPane({ initialChecked: ["SYM0000"] });
++    await screen.findByRole("table");
++    const tray = within(resultsSection()).getByRole("region", { name: REGIONS.selection });
++    expect(tray).toHaveClass("bg-foreground", "text-background");
++    const footnote = within(resultsSection()).getByText(CELL.coverageStatement);
++    expect(Boolean(footnote.compareDocumentPosition(tray) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(
++      true,
++    );
++  });
++
++  it("(b) a building set shows the warning banner and Updating over the kept rows", async () => {
++    listMock.mockResolvedValue(list(rows(3), { later: BUILDING }));
++    renderPane({ summary: summaryOf(SET, BUILDING), checkedAt: "2026-10-16T22:45:10Z" });
++    await screen.findByRole("table");
++    const banner = screen.getByTestId("not-current-banner");
++    expect(within(banner).getByText(SCORE_SET.notReflecting)).toHaveAttribute(
++      "data-variant",
++      "status-warning",
++    );
++    expect(screen.getByText(SCORE_SET.updating)).toBeInTheDocument();
++    expect(screen.getByText(/^checked /)).toBeInTheDocument();
++    expect(document.querySelectorAll("tbody tr[data-symbol]").length).toBe(3);
++    expect(h1()).toBeInTheDocument();
++    expect(banner.compareDocumentPosition(h1()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++  });
++
++  it("(b) a failed set shows the recorded reason and offers no retry", async () => {
++    listMock.mockResolvedValue(list(rows(3), { later: FAILED }));
++    renderPane({ summary: summaryOf(SET, FAILED) });
++    await screen.findByRole("table");
++    const banner = screen.getByTestId("not-current-banner");
++    expect(within(banner).getByText(SCORE_SET.scoreUpdateFailed)).toHaveAttribute(
++      "data-variant",
++      "status-critical",
++    );
++    expect(banner).toHaveTextContent("Factor engine could not read prices");
++    expect(screen.queryByRole("button", { name: /retry|try again/i })).toBeNull();
++    expect(document.querySelectorAll("tbody tr[data-symbol]").length).toBe(3);
++  });
++
++  it("(c) the line's set is the list result's, the banner's later is the summary's", async () => {
++    const otherSet: CurrentSet = { ...SET, setId: "set-9", endedAt: "2026-10-14T22:46:00Z" };
++    listMock.mockResolvedValue(list(rows(3)));
++    renderPane({ summary: summaryOf(otherSet, BUILDING) });
++    await screen.findByRole("table");
++    const line = screen.getByTestId("as-of-line");
++    expect(line).toHaveTextContent("2026-10-15 17:46 CDT");
++    expect(line).not.toHaveTextContent("2026-10-14");
++    expect(screen.getByTestId("not-current-banner")).toBeInTheDocument();
++  });
++
++  it("(c) before the first summary poll the list result's later drives the banner", async () => {
++    listMock.mockResolvedValue(list(rows(3), { later: BUILDING }));
++    renderPane({ summary: null });
++    await screen.findByRole("table");
++    expect(screen.getByTestId("not-current-banner")).toBeInTheDocument();
++    expect(screen.getByText(SCORE_SET.updating)).toBeInTheDocument();
++  });
++
++  it("(c) a summary whose later is null clears the banner and Updating at once", async () => {
++    listMock.mockResolvedValue(list(rows(3), { later: BUILDING }));
++    renderPane({ summary: summaryOf(SET, null) });
++    await screen.findByRole("table");
++    expect(screen.queryByTestId("not-current-banner")).toBeNull();
++    expect(screen.queryByText(SCORE_SET.updating)).toBeNull();
++  });
++
++  it("(c) a pending result with a summary in hand shows no skeleton", () => {
++    listMock.mockReturnValue(new Promise(() => undefined));
++    renderPane({ summary: summaryOf(SET, null) });
++    expect(screen.queryByTestId("as-of-line-skeleton")).toBeNull();
++    expect(screen.queryByTestId("as-of-line")).toBeNull();
++  });
++
++  it("(c) a never-populated result renders no as-of line and no skeleton", async () => {
++    listMock.mockResolvedValue(list([], { neverClassified: true, set: null, matchCount: 0 }));
++    renderPane({ summary: summaryOf(null, null) });
++    await waitFor(() => expect(listMock).toHaveBeenCalled());
++    await act(async () => undefined);
++    expect(screen.queryByTestId("as-of-line")).toBeNull();
++    expect(screen.queryByTestId("as-of-line-skeleton")).toBeNull();
++    expect(screen.queryByRole("button", { name: SCORE_SET.earlierSetsAction })).toBeNull();
++  });
++
++  it("(c) hands the checked time, the announcement and the Earlier sets handler to the line", async () => {
++    const user = userEvent.setup();
++    const onOpenEarlierSets = vi.fn();
++    listMock.mockResolvedValue(list(rows(3), { later: BUILDING }));
++    renderPane({
++      summary: summaryOf(SET, BUILDING),
++      checkedAt: "2026-10-16T22:45:10Z",
++      announcement: "Scores updated to somewhere",
++      onOpenEarlierSets,
++    });
++    await screen.findByRole("table");
++    expect(screen.getByText("Scores updated to somewhere")).toBeInTheDocument();
++    expect(screen.getByText(SCORE_SET.checked("2026-10-16 17:45:10 CDT"))).toBeInTheDocument();
++    await user.click(screen.getByRole("button", { name: SCORE_SET.earlierSetsAction }));
++    expect(onOpenEarlierSets).toHaveBeenCalledTimes(1);
++  });
++
++  it("(c) with neither result nor summary the line is its skeleton", () => {
++    listMock.mockReturnValue(new Promise(() => undefined));
++    renderPane();
++    expect(screen.getByTestId("as-of-line-skeleton")).toBeInTheDocument();
++    expect(screen.queryByTestId("as-of-line")).toBeNull();
++  });
++
++  it("(d) Save carries the list's count and set id, never the summary's", async () => {
++    const user = userEvent.setup();
++    const { createUniverse } = await import("../../api/classification-client");
++    const created = vi.mocked(createUniverse);
++    created.mockRejectedValue(new Error("stop after the call"));
++    listMock.mockResolvedValue(list(rows(3), { matchCount: 120 }));
++    const otherSet: CurrentSet = { ...SET, setId: "set-9" };
++    renderPane({ summary: summaryOf(otherSet, null) });
++    await screen.findByRole("table");
++    await user.click(screen.getByRole("button", { name: RESULTS.saveThese(120) }));
++    expect(screen.getByRole("dialog")).not.toHaveTextContent(/including/);
++    await user.type(screen.getByLabelText("Name"), "Tech");
++    await user.click(screen.getByRole("button", { name: "Save" }));
++    await waitFor(() => expect(created).toHaveBeenCalledTimes(1));
++    expect(created).toHaveBeenCalledWith(expect.objectContaining({ setId: "set-1", name: "Tech" }));
++  });
++
++  it("(d) Save is absent under a universe scope", async () => {
++    listMock.mockResolvedValue(list(rows(3), { matchCount: 120 }));
++    renderPane({ query: { ...DEFAULT_RESEARCH_QUERY, scope: "u1" } });
++    await screen.findByRole("table");
++    expect(screen.queryByRole("button", { name: RESULTS.saveThese(120) })).toBeNull();
++  });
++
++  it("(e) nothing found shows the no-match body, and Clear filters clears then focuses the heading", async () => {
++    const user = userEvent.setup();
++    const onClear = vi.fn();
++    listMock.mockResolvedValue(list([], { matchCount: 0 }));
++    renderPane({ query: { ...DEFAULT_RESEARCH_QUERY, hideIncomplete: true }, onClear });
++    await screen.findByText(RESULTS.noMatch);
++    expect(screen.queryByText(RESULTS.neverScored)).toBeNull();
++    await user.click(screen.getByRole("button", { name: "Clear filters" }));
++    expect(onClear).toHaveBeenCalledTimes(1);
++    expect(h1()).toHaveFocus();
++    expect(h1()).toHaveAttribute("tabindex", "-1");
++  });
++
++  it("(e) the default query with zero matches on a populated store is the same body", async () => {
++    listMock.mockResolvedValue(list([], { matchCount: 0 }));
++    renderPane();
++    expect(await screen.findByText(RESULTS.noMatch)).toBeInTheDocument();
++    expect(screen.queryByTestId("not-current-banner")).toBeNull();
++  });
++
++  it.each([
++    [null, "symbol"],
++    [{ key: "symbol", order: "desc" }, "symbol"],
++    [{ key: "value_percentile", order: "asc" }, "value"],
++    [{ key: "value_score", order: "desc" }, "value"],
++    [{ key: "growth_percentile", order: "desc" }, "growth"],
++    [{ key: "growth_score", order: "asc" }, "growth"],
++    [{ key: "momentum_percentile", order: "asc" }, "momentum"],
++    [{ key: "momentum_score", order: "asc" }, "momentum"],
++  ] as const)("(h) sort %j gives the clause 'sorted by %s'", async (sort, label) => {
++    listMock.mockResolvedValue(list(rows(3)));
++    renderPane({ query: { ...DEFAULT_RESEARCH_QUERY, sort } });
++    await screen.findByRole("table");
++    const line = screen.getByTestId("as-of-line");
++    expect(line).toHaveTextContent(SCORE_SET.sortedBy(label));
++    expect(line.textContent).not.toMatch(/ascending|descending/);
++  });
++
++  it("(g) the pane source has no HTML injection, storage or fetch", () => {
++    const source = readFileSync(
++      path.join(path.dirname(fileURLToPath(import.meta.url)), "results-pane.tsx"),
++      "utf-8",
++    );
++    expect(source).not.toContain("dangerouslySetInnerHTML");
++    expect(source).not.toMatch(/localStorage|sessionStorage|window\.location|fetch\(/);
++  });
++});
+diff --git a/web/src/screens/research/results-pane.tsx b/web/src/screens/research/results-pane.tsx
+new file mode 100644
+index 0000000..30a97b0
+--- /dev/null
++++ b/web/src/screens/research/results-pane.tsx
+@@ -0,0 +1,177 @@
++import { type JSX, type ReactNode, useRef } from "react";
++import type { ClassificationSummary } from "../../api/classification-types";
++import type { ResearchQuery } from "../../api/research-query";
++import { AsOfLine } from "../../components/patterns/as-of-line";
++import { NotCurrentBanner } from "../../components/patterns/not-current-banner";
++import { SelectionTray } from "../../components/patterns/selection-tray";
++import { CELL, FILTERS, REGIONS, RESULTS } from "./copy";
++import type { Notice } from "./notices";
++import { type EmptyKind, type FirstPage, ResultsTable } from "./results-table";
++import { SaveAsUniverse } from "./save-as-universe-dialog";
++
++/**
++ * The Research screen's Results card (AC-11, AC-12, AC-14, AC-20, AC-21;
++ * DAC-E4-2, DAC-E4-3, DAC-E4-4, DAC-E4-S9-1, DAC-E4-S9-2, DAC-E4-S9-5; DEC-0170).
++ * `ResultsPane` is the Research screen's own (`index.tsx` mounts it); a
++ * universe's Members tab composes `ResultsTable` directly.
++ *
++ * Top to bottom: the not-current banner, the header (the one `h1`, the as-of
++ * line and **Save these {n} as a universe…**), the table, the STD-UI-18
++ * footnote once, then the selection tray. The host owns every state and passes
++ * it in.
++ *
++ * Sources of each figure (Open Gap 1): the `h1`'s count, the as-of line's set
++ * and Save's `matchCount` and `setId` are the list result's (they describe the
++ * rows on screen); the banner's and the *Updating* mark's `later` is the poll
++ * summary's, and the list result's only while the first poll is pending. A
++ * summary whose `later` is null clears both at once.
++ *
++ * Built on the shipped S1 to S8 exports: `ResultsTable` (its `onResult` hands
++ * the whole first page, `FirstPage`, rows included, and `onInspect` is
++ * required, so the pane passes a named no-op: the inspector reads the
++ * immediate selection, DEC-0164, DEC-0170), `NotCurrentBanner`, `AsOfLine`,
++ * `SelectionTray` and `SaveAsUniverse`. `incompleteCount` stays `null`: the
++ * first page does not carry every matching row, and the design omits the
++ * *including* clause rather than guess (STD-UI-15). The pane has no state of
++ * its own beyond the `h1` ref, no `fetch`, no storage and no time formatting.
++ */
++
++/** The first page the table hands the host: the figures the pane's header, line and banner read. */
++export type ResearchResult = FirstPage;
++
++export interface ResultsPaneProps {
++  query: ResearchQuery;
++  onQueryChange: (query: ResearchQuery) => void;
++  onClear: () => void;
++  refreshKey: number;
++  result: ResearchResult | null;
++  onResult: (result: ResearchResult) => void;
++  summary: ClassificationSummary | null;
++  checkedAt: string | null;
++  pollFailed: boolean;
++  onTryAgain: () => void;
++  announcement: string | null;
++  selected: string | null;
++  onSelect: (symbol: string) => void;
++  checked: string[];
++  onCheckedChange: (checked: string[]) => void;
++  onAddToUniverse: () => void;
++  onOpenEarlierSets: () => void;
++  onNotify: (notice: Notice) => void;
++}
++
++/**
++ * The table fires `onInspect` 150 ms after a selection, but the inspector
++ * waits 150 ms itself and takes the immediate symbol, so wiring this would
++ * make the wait 300 ms (DEC-0164, DEC-0170).
++ */
++function NO_INSPECT(): void {
++  // Deliberately empty.
++}
++
++/** The as-of line's *sorted by* label: *symbol* for the default order, else the sorted factor's name. */
++function sortLabelFor(query: ResearchQuery): string {
++  const key = query.sort?.key ?? "symbol";
++  const factor = key.split("_")[0] as keyof typeof RESULTS.sortLabels;
++  return RESULTS.sortLabels[factor];
++}
++
++export function ResultsPane({
++  query,
++  onQueryChange,
++  onClear,
++  refreshKey,
++  result,
++  onResult,
++  summary,
++  checkedAt,
++  pollFailed,
++  onTryAgain,
++  announcement,
++  selected,
++  onSelect,
++  checked,
++  onCheckedChange,
++  onAddToUniverse,
++  onOpenEarlierSets,
++  onNotify,
++}: ResultsPaneProps): JSX.Element {
++  const headingRef = useRef<HTMLHeadingElement>(null);
++  const scored = result !== null && !result.neverClassified;
++  // The list result's `later` only while the first summary poll is pending.
++  const later = summary ? summary.later : (result?.later ?? null);
++
++  function empty(kind: EmptyKind): ReactNode {
++    if (kind === "never-populated") {
++      return null;
++    }
++    return (
++      <div className="flex flex-col items-start gap-2">
++        <p>{RESULTS.noMatch}</p>
++        <button
++          type="button"
++          data-variant="ghost"
++          onClick={() => {
++            onClear();
++            headingRef.current?.focus();
++          }}
++          className="rounded px-3 py-2 text-sm underline"
++        >
++          {FILTERS.clearFilters}
++        </button>
++      </div>
++    );
++  }
++
++  return (
++    <section
++      aria-label={REGIONS.results}
++      className="flex min-w-[40rem] flex-1 flex-col gap-4 rounded border border-border bg-card p-4 text-card-foreground"
++    >
++      <NotCurrentBanner set={result?.set ?? summary?.set ?? null} later={later} />
++      <header className="flex flex-wrap items-start justify-between gap-4">
++        <div className="flex flex-col gap-2">
++          <h1 ref={headingRef} tabIndex={-1} className="text-lg">
++            {scored ? RESULTS.stocksMatch(result.matchCount) : RESULTS.title}
++          </h1>
++          <AsOfLine
++            set={result?.set ?? null}
++            later={later}
++            checkedAt={checkedAt}
++            pollFailed={pollFailed}
++            onTryAgain={onTryAgain}
++            announcement={announcement}
++            sortLabel={sortLabelFor(query)}
++            onOpenEarlierSets={onOpenEarlierSets}
++            loading={result === null && summary === null}
++          />
++        </div>
++        {scored ? (
++          <SaveAsUniverse
++            query={query}
++            matchCount={result.matchCount}
++            setId={result.set?.setId ?? null}
++            incompleteCount={null}
++            onNotify={onNotify}
++          />
++        ) : null}
++      </header>
++      <ResultsTable
++        query={query}
++        onQueryChange={onQueryChange}
++        refreshKey={refreshKey}
++        selected={selected}
++        onSelect={onSelect}
++        onInspect={NO_INSPECT}
++        checked={checked}
++        onCheckedChange={onCheckedChange}
++        onResult={onResult}
++        empty={empty}
++      />
++      {scored && result.matchCount > 0 ? (
++        <p className="text-xs text-muted-foreground">{CELL.coverageStatement}</p>
++      ) : null}
++      <SelectionTray checked={checked} onAddToUniverse={onAddToUniverse} />
++    </section>
++  );
++}

@@ -1,0 +1,230 @@
+{
+ "schema": 1,
+ "repo_head": "aed93bd8debe45c4c2dbc2de6a9c120d879041a9",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:76:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 76,
+   "original": "        {set.state === \"building\" || set.endedAt === null ? null : formatTimestamp(set.endedAt)}",
+   "mutated": "        {set.state === \"building\" && set.endedAt === null ? null : formatTimestamp(set.endedAt)}"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:95:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 95,
+   "original": "  const [pageFailed, setPageFailed] = useState(false);",
+   "mutated": "  const [pageFailed, setPageFailed] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:97:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 97,
+   "original": "  const mountedRef = useRef(true);",
+   "mutated": "  const mountedRef = useRef(false);"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:98:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 98,
+   "original": "  const inFlightRef = useRef(false);",
+   "mutated": "  const inFlightRef = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:104:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 104,
+   "original": "    inFlightRef.current = true;",
+   "mutated": "    inFlightRef.current = false;"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:109:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 109,
+   "original": "      if (!mountedRef.current) {",
+   "mutated": "      if (mountedRef.current) {"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:114:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 114,
+   "original": "        return [...current, ...page.sets.filter((set) => !known.has(set.setId))];",
+   "mutated": "        return [...current, ...page.sets.filter((set) => known.has(set.setId))];"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:117:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 117,
+   "original": "      if (page.nextCursor === null && document.activeElement === moreRef.current) {",
+   "mutated": "      if (page.nextCursor === null || document.activeElement === moreRef.current) {"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:121:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 121,
+   "original": "      setPageFailed(false);",
+   "mutated": "      setPageFailed(true);"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:124:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 124,
+   "original": "      if (!mountedRef.current) {",
+   "mutated": "      if (mountedRef.current) {"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:131:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 131,
+   "original": "        setPageFailed(true);",
+   "mutated": "        setPageFailed(false);"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:134:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 134,
+   "original": "      inFlightRef.current = false;",
+   "mutated": "      inFlightRef.current = true;"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:139:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 139,
+   "original": "    mountedRef.current = true;",
+   "mutated": "    mountedRef.current = false;"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:142:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 142,
+   "original": "      mountedRef.current = false;",
+   "mutated": "      mountedRef.current = true;"
+  },
+  {
+   "id": "web/src/screens/research/set-history-dialog.tsx:230:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "line": 230,
+   "original": "        {nextCursor !== null && load === \"loaded\" ? (",
+   "mutated": "        {nextCursor !== null || load === \"loaded\" ? ("
+  },
+  {
+   "id": "manual:dedupe",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "!known.has(set.setId)",
+   "new": "true"
+  },
+  {
+   "id": "manual:inflight",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "if (inFlightRef.current) {\n      return;\n    }",
+   "new": "if (false) {\n      return;\n    }"
+  },
+  {
+   "id": "manual:cursor",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "listClassificationSets({ cursor })",
+   "new": "listClassificationSets()"
+  },
+  {
+   "id": "manual:unranked",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "summary.ranked\n    ?",
+   "new": "!summary.ranked\n    ?"
+  },
+  {
+   "id": "manual:tier-failed",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "failed: { tier: \"critical\"",
+   "new": "failed: { tier: \"warning\""
+  },
+  {
+   "id": "manual:tier-building",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "building: { tier: \"active\"",
+   "new": "building: { tier: \"good\""
+  },
+  {
+   "id": "manual:busy",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "busy={load === \"loading\"}",
+   "new": "busy={false}"
+  },
+  {
+   "id": "manual:initial-focus",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "ref={closeRef}",
+   "new": "ref={undefined}"
+  },
+  {
+   "id": "manual:oncancel",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "onCancel={onClose}",
+   "new": "onCancel={() => undefined}"
+  },
+  {
+   "id": "manual:focus-close",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "closeRef.current?.focus();\n      }\n      setNextCursor",
+   "new": "setNextCursor"
+  },
+  {
+   "id": "manual:focus-cond",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/set-history-dialog.tsx",
+   "old": "page.nextCursor === null && document.activeElement === moreRef.current",
+   "new": "true"
+  }
+ ]
+}

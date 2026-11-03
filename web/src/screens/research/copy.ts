@@ -436,6 +436,18 @@ export const SORT = {
 
 /** The results header and the nothing-found and never-scored bodies (UX 1.1, 1.4). */
 export const RESULTS = {
+  /**
+   * The screen title, which the h1 reads until a scored result gives it a count
+   * and in the never-populated state (UX design 1.1; CAP-002-E4-S9 Open Gap 1,
+   * DEC-0170).
+   */
+  title: "Research",
+  /**
+   * The as-of line's *sorted by* labels: the Symbol column, or a factor by
+   * name for both its percentile and standardised-score keys (UX design 0 and
+   * 1.2; CAP-002-E4-S9 Open Gap 8).
+   */
+  sortLabels: { symbol: "symbol", value: "value", growth: "growth", momentum: "momentum" },
   /** The results table's two text column headers (UX 1.1 column table; CAP-002-E4-S6, DEC-0239). */
   columns: { symbol: "Symbol", name: "Name" },
   stocksMatch: (count: number): string => `${count} stocks match`,
@@ -455,6 +467,21 @@ export const RESULTS = {
     `The latest download, started ${started}, ended Complete at ${ended}`,
   latestDownloadFailed: (started: string, ended: string, reason: string): string =>
     `The latest download, started ${started}, ended Failed at ${ended}: ${reason}`,
+  /**
+   * The four latest-download sentences UX design 1.1 does not contain, which
+   * follow its own *is {state}* / *ended {state} at {time}* pattern with the
+   * run state's word (CAP-002-E4-S9 Open Gap 2, DEC-0171; S2 Open Gap 6).
+   * `cancelling` is not *is Downloading*: the owner has asked it to stop; a
+   * `partial` download is never *ended Complete* (UX design status table).
+   */
+  latestDownloadCancelling: (started: string): string =>
+    `The latest download, started ${started}, is Cancelling`,
+  latestDownloadPartial: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Partial at ${ended}`,
+  latestDownloadCancelled: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Cancelled at ${ended}`,
+  latestDownloadAbandoned: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Abandoned at ${ended}`,
   openDataHealth: "Open Data health",
   tryAgain: "Try again",
 } as const;
@@ -500,6 +527,13 @@ export const SCORE_SET = {
   scoresUpdatedToast: (scoresAt: string): string => `Scores updated to ${scoresAt}`,
   scoreUpdateFailedToast: (reason: string): string => `Score update failed: ${reason}`,
   couldNotCheck: "Could not check for newer scores.",
+  /**
+   * The set history dialog's paging and closing controls: the design fixes the
+   * columns but neither control (UX design 1.2; CAP-002-E4-S9 Open Gap 3,
+   * DEC-0172).
+   */
+  showMore: "Show more",
+  close: "Close",
   historyColumns: {
     state: "State",
     scoresDate: "Scores date",

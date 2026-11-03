@@ -1,0 +1,287 @@
+{
+ "schema": 1,
+ "repo_head": "aed93bd8debe45c4c2dbc2de6a9c120d879041a9",
+ "range": "d51a72947f30802810a511a53d0d4ce402e88004..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/index.tsx:26:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 26,
+   "original": "  const [refreshKey, bump] = useReducer((key: number) => key + 1, 0);",
+   "mutated": "  const [refreshKey, bump] = useReducer((key: number) => key + 2, 0);"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:26:off-by-one:2",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 26,
+   "original": "  const [refreshKey, bump] = useReducer((key: number) => key + 1, 0);",
+   "mutated": "  const [refreshKey, bump] = useReducer((key: number) => key + 1, 1);"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:32:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 32,
+   "original": "  const [addOpen, setAddOpen] = useState(false);",
+   "mutated": "  const [addOpen, setAddOpen] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:33:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 33,
+   "original": "  const [historyOpen, setHistoryOpen] = useState(false);",
+   "mutated": "  const [historyOpen, setHistoryOpen] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:54:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 54,
+   "original": "        onAddToUniverse={() => setAddOpen(true)}",
+   "mutated": "        onAddToUniverse={() => setAddOpen(false)}"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:55:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 55,
+   "original": "        onOpenEarlierSets={() => setHistoryOpen(true)}",
+   "mutated": "        onOpenEarlierSets={() => setHistoryOpen(false)}"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:62:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 62,
+   "original": "          onClose={() => setAddOpen(false)}",
+   "mutated": "          onClose={() => setAddOpen(true)}"
+  },
+  {
+   "id": "web/src/screens/research/index.tsx:66:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/index.tsx",
+   "line": 66,
+   "original": "      {historyOpen ? <SetHistoryDialog onClose={() => setHistoryOpen(false)} /> : null}",
+   "mutated": "      {historyOpen ? <SetHistoryDialog onClose={() => setHistoryOpen(true)} /> : null}"
+  },
+  {
+   "id": "manual:bump",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "useScoreSetPoll({ onNewSet: bump })",
+   "new": "useScoreSetPoll({ onNewSet: () => undefined })"
+  },
+  {
+   "id": "manual:refresh",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "refreshKey={refreshKey}",
+   "new": "refreshKey={0}"
+  },
+  {
+   "id": "manual:active",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "result?.set?.activeInstruments ?? null",
+   "new": "null"
+  },
+  {
+   "id": "manual:clear",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onClear={clear}",
+   "new": "onClear={() => undefined}"
+  },
+  {
+   "id": "manual:query",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onQueryChange={setQuery}",
+   "new": "onQueryChange={() => undefined}"
+  },
+  {
+   "id": "manual:summary",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "summary={poll.summary}",
+   "new": "summary={null}"
+  },
+  {
+   "id": "manual:checkedat",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "checkedAt={poll.checkedAt}",
+   "new": "checkedAt={null}"
+  },
+  {
+   "id": "manual:pollfailed",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "pollFailed={poll.pollFailed}",
+   "new": "pollFailed={false}"
+  },
+  {
+   "id": "manual:tryagain",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onTryAgain={() => void poll.tryAgain()}",
+   "new": "onTryAgain={() => undefined}"
+  },
+  {
+   "id": "manual:announce",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "announcement={poll.announcement}",
+   "new": "announcement={null}"
+  },
+  {
+   "id": "manual:selected",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "selected={selected}\n        onSelect",
+   "new": "selected={null}\n        onSelect"
+  },
+  {
+   "id": "manual:onselect",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onSelect={setSelected}",
+   "new": "onSelect={() => undefined}"
+  },
+  {
+   "id": "manual:checked",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "checked={checked}\n        onCheckedChange",
+   "new": "checked={[]}\n        onCheckedChange"
+  },
+  {
+   "id": "manual:oncheck",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onCheckedChange={setChecked}",
+   "new": "onCheckedChange={() => undefined}"
+  },
+  {
+   "id": "manual:add",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onAddToUniverse={() => setAddOpen(true)}",
+   "new": "onAddToUniverse={() => undefined}"
+  },
+  {
+   "id": "manual:history",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onOpenEarlierSets={() => setHistoryOpen(true)}",
+   "new": "onOpenEarlierSets={() => undefined}"
+  },
+  {
+   "id": "manual:notify",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onNotify={notify}\n      />\n      <InspectorPanel",
+   "new": "onNotify={() => undefined}\n      />\n      <InspectorPanel"
+  },
+  {
+   "id": "manual:inspector",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "<InspectorPanel symbol={selected} />",
+   "new": "<InspectorPanel symbol={null} />"
+  },
+  {
+   "id": "manual:addsymbols",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "symbols={checked}",
+   "new": "symbols={[]}"
+  },
+  {
+   "id": "manual:addclose",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onClose={() => setAddOpen(false)}",
+   "new": "onClose={() => undefined}"
+  },
+  {
+   "id": "manual:histclose",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onClose={() => setHistoryOpen(false)}",
+   "new": "onClose={() => undefined}"
+  },
+  {
+   "id": "manual:addnotify",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onNotify={notify}\n        />",
+   "new": "onNotify={() => undefined}\n        />"
+  },
+  {
+   "id": "manual:dismiss",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onDismiss={dismiss}",
+   "new": "onDismiss={() => undefined}"
+  },
+  {
+   "id": "manual:setresult",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "onResult={setResult}",
+   "new": "onResult={() => undefined}"
+  },
+  {
+   "id": "manual:wrap",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "flex flex-wrap gap-4",
+   "new": "flex gap-4"
+  },
+  {
+   "id": "manual:noticeregion",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/research/index.tsx",
+   "old": "<NoticeRegion notices={notices} onDismiss={dismiss} />",
+   "new": "<NoticeRegion notices={[]} onDismiss={dismiss} />"
+  }
+ ]
+}

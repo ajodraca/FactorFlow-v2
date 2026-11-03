@@ -1,0 +1,753 @@
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 7be5590..e91a13c 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -659,3 +659,25 @@ describe("copy.ts Research screen strings", () => {
+     });
+   });
+ });
++
++// CAP-002-E4-S9 T011 / Open Gap 2: one sentence per latest-download state (DEC-0171).
++describe("copy.ts latest download sentences", () => {
++  const started = "2026-10-15 17:30 CDT";
++  const ended = "2026-10-15 18:30 CDT";
++
++  it("reads one sentence per run state, partial never as Complete", () => {
++    expect(copy.RESULTS.latestDownloadCancelling(started)).toBe(
++      `The latest download, started ${started}, is Cancelling`,
++    );
++    expect(copy.RESULTS.latestDownloadPartial(started, ended)).toBe(
++      `The latest download, started ${started}, ended Partial at ${ended}`,
++    );
++    expect(copy.RESULTS.latestDownloadCancelled(started, ended)).toBe(
++      `The latest download, started ${started}, ended Cancelled at ${ended}`,
++    );
++    expect(copy.RESULTS.latestDownloadAbandoned(started, ended)).toBe(
++      `The latest download, started ${started}, ended Abandoned at ${ended}`,
++    );
++    expect(copy.RESULTS.latestDownloadPartial(started, ended)).not.toContain("Complete");
++  });
++});
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index 2497d8b..d295f70 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -467,6 +467,21 @@ export const RESULTS = {
+     `The latest download, started ${started}, ended Complete at ${ended}`,
+   latestDownloadFailed: (started: string, ended: string, reason: string): string =>
+     `The latest download, started ${started}, ended Failed at ${ended}: ${reason}`,
++  /**
++   * The four latest-download sentences UX design 1.1 does not contain, which
++   * follow its own *is {state}* / *ended {state} at {time}* pattern with the
++   * run state's word (CAP-002-E4-S9 Open Gap 2, DEC-0171; S2 Open Gap 6).
++   * `cancelling` is not *is Downloading*: the owner has asked it to stop; a
++   * `partial` download is never *ended Complete* (UX design status table).
++   */
++  latestDownloadCancelling: (started: string): string =>
++    `The latest download, started ${started}, is Cancelling`,
++  latestDownloadPartial: (started: string, ended: string): string =>
++    `The latest download, started ${started}, ended Partial at ${ended}`,
++  latestDownloadCancelled: (started: string, ended: string): string =>
++    `The latest download, started ${started}, ended Cancelled at ${ended}`,
++  latestDownloadAbandoned: (started: string, ended: string): string =>
++    `The latest download, started ${started}, ended Abandoned at ${ended}`,
+   openDataHealth: "Open Data health",
+   tryAgain: "Try again",
+ } as const;
+diff --git a/web/src/screens/research/results-pane.test.tsx b/web/src/screens/research/results-pane.test.tsx
+index 964e9e3..903ea78 100644
+--- a/web/src/screens/research/results-pane.test.tsx
++++ b/web/src/screens/research/results-pane.test.tsx
+@@ -1,11 +1,11 @@
+ import { readFileSync } from "node:fs";
+ import path from "node:path";
+ import { fileURLToPath } from "node:url";
+-import { act, render, screen, waitFor, within } from "@testing-library/react";
++import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { type JSX, useState } from "react";
+ import { MemoryRouter } from "react-router-dom";
+-import { beforeEach, describe, expect, it, vi } from "vitest";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { listClassifications } from "../../api/classification-client";
+ import type {
+   ClassificationList,
+@@ -16,8 +16,12 @@ import type {
+   LaterSet,
+   StockRow,
+ } from "../../api/classification-types";
++import { fetchHealth, listAcquisitionRuns } from "../../api/client";
+ import { DEFAULT_RESEARCH_QUERY, type ResearchQuery } from "../../api/research-query";
+-import { CELL, REGIONS, RESULTS, SCORE_SET } from "./copy";
++import type { AcquisitionRun, HealthResponse, RunState } from "../../api/types";
++import { HealthProvider } from "../../app/status-region";
++import { CELL, REGIONS, RESULTS, SCORE_SET, SHELL_ROUTES } from "./copy";
++import { formatTimestamp } from "./format";
+ import { ResultsPane, type ResultsPaneProps } from "./results-pane";
+ 
+ vi.mock("../../api/classification-client", async () => {
+@@ -27,7 +31,14 @@ vi.mock("../../api/classification-client", async () => {
+   return { ...actual, listClassifications: vi.fn(), createUniverse: vi.fn() };
+ });
+ 
++vi.mock("../../api/client", async () => {
++  const actual = await vi.importActual<typeof import("../../api/client")>("../../api/client");
++  return { ...actual, listAcquisitionRuns: vi.fn(), fetchHealth: vi.fn() };
++});
++
+ const listMock = vi.mocked(listClassifications);
++const runsMock = vi.mocked(listAcquisitionRuns);
++const healthMock = vi.mocked(fetchHealth);
+ 
+ // --- Fixtures (classification-api section 2.7) --------------------------------
+ 
+@@ -118,6 +129,34 @@ function summaryOf(set: CurrentSet | null, later: LaterSet | null): Classificati
+   };
+ }
+ 
++function health(run: { run_id: string; state: RunState } | null): HealthResponse {
++  return {
++    status: "ok",
++    database: "reachable",
++    credential_present: true,
++    schema_version: 1,
++    most_recent_run: run === null ? null : { ...run, ended_at: null },
++  };
++}
++
++function run(state: RunState, overrides: Partial<AcquisitionRun> = {}): AcquisitionRun {
++  return {
++    runId: "r1",
++    state,
++    historyDepthYears: 5,
++    requestedAt: "2026-10-15T22:29:00Z",
++    startedAt: "2026-10-15T22:30:00Z",
++    endedAt: null,
++    instrumentsNamed: 10,
++    instrumentsWritten: 10,
++    instrumentsFailed: 0,
++    failureReason: null,
++    ...overrides,
++  };
++}
++
++const NEVER = list([], { neverClassified: true, set: null, matchCount: 0, later: BUILDING });
++
+ // --- Harness ------------------------------------------------------------------
+ 
+ type PaneOverrides = Partial<ResultsPaneProps> & { initialChecked?: string[] };
+@@ -164,6 +203,14 @@ const footnotes = (): HTMLElement[] => screen.queryAllByText(CELL.coverageStatem
+ 
+ beforeEach(() => {
+   listMock.mockReset();
++  runsMock.mockReset();
++  runsMock.mockResolvedValue({ runs: [], nextCursor: null });
++  healthMock.mockReset();
++  healthMock.mockResolvedValue(health(null));
++});
++
++afterEach(() => {
++  vi.useRealTimers();
+ });
+ 
+ // Implements TC-COMP-144 (T002): DAC-E4-3, DAC-E4-S9-2.
+@@ -467,3 +514,431 @@ describe("results pane states and props", () => {
+     expect(source).not.toMatch(/localStorage|sessionStorage|window\.location|fetch\(/);
+   });
+ });
++
++// Implements TC-COMP-185 (T001, body half) and T007 (a), (c), (d), (g): DAC-E4-2, DAC-E4-S9-1, AC-22.
++describe("TC-COMP-185: the never-populated body is distinct from the nothing-found body", () => {
++  const body = (): HTMLElement => screen.getByTestId("never-populated");
++
++  it("states that nothing has been scored, the first set's state and the latest download", async () => {
++    listMock.mockResolvedValue(NEVER);
++    runsMock.mockResolvedValue({ runs: [run("running")], nextCursor: null });
++    renderPane({ summary: summaryOf(null, BUILDING) });
++    await screen.findByText(RESULTS.neverScored);
++    const started = formatTimestamp("2026-10-15T22:30:00Z");
++    expect(body()).toHaveTextContent(
++      RESULTS.firstSetBuilding(formatTimestamp(BUILDING.runStartedAt)),
++    );
++    expect(within(body()).getByText(SCORE_SET.updating)).toHaveAttribute(
++      "data-variant",
++      "status-active",
++    );
++    await within(body()).findByText(/is Downloading/);
++    expect(body()).toHaveTextContent(RESULTS.latestDownloadRunning(started));
++    expect(within(body()).getByRole("link", { name: started })).toHaveAttribute("href", "/runs/r1");
++    expect(within(body()).getByRole("link", { name: RESULTS.openDataHealth })).toHaveAttribute(
++      "href",
++      SHELL_ROUTES.dataHealth,
++    );
++  });
++
++  it("shows no table, row, as-of line, Save, footnote, no-match text or retry control", async () => {
++    listMock.mockResolvedValue(NEVER);
++    renderPane({ summary: summaryOf(null, BUILDING) });
++    await screen.findByText(RESULTS.neverScored);
++    expect(screen.queryByRole("table")).toBeNull();
++    expect(screen.queryAllByRole("row")).toHaveLength(0);
++    expect(screen.queryByText(/Scores from/)).toBeNull();
++    expect(screen.queryByRole("button", { name: /Save these/ })).toBeNull();
++    expect(footnotes()).toHaveLength(0);
++    expect(screen.queryByText(RESULTS.noMatch)).toBeNull();
++    expect(screen.queryByRole("button", { name: "Clear filters" })).toBeNull();
++    expect(screen.queryByRole("button", { name: /try again/i })).toBeNull();
++  });
++
++  it("shows Score update failed with the recorded reason when the first attempt failed", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: FAILED });
++    renderPane({ summary: summaryOf(null, FAILED) });
++    await screen.findByText(RESULTS.neverScored);
++    expect(within(body()).getByText(SCORE_SET.scoreUpdateFailed)).toHaveAttribute(
++      "data-variant",
++      "status-critical",
++    );
++    expect(body()).toHaveTextContent(
++      RESULTS.firstSetFailed(
++        formatTimestamp(FAILED.endedAt as string),
++        "Factor engine could not read prices",
++      ),
++    );
++    expect(within(body()).queryByText(SCORE_SET.updating)).toBeNull();
++    expect(screen.queryByRole("button", { name: /try again/i })).toBeNull();
++  });
++
++  it("falls back to the start time and a stated reason for a failed set that recorded neither", async () => {
++    const bare: LaterSet = { ...FAILED, endedAt: null, failureReason: null };
++    listMock.mockResolvedValue({ ...NEVER, later: bare });
++    renderPane({ summary: summaryOf(null, bare) });
++    await screen.findByText(RESULTS.neverScored);
++    expect(body()).toHaveTextContent(
++      RESULTS.firstSetFailed(formatTimestamp(bare.startedAt), SCORE_SET.noReasonRecorded),
++    );
++  });
++
++  it("shows neither badge when no later set exists", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    renderPane({ summary: summaryOf(null, null) });
++    await screen.findByText(RESULTS.neverScored);
++    expect(within(body()).queryByText(SCORE_SET.updating)).toBeNull();
++    expect(within(body()).queryByText(SCORE_SET.scoreUpdateFailed)).toBeNull();
++  });
++
++  it("uses the list result's later until the first summary poll lands", async () => {
++    listMock.mockResolvedValue(NEVER);
++    renderPane({ summary: null });
++    await screen.findByText(RESULTS.neverScored);
++    expect(within(body()).getByText(SCORE_SET.updating)).toBeInTheDocument();
++  });
++
++  it("a populated store with no match shows only the nothing-found body", async () => {
++    runsMock.mockResolvedValue({ runs: [run("running")], nextCursor: null });
++    listMock.mockResolvedValue(list([], { matchCount: 0, later: BUILDING }));
++    renderPane({
++      query: { ...DEFAULT_RESEARCH_QUERY, symbol: "ZZ" },
++      summary: summaryOf(SET, BUILDING),
++    });
++    await screen.findByText(RESULTS.noMatch);
++    expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
++    expect(screen.queryByText(RESULTS.neverScored)).toBeNull();
++    expect(screen.queryByTestId("never-populated")).toBeNull();
++    expect(runsMock).not.toHaveBeenCalled();
++  });
++
++  it("keeps the first set's state when the latest download is running (d)", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: FAILED });
++    runsMock.mockResolvedValue({ runs: [run("running")], nextCursor: null });
++    renderPane({ summary: summaryOf(null, FAILED) });
++    await within(await screen.findByTestId("never-populated")).findByText(/is Downloading/);
++    expect(within(body()).queryByText(SCORE_SET.updating)).toBeNull();
++    expect(within(body()).getByText(SCORE_SET.scoreUpdateFailed)).toBeInTheDocument();
++  });
++});
++
++describe("the latest download line", () => {
++  const started = formatTimestamp("2026-10-15T22:30:00Z");
++  const ended = formatTimestamp("2026-10-15T23:30:00Z");
++  const CASES: Array<[string, AcquisitionRun, string]> = [
++    [
++      "requested",
++      run("requested", { startedAt: null }),
++      RESULTS.latestDownloadRunning(formatTimestamp("2026-10-15T22:29:00Z")),
++    ],
++    ["running", run("running"), RESULTS.latestDownloadRunning(started)],
++    ["cancelling", run("cancelling"), RESULTS.latestDownloadCancelling(started)],
++    [
++      "succeeded",
++      run("succeeded", { endedAt: "2026-10-15T23:30:00Z" }),
++      RESULTS.latestDownloadComplete(started, ended),
++    ],
++    [
++      "partial",
++      run("partial", { endedAt: "2026-10-15T23:30:00Z" }),
++      RESULTS.latestDownloadPartial(started, ended),
++    ],
++    [
++      "failed",
++      run("failed", { endedAt: "2026-10-15T23:30:00Z", failureReason: "Provider refused" }),
++      RESULTS.latestDownloadFailed(started, ended, "Provider refused"),
++    ],
++    [
++      "cancelled",
++      run("cancelled", { endedAt: "2026-10-15T23:30:00Z" }),
++      RESULTS.latestDownloadCancelled(started, ended),
++    ],
++    [
++      "abandoned",
++      run("abandoned", { endedAt: "2026-10-15T23:30:00Z" }),
++      RESULTS.latestDownloadAbandoned(started, ended),
++    ],
++  ];
++
++  it.each(CASES)("reads the %s download from copy.ts", async (_state, download, sentence) => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    runsMock.mockResolvedValue({ runs: [download], nextCursor: null });
++    renderPane({ summary: summaryOf(null, null) });
++    const line = await screen.findByTestId("latest-download");
++    expect(line.textContent).toBe(sentence);
++    const link = within(line).getByRole("link");
++    expect(link).toHaveAttribute("href", `/runs/${download.runId}`);
++    expect(link.textContent).toBe(formatTimestamp(download.startedAt ?? download.requestedAt));
++  });
++
++  it("states a reason when a failed download recorded none", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    runsMock.mockResolvedValue({
++      runs: [run("failed", { endedAt: "2026-10-15T23:30:00Z", failureReason: null })],
++      nextCursor: null,
++    });
++    renderPane({ summary: summaryOf(null, null) });
++    const line = await screen.findByTestId("latest-download");
++    expect(line.textContent).toBe(
++      RESULTS.latestDownloadFailed(started, ended, SCORE_SET.noReasonRecorded),
++    );
++  });
++
++  it("never reads a partial download as Complete", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    runsMock.mockResolvedValue({
++      runs: [run("partial", { endedAt: "2026-10-15T23:30:00Z" })],
++      nextCursor: null,
++    });
++    renderPane({ summary: summaryOf(null, null) });
++    const line = await screen.findByTestId("latest-download");
++    expect(line.textContent).toContain("ended Partial");
++    expect(line.textContent).not.toContain("ended Complete");
++  });
++
++  it("asks for the single latest download once on mount", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    renderPane({ summary: summaryOf(null, null) });
++    await screen.findByText(RESULTS.neverScored);
++    expect(runsMock).toHaveBeenCalledTimes(1);
++    expect(runsMock).toHaveBeenCalledWith({ limit: 1 });
++  });
++
++  it("(c) omits the line and keeps the rest when there is no download", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    renderPane({ summary: summaryOf(null, null) });
++    await screen.findByText(RESULTS.neverScored);
++    await act(async () => undefined);
++    expect(screen.queryByTestId("latest-download")).toBeNull();
++    expect(screen.getByRole("link", { name: RESULTS.openDataHealth })).toBeInTheDocument();
++  });
++
++  it("(c) omits the line without an error when the read fails", async () => {
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    runsMock.mockRejectedValue(new Error("down"));
++    renderPane({ summary: summaryOf(null, null) });
++    await screen.findByText(RESULTS.neverScored);
++    await act(async () => undefined);
++    expect(screen.queryByTestId("latest-download")).toBeNull();
++    expect(screen.queryByRole("alert")).toBeNull();
++    expect(screen.getByTestId("never-populated")).not.toHaveTextContent(/down/);
++  });
++
++  it("(b) reads again when the first set's state or download changes, and not otherwise", async () => {
++    listMock.mockResolvedValue(NEVER);
++    runsMock.mockResolvedValue({ runs: [run("running")], nextCursor: null });
++    const view = renderPane({ summary: summaryOf(null, BUILDING) });
++    await screen.findByTestId("latest-download");
++    expect(runsMock).toHaveBeenCalledTimes(1);
++
++    view.rerender(
++      <MemoryRouter>
++        <Harness summary={summaryOf(null, BUILDING)} checkedAt="2026-10-16T22:45:10Z" />
++      </MemoryRouter>,
++    );
++    await act(async () => undefined);
++    expect(runsMock).toHaveBeenCalledTimes(1);
++
++    runsMock.mockResolvedValue({
++      runs: [run("succeeded", { endedAt: "2026-10-15T23:30:00Z" })],
++      nextCursor: null,
++    });
++    view.rerender(
++      <MemoryRouter>
++        <Harness
++          summary={summaryOf(null, {
++            ...BUILDING,
++            state: "failed",
++            endedAt: "2026-10-16T22:41:00Z",
++            failureReason: "x",
++          })}
++        />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(runsMock).toHaveBeenCalledTimes(2));
++    await waitFor(() =>
++      expect(screen.getByTestId("latest-download").textContent).toContain("ended Complete"),
++    );
++
++    view.rerender(
++      <MemoryRouter>
++        <Harness
++          summary={summaryOf(null, {
++            ...BUILDING,
++            state: "failed",
++            runId: "run-9",
++            endedAt: "2026-10-16T22:41:00Z",
++            failureReason: "x",
++          })}
++        />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(runsMock).toHaveBeenCalledTimes(3));
++  });
++
++  it("(b) reads again when the shell's health reports the download changed", async () => {
++    vi.useFakeTimers({ shouldAdvanceTime: false });
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    healthMock.mockResolvedValue(health({ run_id: "r1", state: "running" }));
++    runsMock.mockResolvedValue({ runs: [run("running")], nextCursor: null });
++    render(
++      <MemoryRouter>
++        <HealthProvider>
++          <Harness summary={summaryOf(null, null)} />
++        </HealthProvider>
++      </MemoryRouter>,
++    );
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(0);
++    });
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(0);
++    });
++    const initial = runsMock.mock.calls.length;
++    expect(initial).toBeGreaterThanOrEqual(1);
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(10_000);
++    });
++    expect(runsMock).toHaveBeenCalledTimes(initial);
++
++    healthMock.mockResolvedValue(health({ run_id: "r1", state: "succeeded" }));
++    runsMock.mockResolvedValue({
++      runs: [run("succeeded", { endedAt: "2026-10-15T23:30:00Z" })],
++      nextCursor: null,
++    });
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(30_000);
++    });
++    expect(runsMock.mock.calls.length).toBe(initial + 1);
++    expect(screen.getByTestId("latest-download").textContent).toContain("ended Complete");
++  });
++
++  it("drops the line when a later read fails, and ignores a stale answer from an earlier read", async () => {
++    const stale: Array<{
++      resolve: (page: { runs: AcquisitionRun[]; nextCursor: string | null }) => void;
++      reject: (reason: unknown) => void;
++    }> = [];
++    listMock.mockResolvedValue(NEVER);
++    runsMock.mockImplementationOnce(
++      () =>
++        new Promise((resolve, reject) => {
++          stale.push({ resolve, reject });
++        }),
++    );
++    runsMock.mockImplementationOnce(
++      () =>
++        new Promise((resolve, reject) => {
++          stale.push({ resolve, reject });
++        }),
++    );
++    const view = renderPane({ summary: summaryOf(null, BUILDING) });
++    await screen.findByText(RESULTS.neverScored);
++    view.rerender(
++      <MemoryRouter>
++        <Harness summary={summaryOf(null, { ...BUILDING, runId: "run-9" })} />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(stale).toHaveLength(2));
++    // The newer read answers first; the older read's answer, late, must not replace it.
++    await act(async () => {
++      stale[1]?.resolve({
++        runs: [run("succeeded", { endedAt: "2026-10-15T23:30:00Z" })],
++        nextCursor: null,
++      });
++    });
++    await act(async () => {
++      stale[0]?.resolve({ runs: [run("running")], nextCursor: null });
++    });
++    expect(screen.getByTestId("latest-download").textContent).toContain("ended Complete");
++    // A later failure of the older read does not clear the newer answer either.
++    await act(async () => {
++      stale[0]?.reject(new Error("late"));
++    });
++    expect(screen.getByTestId("latest-download")).toBeInTheDocument();
++
++    runsMock.mockRejectedValueOnce(new Error("down"));
++    view.rerender(
++      <MemoryRouter>
++        <Harness summary={summaryOf(null, { ...BUILDING, runId: "run-10" })} />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(screen.queryByTestId("latest-download")).toBeNull());
++  });
++
++  it("(b) a failed older read arriving late does not clear a newer line", async () => {
++    const reads: Array<(reason: unknown) => void> = [];
++    listMock.mockResolvedValue(NEVER);
++    runsMock.mockImplementationOnce(
++      () =>
++        new Promise((_resolve, reject) => {
++          reads.push(reject);
++        }),
++    );
++    runsMock.mockResolvedValueOnce({ runs: [run("running")], nextCursor: null });
++    const view = renderPane({ summary: summaryOf(null, BUILDING) });
++    await screen.findByText(RESULTS.neverScored);
++    view.rerender(
++      <MemoryRouter>
++        <Harness summary={summaryOf(null, { ...BUILDING, runId: "run-9" })} />
++      </MemoryRouter>,
++    );
++    await screen.findByTestId("latest-download");
++    await act(async () => {
++      reads[0]?.(new Error("late"));
++    });
++    expect(screen.getByTestId("latest-download")).toBeInTheDocument();
++  });
++
++  it("ignores a read that returns after the pane unmounted", async () => {
++    let resolve!: (page: { runs: AcquisitionRun[]; nextCursor: string | null }) => void;
++    runsMock.mockReturnValue(
++      new Promise((res) => {
++        resolve = res;
++      }),
++    );
++    listMock.mockResolvedValue({ ...NEVER, later: null });
++    renderPane({ summary: summaryOf(null, null) });
++    await screen.findByText(RESULTS.neverScored);
++    cleanup();
++    await act(async () => {
++      resolve({ runs: [run("running")], nextCursor: null });
++    });
++    expect(screen.queryByTestId("latest-download")).toBeNull();
++  });
++});
++
++// T007 (g): Open Gap 7, DEC-0155 as amended.
++describe("poll failure in the never-populated state", () => {
++  it("always renders an empty polite status element, with no sentence or button while the poll works", async () => {
++    listMock.mockResolvedValue(NEVER);
++    renderPane({ summary: summaryOf(null, BUILDING), pollFailed: false });
++    await screen.findByText(RESULTS.neverScored);
++    const status = screen.getByTestId("never-populated-status");
++    expect(status).toHaveAttribute("aria-live", "polite");
++    expect(status).toBeEmptyDOMElement();
++    expect(screen.queryByText(SCORE_SET.couldNotCheck)).toBeNull();
++    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).toBeNull();
++  });
++
++  it("after a failed poll states it in the status element and offers Try again outside it", async () => {
++    const user = userEvent.setup();
++    const onTryAgain = vi.fn();
++    listMock.mockResolvedValue(NEVER);
++    runsMock.mockResolvedValue({ runs: [run("running")], nextCursor: null });
++    renderPane({ summary: summaryOf(null, BUILDING), pollFailed: true, onTryAgain });
++    await screen.findByTestId("latest-download");
++    const status = screen.getByTestId("never-populated-status");
++    expect(status).toHaveTextContent(SCORE_SET.couldNotCheck);
++    const button = screen.getByRole("button", { name: RESULTS.tryAgain });
++    expect(status).not.toContainElement(button);
++    const badge = screen.getByText(SCORE_SET.updating);
++    const download = screen.getByTestId("latest-download");
++    const follows = (a: Element, b: Element): boolean =>
++      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
++    expect(follows(badge, status)).toBe(true);
++    expect(follows(button, download)).toBe(true);
++    await user.click(button);
++    expect(onTryAgain).toHaveBeenCalledTimes(1);
++    expect(screen.getAllByRole("button", { name: RESULTS.tryAgain })).toHaveLength(1);
++  });
++});
+diff --git a/web/src/screens/research/results-pane.tsx b/web/src/screens/research/results-pane.tsx
+index 30a97b0..0446137 100644
+--- a/web/src/screens/research/results-pane.tsx
++++ b/web/src/screens/research/results-pane.tsx
+@@ -1,10 +1,16 @@
+-import { type JSX, type ReactNode, useRef } from "react";
+-import type { ClassificationSummary } from "../../api/classification-types";
++import { type JSX, type ReactNode, useEffect, useRef, useState } from "react";
++import { Link } from "react-router-dom";
++import type { ClassificationSummary, LaterSet } from "../../api/classification-types";
++import { listAcquisitionRuns } from "../../api/client";
+ import type { ResearchQuery } from "../../api/research-query";
++import type { AcquisitionRun } from "../../api/types";
++import { useHealth } from "../../app/status-region";
+ import { AsOfLine } from "../../components/patterns/as-of-line";
+ import { NotCurrentBanner } from "../../components/patterns/not-current-banner";
+ import { SelectionTray } from "../../components/patterns/selection-tray";
+-import { CELL, FILTERS, REGIONS, RESULTS } from "./copy";
++import { StatusBadge } from "../../components/patterns/status-badge";
++import { CELL, FILTERS, REGIONS, RESULTS, SCORE_SET, SHELL_ROUTES } from "./copy";
++import { formatTimestamp } from "./format";
+ import type { Notice } from "./notices";
+ import { type EmptyKind, type FirstPage, ResultsTable } from "./results-table";
+ import { SaveAsUniverse } from "./save-as-universe-dialog";
+@@ -76,6 +82,134 @@ function sortLabelFor(query: ResearchQuery): string {
+   return RESULTS.sortLabels[factor];
+ }
+ 
++/** The sentence for a download's state (Open Gap 2): one `copy.ts` sentence per state. */
++function downloadSentence(download: AcquisitionRun, started: string): string {
++  const ended = download.endedAt === null ? "" : formatTimestamp(download.endedAt);
++  switch (download.state) {
++    case "requested":
++    case "running":
++      return RESULTS.latestDownloadRunning(started);
++    case "cancelling":
++      return RESULTS.latestDownloadCancelling(started);
++    case "succeeded":
++      return RESULTS.latestDownloadComplete(started, ended);
++    case "partial":
++      return RESULTS.latestDownloadPartial(started, ended);
++    case "failed":
++      return RESULTS.latestDownloadFailed(
++        started,
++        ended,
++        download.failureReason ?? SCORE_SET.noReasonRecorded,
++      );
++    case "cancelled":
++      return RESULTS.latestDownloadCancelled(started, ended);
++    case "abandoned":
++      return RESULTS.latestDownloadAbandoned(started, ended);
++  }
++}
++
++/** The latest download's line, its start time the link to the download (DEC-0171). */
++function LatestDownload({ download }: { download: AcquisitionRun }): JSX.Element {
++  const started = formatTimestamp(download.startedAt ?? download.requestedAt);
++  const sentence = downloadSentence(download, started);
++  const at = sentence.indexOf(started);
++  return (
++    <p data-testid="latest-download" className="text-sm">
++      {sentence.slice(0, at)}
++      <Link to={SHELL_ROUTES.download(download.runId)} className="font-numeric underline">
++        {started}
++      </Link>
++      {sentence.slice(at + started.length)}
++    </p>
++  );
++}
++
++/** The first set's state, from the same `later` the banner reads: Updating, or Score update failed. */
++function FirstSetState({ later }: { later: LaterSet }): JSX.Element {
++  if (later.state === "building") {
++    return (
++      <p className="flex flex-col items-start gap-2 text-sm">
++        <StatusBadge tier="active">{SCORE_SET.updating}</StatusBadge>
++        {RESULTS.firstSetBuilding(formatTimestamp(later.runStartedAt))}
++      </p>
++    );
++  }
++  return (
++    <p className="flex flex-col items-start gap-2 text-sm">
++      <StatusBadge tier="critical">{SCORE_SET.scoreUpdateFailed}</StatusBadge>
++      {RESULTS.firstSetFailed(
++        formatTimestamp(later.endedAt ?? later.startedAt),
++        later.failureReason ?? SCORE_SET.noReasonRecorded,
++      )}
++    </p>
++  );
++}
++
++/**
++ * The never-populated body (AC-22, DAC-E4-2, DAC-E4-S9-1; DEC-0170, DEC-0171;
++ * Open Gaps 2 and 7): *No stocks have been scored yet.*, the first set's state,
++ * the poll-failure sentence with **Try again**, the latest download and a link
++ * to Data health. The first set's failed attempt offers nothing to retry
++ * (STD-UI-2); the only control is the poll's own **Try again**.
++ */
++function NeverPopulatedBody({
++  later,
++  pollFailed,
++  onTryAgain,
++}: {
++  later: LaterSet | null;
++  pollFailed: boolean;
++  onTryAgain: () => void;
++}): JSX.Element {
++  const recent = useHealth().health?.most_recent_run ?? null;
++  const [download, setDownload] = useState<AcquisitionRun | null>(null);
++  // The read repeats when the shell's health or the first set reports a change.
++  const signal = [recent?.run_id, recent?.state, later?.state, later?.runId].join("|");
++
++  // biome-ignore lint/correctness/useExhaustiveDependencies: `signal` is the re-read trigger.
++  useEffect(() => {
++    let cancelled = false;
++    listAcquisitionRuns({ limit: 1 })
++      .then((page) => {
++        if (!cancelled) {
++          setDownload(page.runs[0] ?? null);
++        }
++      })
++      .catch(() => {
++        // A secondary read: the line is omitted rather than an error shown.
++        if (!cancelled) {
++          setDownload(null);
++        }
++      });
++    return () => {
++      cancelled = true;
++    };
++  }, [signal]);
++
++  return (
++    <div data-testid="never-populated" className="flex flex-col items-start gap-3 py-3">
++      <p>{RESULTS.neverScored}</p>
++      {later === null ? null : <FirstSetState later={later} />}
++      <output aria-live="polite" data-testid="never-populated-status" className="text-sm">
++        {pollFailed ? SCORE_SET.couldNotCheck : null}
++      </output>
++      {pollFailed ? (
++        <button
++          type="button"
++          onClick={onTryAgain}
++          className="rounded border border-border px-2 py-1 text-xs"
++        >
++          {RESULTS.tryAgain}
++        </button>
++      ) : null}
++      {download === null ? null : <LatestDownload download={download} />}
++      <Link to={SHELL_ROUTES.dataHealth} className="text-sm underline">
++        {RESULTS.openDataHealth}
++      </Link>
++    </div>
++  );
++}
++
+ export function ResultsPane({
+   query,
+   onQueryChange,
+@@ -103,7 +237,7 @@ export function ResultsPane({
+ 
+   function empty(kind: EmptyKind): ReactNode {
+     if (kind === "never-populated") {
+-      return null;
++      return <NeverPopulatedBody later={later} pollFailed={pollFailed} onTryAgain={onTryAgain} />;
+     }
+     return (
+       <div className="flex flex-col items-start gap-2">

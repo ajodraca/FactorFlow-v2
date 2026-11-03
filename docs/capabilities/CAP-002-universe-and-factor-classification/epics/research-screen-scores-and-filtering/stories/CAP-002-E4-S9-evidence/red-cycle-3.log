@@ -1,0 +1,41 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-cad67f/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/copy.test.ts (372 tests | 1 failed) 67ms
+   × copy.ts latest download sentences > reads one sentence per run state, partial never as Complete 4ms
+     → RESULTS.latestDownloadCancelling is not a function
+ ❯ src/screens/research/results-pane.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/results-pane.test.tsx [ src/screens/research/results-pane.test.tsx ]
+TypeError: RESULTS.latestDownloadCancelling is not a function
+ ❯ src/screens/research/results-pane.test.tsx:635:47
+    633|     ],
+    634|     ["running", run("running"), RESULTS.latestDownloadRunning(started)…
+    635|     ["cancelling", run("cancelling"), RESULTS.latestDownloadCancelling…
+       |                                               ^
+    636|     [
+    637|       "succeeded",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/copy.test.ts > copy.ts latest download sentences > reads one sentence per run state, partial never as Complete
+TypeError: RESULTS.latestDownloadCancelling is not a function
+ ❯ src/screens/research/copy.test.ts:669:25
+    667| 
+    668|   it("reads one sentence per run state, partial never as Complete", ()…
+    669|     expect(copy.RESULTS.latestDownloadCancelling(started)).toBe(
+       |                         ^
+    670|       `The latest download, started ${started}, is Cancelling`,
+    671|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed (2)
+      Tests  1 failed | 371 passed (372)
+   Start at  22:24:24
+   Duration  2.53s (transform 491ms, setup 242ms, collect 323ms, tests 67ms, environment 1.19s, prepare 1.15s)
+

@@ -1,0 +1,195 @@
+# TDD evidence for CAP-002-E4-S9 - Research Screen: Results Pane, Never-Populated State and Set History Dialog.
+# Four cycles, with a deviation from the task plan's cycle plan (Other Notes): (1) T004, T010, T011, T012
+# (set-history-dialog.tsx); (2) T002, T005, T006, T011, T013 (results-pane.tsx, populated and nothing-found); (3) T001,
+# T007, T011, T013 (the never-populated body, tested at the ResultsPane level because the body lives there); (4) T003,
+# T005, T007, T008, T009, T014 (index.tsx and the screen tests). T015 and T016 change no behaviour.
+# The driver commits once per stage, so every cycle's commit_hash is `stage` and each cycle's reviewed_patch is its own
+# staged diff: cycle-1.patch is HEAD..index after cycle 1; cycle-2.patch to cycle-4.patch are the diffs between the
+# index trees after each cycle (fingerprinted with check-tdd-evidence.py fingerprint --range), so the four apply in
+# order onto the stage parent aed93bd.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift subagent
+# before the next cycle began; findings were fixed, the patch regenerated and re-reviewed. The verdicts below are the
+# final reviews.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite, generated operators plus hand-written mutants
+# ("operator": "manual") for sources of truth, copy mapping, focus, race guards and wiring.
+# Decisions applied: DEC-0170 to DEC-0172 (owner-provisional); no new decision was recorded.
+
+cycles:
+  - id: cycle-1
+    tasks: [T004, T010, T011, T012]
+    description: >
+      TC-COMP-180 (T004) and T010: the set history dialog behind Earlier sets... as a labelled modal dialog over
+      DialogFrame; one bare listClassificationSets read; the nine columns in the design's order as native column
+      headers; State badges with word and tier shape; the download named by its start time as a link, never a number or
+      id; Ended blank for a building set or one without an end time; qualified counts with Not enough to rank in text
+      for an unranked factor; keyset Show more appended once, de-duplicated, with focus moving to Close when the last
+      page removes it; skeleton, failure sentence by code in an alert with Try again, a failed later page keeping the
+      rows; Close and Escape; late responses after unmount ignored. T011 (strings the dialog needs): SCORE_SET.showMore
+      and SCORE_SET.close with a copy.test.ts anchor. Production: web/src/screens/research/set-history-dialog.tsx and
+      copy.ts.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/red-cycle-1.log
+    red_log_sha256: fc9add1ee90263ce2929fa9edc981e8eec5b4183ca4a65d0dfba9340e7251996
+    red_evidence: >
+      With set-history-dialog.test.tsx and the copy.test.ts anchor written and no dialog file or strings, the dialog file failed to load (Failed to resolve import ./set-history-dialog) and the copy anchor failed (SCORE_SET.showMore undefined): 2 files failed.
+    green_evidence: >
+      set-history-dialog.test.tsx 21 and copy.test.ts passed (386 tests in green-cycle-1.log); tsc --noEmit, biome lint and format clean. Code review first pass CHANGES-REQUIRED (hard-coded Try again, focus lost when the last page removed Show more): both fixed, the patch regenerated and re-reviewed APPROVED. Spec-drift first pass flagged the same hard-coded string; re-checked: no drift.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/green-cycle-1.log
+        sha256: 8d0d4e9d97693f6e67fa1676743c7b6d4890441851d32a8cac4f599109174cc8
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: eb410de916a54d5b4aec85deaa24c4a8b38a109a6d878ac9a4bcb67a0526c708
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/mutation-cycle-1-results.json
+      results_sha256: bdc493c2f769bcdaac76a23e291745a3900a7a2c8d7816f95e3ad17f230f35aa
+      generated: 26
+      killed: 24
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/set-history-dialog.tsx:97:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            mountedRef's initial value (true -> false) is overwritten by the mount effect (mountedRef.current = true) before any read can settle, and nothing reads it in between; the effect's assignment is exercised by every test.
+        - id: web/src/screens/research/set-history-dialog.tsx:142:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The cleanup's mountedRef.current = false (-> true) only guards state updates after unmount; React 18 drops those silently and renders nothing, so no output differs.
+
+  - id: cycle-2
+    tasks: [T002, T005, T006, T011, T013]
+    description: >
+      TC-COMP-144 (T002), TC-COMP-099 (T005) and T006: ResultsPane (results-pane.tsx) with the exported
+      ResearchResult type: the Results section in order (not-current banner, header with the one h1, the as-of line and
+      Save, the table, the STD-UI-18 footnote once, the selection tray); h1 from the list result's matchCount or the
+      screen title before a scored result; the as-of line's set from the list result with the sort label always passed
+      (symbol or the sorted factor); the banner's later from the summary (the list result's only while the first poll
+      is pending, a summary with a null later clearing it); Save's matchCount and setId from the list result,
+      incompleteCount null; the nothing-found body with Clear filters that clears then focuses the h1; onInspect a
+      named no-op. T011 strings: RESULTS.title and RESULTS.sortLabels with anchors. The never-populated body is built in
+      cycle 3 (empty returns null here).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/red-cycle-2.log
+    red_log_sha256: e6c51b325ea4f33c462a8137d8b55dfb20a64fb506cc393c4d8ddda6aec83971
+    red_evidence: >
+      With results-pane.test.tsx and the copy anchor written and no results-pane.tsx, the file failed to load (Failed to resolve import ./results-pane) and the title anchor failed: 2 files failed.
+    green_evidence: >
+      results-pane.test.tsx 32 and copy.test.ts passed (403 tests in green-cycle-2.log); tsc, lint and format clean. Code review APPROVED; spec-drift none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/green-cycle-2.log
+        sha256: f8648d976d854e99dd15d798f9d8594f7b6855c8c3d0938394087f1d2255f320
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6bcb640d262cab88674aa8a3da3c3ad50b8e950b943b794e8d8300acf1b30024
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/mutation-cycle-2-results.json
+      results_sha256: 029d0eb7adeb780b314778c9275e5612eebb46074713559586016eec60544ef4
+      generated: 24
+      killed: 24
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T001, T007, T011, T013]
+    description: >
+      TC-COMP-185 (T001) and T007 (a), (c), (d), (g), (b via the pane's own signal), exercised at the ResultsPane level
+      (deviation from the plan, which placed them in research.test.tsx against the whole screen: they need the pane
+      only, so they are tested where the body lives; the screen-level assertions follow in cycle 4): NeverPopulatedBody
+      inside results-pane.tsx: No stocks have been scored yet, the first set's Updating or Score update failed state
+      from the banner's later, the always-rendered empty polite status element with the poll-failure sentence and Try
+      again outside it, the latest-download line from one listAcquisitionRuns({ limit: 1 }) read on mount and again
+      when the health run or the first set changes, one copy.ts sentence per run state (partial never Complete), start
+      time as the link, the Data health link, stale answers and late failures ignored. T011 strings: the four
+      latest-download sentences (cancelling, partial, cancelled, abandoned) with an anchor.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/red-cycle-3.log
+    red_log_sha256: 9155439c1d7f4eee026dbd07b9985626223a80e2d86f3a558d7ad6ab73066a95
+    red_evidence: >
+      With the new results-pane tests and the copy anchor written and no NeverPopulatedBody, collecting results-pane.test.tsx threw (RESULTS.latestDownloadCancelling is not a function) and the copy anchor failed: 2 files failed.
+    green_evidence: >
+      results-pane.test.tsx 60 and copy.test.ts passed (436 tests in green-cycle-3.log); tsc, lint and format clean. Code review first pass CHANGES-REQUIRED (import order; a failed download without a reason ended the sentence on a colon): fixed with a noReasonRecorded fallback and a test, patch regenerated, re-reviewed APPROVED. Spec-drift none (noted: requested download reads as Downloading with requestedAt, per Open Gap 2).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/green-cycle-3.log
+        sha256: 71a640a689502211bbcd47bf7a072a8168a976b0300c559d42f26f45888d5b11
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 013030751d70ea48f1a0cc491c01feb01cfa64fa06930b2935b2b66d33e316eb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/mutation-cycle-3-results.json
+      results_sha256: 85bfc7263df18c95824effffdf668b2e04b015d06228d6cd9132746f661f7942
+      generated: 36
+      killed: 36
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T003, T005, T007, T008, T009, T014]
+    description: >
+      TC-COMP-185 (screen half), TC-COMP-145 (T003), TC-COMP-099 (screen half), T007 (b), (e), (f), (g), T008 and T009:
+      ResearchScreen (index.tsx, default export): one useResearchQuery, one useScoreSetPoll whose onNewSet bumps the
+      table's refreshKey once, the first-page result, selected and checked by symbol, one useNotices and one
+      NoticeRegion, the Filters pane, ResultsPane, InspectorPanel given the immediate selection, and the Add and
+      Earlier sets dialogs. Tests: URL restore, reload and back with no storage use; refresh once on completion with
+      sort, filters, selection and checks kept and the Save set id pinned to the list's; poll failure and Try again;
+      the never-populated screen; 150 ms inspector call; tray, Add dialog, notices, history dialog. T007 (a), (c), (d)
+      and the health-driven re-read are asserted at the pane level (cycle 3). Not added: T009 (c) focus return and
+      notice link, (d) the status-region inventory (S8's and S7's own tests cover those components). Also removed a
+      source-scan assertion from results-pane.test.tsx that contained the word render.test.tsx forbids under web/src.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/red-cycle-4.log
+    red_log_sha256: 78f79335bbf992f5c1bb2534ff0e8309548b36ba203f526153dfa17716713a31
+    red_evidence: >
+      With research.test.tsx written and no index.tsx, the file failed to load (Failed to resolve import ./index): no tests ran.
+    green_evidence: >
+      research.test.tsx 32 passed (green-cycle-4.log); full web suite 72 files and 1829 tests passed (full-suite.log); biome lint and format clean, tsc --noEmit clean, vite build ok with the new classes present in the built CSS. Code review APPROVED; spec-drift first pass detected missing screen assertions, most added, re-judged: none (remaining gaps are coverage thinness, not behaviour).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/green-cycle-4.log
+        sha256: 211b16a5271e95464f1e30b67bc39d4ec4d6fdb9d4c55559d306920c9dd39ff9
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/full-suite.log
+        sha256: 6785ca60b30763267df91ba46f107b8b7a962d0fb1d6ab6d37730d5c5a378638
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 50b2b7f23bd88b2da9b5ce0a6aad4d8748a8a2fc8e8e8c44ff4da96ad8bd6426
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S9-evidence/mutation-cycle-4-results.json
+      results_sha256: 3aef879b14adc34e29b35713f0c4f44979efcc9b8023a9fb09f4ef04e0fea5a9
+      generated: 34
+      killed: 32
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/index.tsx:26:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The refresh key is an opaque counter compared only by identity change: key + 1 -> key - 1 still changes on every bump, so the table reloads once either way.
+        - id: web/src/screens/research/index.tsx:26:off-by-one:2
+          disposition: equivalent
+          reason: >
+            Same counter: key + 1 -> key + 2 changes on every bump; the value is never rendered or ordered on.
