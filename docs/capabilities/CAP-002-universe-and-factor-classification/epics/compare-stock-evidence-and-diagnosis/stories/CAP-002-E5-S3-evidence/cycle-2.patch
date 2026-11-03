@@ -1,0 +1,985 @@
+diff --git a/web/src/screens/research/copy.test.ts b/web/src/screens/research/copy.test.ts
+index 0ab7e05..d7c07bd 100644
+--- a/web/src/screens/research/copy.test.ts
++++ b/web/src/screens/research/copy.test.ts
+@@ -535,6 +535,8 @@ describe("copy.ts completeness and keying", () => {
+     expect(copy.EVIDENCE.notComputableReason("book-to-price", null)).toBe(
+       "book-to-price couldn't be computed",
+     );
++    expect(copy.EVIDENCE.breadcrumbSeparator).toBe("›");
++    expect(copy.EVIDENCE.followedStocksLink).toBe("Followed stocks");
+     expect(copy.EVIDENCE.dataHealthLink).toBe("Data health");
+     expect(copy.EVIDENCE.unnamedInput).toBe("an input");
+     expect(copy.EVIDENCE.notYetFollowed("NEWCO", "2026-10-15")).toBe(
+diff --git a/web/src/screens/research/copy.ts b/web/src/screens/research/copy.ts
+index e7f7927..88ceab1 100644
+--- a/web/src/screens/research/copy.ts
++++ b/web/src/screens/research/copy.ts
+@@ -850,6 +850,9 @@ export const EVIDENCE = {
+   dataHealthLink: "Data health",
+   /** Names the input when the cell's `reasonInput` matches no input row. */
+   unnamedInput: "an input",
++  /** The breadcrumb's separator and the not-found state's link (UX design 1.6). */
++  breadcrumbSeparator: "›",
++  followedStocksLink: "Followed stocks",
+   /** A followed stock with no row in the current set (DEC-0184 as amended). */
+   notYetFollowed: (symbol: string, scoresDate: string): string =>
+     `${symbol} has no score yet because FactorFlow began following it after the scores dated ${scoresDate} were produced.`,
+diff --git a/web/src/screens/research/stocks/index.tsx b/web/src/screens/research/stocks/index.tsx
+new file mode 100644
+index 0000000..01be6fe
+--- /dev/null
++++ b/web/src/screens/research/stocks/index.tsx
+@@ -0,0 +1,338 @@
++import {
++  type JSX,
++  type KeyboardEvent,
++  type ReactNode,
++  useEffect,
++  useId,
++  useRef,
++  useState,
++} from "react";
++import { Link, useParams, useSearchParams } from "react-router-dom";
++import { getStockEvidence } from "../../../api/classification-client";
++import type { FactorName, Membership, StockEvidence } from "../../../api/classification-types";
++import { ApiError, ApiUnreachableError } from "../../../api/client";
++import { UnreachableState } from "../../../app/status-region";
++import {
++  CELL,
++  EVIDENCE,
++  RESULTS,
++  SELECTION,
++  SHELL_ROUTES,
++  UNIVERSE_DETAIL,
++  failureSentence,
++} from "../copy";
++import FactorCard, { cardShowsMark } from "./factor-card";
++import HistoryTab from "./history-tab";
++
++const FACTORS: readonly FactorName[] = ["value", "growth", "momentum"];
++
++type TabKey = "now" | "earlier";
++
++const TABS: readonly { key: TabKey; label: string }[] = [
++  { key: "now", label: EVIDENCE.nowTab },
++  { key: "earlier", label: EVIDENCE.earlierScoresTab },
++];
++
++/**
++ * A local union rather than `ScreenState`, whose `error` variant cannot hold
++ * the code the failure sentence is chosen by (DEC-0280, as DEC-0278).
++ */
++type Body =
++  | { kind: "loading" }
++  | { kind: "not-found" }
++  | { kind: "unreachable" }
++  | { kind: "error"; error: unknown }
++  | { kind: "loaded"; evidence: StockEvidence };
++
++/** The `status-neutral` badge at the delivered badge size: a stock no longer followed (DEC-0073). */
++function NotFollowedBadge(): JSX.Element {
++  return (
++    <span
++      data-variant="status-neutral"
++      className="inline-flex items-center gap-1 rounded bg-status-neutral-muted px-2 py-1 text-xs font-normal text-status-neutral"
++    >
++      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
++        <circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
++        <line x1="3.5" y1="6" x2="8.5" y2="6" stroke="currentColor" strokeWidth="1.5" />
++      </svg>
++      {CELL.notFollowed}
++    </span>
++  );
++}
++
++/** *In Tech and Dividend growers*, each name a link to its universe, or *In no universe* (DEC-0071). */
++function MembershipsLine({ memberships }: { memberships: readonly Membership[] }): JSX.Element {
++  return (
++    <p data-testid="memberships" className="text-sm">
++      {memberships.length === 0 ? (
++        SELECTION.inNoUniverse
++      ) : (
++        <>
++          {SELECTION.inUniversesLead}
++          {memberships.map((membership, index) => (
++            <span key={membership.universeId}>
++              {index === 0
++                ? null
++                : index === memberships.length - 1
++                  ? SELECTION.listAnd
++                  : SELECTION.listComma}
++              <Link
++                to={`/research/universes/${encodeURIComponent(membership.universeId)}`}
++                className="underline"
++              >
++                {membership.name}
++              </Link>
++            </span>
++          ))}
++        </>
++      )}
++    </p>
++  );
++}
++
++function Breadcrumb({ symbol }: { symbol: string }): JSX.Element {
++  return (
++    <nav aria-label={UNIVERSE_DETAIL.breadcrumb} className="text-sm text-muted-foreground">
++      <Link to="/research" className="underline">
++        {RESULTS.title}
++      </Link>{" "}
++      <span aria-hidden="true">{EVIDENCE.breadcrumbSeparator}</span>{" "}
++      <span className="font-numeric">{symbol}</span>
++    </nav>
++  );
++}
++
++function Title({
++  symbol,
++  evidence,
++}: { symbol: string; evidence: StockEvidence | null }): JSX.Element {
++  return (
++    <h1 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
++      <span className="font-numeric">{symbol}</span>
++      {evidence === null ? null : <span className="font-normal">{evidence.name}</span>}
++      {evidence?.lifecycle === "retired" ? <NotFollowedBadge /> : null}
++    </h1>
++  );
++}
++
++function Skeleton(): JSX.Element {
++  return (
++    <div className="flex flex-col gap-5" aria-busy="true">
++      {FACTORS.map((factor) => (
++        <div
++          key={factor}
++          data-testid="card-skeleton"
++          aria-hidden="true"
++          className="h-24 rounded border border-border bg-secondary"
++        />
++      ))}
++    </div>
++  );
++}
++
++/** The Now panel for a loaded read: the three cards, or the sentence that says why there are none. */
++function NowBody({ evidence, symbol }: { evidence: StockEvidence; symbol: string }): JSX.Element {
++  const { set } = evidence;
++  if (set === null) {
++    return <p className="text-sm">{EVIDENCE.noScoreYet(symbol)}</p>;
++  }
++  // The type promises all three cells; a followed stock with no row in the set arrives with none (DEC-0140).
++  if (FACTORS.some((factor) => evidence.factors[factor] === undefined)) {
++    return <p className="text-sm">{EVIDENCE.notYetFollowed(symbol, set.classificationDate)}</p>;
++  }
++  const cards = FACTORS.map((factor) => {
++    const inputs = evidence.inputs.filter((row) => row.factor === factor);
++    return { factor, inputs, cell: evidence.factors[factor] };
++  });
++  const firstMark = cards.findIndex((card) =>
++    cardShowsMark(card.factor, card.cell, card.inputs, evidence.lifecycle),
++  );
++  return (
++    <div className="flex flex-col gap-5">
++      {cards.map((card, index) => (
++        <FragmentOf key={card.factor}>
++          <FactorCard
++            factor={card.factor}
++            symbol={symbol}
++            cell={card.cell}
++            inputs={card.inputs}
++            lifecycle={evidence.lifecycle}
++            scoresDate={set.classificationDate}
++            latestTradingDay={set.latestTradingDay}
++          />
++          {index === firstMark ? (
++            <p className="text-xs text-muted-foreground">{CELL.restatedExplanation}</p>
++          ) : null}
++        </FragmentOf>
++      ))}
++      <p className="text-xs text-muted-foreground">{CELL.coverageStatement}</p>
++    </div>
++  );
++}
++
++function FragmentOf({ children }: { children: ReactNode }): JSX.Element {
++  return <>{children}</>;
++}
++
++function EvidenceView({ symbol }: { symbol: string }): JSX.Element {
++  const display = symbol.toUpperCase();
++  const [params, setParams] = useSearchParams();
++  const tab: TabKey = params.get("tab") === "earlier" ? "earlier" : "now";
++  const [body, setBody] = useState<Body>({ kind: "loading" });
++  const [attempt, setAttempt] = useState(0);
++  /** The history is read on first activation of Earlier scores and kept mounted after (DEC-0185). */
++  const [historyMounted, setHistoryMounted] = useState(tab === "earlier");
++  const base = useId();
++  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
++
++  if (tab === "earlier" && !historyMounted) {
++    setHistoryMounted(true);
++  }
++
++  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is the Try again trigger.
++  useEffect(() => {
++    setBody({ kind: "loading" });
++    getStockEvidence(symbol)
++      .then((evidence) => setBody({ kind: "loaded", evidence }))
++      .catch((error: unknown) => {
++        if (error instanceof ApiUnreachableError) {
++          setBody({ kind: "unreachable" });
++        } else if (error instanceof ApiError && error.code === "instrument_not_found") {
++          setBody({ kind: "not-found" });
++        } else {
++          setBody({ kind: "error", error });
++        }
++      });
++  }, [symbol, attempt]);
++
++  if (body.kind === "unreachable") {
++    return <UnreachableState />;
++  }
++
++  if (body.kind === "not-found") {
++    return (
++      <div className="mx-auto flex max-w-[1180px] flex-col gap-4">
++        <Breadcrumb symbol={display} />
++        <Title symbol={display} evidence={null} />
++        <p className="text-sm">
++          {failureSentence({
++            operation: "get-stock-evidence",
++            resource: "classification",
++            code: "instrument_not_found",
++            symbols: [display],
++          })}{" "}
++          <Link to={SHELL_ROUTES.followedStocks} className="underline">
++            {EVIDENCE.followedStocksLink}
++          </Link>
++        </p>
++      </div>
++    );
++  }
++
++  const evidence = body.kind === "loaded" ? body.evidence : null;
++
++  function select(index: number): void {
++    const key = TABS[index]?.key ?? "now";
++    setParams(key === "earlier" ? { tab: "earlier" } : {});
++    tabRefs.current[index]?.focus();
++  }
++
++  function onKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number): void {
++    const last = TABS.length - 1;
++    const target =
++      event.key === "ArrowRight"
++        ? index === last
++          ? 0
++          : index + 1
++        : event.key === "ArrowLeft"
++          ? index === 0
++            ? last
++            : index - 1
++          : event.key === "Home"
++            ? 0
++            : event.key === "End"
++              ? last
++              : null;
++    if (target !== null) {
++      event.preventDefault();
++      select(target);
++    }
++  }
++
++  return (
++    <div className="mx-auto flex max-w-[1180px] flex-col gap-4">
++      <Breadcrumb symbol={display} />
++      <Title symbol={display} evidence={evidence} />
++      {evidence === null ? null : <MembershipsLine memberships={evidence.memberships} />}
++      <div role="tablist" className="flex gap-2 border-b border-border">
++        {TABS.map((entry, index) => (
++          <button
++            key={entry.key}
++            ref={(node) => {
++              tabRefs.current[index] = node;
++            }}
++            type="button"
++            role="tab"
++            id={`${base}-${entry.key}-tab`}
++            aria-selected={tab === entry.key}
++            aria-controls={`${base}-${entry.key}-panel`}
++            tabIndex={tab === entry.key ? 0 : -1}
++            onClick={() => select(index)}
++            onKeyDown={(event) => onKeyDown(event, index)}
++            className="min-h-6 px-3 py-2 text-sm aria-selected:border-b-2 aria-selected:font-semibold"
++          >
++            {entry.label}
++          </button>
++        ))}
++      </div>
++      <div
++        role="tabpanel"
++        id={`${base}-now-panel`}
++        aria-labelledby={`${base}-now-tab`}
++        hidden={tab !== "now"}
++      >
++        {body.kind === "loading" ? <Skeleton /> : null}
++        {body.kind === "error" ? (
++          <div className="flex flex-col gap-2 text-sm">
++            <p>
++              {failureSentence({
++                operation: "get-stock-evidence",
++                resource: "classification",
++                code: body.error instanceof ApiError ? body.error.code : null,
++                symbols: [display],
++              })}
++            </p>
++            <button
++              type="button"
++              onClick={() => setAttempt((count) => count + 1)}
++              className="w-fit rounded border border-border px-3 py-2"
++            >
++              {RESULTS.tryAgain}
++            </button>
++          </div>
++        ) : null}
++        {evidence === null ? null : <NowBody evidence={evidence} symbol={display} />}
++      </div>
++      <div
++        role="tabpanel"
++        id={`${base}-earlier-panel`}
++        aria-labelledby={`${base}-earlier-tab`}
++        hidden={tab !== "earlier"}
++      >
++        {historyMounted ? <HistoryTab symbol={symbol} /> : null}
++      </div>
++    </div>
++  );
++}
++
++/**
++ * The Stock evidence screen (AC-12 to AC-17, AC-23; DAC-E5-S3-1 to -5;
++ * DEC-0184, DEC-0185; classification-ui 2.5, 10; UX design 1.6): one stock's
++ * three factor cards on the Now tab and its earlier scores on the other.
++ * `routes.tsx` imports this default export (CAP-002-E4-S10). The inner view is
++ * keyed by the symbol, so a changed symbol reads once and resets the tab state.
++ */
++export default function StockEvidenceScreen(): JSX.Element {
++  const { symbol = "" } = useParams();
++  return <EvidenceView key={symbol} symbol={symbol} />;
++}
+diff --git a/web/src/screens/research/stocks/stock-evidence.test.tsx b/web/src/screens/research/stocks/stock-evidence.test.tsx
+new file mode 100644
+index 0000000..384dad9
+--- /dev/null
++++ b/web/src/screens/research/stocks/stock-evidence.test.tsx
+@@ -0,0 +1,608 @@
++import { render, screen, waitFor, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import * as classificationClient from "../../../api/classification-client";
++import type {
++  CurrentSet,
++  FactorCell,
++  InputRow,
++  StockEvidence,
++  StockHistory,
++} from "../../../api/classification-types";
++import { ApiUnreachableError } from "../../../api/client";
++import { CELL, EVIDENCE, RESULTS, SHELL_ROUTES, failureSentence } from "../copy";
++import StockEvidenceScreen from "./index";
++
++vi.mock("../../../api/classification-client", async () => ({
++  ...(await vi.importActual<typeof import("../../../api/classification-client")>(
++    "../../../api/classification-client",
++  )),
++  getStockEvidence: vi.fn(),
++  getStockHistory: vi.fn(),
++}));
++
++const getStockEvidence = vi.mocked(classificationClient.getStockEvidence);
++const getStockHistory = vi.mocked(classificationClient.getStockHistory);
++const { ClassificationApiError } = classificationClient;
++
++function cell(overrides: Partial<FactorCell> = {}): FactorCell {
++  return {
++    status: "classified",
++    score: "0.58",
++    percentile: "72.00",
++    reasonCode: null,
++    reasonInput: null,
++    reasonDetail: null,
++    restatedPossible: false,
++    ...overrides,
++  };
++}
++
++const INCOMPLETE = cell({
++  status: "not_classified",
++  score: null,
++  percentile: null,
++  reasonCode: "input_missing",
++  reasonInput: "book_to_price",
++});
++
++const SET: CurrentSet = {
++  setId: "s-1",
++  classificationDate: "2026-10-15",
++  runId: "r-1",
++  runStartedAt: "2026-10-15T06:00:00Z",
++  runOutcome: "succeeded",
++  state: "complete",
++  startedAt: "2026-10-15T22:40:00Z",
++  endedAt: "2026-10-15T22:46:00Z",
++  latestTradingDay: "2026-10-14",
++  activeInstruments: 30,
++  notCurrent: false,
++};
++
++function input(overrides: Partial<InputRow> = {}): InputRow {
++  return {
++    factor: "value",
++    inputName: "book_to_price",
++    label: "book-to-price",
++    status: "present",
++    value: "0.4231",
++    asOf: "2026-06-30",
++    knownOn: "2026-10-14",
++    restatedPossible: false,
++    detail: {},
++    ...overrides,
++  };
++}
++
++function evidence(overrides: Partial<StockEvidence> = {}): StockEvidence {
++  return {
++    symbol: "KO",
++    name: "The Coca-Cola Company",
++    lifecycle: "active",
++    set: SET,
++    factors: { value: cell(), growth: cell(), momentum: cell() },
++    inputs: [],
++    memberships: [],
++    ...overrides,
++  };
++}
++
++function history(sets: StockHistory["sets"] = []): StockHistory {
++  return { symbol: "KO", sets, nextCursor: null };
++}
++
++function historyRow(setId: string, date: string, value = cell()): StockHistory["sets"][number] {
++  return {
++    setId,
++    classificationDate: date,
++    runId: `run-${setId}`,
++    runOutcome: "succeeded",
++    endedAt: `${date}T22:46:00Z`,
++    factors: { value, growth: cell(), momentum: cell() },
++  };
++}
++
++function apiError(code: string) {
++  return new ClassificationApiError("ignored envelope message", "req-1", {
++    code,
++    operation: "get-stock-evidence",
++    resource: "classification",
++    symbols: code === "instrument_not_found" ? ["XYZ"] : [],
++  });
++}
++
++function Probe(): JSX.Element {
++  const location = useLocation();
++  return <output data-testid="location">{`${location.pathname}${location.search}`}</output>;
++}
++
++function renderScreen(path = "/research/stocks/KO") {
++  return render(
++    <MemoryRouter initialEntries={[path]}>
++      <Probe />
++      <Routes>
++        <Route path="/research/stocks/:symbol" element={<StockEvidenceScreen />} />
++        <Route path="*" element={<span>elsewhere</span>} />
++      </Routes>
++    </MemoryRouter>,
++  );
++}
++
++const marked = cell({ restatedPossible: true });
++
++beforeEach(() => {
++  getStockEvidence.mockResolvedValue(evidence());
++  getStockHistory.mockResolvedValue(history());
++});
++
++afterEach(() => {
++  vi.clearAllMocks();
++});
++
++describe("StockEvidenceScreen — mandatory component tests", () => {
++  // Implements TC-COMP-116
++  it("reads Not followed on every factor of a retired stock while its earlier scores stay in the history tab", async () => {
++    const retired = cell({
++      status: "not_classified",
++      score: null,
++      percentile: null,
++      reasonCode: "retired",
++    });
++    getStockEvidence.mockResolvedValue(
++      evidence({
++        lifecycle: "retired",
++        factors: { value: retired, growth: retired, momentum: retired },
++      }),
++    );
++    getStockHistory.mockResolvedValue(
++      history([
++        historyRow("s-2", "2026-10-01", cell({ percentile: "81.00" })),
++        historyRow("s-1", "2026-09-15", cell({ percentile: "64.00" })),
++      ]),
++    );
++    renderScreen();
++
++    const title = await screen.findByRole("heading", { level: 1 });
++    expect(within(title).getByText(CELL.notFollowed).closest("[data-variant]")).toHaveAttribute(
++      "data-variant",
++      "status-neutral",
++    );
++    const cards = screen.getAllByRole("region");
++    expect(cards).toHaveLength(3);
++    for (const card of cards) {
++      expect(within(card).getByText(CELL.notFollowed)).toBeInTheDocument();
++      expect(within(card).getByText(CELL.notFollowedNoDate)).toBeInTheDocument();
++      expect(card.querySelector("dl")).toBeNull();
++      expect(within(card).queryByText(CELL.incomplete)).not.toBeInTheDocument();
++    }
++
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    const table = await screen.findByRole("table", { name: EVIDENCE.earlierScoresFor("KO") });
++    expect(within(table).getByText("2026-10-01")).toBeInTheDocument();
++    expect(within(table).getByText("2026-09-15")).toBeInTheDocument();
++    expect(within(table).getByText("81")).toBeInTheDocument();
++    expect(within(table).getByText("64")).toBeInTheDocument();
++  });
++
++  // Implements TC-COMP-149
++  it("shows a not-found state, not an empty card set, for an unknown symbol", async () => {
++    getStockEvidence.mockRejectedValue(apiError("instrument_not_found"));
++    renderScreen("/research/stocks/XYZ");
++
++    expect(
++      await screen.findByText("FactorFlow doesn't follow a stock named XYZ."),
++    ).toBeInTheDocument();
++    expect(screen.getByRole("link", { name: EVIDENCE.followedStocksLink })).toHaveAttribute(
++      "href",
++      SHELL_ROUTES.followedStocks,
++    );
++    expect(screen.queryByRole("region")).not.toBeInTheDocument();
++    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
++    expect(getStockHistory).not.toHaveBeenCalled();
++  });
++
++  // Implements TC-COMP-192
++  it("states the coverage sentence once and the restatement meaning once, directly below the first card with a mark", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({
++        factors: { value: INCOMPLETE, growth: marked, momentum: cell() },
++        inputs: [
++          input({ restatedPossible: true }),
++          input({
++            factor: "growth",
++            inputName: "revenue_growth",
++            label: "revenue growth",
++            value: "0.04",
++            restatedPossible: true,
++          }),
++        ],
++      }),
++    );
++    renderScreen();
++
++    await screen.findByRole("heading", { level: 1 });
++    expect(screen.getAllByText(CELL.coverageStatement)).toHaveLength(1);
++    const sentences = screen.getAllByText(CELL.restatedExplanation);
++    expect(sentences).toHaveLength(1);
++    // Value is Incomplete but its input row carries a mark, so the first mark is in the value card.
++    const [value, growth] = screen.getAllByRole("region");
++    expect(value.nextElementSibling).toBe(sentences[0]);
++    expect(growth.nextElementSibling).not.toBe(sentences[0]);
++    // The marks carry no pointer to the sentence.
++    expect(document.querySelector("[aria-describedby]")).toBeNull();
++  });
++
++  it("places the restatement meaning below the growth card when value has no mark", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({ factors: { value: cell(), growth: marked, momentum: cell() } }),
++    );
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    const [, growth] = screen.getAllByRole("region");
++    expect(growth.nextElementSibling).toBe(screen.getByText(CELL.restatedExplanation));
++  });
++
++  it("renders the restatement meaning nowhere when no mark is drawn, and still the coverage sentence once", async () => {
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
++    expect(screen.getAllByText(CELL.coverageStatement)).toHaveLength(1);
++  });
++
++  it("shows only the history panel's own sentences while Earlier scores is active", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({ factors: { value: marked, growth: cell(), momentum: cell() } }),
++    );
++    getStockHistory.mockResolvedValue(history([historyRow("s-1", "2026-10-01", marked)]));
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    expect(screen.getByText(CELL.restatedExplanation)).toBeVisible();
++
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    await screen.findByRole("table", { name: EVIDENCE.earlierScoresFor("KO") });
++    const explanations = screen.getAllByText(CELL.restatedExplanation);
++    expect(explanations).toHaveLength(2);
++    expect(explanations.filter(isVisible)).toHaveLength(1);
++    const coverage = screen.getByText(CELL.coverageStatement);
++    expect(isVisible(coverage)).toBe(false);
++  });
++});
++
++function isVisible(node: Element): boolean {
++  return node.closest("[hidden]") === null;
++}
++
++describe("StockEvidenceScreen — screen states", () => {
++  it("renders a skeleton of three cards while the evidence is read", () => {
++    getStockEvidence.mockReturnValue(new Promise(() => undefined));
++    renderScreen();
++    expect(screen.getAllByTestId("card-skeleton")).toHaveLength(3);
++    expect(screen.queryByRole("region")).not.toBeInTheDocument();
++  });
++
++  it("states that no stocks have been scored when there is no current set, keeping the history tab reachable", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({ set: null, factors: {} as StockEvidence["factors"] }),
++    );
++    renderScreen();
++    expect(await screen.findByText(EVIDENCE.noScoreYet("KO"))).toBeInTheDocument();
++    expect(screen.queryByRole("region")).not.toBeInTheDocument();
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    expect(getStockHistory).toHaveBeenCalledTimes(1);
++  });
++
++  it("states that FactorFlow began following the stock later when the current set has no cells for it", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({
++        symbol: "NEWCO",
++        name: "NewCo Inc.",
++        factors: {} as StockEvidence["factors"],
++        inputs: [],
++        memberships: [{ universeId: "u-1", name: "Tech" }],
++      }),
++    );
++    renderScreen("/research/stocks/NEWCO");
++    expect(
++      await screen.findByText(EVIDENCE.notYetFollowed("NEWCO", "2026-10-15")),
++    ).toBeInTheDocument();
++    expect(screen.queryByText(EVIDENCE.noScoreYet("NEWCO"))).not.toBeInTheDocument();
++    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
++    expect(screen.queryByText(CELL.incomplete)).not.toBeInTheDocument();
++    expect(screen.getByTestId("memberships")).toHaveTextContent("In Tech");
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    expect(getStockHistory).toHaveBeenCalledWith("NEWCO", expect.anything());
++  });
++
++  it("treats a response lacking only one factor's cell the same way, never passing an undefined cell to a card", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({ factors: { value: cell(), growth: cell() } as StockEvidence["factors"] }),
++    );
++    renderScreen();
++    expect(
++      await screen.findByText(EVIDENCE.notYetFollowed("KO", "2026-10-15")),
++    ).toBeInTheDocument();
++    expect(screen.queryByRole("region")).not.toBeInTheDocument();
++  });
++
++  it("renders the error state with the code's sentence and Try again, keeping the title", async () => {
++    getStockEvidence.mockRejectedValueOnce(apiError("internal_error"));
++    renderScreen();
++    const sentence = failureSentence({
++      operation: "get-stock-evidence",
++      resource: "classification",
++      code: "internal_error",
++    });
++    expect(await screen.findByText(sentence)).toBeInTheDocument();
++    expect(screen.queryByText("ignored envelope message")).not.toBeInTheDocument();
++    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("KO");
++
++    await userEvent.click(screen.getByRole("button", { name: RESULTS.tryAgain }));
++    expect(await screen.findAllByRole("region")).toHaveLength(3);
++    expect(getStockEvidence).toHaveBeenCalledTimes(2);
++    expect(screen.queryByText(sentence)).not.toBeInTheDocument();
++  });
++
++  it("uses the generic sentence for an error that is not an API error", async () => {
++    getStockEvidence.mockRejectedValueOnce(new Error("boom"));
++    renderScreen();
++    expect(
++      await screen.findByText(
++        failureSentence({
++          operation: "get-stock-evidence",
++          resource: "classification",
++          code: null,
++        }),
++      ),
++    ).toBeInTheDocument();
++  });
++
++  it("renders the shell's unreachable state when the API cannot be reached", async () => {
++    getStockEvidence.mockRejectedValue(new ApiUnreachableError("connect ECONNREFUSED"));
++    renderScreen();
++    expect(await screen.findByTestId("unreachable-state")).toBeInTheDocument();
++    expect(screen.queryByRole("region")).not.toBeInTheDocument();
++  });
++
++  it("titles the page with the symbol in the numeric face and the name, under a Research breadcrumb, capped at 1180 px", async () => {
++    renderScreen();
++    const title = await screen.findByRole("heading", { level: 1 });
++    expect(within(title).getByText("KO")).toHaveClass("font-numeric");
++    expect(title).toHaveTextContent("The Coca-Cola Company");
++    const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" });
++    expect(crumbs).toHaveTextContent("Research › KO");
++    expect(within(crumbs).getByRole("link", { name: "Research" })).toHaveAttribute(
++      "href",
++      "/research",
++    );
++    expect(title.parentElement).toHaveClass("max-w-[1180px]");
++    expect(within(title).queryByText(CELL.notFollowed)).not.toBeInTheDocument();
++  });
++
++  it("lists memberships as links to their universes, or In no universe", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({
++        memberships: [
++          { universeId: "u-1", name: "Tech" },
++          { universeId: "u-2", name: "Dividend growers" },
++        ],
++      }),
++    );
++    const { unmount } = renderScreen();
++    const line = await screen.findByTestId("memberships");
++    expect(line).toHaveTextContent("In Tech and Dividend growers");
++    expect(within(line).getByRole("link", { name: "Tech" })).toHaveAttribute(
++      "href",
++      "/research/universes/u-1",
++    );
++    expect(within(line).getByRole("link", { name: "Dividend growers" })).toHaveAttribute(
++      "href",
++      "/research/universes/u-2",
++    );
++    unmount();
++    getStockEvidence.mockResolvedValue(evidence());
++    renderScreen();
++    expect(await screen.findByTestId("memberships")).toHaveTextContent("In no universe");
++  });
++
++  it("joins three memberships with commas and a final and", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({
++        memberships: [
++          { universeId: "u-1", name: "A" },
++          { universeId: "u-2", name: "B" },
++          { universeId: "u-3", name: "C" },
++        ],
++      }),
++    );
++    renderScreen();
++    expect(await screen.findByTestId("memberships")).toHaveTextContent("In A, B and C");
++  });
++
++  it("hands each card its factor's inputs and the set's dates", async () => {
++    getStockEvidence.mockResolvedValue(
++      evidence({
++        factors: { value: INCOMPLETE, growth: cell(), momentum: cell() },
++        inputs: [
++          input({ status: "missing", value: null }),
++          input({
++            factor: "growth",
++            inputName: "revenue_growth",
++            label: "revenue growth",
++            value: "0.04",
++          }),
++        ],
++      }),
++    );
++    renderScreen();
++    const [value, growth, momentum] = await screen.findAllByRole("region");
++    expect(within(value).getByText("book-to-price")).toBeInTheDocument();
++    expect(within(value).queryByText("revenue growth")).not.toBeInTheDocument();
++    expect(within(growth).getByText("revenue growth")).toBeInTheDocument();
++    expect(momentum.querySelector("dl")).toBeNull();
++    expect(value).toHaveTextContent("Value for KO couldn't be scored: book-to-price is missing.");
++  });
++
++  it("mounts no as-of line, banner or poll", async () => {
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    expect(screen.queryByTestId("as-of-line")).not.toBeInTheDocument();
++    expect(screen.queryByTestId("not-current-banner")).not.toBeInTheDocument();
++    expect(getStockEvidence).toHaveBeenCalledTimes(1);
++  });
++});
++
++describe("StockEvidenceScreen — symbol and header edges", () => {
++  it("sends the symbol as received and shows it upper-cased", async () => {
++    getStockEvidence.mockResolvedValue(evidence());
++    renderScreen("/research/stocks/ko");
++    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("KO");
++    expect(getStockEvidence).toHaveBeenCalledWith("ko");
++    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
++      "Research › KO",
++    );
++  });
++
++  it("keeps the breadcrumb and title in the not-found state, naming the symbol in capitals", async () => {
++    getStockEvidence.mockRejectedValue(apiError("instrument_not_found"));
++    renderScreen("/research/stocks/xyz");
++    expect(
++      await screen.findByText("FactorFlow doesn't follow a stock named XYZ."),
++    ).toBeInTheDocument();
++    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("XYZ");
++    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
++      "Research › XYZ",
++    );
++  });
++
++  it("falls back to Now for an unknown tab value", async () => {
++    renderScreen("/research/stocks/KO?tab=bogus");
++    await screen.findByRole("heading", { level: 1 });
++    expect(screen.getByRole("tab", { name: EVIDENCE.nowTab })).toHaveAttribute(
++      "aria-selected",
++      "true",
++    );
++    expect(getStockHistory).not.toHaveBeenCalled();
++  });
++});
++
++describe("StockEvidenceScreen — tabs", () => {
++  it("offers Now (selected) and Earlier scores, each panel labelled by its tab", async () => {
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    expect(screen.getByRole("tablist")).toBeInTheDocument();
++    const now = screen.getByRole("tab", { name: EVIDENCE.nowTab });
++    const earlier = screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab });
++    expect(now).toHaveAttribute("aria-selected", "true");
++    expect(earlier).toHaveAttribute("aria-selected", "false");
++    expect(now).toHaveAttribute("tabindex", "0");
++    expect(earlier).toHaveAttribute("tabindex", "-1");
++    const nowPanel = document.getElementById(
++      now.getAttribute("aria-controls") ?? "",
++    ) as HTMLElement;
++    expect(nowPanel).toHaveAttribute("role", "tabpanel");
++    expect(nowPanel).toHaveAttribute("aria-labelledby", now.id);
++    expect(nowPanel).not.toHaveAttribute("hidden");
++    const earlierPanel = document.getElementById(
++      earlier.getAttribute("aria-controls") ?? "",
++    ) as HTMLElement;
++    expect(earlierPanel).toHaveAttribute("aria-labelledby", earlier.id);
++    expect(earlierPanel).toHaveAttribute("hidden");
++  });
++
++  it("opens Earlier scores from ?tab=earlier", async () => {
++    renderScreen("/research/stocks/KO?tab=earlier");
++    expect(await screen.findByRole("tab", { name: EVIDENCE.earlierScoresTab })).toHaveAttribute(
++      "aria-selected",
++      "true",
++    );
++    await waitFor(() => expect(getStockHistory).toHaveBeenCalledTimes(1));
++  });
++
++  it("updates the tab query and aria-selected on click, and drops the query for Now", async () => {
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    expect(screen.getByTestId("location")).toHaveTextContent("/research/stocks/KO?tab=earlier");
++    expect(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab })).toHaveAttribute(
++      "aria-selected",
++      "true",
++    );
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.nowTab }));
++    expect(screen.getByTestId("location")).toHaveTextContent(/^\/research\/stocks\/KO$/);
++    expect(screen.getByRole("tab", { name: EVIDENCE.nowTab })).toHaveAttribute(
++      "aria-selected",
++      "true",
++    );
++  });
++
++  it("moves between tabs with the arrow, Home and End keys", async () => {
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    screen.getByRole("tab", { name: EVIDENCE.nowTab }).focus();
++    await userEvent.keyboard("{ArrowRight}");
++    const earlier = screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab });
++    expect(earlier).toHaveAttribute("aria-selected", "true");
++    expect(earlier).toHaveFocus();
++    await userEvent.keyboard("{ArrowRight}");
++    expect(screen.getByRole("tab", { name: EVIDENCE.nowTab })).toHaveFocus();
++    await userEvent.keyboard("{ArrowLeft}");
++    expect(earlier).toHaveFocus();
++    await userEvent.keyboard("{ArrowLeft}");
++    expect(screen.getByRole("tab", { name: EVIDENCE.nowTab })).toHaveFocus();
++    await userEvent.keyboard("{ArrowRight}");
++    expect(earlier).toHaveFocus();
++    await userEvent.keyboard("{Home}");
++    expect(screen.getByRole("tab", { name: EVIDENCE.nowTab })).toHaveFocus();
++    await userEvent.keyboard("{End}");
++    expect(earlier).toHaveFocus();
++    await userEvent.keyboard("{a}");
++    expect(earlier).toHaveFocus();
++  });
++
++  it("reads the history only on first activation, then keeps it mounted without a second read", async () => {
++    renderScreen();
++    await screen.findByRole("heading", { level: 1 });
++    expect(getStockHistory).not.toHaveBeenCalled();
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    await waitFor(() => expect(getStockHistory).toHaveBeenCalledTimes(1));
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.nowTab }));
++    await userEvent.click(screen.getByRole("tab", { name: EVIDENCE.earlierScoresTab }));
++    expect(getStockHistory).toHaveBeenCalledTimes(1);
++    expect(getStockEvidence).toHaveBeenCalledTimes(1);
++    expect(screen.getAllByRole("region", { hidden: true })).toHaveLength(3);
++  });
++
++  it("reads once for a changed symbol and resets the history mount", async () => {
++    const view = render(
++      <MemoryRouter initialEntries={["/research/stocks/KO?tab=earlier"]}>
++        <Probe />
++        <Routes>
++          <Route path="/research/stocks/:symbol" element={<StockEvidenceScreen />} />
++        </Routes>
++        <GoTo to="/research/stocks/PEP" />
++      </MemoryRouter>,
++    );
++    await waitFor(() => expect(getStockHistory).toHaveBeenCalledTimes(1));
++    getStockEvidence.mockResolvedValue(evidence({ symbol: "PEP", name: "PepsiCo" }));
++    await userEvent.click(within(view.container).getByRole("button", { name: "go" }));
++    await waitFor(() => expect(getStockEvidence).toHaveBeenLastCalledWith("PEP"));
++    expect(getStockEvidence).toHaveBeenCalledTimes(2);
++    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("PEP");
++    expect(screen.getByRole("tab", { name: EVIDENCE.nowTab })).toHaveAttribute(
++      "aria-selected",
++      "true",
++    );
++    expect(getStockHistory).toHaveBeenCalledTimes(1);
++  });
++});
++
++function GoTo({ to }: { to: string }): JSX.Element {
++  const navigate = useNavigate();
++  return (
++    <button type="button" onClick={() => navigate(to)}>
++      go
++    </button>
++  );
++}

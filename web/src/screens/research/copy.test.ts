@@ -516,6 +516,32 @@ describe("copy.ts completeness and keying", () => {
     // CAP-002-E5-S2 T002: the Earlier scores table's label and its Produced heading.
     expect(copy.EVIDENCE.earlierScoresFor("AAPL")).toBe("Earlier scores for AAPL");
     expect(copy.EVIDENCE.producedColumn).toBe("Produced");
+    // CAP-002-E5-S3 T002: the three-part statements' reasons and the evidence screen's own sentences.
+    expect(copy.EVIDENCE.fundamentalOutdatedReason("2026-10-15")).toBe(
+      "its latest statement covers a quarter that ended more than 6 months before 2026-10-15",
+    );
+    expect(copy.EVIDENCE.priceOutdatedReason("2026-10-14")).toBe(
+      "its latest price is not from the latest trading day, 2026-10-14",
+    );
+    expect(copy.EVIDENCE.providerHoldsNoDataReason("free-cash-flow yield", "KO")).toBe(
+      "the provider reports no free-cash-flow yield for KO",
+    );
+    expect(copy.EVIDENCE.missingInputReason("free-cash-flow yield")).toBe(
+      "free-cash-flow yield is missing",
+    );
+    expect(copy.EVIDENCE.notComputableReason("book-to-price", "book value is negative")).toBe(
+      "book-to-price couldn't be computed (book value is negative)",
+    );
+    expect(copy.EVIDENCE.notComputableReason("book-to-price", null)).toBe(
+      "book-to-price couldn't be computed",
+    );
+    expect(copy.EVIDENCE.breadcrumbSeparator).toBe("›");
+    expect(copy.EVIDENCE.followedStocksLink).toBe("Followed stocks");
+    expect(copy.EVIDENCE.dataHealthLink).toBe("Data health");
+    expect(copy.EVIDENCE.unnamedInput).toBe("an input");
+    expect(copy.EVIDENCE.notYetFollowed("NEWCO", "2026-10-15")).toBe(
+      "NEWCO has no score yet because FactorFlow began following it after the scores dated 2026-10-15 were produced.",
+    );
     expect(copy.CELL.notFollowedSince("2026-10-01")).toBe(
       "Not followed since 2026-10-01. Earlier scores stand.",
     );

@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "repo_head": "6e7b8b019cf98eef9ab96b4e289d7c18041fc2cc",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/research/copy.ts:841:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/copy.ts",
+      "line": 841,
+      "original": "    `its latest statement covers a quarter that ended more than 6 months before ${scoresDate}`,",
+      "mutated": "    `its latest statement covers a quarter that ended more than 7 months before ${scoresDate}`,"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:35:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 35,
+      "original": "  return lifecycle === \"retired\" || cell.reasonCode === \"retired\";",
+      "mutated": "  return lifecycle === \"retired\" && cell.reasonCode === \"retired\";"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:64:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 64,
+      "original": "  if (factor === \"momentum\" || isRetired(cell, lifecycle)) {",
+      "mutated": "  if (factor === \"momentum\" && isRetired(cell, lifecycle)) {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:65:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 65,
+      "original": "    return false;",
+      "mutated": "    return true;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:67:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 67,
+      "original": "  return cellDrawsMark(cell, factor) || inputs.some((input) => input.restatedPossible);",
+      "mutated": "  return cellDrawsMark(cell, factor) && inputs.some((input) => input.restatedPossible);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:77:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 77,
+      "original": "    return false;",
+      "mutated": "    return true;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:80:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 80,
+      "original": "  if (typeof detail !== \"object\" || detail === null) {",
+      "mutated": "  if (typeof detail !== \"object\" && detail === null) {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:81:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 81,
+      "original": "    return false;",
+      "mutated": "    return true;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:84:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 84,
+      "original": "  if (typeof acquisition !== \"object\" || acquisition === null) {",
+      "mutated": "  if (typeof acquisition !== \"object\" && acquisition === null) {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:85:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 85,
+      "original": "    return false;",
+      "mutated": "    return true;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(1, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(0, 5)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:3",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(0, 4)) * 13 + Number(scoresDate.slice(5, 7)) - 1 - 6;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:4",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(6, 7)) - 1 - 6;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:5",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 8)) - 1 - 6;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:6",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 2 - 6;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:96:off-by-one:7",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 96,
+      "original": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 6;",
+      "mutated": "  const months = Number(scoresDate.slice(0, 4)) * 12 + Number(scoresDate.slice(5, 7)) - 1 - 7;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:97:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 97,
+      "original": "  const year = Math.floor(months / 12);",
+      "mutated": "  const year = Math.floor(months / 13);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:98:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 98,
+      "original": "  const month = (months % 12) + 1;",
+      "mutated": "  const month = (months % 13) + 1;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:98:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 98,
+      "original": "  const month = (months % 12) + 1;",
+      "mutated": "  const month = (months % 12) + 2;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:99:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 99,
+      "original": "  const monthEnd = new Date(Date.UTC(year, month, 0)).getUTCDate();",
+      "mutated": "  const monthEnd = new Date(Date.UTC(year, month, 1)).getUTCDate();"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:100:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 100,
+      "original": "  const day = Math.min(Number(scoresDate.slice(8, 10)), monthEnd);",
+      "mutated": "  const day = Math.min(Number(scoresDate.slice(9, 10)), monthEnd);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:100:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 100,
+      "original": "  const day = Math.min(Number(scoresDate.slice(8, 10)), monthEnd);",
+      "mutated": "  const day = Math.min(Number(scoresDate.slice(8, 11)), monthEnd);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:101:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 101,
+      "original": "  return `${String(year).padStart(4, \"0\")}-${String(month).padStart(2, \"0\")}-${String(day).padStart(2, \"0\")}`;",
+      "mutated": "  return `${String(year).padStart(5, \"0\")}-${String(month).padStart(2, \"0\")}-${String(day).padStart(2, \"0\")}`;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:101:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 101,
+      "original": "  return `${String(year).padStart(4, \"0\")}-${String(month).padStart(2, \"0\")}-${String(day).padStart(2, \"0\")}`;",
+      "mutated": "  return `${String(year).padStart(4, \"0\")}-${String(month).padStart(3, \"0\")}-${String(day).padStart(2, \"0\")}`;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:101:off-by-one:3",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 101,
+      "original": "  return `${String(year).padStart(4, \"0\")}-${String(month).padStart(2, \"0\")}-${String(day).padStart(2, \"0\")}`;",
+      "mutated": "  return `${String(year).padStart(4, \"0\")}-${String(month).padStart(2, \"0\")}-${String(day).padStart(3, \"0\")}`;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:106:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 106,
+      "original": "  return factor !== \"momentum\" && input.asOf !== null && input.asOf < sixMonthsBefore(scoresDate);",
+      "mutated": "  return factor !== \"momentum\" || input.asOf !== null && input.asOf < sixMonthsBefore(scoresDate);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:106:negate-boolean:2",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 106,
+      "original": "  return factor !== \"momentum\" && input.asOf !== null && input.asOf < sixMonthsBefore(scoresDate);",
+      "mutated": "  return factor !== \"momentum\" && input.asOf !== null || input.asOf < sixMonthsBefore(scoresDate);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:106:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 106,
+      "original": "  return factor !== \"momentum\" && input.asOf !== null && input.asOf < sixMonthsBefore(scoresDate);",
+      "mutated": "  return factor !== \"momentum\" && input.asOf !== null && input.asOf <= sixMonthsBefore(scoresDate);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:121:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 121,
+      "original": "      if (input !== undefined && providerHoldsNoData(input)) {",
+      "mutated": "      if (input !== undefined || providerHoldsNoData(input)) {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:137:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 137,
+      "original": "        input !== undefined && isOutdatedFundamental(input, factor, scoresDate)",
+      "mutated": "        input !== undefined || isOutdatedFundamental(input, factor, scoresDate)"
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:289:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 289,
+      "original": "        {!retired && cell.reasonCode === \"not_enough_stocks\" && cell.reasonDetail !== null ? (",
+      "mutated": "        {!retired || cell.reasonCode === \"not_enough_stocks\" && cell.reasonDetail !== null ? ("
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:289:negate-boolean:2",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 289,
+      "original": "        {!retired && cell.reasonCode === \"not_enough_stocks\" && cell.reasonDetail !== null ? (",
+      "mutated": "        {!retired && cell.reasonCode === \"not_enough_stocks\" || cell.reasonDetail !== null ? ("
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:298:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 298,
+      "original": "        {retired || inputs.length === 0 ? null : (",
+      "mutated": "        {retired && inputs.length === 0 ? null : ("
+    },
+    {
+      "id": "web/src/screens/research/stocks/factor-card.tsx:298:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/factor-card.tsx",
+      "line": 298,
+      "original": "        {retired || inputs.length === 0 ? null : (",
+      "mutated": "        {retired || inputs.length === 1 ? null : ("
+    }
+  ]
+}

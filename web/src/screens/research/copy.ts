@@ -832,4 +832,28 @@ export const EVIDENCE = {
   earlierScoresFor: (symbol: string): string => `Earlier scores for ${symbol}`,
   /** The column naming when a set was produced, from the set's end time (DEC-0179). */
   producedColumn: "Produced",
+  /**
+   * The reasons a factor card's three-part statement slots into
+   * `couldNotBeScored` (CAP-002-E5-S3 T002; AC-13; DEC-0181, DEC-0182,
+   * DEC-0186). No design prints the price and not-computable wordings.
+   */
+  fundamentalOutdatedReason: (scoresDate: string): string =>
+    `its latest statement covers a quarter that ended more than 6 months before ${scoresDate}`,
+  priceOutdatedReason: (latestTradingDay: string): string =>
+    `its latest price is not from the latest trading day, ${latestTradingDay}`,
+  providerHoldsNoDataReason: (input: string, symbol: string): string =>
+    `the provider reports no ${input} for ${symbol}`,
+  missingInputReason: (input: string): string => `${input} is missing`,
+  notComputableReason: (input: string, detail: string | null): string =>
+    detail === null ? `${input} couldn't be computed` : `${input} couldn't be computed (${detail})`,
+  /** The link text of the recovery sentence (SHELL_ROUTES.dataHealth). */
+  dataHealthLink: "Data health",
+  /** Names the input when the cell's `reasonInput` matches no input row. */
+  unnamedInput: "an input",
+  /** The breadcrumb's separator and the not-found state's link (UX design 1.6). */
+  breadcrumbSeparator: "›",
+  followedStocksLink: "Followed stocks",
+  /** A followed stock with no row in the current set (DEC-0184 as amended). */
+  notYetFollowed: (symbol: string, scoresDate: string): string =>
+    `${symbol} has no score yet because FactorFlow began following it after the scores dated ${scoresDate} were produced.`,
 } as const;

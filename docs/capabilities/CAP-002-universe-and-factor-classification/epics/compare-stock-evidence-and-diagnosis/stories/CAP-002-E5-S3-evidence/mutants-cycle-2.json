@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "repo_head": "6e7b8b019cf98eef9ab96b4e289d7c18041fc2cc",
+  "range": "67373dda16f9eab0fddb1ec400aba5670728977d..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:67:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 67,
+      "original": "      {memberships.length === 0 ? (",
+      "mutated": "      {memberships.length === 1 ? ("
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:74:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 74,
+      "original": "              {index === 0",
+      "mutated": "              {index === 1"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:76:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 76,
+      "original": "                : index === memberships.length - 1",
+      "mutated": "                : index === memberships.length - 2"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:182:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 182,
+      "original": "  const [attempt, setAttempt] = useState(0);",
+      "mutated": "  const [attempt, setAttempt] = useState(1);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:188:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 188,
+      "original": "  if (tab === \"earlier\" && !historyMounted) {",
+      "mutated": "  if (tab === \"earlier\" || !historyMounted) {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:188:negate-boolean:2",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 188,
+      "original": "  if (tab === \"earlier\" && !historyMounted) {",
+      "mutated": "  if (tab === \"earlier\" && historyMounted) {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:189:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 189,
+      "original": "    setHistoryMounted(true);",
+      "mutated": "    setHistoryMounted(false);"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:196:remove-attribute:1",
+      "cycle": "cycle-2",
+      "operator": "remove-attribute",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 196,
+      "original": "      .then((evidence) => setBody({ kind: \"loaded\", evidence }))",
+      "mutated": ""
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:200:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 200,
+      "original": "        } else if (error instanceof ApiError && error.code === \"instrument_not_found\") {",
+      "mutated": "        } else if (error instanceof ApiError || error.code === \"instrument_not_found\") {"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:241:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 241,
+      "original": "    const last = TABS.length - 1;",
+      "mutated": "    const last = TABS.length - 2;"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:245:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 245,
+      "original": "          ? 0",
+      "mutated": "          ? 1"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:246:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 246,
+      "original": "          : index + 1",
+      "mutated": "          : index + 2"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:248:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 248,
+      "original": "          ? index === 0",
+      "mutated": "          ? index === 1"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:250:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 250,
+      "original": "            : index - 1",
+      "mutated": "            : index - 2"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:252:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 252,
+      "original": "            ? 0",
+      "mutated": "            ? 1"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:279:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 279,
+      "original": "            tabIndex={tab === entry.key ? 0 : -1}",
+      "mutated": "            tabIndex={tab === entry.key ? 1 : -1}"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:279:off-by-one:2",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 279,
+      "original": "            tabIndex={tab === entry.key ? 0 : -1}",
+      "mutated": "            tabIndex={tab === entry.key ? 0 : -2}"
+    },
+    {
+      "id": "web/src/screens/research/stocks/index.tsx:307:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/research/stocks/index.tsx",
+      "line": 307,
+      "original": "              onClick={() => setAttempt((count) => count + 1)}",
+      "mutated": "              onClick={() => setAttempt((count) => count + 2)}"
+    }
+  ]
+}
