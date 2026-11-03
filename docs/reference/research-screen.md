@@ -1,6 +1,6 @@
 # Research screen modules (`web/src/screens/research/`)
 
-`web/src/screens/research/` will hold the CAP-002 Research screens
+`web/src/screens/research/` holds the CAP-002 Research screens
 (`component-design-classification-ui.md`). So far it holds two pure modules
 the screens will share (CAP-002-E4-S2) and one hook (CAP-002-E4-S4):
 
@@ -36,6 +36,15 @@ and the results table with its window arithmetic (CAP-002-E4-S6):
 - `results-table.tsx`, the virtualised results table
   ([Results table](#results-table-results-tabletsx));
 
+and the Research screen itself (CAP-002-E4-S9), composed from the above:
+
+- `index.tsx`, the default export `ResearchScreen`
+  ([Research screen](#research-screen-indextsx));
+- `results-pane.tsx`, the Results card with its never-populated and
+  nothing-found bodies ([Results pane](#results-pane-results-panetsx));
+- `set-history-dialog.tsx`, the **Earlier sets…** dialog
+  ([Set history dialog](#set-history-dialog-set-history-dialogtsx));
+
 and the first screen, the universes list with its create dialog
 (CAP-002-E1-S7), in `universes/`; see
 [Universes screen](#universes-screen-universes);
@@ -49,8 +58,8 @@ the Add stocks and retire dialogs (CAP-002-E1-S9), also in
 `universes/detail/`; see
 [Universe detail page](#universe-detail-page-universesdetail).
 
-No route mounts any of them yet: `/research/universes` and
-`/research/universes/:universeId` are registered by CAP-002-E4-S10. The dialogs' only importers are
+No route mounts any of them yet: `/research` and the universes routes are
+registered by CAP-002-E4-S10, which imports `ResearchScreen`. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
 dialogs and the tests, `dialog-frame.tsx` also by the Add stocks dialog. The results table's importers are its test and the
 Members tab (CAP-002-E4-S9 is its other planned host), which also imports
@@ -123,7 +132,7 @@ section 14.
 | `thresholdFieldError(factor, measure)` | the threshold field's error on blur, *Could not set the {factor} threshold: {rule}.*, where `rule` is *a percentile is a number from 0 to 100* or *a standardised score is a finite number* (DEC-0157, provisional). A standalone string: not `failureSentence` output and no `OPERATION_LABELS` entry |
 | `CELL`, `INPUT_STATUS`, `IncompleteReasonCode` | the factor cell and column states (see [Factor-cell sentences](#factor-cell-sentences)), an input's non-present status, and the three `ReasonCode` values an *Incomplete* cell can carry |
 | `SORT` | the results table's sort-button names, `bySymbol` (*Sort by symbol*), `byPercentile(factor)` and `byStandardisedScore(factor)` (*Sort by {factor} percentile*, *Sort by {factor} standardised score*), and `incompleteLast`, the ranked factor headers' description (*Stocks with an incomplete score are listed last, whether sorted up or down.*) (CAP-002-E4-S6; DEC-0161) |
-| `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history. `RESULTS.columns`, the table's *Symbol* and *Name* headers, is CAP-002-E4-S6's (DEC-0239) |
+| `RESULTS`, `SCORE_SET` | the results header and empty bodies, and the as-of line, not-current banner and set history. `RESULTS.columns`, the table's *Symbol* and *Name* headers, is CAP-002-E4-S6's (DEC-0239). CAP-002-E4-S9 added to `RESULTS`: `title` (*Research*, the `h1` until a scored result gives it a count, and in the never-populated state; DEC-0170); `sortLabels`, the as-of line's *sorted by* word per factor (*symbol*, *value*, *growth*, *momentum*); and four latest-download sentences UX design 1.1 does not contain, `latestDownloadCancelling`, `latestDownloadPartial`, `latestDownloadCancelled` and `latestDownloadAbandoned`, which follow its *is {state}* / *ended {state} at {time}* pattern (DEC-0171). It added `SCORE_SET.showMore` (*Show more*) and `SCORE_SET.close` (*Close*), the history dialog's two controls, which the design does not word (DEC-0172) |
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. `SELECTION` entries no design contains carry a doc comment saying so (CAP-002-E4-S7; DEC-0165): `inspectorLoading`, *Loading the selected stock.*, the inspector skeleton's screen-reader text; `inputsLineAsOf(inputs, asOf)`, the inputs clause with no `known_on`; `inputsLineSeparator`, `; `, between clauses of differing dates. `inUniversesLead`, `listComma` and `listAnd` split `inUniverses` so the inspector can link each name. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
 | `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional). CAP-002-E1-S8 added six `UNIVERSE_DETAIL` entries: `removeAction` (*Remove…*) and `renamedDetail(before, after)` (*{before} → {after}*) are UX 1.4's; `asOfFiltersNote` (*Filters and sorting apply to current members only.*; DEC-0105), `malformedDate` (*Enter a date as YYYY-MM-DD.*) and `noLongerMember(symbol, name)` (DEC-0107), and `loadMore` (*Load more*; DEC-0107) are in no design and carry a doc comment saying so. CAP-002-E1-S9 added four (DEC-0109): `addedStocks(added, name, alreadyMembers)`, `DIALOGS.added` with *stock* singular at one; `allAlreadyMembers(count, name)` (*All {n} were already members of {name}.*), in no design; `addNotFollowed(symbols)`, the Add stocks `instrument_not_acquired` refusal, UX 1.4's *as in Section 1.3* with the verb adapted; and `breadcrumb` (*Breadcrumb*), the detail page's breadcrumb `nav` label, which no design words |
@@ -746,6 +755,111 @@ module-level state and touches no storage.
 
 `use-score-set-poll.test.ts` beside it carries TC-COMP-177 and TC-COMP-184
 and drives the hook with fake timers, mocking the client and `useHealth`.
+
+## Research screen (`index.tsx`)
+
+`ResearchScreen`, the default export, is the `/research` screen (AC-9, AC-16,
+AC-20 to AC-22; DAC-E4-2 to DAC-E4-4, DAC-E4-S9-3; DEC-0170; CAP-002-E4-S9).
+CAP-002-E4-S10 registers it at `routes.tsx`. It composes the Filters pane,
+the Results pane and the selected stock's `InspectorPanel`, and owns:
+
+- the one `useResearchQuery()` (the URL is the only home of sort, thresholds,
+  scope, hide-incomplete and search);
+- the one `useScoreSetPoll({ onNewSet })`, whose `onNewSet` bumps a
+  `refreshKey` the results table reloads from, once per new set;
+- `result` (the first page the table reports), `selected` (a symbol or
+  `null`), `checked` (symbols) and the one `useNotices()`/`NoticeRegion`;
+- whether the Add to universe dialog and the set history dialog are open;
+  each is mounted only while open.
+
+It has no `fetch`, timer or storage of its own. The Filters pane gets
+`showLookIn` and `activeInstruments` from the first page's set.
+
+## Results pane (`results-pane.tsx`)
+
+`ResultsPane(props)` is the Results card (AC-11, AC-12, AC-14, AC-20, AC-21;
+DAC-E4-2 to DAC-E4-4, DAC-E4-S9-1, DAC-E4-S9-2, DAC-E4-S9-5; DEC-0170,
+DEC-0171). `ResearchResult` is `FirstPage` from `results-table.tsx`. The host
+passes in every state: `query`, `onQueryChange`, `onClear`, `refreshKey`,
+`result`, `onResult`, the poll's `summary`, `checkedAt`, `pollFailed`,
+`onTryAgain` and `announcement`, `selected`, `onSelect`, `checked`,
+`onCheckedChange`, `onAddToUniverse`, `onOpenEarlierSets` and `onNotify`.
+Top to bottom it renders:
+
+1. `NotCurrentBanner`, from `result?.set ?? summary?.set` and `later`;
+2. the header: the one `h1` (*{n} stocks match* once a result is scored,
+   else `RESULTS.title`), `AsOfLine` with the `sortLabel` and
+   `onOpenEarlierSets`, and `SaveAsUniverse` once scored;
+3. `ResultsTable`, with the pane's `empty` renderer;
+4. `CELL.coverageStatement`, once, when a scored result has rows;
+5. `SelectionTray`.
+
+**Sources of each figure.** The `h1`'s count, the as-of line's set and
+Save's `matchCount` and `setId` are the list result's, since they describe
+the rows on screen. `later`, which drives the banner and the *Updating*
+mark, is the poll summary's, and the list result's only while the first poll
+is pending; a summary whose `later` is null clears both. `incompleteCount`
+is passed as `null`: the first page does not carry every matching row, so
+the *including* clause is omitted rather than guessed (STD-UI-15).
+
+**Sort label.** `sortLabelFor(query)` gives `RESULTS.sortLabels` for the
+sorted key's factor, or *symbol* for the default order.
+
+**Inspector.** `ResultsTable.onInspect` is required, and the pane passes a
+named no-op: the inspector takes the immediate `selected` and waits 150 ms
+itself, so wiring `onInspect` would make the wait 300 ms (DEC-0164,
+DEC-0170).
+
+**Nothing found.** `RESULTS.noMatch` and a **Clear filters** ghost button
+that calls `onClear` and moves focus to the `h1`.
+
+**Never populated** (AC-22). The body shows `RESULTS.neverScored`; the first
+set's state from `later` (`building` gives the *Updating* badge and
+`firstSetBuilding(started)`, else the *Score update failed* badge and
+`firstSetFailed(time, reason)`, with `SCORE_SET.noReasonRecorded` when no
+reason was recorded; it offers nothing to retry, STD-UI-2); a polite
+`output` with `SCORE_SET.couldNotCheck` and **Try again** when the poll
+failed; the latest download; and an **Open Data health** link
+(`SHELL_ROUTES.dataHealth`).
+
+The latest download is read with `listAcquisitionRuns({ limit: 1 })`, and the
+read repeats when `useHealth().health.most_recent_run`'s `run_id` or `state`,
+or `later`'s `state` or `runId`, changes (DEC-0171). A rejected read omits
+the line. Its sentence is one `RESULTS.latestDownload*` per run state
+(`requested` and `running` share *is Downloading*), and the start time is
+the link to `SHELL_ROUTES.download(runId)`. A failed run with no
+`failureReason` reads `SCORE_SET.noReasonRecorded`.
+
+`results-pane.test.tsx` and `research.test.tsx` beside the modules drive the
+pane and the screen with the client mocked at its boundary and fake timers.
+
+## Set history dialog (`set-history-dialog.tsx`)
+
+`SetHistoryDialog({ onClose })` is the **Earlier sets…** dialog (AC-21,
+DAC-E4-S9-4; UX design 1.2; classification-ui 2.6; DEC-0073, DEC-0078,
+DEC-0172). It is read-only, with no confirm action, and sits in
+`DialogFrame`, which moves focus in, traps Tab, closes on Escape and returns
+focus to the opener. The host mounts it only while open.
+
+- **Reads.** `listClassificationSets()` once on mount, bare, then
+  `listClassificationSets({ cursor })` for each **Show more**. Rows are
+  de-duplicated by `setId`, in the order the API returns them (newest
+  first), and only one read is in flight. When the last page removes
+  **Show more**, focus moves to **Close** if **Show more** held it.
+- **Table.** Columns: State, Scores date, Download, Started, Ended, the
+  Value, Growth and Momentum qualified counts, and Reason. State is a
+  `StatusBadge` (*Complete*, *Updating*, *Failed*). The Download cell is the
+  run's start time linked to `SHELL_ROUTES.download(runId)` with the
+  `SCORE_SET.openDownload` label, beside an outcome badge (*Complete* or
+  *Partial*), never a number or id (DEC-0083). Ended is empty for a
+  `building` set. An unranked factor's count is followed by *Not enough to
+  rank* in text.
+- **Failure.** A failed first read shows `failureSentence` for
+  `list-classification-sets` by error code, never the envelope's `message`,
+  in an alert with **Try again**; a failed later page shows the same sentence
+  and keeps the rows already loaded.
+
+`set-history-dialog.test.tsx` carries its tests.
 
 ## Universes screen (`universes/`)
 
