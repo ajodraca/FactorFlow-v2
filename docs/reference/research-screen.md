@@ -45,6 +45,10 @@ and the Research screen itself (CAP-002-E4-S9), composed from the above:
 - `set-history-dialog.tsx`, the **Earlier sets…** dialog
   ([Set history dialog](#set-history-dialog-set-history-dialogtsx));
 
+and the stock evidence screen's Earlier scores panel (CAP-002-E5-S2), in
+`stocks/`; see
+[Stock Earlier scores](#stock-earlier-scores-stockshistory-tabtsx);
+
 and the first screen, the universes list with its create dialog
 (CAP-002-E1-S7), in `universes/`; see
 [Universes screen](#universes-screen-universes);
@@ -1165,6 +1169,61 @@ Open warnings from the story's implementation review v1:
 - After **Show current members**, a later `422` shows the as-of table of an
   earlier visit under the field error (IR-004).
 - Three Members-tab tests end before their reads settle (IR-005).
+
+## Stock Earlier scores (`stocks/history-tab.tsx`)
+
+`HistoryTab({ symbol })` (default export) is the Earlier scores panel of the
+Stock evidence screen (AC-15, AC-18, AC-19, AC-23; DAC-E5-S2-1 to -4;
+DEC-0178, DEC-0179, DEC-0180). It shows one stock's classifications in
+earlier sets in the order `getStockHistory(symbol, { limit: 50 })` returns
+them, one row per set. It fetches and renders: no row is sorted, filtered,
+re-dated or recomputed, and a retired stock's rows are not special-cased. A
+response from an earlier read, or one settling after unmount, is ignored.
+The first page is read on mount and whenever `symbol` changes.
+
+The panel is a native `table` (`data-variant="history"`) labelled
+`EVIDENCE.earlierScoresFor(symbol)`:
+
+| Column | Content |
+|--------|---------|
+| *Scores date* | `formatDate(classificationDate)`, the row header (`scope="row"`) |
+| *Produced* (`EVIDENCE.producedColumn`) | `formatTimestamp(endedAt)` and a `StatusBadge`: *Complete* (`good`) for a `succeeded` run, *Partial* (`warning`) for a `partial` one. No run id is shown |
+| *Value*, *Growth*, *Momentum* | `FactorCell` with `showScore`, as recorded |
+
+`EVIDENCE.historyNote` is shown above the table. `CELL.restatedExplanation`
+is shown only when `FactorCell` draws the restated mark on a row: a
+`classified` value or growth cell with `restatedPossible` and a percentile,
+whose reason is not `retired` or `not_enough_stocks`.
+
+| State | Renders |
+|-------|---------|
+| loading | the table, `aria-busy`, with three `aria-hidden` skeleton rows |
+| no rows | `EVIDENCE.noEarlierScores(symbol)` |
+| failed first read | `failureSentence` selected by the `ClassificationApiError` `code` (never the envelope `message`) and **Try again**, which reads again from the first page |
+| failed later page | the rows kept, the sentence in a `role="alert"` beneath them and **Try again**, which re-reads that page; after a `cursor_stale` or `cursor_invalid` refusal it reads again from the first page |
+| unreachable API | nothing: the shell owns that state |
+
+While a cursor remains, **Show more** (`SCORE_SET.showMore`) appends the next
+50 rows. It stays mounted, `aria-disabled` while its page is read, and when
+the last page arrives with focus on it, focus moves to the table. The tab
+keeps a local state union rather than `ScreenState`, as the universe History
+tab does. `copy.ts` gained `EVIDENCE.earlierScoresFor` and
+`EVIDENCE.producedColumn`.
+
+Tests: `history-tab.test.tsx` (TC-COMP-115 among others) and `copy.test.ts`,
+mocking only `classification-client`.
+
+Open warnings from the story's implementation review v1:
+
+- The two panel sentences' `--muted-foreground` token is not pinned, and
+  neither is the symbol in the skeleton's label or in a later page's failure
+  sentence; the code does both (IR-001, IR-002).
+- Focus is lost to `<body>` after each **Try again** (IR-003).
+- After a refused cursor, **Show more** stays offered and resends the refused
+  cursor (IR-004).
+- An unreachable read blanks the panel with no recovery from within it, and
+  discards rows already shown when it happens on **Show more** (IR-005).
+- The rework after each first review has no RED record (IR-006).
 
 ## Universe detail page (`universes/detail/`)
 
