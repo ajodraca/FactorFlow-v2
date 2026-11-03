@@ -1,0 +1,114 @@
+# TDD evidence for CAP-002-E5-S1 - Comparison Table Pattern and Compare Screen.
+# Two cycles: (1) the ComparisonTable pattern and the compare strings (T001, T002, T003, T005 to T007, T011);
+# (2) the CompareScreen (T004, T008 to T010, T012). T013 and T014 change no behaviour. The driver commits once per
+# stage, so every cycle's commit_hash is `stage`; each cycle's reviewed_patch is its own diff (cycle-1.patch is
+# HEAD..tree after cycle 1, cycle-2.patch the diff between the trees after each cycle, fingerprinted with
+# check-tdd-evidence.py fingerprint --range), so the two apply in order onto the stage parent 543198f.
+# Reviews: each cycle's final patch was judged by an independent code-review subagent and an independent spec-drift
+# subagent after the last code change; earlier rounds' findings were fixed and the patches regenerated and re-reviewed.
+# Mutation: scripts/mutation-run.py with each cycle's focused suite, generated operators only.
+# Decisions applied: DEC-0175 to DEC-0177 (owner-provisional); no new decision was recorded.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T005, T006, T007, T011]
+    description: >
+      TC-COMP-127 and TC-COMP-114 (T003) plus T005 to T007: ComparisonTable (comparison-table.tsx), a native table
+      labelled Comparison of n stocks with column and row headers scoped, the three row groups in the UX 1.5 order, the
+      percentile through FactorCell unchanged and the standardised score beneath it (an em dash unless the cell is a
+      measured, ranked, followed score), per-input status per DEC-0077 (Missing, Outdated, Couldn't be computed, an
+      absent input row an em dash only), the per-input dates disclosure per DEC-0078, the restated mark through
+      RestatedMark, Not enough to rank stated once in the group header, retired stocks Not followed. T002: the compare
+      strings in copy.ts (COMPARE.duplicate, notCompared, inputLabels, breadcrumb, measure, removeGlyph, dates, asOf,
+      knownOn); the others already existed. T001: upstream modules present, names recorded in the tasks Notes.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/red-cycle-1.log
+    red_log_sha256: be64a96fb09b71ee0c52a58e23dc570d7432bee3f0cf8a249df1a64e9a942946
+    red_evidence: >
+      With comparison-table.test.tsx written and no comparison-table.tsx, the file failed to load (Failed to resolve
+      import ./comparison-table): 1 file failed, no test ran.
+    green_evidence: >
+      comparison-table.test.tsx 20 and copy.test.ts passed (green-cycle-1.log); tsc --noEmit, biome lint and format
+      clean. Code review first pass APPROVED with lows, second pass REJECTED (import order, repeated row headers
+      without their factor, blank corner cell, a score under a null percentile): all fixed, the patch regenerated and
+      the final review APPROVED. Spec-drift none against the approved plan (the factor swatch and two row labels of
+      ux-design 1.5 are plan-vs-design notes, recorded in the tasks Notes).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/green-cycle-1.log
+        sha256: 9a8f1041c2ef231c7250f7efd67e1429b4a414e30f4a9b402f69818c60ac951f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/full-suite.log
+        sha256: 6488eb9579ccc155f8e5345438fea96aed7d09bc66232342f6deb57bddf87883
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 344085ebc9f1556339bda6c5b9c8928ace22fdc15d9e2092a8b3f3b5d62eb293
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: 63b1ca890b9ec6bf8ee8b97d7cefd1162d692021b7ee78293c8684d025ce8bb9
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T004, T008, T009, T010, T012]
+    description: >
+      TC-COMP-128, TC-COMP-129 and TC-COMP-190 (T004) plus T008 to T010: CompareScreen (compare/index.tsx), the
+      symbols read from the page URL's one comma-joined value and written by navigate in the tray's literal-comma form;
+      one list read plus one evidence read per column; Add blocked at six with aria-disabled and aria-describedby, a
+      duplicate and instrument_not_found as field errors, a seventh URL symbol not read; the server's unknown symbols
+      (and any symbol neither returned nor reported) named in the not-compared notice with no column; the single-symbol
+      evidence-only column guarded on a non-null set and all three factor keys; removal moving focus to the nearest
+      rendered column header or the entry field; loading skeleton, never-populated statement, failure by code with Try
+      again, unreachable rendering nothing, a not-current set populated; the STD-UI-17 sentence once under the table.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/red-cycle-2.log
+    red_log_sha256: 76d733dcffd92a56db60ad4703d742adc2cebc3b2e3536a20aa588a7e4ec9626
+    red_evidence: >
+      With compare.test.tsx written and no compare/index.tsx, the file failed to load (Failed to resolve import
+      ./index): 1 file failed, no test ran.
+    green_evidence: >
+      compare.test.tsx 40 and copy.test.ts passed (green-cycle-2.log); the full suite passed (74 files, 1905 tests),
+      build, tsc --noEmit, biome lint and format clean. Code review first pass REJECTED (focus on a non-rendered
+      neighbour): fixed with tests, then a further round found a false not-compared notice while a new list read is
+      pending: fixed with a listKey freshness check and a test; final review APPROVED. Spec-drift flagged symbols
+      neither returned nor reported (now named), the unreachable state and the local Read union (recorded in the
+      tasks Notes); final check none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/green-cycle-2.log
+        sha256: ac07737b49ca1c3069e854e61d32b36555fc1f01aeb7e5e92d915ea804c4464a
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/full-suite.log
+        sha256: 6488eb9579ccc155f8e5345438fea96aed7d09bc66232342f6deb57bddf87883
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/build.log
+        sha256: e50b194a78afe05ad2f96418cee988dec8069f34f0291f515ea3dedaf4d6dd53
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a3ec541fd5b294b2d0e164f76cbf1102fc42789a161f2ed4713914ae3a8f3b8d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: d179707a7c380b7bfa46681f1390ae844047539c8d935ce92ac52d1761629d2d
+      generated: 58
+      killed: 56
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/compare/index.tsx:111:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The Try again counter's initial value (0 -> 1) is only a dependency of the read effect, compared by identity change; the first run does not read it.
+        - id: web/src/screens/research/compare/index.tsx:369:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Same counter: previous + 1 -> previous + 2 changes the effect's dependency on every press; the value is never rendered or ordered on.
