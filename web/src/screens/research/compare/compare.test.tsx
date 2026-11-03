@@ -13,6 +13,7 @@ import type {
 } from "../../../api/classification-types";
 import { ApiError, ApiUnreachableError } from "../../../api/client";
 import { CELL, COMPARE, RESULTS } from "../copy";
+import { formatPercentile } from "../format";
 import CompareScreen from "./index";
 
 vi.mock("../../../api/classification-client", async () => ({
@@ -124,6 +125,9 @@ function Probe(): JSX.Element {
       <output data-testid="search">{useLocation().search}</output>
       <button type="button" onClick={() => navigate("/research/compare?symbols=CCC,DDD")}>
         go elsewhere
+      </button>
+      <button type="button" onClick={() => navigate("/research/compare?symbols=A,B,C,D,E,G")}>
+        go to six
       </button>
     </>
   );
@@ -753,5 +757,269 @@ describe("CompareScreen while the list read for a new symbol is pending", () => 
     finish(list([row("AAA"), row("BBB"), row("CCC")]));
     await waitFor(() => expect(stockHeaders()).toHaveLength(3));
     expect(screen.queryByText(COMPARE.notCompared("CCC"))).toBeNull();
+  });
+});
+
+describe("CompareScreen review rework (CAP-002-E5-S1 implementation review v1)", () => {
+  async function addNotFollowed(user: ReturnType<typeof userEvent.setup>): Promise<HTMLElement> {
+    getStockEvidence.mockImplementation(async (symbol) => {
+      if (symbol === "XYZ") {
+        throw new ApiError("RAW", "req-1", { code: "instrument_not_found" });
+      }
+      return evidence(symbol);
+    });
+    const field = screen.getByLabelText(COMPARE.addAStock);
+    await user.type(field, "xyz{Enter}");
+    await screen.findByText("FactorFlow doesn't follow a stock named XYZ.");
+    return field;
+  }
+
+  // Implements TC-COMP-129 (IR-001): the error belongs to the field.
+  it("attaches instrument_not_found to the entry field and clears it on editing", async () => {
+    answerAll();
+    const user = userEvent.setup();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+
+    const field = await addNotFollowed(user);
+
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(field).toHaveAccessibleDescription("FactorFlow doesn't follow a stock named XYZ.");
+    expect(screen.getByRole("alert")).toHaveTextContent("FactorFlow doesn't follow");
+    await user.type(field, "Q");
+    expect(field).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByText("FactorFlow doesn't follow a stock named XYZ.")).toBeNull();
+  });
+
+  it("clears the field error when an Add succeeds", async () => {
+    answerAll();
+    const user = userEvent.setup();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+    const field = await addNotFollowed(user);
+
+    await user.clear(field);
+    await user.type(field, "ccc{Enter}");
+
+    await waitFor(() => expect(stockHeaders()).toHaveLength(3));
+    expect(field).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByText("FactorFlow doesn't follow a stock named XYZ.")).toBeNull();
+  });
+
+  it("clears a standing field error when a pending Add then succeeds", async () => {
+    answerAll();
+    let release: (value: StockEvidence) => void = () => {};
+    getStockEvidence.mockImplementation((symbol) => {
+      if (symbol === "XYZ") {
+        return Promise.reject(new ApiError("RAW", "req-1", { code: "instrument_not_found" }));
+      }
+      return symbol === "CCC"
+        ? new Promise<StockEvidence>((resolve) => {
+            release = resolve;
+          })
+        : Promise.resolve(evidence(symbol));
+    });
+    const user = userEvent.setup();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+    const field = screen.getByLabelText(COMPARE.addAStock);
+
+    await user.type(field, "ccc{Enter}");
+    await user.clear(field);
+    await user.type(field, "xyz{Enter}");
+    await screen.findByText("FactorFlow doesn't follow a stock named XYZ.");
+    release(evidence("CCC"));
+
+    await waitFor(() => expect(stockHeaders()).toHaveLength(3));
+    expect(screen.queryByText("FactorFlow doesn't follow a stock named XYZ.")).toBeNull();
+    expect(field).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("attaches a duplicate to the entry field", async () => {
+    answerAll();
+    const user = userEvent.setup();
+    renderAt("?symbols=AAPL,MSFT");
+    await screen.findByRole("table");
+
+    const field = screen.getByLabelText(COMPARE.addAStock);
+    await user.type(field, "aapl{Enter}");
+
+    expect(await screen.findByText(COMPARE.duplicate("AAPL"))).toBeInTheDocument();
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(field).toHaveAccessibleDescription(COMPARE.duplicate("AAPL"));
+  });
+
+  // IR-004: the page card and the secondary Add.
+  it("holds the heading and table in one card and styles Add as secondary", async () => {
+    answerAll();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+
+    const card = screen.getByRole("heading", { level: 1 }).closest("section");
+    expect(card).not.toBeNull();
+    expect(card?.className).toMatch(/\bbg-card\b/);
+    expect(card?.className).toMatch(/\btext-card-foreground\b/);
+    expect(card).toContainElement(screen.getByRole("table"));
+    expect(card).toContainElement(screen.getByRole("button", { name: COMPARE.add }));
+    const add = screen.getByRole("button", { name: COMPARE.add });
+    expect(add.className).toMatch(/\bbg-secondary\b/);
+    expect(add.className).toMatch(/\btext-secondary-foreground\b/);
+  });
+
+  // IR-005: one evidence read per column, kept across Add and Remove.
+  it("reads evidence only for a column it has none for", async () => {
+    answerAll();
+    const user = userEvent.setup();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+    getStockEvidence.mockClear();
+
+    await user.type(screen.getByLabelText(COMPARE.addAStock), "ccc{Enter}");
+    await waitFor(() => expect(stockHeaders()).toHaveLength(3));
+    expect(getStockEvidence.mock.calls.map(([symbol]) => symbol)).toEqual(["CCC"]);
+
+    await user.click(screen.getByRole("button", { name: COMPARE.removeFromComparison("BBB") }));
+    await waitFor(() => expect(stockHeaders()).toHaveLength(2));
+    expect(getStockEvidence.mock.calls.map(([symbol]) => symbol)).toEqual(["CCC"]);
+  });
+
+  // IR-005: never one set's inputs under another set's scores.
+  it("re-reads a column's evidence when the list read is of a different set", async () => {
+    const SET_2 = { ...SET, setId: "s2" };
+    let current = SET;
+    listClassifications.mockImplementation(async (params = {}) =>
+      list(
+        (params.symbols ?? []).map((symbol) => row(symbol)),
+        { set: current },
+      ),
+    );
+    getStockEvidence.mockImplementation(async (symbol) =>
+      evidence(symbol, {
+        set: current,
+        inputs: [inputRow("book_to_price", "value", current === SET ? "0.85" : "0.33")],
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt("?symbols=AAA,BBB");
+    const table = await screen.findByRole("table");
+    expect(table).toHaveTextContent("0.85");
+
+    current = SET_2;
+    await user.type(screen.getByLabelText(COMPARE.addAStock), "ccc{Enter}");
+
+    await waitFor(() => expect(stockHeaders()).toHaveLength(3));
+    await waitFor(() => expect(screen.getByRole("table")).not.toHaveTextContent("0.85"));
+    expect(screen.getByRole("table")).toHaveTextContent("0.33");
+  });
+
+  // Implements TC-COMP-190 (IR-007): the sentence follows a mark wherever it is drawn.
+  it("renders the sentence once for a mark on an input row alone", async () => {
+    listClassifications.mockResolvedValue(list([row("AAA"), row("BBB")]));
+    getStockEvidence.mockImplementation(async (symbol) =>
+      evidence(symbol, {
+        inputs: [
+          { ...inputRow("book_to_price", "value", "0.85"), restatedPossible: symbol === "AAA" },
+        ],
+      }),
+    );
+    renderAt("?symbols=AAA,BBB");
+
+    const table = await screen.findByRole("table");
+    expect(within(table).getAllByText(CELL.possiblyRestated)).toHaveLength(1);
+    expect(screen.getAllByText(CELL.restatedExplanation)).toHaveLength(1);
+  });
+
+  it("renders no sentence for a momentum cell or momentum input flagged restated", async () => {
+    listClassifications.mockResolvedValue(
+      list([row("AAA", { factors: cells({ momentum: scored("50", true) }) }), row("BBB")]),
+    );
+    getStockEvidence.mockImplementation(async (symbol) =>
+      evidence(symbol, {
+        inputs: [{ ...inputRow("return_3m", "momentum", "0.03"), restatedPossible: true }],
+      }),
+    );
+    renderAt("?symbols=AAA,BBB");
+
+    await screen.findByRole("table");
+    expect(screen.queryByText(CELL.restatedExplanation)).toBeNull();
+  });
+
+  // IR-008: the single-column read builds a column only from a full factors record.
+  it("builds no column from a partial factors record", async () => {
+    getStockEvidence.mockImplementation(async (symbol) =>
+      evidence(symbol, { factors: { value: scored("70") } as StockEvidence["factors"] }),
+    );
+    renderAt("?symbols=NEWCO");
+
+    expect(await screen.findByText(COMPARE.notCompared("NEWCO"))).toBeInTheDocument();
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+
+  it("shows the evidence, not a stale list, when a comparison shrinks to one column", async () => {
+    listClassifications.mockImplementation(async (params = {}) =>
+      list((params.symbols ?? []).map((symbol) => row(symbol))),
+    );
+    getStockEvidence.mockImplementation(async (symbol) =>
+      evidence(symbol, { factors: cells({ value: scored("11") }) }),
+    );
+    const user = userEvent.setup();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+
+    await user.click(screen.getByRole("button", { name: COMPARE.removeFromComparison("BBB") }));
+
+    await waitFor(() => expect(stockHeaders()).toHaveLength(1));
+    const table = screen.getByRole("table");
+    expect(table).toHaveTextContent(formatPercentile("11"));
+    expect(table).not.toHaveTextContent(formatPercentile("70"));
+  });
+
+  it("writes a reserved character encoded when a column is removed", async () => {
+    answerAll();
+    const user = userEvent.setup();
+    renderAt("?symbols=A%26B,MSFT,AAPL");
+    await screen.findByRole("table");
+
+    await user.click(screen.getByRole("button", { name: COMPARE.removeFromComparison("MSFT") }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("search")).toHaveTextContent(/^\?symbols=A%26B,AAPL$/),
+    );
+  });
+
+  it("names several not-compared symbols in the order received, joined by a comma", async () => {
+    listClassifications.mockResolvedValue(
+      list([row("AAA"), row("BBB")], { unknownSymbols: ["ZZZ", "YYY"] }),
+    );
+    getStockEvidence.mockImplementation(async (symbol) => evidence(symbol));
+    renderAt("?symbols=AAA,BBB,ZZZ,YYY");
+
+    expect(await screen.findByText(COMPARE.notCompared("ZZZ, YYY"))).toBeInTheDocument();
+  });
+
+  it("writes nothing when an Add finishes after the URL has reached six", async () => {
+    answerAll();
+    let release: (value: StockEvidence) => void = () => {};
+    getStockEvidence.mockImplementation((symbol) =>
+      symbol === "F"
+        ? new Promise<StockEvidence>((resolve) => {
+            release = resolve;
+          })
+        : Promise.resolve(evidence(symbol)),
+    );
+    const user = userEvent.setup();
+    renderAt("?symbols=A,B,C,D,E");
+    await screen.findByRole("table");
+
+    await user.type(screen.getByLabelText(COMPARE.addAStock), "f{Enter}");
+    await user.click(screen.getByRole("button", { name: "go to six" }));
+    await waitFor(() =>
+      expect(screen.getByTestId("search")).toHaveTextContent(/^\?symbols=A,B,C,D,E,G$/),
+    );
+    release(evidence("F"));
+
+    await waitFor(() => expect(getStockEvidence).toHaveBeenCalledWith("F"));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.getByTestId("search")).toHaveTextContent(/^\?symbols=A,B,C,D,E,G$/);
   });
 });

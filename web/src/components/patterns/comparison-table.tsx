@@ -79,6 +79,16 @@ function WarningIcon(): JSX.Element {
   );
 }
 
+/** The neutral status shape: a dash in a circle, as E4-S3's badge draws it (STD-UI-8). */
+function NeutralIcon(): JSX.Element {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
+      <circle cx="6" cy="6" r="4.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M3.5 6H8.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
 /** The score row: em dash wherever the cell carries no measured score. */
 function scoreText(cell: FactorCellData): string | null {
   if (cell.status !== "classified" || cell.score === null || cell.percentile === null) {
@@ -210,6 +220,7 @@ function StockHeader({
           data-variant="status-neutral"
           className={`${BADGE} bg-status-neutral-muted text-status-neutral`}
         >
+          <NeutralIcon />
           {CELL.notFollowed}
         </span>
       ) : null}

@@ -112,3 +112,69 @@ cycles:
           disposition: equivalent
           reason: >
             Same counter: previous + 1 -> previous + 2 changes the effect's dependency on every press; the value is never rendered or ordered on.
+
+  - id: cycle-3
+    tasks: [T004, T006, T008, T009, T010, T012, T014]
+    description: >
+      Rework of implementation review v1 (IR-001 to IR-009; the LOW findings IR-010 to IR-013 are left, as the report
+      makes them optional). IR-001: the entry field's instrument_not_found and duplicate errors are the field's own
+      (id, aria-invalid, aria-describedby, destructive token) and clear on editing or a successful Add. IR-002: the
+      column header's Not followed badge carries a private dash-in-circle shape. IR-004: the screen's content sits in
+      the full-width bg-card card under the breadcrumb, and Add takes the secondary tokens. IR-005: a column's evidence
+      is re-read when its set is not the list read's set. IR-003, IR-006 to IR-009: tests pinning the header badge's
+      lifecycle condition, the dates labels, the percentile cell's content, a missing input's em dash, the momentum
+      input mark, the sentence for an input-row mark alone and its absence for momentum flags, the partial factors
+      record, the single-column evidence, the encoded URL, the notice's join and order, the overflow guard and the
+      anchored compare strings.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/red-cycle-3.log
+    red_log_sha256: 8ea336bcf00644cc91dd39a92784ebf76f3a67aa51454318300e085b502adca9
+    red_evidence: >
+      With the new tests written and the code unchanged, 4 tests failed (the entry field's aria-invalid and accessible
+      description, the card and secondary Add, the evidence re-read on a set mismatch) and the header badge's shape
+      failed in the table suite run before it; the rest pin behaviour the code already had and are proved by the
+      mutation run below.
+    green_evidence: >
+      The full suite passed (74 files, 1925 tests), build, tsc --noEmit, biome lint and format clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/full-suite-rework.log
+        sha256: f3ff71cbfea23a162d91e046bcd17639ea4e27b16ebced25fe7c7407b5635534
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/build-rework.log
+        sha256: 1306fb37b9e363a507b9b438a351860f4dfccb6e1971803e0865f52bb0226ab5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8b6b9579d7f1c8f7c7f3fd6f3fd30222f09135ad621b02197f646828d6fb95bb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: 53c4f8018b0260ec3f6b34bea9e6e96bc0af04ddffda1a2034e63219fb06f660
+      generated: 52
+      killed: 47
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors:
+        - id: web/src/screens/research/compare/index.tsx:385:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The Try again counter (previous + 1 -> previous + 2) is only a dependency of the read effect, compared by identity change; its value is never rendered or ordered on.
+        - id: manual:ct-link-no-encode
+          disposition: equivalent
+          reason: >
+            The header link's symbol comes only from a list or evidence row, and instrument symbols match ^[A-Z][A-Z0-9.-]{0,15}$ (src/factorflow/instruments/symbols.py:5), on which encodeURIComponent is the identity; adversarial review v1 judged the same.
+        - id: manual:ct-score-ignore-unranked
+          disposition: equivalent
+          reason: >
+            The store's factor_classification_shape check gives a classified cell no reason code, so a not_enough_stocks cell is not_classified with a null score and scoreText's first guard already returns the em dash; adversarial review v1 judged the same.
+        - id: manual:ix-add-no-clear-draft
+          disposition: equivalent
+          reason: >
+            No artifact fixes the field's value after a successful Add; UX 1.5 and form specification section 4 cover only the failure path; adversarial review v1 judged the same.
+        - id: manual:ix-activelist-stale
+          disposition: equivalent
+          reason: >
+            In steady state the mutant and the code agree: below two symbols no list read runs, and the same effect pass that settles the evidence read replaces the list with null, so the stale list is shown for at most the render before that pass, which no test can observe under act. Adversarial review v1 judged this mutant not equivalent because its test could not tell list from evidence; the new test shows the evidence's cells after a removal (it kills a mutant that builds the single column from the list), and the owner or reviewer may overturn this disposition.

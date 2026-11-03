@@ -1,0 +1,475 @@
+{
+ "schema": 1,
+ "repo_head": "5f1e46b03ff33987463d955090fd0ceb8181fe7e",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/compare/index.tsx:158:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 158,
+   "original": "          (result?.set != null && (cached.set?.setId ?? null) !== result.set.setId)",
+   "mutated": "          (result?.set == null && (cached.set?.setId ?? null) !== result.set.setId)"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:158:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 158,
+   "original": "          (result?.set != null && (cached.set?.setId ?? null) !== result.set.setId)",
+   "mutated": "          (result?.set != null || (cached.set?.setId ?? null) !== result.set.setId)"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:367:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 367,
+   "original": "        {blocked || validationBound ? (",
+   "mutated": "        {blocked && validationBound ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:373:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 373,
+   "original": "        {notCompared.length === 0 ? null : (",
+   "mutated": "        {notCompared.length === 1 ? null : ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:377:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 377,
+   "original": "        (read.kind === \"loaded\" && count >= MIN_SYMBOLS && list === null) ? (",
+   "mutated": "        (read.kind === \"loaded\" || count >= MIN_SYMBOLS && list === null) ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:377:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 377,
+   "original": "        (read.kind === \"loaded\" && count >= MIN_SYMBOLS && list === null) ? (",
+   "mutated": "        (read.kind === \"loaded\" && count >= MIN_SYMBOLS || list === null) ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:377:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 377,
+   "original": "        (read.kind === \"loaded\" && count >= MIN_SYMBOLS && list === null) ? (",
+   "mutated": "        (read.kind === \"loaded\" && count > MIN_SYMBOLS && list === null) ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:380:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 380,
+   "original": "        {read.kind === \"error\" && !validationBound ? (",
+   "mutated": "        {read.kind === \"error\" || !validationBound ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:380:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 380,
+   "original": "        {read.kind === \"error\" && !validationBound ? (",
+   "mutated": "        {read.kind === \"error\" && validationBound ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:385:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 385,
+   "original": "              onClick={() => setAttempt((previous) => previous + 1)}",
+   "mutated": "              onClick={() => setAttempt((previous) => previous + 2)}"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:393:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 393,
+   "original": "        {columns.length > 0 ? (",
+   "mutated": "        {columns.length >= 0 ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:393:off-by-one:2",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 393,
+   "original": "        {columns.length > 0 ? (",
+   "mutated": "        {columns.length > 1 ? ("
+  },
+  {
+   "id": "manual:ct-dates-label-asof",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 154,
+   "original": "        {COMPARE.asOf} {input?.asOf ?? CELL.absentValue}",
+   "mutated": "        {COMPARE.knownOn} {input?.asOf ?? CELL.absentValue}"
+  },
+  {
+   "id": "manual:ct-dates-show-knownon-as-asof",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 154,
+   "original": "        {COMPARE.asOf} {input?.asOf ?? CELL.absentValue}",
+   "mutated": "        {COMPARE.asOf} {input?.knownOn ?? CELL.absentValue}"
+  },
+  {
+   "id": "manual:ct-header-notfollowed-always",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 218,
+   "original": "      {column.lifecycle === \"retired\" ? (",
+   "mutated": "      {column.lifecycle !== \"\" ? ("
+  },
+  {
+   "id": "manual:ct-header-notfollowed-never",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 218,
+   "original": "      {column.lifecycle === \"retired\" ? (",
+   "mutated": "      {false ? ("
+  },
+  {
+   "id": "manual:ct-input-mark-const-factor",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 145,
+   "original": "      {input.restatedPossible ? <RestatedMark factor={input.factor} /> : null}",
+   "mutated": "      {input.restatedPossible ? <RestatedMark factor=\"value\" /> : null}"
+  },
+  {
+   "id": "manual:ct-input-mark-never",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 145,
+   "original": "      {input.restatedPossible ? <RestatedMark factor={input.factor} /> : null}",
+   "mutated": "      {null}"
+  },
+  {
+   "id": "manual:ct-group-summary-always",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 281,
+   "original": "                  {summary !== undefined && !summary.ranked ? (",
+   "mutated": "                  {summary !== undefined ? ("
+  },
+  {
+   "id": "manual:ct-link-no-encode",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 212,
+   "original": "        to={`/research/stocks/${encodeURIComponent(column.symbol)}`}",
+   "mutated": "        to={`/research/stocks/${column.symbol}`}"
+  },
+  {
+   "id": "manual:ct-missing-shows-value",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 143,
+   "original": "      {input.status === \"missing\" ? <Absent /> : value}",
+   "mutated": "      {value}"
+  },
+  {
+   "id": "manual:ct-percentile-showscore",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 295,
+   "original": "                    <FactorCell cell={column.factors[factor]} factor={factor} />",
+   "mutated": "                    <FactorCell cell={column.factors[factor]} factor={factor} showScore />"
+  },
+  {
+   "id": "manual:ct-score-ignore-retired",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 97,
+   "original": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\") {",
+   "mutated": "  if (cell.reasonCode === \"not_enough_stocks\") {"
+  },
+  {
+   "id": "manual:ct-score-ignore-unranked",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 97,
+   "original": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\") {",
+   "mutated": "  if (cell.reasonCode === \"retired\") {"
+  },
+  {
+   "id": "manual:ix-url-no-encode",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 35,
+   "original": "  return `/research/compare?symbols=${symbols.map(encodeURIComponent).join(\",\")}`;",
+   "mutated": "  return `/research/compare?symbols=${symbols.join(\",\")}`;"
+  },
+  {
+   "id": "manual:ix-hasmark-no-inputs",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 91,
+   "original": "      column.inputs.some((input) => input.factor !== \"momentum\" && input.restatedPossible),",
+   "mutated": "      false,"
+  },
+  {
+   "id": "manual:ix-hasmark-momentum-cells",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 90,
+   "original": "      FACTORS.some((factor) => factor !== \"momentum\" && column.factors[factor].restatedPossible) ||",
+   "mutated": "      FACTORS.some((factor) => column.factors[factor].restatedPossible) ||"
+  },
+  {
+   "id": "manual:ix-hasmark-momentum-inputs",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 91,
+   "original": "      column.inputs.some((input) => input.factor !== \"momentum\" && input.restatedPossible),",
+   "mutated": "      column.inputs.some((input) => input.restatedPossible),"
+  },
+  {
+   "id": "manual:ix-add-no-clear-draft",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 235,
+   "original": "      setDraft(\"\");",
+   "mutated": "      void 0;"
+  },
+  {
+   "id": "manual:ix-add-overflow-unguarded",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 238,
+   "original": "      if (next.length <= MAX_SYMBOLS) {",
+   "mutated": "      if (true) {"
+  },
+  {
+   "id": "manual:ix-notcompared-join",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 374,
+   "original": "          <p className=\"text-sm\">{COMPARE.notCompared(notCompared.join(\", \"))}</p>",
+   "mutated": "          <p className=\"text-sm\">{COMPARE.notCompared(notCompared.join(\",\"))}</p>"
+  },
+  {
+   "id": "manual:ix-reported-reversed",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 147,
+   "original": "      const reported = result?.unknownSymbols.map((symbol) => symbol.toUpperCase()) ?? [];",
+   "mutated": "      const reported = result?.unknownSymbols.map((symbol) => symbol.toUpperCase()).reverse() ?? [];"
+  },
+  {
+   "id": "manual:ix-hasallfactors-some",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 44,
+   "original": "  return FACTORS.every((factor) => evidence.factors[factor] !== undefined);",
+   "mutated": "  return FACTORS.some((factor) => evidence.factors[factor] !== undefined);"
+  },
+  {
+   "id": "manual:ix-activelist-stale",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 273,
+   "original": "  const activeList = count >= MIN_SYMBOLS ? list : null;",
+   "mutated": "  const activeList = list;"
+  },
+  {
+   "id": "manual:ix-columns-in-list-order",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 278,
+   "original": "    for (const symbol of symbols) {",
+   "mutated": "    for (const symbol of [...symbols].reverse()) {"
+  },
+  {
+   "id": "manual:ix-add-no-instanceof-unreachable",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 242,
+   "original": "      if (caught instanceof ApiUnreachableError) {",
+   "mutated": "      if (false) {"
+  },
+  {
+   "id": "manual:ix-add-blocked-ignored",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 224,
+   "original": "    if (blocked || symbol.length === 0) {",
+   "mutated": "    if (symbol.length === 0) {"
+  },
+  {
+   "id": "manual:ix-empty-no-focus",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 216,
+   "original": "    if (count === 0) {",
+   "mutated": "    if (false) {"
+  },
+  {
+   "id": "manual:ix-sentence-twice",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 397,
+   "original": "              <p className=\"text-xs text-muted-foreground\">{CELL.restatedExplanation}</p>",
+   "mutated": "              <><p className=\"text-xs text-muted-foreground\">{CELL.restatedExplanation}</p><p>{CELL.restatedExplanation}</p></>"
+  },
+  {
+   "id": "manual:cp-notcompared-wording",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "line": 813,
+   "original": "    `Not compared because there is no current score for ${symbols}.`,",
+   "mutated": "    `Not compared: no current score for ${symbols}.`,"
+  },
+  {
+   "id": "manual:cp-duplicate-drops-symbol",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "line": 810,
+   "original": "  duplicate: (symbol: string): string => `${symbol} is already in this comparison.`,",
+   "mutated": "  duplicate: (symbol: string): string => `That stock is already in this comparison.`,"
+  },
+  {
+   "id": "manual:cp-label-eps",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "line": 820,
+   "original": "    eps_growth: \"EPS growth\",",
+   "mutated": "    eps_growth: \"Earnings growth\","
+  },
+  {
+   "id": "manual:cp-label-fcf",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "line": 818,
+   "original": "    fcf_yield: \"Free-cash-flow yield\",",
+   "mutated": "    fcf_yield: \"Cash yield\","
+  },
+  {
+   "id": "manual:cp-label-return-12m",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/copy.ts",
+   "line": 823,
+   "original": "    return_12m: \"12-month return\",",
+   "mutated": "    return_12m: \"1-year return\","
+  },
+  {
+   "id": "manual:ct-outdated-no-icon",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 129,
+   "original": "        <WarningIcon />",
+   "mutated": ""
+  },
+  {
+   "id": "manual:ct-notcomputable-no-icon",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 136,
+   "original": "        <WarningIcon />",
+   "mutated": ""
+  },
+  {
+   "id": "manual:ct-header-no-icon",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 223,
+   "original": "          <NeutralIcon />",
+   "mutated": ""
+  },
+  {
+   "id": "manual:ix-add-keep-stale-error",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 234,
+   "original": "      setFieldError(null);",
+   "mutated": ""
+  },
+  {
+   "id": "manual:ix-edit-keeps-error",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 344,
+   "original": "                  setFieldError(null);",
+   "mutated": ""
+  },
+  {
+   "id": "manual:ix-evidence-no-cache",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 157,
+   "original": "          cached === undefined ||",
+   "mutated": "          true ||"
+  },
+  {
+   "id": "manual:ix-evidence-ignores-set",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 158,
+   "original": "          (result?.set != null && (cached.set?.setId ?? null) !== result.set.setId)",
+   "mutated": "          false)"
+  },
+  {
+   "id": "manual:ix-no-aria-invalid",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 346,
+   "original": "                aria-invalid={fieldError === null ? undefined : \"true\"}",
+   "mutated": "                aria-invalid={undefined}"
+  }
+ ]
+}

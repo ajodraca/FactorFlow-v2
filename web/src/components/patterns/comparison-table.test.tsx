@@ -626,3 +626,100 @@ describe("ComparisonTable cells that hold a score the cell must not print", () =
     expect(group).toHaveAttribute("colspan", "4");
   });
 });
+
+describe("ComparisonTable review rework (CAP-002-E5-S1 implementation review v1)", () => {
+  // Implements TC-COMP-114 (IR-003): the lifecycle badge belongs to the retired column alone.
+  it("gives only the retired column's header the Not followed badge, with a shape", () => {
+    const retired = column("OLD", { lifecycle: "retired", inputs: [] });
+    const table = renderTable([column("AAA"), retired]);
+
+    const active = within(table).getByRole("columnheader", { name: /AAA/ });
+    expect(active).not.toHaveTextContent(CELL.notFollowed);
+    expect(active.querySelector("[data-variant='status-neutral']")).toBeNull();
+    expect(active.querySelector("[aria-hidden='true']")).toBeNull();
+
+    const header = within(table).getByRole("columnheader", { name: /OLD/ });
+    const badge = within(header).getByText(CELL.notFollowed).closest("[data-variant]");
+    expect(badge).toHaveAttribute("data-variant", "status-neutral");
+    // STD-UI-8: a word plus a shape, never the word alone (IR-002).
+    expect(badge?.querySelector("svg[aria-hidden='true']")).not.toBeNull();
+  });
+
+  // IR-002: the Outdated badge keeps its triangle.
+  it("draws the Outdated badge with a shape", () => {
+    const table = renderTable([
+      column("AAA", {
+        inputs: allInputs().map((row) =>
+          row.inputName === "fcf_yield" ? { ...row, status: "outdated" as const } : row,
+        ),
+      }),
+      column("BBB"),
+    ]);
+
+    const badge = within(cellAt(table, COMPARE.inputLabels.fcf_yield, 0))
+      .getByText(INPUT_STATUS.outdated)
+      .closest("[data-variant]");
+    expect(badge?.querySelector("svg[aria-hidden='true']")).not.toBeNull();
+  });
+
+  // IR-006: each date sits under its own label.
+  it("prints each date beside its own label", async () => {
+    const dated = column("AAA", {
+      inputs: allInputs().map((row) =>
+        row.inputName === "book_to_price"
+          ? { ...row, asOf: "2025-06-27", knownOn: "2026-10-14" }
+          : row,
+      ),
+    });
+    const table = renderTable([dated, column("BBB")]);
+    await userEvent.click(
+      within(table).getByRole("button", { name: COMPARE.showDatesFor("book-to-price") }),
+    );
+
+    const lines = Array.from(
+      cellAt(table, COMPARE.inputLabels.book_to_price, 0).querySelectorAll("span > span"),
+    ).map((line) => line.textContent);
+    expect(lines).toContain(`${COMPARE.asOf} 2025-06-27`);
+    expect(lines).toContain(`${COMPARE.knownOn} 2026-10-14`);
+  });
+
+  // IR-006: the standardised score has a row of its own.
+  it("keeps the standardised score out of the percentile cell", () => {
+    const table = renderTable([column("AAA"), column("BBB")]);
+
+    const percentile = cellAt(table, COMPARE.percentile, 0);
+    expect(percentile).toHaveTextContent(formatPercentile("72.4"));
+    expect(percentile.textContent).not.toContain(formatScore("0.61"));
+  });
+
+  // IR-006 / DEC-0077: a missing input is an em dash and its word, whatever value arrives.
+  it("renders a missing input as only an em dash and Missing", () => {
+    const table = renderTable([
+      column("AAA", {
+        inputs: allInputs().map((row) =>
+          row.inputName === "earnings_yield"
+            ? { ...row, status: "missing" as const, value: "0.0634" }
+            : row,
+        ),
+      }),
+      column("BBB"),
+    ]);
+
+    const cell = cellAt(table, COMPARE.inputLabels.earnings_yield, 0);
+    expect(cell.textContent).toBe(`—${INPUT_STATUS.missing}`);
+  });
+
+  // IR-006 / DEC-0075: the mark is never on momentum, even on an input row.
+  it("shows no mark on a momentum input flagged restated", () => {
+    const table = renderTable([
+      column("AAA", {
+        inputs: allInputs().map((row) =>
+          row.inputName === "return_3m" ? { ...row, restatedPossible: true } : row,
+        ),
+      }),
+      column("BBB"),
+    ]);
+
+    expect(within(table).queryByText(CELL.possiblyRestated)).toBeNull();
+  });
+});

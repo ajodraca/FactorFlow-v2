@@ -127,6 +127,7 @@ export default function CompareScreen(): JSX.Element | null {
   symbolsRef.current = symbols;
   const shownRef = useRef<string[]>([]);
   const reasonId = useId();
+  const errorId = useId();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: `symbolsKey` stands for `symbols`; `attempt` is the Try again trigger.
   useEffect(() => {
@@ -149,7 +150,14 @@ export default function CompareScreen(): JSX.Element | null {
           !reported.includes(symbol) &&
           (result === null || result.stocks.some((stock) => stock.symbol.toUpperCase() === symbol)),
       );
-      const missing = columns.filter((symbol) => evidenceRef.current[symbol] === undefined);
+      // Evidence of another set than the list's would put old inputs under new scores (STD-UI-16).
+      const missing = columns.filter((symbol) => {
+        const cached = evidenceRef.current[symbol];
+        return (
+          cached === undefined ||
+          (result?.set != null && (cached.set?.setId ?? null) !== result.set.setId)
+        );
+      });
       const settled = await Promise.allSettled(missing.map((symbol) => getStockEvidence(symbol)));
       const fetched: Record<string, StockEvidence> = {};
       const notFollowed: string[] = [];
@@ -313,7 +321,7 @@ export default function CompareScreen(): JSX.Element | null {
     read.kind === "error" && count >= MIN_SYMBOLS && codeOf(read.error) === "validation_error";
 
   return (
-    <div className="flex flex-col gap-5 p-5">
+    <div className="flex flex-col gap-4">
       <nav aria-label={UNIVERSE_DETAIL.breadcrumb} className="text-sm text-muted-foreground">
         <Link to="/research" className="underline">
           {UNIVERSES.researchLink}
@@ -321,67 +329,76 @@ export default function CompareScreen(): JSX.Element | null {
         <span aria-hidden="true"> › </span>
         <span aria-current="page">{COMPARE.breadcrumb}</span>
       </nav>
-      <h1 className="text-xl font-semibold">{COMPARE.comparing(count)}</h1>
-      <form onSubmit={(event) => void add(event)} className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-2 text-sm">
-          {COMPARE.addAStock}
-          <input
-            ref={entryRef}
-            type="text"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            className="rounded border border-border px-3 py-2"
-          />
-        </label>
-        <button
-          type="submit"
-          data-variant="secondary"
-          aria-disabled={blocked}
-          aria-describedby={blocked ? reasonId : undefined}
-          className="rounded border border-border px-3 py-2 text-sm"
-        >
-          {COMPARE.add}
-        </button>
-      </form>
-      {fieldError === null ? null : (
-        <p role="alert" className="text-sm">
-          {fieldError}
-        </p>
-      )}
-      {blocked || validationBound ? (
-        <p id={reasonId} className="text-sm">
-          {COMPARE.atMost}
-        </p>
-      ) : null}
-      {prompt === null ? null : <p className="text-sm">{prompt}</p>}
-      {notCompared.length === 0 ? null : (
-        <p className="text-sm">{COMPARE.notCompared(notCompared.join(", "))}</p>
-      )}
-      {read.kind === "loading" ||
-      (read.kind === "loaded" && count >= MIN_SYMBOLS && list === null) ? (
-        <Skeleton count={count} />
-      ) : null}
-      {read.kind === "error" && !validationBound ? (
-        <div role="alert" className="flex flex-col items-start gap-2 text-sm">
-          <p>{readSentence(read.error)}</p>
+      <section className="flex flex-col gap-4 rounded border border-border bg-card p-4 text-card-foreground">
+        <h1 className="text-xl font-semibold">{COMPARE.comparing(count)}</h1>
+        <form onSubmit={(event) => void add(event)} className="flex flex-wrap items-start gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="flex items-center gap-2 text-sm">
+              {COMPARE.addAStock}
+              <input
+                ref={entryRef}
+                type="text"
+                value={draft}
+                onChange={(event) => {
+                  setDraft(event.target.value);
+                  setFieldError(null);
+                }}
+                aria-invalid={fieldError === null ? undefined : "true"}
+                aria-describedby={fieldError === null ? undefined : errorId}
+                className="rounded border border-border px-3 py-2"
+              />
+            </label>
+            {fieldError === null ? null : (
+              <p id={errorId} role="alert" className="text-[hsl(var(--destructive))] text-sm">
+                {fieldError}
+              </p>
+            )}
+          </div>
           <button
-            type="button"
-            onClick={() => setAttempt((previous) => previous + 1)}
-            className="rounded border border-border px-3 py-2"
+            type="submit"
+            data-variant="secondary"
+            aria-disabled={blocked}
+            aria-describedby={blocked ? reasonId : undefined}
+            className="rounded bg-secondary px-3 py-2 text-sm text-secondary-foreground"
           >
-            {RESULTS.tryAgain}
+            {COMPARE.add}
           </button>
-        </div>
-      ) : null}
-      {neverPopulated ? <p className="text-sm">{RESULTS.neverScored}</p> : null}
-      {columns.length > 0 ? (
-        <div ref={tableRef} className="flex flex-col gap-2">
-          <ComparisonTable columns={columns} factors={activeList?.factors} onRemove={remove} />
-          {hasMark(columns) ? (
-            <p className="text-xs text-muted-foreground">{CELL.restatedExplanation}</p>
-          ) : null}
-        </div>
-      ) : null}
+        </form>
+        {blocked || validationBound ? (
+          <p id={reasonId} className="text-sm">
+            {COMPARE.atMost}
+          </p>
+        ) : null}
+        {prompt === null ? null : <p className="text-sm">{prompt}</p>}
+        {notCompared.length === 0 ? null : (
+          <p className="text-sm">{COMPARE.notCompared(notCompared.join(", "))}</p>
+        )}
+        {read.kind === "loading" ||
+        (read.kind === "loaded" && count >= MIN_SYMBOLS && list === null) ? (
+          <Skeleton count={count} />
+        ) : null}
+        {read.kind === "error" && !validationBound ? (
+          <div role="alert" className="flex flex-col items-start gap-2 text-sm">
+            <p>{readSentence(read.error)}</p>
+            <button
+              type="button"
+              onClick={() => setAttempt((previous) => previous + 1)}
+              className="rounded border border-border px-3 py-2"
+            >
+              {RESULTS.tryAgain}
+            </button>
+          </div>
+        ) : null}
+        {neverPopulated ? <p className="text-sm">{RESULTS.neverScored}</p> : null}
+        {columns.length > 0 ? (
+          <div ref={tableRef} className="flex flex-col gap-2">
+            <ComparisonTable columns={columns} factors={activeList?.factors} onRemove={remove} />
+            {hasMark(columns) ? (
+              <p className="text-xs text-muted-foreground">{CELL.restatedExplanation}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
     </div>
   );
 }
