@@ -49,6 +49,10 @@ and the stock evidence screen's Earlier scores panel (CAP-002-E5-S2), in
 `stocks/`; see
 [Stock Earlier scores](#stock-earlier-scores-stockshistory-tabtsx);
 
+and the Stock evidence screen and its factor card (CAP-002-E5-S3), in
+`stocks/`; see
+[Stock evidence screen](#stock-evidence-screen-stocksindextsx);
+
 and the first screen, the universes list with its create dialog
 (CAP-002-E1-S7), in `universes/`; see
 [Universes screen](#universes-screen-universes);
@@ -1224,6 +1228,89 @@ Open warnings from the story's implementation review v1:
 - An unreachable read blanks the panel with no recovery from within it, and
   discards rows already shown when it happens on **Show more** (IR-005).
 - The rework after each first review has no RED record (IR-006).
+
+## Stock evidence screen (`stocks/index.tsx`)
+
+`StockEvidenceScreen` (default export of `stocks/index.tsx`) is the page at
+`/research/stocks/:symbol` (AC-12 to AC-17, AC-23; DAC-E5-S3-1 to -5;
+DEC-0184, DEC-0185, DEC-0186; DEC-0279, DEC-0280). It reads the `symbol`
+route parameter and renders an inner view keyed by it, so a changed symbol
+reads once and resets the tab state. `routes.tsx` imports it
+(CAP-002-E4-S10); no route in `web/src` mounts it before that story.
+
+The view reads `getStockEvidence(symbol)` on mount, when the symbol changes
+and on **Try again**; a response from a superseded read is ignored. Above the
+tabs it shows the breadcrumb (*Research › SYMBOL*), the `h1` (symbol, name and
+the *Not followed* badge when `lifecycle` is `retired`) and the memberships
+line (*In {names}*, each name linking to `/research/universes/{id}`, or
+*In no universe*). The tabs are *Now* and *Earlier scores*, held in the
+`?tab=earlier` query parameter (absent means *Now*), with arrow, `Home` and
+`End` keys moving between them. `HistoryTab` mounts on first activation of
+*Earlier scores* and stays mounted (DEC-0185).
+
+| State | Renders |
+|-------|---------|
+| loading | three `aria-hidden` card skeletons in the Now panel, `aria-busy` |
+| `instrument_not_found` | breadcrumb, `h1` with the symbol alone, the failure sentence and a *Followed stocks* link |
+| unreachable API | `UnreachableState` |
+| any other failure | in the Now panel, the failure sentence chosen by the error `code` and **Try again** |
+| `set` is `null` | `EVIDENCE.noScoreYet(symbol)` |
+| a followed stock with no row in the set (a factor cell is missing) | `EVIDENCE.notYetFollowed(symbol, classificationDate)` (DEC-0140) |
+| loaded | one `FactorCard` per factor in the order value, growth, momentum |
+
+The screen keeps a local `Body` union rather than `ScreenState`, whose error
+variant cannot hold the code the failure sentence is chosen by (DEC-0280).
+The STD-UI-18 coverage sentence (`CELL.coverageStatement`) appears once, below
+the cards, and the restatement meaning (`CELL.restatedExplanation`) appears
+once, below the first card for which `cardShowsMark` is true.
+
+### Factor card (`stocks/factor-card.tsx`)
+
+`FactorCard({ factor, symbol, cell, inputs, lifecycle, scoresDate,
+latestTradingDay })` is one `section` labelled by its `h2` (factor swatch and
+name). It renders the delivered `FactorCell`; for a scored cell the
+standardised score beneath it (`formatScore`); and every input row as a
+`dl` item with its value (`formatRatio` for `book_to_price`, `earnings_yield`
+and `fcf_yield`, `formatRate` for the rest, *—* when null), a per-input status
+(*Missing* badge, *Outdated* `StatusBadge`, *Not computable* text), the
+*Possibly restated* mark where `restatedPossible`, and `as_of` and `known_on`
+(DEC-0077). `cardShowsMark` is exported for the screen.
+
+A retired stock, or a cell whose reason is `retired`, reads *Not followed*
+with `CELL.notFollowedNoDate` and lists no inputs. A cell with reason
+`not_enough_stocks` and a `reasonDetail` reads `notEnoughToRankSentence`
+(DEC-0186). Otherwise an incomplete cell prints the three-part statement,
+chosen by `reasonCode` and the cell's `reasonInput` row:
+
+| `reasonCode` | Reason slotted into `couldNotBeScored` | Recovery line |
+|--------------|----------------------------------------|---------------|
+| `input_missing`, provider holds no data (`detail.last_acquisition.outcome` is `not_found`) | `providerHoldsNoDataReason` | `noActionChangesThis` |
+| `input_missing` | `missingInputReason` | next download, with a *Data health* link |
+| `input_outdated`, a fundamental older than six months before `scoresDate` | `fundamentalOutdatedReason` | next download, with a *Data health* link |
+| `input_outdated`, otherwise (price) | `priceOutdatedReason(latestTradingDay)` | next download, with a *Data health* link |
+| `input_not_computable` | `notComputableReason` | none |
+
+The six-month bound is arithmetic on the date string's fields, with the day
+clamped to the month's end; no date string is parsed (STD-UI-5). A
+`reasonInput` that matches no row is named `EVIDENCE.unnamedInput`.
+`copy.ts` gained the reason wordings, `dataHealthLink`, `unnamedInput`,
+`breadcrumbSeparator`, `followedStocksLink`, `notYetFollowed` and
+`notEnoughToRankSentence` on `EVIDENCE`. No design prints the price and
+not-computable wordings.
+
+Tests: `stocks/stock-evidence.test.tsx`, `stocks/factor-card.test.tsx` and
+`copy.test.ts`, mocking only `classification-client`.
+
+Open warnings from the story's implementation review v2:
+
+- The factor inside the `notEnoughToRankSentence` is not pinned by a test;
+  hard-coding *value* survives (IR-001).
+- The tests that pin the specific reason input carry no TC marker (IR-002).
+- Two size literals sit outside the theme (STD-UI-29) (IR-003).
+- On `?tab=earlier`, a failed evidence read is not shown in the active panel
+  (IR-004).
+- The TDD evidence's cycle-2 count is wrong, and one rework test has no RED
+  record (IR-005).
 
 ## Universe detail page (`universes/detail/`)
 
