@@ -2,19 +2,23 @@
 
 The classification API is the CAP-002 HTTP surface over the universe service
 and the classification reader (`component-design-classification-api.md`
-sections 2.1, 2.4 to 2.7). Its universes router is in place (CAP-002-E1-S6);
-the `/api/classifications` routes are a later story (CAP-002-E3-S5).
+sections 2.1, 2.4 to 2.7). It has two routers: the universes router
+(CAP-002-E1-S6), described in the sections from [Operations](#operations) to
+[Transactions](#transactions), and the classifications router (CAP-002-E3-S5),
+described under [Classification reads](#classification-reads).
 
 | File | Holds |
 |------|-------|
 | `src/factorflow/api/routes/universes.py` | The eight `/api/universes` route handlers, the refusal table `REFUSALS` and the response shaping |
-| `src/factorflow/api/classification_models.py` | The Pydantic request and response models. CAP-002-E3-S5 appends the classification models and reuses `Thresholds`, `FactorCellResponse` and `SetBlock` from here |
+| `src/factorflow/api/routes/classifications.py` | The six `/api/classifications` read handlers, their own refusal table `REFUSALS` and the cursor-code choice |
+| `src/factorflow/api/classification_models.py` | The Pydantic request and response models of both routers. The classification models reuse E1-S6's `FactorCellResponse`, `FactorsResponse` and `SetBlock` through their `from_reader` classmethods (DEC-0281, agent-decided) |
 | `src/factorflow/api/classification_bounds.py` | The bounds this API adds: `MIN_COMPARE_SYMBOLS` (2), `MAX_COMPARE_SYMBOLS` (6) and `MAX_UNIVERSE_NAME_LENGTH` |
 
-`app.py` registers the router with one `include_router(universes.router)`, so
-every universes route is behind the delivered request-id, Host and Origin
+`app.py` registers the routers with `include_router(universes.router)` and
+`include_router(classifications.router)`, so every route of both is behind
+the delivered request-id, Host and Origin
 middleware and error envelope (see the README's
-[Running the API](../../README.md#running-the-api)). The routes validate,
+[Running the API](../../README.md#running-the-api)). The universes routes validate,
 delegate to `factorflow.universes.service` (reached as `service.<fn>`) and the
 reader, map typed refusals to the envelope and shape the response. They hold
 no universe rule and no SQL. The service's behaviour is described in
@@ -160,15 +164,158 @@ criterion:
   current members, the reader's `CursorError` is answered as
   `422 cursor_invalid`, although the request carried no cursor (IR-002, low).
 
+## Classification reads
+
+`routes/classifications.py` serves six read operations over
+`factorflow.classification.reader`, reached as `reader.<fn>`. Each handler
+checks one connection out of the pool, makes one reader call on it and
+commits nothing. A typed refusal becomes the envelope; anything else
+propagates to the delivered `500`. The handlers hold no classification rule
+and compute nothing: every response value is a reader field copied across.
+The reader's behaviour is described in
+[`classification-reader.md`](classification-reader.md).
+
+| Method and path | Reader call | Success |
+|-----------------|-------------|---------|
+| `GET /api/classifications` | `list_classifications(conn, query.to_filters())`, or `compare(conn, symbols)` when `symbols` is given | `200` `ClassificationListResponse` |
+| `GET /api/classifications/summary` | `summary(conn)` | `200` `ClassificationSummaryResponse` |
+| `GET /api/classifications/sets` | `list_sets(conn, limit, cursor)` | `200` `SetListResponse` |
+| `GET /api/classifications/sets/{set_id}` | `get_set(conn, set_id)` | `200` `SetResponse` |
+| `GET /api/classifications/stocks/{symbol}` | `stock_evidence(conn, symbol)` | `200` `StockEvidenceResponse` |
+| `GET /api/classifications/stocks/{symbol}/history` | `stock_history(conn, symbol, limit, cursor)` | `200` `StockHistoryResponse` |
+
+`/summary` is declared before the parameterised paths, so the literal is
+never captured as a path parameter (DAC-E3-S5-1).
+
+### Classification requests
+
+`GET /api/classifications` takes its query as `ClassificationListQuery`, which
+forbids unknown keys. The model is flat because a query-parameter model cannot
+nest:
+
+| Parameter | Rule |
+|-----------|------|
+| `universe_id` | an optional UUID; scopes the list to the universe |
+| `symbol` | an optional prefix, trimmed, upper-cased and shape-checked like a symbol |
+| `sort` | one of `symbol` (default), `{value,growth,momentum}_score` and `{value,growth,momentum}_percentile` |
+| `order` | `asc` (default) or `desc` |
+| `{value,growth,momentum}_{score,percentile}_{min,max}` | the twelve optional `Decimal` bounds. A percentile bound lies in 0 to 100. NaN and infinity are refused by Pydantic's default for `Decimal` (DEC-0281) |
+| `hide_incomplete` | boolean, default `false` |
+| `limit` | 1 to `MAX_PAGE_SIZE` (500), default `DEFAULT_PAGE_SIZE` (50) |
+| `cursor` | the previous page's `next_cursor` |
+| `symbols` | compare: repeated or comma-separated symbols, each trimmed, upper-cased and shape-checked, duplicates dropped in first-seen order, `MIN_COMPARE_SYMBOLS` (2) to `MAX_COMPARE_SYMBOLS` (6) distinct |
+
+`to_filters()` builds the reader's `ListFilters`. Its `Thresholds` carries
+only the bounds the request named, with `hide_incomplete` and the `symbol`
+prefix.
+
+`symbols` takes no other parameter but `limit`. `compare_conflicts` reads
+the names in the query string, not the model's `model_fields_set`, because
+FastAPI fills the defaults of `sort`, `order` and `hide_incomplete` into it
+(DEC-0281). Each other name the request carries is a `422 validation_error`
+whose `loc` is that query field. Compare does not pass `limit` to the reader:
+`reader.compare` reads at most `MAX_COMPARE_SYMBOLS` rows itself.
+
+`/sets` and `/stocks/{symbol}/history` take `limit` (1 to 500, default 50)
+and `cursor`. `set_id` is a UUID path parameter. The `{symbol}` path segment
+is normalised and shape-checked by the `_symbol` dependency before the
+reader; a malformed one is a `422 validation_error` with `loc`
+`["path", "symbol"]`.
+
+A query that fails these rules is a `422 validation_error` from the delivered
+validation handler, which names fields and never echoes a value.
+
+### Classification responses
+
+Decimals serialise as decimal strings at stored precision: `_json` dumps each
+model in Pydantic's JSON mode, as the universes routes do.
+
+- `ClassificationListResponse` (list and compare): `set`, `never_classified`,
+  `later`, `factors`, then `match_count`, `stocks`, `unknown_symbols` and
+  `next_cursor`.
+  - `set` is E1-S6's `SetBlock`, or null when no set is complete;
+    `never_classified` is true exactly then.
+  - `later` is `LaterBlock`: `set_id`, `state`, `started_at`, `ended_at`,
+    `failure_reason`, `run_id`, `run_started_at`, or null.
+  - `factors` maps `value`, `growth` and `momentum` to `qualified_count`,
+    `ranked` and `min_peer_set_size`. While no set is complete each is the
+    zero record, `0`, `false` and `MIN_PEER_SET_SIZE` (30) (DEC-0140).
+  - each stock: `symbol`, `name`, `lifecycle` and `factors`, the three
+    `FactorCellResponse` cells.
+  - `match_count` counts the whole filtered scope, not the page.
+    `unknown_symbols` is filled by compare only, and is `[]` on a list.
+- `ClassificationSummaryResponse`: the same `set`, `never_classified`,
+  `later` and `factors`, and `stocks_current` (`current_count`,
+  `followed_count`), null while `set` is.
+- `StockEvidenceResponse`: `set`, `symbol`, `name`, `lifecycle`, `factors`
+  (the three cells by factor name), `inputs` (each `factor`, `input_name`,
+  `label`, `status`, `value`, `as_of`, `known_on`, `restated_possible`,
+  `detail`) and `memberships` (each `universe_id`, `name`).
+- `StockHistoryResponse`: `symbol`, `sets` (each `set_id`,
+  `classification_date`, `run_id`, `run_outcome`, `ended_at`, `factors`) and
+  `next_cursor`.
+- `SetResponse`: `set_id`, `state`, `classification_date`, `run_id`,
+  `run_started_at`, `run_outcome`, `started_at`, `ended_at`,
+  `failure_reason`, `latest_trading_day`, `active_instruments` and `factors`,
+  the per-factor counts. `SetListResponse` is `sets` and `next_cursor`.
+
+The list and the summary build `set`, `never_classified`, `later` and
+`factors` through one builder, `_SetBlocks.parts`, so the two cannot drift
+(DAC-E3-11, DAC-E3-S5-3). They have one shape before and after the first set
+completes.
+
+### Classification refusals
+
+The router's own `REFUSALS` maps the reader's typed refusals (design 2.5,
+DEC-0139):
+
+| Exception | Status and `code` | `resource` |
+|-----------|-------------------|------------|
+| `reader.UniverseNotFound` | `404 universe_not_found` | `universe` |
+| `reader.InstrumentNotFound` | `404 instrument_not_found` | `classification` |
+| `reader.SetNotFound` | `404 classification_set_not_found` | `classification-set` |
+| `CursorError` | `422 cursor_invalid` or `422 cursor_stale` | `classification` |
+
+- `message` is `Could not <operation>: <reason>.`. `_reason` builds the
+  reason only from the exception's own attributes (the universe id, the
+  symbol or the set id), never from its text.
+- `cursor_stale` is answered only on `GET /api/classifications`, for a list
+  cursor the reader's own `decode_cursor` accepts for the set, sort and order
+  the cursor names: a well-formed cursor for another set. Every other refused
+  cursor, and every refused cursor on `/sets` and
+  on `/history`, is `cursor_invalid` (DEC-0138). The cursor's values are used
+  only to re-run the decoder, never to choose a page.
+
+**Accepted warning from implementation review v3**
+(`CAP-002-E3-S5-implementation-review-v3.md`), which fails no acceptance
+criterion: `classification_models.py` defines the percentile bound twice,
+`_PERCENTILE` for `Thresholds` and `_PERCENTILE_BOUND` for
+`ClassificationListQuery`, and has two identical symbol-prefix validators. The
+two are the same today and both are tested. A change to one must be made to
+the other, or the saved filter and the list query drift apart (IR-001, low).
+
 ## Tests
 
-- `tests/unit/test_api_classification_models.py`: request models and bounds.
+- `tests/unit/test_api_classification_models.py`: request models and bounds,
+  `ClassificationListQuery` included.
 - `tests/unit/test_api_universes_routes.py`: the handlers over a doubled pool,
   service and reader.
-- `tests/unit/test_api_classification_error_mapping.py`: `REFUSALS`, messages,
-  `resource` and `symbols`.
+- `tests/unit/test_api_classifications_routes.py`: the classification
+  handlers over a doubled pool and reader: the reader call each route makes,
+  route order, compare's conflicts and the response shapes.
+- `tests/unit/test_api_classification_error_mapping.py`: both `REFUSALS`
+  tables, messages, `resource` and `symbols`, and the `cursor_invalid` and
+  `cursor_stale` choice.
 - `tests/integration/test_api_universes.py`: the routes against PostgreSQL
   behind the real pool, service, replay and reader (marked `postgres`).
+- `tests/integration/test_api_classifications.py` and
+  `tests/integration/test_api_classification_summary.py`: the classification
+  routes against PostgreSQL behind the real pool and reader, with sets seeded
+  through `tests/integration/api_classification_support.py` (marked
+  `postgres`). `test_a_universe_scopes_the_list_and_an_unknown_one_is_404`
+  seeds its retired member with classified cells, which the engine never
+  writes for a retired instrument. The reader's own suite pins the realistic
+  case (review v3 IR-002, low).
 - `tests/integration/test_api_classification_host_origin.py`: the Host and
-  Origin checks on the universes routes, against a real store (marked
-  `postgres`).
+  Origin checks on the universes and classification routes, against a real
+  store (marked `postgres`).
