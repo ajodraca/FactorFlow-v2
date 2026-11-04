@@ -1,0 +1,10 @@
+$ uv run pytest tests/unit/test_api_classification_lifespan.py -q --tb=line
+(production tree at 8ee5571, app.py without run_classification_loop; transcript of the observed run)
+EEEEEE                                                                   [100%]
+ERROR test_classification_task_created_beside_reclaim_task: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
+ERROR test_both_tasks_cancelled_before_pool_close: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
+ERROR test_reclaim_cancelled_when_classification_task_already_finished: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
+ERROR test_reclaim_cancelled_and_pool_closed_when_classification_task_raised: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
+ERROR test_loop_called_with_pool_and_environment_settings: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
+ERROR test_invalid_classification_settings_fail_startup_before_any_task: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
+6 errors in 0.48s

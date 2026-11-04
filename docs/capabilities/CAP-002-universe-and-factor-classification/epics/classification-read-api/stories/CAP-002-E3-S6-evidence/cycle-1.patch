@@ -1,0 +1,1508 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-mutants.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-mutants.json
+new file mode 100644
+index 0000000..3877d8b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-mutants.json
+@@ -0,0 +1,127 @@
++{
++ "schema": "mutation-run/1",
++ "repo_head": "8ee557175e91eb8b02fecc88595698507b79e8a0",
++ "range": "working-tree",
++ "mutants": [
++  {
++   "id": "src/factorflow/api/app.py:199:manual:1",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 199,
++   "original": "    classification_settings = ClassificationSettings()",
++   "mutated": "    classification_settings = None",
++   "note": "settings not constructed",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:207:manual:2",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 207,
++   "original": "    classification_task = asyncio.create_task(",
++   "mutated": "    classification_task = asyncio.create_task(asyncio.sleep(0))",
++   "note": "loop never created",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:208:manual:3",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 208,
++   "original": "        run_classification_loop(pool=pool, settings=classification_settings)",
++   "mutated": "        run_classification_loop(pool=pool)",
++   "note": "settings not passed",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:208:manual:4",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 208,
++   "original": "        run_classification_loop(pool=pool, settings=classification_settings)",
++   "mutated": "        run_classification_loop(pool=None, settings=classification_settings)",
++   "note": "pool not passed",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:213:manual:5",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 213,
++   "original": "        classification_task.cancel()",
++   "mutated": "        pass",
++   "note": "classification task not cancelled",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:215:manual:6",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 215,
++   "original": "            await classification_task",
++   "mutated": "            pass",
++   "note": "classification task not awaited",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:217:manual:7",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 217,
++   "original": "            pass",
++   "mutated": "            raise",
++   "note": "CancelledError not swallowed",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:218:manual:8",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 218,
++   "original": "        except Exception:",
++   "mutated": "        except ValueError:",
++   "note": "task error not handled",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:219:manual:9",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 219,
++   "original": "            _log.exception(\"classification scheduler task ended with an error\")",
++   "mutated": "            pass",
++   "note": "error not logged",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:219:manual:10",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 219,
++   "original": "            _log.exception(\"classification scheduler task ended with an error\")",
++   "mutated": "            _log.exception(\"classification scheduler task ended with an error!\")",
++   "note": "message changed",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:219:manual:11",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 219,
++   "original": "            _log.exception(\"classification scheduler task ended with an error\")",
++   "mutated": "            _log.info(\"classification scheduler task ended with an error\")",
++   "note": "logged below ERROR",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "src/factorflow/api/app.py:47:manual:12",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 47,
++   "original": "_log = logging.getLogger(__name__)",
++   "mutated": "_log = logging.getLogger('other')",
++   "note": "logger name changed",
++   "cycle": "cycle-1"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..77a1d0d
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w0
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w0
++Installed 43 packages in 167ms
++.........                                                                [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w0/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w0/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++9 passed, 2 warnings in 2.78s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..e01bdea
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1
++Installed 43 packages in 146ms
++.........                                                                [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++9 passed, 2 warnings in 2.78s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..2c489a9
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2
++Installed 43 packages in 166ms
++.........                                                                [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++9 passed, 2 warnings in 2.78s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_199_manual_1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_199_manual_1.log
+new file mode 100644
+index 0000000..9414a65
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_199_manual_1.log
+@@ -0,0 +1,55 @@
++....F
++=================================== FAILURES ===================================
++_____________ test_loop_called_with_pool_and_environment_settings ______________
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109415130>
++events = ['pool:open', 'reclaim:start', 'classification:start', 'classification:cancelled', 'reclaim:cancelled', 'pool:close']
++
++    def test_loop_called_with_pool_and_environment_settings(
++        monkeypatch: pytest.MonkeyPatch, events: list[str]
++    ) -> None:
++        """# Implements TC-COMP-087 (DAC-E3-S6-2): keyword ``pool`` and ``settings``, nothing else."""
++        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "7")
++        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS", "120")
++        calls: list[dict[str, Any]] = []
++        sleeper = _sleeping_loop("classification", events)
++    
++        async def _recording_loop(**kwargs: Any) -> None:
++            calls.append(dict(kwargs))
++            await sleeper(**kwargs)
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _recording_loop)
++        holder: dict[str, Any] = {}
++    
++        async def scenario() -> None:
++            app = FastAPI()
++            async with app_module._lifespan(app):
++                await asyncio.sleep(0)
++                await asyncio.sleep(0)
++                holder["pool"] = app.state.db_pool
++    
++        asyncio.run(scenario())
++    
++        assert len(calls) == 1
++        assert set(calls[0]) == {"pool", "settings"}
++        assert calls[0]["pool"] is holder["pool"]
++        settings = calls[0]["settings"]
++>       assert isinstance(settings, ClassificationSettings)
++E       assert False
++E        +  where False = isinstance(None, ClassificationSettings)
++
++tests/unit/test_api_classification_lifespan.py:184: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w0/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w0/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_loop_called_with_pool_and_environment_settings
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 4 passed, 2 warnings in 0.60s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_207_manual_2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_207_manual_2.log
+new file mode 100644
+index 0000000..71e32cd
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_207_manual_2.log
+@@ -0,0 +1,29 @@
++
++==================================== ERRORS ====================================
++_______ ERROR collecting tests/unit/test_api_classification_lifespan.py ________
++.venv/lib/python3.12/site-packages/_pytest/python.py:508: in importtestmodule
++    mod = import_path(
++.venv/lib/python3.12/site-packages/_pytest/pathlib.py:596: in import_path
++    importlib.import_module(module_name)
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++<frozen importlib._bootstrap>:1387: in _gcd_import
++    ???
++<frozen importlib._bootstrap>:1360: in _find_and_load
++    ???
++<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
++    ???
++<frozen importlib._bootstrap>:935: in _load_unlocked
++    ???
++.venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:188: in exec_module
++    exec(co, module.__dict__)
++tests/unit/test_api_classification_lifespan.py:21: in <module>
++    import factorflow.api.app as app_module
++E     File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/src/factorflow/api/app.py", line 208
++E       run_classification_loop(pool=pool, settings=classification_settings)
++E   IndentationError: unexpected indent
++=========================== short test summary info ============================
++ERROR tests/unit/test_api_classification_lifespan.py
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 error in 0.44s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_3.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_3.log
+new file mode 100644
+index 0000000..37ffddb
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_3.log
+@@ -0,0 +1,55 @@
++....F
++=================================== FAILURES ===================================
++_____________ test_loop_called_with_pool_and_environment_settings ______________
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b615610>
++events = ['pool:open', 'reclaim:start', 'classification:start', 'classification:cancelled', 'reclaim:cancelled', 'pool:close']
++
++    def test_loop_called_with_pool_and_environment_settings(
++        monkeypatch: pytest.MonkeyPatch, events: list[str]
++    ) -> None:
++        """# Implements TC-COMP-087 (DAC-E3-S6-2): keyword ``pool`` and ``settings``, nothing else."""
++        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "7")
++        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS", "120")
++        calls: list[dict[str, Any]] = []
++        sleeper = _sleeping_loop("classification", events)
++    
++        async def _recording_loop(**kwargs: Any) -> None:
++            calls.append(dict(kwargs))
++            await sleeper(**kwargs)
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _recording_loop)
++        holder: dict[str, Any] = {}
++    
++        async def scenario() -> None:
++            app = FastAPI()
++            async with app_module._lifespan(app):
++                await asyncio.sleep(0)
++                await asyncio.sleep(0)
++                holder["pool"] = app.state.db_pool
++    
++        asyncio.run(scenario())
++    
++        assert len(calls) == 1
++>       assert set(calls[0]) == {"pool", "settings"}
++E       AssertionError: assert {'pool'} == {'pool', 'settings'}
++E         
++E         Extra items in the right set:
++E         'settings'
++E         Use -v to get more diff
++
++tests/unit/test_api_classification_lifespan.py:181: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_loop_called_with_pool_and_environment_settings
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 4 passed, 2 warnings in 0.60s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_4.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_4.log
+new file mode 100644
+index 0000000..9508e31
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_4.log
+@@ -0,0 +1,52 @@
++....F
++=================================== FAILURES ===================================
++_____________ test_loop_called_with_pool_and_environment_settings ______________
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d84fc80>
++events = ['pool:open', 'reclaim:start', 'classification:start', 'classification:cancelled', 'reclaim:cancelled', 'pool:close']
++
++    def test_loop_called_with_pool_and_environment_settings(
++        monkeypatch: pytest.MonkeyPatch, events: list[str]
++    ) -> None:
++        """# Implements TC-COMP-087 (DAC-E3-S6-2): keyword ``pool`` and ``settings``, nothing else."""
++        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "7")
++        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS", "120")
++        calls: list[dict[str, Any]] = []
++        sleeper = _sleeping_loop("classification", events)
++    
++        async def _recording_loop(**kwargs: Any) -> None:
++            calls.append(dict(kwargs))
++            await sleeper(**kwargs)
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _recording_loop)
++        holder: dict[str, Any] = {}
++    
++        async def scenario() -> None:
++            app = FastAPI()
++            async with app_module._lifespan(app):
++                await asyncio.sleep(0)
++                await asyncio.sleep(0)
++                holder["pool"] = app.state.db_pool
++    
++        asyncio.run(scenario())
++    
++        assert len(calls) == 1
++        assert set(calls[0]) == {"pool", "settings"}
++>       assert calls[0]["pool"] is holder["pool"]
++E       assert None is <tests.unit.test_api_classification_lifespan._Pool object at 0x10d94a390>
++
++tests/unit/test_api_classification_lifespan.py:182: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_loop_called_with_pool_and_environment_settings
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 4 passed, 2 warnings in 0.60s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_213_manual_5.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_213_manual_5.log
+new file mode 100644
+index 0000000..e69de29
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_215_manual_6.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_215_manual_6.log
+new file mode 100644
+index 0000000..66c7601
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_215_manual_6.log
+@@ -0,0 +1,48 @@
++...F
++=================================== FAILURES ===================================
++____ test_reclaim_cancelled_and_pool_closed_when_classification_task_raised ____
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b537a40>
++events = ['pool:open', 'reclaim:start', 'reclaim:cancelled', 'pool:close']
++caplog = <_pytest.logging.LogCaptureFixture object at 0x10b630800>
++
++    def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++        monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++    ) -> None:
++        """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++    
++        The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++        """
++        boom = RuntimeError("start-up reclaim failed")
++    
++        async def _raising_loop(**_kwargs: Any) -> None:
++            raise boom
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++        caplog.set_level(logging.ERROR)
++    
++        asyncio.run(_enter_and_leave())
++    
++        assert "reclaim:cancelled" in events
++        assert "pool:close" in events
++        assert events.index("reclaim:cancelled") < events.index("pool:close")
++        errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
++>       assert len(errors) == 1
++E       assert 0 == 1
++E        +  where 0 = len([])
++
++tests/unit/test_api_classification_lifespan.py:146: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_reclaim_cancelled_and_pool_closed_when_classification_task_raised
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 3 passed, 2 warnings in 0.59s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_217_manual_7.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_217_manual_7.log
+new file mode 100644
+index 0000000..4932817
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_217_manual_7.log
+@@ -0,0 +1,73 @@
++F
++=================================== FAILURES ===================================
++_____________ test_classification_task_created_beside_reclaim_task _____________
++
++events = ['pool:open', 'reclaim:start', 'classification:start', 'classification:cancelled', 'reclaim:cancelled']
++
++    def test_classification_task_created_beside_reclaim_task(events: list[str]) -> None:
++        """# Implements TC-COMP-086 (DAC-E3-S6-1): both tasks start after the pool opens."""
++        seen: list[str] = []
++    
++        async def scenario() -> None:
++            async with app_module._lifespan(FastAPI()):
++                await asyncio.sleep(0)
++                await asyncio.sleep(0)
++                seen.extend(events)
++    
++>       asyncio.run(scenario())
++
++tests/unit/test_api_classification_lifespan.py:91: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
++    return runner.run(main)
++           ^^^^^^^^^^^^^^^^
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
++    return self._loop.run_until_complete(task)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
++    return future.result()
++           ^^^^^^^^^^^^^^^
++tests/unit/test_api_classification_lifespan.py:86: in scenario
++    async with app_module._lifespan(FastAPI()):
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/contextlib.py:217: in __aexit__
++    await anext(self.gen)
++src/factorflow/api/app.py:215: in _lifespan
++    await classification_task
++tests/unit/test_api_classification_lifespan.py:45: in _loop
++    await asyncio.Event().wait()
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++self = <asyncio.locks.Event object at 0x1096ed6a0 [unset]>
++
++    async def wait(self):
++        """Block until the internal flag is true.
++    
++        If the internal flag is true on entry, return True
++        immediately.  Otherwise, block until another coroutine calls
++        set() to set the flag to true, then return True.
++        """
++        if self._value:
++            return True
++    
++        fut = self._get_loop().create_future()
++        self._waiters.append(fut)
++        try:
++>           await fut
++E           asyncio.exceptions.CancelledError
++
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/locks.py:212: CancelledError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_classification_task_created_beside_reclaim_task
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 2 warnings in 0.59s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_218_manual_8.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_218_manual_8.log
+new file mode 100644
+index 0000000..997d80c
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_218_manual_8.log
+@@ -0,0 +1,66 @@
++...F
++=================================== FAILURES ===================================
++____ test_reclaim_cancelled_and_pool_closed_when_classification_task_raised ____
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d7d7aa0>
++events = ['pool:open', 'reclaim:start', 'reclaim:cancelled']
++caplog = <_pytest.logging.LogCaptureFixture object at 0x10d8d0aa0>
++
++    def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++        monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++    ) -> None:
++        """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++    
++        The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++        """
++        boom = RuntimeError("start-up reclaim failed")
++    
++        async def _raising_loop(**_kwargs: Any) -> None:
++            raise boom
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++        caplog.set_level(logging.ERROR)
++    
++>       asyncio.run(_enter_and_leave())
++
++tests/unit/test_api_classification_lifespan.py:140: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
++    return runner.run(main)
++           ^^^^^^^^^^^^^^^^
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
++    return self._loop.run_until_complete(task)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
++    return future.result()
++           ^^^^^^^^^^^^^^^
++tests/unit/test_api_classification_lifespan.py:75: in _enter_and_leave
++    async with app_module._lifespan(app):
++               ^^^^^^^^^^^^^^^^^^^^^^^^^
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/contextlib.py:217: in __aexit__
++    await anext(self.gen)
++src/factorflow/api/app.py:215: in _lifespan
++    await classification_task
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++_kwargs = {'pool': <tests.unit.test_api_classification_lifespan._Pool object at 0x10d8d02f0>, 'settings': ClassificationSettings(poll_interval_seconds=5.0, build_timeout_seconds=300.0)}
++
++    async def _raising_loop(**_kwargs: Any) -> None:
++>       raise boom
++E       RuntimeError: start-up reclaim failed
++
++tests/unit/test_api_classification_lifespan.py:135: RuntimeError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_reclaim_cancelled_and_pool_closed_when_classification_task_raised
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 3 passed, 2 warnings in 0.59s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_10.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_10.log
+new file mode 100644
+index 0000000..6333639
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_10.log
+@@ -0,0 +1,62 @@
++...F
++=================================== FAILURES ===================================
++____ test_reclaim_cancelled_and_pool_closed_when_classification_task_raised ____
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109c68a10>
++events = ['pool:open', 'reclaim:start', 'reclaim:cancelled', 'pool:close']
++caplog = <_pytest.logging.LogCaptureFixture object at 0x108f0fb00>
++
++    def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++        monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++    ) -> None:
++        """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++    
++        The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++        """
++        boom = RuntimeError("start-up reclaim failed")
++    
++        async def _raising_loop(**_kwargs: Any) -> None:
++            raise boom
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++        caplog.set_level(logging.ERROR)
++    
++        asyncio.run(_enter_and_leave())
++    
++        assert "reclaim:cancelled" in events
++        assert "pool:close" in events
++        assert events.index("reclaim:cancelled") < events.index("pool:close")
++        errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
++        assert len(errors) == 1
++        assert errors[0].name == "factorflow.api.app"
++>       assert errors[0].getMessage() == "classification scheduler task ended with an error"
++E       AssertionError: assert 'classificati...ith an error!' == 'classificati...with an error'
++E         
++E         Skipping 38 identical leading characters in diff, use -v to show
++E         - th an error
++E         + th an error!
++E         ?            +
++
++tests/unit/test_api_classification_lifespan.py:148: AssertionError
++------------------------------ Captured log call -------------------------------
++ERROR    factorflow.api.app:app.py:219 classification scheduler task ended with an error!
++Traceback (most recent call last):
++  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/src/factorflow/api/app.py", line 215, in _lifespan
++    await classification_task
++  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/tests/unit/test_api_classification_lifespan.py", line 135, in _raising_loop
++    raise boom
++RuntimeError: start-up reclaim failed
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_reclaim_cancelled_and_pool_closed_when_classification_task_raised
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 3 passed, 2 warnings in 0.58s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_11.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_11.log
+new file mode 100644
+index 0000000..e70b31f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_11.log
+@@ -0,0 +1,50 @@
++...F
++=================================== FAILURES ===================================
++____ test_reclaim_cancelled_and_pool_closed_when_classification_task_raised ____
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b8217f0>
++events = ['pool:open', 'reclaim:start', 'reclaim:cancelled', 'pool:close']
++caplog = <_pytest.logging.LogCaptureFixture object at 0x10b827f50>
++
++    def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++        monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++    ) -> None:
++        """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++    
++        The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++        """
++        boom = RuntimeError("start-up reclaim failed")
++    
++        async def _raising_loop(**_kwargs: Any) -> None:
++            raise boom
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++        caplog.set_level(logging.ERROR)
++    
++        asyncio.run(_enter_and_leave())
++    
++        assert "reclaim:cancelled" in events
++        assert "pool:close" in events
++        assert events.index("reclaim:cancelled") < events.index("pool:close")
++        errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
++>       assert len(errors) == 1
++E       assert 0 == 1
++E        +  where 0 = len([])
++
++tests/unit/test_api_classification_lifespan.py:146: AssertionError
++------------------------------ Captured log call -------------------------------
++INFO     factorflow.api.app:app.py:219 classification scheduler task ended with an error
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_reclaim_cancelled_and_pool_closed_when_classification_task_raised
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 3 passed, 2 warnings in 0.57s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_9.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_9.log
+new file mode 100644
+index 0000000..97f9c8f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_9.log
+@@ -0,0 +1,48 @@
++...F
++=================================== FAILURES ===================================
++____ test_reclaim_cancelled_and_pool_closed_when_classification_task_raised ____
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bb6fc50>
++events = ['pool:open', 'reclaim:start', 'reclaim:cancelled', 'pool:close']
++caplog = <_pytest.logging.LogCaptureFixture object at 0x10bb6fd70>
++
++    def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++        monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++    ) -> None:
++        """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++    
++        The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++        """
++        boom = RuntimeError("start-up reclaim failed")
++    
++        async def _raising_loop(**_kwargs: Any) -> None:
++            raise boom
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++        caplog.set_level(logging.ERROR)
++    
++        asyncio.run(_enter_and_leave())
++    
++        assert "reclaim:cancelled" in events
++        assert "pool:close" in events
++        assert events.index("reclaim:cancelled") < events.index("pool:close")
++        errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
++>       assert len(errors) == 1
++E       assert 0 == 1
++E        +  where 0 = len([])
++
++tests/unit/test_api_classification_lifespan.py:146: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_reclaim_cancelled_and_pool_closed_when_classification_task_raised
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 3 passed, 2 warnings in 0.57s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_47_manual_12.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_47_manual_12.log
+new file mode 100644
+index 0000000..bb3c7b6
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_47_manual_12.log
+@@ -0,0 +1,59 @@
++...F
++=================================== FAILURES ===================================
++____ test_reclaim_cancelled_and_pool_closed_when_classification_task_raised ____
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b5c7e60>
++events = ['pool:open', 'reclaim:start', 'reclaim:cancelled', 'pool:close']
++caplog = <_pytest.logging.LogCaptureFixture object at 0x10b5cf4d0>
++
++    def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++        monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++    ) -> None:
++        """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++    
++        The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++        """
++        boom = RuntimeError("start-up reclaim failed")
++    
++        async def _raising_loop(**_kwargs: Any) -> None:
++            raise boom
++    
++        monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++        caplog.set_level(logging.ERROR)
++    
++        asyncio.run(_enter_and_leave())
++    
++        assert "reclaim:cancelled" in events
++        assert "pool:close" in events
++        assert events.index("reclaim:cancelled") < events.index("pool:close")
++        errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
++        assert len(errors) == 1
++>       assert errors[0].name == "factorflow.api.app"
++E       AssertionError: assert 'other' == 'factorflow.api.app'
++E         
++E         - factorflow.api.app
++E         + other
++
++tests/unit/test_api_classification_lifespan.py:147: AssertionError
++------------------------------ Captured log call -------------------------------
++ERROR    other:app.py:219 classification scheduler task ended with an error
++Traceback (most recent call last):
++  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/src/factorflow/api/app.py", line 215, in _lifespan
++    await classification_task
++  File "/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/tests/unit/test_api_classification_lifespan.py", line 135, in _raising_loop
++    raise boom
++RuntimeError: start-up reclaim failed
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o64d_o9s/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_reclaim_cancelled_and_pool_closed_when_classification_task_raised
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 3 passed, 2 warnings in 0.57s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..8a4091b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,228 @@
++{
++  "schema": 1,
++  "command": "uv run --all-extras pytest tests/unit/test_api_classification_lifespan.py tests/unit/test_api_no_secrets.py -q -x",
++  "repo_head": "8ee557175e91eb8b02fecc88595698507b79e8a0",
++  "tree_patch_sha256": "c123e1f03a07461d3f348f0a41087d887298e020dd03ad36a306dde41e8b63ab",
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-mutants.json",
++  "mutants_sha256": "5c81423bc7858d220c2549638413d8a32015b004215a89245dfe68cd9fa0d730",
++  "jobs": 3,
++  "started": "2026-11-04T23:41:21Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 5.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "3ac91711f53b7ca2f8211a8472681df51b52c4f6b725a651120cd8be734ddfcf"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 5.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "7d1964c51f81d8e8c6e12d534f795ea8c3cbb7776537bbf7b53581f23e8703fe"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 5.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "59fa8956f458a252134f338921f275aeb9fe1c94eb24be36e6486c9e2cfd9111"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/api/app.py:199:manual:1",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 199,
++      "original": "    classification_settings = ClassificationSettings()",
++      "mutated": "    classification_settings = None",
++      "note": "settings not constructed",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_199_manual_1.log",
++      "log_sha256": "beea5f1bbfd63e9d78580abf2c9cb50ee492eaed9fadb5133566e5b0acb2f7dd"
++    },
++    {
++      "id": "src/factorflow/api/app.py:207:manual:2",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 207,
++      "original": "    classification_task = asyncio.create_task(",
++      "mutated": "    classification_task = asyncio.create_task(asyncio.sleep(0))",
++      "note": "loop never created",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_207_manual_2.log",
++      "log_sha256": "a0910842c0764563bcfa60ea513bc7934f98eb9736ca623c1479c8ab88832b54"
++    },
++    {
++      "id": "src/factorflow/api/app.py:208:manual:3",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 208,
++      "original": "        run_classification_loop(pool=pool, settings=classification_settings)",
++      "mutated": "        run_classification_loop(pool=pool)",
++      "note": "settings not passed",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_3.log",
++      "log_sha256": "f670324caf30e764a4b59eee75d5c3005e4eac6004ec25ade7b16e320519eb7b"
++    },
++    {
++      "id": "src/factorflow/api/app.py:208:manual:4",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 208,
++      "original": "        run_classification_loop(pool=pool, settings=classification_settings)",
++      "mutated": "        run_classification_loop(pool=None, settings=classification_settings)",
++      "note": "pool not passed",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_208_manual_4.log",
++      "log_sha256": "a372d362b11a4141223d7d571ed9435b1237fc4302ec690a4c0a0b77e8970049"
++    },
++    {
++      "id": "src/factorflow/api/app.py:213:manual:5",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 213,
++      "original": "        classification_task.cancel()",
++      "mutated": "        pass",
++      "note": "classification task not cancelled",
++      "cycle": "cycle-1",
++      "state": "timeout",
++      "exit_code": null,
++      "seconds": 90.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_213_manual_5.log",
++      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
++    },
++    {
++      "id": "src/factorflow/api/app.py:215:manual:6",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 215,
++      "original": "            await classification_task",
++      "mutated": "            pass",
++      "note": "classification task not awaited",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_215_manual_6.log",
++      "log_sha256": "96cf36178b17266b086caf3966659ddd883b4d35aaf09b95018484a6f521cab3"
++    },
++    {
++      "id": "src/factorflow/api/app.py:217:manual:7",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 217,
++      "original": "            pass",
++      "mutated": "            raise",
++      "note": "CancelledError not swallowed",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_217_manual_7.log",
++      "log_sha256": "c73de3b5402035b59f495e045d8bc2aa069adfab9da31ac08206b6fe64c5a240"
++    },
++    {
++      "id": "src/factorflow/api/app.py:218:manual:8",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 218,
++      "original": "        except Exception:",
++      "mutated": "        except ValueError:",
++      "note": "task error not handled",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_218_manual_8.log",
++      "log_sha256": "e14c35274244f52d9835dd8c0c1de9fc87f35b54f0ce2423db24840d96d6e2f9"
++    },
++    {
++      "id": "src/factorflow/api/app.py:219:manual:9",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 219,
++      "original": "            _log.exception(\"classification scheduler task ended with an error\")",
++      "mutated": "            pass",
++      "note": "error not logged",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_9.log",
++      "log_sha256": "040ff23893e322c92a52b6de23e651d79fa20bf383470b319ce3ee39ba5c0925"
++    },
++    {
++      "id": "src/factorflow/api/app.py:219:manual:10",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 219,
++      "original": "            _log.exception(\"classification scheduler task ended with an error\")",
++      "mutated": "            _log.exception(\"classification scheduler task ended with an error!\")",
++      "note": "message changed",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_10.log",
++      "log_sha256": "23d461a35d8592073ae11a3f7403aa040db3b2ffb2863974c3b2dc526640ce22"
++    },
++    {
++      "id": "src/factorflow/api/app.py:219:manual:11",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 219,
++      "original": "            _log.exception(\"classification scheduler task ended with an error\")",
++      "mutated": "            _log.info(\"classification scheduler task ended with an error\")",
++      "note": "logged below ERROR",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_219_manual_11.log",
++      "log_sha256": "6c61d523cb875f3a9ab49198b80c31098ff961c30f702ff7d3a9f197ed3b6ef5"
++    },
++    {
++      "id": "src/factorflow/api/app.py:47:manual:12",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 47,
++      "original": "_log = logging.getLogger(__name__)",
++      "mutated": "_log = logging.getLogger('other')",
++      "note": "logger name changed",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results-logs/src_factorflow_api_app.py_47_manual_12.log",
++      "log_sha256": "1828ad786ccdf646a38a1db908e416846cbbe11d1080b1b8235a286233d11007"
++    }
++  ],
++  "finished": "2026-11-04T23:42:58Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/red-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/red-cycle-1.log
+new file mode 100644
+index 0000000..be88f88
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/red-cycle-1.log
+@@ -0,0 +1,10 @@
++$ uv run pytest tests/unit/test_api_classification_lifespan.py -q --tb=line
++(production tree at 8ee5571, app.py without run_classification_loop; transcript of the observed run)
++EEEEEE                                                                   [100%]
++ERROR test_classification_task_created_beside_reclaim_task: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
++ERROR test_both_tasks_cancelled_before_pool_close: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
++ERROR test_reclaim_cancelled_when_classification_task_already_finished: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
++ERROR test_reclaim_cancelled_and_pool_closed_when_classification_task_raised: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
++ERROR test_loop_called_with_pool_and_environment_settings: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
++ERROR test_invalid_classification_settings_fail_startup_before_any_task: AttributeError: module 'factorflow.api.app' has no attribute 'run_classification_loop'
++6 errors in 0.48s
+diff --git a/src/factorflow/api/app.py b/src/factorflow/api/app.py
+index 7bd0dd9..ed50fef 100644
+--- a/src/factorflow/api/app.py
++++ b/src/factorflow/api/app.py
+@@ -34,6 +34,8 @@ from factorflow.api.routes import (
+     settings,
+     universes,
+ )
++from factorflow.classification.scheduler import run_classification_loop
++from factorflow.classification.settings import ClassificationSettings
+ from factorflow.config.settings import (
+     ApiSettings,
+     DatabaseSettings,
+@@ -42,6 +44,8 @@ from factorflow.config.settings import (
+ )
+ from factorflow.runs.reclaim import reclaim_stale_runs
+ 
++_log = logging.getLogger(__name__)
++
+ # Owner-confirmed reclaim loop cadence (5 seconds).  Injectable via
+ # `_run_reclaim_loop`'s `interval_seconds` parameter in tests; this module-
+ # level constant is the production default per the open gap recorded in the
+@@ -192,6 +196,7 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+     app.state.db_pool = pool
+ 
+     run_settings = RunSettings()
++    classification_settings = ClassificationSettings()
+     reclaim_task = asyncio.create_task(
+         _run_reclaim_loop(
+             pool=pool,
+@@ -199,9 +204,19 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+             interval_seconds=_reclaim_interval_seconds,
+         )
+     )
++    classification_task = asyncio.create_task(
++        run_classification_loop(pool=pool, settings=classification_settings)
++    )
+     try:
+         yield
+     finally:
++        classification_task.cancel()
++        try:
++            await classification_task
++        except asyncio.CancelledError:
++            pass
++        except Exception:
++            _log.exception("classification scheduler task ended with an error")
+         reclaim_task.cancel()
+         try:
+             await reclaim_task
+diff --git a/tests/unit/test_api_classification_lifespan.py b/tests/unit/test_api_classification_lifespan.py
+new file mode 100644
+index 0000000..9879972
+--- /dev/null
++++ b/tests/unit/test_api_classification_lifespan.py
+@@ -0,0 +1,202 @@
++"""The classification scheduler task in the API lifespan (CAP-002-E3-S6).
++
++Covers DAC-E3-S6-1 (the task is created beside the reclaim task and both are
++cancelled on shutdown) and DAC-E3-S6-2 (the loop is called with the pool and
++``ClassificationSettings()``). Doubles are injected by monkeypatching module
++attributes of ``factorflow.api.app`` and the ``FACTORFLOW_CLASSIFICATION_*``
++environment, never through a parameter of ``_lifespan`` (DEC-0142). The real
++``_lifespan`` runs under ``asyncio.run``: the project installs no async test
++plugin, as ``test_api_reclaim_lifespan.py`` records.
++"""
++
++from __future__ import annotations
++
++import asyncio
++import logging
++from typing import Any
++
++import pytest
++from fastapi import FastAPI
++
++import factorflow.api.app as app_module
++from factorflow.classification.settings import ClassificationSettings
++from factorflow.config.settings import ConfigurationError
++
++
++class _RecordingPool:
++    """Stands in for ``ConnectionPool``; records open and close in order."""
++
++    events: list[str]
++
++    def __init__(self, **_kwargs: Any) -> None:
++        pass
++
++    def open(self) -> None:
++        self.events.append("pool:open")
++
++    def close(self) -> None:
++        self.events.append("pool:close")
++
++
++def _sleeping_loop(name: str, events: list[str]) -> Any:
++    async def _loop(**_kwargs: Any) -> None:
++        events.append(f"{name}:start")
++        try:
++            await asyncio.Event().wait()
++        except asyncio.CancelledError:
++            events.append(f"{name}:cancelled")
++            raise
++
++    return _loop
++
++
++@pytest.fixture(autouse=True)
++def _database_url(monkeypatch: pytest.MonkeyPatch) -> None:
++    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
++
++
++@pytest.fixture
++def events(monkeypatch: pytest.MonkeyPatch) -> list[str]:
++    recorded: list[str] = []
++    pool_cls = type("_Pool", (_RecordingPool,), {"events": recorded})
++    monkeypatch.setattr(app_module, "ConnectionPool", pool_cls)
++    monkeypatch.setattr(app_module, "_run_reclaim_loop", _sleeping_loop("reclaim", recorded))
++    monkeypatch.setattr(
++        app_module,
++        "run_classification_loop",
++        _sleeping_loop("classification", recorded),
++        raising=True,
++    )
++    return recorded
++
++
++async def _enter_and_leave(extra_ticks: int = 2) -> FastAPI:
++    app = FastAPI()
++    async with app_module._lifespan(app):
++        for _ in range(extra_ticks):
++            await asyncio.sleep(0)
++    return app
++
++
++def test_classification_task_created_beside_reclaim_task(events: list[str]) -> None:
++    """# Implements TC-COMP-086 (DAC-E3-S6-1): both tasks start after the pool opens."""
++    seen: list[str] = []
++
++    async def scenario() -> None:
++        async with app_module._lifespan(FastAPI()):
++            await asyncio.sleep(0)
++            await asyncio.sleep(0)
++            seen.extend(events)
++
++    asyncio.run(scenario())
++
++    assert "reclaim:start" in seen
++    assert "classification:start" in seen
++    assert seen.index("pool:open") < seen.index("reclaim:start")
++    assert seen.index("pool:open") < seen.index("classification:start")
++
++
++def test_both_tasks_cancelled_before_pool_close(events: list[str]) -> None:
++    """# Implements TC-COMP-086 (DAC-E3-S6-1): cancel and await precede ``pool.close()``."""
++    asyncio.run(_enter_and_leave())
++
++    assert "classification:cancelled" in events
++    assert "reclaim:cancelled" in events
++    assert events.index("classification:cancelled") < events.index("pool:close")
++    assert events.index("reclaim:cancelled") < events.index("pool:close")
++
++
++def test_reclaim_cancelled_when_classification_task_already_finished(
++    monkeypatch: pytest.MonkeyPatch, events: list[str]
++) -> None:
++    """# Implements TC-COMP-086: a classification loop that returns at once leaves a clean exit."""
++
++    async def _returns_at_once(**_kwargs: Any) -> None:
++        return None
++
++    monkeypatch.setattr(app_module, "run_classification_loop", _returns_at_once)
++
++    asyncio.run(_enter_and_leave())
++
++    assert "reclaim:cancelled" in events
++    assert events.index("reclaim:cancelled") < events.index("pool:close")
++
++
++def test_reclaim_cancelled_and_pool_closed_when_classification_task_raised(
++    monkeypatch: pytest.MonkeyPatch, events: list[str], caplog: pytest.LogCaptureFixture
++) -> None:
++    """# Implements TC-COMP-086 (Open Gap 6): an error already ended in the task is logged once.
++
++    The unchanged reclaim block and ``pool.close()`` still run, and the exit is clean.
++    """
++    boom = RuntimeError("start-up reclaim failed")
++
++    async def _raising_loop(**_kwargs: Any) -> None:
++        raise boom
++
++    monkeypatch.setattr(app_module, "run_classification_loop", _raising_loop)
++    caplog.set_level(logging.ERROR)
++
++    asyncio.run(_enter_and_leave())
++
++    assert "reclaim:cancelled" in events
++    assert "pool:close" in events
++    assert events.index("reclaim:cancelled") < events.index("pool:close")
++    errors = [r for r in caplog.records if r.levelno >= logging.ERROR]
++    assert len(errors) == 1
++    assert errors[0].name == "factorflow.api.app"
++    assert errors[0].getMessage() == "classification scheduler task ended with an error"
++    # The redaction filter (AC-13) scrubs the traceback into `exc_text` and clears `exc_info`
++    # on every record (DEC-0282), so the logged exception is read from `exc_text`.
++    assert errors[0].exc_text is not None
++    assert "RuntimeError: start-up reclaim failed" in errors[0].exc_text
++
++
++def test_loop_called_with_pool_and_environment_settings(
++    monkeypatch: pytest.MonkeyPatch, events: list[str]
++) -> None:
++    """# Implements TC-COMP-087 (DAC-E3-S6-2): keyword ``pool`` and ``settings``, nothing else."""
++    monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "7")
++    monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS", "120")
++    calls: list[dict[str, Any]] = []
++    sleeper = _sleeping_loop("classification", events)
++
++    async def _recording_loop(**kwargs: Any) -> None:
++        calls.append(dict(kwargs))
++        await sleeper(**kwargs)
++
++    monkeypatch.setattr(app_module, "run_classification_loop", _recording_loop)
++    holder: dict[str, Any] = {}
++
++    async def scenario() -> None:
++        app = FastAPI()
++        async with app_module._lifespan(app):
++            await asyncio.sleep(0)
++            await asyncio.sleep(0)
++            holder["pool"] = app.state.db_pool
++
++    asyncio.run(scenario())
++
++    assert len(calls) == 1
++    assert set(calls[0]) == {"pool", "settings"}
++    assert calls[0]["pool"] is holder["pool"]
++    settings = calls[0]["settings"]
++    assert isinstance(settings, ClassificationSettings)
++    assert settings == ClassificationSettings()
++    assert settings.poll_interval_seconds == 7.0
++    assert settings.build_timeout_seconds == 120.0
++
++
++def test_invalid_classification_settings_fail_startup_before_any_task(
++    monkeypatch: pytest.MonkeyPatch, events: list[str]
++) -> None:
++    """# Implements TC-COMP-087 (DAC-E3-S6-2): a bad value fails startup, naming the variable."""
++    monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "0")
++
++    with pytest.raises(ConfigurationError) as excinfo:
++        asyncio.run(_enter_and_leave())
++
++    message = str(excinfo.value)
++    assert "FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS" in message
++    assert "reclaim:start" not in events
++    assert "classification:start" not in events
+diff --git a/tests/unit/test_api_no_secrets.py b/tests/unit/test_api_no_secrets.py
+index 9824f30..f89b7f6 100644
+--- a/tests/unit/test_api_no_secrets.py
++++ b/tests/unit/test_api_no_secrets.py
+@@ -3,6 +3,12 @@
+ Task plan T009.
+ """
+ 
++import logging
++import uuid
++from collections.abc import Iterator
++from contextlib import contextmanager
++from typing import Any
++
+ import pytest
+ from fastapi.testclient import TestClient
+ 
+@@ -21,3 +27,113 @@ def test_health_never_echoes_credential(monkeypatch: pytest.MonkeyPatch) -> None
+     assert secret_value not in response.text
+     body = response.json()
+     assert body["credential_present"] is True
++
++
++# ---------------------------------------------------------------------------
++# CAP-002-E3-S6: TC-COMP-088 / DAC-E3-S6-3 / DAC-E3-13 -- the universes and
++# classifications routes leak no credential (DEC-0084).
++# ---------------------------------------------------------------------------
++
++_SECRET = "sk-super-secret-massive-key-9876543210"
++_NEW_PREFIXES = ("/api/universes", "/api/classifications")
++
++
++class _FakePool:
++    @contextmanager
++    def connection(self) -> Iterator[object]:
++        yield object()
++
++
++def _assert_no_secret(secret: str, *, text: str, headers: dict[str, str], logs: str) -> None:
++    assert secret not in text, "credential in a response body"
++    assert all(secret not in value for value in headers.values()), "credential in a header"
++    assert secret not in logs, "credential in a log"
++
++
++def _new_routes(app: Any) -> list[tuple[str, str]]:
++    """(METHOD, path) of every route under the new prefixes.
++
++    FastAPI keeps an included router as one wrapping entry, so the OpenAPI
++    schema is the reliable enumeration of what is mounted.
++    """
++    return [
++        (method.upper(), path)
++        for path, operations in app.openapi()["paths"].items()
++        if path.startswith(_NEW_PREFIXES)
++        for method in operations
++    ]
++
++
++def _fill(path: str) -> str:
++    parts = []
++    for part in path.split("/"):
++        if part.startswith("{") and part.endswith("}"):
++            name = part[1:-1]
++            parts.append(str(uuid.uuid4()) if name.endswith("id") else "AAA")
++        else:
++            parts.append(part)
++    return "/".join(parts)
++
++
++def test_new_routes_never_echo_credential(
++    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
++) -> None:
++    """# Implements TC-COMP-088: every universes and classifications route, every method."""
++    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", _SECRET)
++    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
++    caplog.set_level(logging.DEBUG)
++
++    app = create_app()
++    app.state.db_pool = _FakePool()
++    routes = _new_routes(app)
++    enumerated = set(routes)
++    for expected in (
++        ("GET", "/api/universes"),
++        ("GET", "/api/classifications"),
++        ("GET", "/api/classifications/summary"),
++        ("GET", "/api/classifications/sets"),
++        ("GET", "/api/classifications/sets/{set_id}"),
++        ("GET", "/api/classifications/stocks/{symbol}"),
++        ("GET", "/api/classifications/stocks/{symbol}/history"),
++    ):
++        assert expected in enumerated, f"{expected} is not mounted"
++
++    client = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False)
++    for method, path in sorted(routes):
++        kwargs: dict[str, Any] = {} if method in ("GET", "HEAD", "OPTIONS") else {"json": {}}
++        response = client.request(method, _fill(path), **kwargs)
++        _assert_no_secret(
++            _SECRET,
++            text=response.text,
++            headers=dict(response.headers),
++            logs=caplog.text,
++        )
++
++
++def test_secret_detector_fails_on_a_leaking_route_and_a_leaking_log(
++    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
++) -> None:
++    """# Implements TC-COMP-088: the detector itself raises when a secret does leak."""
++    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", _SECRET)
++    monkeypatch.setenv("FACTORFLOW_DATABASE_URL", "postgresql://unused@127.0.0.1/unused")
++    caplog.set_level(logging.DEBUG)
++
++    app = create_app()
++    app.state.db_pool = _FakePool()
++
++    def _leak() -> dict[str, str]:
++        return {"key": _SECRET}
++
++    app.add_api_route("/api/__leak", _leak)
++    # The static mount added by `create_app` matches every path, so the throwaway route goes first.
++    app.router.routes.insert(0, app.router.routes.pop())
++
++    client = TestClient(app, base_url="http://127.0.0.1:8000", raise_server_exceptions=False)
++    response = client.get("/api/__leak")
++    with pytest.raises(AssertionError):
++        _assert_no_secret(_SECRET, text=response.text, headers={}, logs="")
++    with pytest.raises(AssertionError):
++        _assert_no_secret(_SECRET, text="", headers={"x-leak": _SECRET}, logs="")
++    logging.getLogger("factorflow.test").warning("leaked %s", _SECRET)
++    with pytest.raises(AssertionError):
++        _assert_no_secret(_SECRET, text="", headers={}, logs=caplog.text)

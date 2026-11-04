@@ -34,6 +34,8 @@ from factorflow.api.routes import (
     settings,
     universes,
 )
+from factorflow.classification.scheduler import run_classification_loop
+from factorflow.classification.settings import ClassificationSettings
 from factorflow.config.settings import (
     ApiSettings,
     DatabaseSettings,
@@ -41,6 +43,8 @@ from factorflow.config.settings import (
     configure_logging,
 )
 from factorflow.runs.reclaim import reclaim_stale_runs
+
+_log = logging.getLogger(__name__)
 
 # Owner-confirmed reclaim loop cadence (5 seconds).  Injectable via
 # `_run_reclaim_loop`'s `interval_seconds` parameter in tests; this module-
@@ -192,6 +196,7 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.db_pool = pool
 
     run_settings = RunSettings()
+    classification_settings = ClassificationSettings()
     reclaim_task = asyncio.create_task(
         _run_reclaim_loop(
             pool=pool,
@@ -199,9 +204,19 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
             interval_seconds=_reclaim_interval_seconds,
         )
     )
+    classification_task = asyncio.create_task(
+        run_classification_loop(pool=pool, settings=classification_settings)
+    )
     try:
         yield
     finally:
+        classification_task.cancel()
+        try:
+            await classification_task
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            _log.exception("classification scheduler task ended with an error")
         reclaim_task.cancel()
         try:
             await reclaim_task

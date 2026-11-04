@@ -1,0 +1,127 @@
+{
+ "schema": "mutation-run/1",
+ "repo_head": "8ee557175e91eb8b02fecc88595698507b79e8a0",
+ "range": "working-tree",
+ "mutants": [
+  {
+   "id": "src/factorflow/api/app.py:199:manual:1",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 199,
+   "original": "    classification_settings = ClassificationSettings()",
+   "mutated": "    classification_settings = None",
+   "note": "settings not constructed",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:207:manual:2",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 207,
+   "original": "    classification_task = asyncio.create_task(",
+   "mutated": "    classification_task = asyncio.create_task(asyncio.sleep(0))",
+   "note": "loop never created",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:208:manual:3",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 208,
+   "original": "        run_classification_loop(pool=pool, settings=classification_settings)",
+   "mutated": "        run_classification_loop(pool=pool)",
+   "note": "settings not passed",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:208:manual:4",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 208,
+   "original": "        run_classification_loop(pool=pool, settings=classification_settings)",
+   "mutated": "        run_classification_loop(pool=None, settings=classification_settings)",
+   "note": "pool not passed",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:213:manual:5",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 213,
+   "original": "        classification_task.cancel()",
+   "mutated": "        pass",
+   "note": "classification task not cancelled",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:215:manual:6",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 215,
+   "original": "            await classification_task",
+   "mutated": "            pass",
+   "note": "classification task not awaited",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:217:manual:7",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 217,
+   "original": "            pass",
+   "mutated": "            raise",
+   "note": "CancelledError not swallowed",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:218:manual:8",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 218,
+   "original": "        except Exception:",
+   "mutated": "        except ValueError:",
+   "note": "task error not handled",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:219:manual:9",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 219,
+   "original": "            _log.exception(\"classification scheduler task ended with an error\")",
+   "mutated": "            pass",
+   "note": "error not logged",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:219:manual:10",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 219,
+   "original": "            _log.exception(\"classification scheduler task ended with an error\")",
+   "mutated": "            _log.exception(\"classification scheduler task ended with an error!\")",
+   "note": "message changed",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:219:manual:11",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 219,
+   "original": "            _log.exception(\"classification scheduler task ended with an error\")",
+   "mutated": "            _log.info(\"classification scheduler task ended with an error\")",
+   "note": "logged below ERROR",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "src/factorflow/api/app.py:47:manual:12",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 47,
+   "original": "_log = logging.getLogger(__name__)",
+   "mutated": "_log = logging.getLogger('other')",
+   "note": "logger name changed",
+   "cycle": "cycle-1"
+  }
+ ]
+}
