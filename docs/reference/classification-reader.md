@@ -19,9 +19,11 @@ service, whose `create_from_filter` imports `Thresholds`, `current_set` and
 [`universe-service.md`](universe-service.md#create-from-a-filter)). The reader
 imports `MEMBERSHIP_AS_OF_SQL` from `factorflow.universes.replay`, never the
 universe service, so the service imports the reader without a cycle
-(`test_reader_does_not_import_the_universe_service`). No module under `src/`
-calls `compare`, `stock_evidence`, `stock_history`, `list_sets` or `get_set`
-yet; the `/api/classifications` routes that will are CAP-002-E3-S5's.
+(`test_reader_does_not_import_the_universe_service`). The classification
+API's `/api/classifications` routes call `list_classifications`, `compare`,
+`summary`, `stock_evidence`, `stock_history`, `list_sets` and `get_set`, one
+call per request (CAP-002-E3-S5; see
+[`classification-api.md`](classification-api.md#classification-reads)).
 
 Every function that reads the database takes the caller's `psycopg.Connection`. The reader writes
 nothing, never commits and catches no database error. Every value it returns

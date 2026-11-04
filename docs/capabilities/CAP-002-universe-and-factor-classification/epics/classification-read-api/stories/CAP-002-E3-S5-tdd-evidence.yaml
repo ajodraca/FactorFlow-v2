@@ -1,0 +1,147 @@
+# TDD evidence for CAP-002-E3-S5 - Classifications router mounted in the application.
+# One cycle: the unit tests were written first by an earlier run (commit 64251c2, never run) and carried onto this
+# story branch; the router, the models and the mount then made them pass. commit_hash is stage.
+# Decision: DEC-0281 (three plan statements corrected to the delivered code).
+# Cycle-1 note (superseded by cycle-2): the postgres integration files were written without being run; the claim that Docker
+# is absent held only inside the sandbox. Cycle-2 ran them against postgres:16 outside it.
+# The three unit packaging tests (test_release_excludes_test_paths, test_distribution_contents) cannot run in the
+# sandbox: uv cannot open its cache.
+# Review notes: reviews were run on the unit and integration files together; both APPROVED with non-blocking notes.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019, T020, T021, T022, T023]
+    description: >
+      src/factorflow/api/routes/classifications.py (six reads, REFUSALS table, _cursor_code), the request and
+      response models appended to src/factorflow/api/classification_models.py, the one include_router line and the
+      import in src/factorflow/api/app.py. Tests: tests/unit/test_api_classifications_routes.py,
+      test_api_classification_models.py and test_api_classification_error_mapping.py (extended), and the unrun
+      integration files named above. The first mutation run left 32 survivors (unserialised fields, the cursor
+      padding, the page lower bound); full-body tests were added and two redundant arguments removed, and the rerun
+      killed all 92. Two defects in the carried-over tests were fixed: the static-mount test looked for
+      /api/classifications routes at the top of router.routes, where FastAPI wraps included routers, and a duplicated
+      test name hid one symbol-prefix test.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-1.log
+    red_log_sha256: f51bc6cb835bce742e31de027080ce770e7b6da8cb45a10dbb0053d25f3f0f6e
+    red_evidence: >
+      Observed with the test files at 64251c2 and the production tree at the base commit aed93bd (a clean archive of
+      it): collection fails on ImportError for ClassificationListQuery and for the classifications router, so no test
+      in the three files ran.
+    green_evidence: >
+      The three unit files: 201 passed (green-cycle-1.log). Full not-postgres suite: 1594 passed, 1 failed and 2 errors,
+      all three the packaging tests whose uv build cannot open its cache in the sandbox. ruff check, ruff format
+      --check and mypy src clean. T021 checks: app.py differs by the import and one include_router line; no SQL or
+      massive reference in the router; the three E1-S6 classes are defined once; the delivered API suites (83) pass.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/green-cycle-1.log
+        sha256: e3ede66788c802f0b79a36c510cbc63954c37d7c9132f71f9e26acf8045f3e36
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/code-review-cycle-1.txt
+        sha256: 0322ea86d93908e71c5ea5599ab3963d875a7f8913c8ec68c033e3402efca96b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/spec-drift-cycle-1.txt
+        sha256: 6a3f16312dac8a86997242cff1bce956020a38bcc4f8614e789e61b7327c311b
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 0965b666d9596e2b782e65f4a36410abfa378319775e67b9f65c8c293629df71
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: 7f36ee894bcf71f2e00719bfaabd850186154ef2ebca7660850e3c7cefc1af44
+      generated: 92
+      killed: 92
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    kind: rework
+    tasks: [T009, T010, T012, T013, T016, T022]
+    description: >
+      Rework of adversarial-review v1 (CHANGES-REQUIRED). IR-001/IR-002: later_set seeds a claimed running run
+      (building_run) and takes its own started_at; the summary currency test is one test per state. IR-003: the
+      missing T012/T013 cases. IR-004/IR-005: cursor rows re-signed so they fail on the rule they name, and the
+      resource, universe id and operation texts pinned. IR-006: a zero-valued bound. IR-007: empty compare entries
+      are shape-checked and refused (the one production line, classification_models.py _compare_symbols). IR-008,
+      IR-010: comment corrected, summary request id and psycopg.OperationalError rows added. IR-009 (optional) is
+      not addressed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-2.log
+    red_log_sha256: 4e129af849b423c38d14a77d87fb2f7059a8723e41ce250b3d738b88f75d8d8a
+    red_evidence: >
+      IR-007: four new tests fail against the production line at bcdff3e (red-cycle-2.log). The other rework tests
+      pin behaviour the code already had; the review's seven surviving mutants for them are killed below.
+    green_evidence: >
+      Full suite including postgres-marked tests against postgres:16, run outside the sandbox: 2544 passed, 1 xfailed
+      (green-cycle-2.log). ruff check, ruff format and mypy src clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/green-cycle-2.log
+        sha256: 12a3828bfc86727f1a1983287609fa7eb0d7aa7c6f3789b4785d29a07013b461
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/code-review-cycle-2.txt
+        sha256: 667c5515090df8792a89c640f10d6e9835bcf9dea8b155e42b757563a9e101d4
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/spec-drift-cycle-2.txt
+        sha256: e407039998c208d45657c64a08d2f098b6d4824ac12132f9f273ebb2a1504026
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7b4b0402dfbabfeefb38418bcf05b64d92ff27e9177b05cb135b3283af055acb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 8b0003ab2845999d439ed2e2749aa1f8b39413550e129ff70ec9990e9d50263a
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-3
+    kind: rework
+    tasks: [T009, T012, T017]
+    description: >
+      Attended rework of adversarial-review v2 (CHANGES-REQUIRED), test files only. IR-001 case (2): the match-count
+      test seeds HX (input reason, passes the threshold) and ZZZ (passes under another prefix), so hide_incomplete and
+      the symbol prefix each change match_count (6, 5, 5) on both pages; the zero-bound assertion now expects the six
+      stocks that pass it. IR-001 case (7): the retired compare stock is seeded as the engine stores it (not_classified,
+      reason_code retired) and its status and reason are asserted. IR-002: three cursor_invalid rows (set a number, not
+      an object, no set). IR-003 (optional) is not addressed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-3.log
+    red_log_sha256: 9d0407cce99321ec4a6a0c40ecbe54937931a272e21539b721f64dba4454eb85
+    red_evidence: >
+      Each reworked test, run alone, fails against review v2's five probe mutants (435:manual:41/42, 76:manual:21/22/23,
+      renumbered cycle-3 manual:1 to 5), which review v2 recorded as surviving the cycle-2 tests (red-cycle-3.log). The
+      case (7) assertions pin behaviour the reader already has.
+    green_evidence: >
+      Full suite including postgres-marked tests against postgres:16, run outside the sandbox: 2547 passed, 1 xfailed
+      (green-cycle-3.log). ruff check, ruff format --check and mypy src clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/green-cycle-3.log
+        sha256: 0b9fbca3a0af60e5b9158b2b760fc53d340503154f18dbeae35280fdf42c1aad
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/code-review-cycle-3.txt
+        sha256: 58ed6e437278365f0472f16c698831e26165d5aca93f753ffd7b145e6d6405b8
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/spec-drift-cycle-3.txt
+        sha256: 76825e70be92d3090905dd7c13809ad00567fac009c36e5b782956ae45248bf8
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2fb060512bc92c21068bf7e46fdde39676ca5b78d59acb2a9b13e0419a504778
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-3-results.json
+      results_sha256: b56c425c4453b4699b28cf7bc9ef808cc7593efab9854e7ea83f897c33bb85a9
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

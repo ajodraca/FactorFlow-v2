@@ -1,0 +1,3 @@
+Independent spec-drift review of cycle-1.patch against story, task plan and component-design-classification-api.md 2.4-2.7, 3, 7, 11 (fresh general-purpose subagent, read-only). drift_detected: false. No blocking findings.
+Assessed as acceptable: the _cell_response/_factors_response/_set_block helpers delegate to the from_reader classmethods E1-S6 already shipped (plan wording "get no classmethod" is stale; DEC-0281).
+Non-blocking: compare_conflicts takes the query-string names (FastAPI fills defaults into model_fields_set); bounds rely on Pydantic's default NaN/infinity refusal; a bad cursor on /sets and /history carries resource "classification" (design 2.5 silent).

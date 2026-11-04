@@ -1,0 +1,10 @@
+RED for cycle-2, observed 2026-11-03 with the rework tests in place and the production tree at bcdff3e
+(the empty-entry skip `if symbol and symbol not in symbols` restored in classification_models.py).
+uv run pytest tests/unit/test_api_classification_error_mapping.py tests/unit/test_api_classification_models.py tests/unit/test_api_classifications_routes.py -q
+FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[AAA,,BBB]
+FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[AAA,BBB,]
+FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[,AAA,BBB]
+FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[AAA, ,BBB]
+4 failed, 215 passed
+(The other rework tests - cursor rules, refusal envelope, zero bounds, request id, postgres seeding - pin behaviour the
+production code already had; they are proven by the mutants below, which the previous tests let survive.)

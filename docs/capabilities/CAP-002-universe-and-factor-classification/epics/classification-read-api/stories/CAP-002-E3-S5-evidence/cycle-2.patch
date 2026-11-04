@@ -1,0 +1,734 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-mutants.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-mutants.json
+new file mode 100644
+index 0000000..939ca17
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-mutants.json
+@@ -0,0 +1,77 @@
++{
++  "schema": 1,
++  "repo_head": "1a27db8e1cc5cb6b62d5ea6ca21e11896a3b3115",
++  "range": "HEAD..worktree",
++  "mutants": [
++    {
++      "id": "src/factorflow/api/routes/classifications.py:72:manual:1",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 72,
++      "original": "        set_id, sort, order = UUID(payload[\"set\"]), payload[\"sort\"], payload[\"order\"]",
++      "mutated": "        set_id, sort, order = payload[\"set\"], payload[\"sort\"], payload[\"order\"]",
++      "note": "set not parsed as a UUID (DEC-0138)",
++      "cycle": "cycle-2"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:73:manual:2",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 73,
++      "original": "        if sort not in reader.SORT_ALLOWLIST or order not in (\"asc\", \"desc\"):",
++      "mutated": "        if False:",
++      "note": "allowlist/order check removed (DEC-0138)",
++      "cycle": "cycle-2"
++    },
++    {
++      "id": "src/factorflow/api/classification_models.py:428:manual:3",
++      "operator": "manual",
++      "file": "src/factorflow/api/classification_models.py",
++      "line": 428,
++      "original": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name)) is not None",
++      "mutated": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name))",
++      "note": "a zero bound dropped by truthiness (T010, design 2.4)",
++      "cycle": "cycle-2"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:56:manual:4",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 56,
++      "original": "        return f\"no universe has the id {exc.universe_id}\"",
++      "mutated": "        return \"no universe has the id\"",
++      "note": "universe id dropped from message (design 2.5, T017)",
++      "cycle": "cycle-2"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:219:manual:5",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 219,
++      "original": "        request, \"read the classification set\", lambda conn: reader.get_set(conn, set_id)",
++      "mutated": "        request, \"list the classification sets\", lambda conn: reader.get_set(conn, set_id)",
++      "note": "set-detail operation text not distinguished (T019)",
++      "cycle": "cycle-2"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:182:manual:6",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 182,
++      "original": "            \"list the classifications\",",
++      "mutated": "            \"compare the stocks\",",
++      "note": "list operation text not distinguished (T017)",
++      "cycle": "cycle-2"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:47:manual:11",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 47,
++      "original": "    CursorError: (422, \"cursor_invalid\", _RESOURCE),",
++      "mutated": "    CursorError: (422, \"cursor_invalid\", \"universe\"),",
++      "note": "cursor error resource changed (DEC-0139)",
++      "cycle": "cycle-2"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..b434dba
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,155 @@
++{
++  "schema": 1,
++  "command": "env PYTHONPATH={workdir}/src /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-cad67f/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python -m pytest tests/unit/test_api_classifications_routes.py tests/unit/test_api_classification_models.py tests/unit/test_api_classification_error_mapping.py tests/integration/test_api_classifications.py tests/integration/test_api_classification_summary.py -q -x -p no:cacheprovider",
++  "repo_head": "1a27db8e1cc5cb6b62d5ea6ca21e11896a3b3115",
++  "tree_patch_sha256": "edfcc16850b40412ead19abad04d9cea95d3c9ace1ecbd50dbcd9370ade1443c",
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/mutants2.json",
++  "mutants_sha256": "82ab29872098bcc8af87cc8ae0d0d9b422b7c493c89d840323f4cfeebb1595a1",
++  "jobs": 4,
++  "started": "2026-11-03T23:47:56Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 9.7,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/baseline-w2.log",
++      "log_sha256": "a793c331b8939989ef6fbf888ad84ffbf231ca97b3f073cf0f01b3de15e68cc8"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 9.7,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/baseline-w3.log",
++      "log_sha256": "262be7041f0b44869269ff2d2bfb4d02c5c3492f0bc3e5d143480bfdc6f431fd"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 9.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/baseline-w0.log",
++      "log_sha256": "287679f14ebae3349631be1f9182ecd53c80f6ca5c4b05aca8eba812791a3346"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 9.8,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/baseline-w1.log",
++      "log_sha256": "9b1c545de949679ce3e801885eeef5f06df72f84ee3e32e080313d7f6e0f90b7"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/api/routes/classifications.py:72:manual:1",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 72,
++      "original": "        set_id, sort, order = UUID(payload[\"set\"]), payload[\"sort\"], payload[\"order\"]",
++      "mutated": "        set_id, sort, order = payload[\"set\"], payload[\"sort\"], payload[\"order\"]",
++      "note": "set not parsed as a UUID (DEC-0138)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_routes_classifications.py_72_manual_1.log",
++      "log_sha256": "4907af37de3a4decb0006748ee8145b10c1a266fb4552e804f65622dff91b842"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:73:manual:2",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 73,
++      "original": "        if sort not in reader.SORT_ALLOWLIST or order not in (\"asc\", \"desc\"):",
++      "mutated": "        if False:",
++      "note": "allowlist/order check removed (DEC-0138)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.2,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_routes_classifications.py_73_manual_2.log",
++      "log_sha256": "ef2656222a19d07c181c88084e1d2e4fbaaf01cff09aada241f13a0b0a9a55d7"
++    },
++    {
++      "id": "src/factorflow/api/classification_models.py:428:manual:3",
++      "operator": "manual",
++      "file": "src/factorflow/api/classification_models.py",
++      "line": 428,
++      "original": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name)) is not None",
++      "mutated": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name))",
++      "note": "a zero bound dropped by truthiness (T010, design 2.4)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_classification_models.py_428_manual_3.log",
++      "log_sha256": "f810360b9c5c6ab9c8b9aec7940abf00ad206e60a378a1fa3f8ea3aef9c2e9b3"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:56:manual:4",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 56,
++      "original": "        return f\"no universe has the id {exc.universe_id}\"",
++      "mutated": "        return \"no universe has the id\"",
++      "note": "universe id dropped from message (design 2.5, T017)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.1,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_routes_classifications.py_56_manual_4.log",
++      "log_sha256": "dde54a8413668e6ff96f1c096b464b6f00e9b7dd6cb9c2b7a721bb0d34e020c1"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:219:manual:5",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 219,
++      "original": "        request, \"read the classification set\", lambda conn: reader.get_set(conn, set_id)",
++      "mutated": "        request, \"list the classification sets\", lambda conn: reader.get_set(conn, set_id)",
++      "note": "set-detail operation text not distinguished (T019)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_routes_classifications.py_219_manual_5.log",
++      "log_sha256": "9e96cd7370f8feda39a18af98722a5d942868ad4462edf50ba3132e1c3a82519"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:182:manual:6",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 182,
++      "original": "            \"list the classifications\",",
++      "mutated": "            \"compare the stocks\",",
++      "note": "list operation text not distinguished (T017)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_routes_classifications.py_182_manual_6.log",
++      "log_sha256": "79bb796a75a49e2643a6cb959fffdcbd7a26e51c3ed0ddf4bd394f7fd5839919"
++    },
++    {
++      "id": "src/factorflow/api/routes/classifications.py:47:manual:11",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/classifications.py",
++      "line": 47,
++      "original": "    CursorError: (422, \"cursor_invalid\", _RESOURCE),",
++      "mutated": "    CursorError: (422, \"cursor_invalid\", \"universe\"),",
++      "note": "cursor error resource changed (DEC-0139)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/055fc531-a180-46f5-84c5-054667ac1a43/scratchpad/results2-logs/src_factorflow_api_routes_classifications.py_47_manual_11.log",
++      "log_sha256": "524f2eef9e98ed2e7b89e74a0acdc9372101344e645ad28ce1f0a79467a700cb"
++    }
++  ],
++  "finished": "2026-11-03T23:48:10Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-2.log
+new file mode 100644
+index 0000000..db1c9ad
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S5-evidence/red-cycle-2.log
+@@ -0,0 +1,10 @@
++RED for cycle-2, observed 2026-11-03 with the rework tests in place and the production tree at bcdff3e
++(the empty-entry skip `if symbol and symbol not in symbols` restored in classification_models.py).
++uv run pytest tests/unit/test_api_classification_error_mapping.py tests/unit/test_api_classification_models.py tests/unit/test_api_classifications_routes.py -q
++FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[AAA,,BBB]
++FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[AAA,BBB,]
++FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[,AAA,BBB]
++FAILED tests/unit/test_api_classification_models.py::test_an_empty_symbols_entry_is_refused_on_symbols[AAA, ,BBB]
++4 failed, 215 passed
++(The other rework tests - cursor rules, refusal envelope, zero bounds, request id, postgres seeding - pin behaviour the
++production code already had; they are proven by the mutants below, which the previous tests let survive.)
+diff --git a/src/factorflow/api/classification_models.py b/src/factorflow/api/classification_models.py
+index 31d335b..5c6ed68 100644
+--- a/src/factorflow/api/classification_models.py
++++ b/src/factorflow/api/classification_models.py
+@@ -400,7 +400,7 @@ class ClassificationListQuery(BaseModel):
+         for entry in entries:
+             for part in str(entry).split(","):
+                 symbol = normalise(part)
+-                if symbol and symbol not in symbols:
++                if symbol not in symbols:
+                     symbols.append(symbol)
+         if not all(is_valid(symbol) for symbol in symbols):
+             raise ValueError(f"every symbol must match {_SYMBOL_SHAPE} after upper-casing")
+diff --git a/tests/integration/api_classification_support.py b/tests/integration/api_classification_support.py
+index a2555de..1fbd857 100644
+--- a/tests/integration/api_classification_support.py
++++ b/tests/integration/api_classification_support.py
+@@ -65,16 +65,36 @@ def complete_set(
+     )
+ 
+ 
+-def later_set(conn: psycopg.Connection, state: str) -> UUID:
+-    """A newer ``building`` or ``failed`` set on its own run."""
+-    run_id = insert_run(conn, "running" if state == "building" else "failed", started_at=T1)
++def building_run(conn: psycopg.Connection, started_at: datetime) -> UUID:
++    """A ``running`` acquisition run, claimed as ``acquisition_run_claim_agrees`` requires.
++
++    At most one run may be active (``idx_acquisition_run_single_active``), so a test that needs
++    two ``building`` sets ends the first run before it calls this again.
++    """
++    row = conn.execute(
++        "INSERT INTO acquisition_run (state, history_depth_years, started_at, claimed_by, "
++        "heartbeat_at) VALUES ('running', 5, %s, 'test-worker', %s) RETURNING run_id",
++        (started_at, started_at),
++    ).fetchone()
++    conn.commit()
++    assert row is not None
++    return row[0]  # type: ignore[no-any-return]
++
++
++def later_set(conn: psycopg.Connection, state: str, *, started_at: datetime = T1) -> UUID:
++    """A newer ``building`` or ``failed`` set on its own run, started at ``started_at``."""
+     failed = state == "failed"
++    run_id = (
++        insert_run(conn, "failed", started_at=started_at)
++        if failed
++        else building_run(conn, started_at)
++    )
+     return insert_set(
+         conn,
+         run_id,
+         state,
+-        started_at=T1,
+-        ended_at=T1 if failed else None,
++        started_at=started_at,
++        ended_at=started_at if failed else None,
+         failure_reason="boom" if failed else None,
+     )
+ 
+diff --git a/tests/integration/test_api_classification_summary.py b/tests/integration/test_api_classification_summary.py
+index 5fab689..ce6eee1 100644
+--- a/tests/integration/test_api_classification_summary.py
++++ b/tests/integration/test_api_classification_summary.py
+@@ -44,27 +44,42 @@ def test_the_summary_counts_the_current_stocks(
+     assert "stocks" not in body
+ 
+ 
+-def test_a_newer_set_is_carried_as_later_and_equals_the_list_read(
++def test_an_outdated_input_makes_a_stock_not_current_and_followed_is_the_set_count(
+     app: tuple[TestClient, psycopg.Connection],
+ ) -> None:
+-    """DAC-E3-11: `set` and `later` are equal objects on the summary and the list."""
++    """T013 (1): `outdated` and `missing` count against a stock; `followed_count` is the set's
++    `active_instruments`, which need not equal the number of stored stock rows."""
++    client, conn = app
++    set_id = complete_set(conn, active_instruments=5)
++    for symbol, status in (("AAA", "present"), ("BBB", "outdated")):
++        stock = seed_scored_stock(conn, set_id, symbol, value=SCORE)
++        seed_inputs(conn, set_id, stock, statuses={"book_to_price": status})
++    body = client.get("/api/classifications/summary").json()
++    assert body["stocks_current"] == {"current_count": 1, "followed_count": 5}
++
++
++@pytest.mark.parametrize("state", ["building", "failed"])
++def test_a_newer_set_is_carried_as_later_and_equals_the_list_read(
++    app: tuple[TestClient, psycopg.Connection], state: str
++) -> None:
++    """DAC-E3-11, T013 (2): `set` and `later` are equal objects on the summary and the list.
++    Each state is its own test, so the newer set is the only candidate for `later`."""
+     client, conn = app
+     set_id = complete_set(conn)
+     seed_scored_stock(conn, set_id, "AAA", value=SCORE)
+-    for state in ("building", "failed"):
+-        later_set(conn, state)
+-        summary = client.get("/api/classifications/summary").json()
+-        listed = client.get("/api/classifications").json()
+-        assert summary["set"]["not_current"] is True
+-        assert summary["later"]["state"] == state
+-        assert summary["set"] == listed["set"]
+-        assert summary["later"] == listed["later"]
++    later_set(conn, state)
++    summary = client.get("/api/classifications/summary").json()
++    listed = client.get("/api/classifications").json()
++    assert summary["set"]["not_current"] is True
++    assert summary["later"]["state"] == state
++    assert summary["set"] == listed["set"]
++    assert summary["later"] == listed["later"]
+ 
+ 
+ def test_before_any_complete_set_the_summary_says_nothing_is_classified(
+     app: tuple[TestClient, psycopg.Connection],
+ ) -> None:
+-    """DEC-0140: the zero record, with the same keys as the list read."""
++    """DEC-0140, T013 (3): the zero record, with the same keys as the list read."""
+     client, conn = app
+     empty = client.get("/api/classifications/summary").json()
+     assert empty["never_classified"] is True
+@@ -73,3 +88,15 @@ def test_before_any_complete_set_the_summary_says_nothing_is_classified(
+     building = client.get("/api/classifications/summary").json()
+     assert building["never_classified"] is True and building["later"]["state"] == "building"
+     assert building["factors"] == client.get("/api/classifications").json()["factors"]
++
++
++def test_a_failed_first_set_leaves_the_summary_never_classified(
++    app: tuple[TestClient, psycopg.Connection],
++) -> None:
++    """T013 (3): a `failed` first set is carried as `later`, and nothing is classified."""
++    client, conn = app
++    later_set(conn, "failed")
++    body = client.get("/api/classifications/summary").json()
++    assert body["never_classified"] is True and body["set"] is None
++    assert body["later"]["state"] == "failed" and body["later"]["failure_reason"] == "boom"
++    assert body["later"] == client.get("/api/classifications").json()["later"]
+diff --git a/tests/integration/test_api_classifications.py b/tests/integration/test_api_classifications.py
+index 4f34546..4c963fc 100644
+--- a/tests/integration/test_api_classifications.py
++++ b/tests/integration/test_api_classifications.py
+@@ -25,8 +25,6 @@ from tests.integration.api_classification_support import (
+ from tests.integration.reader_seed import (
+     insert_classification,
+     insert_instrument,
+-    insert_run,
+-    insert_set,
+     insert_universe,
+     retire_universe,
+     seed_inputs,
+@@ -60,9 +58,14 @@ def test_the_list_carries_the_set_the_factors_and_string_scores(app: App) -> Non
+     stock = body["stocks"][0]
+     assert (stock["symbol"], stock["name"]) == ("AAA", "Alpha Inc")
+     assert stock["factors"]["value"]["score"] == "1.250000"
++    block = body["set"]
++    assert block["run_started_at"] == "2026-10-15T21:00:00Z"
++    assert block["ended_at"] == "2026-10-15T21:05:00Z" and block["active_instruments"] == 3
++    assert stock["lifecycle"] == "active" and stock["factors"]["value"]["percentile"] == "87.500000"
+     later_set(conn, "building")
+     newer = client.get("/api/classifications").json()
+     assert newer["set"]["not_current"] is True and newer["later"]["state"] == "building"
++    assert newer["later"]["run_started_at"] == "2026-10-16T14:30:00Z"
+ 
+ 
+ def test_the_match_count_covers_the_whole_set_on_every_page(app: App) -> None:
+@@ -99,6 +102,26 @@ def test_thresholds_and_hide_incomplete_follow_the_documented_rule(app: App) ->
+     assert {"BBB", "CCC"} <= set(_symbols(bound))
+ 
+ 
++def test_filters_change_the_match_count_identically_on_every_page(app: App) -> None:
++    """Design section 7, "Match count is over the whole set": the filtered total is on each page."""
++    client, conn = app
++    set_id = complete_set(conn, active_instruments=6)
++    for index in range(4):
++        seed_scored_stock(conn, set_id, f"H{index}", value=SCORE)
++    seed_scored_stock(conn, set_id, "LOW1", value=LOW)
++    seed_scored_stock(conn, set_id, "LOW2", value=LOW)
++    filters: dict[str, str] = {"value_percentile_min": "50"}
++    for extra in ({}, {"hide_incomplete": "true"}, {"symbol": "h"}):
++        params = {**filters, **extra, "limit": 2}
++        first = client.get("/api/classifications", params=params).json()
++        second = client.get(
++            "/api/classifications", params={**params, "cursor": first["next_cursor"]}
++        ).json()
++        assert first["match_count"] == second["match_count"] == 4, extra
++    zero = client.get("/api/classifications", params={"value_score_min": "0"}).json()
++    assert _symbols(zero) == ["H0", "H1", "H2", "H3"] and zero["match_count"] == 4
++
++
+ def test_nothing_classified_says_so(app: App) -> None:
+     client, conn = app
+     empty = client.get("/api/classifications").json()
+@@ -151,6 +174,10 @@ def test_compare_reports_unknown_symbols_and_enforces_its_bounds(app: App) -> No
+     seed_scored_stock(conn, set_id, "BBB", value=SCORE)
+     body = client.get("/api/classifications", params={"symbols": "AAA,BBB,NOPE"}).json()
+     assert _symbols(body) == ["AAA", "BBB"] and body["unknown_symbols"] == ["NOPE"]
++    seed_scored_stock(conn, set_id, "OLD", value=SCORE, lifecycle="retired")
++    kept = client.get("/api/classifications", params={"symbols": "AAA,OLD"}).json()
++    assert _symbols(kept) == ["AAA", "OLD"] and kept["unknown_symbols"] == []
++    assert kept["stocks"][1]["lifecycle"] == "retired"
+     for symbols in ("AAA", "A1,A2,A3,A4,A5,A6,A7"):
+         response = client.get("/api/classifications", params={"symbols": symbols})
+         assert response.status_code == 422 and "`symbols`" in response.json()["error"]["message"]
+@@ -173,6 +200,40 @@ def test_the_evidence_shows_inputs_with_their_dates_and_memberships(app: App) ->
+     assert set(body["factors"]) == {"value", "growth", "momentum"}
+ 
+ 
++def test_the_evidence_carries_restated_and_detail_and_omits_a_retired_universe(app: App) -> None:
++    client, conn = app
++    set_id = complete_set(conn)
++    stock = seed_scored_stock(conn, set_id, "AAA", value=SCORE, restated=["value"])
++    seed_inputs(
++        conn, set_id, stock, restated=["book_to_price"], statuses={"earnings_yield": "missing"}
++    )
++    gone = insert_universe(conn, "Gone", [stock])
++    insert_universe(conn, "Live", [stock])
++    retire_universe(conn, gone)
++    body = client.get("/api/classifications/stocks/AAA").json()
++    inputs = {row["input_name"]: row for row in body["inputs"]}
++    assert inputs["book_to_price"]["restated_possible"] is True
++    assert inputs["earnings_yield"]["restated_possible"] is False
++    assert (
++        inputs["earnings_yield"]["status"] == "missing" and inputs["earnings_yield"]["detail"] == {}
++    )
++    assert inputs["fcf_yield"]["value"] == "1.0000000000"
++    assert body["factors"]["value"]["restated_possible"] is True
++    assert [m["name"] for m in body["memberships"]] == ["Live"]
++
++
++def test_a_known_stock_before_any_set_has_no_set_factors_or_inputs(app: App) -> None:
++    """DEC-0140, design section 7 "Evidence with memberships": 200 with the empty shape."""
++    client, conn = app
++    stock = insert_instrument(conn, "AAA")
++    insert_universe(conn, "Mine", [stock])
++    response = client.get("/api/classifications/stocks/AAA")
++    assert response.status_code == 200
++    body = response.json()
++    assert body["set"] is None and body["factors"] == {} and body["inputs"] == []
++    assert [m["name"] for m in body["memberships"]] == ["Mine"]
++
++
+ def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app: App) -> None:
+     client, conn = app
+     first = complete_set(conn, started_at=T0.replace(day=10))
+@@ -189,14 +250,40 @@ def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app
+     assert client.get("/api/classifications/stocks/NOPE/history").status_code == 404
+ 
+ 
++def test_the_history_carries_the_stored_restated_flag_and_a_new_stock_has_none(app: App) -> None:
++    client, conn = app
++    earlier = complete_set(conn, started_at=T0.replace(day=10))
++    complete_set(conn)
++    stock = insert_instrument(conn, "AAA")
++    for factor in ("value", "growth", "momentum"):
++        insert_classification(
++            conn,
++            earlier,
++            stock,
++            factor,
++            score=SCORE[0],
++            percentile=SCORE[1],
++            restated_possible=factor == "growth",
++        )
++    insert_instrument(conn, "NEW")
++    cells = client.get("/api/classifications/stocks/AAA/history").json()["sets"][0]["factors"]
++    assert [cells[f]["restated_possible"] for f in ("value", "growth", "momentum")] == [
++        False,
++        True,
++        False,
++    ]
++    fresh = client.get("/api/classifications/stocks/NEW/history")
++    assert fresh.status_code == 200
++    assert fresh.json() == {"symbol": "NEW", "sets": [], "next_cursor": None}
++
++
+ def test_the_sets_list_and_detail_agree(app: App) -> None:
+     client, conn = app
+     done = complete_set(conn)
+     later_set(conn, "failed")
+-    run = insert_run(conn, "running", started_at=T1.replace(day=20))
+-    insert_set(conn, run, "building", started_at=T1.replace(day=20))
++    later_set(conn, "building", started_at=T1.replace(day=20))
+     body = client.get("/api/classifications/sets").json()
+-    assert [s["state"] for s in body["sets"]][-1] == "complete"
++    assert [s["state"] for s in body["sets"]] == ["building", "failed", "complete"]
+     assert all("run_started_at" in s for s in body["sets"])
+     failed = next(s for s in body["sets"] if s["state"] == "failed")
+     assert failed["failure_reason"] == "boom" and failed["ended_at"] is not None
+@@ -214,6 +301,18 @@ def test_page_bounds(app: App) -> None:
+         assert client.get(path, params={"limit": 500}).status_code == 200
+         assert client.get(path, params={"limit": 501}).status_code == 422
+     assert client.get("/api/classifications/stocks/AAA/history?limit=501").status_code == 422
++    insert_instrument(conn, "AAA")
++    assert client.get("/api/classifications/stocks/AAA/history?limit=500").status_code == 200
++
++
++def test_the_default_page_size_is_fifty(app: App) -> None:
++    client, conn = app
++    set_id = complete_set(conn, active_instruments=51)
++    for index in range(51):
++        seed_scored_stock(conn, set_id, f"S{index:02d}", value=SCORE)
++    body = client.get("/api/classifications").json()
++    assert len(body["stocks"]) == 50 and body["match_count"] == 51
++    assert body["next_cursor"] is not None
+ 
+ 
+ def _forged(cursor: str) -> str:
+diff --git a/tests/unit/test_api_classification_error_mapping.py b/tests/unit/test_api_classification_error_mapping.py
+index 80d856b..1e898cf 100644
+--- a/tests/unit/test_api_classification_error_mapping.py
++++ b/tests/unit/test_api_classification_error_mapping.py
+@@ -15,6 +15,7 @@ from decimal import Decimal
+ from typing import Any
+ from uuid import UUID
+ 
++import psycopg
+ import pytest
+ from fastapi.testclient import TestClient
+ 
+@@ -325,14 +326,20 @@ def _reader_raises(monkeypatch: pytest.MonkeyPatch, name: str, exc: Exception) -
+     monkeypatch.setattr(reader, name, _raising(exc))
+ 
+ 
+-def _forge(cursor: str, **changes: Any) -> str:
+-    """Change fields of a reader-issued cursor and re-encode it the reader's way."""
++def _forge(cursor: str, *, resign: bool = True, **changes: Any) -> str:
++    """Change fields of a reader-issued cursor and re-encode it the reader's way.
++
++    The checksum is recomputed unless ``resign`` is false, so a changed field is judged by the
++    rule it breaks and not by the checksum the change leaves stale (IR-004).
++    """
+     payload = json.loads(base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4)))
+     for key, value in changes.items():
+         if value is None:
+             payload.pop(key, None)
+         else:
+             payload[key] = value
++    if resign and "chk" in payload:
++        payload["chk"] = reader._cursor_check(payload)
+     text = json.dumps(payload, separators=(",", ":"))
+     return base64.urlsafe_b64encode(text.encode()).decode().rstrip("=")
+ 
+@@ -388,6 +395,42 @@ def test_a_missing_universe_or_set_is_a_404_in_its_own_resource(
+     assert str(SET_ID) in error["message"]
+ 
+ 
++def test_a_missing_universe_names_its_id_and_the_list_read(
++    reads: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """Design 2.5, STD-UI-19: the message names the operation and the owner-supplied value."""
++    _reader_raises(monkeypatch, "list_classifications", reader.UniverseNotFound(OTHER_SET_ID))
++    message = reads.get("/api/classifications").json()["error"]["message"]
++    assert message == f"Could not list the classifications: no universe has the id {OTHER_SET_ID}."
++
++
++def test_each_read_that_can_refuse_names_its_own_operation(
++    reads: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """T019: the operation text tells the list, compare, set detail and set list apart."""
++    cases = (
++        ("compare", "/api/classifications?symbols=AAA,BBB", "compare the stocks"),
++        ("get_set", f"/api/classifications/sets/{SET_ID}", "read the classification set"),
++        ("list_sets", "/api/classifications/sets", "list the classification sets"),
++    )
++    for name, path, operation in cases:
++        _reader_raises(monkeypatch, name, CursorError("x"))
++        message = reads.get(path).json()["error"]["message"]
++        assert message.startswith(f"Could not {operation}:"), (name, message)
++
++
++@pytest.mark.parametrize("cursor", ["!!", "STALE"])
++def test_every_cursor_refusal_is_in_the_classification_resource(
++    reads: TestClient, monkeypatch: pytest.MonkeyPatch, cursor: str
++) -> None:
++    """DEC-0139: invalid and stale cursors alike carry resource `classification`."""
++    if cursor == "STALE":
++        cursor = reader.encode_cursor(SET_ID, "symbol", "asc", "AAA", False, "AAA")
++    _reader_raises(monkeypatch, "list_classifications", CursorError(cursor))
++    error = reads.get("/api/classifications", params={"cursor": cursor}).json()["error"]
++    assert error["resource"] == "classification"
++
++
+ def _list_cursor(sort: str = "symbol") -> str:
+     if sort == "symbol":
+         return reader.encode_cursor(SET_ID, "symbol", "asc", "AAA", False, "AAA")
+@@ -401,6 +444,8 @@ INVALID = {
+     "bad key": _forge(_list_cursor("value_score"), key="abc"),
+     "unknown sort": _forge(_list_cursor("value_score"), sort="bogus"),
+     "unknown order": _forge(_list_cursor("value_score"), order="sideways"),
++    "set not a UUID": _forge(_list_cursor("value_score"), set="not-a-uuid"),
++    "altered checksum": _forge(_list_cursor("value_score"), resign=False, sym="ZZZ"),
+ }
+ STALE = {
+     "symbol sort": _list_cursor(),
+@@ -410,7 +455,7 @@ STALE = {
+ }
+ 
+ 
+-# Implements TC-COMP-148
++# Implements T009 (DEC-0138 rows)
+ @pytest.mark.parametrize("cursor", INVALID.values(), ids=INVALID.keys())
+ def test_a_malformed_list_cursor_is_cursor_invalid(
+     reads: TestClient, monkeypatch: pytest.MonkeyPatch, cursor: str
+@@ -457,7 +502,12 @@ def test_history_and_sets_cursors_are_always_invalid(
+ 
+ @pytest.mark.parametrize("name", list(CLASSIFICATION_PATHS))
+ @pytest.mark.parametrize(
+-    "exc", [RuntimeError("password=hunter2 secret path /tmp/x"), ValueError(SENTINEL)]
++    "exc",
++    [
++        RuntimeError("password=hunter2 secret path /tmp/x"),
++        ValueError(SENTINEL),
++        psycopg.OperationalError("connection to server at 10.0.0.1 failed"),
++    ],
+ )
+ def test_an_unmapped_exception_is_the_bare_internal_error(
+     reads: TestClient, monkeypatch: pytest.MonkeyPatch, name: str, exc: Exception
+diff --git a/tests/unit/test_api_classification_models.py b/tests/unit/test_api_classification_models.py
+index 9de7801..e2e6e3e 100644
+--- a/tests/unit/test_api_classification_models.py
++++ b/tests/unit/test_api_classification_models.py
+@@ -537,6 +537,14 @@ def test_symbols_split_strip_upper_case_and_de_duplicate_in_first_seen_order() -
+     assert exc.value.errors()[0]["loc"] == ("symbols",)
+ 
+ 
++@pytest.mark.parametrize("bad", ["AAA,,BBB", "AAA,BBB,", ",AAA,BBB", "AAA, ,BBB"])
++def test_an_empty_symbols_entry_is_refused_on_symbols(bad: str) -> None:
++    """T016 (IR-007): each split entry is shape-checked, so an empty one is refused, not dropped."""
++    with pytest.raises(ValidationError) as exc:
++        _query(symbols=bad)
++    assert exc.value.errors()[0]["loc"] == ("symbols",)
++
++
+ def test_an_unknown_field_is_refused() -> None:
+     """Every request model forbids unknown keys."""
+     with pytest.raises(ValidationError):
+@@ -571,6 +579,12 @@ def test_to_filters_carries_only_the_supplied_bounds() -> None:
+     )
+ 
+ 
++def test_to_filters_keeps_a_zero_valued_bound() -> None:
++    """T010 (IR-006): `0` is a supplied bound ("score at least 0"), not an absent one."""
++    bounds = _query(value_score_min="0", growth_percentile_max="0").to_filters().thresholds.bounds
++    assert bounds == {"value_score_min": Decimal("0"), "growth_percentile_max": Decimal("0")}
++
++
+ def test_compare_conflicts_names_what_the_request_set_besides_symbols_and_limit() -> None:
+     """DEC-0141: `model_fields_set` is what the request named, so defaults never conflict."""
+     assert _query(symbols="AAA,BBB", limit=10).compare_conflicts() == []
+diff --git a/tests/unit/test_api_classifications_routes.py b/tests/unit/test_api_classifications_routes.py
+index 8803754..9fd99c8 100644
+--- a/tests/unit/test_api_classifications_routes.py
++++ b/tests/unit/test_api_classifications_routes.py
+@@ -362,12 +362,19 @@ def test_a_foreign_host_is_refused_before_the_reader(client: TestClient, path: s
+ 
+ 
+ # Implements TC-COMP-126
++@pytest.mark.parametrize(
++    ("name", "path"),
++    [
++        ("list_classifications", "/api/classifications?cursor=x"),
++        ("summary", "/api/classifications/summary"),
++    ],
++)
+ def test_the_request_id_wraps_an_error_from_the_router(
+-    client: TestClient, monkeypatch: pytest.MonkeyPatch
++    client: TestClient, monkeypatch: pytest.MonkeyPatch, name: str, path: str
+ ) -> None:
+-    """DAC-E3-S5-6: the envelope's id is the response header's id."""
+-    _double(monkeypatch, "list_classifications", raises=CursorError("x"))
+-    response = client.get("/api/classifications?cursor=x")
++    """DAC-E3-S5-6 (T008 b): the envelope's id is the response header's id, list and summary."""
++    _double(monkeypatch, name, raises=CursorError("x") if name != "summary" else RuntimeError("x"))
++    response = client.get(path)
+     assert response.headers["X-Request-Id"]
+     assert response.json()["error"]["request_id"] == response.headers["X-Request-Id"]
+ 

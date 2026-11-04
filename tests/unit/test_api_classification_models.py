@@ -14,9 +14,11 @@ import pytest
 from pydantic import ValidationError
 
 from factorflow.api import classification_bounds
-from factorflow.api.bounds import MAX_SYMBOLS_PER_REQUEST
+from factorflow.api.bounds import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MAX_SYMBOLS_PER_REQUEST
+from factorflow.api.classification_bounds import MAX_COMPARE_SYMBOLS, MIN_COMPARE_SYMBOLS
 from factorflow.api.classification_models import (
     AddMembersRequest,
+    ClassificationListQuery,
     CreateUniverseRequest,
     FactorCellResponse,
     FactorsResponse,
@@ -24,6 +26,7 @@ from factorflow.api.classification_models import (
     RenameUniverseRequest,
     SetBlock,
     Thresholds,
+    _cell_response,
 )
 from factorflow.classification import reader
 from factorflow.classification.constants import FACTORS
@@ -385,3 +388,205 @@ def test_the_set_block_copies_every_current_set_field_but_the_factor_summaries()
     block = SetBlock.from_reader(current)
     expected = {f.name: getattr(current, f.name) for f in fields(current) if f.name != "factors"}
     assert block.model_dump() == expected
+
+
+# --- classification list query and cell serialisation (CAP-002-E3-S5; T004, T006, T010) --------
+
+
+def _query(**params: Any) -> ClassificationListQuery:
+    return ClassificationListQuery.model_validate(params)
+
+
+# Implements TC-COMP-125
+@pytest.mark.parametrize("count", [0, 1, MAX_COMPARE_SYMBOLS + 1])
+def test_compare_outside_the_bounds_is_refused_on_symbols(count: int) -> None:
+    """DAC-E3-S5-2, DAC-E3-7: the error's location is `symbols`."""
+    with pytest.raises(ValidationError) as exc:
+        _query(symbols=_symbols(count))
+    assert exc.value.errors()[0]["loc"] == ("symbols",)
+
+
+# Implements TC-COMP-125
+@pytest.mark.parametrize("count", [MIN_COMPARE_SYMBOLS, MAX_COMPARE_SYMBOLS])
+def test_compare_at_the_bounds_is_accepted(count: int) -> None:
+    """DAC-E3-S5-2: both ends of the range are inside it."""
+    assert _query(symbols=_symbols(count)).symbols == _symbols(count)
+
+
+# Implements TC-COMP-125
+def test_the_compare_count_is_taken_after_upper_casing_and_de_duplication() -> None:
+    """DEC-0070: `AAA` and `aaa` are one symbol, so two of them are one, which is too few."""
+    with pytest.raises(ValidationError) as exc:
+        _query(symbols=["AAA", "aaa"])
+    assert exc.value.errors()[0]["loc"] == ("symbols",)
+
+
+# Implements TC-COMP-070
+def test_a_classified_cell_keeps_its_stored_precision_as_a_string() -> None:
+    """DAC-E3-S5-4: trailing zeros stay; the key `restated_possible` is present."""
+    cell = reader.FactorCell(
+        "classified", Decimal("12.345600"), Decimal("87.500000"), None, None, None, True
+    )
+    response = _cell_response(cell)
+    assert isinstance(response, FactorCellResponse)
+    assert response.model_dump(mode="json") == {
+        "status": "classified",
+        "score": "12.345600",
+        "percentile": "87.500000",
+        "reason_code": None,
+        "reason_input": None,
+        "reason_detail": None,
+        "restated_possible": True,
+    }
+
+
+# Implements TC-COMP-070
+def test_a_not_classified_cell_has_null_scores_and_still_carries_restated_possible() -> None:
+    """DAC-E3-S5-4: the key is present, not omitted, when false."""
+    cell = reader.FactorCell(
+        "not_classified", None, None, "input_missing", "book_to_price", "no filing", False
+    )
+    dumped = _cell_response(cell).model_dump(mode="json")
+    assert dumped["score"] is None and dumped["percentile"] is None
+    assert dumped["restated_possible"] is False
+    assert dumped["reason_code"] == "input_missing"
+
+
+# Implements TC-COMP-070
+def test_a_negative_score_keeps_its_sign_and_scale() -> None:
+    """DAC-E3-S5-4."""
+    cell = reader.FactorCell(
+        "classified", Decimal("-0.500000"), Decimal("1"), None, None, None, False
+    )
+    assert _cell_response(cell).model_dump(mode="json")["score"] == "-0.500000"
+
+
+def test_the_list_query_has_the_documented_defaults() -> None:
+    """Design 2.4: symbol order, ascending, the default page, nothing filtered."""
+    query = _query()
+    assert (query.sort, query.order, query.limit) == ("symbol", "asc", DEFAULT_PAGE_SIZE)
+    assert query.hide_incomplete is False
+    assert query.model_fields_set == set()
+    assert query.universe_id is query.symbols is query.symbol is query.cursor is None
+    assert all(getattr(query, name) is None for name in BOUND_NAMES)
+
+
+def test_sort_is_exactly_the_reader_allowlist() -> None:
+    """Design 2.4: seven keys, nothing else, however it is spelt."""
+    for key in reader.SORT_ALLOWLIST:
+        assert _query(sort=key).sort == key
+    assert len(reader.SORT_ALLOWLIST) == 7
+    for bad in ("score", "VALUE_SCORE", "value_score;--"):
+        with pytest.raises(ValidationError) as exc:
+            _query(sort=bad)
+        assert exc.value.errors()[0]["loc"] == ("sort",)
+
+
+def test_order_and_limit_are_bounded() -> None:
+    """Design 2.4: `asc` or `desc`; 1 to `MAX_PAGE_SIZE`."""
+    assert _query(order="desc").order == "desc"
+    for params in ({"order": "up"}, {"limit": 0}, {"limit": MAX_PAGE_SIZE + 1}):
+        with pytest.raises(ValidationError):
+            _query(**params)
+    assert _query(limit=1).limit == 1
+    assert _query(limit=MAX_PAGE_SIZE).limit == MAX_PAGE_SIZE
+
+
+@pytest.mark.parametrize("name", [n for n in BOUND_NAMES if "percentile" in n])
+def test_a_percentile_bound_is_0_to_100_and_finite(name: str) -> None:
+    """DEC-0141: 0 and 100 are accepted; -0.1, 100.1 and NaN are not."""
+    assert getattr(_query(**{name: "0"}), name) == 0
+    assert getattr(_query(**{name: "100"}), name) == 100
+    for bad in ("-0.1", "100.1", "NaN"):
+        with pytest.raises(ValidationError) as exc:
+            _query(**{name: bad})
+        assert exc.value.errors()[0]["loc"] == (name,)
+
+
+@pytest.mark.parametrize("name", [n for n in BOUND_NAMES if "score" in n])
+def test_a_score_bound_is_finite_and_may_be_negative(name: str) -> None:
+    """Design 2.4: a z-score can be below zero; NaN and infinity are refused."""
+    assert getattr(_query(**{name: "-1.5"}), name) == Decimal("-1.5")
+    for bad in ("NaN", "Infinity"):
+        with pytest.raises(ValidationError):
+            _query(**{name: bad})
+
+
+def test_a_bound_given_as_a_string_is_a_decimal_not_a_float() -> None:
+    """The stored scale is never touched by a float round trip."""
+    assert _query(value_score_min="1.5").value_score_min == Decimal("1.5")
+
+
+def test_the_list_query_symbol_prefix_is_upper_cased_and_shape_checked() -> None:
+    """Design 2.4: `^[A-Z][A-Z0-9.-]{0,15}$` after upper-casing."""
+    assert _query(symbol="aa").symbol == "AA"
+    assert _query(symbol="A" * 16).symbol == "A" * 16
+    for bad in ("", "1A", "A%", "A B", "A" * 17):
+        with pytest.raises(ValidationError) as exc:
+            _query(symbol=bad)
+        assert exc.value.errors()[0]["loc"] == ("symbol",)
+
+
+def test_symbols_split_strip_upper_case_and_de_duplicate_in_first_seen_order() -> None:
+    """The comma form and the list form give one list."""
+    assert _query(symbols="aaa, BBB").symbols == ["AAA", "BBB"]
+    assert _query(symbols=["AAA", "BBB"]).symbols == ["AAA", "BBB"]
+    assert _query(symbols=["BBB,AAA", "bbb", "CCC"]).symbols == ["BBB", "AAA", "CCC"]
+    with pytest.raises(ValidationError) as exc:
+        _query(symbols="AAA,1BB")
+    assert exc.value.errors()[0]["loc"] == ("symbols",)
+
+
+@pytest.mark.parametrize("bad", ["AAA,,BBB", "AAA,BBB,", ",AAA,BBB", "AAA, ,BBB"])
+def test_an_empty_symbols_entry_is_refused_on_symbols(bad: str) -> None:
+    """T016 (IR-007): each split entry is shape-checked, so an empty one is refused, not dropped."""
+    with pytest.raises(ValidationError) as exc:
+        _query(symbols=bad)
+    assert exc.value.errors()[0]["loc"] == ("symbols",)
+
+
+def test_an_unknown_field_is_refused() -> None:
+    """Every request model forbids unknown keys."""
+    with pytest.raises(ValidationError):
+        _query(foo=1)
+
+
+def test_to_filters_carries_only_the_supplied_bounds() -> None:
+    """The reader's `ListFilters`, with `Decimal` bounds and the paging fields as given."""
+    uid = uuid4()
+    filters = _query(
+        universe_id=str(uid),
+        sort="growth_score",
+        order="desc",
+        value_percentile_min="80",
+        momentum_score_max="-1",
+        hide_incomplete="true",
+        symbol="aa",
+        limit=25,
+        cursor="c",
+    ).to_filters()
+    assert filters == reader.ListFilters(
+        universe_id=uid,
+        sort="growth_score",
+        order="desc",
+        thresholds=reader.Thresholds(
+            bounds={"value_percentile_min": Decimal("80"), "momentum_score_max": Decimal("-1")},
+            hide_incomplete=True,
+            symbol="AA",
+        ),
+        limit=25,
+        cursor="c",
+    )
+
+
+def test_to_filters_keeps_a_zero_valued_bound() -> None:
+    """T010 (IR-006): `0` is a supplied bound ("score at least 0"), not an absent one."""
+    bounds = _query(value_score_min="0", growth_percentile_max="0").to_filters().thresholds.bounds
+    assert bounds == {"value_score_min": Decimal("0"), "growth_percentile_max": Decimal("0")}
+
+
+def test_compare_conflicts_names_what_the_request_set_besides_symbols_and_limit() -> None:
+    """DEC-0141: `model_fields_set` is what the request named, so defaults never conflict."""
+    assert _query(symbols="AAA,BBB", limit=10).compare_conflicts() == []
+    conflicts = _query(symbols="AAA,BBB", sort="symbol", value_score_min="1").compare_conflicts()
+    assert sorted(conflicts) == ["sort", "value_score_min"]

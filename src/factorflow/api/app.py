@@ -25,7 +25,15 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import FileResponse
 
 from factorflow.api.errors import error_response, internal_error_handler
-from factorflow.api.routes import coverage, health, instruments, runs, settings, universes
+from factorflow.api.routes import (
+    classifications,
+    coverage,
+    health,
+    instruments,
+    runs,
+    settings,
+    universes,
+)
 from factorflow.config.settings import (
     ApiSettings,
     DatabaseSettings,
@@ -460,6 +468,7 @@ def create_app() -> FastAPI:
     app.include_router(runs.router)
     app.include_router(coverage.router)
     app.include_router(universes.router)
+    app.include_router(classifications.router)
 
     _add_host_origin_middleware(app)
     _add_request_id_middleware(app)

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "repo_head": "c13ba10d1442eac6654057d8d6d117121f04ceaf",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/classification_models.py:435:manual:1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 435,
+      "original": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=self.symbol",
+      "mutated": "                bounds=bounds, hide_incomplete=False, symbol=self.symbol",
+      "note": "review v2 probe 435:manual:41: hide_incomplete never forwarded (IR-001 case 2)",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:435:manual:2",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 435,
+      "original": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=self.symbol",
+      "mutated": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=None",
+      "note": "review v2 probe 435:manual:42: symbol prefix never forwarded (IR-001 case 2)",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:76:manual:3",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 76,
+      "original": "    except (ValueError, KeyError, TypeError, AttributeError, CursorError):",
+      "mutated": "    except (ValueError, KeyError, TypeError, CursorError):",
+      "note": "review v2 76:manual:21 (IR-002)",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:76:manual:4",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 76,
+      "original": "    except (ValueError, KeyError, TypeError, AttributeError, CursorError):",
+      "mutated": "    except (ValueError, KeyError, AttributeError, CursorError):",
+      "note": "review v2 76:manual:22 (IR-002)",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:76:manual:5",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 76,
+      "original": "    except (ValueError, KeyError, TypeError, AttributeError, CursorError):",
+      "mutated": "    except (ValueError, TypeError, AttributeError, CursorError):",
+      "note": "review v2 76:manual:23 (IR-002)",
+      "cycle": "cycle-3"
+    }
+  ]
+}

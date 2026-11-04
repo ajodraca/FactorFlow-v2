@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "repo_head": "1a27db8e1cc5cb6b62d5ea6ca21e11896a3b3115",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/routes/classifications.py:72:manual:1",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 72,
+      "original": "        set_id, sort, order = UUID(payload[\"set\"]), payload[\"sort\"], payload[\"order\"]",
+      "mutated": "        set_id, sort, order = payload[\"set\"], payload[\"sort\"], payload[\"order\"]",
+      "note": "set not parsed as a UUID (DEC-0138)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:73:manual:2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 73,
+      "original": "        if sort not in reader.SORT_ALLOWLIST or order not in (\"asc\", \"desc\"):",
+      "mutated": "        if False:",
+      "note": "allowlist/order check removed (DEC-0138)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:428:manual:3",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 428,
+      "original": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name)) is not None",
+      "mutated": "            name: value for name in _BOUND_NAMES if (value := getattr(self, name))",
+      "note": "a zero bound dropped by truthiness (T010, design 2.4)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:56:manual:4",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 56,
+      "original": "        return f\"no universe has the id {exc.universe_id}\"",
+      "mutated": "        return \"no universe has the id\"",
+      "note": "universe id dropped from message (design 2.5, T017)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:219:manual:5",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 219,
+      "original": "        request, \"read the classification set\", lambda conn: reader.get_set(conn, set_id)",
+      "mutated": "        request, \"list the classification sets\", lambda conn: reader.get_set(conn, set_id)",
+      "note": "set-detail operation text not distinguished (T019)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:182:manual:6",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 182,
+      "original": "            \"list the classifications\",",
+      "mutated": "            \"compare the stocks\",",
+      "note": "list operation text not distinguished (T017)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:47:manual:11",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 47,
+      "original": "    CursorError: (422, \"cursor_invalid\", _RESOURCE),",
+      "mutated": "    CursorError: (422, \"cursor_invalid\", \"universe\"),",
+      "note": "cursor error resource changed (DEC-0139)",
+      "cycle": "cycle-2"
+    }
+  ]
+}
