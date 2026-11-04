@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-cad67f/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/research/stocks/factor-card.test.tsx (0 test)
+ ❯ src/screens/research/copy.test.ts (378 tests | 1 failed) 27ms
+   × copy.ts completeness and keying > (d) renders the templated design messages for the design's example arguments 3ms
+     → EVIDENCE.fundamentalOutdatedReason is not a function
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/stocks/factor-card.test.tsx [ src/screens/research/stocks/factor-card.test.tsx ]
+Error: Failed to resolve import "./factor-card" from "web/src/screens/research/stocks/factor-card.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-cad67f/repos/factorflow-v2/FactorFlow-v2/web/src/screens/research/stocks/factor-card.test.tsx:6:23
+  4  |  import { describe, expect, it } from "vitest";
+  5  |  import { CELL, EVIDENCE, INPUT_STATUS, SHELL_ROUTES } from "../copy";
+  6  |  import FactorCard from "./factor-card";
+     |                          ^
+  7  |  function cell(overrides = {}) {
+  8  |    return {
+ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/research/copy.test.ts > copy.ts completeness and keying > (d) renders the templated design messages for the design's example arguments
+TypeError: EVIDENCE.fundamentalOutdatedReason is not a function
+ ❯ src/screens/research/copy.test.ts:520:26
+    518|     expect(copy.EVIDENCE.producedColumn).toBe("Produced");
+    519|     // CAP-002-E5-S3 T002: the three-part statements' reasons and the …
+    520|     expect(copy.EVIDENCE.fundamentalOutdatedReason("2026-10-15")).toBe(
+       |                          ^
+    521|       "its latest statement covers a quarter that ended more than 6 mo…
+    522|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed (2)
+      Tests  1 failed | 377 passed (378)
+   Start at  02:46:00
+   Duration  760ms (transform 63ms, setup 112ms, collect 60ms, tests 27ms, environment 595ms, prepare 300ms)
+

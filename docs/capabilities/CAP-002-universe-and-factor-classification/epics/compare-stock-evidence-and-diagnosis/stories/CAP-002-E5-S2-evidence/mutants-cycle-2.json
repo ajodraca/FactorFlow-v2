@@ -1,0 +1,673 @@
+{
+ "schema": 1,
+ "repo_head": "543198fb17b3dc5f9905e113eb76eeb9a0760ef1",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:11:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 11,
+   "original": "const PAGE_SIZE = 50;",
+   "mutated": "const PAGE_SIZE = 51;"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:36:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 36,
+   "original": "        operation: error.operation,",
+   "mutated": "        operation: nil,"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:37:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 37,
+   "original": "        resource: error.resource,",
+   "mutated": "        resource: nil,"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:38:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 38,
+   "original": "        code: error.code,",
+   "mutated": "        code: nil,"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:48:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 48,
+   "original": "    (error.code === \"cursor_stale\" || error.code === \"cursor_invalid\")",
+   "mutated": "    (error.code === \"cursor_stale\" && error.code === \"cursor_invalid\")"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:69:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 69,
+   "original": "  return drawsMark(row, \"value\") || drawsMark(row, \"growth\");",
+   "mutated": "  return drawsMark(row, \"value\") && drawsMark(row, \"growth\");"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:131:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 131,
+   "original": "  const [pagePending, setPagePending] = useState(false);",
+   "mutated": "  const [pagePending, setPagePending] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:133:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 133,
+   "original": "  const [unreachable, setUnreachable] = useState(false);",
+   "mutated": "  const [unreachable, setUnreachable] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:135:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 135,
+   "original": "  const [focusTable, setFocusTable] = useState(false);",
+   "mutated": "  const [focusTable, setFocusTable] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:139:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 139,
+   "original": "  const [attempt, setAttempt] = useState(0);",
+   "mutated": "  const [attempt, setAttempt] = useState(1);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:141:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 141,
+   "original": "  const generation = useRef(0);",
+   "mutated": "  const generation = useRef(1);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:145:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 145,
+   "original": "      generation.current += 1;",
+   "mutated": "      generation.current += 2;"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:152:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 152,
+   "original": "    generation.current += 1;",
+   "mutated": "    generation.current += 2;"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:155:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 155,
+   "original": "    setPagePending(false);",
+   "mutated": "    setPagePending(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:157:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 157,
+   "original": "    setUnreachable(false);",
+   "mutated": "    setUnreachable(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:169:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 169,
+   "original": "          setUnreachable(true);",
+   "mutated": "          setUnreachable(false);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:179:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 179,
+   "original": "      setPagePending(true);",
+   "mutated": "      setPagePending(false);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:186:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 186,
+   "original": "          if (page.nextCursor === null && document.activeElement === moreRef.current) {",
+   "mutated": "          if (page.nextCursor === null || document.activeElement === moreRef.current) {"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:187:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 187,
+   "original": "            setFocusTable(true);",
+   "mutated": "            setFocusTable(false);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:194:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 194,
+   "original": "                  nextCursor: page.nextCursor,",
+   "mutated": "                  nextCursor: nil,"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:198:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 198,
+   "original": "          setPagePending(false);",
+   "mutated": "          setPagePending(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:204:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 204,
+   "original": "          setPagePending(false);",
+   "mutated": "          setPagePending(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:206:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 206,
+   "original": "            setUnreachable(true);",
+   "mutated": "            setUnreachable(false);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:217:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 217,
+   "original": "      setFocusTable(false);",
+   "mutated": "      setFocusTable(true);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:236:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 236,
+   "original": "          {[0, 1, 2].map((index) => (",
+   "mutated": "          {[1, 1, 2].map((index) => ("
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:236:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 236,
+   "original": "          {[0, 1, 2].map((index) => (",
+   "mutated": "          {[0, 2, 2].map((index) => ("
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:236:off-by-one:3",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 236,
+   "original": "          {[0, 1, 2].map((index) => (",
+   "mutated": "          {[0, 1, 3].map((index) => ("
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:238:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 238,
+   "original": "              <td colSpan={5} className={CELL_CLASS}>",
+   "mutated": "              <td colSpan={6} className={CELL_CLASS}>"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:254:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 254,
+   "original": "          onClick={() => setAttempt((count) => count + 1)}",
+   "mutated": "          onClick={() => setAttempt((count) => count + 2)}"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:263:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 263,
+   "original": "  if (body.rows.length === 0) {",
+   "mutated": "  if (body.rows.length === 1) {"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:276:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 276,
+   "original": "        tabIndex={-1}",
+   "mutated": "        tabIndex={-2}"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:295:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 295,
+   "original": "              if (isRefusedCursor(pageError) || nextCursor === null) {",
+   "mutated": "              if (isRefusedCursor(pageError) && nextCursor === null) {"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:296:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 296,
+   "original": "                setAttempt((count) => count + 1);",
+   "mutated": "                setAttempt((count) => count + 2);"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:314:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 314,
+   "original": "            if (!pagePending) {",
+   "mutated": "            if (pagePending) {"
+  },
+  {
+   "id": "manual:sentence-by-code",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "failureSentence({\n        operation: error.operation,\n        resource: error.resource,\n        code: error.code,\n        symbols: [symbol],\n      })",
+   "new": "failureSentence({ operation: \"get-stock-history\", resource: \"classification\", code: null })"
+  },
+  {
+   "id": "manual:symbols",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "symbols: [symbol],",
+   "new": "symbols: [],"
+  },
+  {
+   "id": "manual:fallback-op",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "operation: \"get-stock-history\", resource: \"classification\", code: null",
+   "new": "operation: \"get-stock-history\", resource: \"classification\", code: \"internal_error\""
+  },
+  {
+   "id": "manual:refused-stale",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "error.code === \"cursor_stale\" || error.code === \"cursor_invalid\"",
+   "new": "error.code === \"cursor_invalid\""
+  },
+  {
+   "id": "manual:refused-invalid",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "error.code === \"cursor_stale\" || error.code === \"cursor_invalid\"",
+   "new": "error.code === \"cursor_stale\""
+  },
+  {
+   "id": "manual:refused-never",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "isRefusedCursor(pageError) || nextCursor === null",
+   "new": "nextCursor === null"
+  },
+  {
+   "id": "manual:refused-always",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "isRefusedCursor(pageError) || nextCursor === null",
+   "new": "true"
+  },
+  {
+   "id": "manual:unreachable-first",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "if (error instanceof ApiUnreachableError) {\n          setUnreachable(true);\n        } else {\n          setBody",
+   "new": "if (false) {\n          setUnreachable(true);\n        } else {\n          setBody"
+  },
+  {
+   "id": "manual:unreachable-page",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "if (error instanceof ApiUnreachableError) {\n            setUnreachable(true);\n          } else {\n            setPageError",
+   "new": "if (false) {\n            setUnreachable(true);\n          } else {\n            setPageError"
+  },
+  {
+   "id": "manual:unreachable-null",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "  if (unreachable) {\n    return null;\n  }",
+   "new": "  if (false) {\n    return null;\n  }"
+  },
+  {
+   "id": "manual:append-order",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "rows: [...previous.rows, ...page.sets]",
+   "new": "rows: [...page.sets, ...previous.rows]"
+  },
+  {
+   "id": "manual:append-replace",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "rows: [...previous.rows, ...page.sets]",
+   "new": "rows: page.sets"
+  },
+  {
+   "id": "manual:cursor-pass",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "getStockHistory(symbol, { limit: PAGE_SIZE, cursor })",
+   "new": "getStockHistory(symbol, { limit: PAGE_SIZE })"
+  },
+  {
+   "id": "manual:cursor-keep",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "nextCursor: page.nextCursor,\n                }",
+   "new": "nextCursor,\n                }"
+  },
+  {
+   "id": "manual:pending-guard",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "if (!pagePending) {\n              readMore(nextCursor);\n            }",
+   "new": "readMore(nextCursor);"
+  },
+  {
+   "id": "manual:aria-disabled",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "aria-disabled={pagePending ? \"true\" : undefined}",
+   "new": "aria-disabled={undefined}"
+  },
+  {
+   "id": "manual:pending-clear",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "          setPagePending(false);\n        })\n        .catch",
+   "new": "        })\n        .catch"
+  },
+  {
+   "id": "manual:pending-clear-err",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "          setPagePending(false);\n          if (error instanceof ApiUnreachableError) {\n            setUnreachable(true);\n          } else {\n            setPageError",
+   "new": "          if (error instanceof ApiUnreachableError) {\n            setUnreachable(true);\n          } else {\n            setPageError"
+  },
+  {
+   "id": "manual:pageerror-clear",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "setPagePending(true);\n      setPageError(null);",
+   "new": "setPagePending(true);"
+  },
+  {
+   "id": "manual:pageerror-show",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "{pageError === null ? null : (",
+   "new": "{false ? null : ("
+  },
+  {
+   "id": "manual:alert-role",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "<p role=\"alert\">",
+   "new": "<p>"
+  },
+  {
+   "id": "manual:showmore-hidden",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "{nextCursor === null ? null : (\n        <button",
+   "new": "{false ? null : (\n        <button"
+  },
+  {
+   "id": "manual:retry-page-reads",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "readMore(nextCursor);\n              }\n            }}\n            className=\"w-fit rounded bg-secondary px-3 py-2 text-secondary-foreground\"",
+   "new": "setAttempt((count) => count + 1);\n              }\n            }}\n            className=\"w-fit rounded bg-secondary px-3 py-2 text-secondary-foreground\""
+  },
+  {
+   "id": "manual:retry",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "onClick={() => setAttempt((count) => count + 1)}",
+   "new": "onClick={() => undefined}"
+  },
+  {
+   "id": "manual:retry-dep",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "}, [symbol, attempt]);",
+   "new": "}, [symbol]);"
+  },
+  {
+   "id": "manual:error-state",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "if (body.kind === \"error\") {",
+   "new": "if (false) {"
+  },
+  {
+   "id": "manual:gen-bump",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    generation.current += 1;\n    const current = generation.current;\n    setBody",
+   "new": "    const current = generation.current;\n    setBody"
+  },
+  {
+   "id": "manual:first-catch-guard",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "      .catch((error: unknown) => {\n        if (current !== generation.current) {\n          return;\n        }\n        if (error instanceof ApiUnreachableError) {\n          setUnreachable(true);\n        } else {\n          setBody",
+   "new": "      .catch((error: unknown) => {\n        if (error instanceof ApiUnreachableError) {\n          setUnreachable(true);\n        } else {\n          setBody"
+  },
+  {
+   "id": "manual:first-then-guard",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "        if (current === generation.current) {\n          setBody({ kind: \"loaded\", rows: page.sets, nextCursor: page.nextCursor });\n        }",
+   "new": "        setBody({ kind: \"loaded\", rows: page.sets, nextCursor: page.nextCursor });"
+  },
+  {
+   "id": "manual:page-gen",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "if (current !== generation.current) {\n            return;\n          }\n          if (page.nextCursor === null",
+   "new": "if (page.nextCursor === null"
+  },
+  {
+   "id": "manual:page-catch-gen",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "        .catch((error: unknown) => {\n          if (current !== generation.current) {\n            return;\n          }\n          setPagePending(false);",
+   "new": "        .catch((error: unknown) => {\n          setPagePending(false);"
+  },
+  {
+   "id": "manual:skeleton-busy",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "aria-busy=\"true\"\n        data-variant",
+   "new": "data-variant"
+  },
+  {
+   "id": "manual:skeleton-head",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "        <Head />\n        <tbody>\n          {[0, 1, 2]",
+   "new": "        <tbody>\n          {[0, 1, 2]"
+  },
+  {
+   "id": "manual:skeleton-colspan",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "colSpan={5}",
+   "new": "colSpan={4}"
+  },
+  {
+   "id": "manual:reset-unreach",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    setUnreachable(false);\n",
+   "new": ""
+  },
+  {
+   "id": "manual:reset-pageerr",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    setPageError(null);\n    setUnreachable",
+   "new": "    setUnreachable"
+  },
+  {
+   "id": "manual:reset-pending",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    setPagePending(false);\n    setPageError",
+   "new": "    setPageError"
+  },
+  {
+   "id": "manual:page-size",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "const PAGE_SIZE = 50;",
+   "new": "const PAGE_SIZE = 25;"
+  },
+  {
+   "id": "manual:readmore-dep",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    [symbol],\n  );",
+   "new": "    [],\n  );"
+  },
+  {
+   "id": "manual:focus-cond",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "page.nextCursor === null && document.activeElement === moreRef.current",
+   "new": "page.nextCursor === null"
+  },
+  {
+   "id": "manual:focus-active",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "page.nextCursor === null && document.activeElement === moreRef.current",
+   "new": "document.activeElement === moreRef.current"
+  },
+  {
+   "id": "manual:focus-call",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "      tableRef.current?.focus();",
+   "new": "      void 0;"
+  },
+  {
+   "id": "manual:focus-reset",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "      setFocusTable(false);\n",
+   "new": ""
+  },
+  {
+   "id": "manual:table-tabindex",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "        tabIndex={-1}\n",
+   "new": ""
+  },
+  {
+   "id": "manual:secondary",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "data-variant=\"secondary\"\n          aria-disabled",
+   "new": "aria-disabled"
+  }
+ ]
+}

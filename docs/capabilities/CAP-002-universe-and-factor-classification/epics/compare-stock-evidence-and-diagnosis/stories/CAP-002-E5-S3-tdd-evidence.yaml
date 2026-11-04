@@ -1,0 +1,168 @@
+# TDD evidence for CAP-002-E5-S3 - Stock Evidence Screen with Factor Cards and Three-Part Insufficient-Evidence Statements.
+# Two cycles: (1) T002, T003, T005, T006, T007, T010 (strings, FactorCard: statements, input list, card states);
+# (2) T004, T008, T009, T011, T013 (StockEvidenceScreen: header, memberships, tabs, states, page-level sentences).
+# T001 (gate), T012 (integration check), T014 (a11y/token review) and T015 change no behaviour of their own.
+# The driver commits once per stage, so every cycle's commit_hash is `stage`. cycle-1.patch is HEAD..index after
+# cycle 1; cycle-2.patch is the diff between the index trees after cycle 1 (67373dda) and after cycle 2 (0615e8e1)
+# (check-tdd-evidence.py fingerprint --range), so the two apply in order onto the stage parent 6e7b8b0.
+# Reviews: each cycle's patch was judged by an independent code-review subagent and an independent spec-drift subagent
+# before the next cycle began. Cycle 1: code review APPROVED with untested-guard findings (all fixed with tests) and
+# spec drift on two unspecified strings (recorded as DEC-0279) and a comment, re-reviewed APPROVED with no drift.
+# Cycle 2: code review APPROVED; spec drift on a literal aria-label (fixed), re-reviewed APPROVED with no drift.
+# Mutation: scripts/mutation-run.py with the focused suite. The runner needs node_modules in each clone, so the
+# command links it.
+# Decisions applied: DEC-0181 to DEC-0186 (owner-provisional); DEC-0279 and DEC-0280 recorded here.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T005, T006, T007, T010]
+    description: >
+      TC-COMP-105 and TC-COMP-106 (T003) plus T005 to T007: FactorCard (default export, factor-card.tsx) renders a
+      section labelled by an h2 with the factor swatch; the E4-S3 factor cell with the standardised score beneath;
+      the three-part statement (fundamentals sentence against the scores' date minus 6 months by string comparison
+      with the day clamped, price sentence from latestTradingDay, provider-holds-no-data via a runtime-narrowed
+      detail.last_acquisition.outcome with no recovery, not_computable with the reason detail and no recovery);
+      the input list as a description list with per-input status, formatRatio/formatRate values, wire dates and the
+      restated mark; Not enough to rank and Not followed states. cardShowsMark is the helper the screen cycle uses
+      to place the restatement sentence. T002 strings in copy.ts with a copy.test.ts anchor.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/red-cycle-1.log
+    red_log_sha256: 03e40121e22b2c0bac309748a8780b0af9997a3bfa87b369b43be64c2de5462f
+    red_evidence: >
+      With factor-card.test.tsx and the copy.test.ts anchor written and no FactorCard or strings, the card test file
+      failed to load (Failed to resolve import ./factor-card) and the copy anchor failed
+      (EVIDENCE.fundamentalOutdatedReason is not a function): 2 files failed.
+    green_evidence: >
+      factor-card.test.tsx 55 tests and copy.test.ts 386 passed (441 tests in green-cycle-1.log); tsc --noEmit, biome
+      lint and format clean. Code review APPROVED with findings (momentum guard, null as-of, unmatched reason input,
+      empty parentheses, retired and unranked edges): fixed with tests. Spec drift on missingInputReason and
+      unnamedInput (DEC-0279) and a comment: resolved; re-reviewed APPROVED, no drift.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/green-cycle-1.log
+        sha256: fd4f7168b829c6752449f280bcedaf0124d213634d547881b1e2ab17d70ac42d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c8f307da0d14945a93bfacba5617596c9128e5e294199f088e9a5d7240881811
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 06d1ef9520e532635063570c7c8f1fb15a9cf050b07ddd5f61575565e1754af8
+      generated: 35
+      killed: 34
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.971
+      survivors:
+        - id: web/src/screens/research/stocks/factor-card.tsx:100:off-by-one:2
+          disposition: equivalent
+          reason: >
+            Widening slice(8, 10) to slice(8, 11) on a 10-character ISO date returns the same two-digit day.
+
+  - id: cycle-2
+    tasks: [T004, T008, T009, T011, T013]
+    description: >
+      TC-COMP-116, TC-COMP-149 and TC-COMP-192 (T004) plus T008, T009 and T013: StockEvidenceScreen (default export,
+      index.tsx) reads the evidence once per symbol into a local state union (DEC-0280), renders the Research
+      breadcrumb, the h1 with symbol and name and the Not followed badge, the memberships line, a WAI-ARIA tablist
+      (Now / Earlier scores, ?tab=earlier, arrow/Home/End keys) with the history mounted on first activation and kept,
+      the Now panel with three FactorCards, the STD-UI-18 sentence once and the STD-UI-17 sentence directly below the
+      first card showing a mark, the no-score and began-following-later sentences, the loading skeleton, the error
+      state with Try again, the not-found state with the followed-stocks link and the shell's unreachable state.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/red-cycle-2.log
+    red_log_sha256: 1dc6dac8f7b06ba2914eaf288eb8e581539dad256a940945028dfd9a1d12cf65
+    red_evidence: >
+      With stock-evidence.test.tsx written and no index.tsx, the file failed to load (Failed to resolve import
+      ./index): 1 file failed, no tests ran.
+    green_evidence: >
+      stock-evidence.test.tsx 27 tests; stocks/ and copy.test.ts 526 tests passed (green-cycle-2.log); the full
+      npm run test (75 files, 1976 tests, full-suite.log), lint, format, tsc --noEmit and npm run build are clean.
+      Code review APPROVED (low findings; casing, bogus tab, not-found header and ArrowLeft covered with tests); spec
+      drift on a literal aria-label fixed; re-reviewed APPROVED, no drift.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/green-cycle-2.log
+        sha256: 4182956581caaf4fc24fc51b6f49e09062d0b8ccb87de8abc05d048148e22bbe
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/full-suite.log
+        sha256: a5b0e3ba5bec0a78a2886ed2c23f69fc1f17153317386b9951e16e8919268226
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8403605c63132d67b33909b4eeb2d0bdeb3698f0009448dc10a09453d671af01
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: 04cefe143040a8e619cd6588015d4b116b2cf1d89d1a7d4807f2fecf33c5eb9b
+      generated: 18
+      killed: 16
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.889
+      survivors:
+        - id: web/src/screens/research/stocks/index.tsx:182:off-by-one:1
+          disposition: equivalent
+          reason: >
+            attempt's initial value (0 -> 1) is only a change trigger for the read effect; nothing reads its value.
+        - id: web/src/screens/research/stocks/index.tsx:307:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Try again's increment (+1 -> +2) only has to change attempt; the read effect depends on it, not on its size.
+
+  - id: cycle-3
+    tasks: [T002, T003, T005, T007, T010, T011]
+    description: >
+      Review-rework cycle for CAP-002-E5-S3-implementation-review-v1 (CHANGES-REQUIRED). IR-001: the Not enough to
+      rank card prints the DEC-0186 sentence (EVIDENCE.notEnoughToRankSentence around the engine's reasonDetail and the
+      factor label) instead of the bare fragment. IR-002: multi-row value card whose reason input is not first.
+      IR-003: lifecycle-retired stock tests (Not followed with an incomplete cell, no score on a classified cell, no
+      restatement sentence). IR-004: error sentence chosen by code (validation_error) and the history read sent the
+      symbol as received. IR-005: the evidence read discards a superseded response. IR-006 (two size literals) and
+      IR-007 (error placement on ?tab=earlier, DEC-0280 clause) are left for the owner; IR-008 is addressed by this
+      entry (RED observed as a behavioural assertion failure, accurate counts).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/red-cycle-3.log
+    red_log_sha256: 782f34130feb14c97606b3f54a4f129345ea347396ead9c2d7d7dae200aad18f
+    red_evidence: >
+      With the rework tests written and no production change, 3 tests failed on assertions: the copy anchor
+      (notEnoughToRankSentence is not a function), the card test (the full DEC-0186 sentence was not found, the bare
+      fragment was rendered) and the validation_error sentence test (expected text mistyped, corrected before the
+      change). The IR-002, IR-003 and IR-004 history-symbol tests pin behaviour that was already correct, so they
+      pass at RED by design; the mutation run below shows they fail under the review's surviving mutants.
+    green_evidence: >
+      stocks/ and copy.test.ts 535 tests passed (green-cycle-3.log); the full npm run test is 75 files, 1988 tests
+      (full-suite-cycle-3.log); lint, format, tsc --noEmit and npm run build are clean. Code review APPROVED; spec
+      drift none.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/green-cycle-3.log
+        sha256: 374b73d973bf846972d456fdf9bf7678fecd2118d703eff1565b3d264d5c2b76
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/full-suite-cycle-3.log
+        sha256: f022a24bf9de812f600dd395f2344fae2255c28733a6eff8f210980afc943fb8
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 173e3e54893f2035715a2033b3135e4ff3871be9ff9bc71cbdcdb4ab55aa0bcd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 589e8d4eb91d91849c909cb86488ed01b377f0f32b47543af71c199cdcaa8ecd
+      generated: 9
+      killed: 8
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.889
+      survivors:
+        - id: web/src/screens/research/stocks/index.tsx:211:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The cleanup that sets superseded to true is unobservable: the screen is rendered with key=symbol, so a
+            changed symbol remounts and a stale setState lands on an unmounted component, and Try again exists only
+            after a read has settled. Setting it false in the cleanup changes no rendered output.

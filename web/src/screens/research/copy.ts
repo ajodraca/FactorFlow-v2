@@ -436,6 +436,18 @@ export const SORT = {
 
 /** The results header and the nothing-found and never-scored bodies (UX 1.1, 1.4). */
 export const RESULTS = {
+  /**
+   * The screen title, which the h1 reads until a scored result gives it a count
+   * and in the never-populated state (UX design 1.1; CAP-002-E4-S9 Open Gap 1,
+   * DEC-0170).
+   */
+  title: "Research",
+  /**
+   * The as-of line's *sorted by* labels: the Symbol column, or a factor by
+   * name for both its percentile and standardised-score keys (UX design 0 and
+   * 1.2; CAP-002-E4-S9 Open Gap 8).
+   */
+  sortLabels: { symbol: "symbol", value: "value", growth: "growth", momentum: "momentum" },
   /** The results table's two text column headers (UX 1.1 column table; CAP-002-E4-S6, DEC-0239). */
   columns: { symbol: "Symbol", name: "Name" },
   stocksMatch: (count: number): string => `${count} stocks match`,
@@ -455,6 +467,21 @@ export const RESULTS = {
     `The latest download, started ${started}, ended Complete at ${ended}`,
   latestDownloadFailed: (started: string, ended: string, reason: string): string =>
     `The latest download, started ${started}, ended Failed at ${ended}: ${reason}`,
+  /**
+   * The four latest-download sentences UX design 1.1 does not contain, which
+   * follow its own *is {state}* / *ended {state} at {time}* pattern with the
+   * run state's word (CAP-002-E4-S9 Open Gap 2, DEC-0171; S2 Open Gap 6).
+   * `cancelling` is not *is Downloading*: the owner has asked it to stop; a
+   * `partial` download is never *ended Complete* (UX design status table).
+   */
+  latestDownloadCancelling: (started: string): string =>
+    `The latest download, started ${started}, is Cancelling`,
+  latestDownloadPartial: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Partial at ${ended}`,
+  latestDownloadCancelled: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Cancelled at ${ended}`,
+  latestDownloadAbandoned: (started: string, ended: string): string =>
+    `The latest download, started ${started}, ended Abandoned at ${ended}`,
   openDataHealth: "Open Data health",
   tryAgain: "Try again",
 } as const;
@@ -500,6 +527,13 @@ export const SCORE_SET = {
   scoresUpdatedToast: (scoresAt: string): string => `Scores updated to ${scoresAt}`,
   scoreUpdateFailedToast: (reason: string): string => `Score update failed: ${reason}`,
   couldNotCheck: "Could not check for newer scores.",
+  /**
+   * The set history dialog's paging and closing controls: the design fixes the
+   * columns but neither control (UX design 1.2; CAP-002-E4-S9 Open Gap 3,
+   * DEC-0172).
+   */
+  showMore: "Show more",
+  close: "Close",
   historyColumns: {
     state: "State",
     scoresDate: "Scores date",
@@ -788,10 +822,44 @@ export const EVIDENCE = {
   noActionChangesThis: "No action in FactorFlow changes this.",
   onlyQualified: (count: number, needed: number, factor: string): string =>
     `Only ${count} of ${needed} stocks qualified on ${factor} in this set, so no stock was ranked on it.`,
+  /**
+   * The sentence around the engine's `reasonDetail` ("18 of 30 stocks
+   * qualified") on a Not enough to rank card (DEC-0186; UX design 1.6).
+   */
+  notEnoughToRankSentence: (reasonDetail: string, factor: string): string =>
+    `Only ${reasonDetail} on ${factor} in this set, so no stock was ranked on it.`,
   showHowComputed: (input: string): string => `Show how ${input} was computed`,
   historyNote:
     "Each row is what was known when that set was produced. Later data does not change it.",
   noScoreYet: (symbol: string): string =>
     `${symbol} has no score yet because no stocks have been scored.`,
   noEarlierScores: (symbol: string): string => `No earlier scores for ${symbol}.`,
+  /** The Earlier scores table's accessible label (CAP-002-E5-S2 T002). */
+  earlierScoresFor: (symbol: string): string => `Earlier scores for ${symbol}`,
+  /** The column naming when a set was produced, from the set's end time (DEC-0179). */
+  producedColumn: "Produced",
+  /**
+   * The reasons a factor card's three-part statement slots into
+   * `couldNotBeScored` (CAP-002-E5-S3 T002; AC-13; DEC-0181, DEC-0182,
+   * DEC-0186). No design prints the price and not-computable wordings.
+   */
+  fundamentalOutdatedReason: (scoresDate: string): string =>
+    `its latest statement covers a quarter that ended more than 6 months before ${scoresDate}`,
+  priceOutdatedReason: (latestTradingDay: string): string =>
+    `its latest price is not from the latest trading day, ${latestTradingDay}`,
+  providerHoldsNoDataReason: (input: string, symbol: string): string =>
+    `the provider reports no ${input} for ${symbol}`,
+  missingInputReason: (input: string): string => `${input} is missing`,
+  notComputableReason: (input: string, detail: string | null): string =>
+    detail === null ? `${input} couldn't be computed` : `${input} couldn't be computed (${detail})`,
+  /** The link text of the recovery sentence (SHELL_ROUTES.dataHealth). */
+  dataHealthLink: "Data health",
+  /** Names the input when the cell's `reasonInput` matches no input row. */
+  unnamedInput: "an input",
+  /** The breadcrumb's separator and the not-found state's link (UX design 1.6). */
+  breadcrumbSeparator: "›",
+  followedStocksLink: "Followed stocks",
+  /** A followed stock with no row in the current set (DEC-0184 as amended). */
+  notYetFollowed: (symbol: string, scoresDate: string): string =>
+    `${symbol} has no score yet because FactorFlow began following it after the scores dated ${scoresDate} were produced.`,
 } as const;

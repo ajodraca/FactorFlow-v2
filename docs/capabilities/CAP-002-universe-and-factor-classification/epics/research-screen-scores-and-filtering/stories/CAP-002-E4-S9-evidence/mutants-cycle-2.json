@@ -1,0 +1,207 @@
+{
+ "schema": 1,
+ "repo_head": "aed93bd8debe45c4c2dbc2de6a9c120d879041a9",
+ "range": "640de9699afaac146958e84b67869530812c1e02..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/results-pane.tsx:75:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 75,
+   "original": "  const factor = key.split(\"_\")[0] as keyof typeof RESULTS.sortLabels;",
+   "mutated": "  const factor = key.split(\"_\")[1] as keyof typeof RESULTS.sortLabels;"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:100:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 100,
+   "original": "  const scored = result !== null && !result.neverClassified;",
+   "mutated": "  const scored = result !== null || !result.neverClassified;"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:100:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 100,
+   "original": "  const scored = result !== null && !result.neverClassified;",
+   "mutated": "  const scored = result !== null && result.neverClassified;"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:134:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 134,
+   "original": "          <h1 ref={headingRef} tabIndex={-1} className=\"text-lg\">",
+   "mutated": "          <h1 ref={headingRef} tabIndex={-2} className=\"text-lg\">"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:146:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 146,
+   "original": "            loading={result === null && summary === null}",
+   "mutated": "            loading={result === null || summary === null}"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:171:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 171,
+   "original": "      {scored && result.matchCount > 0 ? (",
+   "mutated": "      {scored || result.matchCount > 0 ? ("
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:171:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 171,
+   "original": "      {scored && result.matchCount > 0 ? (",
+   "mutated": "      {scored && result.matchCount >= 0 ? ("
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:171:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 171,
+   "original": "      {scored && result.matchCount > 0 ? (",
+   "mutated": "      {scored && result.matchCount > 1 ? ("
+  },
+  {
+   "id": "manual:later-expr",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "summary ? summary.later : (result?.later ?? null)",
+   "new": "summary?.later ?? result?.later ?? null"
+  },
+  {
+   "id": "manual:later-expr2",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "summary ? summary.later : (result?.later ?? null)",
+   "new": "result?.later ?? null"
+  },
+  {
+   "id": "manual:set-src",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "set={result?.set ?? null}",
+   "new": "set={summary?.set ?? result?.set ?? null}"
+  },
+  {
+   "id": "manual:setid",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "setId={result.set?.setId ?? null}",
+   "new": "setId={summary?.set?.setId ?? null}"
+  },
+  {
+   "id": "manual:footnote-count",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "scored && result.matchCount > 0 ?",
+   "new": "scored ?"
+  },
+  {
+   "id": "manual:loading",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "loading={result === null && summary === null}",
+   "new": "loading={result === null}"
+  },
+  {
+   "id": "manual:sortlabel",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "query.sort?.key ?? \"symbol\"",
+   "new": "query.sort?.key ?? \"value\""
+  },
+  {
+   "id": "manual:banner-set",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "set={result?.set ?? summary?.set ?? null}",
+   "new": "set={null}"
+  },
+  {
+   "id": "manual:focus",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "headingRef.current?.focus();",
+   "new": "undefined;"
+  },
+  {
+   "id": "manual:clear",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "onClear();\n",
+   "new": "\n"
+  },
+  {
+   "id": "manual:tabindex",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "tabIndex={-1}",
+   "new": "tabIndex={0}"
+  },
+  {
+   "id": "manual:h1-count",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "RESULTS.stocksMatch(result.matchCount)",
+   "new": "RESULTS.stocksMatch(result.stocks.length)"
+  },
+  {
+   "id": "manual:tray",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "<SelectionTray checked={checked} onAddToUniverse={onAddToUniverse} />",
+   "new": "<></>"
+  },
+  {
+   "id": "manual:checkedat",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "checkedAt={checkedAt}",
+   "new": "checkedAt={null}"
+  },
+  {
+   "id": "manual:announce",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "announcement={announcement}",
+   "new": "announcement={null}"
+  },
+  {
+   "id": "manual:incomplete",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "incompleteCount={null}",
+   "new": "incompleteCount={3}"
+  }
+ ]
+}

@@ -1,0 +1,252 @@
+{
+ "schema": 1,
+ "repo_head": "543198fb17b3dc5f9905e113eb76eeb9a0760ef1",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:10:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 10,
+   "original": "const PAGE_SIZE = 50;",
+   "mutated": "const PAGE_SIZE = 51;"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:41:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 41,
+   "original": "  return drawsMark(row, \"value\") || drawsMark(row, \"growth\");",
+   "mutated": "  return drawsMark(row, \"value\") && drawsMark(row, \"growth\");"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:77:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 77,
+   "original": "    let current = true;",
+   "mutated": "    let current = false;"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:85:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 85,
+   "original": "      current = false;",
+   "mutated": "      current = true;"
+  },
+  {
+   "id": "web/src/screens/research/stocks/history-tab.tsx:98:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "line": 98,
+   "original": "  if (body.rows.length === 0) {",
+   "mutated": "  if (body.rows.length === 1) {"
+  },
+  {
+   "id": "manual:rows-some",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "body.rows.some(marksARow)",
+   "new": "false"
+  },
+  {
+   "id": "manual:momentum-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "drawsMark(row, \"growth\")",
+   "new": "drawsMark(row, \"value\")"
+  },
+  {
+   "id": "manual:only-value",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "drawsMark(row, \"value\") || drawsMark(row, \"growth\")",
+   "new": "drawsMark(row, \"value\")"
+  },
+  {
+   "id": "manual:only-growth",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "drawsMark(row, \"value\") || drawsMark(row, \"growth\")",
+   "new": "drawsMark(row, \"growth\")"
+  },
+  {
+   "id": "manual:pct-null",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    cell.percentile !== null &&\n",
+   "new": ""
+  },
+  {
+   "id": "manual:status",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    cell.status === \"classified\" &&\n",
+   "new": ""
+  },
+  {
+   "id": "manual:restated-flag",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "  return (\n    cell.restatedPossible &&",
+   "new": "  return (\n    true &&"
+  },
+  {
+   "id": "manual:retired",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    cell.reasonCode !== \"retired\" &&\n",
+   "new": ""
+  },
+  {
+   "id": "manual:notenough",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    cell.reasonCode !== \"not_enough_stocks\"\n",
+   "new": "    true\n"
+  },
+  {
+   "id": "manual:empty",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "body.rows.length === 0",
+   "new": "body.rows.length === -1"
+  },
+  {
+   "id": "manual:show-score",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": " showScore />",
+   "new": " />"
+  },
+  {
+   "id": "manual:outcome-good",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "succeeded: { tier: \"good\"",
+   "new": "succeeded: { tier: \"warning\""
+  },
+  {
+   "id": "manual:outcome-partial",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "partial: { tier: \"warning\"",
+   "new": "partial: { tier: \"good\""
+  },
+  {
+   "id": "manual:rowheader",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "<th scope=\"row\"",
+   "new": "<td"
+  },
+  {
+   "id": "manual:fontnum",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "font-numeric font-normal",
+   "new": "font-normal"
+  },
+  {
+   "id": "manual:colscope",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "<th key={factor} scope=\"col\"",
+   "new": "<th key={factor}"
+  },
+  {
+   "id": "manual:produced",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "formatTimestamp(row.endedAt)",
+   "new": "formatDate(row.classificationDate)"
+  },
+  {
+   "id": "manual:key",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "key={row.setId}",
+   "new": "key={row.classificationDate.slice(0,1)}"
+  },
+  {
+   "id": "manual:limit",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "{ limit: PAGE_SIZE }",
+   "new": "{}"
+  },
+  {
+   "id": "manual:factor-order",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "[\"value\", \"growth\", \"momentum\"];",
+   "new": "[\"momentum\", \"growth\", \"value\"];"
+  },
+  {
+   "id": "manual:note",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "{EVIDENCE.historyNote}",
+   "new": "{CELL.restatedExplanation}"
+  },
+  {
+   "id": "manual:note-cond",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "<p className=\"text-xs text-muted-foreground\">{EVIDENCE.historyNote}</p>",
+   "new": "{body.rows.some(marksARow) ? <p>{EVIDENCE.historyNote}</p> : null}"
+  },
+  {
+   "id": "manual:variant",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "data-variant=\"history\"",
+   "new": "data-variant=\"x\""
+  },
+  {
+   "id": "manual:symbol-dep",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "}, [symbol]);",
+   "new": "}, []);"
+  },
+  {
+   "id": "manual:reset-loading",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/research/stocks/history-tab.tsx",
+   "old": "    setBody({ kind: \"loading\" });\n    getStockHistory",
+   "new": "    getStockHistory"
+  }
+ ]
+}

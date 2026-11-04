@@ -1,0 +1,302 @@
+{
+ "schema": 1,
+ "repo_head": "aed93bd8debe45c4c2dbc2de6a9c120d879041a9",
+ "range": "7e3e6b5cc6be7ae2d198e7682758705fb938ec3a..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/results-pane.tsx:118:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 118,
+   "original": "      {sentence.slice(0, at)}",
+   "mutated": "      {sentence.slice(1, at)}"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:171:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 171,
+   "original": "    let cancelled = false;",
+   "mutated": "    let cancelled = true;"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:172:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 172,
+   "original": "    listAcquisitionRuns({ limit: 1 })",
+   "mutated": "    listAcquisitionRuns({ limit: 2 })"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:174:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 174,
+   "original": "        if (!cancelled) {",
+   "mutated": "        if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:175:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 175,
+   "original": "          setDownload(page.runs[0] ?? null);",
+   "mutated": "          setDownload(page.runs[1] ?? null);"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:180:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 180,
+   "original": "        if (!cancelled) {",
+   "mutated": "        if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/results-pane.tsx:185:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "line": 185,
+   "original": "      cancelled = true;",
+   "mutated": "      cancelled = false;"
+  },
+  {
+   "id": "manual:part-running",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "return RESULTS.latestDownloadRunning(started);\n    case \"cancelling\"",
+   "new": "return RESULTS.latestDownloadCancelling(started);\n    case \"cancelling\""
+  },
+  {
+   "id": "manual:partial-as-complete",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "return RESULTS.latestDownloadPartial(started, ended);",
+   "new": "return RESULTS.latestDownloadComplete(started, ended);"
+  },
+  {
+   "id": "manual:cancel-as-run",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "return RESULTS.latestDownloadCancelling(started);\n    case \"succeeded\"",
+   "new": "return RESULTS.latestDownloadRunning(started);\n    case \"succeeded\""
+  },
+  {
+   "id": "manual:cancelled",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "return RESULTS.latestDownloadCancelled(started, ended);",
+   "new": "return RESULTS.latestDownloadAbandoned(started, ended);"
+  },
+  {
+   "id": "manual:abandoned",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "return RESULTS.latestDownloadAbandoned(started, ended);",
+   "new": "return RESULTS.latestDownloadCancelled(started, ended);"
+  },
+  {
+   "id": "manual:started-fallback",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "download.startedAt ?? download.requestedAt",
+   "new": "download.requestedAt"
+  },
+  {
+   "id": "manual:link",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "SHELL_ROUTES.download(download.runId)",
+   "new": "SHELL_ROUTES.dataHealth"
+  },
+  {
+   "id": "manual:limit",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "listAcquisitionRuns({ limit: 1 })",
+   "new": "listAcquisitionRuns({ limit: 5 })"
+  },
+  {
+   "id": "manual:signal-health",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "recent?.run_id, recent?.state, ",
+   "new": ""
+  },
+  {
+   "id": "manual:signal-later",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "later?.state, later?.runId]",
+   "new": "]"
+  },
+  {
+   "id": "manual:signal-later2",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "later?.state, later?.runId]",
+   "new": "later?.state]"
+  },
+  {
+   "id": "manual:signal-state",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "recent?.run_id, recent?.state,",
+   "new": "recent?.run_id,"
+  },
+  {
+   "id": "manual:catch-null",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "setDownload(null);\n        }\n      });",
+   "new": "undefined;\n        }\n      });"
+  },
+  {
+   "id": "manual:cancelled-flag",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "if (!cancelled) {\n          setDownload(page.runs[0] ?? null);",
+   "new": "if (true) {\n          setDownload(page.runs[0] ?? null);"
+  },
+  {
+   "id": "manual:empty-run",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "page.runs[0] ?? null",
+   "new": "page.runs[0]"
+  },
+  {
+   "id": "manual:failed-time",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "later.endedAt ?? later.startedAt",
+   "new": "later.startedAt"
+  },
+  {
+   "id": "manual:failed-reason-fb",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "later.failureReason ?? SCORE_SET.noReasonRecorded",
+   "new": "later.failureReason ?? \"\""
+  },
+  {
+   "id": "manual:building-time",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "formatTimestamp(later.runStartedAt)",
+   "new": "formatTimestamp(later.startedAt)"
+  },
+  {
+   "id": "manual:badge-tier",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "<StatusBadge tier=\"active\">",
+   "new": "<StatusBadge tier=\"warning\">"
+  },
+  {
+   "id": "manual:badge-tier2",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "<StatusBadge tier=\"critical\">",
+   "new": "<StatusBadge tier=\"active\">"
+  },
+  {
+   "id": "manual:pollfail-text",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "{pollFailed ? SCORE_SET.couldNotCheck : null}",
+   "new": "{SCORE_SET.couldNotCheck}"
+  },
+  {
+   "id": "manual:pollfail-btn",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "      {pollFailed ? (\n        <button",
+   "new": "      {true ? (\n        <button"
+  },
+  {
+   "id": "manual:aria-live",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "aria-live=\"polite\" data-testid=\"never-populated-status\"",
+   "new": "aria-live=\"off\" data-testid=\"never-populated-status\""
+  },
+  {
+   "id": "manual:trigger",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "onClick={onTryAgain}\n          className=\"rounded border border-border px-2 py-1 text-xs\"",
+   "new": "onClick={() => undefined}\n          className=\"rounded border border-border px-2 py-1 text-xs\""
+  },
+  {
+   "id": "manual:health-link",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "<Link to={SHELL_ROUTES.dataHealth}",
+   "new": "<Link to={SHELL_ROUTES.followedStocks}"
+  },
+  {
+   "id": "manual:later-null",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "{later === null ? null : <FirstSetState later={later} />}",
+   "new": "<FirstSetState later={later as LaterSet} />"
+  },
+  {
+   "id": "manual:body-wiring",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "<NeverPopulatedBody later={later} pollFailed={pollFailed} onTryAgain={onTryAgain} />",
+   "new": "<NeverPopulatedBody later={null} pollFailed={pollFailed} onTryAgain={onTryAgain} />"
+  },
+  {
+   "id": "manual:wiring-poll",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "<NeverPopulatedBody later={later} pollFailed={pollFailed} onTryAgain={onTryAgain} />",
+   "new": "<NeverPopulatedBody later={later} pollFailed={false} onTryAgain={onTryAgain} />"
+  },
+  {
+   "id": "manual:failed-reason",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/research/results-pane.tsx",
+   "old": "download.failureReason ?? SCORE_SET.noReasonRecorded",
+   "new": "\"\""
+  }
+ ]
+}

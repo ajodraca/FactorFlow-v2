@@ -1,0 +1,1051 @@
+diff --git a/web/src/screens/research/stocks/history-tab.test.tsx b/web/src/screens/research/stocks/history-tab.test.tsx
+index 2aa8aac..1b773c5 100644
+--- a/web/src/screens/research/stocks/history-tab.test.tsx
++++ b/web/src/screens/research/stocks/history-tab.test.tsx
+@@ -1,14 +1,16 @@
+-import { render, screen, waitFor, within } from "@testing-library/react";
++import { act, render, screen, waitFor, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
+ import { MemoryRouter } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import * as classificationClient from "../../../api/classification-client";
++import { ApiUnreachableError } from "../../../api/client";
+ import type {
+   FactorCell,
+   FactorName,
+   StockHistory,
+   StockHistoryRow,
+ } from "../../../api/classification-types";
+-import { CELL, EVIDENCE, SCORE_SET } from "../copy";
++import { CELL, EVIDENCE, RESULTS, SCORE_SET, failureSentence } from "../copy";
+ import { formatTimestamp } from "../format";
+ import HistoryTab from "./history-tab";
+ 
+@@ -20,6 +22,7 @@ vi.mock("../../../api/classification-client", async () => ({
+ }));
+ 
+ const getStockHistory = vi.mocked(classificationClient.getStockHistory);
++const { ClassificationApiError } = classificationClient;
+ 
+ function cell(overrides: Partial<FactorCell> = {}): FactorCell {
+   return {
+@@ -89,6 +92,13 @@ function renderTab(symbol = "AAPL") {
+   );
+ }
+ 
++/** The table once the first read has settled: the skeleton carries `aria-busy`. */
++async function loadedTable(name?: string): Promise<HTMLElement> {
++  const query = (): HTMLElement => screen.getByRole("table", name === undefined ? {} : { name });
++  await waitFor(() => expect(query()).not.toHaveAttribute("aria-busy"));
++  return query();
++}
++
+ function bodyRows(): HTMLElement[] {
+   const table = screen.getByRole("table");
+   return within(table).getAllByRole("row").slice(1);
+@@ -108,7 +118,7 @@ describe("HistoryTab rows as recorded", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE, OLDEST]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     const rows = bodyRows();
+     expect(rows).toHaveLength(3);
+     const dates = rows.map((tr) => within(tr).getByRole("rowheader").textContent);
+@@ -142,7 +152,7 @@ describe("HistoryTab rows as recorded", () => {
+     getStockHistory.mockResolvedValueOnce(history([OLDEST, NEWEST, MIDDLE]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     const dates = bodyRows().map((tr) => within(tr).getByRole("rowheader").textContent);
+     expect(dates).toEqual(["2026-09-15", "2026-10-15", "2026-10-01"]);
+   });
+@@ -164,7 +174,7 @@ describe("HistoryTab rows as recorded", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE]));
+     renderTab("OLD");
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     expect(getStockHistory).toHaveBeenCalledWith("OLD", expect.anything());
+     expect(bodyRows()).toHaveLength(2);
+     expect(screen.getAllByTestId("factor-percentile")).toHaveLength(6);
+@@ -179,7 +189,7 @@ describe("HistoryTab restated mark", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE, OLDEST]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     const [newest, middle, oldest] = bodyRows();
+     expect(within(newest).queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
+     expect(within(middle).getAllByText(CELL.possiblyRestated)).toHaveLength(1);
+@@ -195,7 +205,7 @@ describe("HistoryTab restated mark", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE, OLDEST]));
+     renderTab();
+ 
+-    const table = await screen.findByRole("table");
++    const table = await loadedTable();
+     const sentence = screen.getByText(CELL.restatedExplanation);
+     expect(screen.getAllByText(CELL.restatedExplanation)).toHaveLength(1);
+     expect(sentence.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+@@ -208,7 +218,7 @@ describe("HistoryTab restated mark", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
+     // The history sentence is stated every time, marked or not.
+     expect(screen.getAllByText(EVIDENCE.historyNote)).toHaveLength(1);
+@@ -223,7 +233,7 @@ describe("HistoryTab restated mark", () => {
+       getStockHistory.mockResolvedValueOnce(history([only]));
+       renderTab();
+ 
+-      await screen.findByRole("table");
++      await loadedTable();
+       expect(screen.getAllByText(CELL.possiblyRestated)).toHaveLength(1);
+       expect(screen.getAllByText(CELL.restatedExplanation)).toHaveLength(1);
+     },
+@@ -244,7 +254,7 @@ describe("HistoryTab restated mark", () => {
+       getStockHistory.mockResolvedValueOnce(history([flagged]));
+       renderTab();
+ 
+-      await screen.findByRole("table");
++      await loadedTable();
+       expect(screen.getByText(CELL.incomplete)).toBeInTheDocument();
+       expect(screen.queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
+       expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
+@@ -263,7 +273,7 @@ describe("HistoryTab restated mark", () => {
+     getStockHistory.mockResolvedValueOnce(history([flagged]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     expect(screen.queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
+     expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
+   });
+@@ -275,7 +285,7 @@ describe("HistoryTab restated mark", () => {
+     getStockHistory.mockResolvedValueOnce(history([odd]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     expect(screen.queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
+     // The sentence needs a mark to explain: a momentum flag draws none.
+     expect(screen.queryByText(CELL.restatedExplanation)).not.toBeInTheDocument();
+@@ -287,7 +297,7 @@ describe("HistoryTab table content", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST]));
+     renderTab();
+ 
+-    const table = await screen.findByRole("table", { name: EVIDENCE.earlierScoresFor("AAPL") });
++    const table = await loadedTable(EVIDENCE.earlierScoresFor("AAPL"));
+     expect(table).toHaveAttribute("data-variant", "history");
+     const headers = within(table)
+       .getAllByRole("columnheader")
+@@ -309,7 +319,7 @@ describe("HistoryTab table content", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, OLDEST]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     const [first, second] = bodyRows();
+     expect(within(first).getByText(formatTimestamp("2026-10-15T22:46:00Z"))).toBeInTheDocument();
+     expect(within(first).getByRole("rowheader")).toHaveClass("font-numeric");
+@@ -323,7 +333,7 @@ describe("HistoryTab table content", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+     expect(screen.queryByText(/run-s-/)).not.toBeInTheDocument();
+     expect(screen.queryByText(/#\d/)).not.toBeInTheDocument();
+@@ -343,7 +353,7 @@ describe("HistoryTab table content", () => {
+     getStockHistory.mockResolvedValueOnce(history([incomplete]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     const [only] = bodyRows();
+     expect(within(only).getByText(CELL.incomplete)).toBeInTheDocument();
+     expect(within(only).getAllByTestId("factor-percentile")).toHaveLength(2);
+@@ -356,7 +366,7 @@ describe("HistoryTab table content", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     await waitFor(() => expect(getStockHistory).toHaveBeenCalledTimes(1));
+     expect(getStockHistory).toHaveBeenCalledWith("AAPL", { limit: 50 });
+   });
+@@ -367,7 +377,7 @@ describe("HistoryTab fetch per symbol", () => {
+   it("reads again only when the symbol changes, and drops the previous rows", async () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST]));
+     const view = renderTab("AAPL");
+-    await screen.findByRole("table");
++    await loadedTable();
+ 
+     view.rerender(
+       <MemoryRouter>
+@@ -388,7 +398,8 @@ describe("HistoryTab fetch per symbol", () => {
+       </MemoryRouter>,
+     );
+     // While MSFT is read, AAPL's rows are not shown under MSFT's label.
+-    expect(screen.queryByRole("table")).not.toBeInTheDocument();
++    expect(screen.getByRole("table")).toHaveAttribute("aria-busy", "true");
++    expect(screen.queryByTestId("factor-percentile")).not.toBeInTheDocument();
+     settleSecond({ symbol: "MSFT", sets: [], nextCursor: null });
+     expect(await screen.findByText("No earlier scores for MSFT.")).toBeInTheDocument();
+     expect(getStockHistory).toHaveBeenCalledTimes(2);
+@@ -423,8 +434,529 @@ describe("HistoryTab fetch per symbol", () => {
+     getStockHistory.mockResolvedValueOnce(history([NEWEST, same]));
+     renderTab();
+ 
+-    await screen.findByRole("table");
++    await loadedTable();
+     expect(bodyRows()).toHaveLength(2);
+     expect(errors).not.toHaveBeenCalled();
+   });
+ });
++
++describe("HistoryTab late gaps from the cycle-1 reviews", () => {
++  it("shows the scores date as recorded, not the day the set ended", async () => {
++    const lateEnd = row("s-10", "2026-10-15", "2026-10-16T01:10:00Z");
++    getStockHistory.mockResolvedValueOnce(history([lateEnd]));
++    renderTab();
++
++    await loadedTable();
++    const [only] = bodyRows();
++    expect(within(only).getByRole("rowheader")).toHaveTextContent("2026-10-15");
++    expect(within(only).getByText(formatTimestamp("2026-10-16T01:10:00Z"))).toHaveClass(
++      "font-numeric",
++    );
++  });
++
++  it("labels the table with the symbol it was given", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    renderTab("OLD");
++
++    expect(await loadedTable(EVIDENCE.earlierScoresFor("OLD"))).toBeInTheDocument();
++  });
++});
++
++function apiError(code: string) {
++  return new ClassificationApiError("ignored envelope message", "req-1", {
++    code,
++    operation: "get-stock-history",
++    resource: "classification",
++  });
++}
++
++describe("HistoryTab paging", () => {
++  // Implements T006
++  it("shows Show more only while a cursor is held, and appends the next page after the rows", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE], "cur-1"));
++    renderTab();
++
++    await loadedTable();
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++    const more = screen.getByRole("button", { name: SCORE_SET.showMore });
++    getStockHistory.mockResolvedValueOnce(history([OLDEST], null));
++    await user.click(more);
++
++    await waitFor(() => expect(bodyRows()).toHaveLength(3));
++    expect(getStockHistory).toHaveBeenCalledTimes(2);
++    expect(getStockHistory).toHaveBeenLastCalledWith("AAPL", { limit: 50, cursor: "cur-1" });
++    const dates = bodyRows().map((tr) => within(tr).getByRole("rowheader").textContent);
++    expect(dates).toEqual(["2026-10-15", "2026-10-01", "2026-09-15"]);
++    expect(screen.queryByRole("button", { name: SCORE_SET.showMore })).not.toBeInTheDocument();
++    expect(screen.getAllByText(EVIDENCE.historyNote)).toHaveLength(1);
++  });
++
++  it("has no Show more when the first page held no cursor", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    renderTab();
++
++    await loadedTable();
++    expect(screen.queryByRole("button", { name: SCORE_SET.showMore })).not.toBeInTheDocument();
++  });
++
++  it("disables Show more while a read is in flight, and issues one read for repeated activation", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++
++    let settle: (value: StockHistory) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((resolve) => {
++        settle = resolve;
++      }),
++    );
++    const more = screen.getByRole("button", { name: SCORE_SET.showMore });
++    await user.click(more);
++    expect(more).toHaveAttribute("aria-disabled", "true");
++    expect(more).not.toBeDisabled();
++    await user.click(more);
++    expect(getStockHistory).toHaveBeenCalledTimes(2);
++
++    await act(async () => {
++      settle(history([MIDDLE], "cur-2"));
++    });
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(screen.getByRole("button", { name: SCORE_SET.showMore })).not.toHaveAttribute(
++      "aria-disabled",
++    );
++  });
++
++  // Implements TC-COMP-191: a later page never changes a mark on a row already shown.
++  it("leaves the marks of rows already shown as they were when more rows arrive", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST, MIDDLE], "cur-1"));
++    renderTab();
++    await loadedTable();
++    expect(screen.getAllByText(CELL.possiblyRestated)).toHaveLength(1);
++
++    getStockHistory.mockResolvedValueOnce(history([OLDEST], null));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await waitFor(() => expect(bodyRows()).toHaveLength(3));
++
++    const [newest, middle, oldest] = bodyRows();
++    expect(within(newest).queryByText(CELL.possiblyRestated)).not.toBeInTheDocument();
++    expect(within(middle).getAllByText(CELL.possiblyRestated)).toHaveLength(1);
++    expect(within(oldest).getAllByText(CELL.possiblyRestated)).toHaveLength(1);
++    expect(screen.getAllByText(CELL.restatedExplanation)).toHaveLength(1);
++  });
++
++  it("keeps the loaded rows and states the failure beneath them when Show more fails", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++
++    getStockHistory.mockRejectedValueOnce(apiError("cursor_stale"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++
++    const sentence = failureSentence({
++      operation: "get-stock-history",
++      resource: "classification",
++      code: "cursor_stale",
++    });
++    const alert = await screen.findByRole("alert");
++    expect(alert).toHaveTextContent(sentence);
++    expect(bodyRows()).toHaveLength(1);
++    const table = screen.getByRole("table");
++    expect(table.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    expect(screen.queryByText(apiError("cursor_stale").message)).not.toBeInTheDocument();
++  });
++});
++
++describe("HistoryTab states", () => {
++  // Implements T007
++  it("renders a skeleton table with the final columns while the first read is pending", () => {
++    getStockHistory.mockReturnValueOnce(new Promise<StockHistory>(() => undefined));
++    renderTab();
++
++    const table = screen.getByRole("table", { name: EVIDENCE.earlierScoresFor("AAPL") });
++    expect(table).toHaveAttribute("aria-busy", "true");
++    const headers = within(table)
++      .getAllByRole("columnheader")
++      .map((th) => th.textContent);
++    expect(headers).toEqual([
++      SCORE_SET.historyColumns.scoresDate,
++      EVIDENCE.producedColumn,
++      "Value",
++      "Growth",
++      "Momentum",
++    ]);
++    const placeholders = within(table).getAllByRole("cell");
++    expect(placeholders).toHaveLength(3);
++    for (const placeholder of placeholders) {
++      expect(placeholder).toHaveAttribute("colspan", "5");
++    }
++    expect(screen.queryByText("No earlier scores for AAPL.")).not.toBeInTheDocument();
++  });
++
++  it.each([
++    ["instrument_not_found", "FactorFlow doesn't follow a stock named AAPL."],
++    [
++      "internal_error",
++      "Could not load the stock's earlier scores: FactorFlow hit an unexpected problem. Try again.",
++    ],
++    [
++      "validation_error",
++      "Could not load the stock's earlier scores: FactorFlow could not accept the scores as entered. Check it, then try again.",
++    ],
++  ])(
++    "states a %s failure by operation, resource and reason, never the envelope message",
++    async (code, sentence) => {
++      getStockHistory.mockRejectedValueOnce(apiError(code));
++      renderTab();
++
++      expect(await screen.findByText(sentence)).toBeInTheDocument();
++      expect(screen.queryByText(/ignored envelope message/)).not.toBeInTheDocument();
++      expect(screen.queryByRole("table")).not.toBeInTheDocument();
++      expect(screen.getByRole("button", { name: RESULTS.tryAgain })).toBeInTheDocument();
++    },
++  );
++
++  it("states an unexpected failure with the fallback sentence", async () => {
++    getStockHistory.mockRejectedValueOnce(new Error("boom"));
++    renderTab();
++
++    expect(
++      await screen.findByText(
++        "Could not load the stock's earlier scores: FactorFlow hit an unexpected problem. Try again.",
++      ),
++    ).toBeInTheDocument();
++    expect(screen.queryByText(/boom/)).not.toBeInTheDocument();
++  });
++
++  it("reissues the first read from Try again", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockRejectedValueOnce(apiError("internal_error"));
++    renderTab();
++    const retry = await screen.findByRole("button", { name: RESULTS.tryAgain });
++
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    await user.click(retry);
++
++    await loadedTable();
++    expect(getStockHistory).toHaveBeenCalledTimes(2);
++    expect(getStockHistory).toHaveBeenLastCalledWith("AAPL", { limit: 50 });
++    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
++  });
++
++  it("renders nothing for an unreachable API, which the shell states", async () => {
++    getStockHistory.mockRejectedValueOnce(new ApiUnreachableError("offline"));
++    const { container } = renderTab();
++
++    await waitFor(() => expect(screen.queryByRole("table")).not.toBeInTheDocument());
++    expect(container).toBeEmptyDOMElement();
++  });
++});
++
++describe("HistoryTab page failures and symbol changes", () => {
++  function swap(view: ReturnType<typeof renderTab>, symbol: string): void {
++    view.rerender(
++      <MemoryRouter>
++        <HistoryTab symbol={symbol} />
++      </MemoryRouter>,
++    );
++  }
++
++  it("lets Show more be tried again after a page failed, clearing the alert once it succeeds", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++
++    getStockHistory.mockRejectedValueOnce(apiError("internal_error"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await screen.findByRole("alert");
++    const more = screen.getByRole("button", { name: SCORE_SET.showMore });
++    expect(more).not.toHaveAttribute("aria-disabled");
++
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], null));
++    await user.click(more);
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++    expect(getStockHistory).toHaveBeenCalledTimes(3);
++  });
++
++  it("clears the alert while the next page is read", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++    getStockHistory.mockRejectedValueOnce(apiError("cursor_stale"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await screen.findByRole("alert");
++
++    getStockHistory.mockReturnValueOnce(new Promise<StockHistory>(() => undefined));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("renders nothing when the API is unreachable while paging", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    const { container } = renderTab();
++    await loadedTable();
++
++    getStockHistory.mockRejectedValueOnce(new ApiUnreachableError("offline"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await waitFor(() => expect(container).toBeEmptyDOMElement());
++  });
++
++  it("reads further pages for the symbol now shown, not the one first mounted", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-a"));
++    const view = renderTab("AAPL");
++    await loadedTable();
++
++    getStockHistory.mockResolvedValueOnce({ symbol: "MSFT", sets: [MIDDLE], nextCursor: "cur-m" });
++    swap(view, "MSFT");
++    await waitFor(() =>
++      expect(screen.getByRole("button", { name: SCORE_SET.showMore })).toBeVisible(),
++    );
++    getStockHistory.mockResolvedValueOnce(history([OLDEST], null));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(getStockHistory).toHaveBeenLastCalledWith("MSFT", { limit: 50, cursor: "cur-m" });
++  });
++
++  it("ignores a page that settles after the symbol changed", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-a"));
++    const view = renderTab("AAPL");
++    await loadedTable();
++
++    let settle: (value: StockHistory) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((resolve) => {
++        settle = resolve;
++      }),
++    );
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    getStockHistory.mockResolvedValueOnce({ symbol: "MSFT", sets: [MIDDLE], nextCursor: null });
++    swap(view, "MSFT");
++    await waitFor(() => expect(bodyRows()).toHaveLength(1));
++
++    await act(async () => {
++      settle(history([OLDEST], null));
++    });
++    expect(bodyRows()).toHaveLength(1);
++    expect(within(bodyRows()[0]).getByRole("rowheader")).toHaveTextContent("2026-10-01");
++  });
++
++  it("ignores a page failure that settles after the symbol changed", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-a"));
++    const view = renderTab("AAPL");
++    await loadedTable();
++
++    let fail: (reason: unknown) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((_, reject) => {
++        fail = reject;
++      }),
++    );
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], null));
++    swap(view, "MSFT");
++    await waitFor(() => expect(bodyRows()).toHaveLength(1));
++
++    await act(async () => {
++      fail(apiError("cursor_stale"));
++    });
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("clears a page failure and an in-flight page when the symbol changes", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-a"));
++    const view = renderTab("AAPL");
++    await loadedTable();
++    getStockHistory.mockRejectedValueOnce(apiError("cursor_stale"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await screen.findByRole("alert");
++
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], "cur-m"));
++    swap(view, "MSFT");
++    await waitFor(() => expect(bodyRows()).toHaveLength(1));
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it("is not left pending when the symbol changes during a page read", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-a"));
++    const view = renderTab("AAPL");
++    await loadedTable();
++    getStockHistory.mockReturnValueOnce(new Promise<StockHistory>(() => undefined));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], "cur-m"));
++    swap(view, "MSFT");
++    await waitFor(() => expect(bodyRows()).toHaveLength(1));
++    expect(screen.getByRole("button", { name: SCORE_SET.showMore })).not.toHaveAttribute(
++      "aria-disabled",
++    );
++  });
++
++  it("shows the tab again when the symbol changes after an unreachable read", async () => {
++    getStockHistory.mockRejectedValueOnce(new ApiUnreachableError("offline"));
++    const view = renderTab("AAPL");
++    await waitFor(() => expect(screen.queryByRole("table")).not.toBeInTheDocument());
++
++    getStockHistory.mockResolvedValueOnce(history([NEWEST]));
++    swap(view, "MSFT");
++    await loadedTable();
++    expect(bodyRows()).toHaveLength(1);
++  });
++
++  it("offers Try again beside a failed page, re-reading the same page for a transient failure", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++    getStockHistory.mockRejectedValueOnce(apiError("internal_error"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await screen.findByRole("alert");
++
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], null));
++    await user.click(screen.getByRole("button", { name: RESULTS.tryAgain }));
++
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(getStockHistory).toHaveBeenLastCalledWith("AAPL", { limit: 50, cursor: "cur-1" });
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
++  it.each(["cursor_stale", "cursor_invalid"])(
++    "restarts from the first page on Try again after a refused cursor (%s)",
++    async (code) => {
++      const user = userEvent.setup();
++      getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++      renderTab();
++      await loadedTable();
++      getStockHistory.mockRejectedValueOnce(apiError(code));
++      await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++      await screen.findByRole("alert");
++
++      getStockHistory.mockResolvedValueOnce(history([MIDDLE, OLDEST], null));
++      await user.click(screen.getByRole("button", { name: RESULTS.tryAgain }));
++
++      await waitFor(() => expect(bodyRows()).toHaveLength(2));
++      expect(getStockHistory).toHaveBeenLastCalledWith("AAPL", { limit: 50 });
++      expect(getStockHistory).toHaveBeenCalledTimes(3);
++      const dates = bodyRows().map((tr) => within(tr).getByRole("rowheader").textContent);
++      expect(dates).toEqual(["2026-10-01", "2026-09-15"]);
++    },
++  );
++
++  it("moves focus to the table when the last page removes the focused Show more", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], null));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(screen.getByRole("table")).toHaveFocus();
++  });
++
++  it("does not take focus when the last page arrives while focus is elsewhere", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++    let settle: (value: StockHistory) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((resolve) => {
++        settle = resolve;
++      }),
++    );
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    screen.getByRole("button", { name: SCORE_SET.showMore }).blur();
++
++    await act(async () => {
++      settle(history([MIDDLE], null));
++    });
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(screen.getByRole("table")).not.toHaveFocus();
++  });
++
++  it("draws Show more as a secondary button", async () => {
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    renderTab();
++    await loadedTable();
++
++    expect(screen.getByRole("button", { name: SCORE_SET.showMore })).toHaveAttribute(
++      "data-variant",
++      "secondary",
++    );
++  });
++
++  it("ignores a first-read failure that settles after the symbol changed", async () => {
++    let fail: (reason: unknown) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((_, reject) => {
++        fail = reject;
++      }),
++    );
++    const view = renderTab("AAPL");
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE]));
++    swap(view, "MSFT");
++    await loadedTable();
++
++    await act(async () => {
++      fail(apiError("internal_error"));
++    });
++    expect(bodyRows()).toHaveLength(1);
++    expect(screen.queryByRole("button", { name: RESULTS.tryAgain })).not.toBeInTheDocument();
++  });
++
++  it("ignores an unreachable first read that settles after the symbol changed", async () => {
++    let fail: (reason: unknown) => void = () => undefined;
++    getStockHistory.mockReturnValueOnce(
++      new Promise<StockHistory>((_, reject) => {
++        fail = reject;
++      }),
++    );
++    const view = renderTab("AAPL");
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE]));
++    swap(view, "MSFT");
++    await loadedTable();
++
++    await act(async () => {
++      fail(new ApiUnreachableError("offline"));
++    });
++    expect(bodyRows()).toHaveLength(1);
++  });
++
++  it("keeps focus on Show more while pages remain, and moves it to the table on every last page", async () => {
++    const user = userEvent.setup();
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-1"));
++    const view = renderTab("AAPL");
++    await loadedTable();
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], "cur-2"));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(screen.getByRole("button", { name: SCORE_SET.showMore })).toHaveFocus();
++    getStockHistory.mockResolvedValueOnce(history([OLDEST], null));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await waitFor(() => expect(bodyRows()).toHaveLength(3));
++    const table = screen.getByRole("table");
++    expect(table).toHaveFocus();
++    expect(table).toHaveAttribute("tabindex", "-1");
++
++    getStockHistory.mockResolvedValueOnce(history([NEWEST], "cur-3"));
++    swap(view, "MSFT");
++    await waitFor(() => expect(bodyRows()).toHaveLength(1));
++    getStockHistory.mockResolvedValueOnce(history([MIDDLE], null));
++    await user.click(screen.getByRole("button", { name: SCORE_SET.showMore }));
++    await waitFor(() => expect(bodyRows()).toHaveLength(2));
++    expect(screen.getByRole("table")).toHaveFocus();
++  });
++});
+diff --git a/web/src/screens/research/stocks/history-tab.tsx b/web/src/screens/research/stocks/history-tab.tsx
+index ad5c81a..7dba29f 100644
+--- a/web/src/screens/research/stocks/history-tab.tsx
++++ b/web/src/screens/research/stocks/history-tab.tsx
+@@ -1,9 +1,10 @@
+-import { type JSX, useEffect, useState } from "react";
+-import { getStockHistory } from "../../../api/classification-client";
++import { type JSX, useCallback, useEffect, useRef, useState } from "react";
++import { ClassificationApiError, getStockHistory } from "../../../api/classification-client";
+ import type { FactorName, StockHistoryRow } from "../../../api/classification-types";
++import { ApiUnreachableError } from "../../../api/client";
+ import { FactorCell } from "../../../components/patterns/factor-cell";
+ import { StatusBadge, type StatusTier } from "../../../components/patterns/status-badge";
+-import { CELL, EVIDENCE, FACTOR_LABELS, SCORE_SET, UNIVERSES } from "../copy";
++import { CELL, EVIDENCE, FACTOR_LABELS, RESULTS, SCORE_SET, failureSentence } from "../copy";
+ import { formatDate, formatTimestamp } from "../format";
+ 
+ /** The API's default page size (DEC-0178). */
+@@ -19,7 +20,34 @@ const OUTCOME_TIER: Record<StockHistoryRow["runOutcome"], { tier: StatusTier; wo
+ const HEAD_CLASS = "px-2 py-1 text-left text-xs text-muted-foreground";
+ const CELL_CLASS = "px-2 py-1 text-left align-top text-sm";
+ 
+-type Body = { kind: "loading" } | { kind: "loaded"; rows: StockHistoryRow[] };
++/**
++ * A local union rather than `ScreenState`, whose `error` variant carries a
++ * `message` this tab must never render (classification-ui 2.4), as the
++ * delivered universe History tab does.
++ */
++type Body =
++  | { kind: "loading" }
++  | { kind: "error"; error: unknown }
++  | { kind: "loaded"; rows: StockHistoryRow[]; nextCursor: string | null };
++
++function sentenceFor(error: unknown, symbol: string): string {
++  return error instanceof ClassificationApiError
++    ? failureSentence({
++        operation: error.operation,
++        resource: error.resource,
++        code: error.code,
++        symbols: [symbol],
++      })
++    : failureSentence({ operation: "get-stock-history", resource: "classification", code: null });
++}
++
++/** A refused cursor names another set or ordering, so only the first page can recover it. */
++function isRefusedCursor(error: unknown): boolean {
++  return (
++    error instanceof ClassificationApiError &&
++    (error.code === "cursor_stale" || error.code === "cursor_invalid")
++  );
++}
+ 
+ /**
+  * Whether `FactorCell` draws the mark on this factor's cell: a scored value or
+@@ -61,6 +89,27 @@ function HistoryRow({ row }: { row: StockHistoryRow }): JSX.Element {
+   );
+ }
+ 
++/** The header cells of the table, shared by the loaded table and its skeleton. */
++function Head(): JSX.Element {
++  return (
++    <thead>
++      <tr>
++        <th scope="col" className={HEAD_CLASS}>
++          {SCORE_SET.historyColumns.scoresDate}
++        </th>
++        <th scope="col" className={HEAD_CLASS}>
++          {EVIDENCE.producedColumn}
++        </th>
++        {FACTORS.map((factor) => (
++          <th key={factor} scope="col" className={HEAD_CLASS}>
++            {FACTOR_LABELS[factor]}
++          </th>
++        ))}
++      </tr>
++    </thead>
++  );
++}
++
+ /**
+  * The Earlier scores panel of the Stock evidence screen (AC-15, AC-18, AC-19,
+  * AC-23; DAC-E5-S2-1 to -4; UX design 1.6; classification-ui 2.4, 10): one
+@@ -69,29 +118,145 @@ function HistoryRow({ row }: { row: StockHistoryRow }): JSX.Element {
+  * renders and nothing more: no row is sorted, filtered, re-dated or
+  * recomputed, and a retired stock's rows are not special-cased (DEC-0178,
+  * DEC-0179, DEC-0180).
++ *
++ * The first page is read on mount and again when the symbol changes; **Show
++ * more** appends the next keyset page after the rows already shown. A failed
++ * first read replaces the body with the operation, resource and reason
++ * sentence (by `code`, never the envelope's `message`) and **Try again**; a
++ * failed later page keeps the rows and states the failure beneath them. An
++ * unreachable API renders nothing: the shell owns that state.
+  */
+-export default function HistoryTab({ symbol }: { symbol: string }): JSX.Element {
++export default function HistoryTab({ symbol }: { symbol: string }): JSX.Element | null {
+   const [body, setBody] = useState<Body>({ kind: "loading" });
++  const [pagePending, setPagePending] = useState(false);
++  const [pageError, setPageError] = useState<unknown>(null);
++  const [unreachable, setUnreachable] = useState(false);
++  /** Set when the last page removes a focused Show more: focus then moves to the table. */
++  const [focusTable, setFocusTable] = useState(false);
++  const moreRef = useRef<HTMLButtonElement>(null);
++  const tableRef = useRef<HTMLTableElement>(null);
++  /** Bumped by Try again: the history is read again from its first page. */
++  const [attempt, setAttempt] = useState(0);
++  /** A response from an earlier read, or one settling after unmount, is ignored. */
++  const generation = useRef(0);
++
++  useEffect(
++    () => () => {
++      generation.current += 1;
++    },
++    [],
++  );
+ 
++  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is the Try again trigger.
+   useEffect(() => {
+-    let current = true;
++    generation.current += 1;
++    const current = generation.current;
+     setBody({ kind: "loading" });
+-    getStockHistory(symbol, { limit: PAGE_SIZE }).then((page) => {
+-      if (current) {
+-        setBody({ kind: "loaded", rows: page.sets });
+-      }
+-    });
+-    return () => {
+-      current = false;
+-    };
+-  }, [symbol]);
++    setPagePending(false);
++    setPageError(null);
++    setUnreachable(false);
++    getStockHistory(symbol, { limit: PAGE_SIZE })
++      .then((page) => {
++        if (current === generation.current) {
++          setBody({ kind: "loaded", rows: page.sets, nextCursor: page.nextCursor });
++        }
++      })
++      .catch((error: unknown) => {
++        if (current !== generation.current) {
++          return;
++        }
++        if (error instanceof ApiUnreachableError) {
++          setUnreachable(true);
++        } else {
++          setBody({ kind: "error", error });
++        }
++      });
++  }, [symbol, attempt]);
++
++  const readMore = useCallback(
++    (cursor: string): void => {
++      const current = generation.current;
++      setPagePending(true);
++      setPageError(null);
++      getStockHistory(symbol, { limit: PAGE_SIZE, cursor })
++        .then((page) => {
++          if (current !== generation.current) {
++            return;
++          }
++          if (page.nextCursor === null && document.activeElement === moreRef.current) {
++            setFocusTable(true);
++          }
++          setBody((previous) =>
++            previous.kind === "loaded"
++              ? {
++                  kind: "loaded",
++                  rows: [...previous.rows, ...page.sets],
++                  nextCursor: page.nextCursor,
++                }
++              : previous,
++          );
++          setPagePending(false);
++        })
++        .catch((error: unknown) => {
++          if (current !== generation.current) {
++            return;
++          }
++          setPagePending(false);
++          if (error instanceof ApiUnreachableError) {
++            setUnreachable(true);
++          } else {
++            setPageError(error);
++          }
++        });
++    },
++    [symbol],
++  );
++
++  useEffect(() => {
++    if (focusTable) {
++      setFocusTable(false);
++      tableRef.current?.focus();
++    }
++  }, [focusTable]);
++
++  if (unreachable) {
++    return null;
++  }
+ 
+   if (body.kind === "loading") {
+     return (
+-      <output aria-busy="true" className="flex flex-col gap-2">
+-        <span className="sr-only">{UNIVERSES.loading}</span>
+-        <span aria-hidden="true" className="block h-2 rounded bg-secondary" />
+-      </output>
++      <table
++        aria-label={EVIDENCE.earlierScoresFor(symbol)}
++        aria-busy="true"
++        data-variant="history"
++        className="w-full border-collapse"
++      >
++        <Head />
++        <tbody>
++          {[0, 1, 2].map((index) => (
++            <tr key={index} className="border-t border-border">
++              <td colSpan={5} className={CELL_CLASS}>
++                <span aria-hidden="true" className="block h-2 rounded bg-secondary" />
++              </td>
++            </tr>
++          ))}
++        </tbody>
++      </table>
++    );
++  }
++
++  if (body.kind === "error") {
++    return (
++      <div className="flex flex-col gap-2 text-sm">
++        <p>{sentenceFor(body.error, symbol)}</p>
++        <button
++          type="button"
++          onClick={() => setAttempt((count) => count + 1)}
++          className="w-fit rounded border border-border px-3 py-2"
++        >
++          {RESULTS.tryAgain}
++        </button>
++      </div>
+     );
+   }
+ 
+@@ -99,6 +264,7 @@ export default function HistoryTab({ symbol }: { symbol: string }): JSX.Element
+     return <p className="text-sm">{EVIDENCE.noEarlierScores(symbol)}</p>;
+   }
+ 
++  const { nextCursor } = body;
+   return (
+     <div className="flex flex-col gap-2">
+       <p className="text-xs text-muted-foreground">{EVIDENCE.historyNote}</p>
+@@ -106,31 +272,54 @@ export default function HistoryTab({ symbol }: { symbol: string }): JSX.Element
+         <p className="text-xs text-muted-foreground">{CELL.restatedExplanation}</p>
+       ) : null}
+       <table
++        ref={tableRef}
++        tabIndex={-1}
+         aria-label={EVIDENCE.earlierScoresFor(symbol)}
+         data-variant="history"
+         className="w-full border-collapse"
+       >
+-        <thead>
+-          <tr>
+-            <th scope="col" className={HEAD_CLASS}>
+-              {SCORE_SET.historyColumns.scoresDate}
+-            </th>
+-            <th scope="col" className={HEAD_CLASS}>
+-              {EVIDENCE.producedColumn}
+-            </th>
+-            {FACTORS.map((factor) => (
+-              <th key={factor} scope="col" className={HEAD_CLASS}>
+-                {FACTOR_LABELS[factor]}
+-              </th>
+-            ))}
+-          </tr>
+-        </thead>
++        <Head />
+         <tbody>
+           {body.rows.map((row) => (
+             <HistoryRow key={row.setId} row={row} />
+           ))}
+         </tbody>
+       </table>
++      {pageError === null ? null : (
++        <div className="flex flex-col gap-2 text-sm">
++          <p role="alert">{sentenceFor(pageError, symbol)}</p>
++          <button
++            type="button"
++            data-variant="secondary"
++            onClick={() => {
++              if (isRefusedCursor(pageError) || nextCursor === null) {
++                setAttempt((count) => count + 1);
++              } else {
++                readMore(nextCursor);
++              }
++            }}
++            className="w-fit rounded bg-secondary px-3 py-2 text-secondary-foreground"
++          >
++            {RESULTS.tryAgain}
++          </button>
++        </div>
++      )}
++      {nextCursor === null ? null : (
++        <button
++          ref={moreRef}
++          type="button"
++          data-variant="secondary"
++          aria-disabled={pagePending ? "true" : undefined}
++          onClick={() => {
++            if (!pagePending) {
++              readMore(nextCursor);
++            }
++          }}
++          className="min-h-6 w-fit rounded bg-secondary px-3 py-2 text-sm text-secondary-foreground"
++        >
++          {SCORE_SET.showMore}
++        </button>
++      )}
+     </div>
+   );
+ }
