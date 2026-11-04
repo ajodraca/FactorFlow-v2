@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "command": "env PYTHONPATH={workdir}/src /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-cad67f/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python -m pytest tests/integration/test_api_classifications.py::test_filters_change_the_match_count_identically_on_every_page tests/integration/test_api_classifications.py::test_compare_reports_unknown_symbols_and_enforces_its_bounds tests/unit/test_api_classification_error_mapping.py::test_a_malformed_list_cursor_is_cursor_invalid -q -p no:cacheprovider",
+  "repo_head": "c13ba10d1442eac6654057d8d6d117121f04ceaf",
+  "tree_patch_sha256": "2fb060512bc92c21068bf7e46fdde39676ca5b78d59acb2a9b13e0419a504778",
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-mutants.json",
+  "mutants_sha256": "471e18cb7c2d23ae319020c329012f0338ef3bbee5cc16ecb80d63c18a82e27c",
+  "jobs": 3,
+  "started": "2026-11-04T16:49:58Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 4.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/baseline-w1.log",
+      "log_sha256": "6dc4e5f07435e1d4e51c3c6ca127e0015e2ae271b35827c39721c64b312b3bf2"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 4.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/baseline-w2.log",
+      "log_sha256": "f7e691acf243cdc1c64838ae18c4c3573a01901f06420f0fa75bbee83149b8d2"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 4.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/baseline-w0.log",
+      "log_sha256": "1393d1534b97be1078ba1789150dea336a7ac51667d887a86c80a086a30d77b8"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/api/classification_models.py:435:manual:1",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 435,
+      "original": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=self.symbol",
+      "mutated": "                bounds=bounds, hide_incomplete=False, symbol=self.symbol",
+      "note": "review v2 probe 435:manual:41: hide_incomplete never forwarded (IR-001 case 2)",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/src_factorflow_api_classification_models.py_435_manual_1.log",
+      "log_sha256": "355f6a612afeffbbe1b7bc089a9922e177495cb16285880cc8019d7b9cf6a85e"
+    },
+    {
+      "id": "src/factorflow/api/classification_models.py:435:manual:2",
+      "operator": "manual",
+      "file": "src/factorflow/api/classification_models.py",
+      "line": 435,
+      "original": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=self.symbol",
+      "mutated": "                bounds=bounds, hide_incomplete=self.hide_incomplete, symbol=None",
+      "note": "review v2 probe 435:manual:42: symbol prefix never forwarded (IR-001 case 2)",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.7,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/src_factorflow_api_classification_models.py_435_manual_2.log",
+      "log_sha256": "bb1eda533da867e597a90ef249c4ce2a648e1c04743d2ab319a7963576c020b2"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:76:manual:3",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 76,
+      "original": "    except (ValueError, KeyError, TypeError, AttributeError, CursorError):",
+      "mutated": "    except (ValueError, KeyError, TypeError, CursorError):",
+      "note": "review v2 76:manual:21 (IR-002)",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/src_factorflow_api_routes_classifications.py_76_manual_3.log",
+      "log_sha256": "2dc6aba03908fb2c5b029506c5c5cff2fccb0baa8ef1830cbf4af439a05a9d82"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:76:manual:4",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 76,
+      "original": "    except (ValueError, KeyError, TypeError, AttributeError, CursorError):",
+      "mutated": "    except (ValueError, KeyError, AttributeError, CursorError):",
+      "note": "review v2 76:manual:22 (IR-002)",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.4,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/src_factorflow_api_routes_classifications.py_76_manual_4.log",
+      "log_sha256": "905741cd2ba485264389ead2ce0b5fe4c01fb727a530578d374b4fb850b050ad"
+    },
+    {
+      "id": "src/factorflow/api/routes/classifications.py:76:manual:5",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/classifications.py",
+      "line": 76,
+      "original": "    except (ValueError, KeyError, TypeError, AttributeError, CursorError):",
+      "mutated": "    except (ValueError, TypeError, AttributeError, CursorError):",
+      "note": "review v2 76:manual:23 (IR-002)",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.3,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-002-run-cad67f/84d2a8b1-7d04-4c69-914f-def12cfde0d7/scratchpad/mut3/mutation-cycle-3-results-logs/src_factorflow_api_routes_classifications.py_76_manual_5.log",
+      "log_sha256": "9ea66c2bb88d007372dd7f7521c3bc221c53f47e3c3aa8241e01d985c88407f8"
+    }
+  ],
+  "finished": "2026-11-04T16:50:10Z"
+}

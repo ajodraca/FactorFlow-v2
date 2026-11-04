@@ -446,6 +446,9 @@ INVALID = {
     "unknown order": _forge(_list_cursor("value_score"), order="sideways"),
     "set not a UUID": _forge(_list_cursor("value_score"), set="not-a-uuid"),
     "altered checksum": _forge(_list_cursor("value_score"), resign=False, sym="ZZZ"),
+    "set a number": _forge(_list_cursor(), set=7),
+    "not an object": base64.urlsafe_b64encode(b"[1,2]").decode().rstrip("="),
+    "no set": _forge(_list_cursor(), set=None),
 }
 STALE = {
     "symbol sort": _list_cursor(),

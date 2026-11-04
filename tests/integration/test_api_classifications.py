@@ -105,21 +105,25 @@ def test_thresholds_and_hide_incomplete_follow_the_documented_rule(app: App) -> 
 def test_filters_change_the_match_count_identically_on_every_page(app: App) -> None:
     """Design section 7, "Match count is over the whole set": the filtered total is on each page."""
     client, conn = app
-    set_id = complete_set(conn, active_instruments=6)
+    set_id = complete_set(conn, active_instruments=8)
     for index in range(4):
         seed_scored_stock(conn, set_id, f"H{index}", value=SCORE)
+    seed_scored_stock(conn, set_id, "HX", value=("input_missing", "book_to_price"))
+    seed_scored_stock(conn, set_id, "ZZZ", value=SCORE)
     seed_scored_stock(conn, set_id, "LOW1", value=LOW)
     seed_scored_stock(conn, set_id, "LOW2", value=LOW)
     filters: dict[str, str] = {"value_percentile_min": "50"}
-    for extra in ({}, {"hide_incomplete": "true"}, {"symbol": "h"}):
+    # HX passes the threshold with an input reason and ZZZ under another prefix, so each
+    # variant moves the count away from the threshold alone's 6.
+    for extra, count in (({}, 6), ({"hide_incomplete": "true"}, 5), ({"symbol": "h"}, 5)):
         params = {**filters, **extra, "limit": 2}
         first = client.get("/api/classifications", params=params).json()
         second = client.get(
             "/api/classifications", params={**params, "cursor": first["next_cursor"]}
         ).json()
-        assert first["match_count"] == second["match_count"] == 4, extra
+        assert first["match_count"] == second["match_count"] == count, extra
     zero = client.get("/api/classifications", params={"value_score_min": "0"}).json()
-    assert _symbols(zero) == ["H0", "H1", "H2", "H3"] and zero["match_count"] == 4
+    assert _symbols(zero) == ["H0", "H1", "H2", "H3", "HX", "ZZZ"] and zero["match_count"] == 6
 
 
 def test_nothing_classified_says_so(app: App) -> None:
@@ -174,10 +178,16 @@ def test_compare_reports_unknown_symbols_and_enforces_its_bounds(app: App) -> No
     seed_scored_stock(conn, set_id, "BBB", value=SCORE)
     body = client.get("/api/classifications", params={"symbols": "AAA,BBB,NOPE"}).json()
     assert _symbols(body) == ["AAA", "BBB"] and body["unknown_symbols"] == ["NOPE"]
-    seed_scored_stock(conn, set_id, "OLD", value=SCORE, lifecycle="retired")
+    retired = ("retired", None)
+    seed_scored_stock(
+        conn, set_id, "OLD", value=retired, growth=retired, momentum=retired, lifecycle="retired"
+    )
     kept = client.get("/api/classifications", params={"symbols": "AAA,OLD"}).json()
     assert _symbols(kept) == ["AAA", "OLD"] and kept["unknown_symbols"] == []
-    assert kept["stocks"][1]["lifecycle"] == "retired"
+    old = kept["stocks"][1]
+    assert old["lifecycle"] == "retired"
+    assert {cell["status"] for cell in old["factors"].values()} == {"not_classified"}
+    assert {cell["reason_code"] for cell in old["factors"].values()} == {"retired"}
     for symbols in ("AAA", "A1,A2,A3,A4,A5,A6,A7"):
         response = client.get("/api/classifications", params={"symbols": symbols})
         assert response.status_code == 422 and "`symbols`" in response.json()["error"]["message"]

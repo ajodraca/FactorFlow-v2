@@ -1,0 +1,33 @@
+RED for cycle-3, observed 2026-11-04: the reworked tests run alone against each of review v2's five probe mutants
+(IR-001 case 2: 435:manual:41/42, renumbered cycle-3 manual:1/2; IR-002: 76:manual:21/22/23, renumbered manual:3/4/5).
+Review v2 recorded that the cycle-2 tests survived all five. IR-001 case 7 (retired reason) pins behaviour the reader already has.
+
+=== src_factorflow_api_classification_models.py_435_manual_1
+E           AssertionError: {'hide_incomplete': 'true'}
+E           assert 6 == 5
+FAILED tests/integration/test_api_classifications.py::test_filters_change_the_match_count_identically_on_every_page
+1 failed, 12 passed, 2 warnings in 2.75s
+
+=== src_factorflow_api_classification_models.py_435_manual_2
+E           AssertionError: {'symbol': 'h'}
+E           assert 6 == 5
+FAILED tests/integration/test_api_classifications.py::test_filters_change_the_match_count_identically_on_every_page
+1 failed, 12 passed, 2 warnings in 2.86s
+
+=== src_factorflow_api_routes_classifications.py_76_manual_3
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+FAILED tests/unit/test_api_classification_error_mapping.py::test_a_malformed_list_cursor_is_cursor_invalid[set a number]
+1 failed, 12 passed, 2 warnings in 2.84s
+
+=== src_factorflow_api_routes_classifications.py_76_manual_4
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+FAILED tests/unit/test_api_classification_error_mapping.py::test_a_malformed_list_cursor_is_cursor_invalid[not an object]
+1 failed, 12 passed, 2 warnings in 2.60s
+
+=== src_factorflow_api_routes_classifications.py_76_manual_5
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+FAILED tests/unit/test_api_classification_error_mapping.py::test_a_malformed_list_cursor_is_cursor_invalid[no set]
+1 failed, 12 passed, 2 warnings in 2.57s
