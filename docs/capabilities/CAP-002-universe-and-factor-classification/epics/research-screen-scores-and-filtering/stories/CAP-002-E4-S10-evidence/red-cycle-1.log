@@ -1,0 +1,331 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/app/shell.test.tsx > Shell — no principal is assumed (AC-14) > renders no element matching sign-in, account, or user-menu semantics
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > replaces the main region with the designed state on /coverage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/app/shell.a11y.test.tsx (2 tests | 1 failed) 86ms
+   × Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order 75ms
+     → expected [ …(4) ] to have a length of 5 but got 4
+ ❯ src/app/shell.test.tsx (3 tests | 1 failed) 98ms
+   × Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1) > renders exactly five navigation items in order with exact labels 14ms
+     → expected [ <a …(3)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
+ ❯ src/app/routes.test.tsx (7 tests | 1 failed) 150ms
+   × Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens 75ms
+     → expected [ <a …(2)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
+ ❯ src/app/shell.unreachable.test.tsx (9 tests | 1 failed) 155ms
+   × Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > keeps the navigation rail rendered so the owner is not stranded 13ms
+     → expected [ …(4) ] to have a length of 5 but got 4
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
+AssertionError: expected [ <a …(2)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
+
+- Expected
++ Received
+
+- 5
++ 4
+
+ ❯ src/app/routes.test.tsx:76:19
+     74|     const nav = screen.getByRole("navigation");
+     75|     const items = within(nav).getAllByRole("link");
+     76|     expect(items).toHaveLength(5);
+       |                   ^
+     77| 
+     78|     const runsItem = within(nav).getByText("Runs").closest("a");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
+AssertionError: expected [ …(4) ] to have a length of 5 but got 4
+
+- Expected
++ Received
+
+- 5
++ 4
+
+ ❯ src/app/shell.a11y.test.tsx:37:19
+     35|     const nav = screen.getByRole("navigation");
+     36|     const items = within(nav).getAllByRole("link");
+     37|     expect(items).toHaveLength(5);
+       |                   ^
+     38| 
+     39|     for (const item of items) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/app/shell.test.tsx > Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1) > renders exactly five navigation items in order with exact labels
+AssertionError: expected [ <a …(3)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
+
+- Expected
++ Received
+
+- 5
++ 4
+
+ ❯ src/app/shell.test.tsx:72:19
+     70|     const items = within(nav).getAllByRole("link");
+     71| 
+     72|     expect(items).toHaveLength(5);
+       |                   ^
+     73|     expect(items.map((el) => el.textContent)).toEqual([
+     74|       "Coverage",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > keeps the navigation rail rendered so the owner is not stranded
+AssertionError: expected [ …(4) ] to have a length of 5 but got 4
+
+- Expected
++ Received
+
+- 5
++ 4
+
+ ❯ src/app/shell.unreachable.test.tsx:59:19
+     57|     expect(nav).toBeInTheDocument();
+     58|     const items = within(nav).getAllByRole("link");
+     59|     expect(items).toHaveLength(5);
+       |                   ^
+     60|     expect(items.map((el) => el.textContent)).toEqual([
+     61|       "Coverage",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  4 failed (4)
+      Tests  4 failed | 17 passed (21)
+   Start at  12:16:25
+   Duration  801ms (transform 177ms, setup 142ms, collect 644ms, tests 490ms, environment 768ms, prepare 314ms)
+
+===== routes.test.tsx RED (T005, T006; before routes.tsx registers the five routes; T007, T008 are guards that pass) =====
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
+
+ ❯ src/app/routes.test.tsx (19 tests | 6 failed) 182ms
+   × Routes — declares exactly ten routes > routes.tsx defines four destination routes, one run-detail child route and five CAP-002 routes 3ms
+     → expected [ '/coverage', '/instruments', …(3) ] to have a length of 10 but got 5
+   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research inside the shell with Research active 5ms
+     → Unable to find an element by: [data-testid="stub-research"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/stocks/AAPL inside the shell with Research active 4ms
+     → Unable to find an element by: [data-testid="stub-stock-evidence"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/compare inside the shell with Research active 4ms
+     → Unable to find an element by: [data-testid="stub-compare"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes inside the shell with Research active 4ms
+     → Unable to find an element by: [data-testid="stub-universes"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes/u1 inside the shell with Research active 4ms
+     → Unable to find an element by: [data-testid="stub-universe-detail"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — declares exactly ten routes > routes.tsx defines four destination routes, one run-detail child route and five CAP-002 routes
+AssertionError: expected [ '/coverage', '/instruments', …(3) ] to have a length of 10 but got 5
+
+- Expected
++ Received
+
+- 10
++ 5
+
+ ❯ src/app/routes.test.tsx:136:30
+    134|     // excluded from the count.
+    135|     const storyOwnedRoutes = pathMatches.filter((p) => p !== "/" && p …
+    136|     expect(storyOwnedRoutes).toHaveLength(10);
+       |                              ^
+    137|     expect(storyOwnedRoutes.sort()).toEqual(
+    138|       [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research inside the shell with Research active
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-research"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/app/routes.test.tsx:265:27
+    263| 
+    264|       const main = screen.getByRole("main");
+    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
+       |                           ^
+    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
+    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/stocks/AAPL inside the shell with Research active
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-stock-evidence"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/app/routes.test.tsx:265:27
+    263| 
+    264|       const main = screen.getByRole("main");
+    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
+       |                           ^
+    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
+    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/compare inside the shell with Research active
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-compare"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/app/routes.test.tsx:265:27
+    263| 
+    264|       const main = screen.getByRole("main");
+    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
+       |                           ^
+    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
+    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes inside the shell with Research active
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-universes"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/app/routes.test.tsx:265:27
+    263| 
+    264|       const main = screen.getByRole("main");
+    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
+       |                           ^
+    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
+    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes/u1 inside the shell with Research active
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-universe-detail"]
+
+Ignored nodes: comments, script, style
+[36m<main[39m
+  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
+[36m>[39m
+  [36m<p>[39m
+    [0mNot found[0m
+  [36m</p>[39m
+[36m</main>[39m
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/app/routes.test.tsx:265:27
+    263| 
+    264|       const main = screen.getByRole("main");
+    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
+       |                           ^
+    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
+    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 13 passed (19)
+   Start at  12:18:13
+   Duration  727ms (transform 106ms, setup 29ms, collect 169ms, tests 182ms, environment 156ms, prepare 61ms)
+

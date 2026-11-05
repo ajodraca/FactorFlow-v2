@@ -6,12 +6,15 @@ import { HealthProvider, StatusRegion, UnreachableState, useHealth } from "./sta
 /**
  * Product-vocabulary destinations, in the fixed order UX design section 0
  * and DAC-E1-12 require (STD-UI-1). Not "Jobs", not "Sync", not "Import".
+ * Research is the fifth destination (CAP-002, DEC-0069): the shell capability
+ * removes or replaces this line.
  */
 const DESTINATIONS = [
   { label: "Coverage", to: "/coverage" },
   { label: "Instruments", to: "/instruments" },
   { label: "Runs", to: "/runs" },
   { label: "Settings", to: "/settings" },
+  { label: "Research", to: "/research" },
 ] as const;
 
 /**
@@ -35,7 +38,7 @@ function MainRegion(): JSX.Element {
 
 /**
  * The application shell (UX design section 0; component design section 2.2):
- * a fixed left navigation rail of `--space-7` width holding the four
+ * a fixed left navigation rail of `--space-7` width holding the five
  * destinations, a main region, and a persistent status region pinned to the
  * bottom of the rail. A pure composition, not a design-system component
  * — no spacing or type value here is a literal; every one resolves to a

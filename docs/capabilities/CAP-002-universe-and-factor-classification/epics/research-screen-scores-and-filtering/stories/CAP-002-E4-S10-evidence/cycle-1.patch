@@ -1,0 +1,1038 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..f3c3b5f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutants-cycle-1.json
+@@ -0,0 +1,111 @@
++{
++  "schema": 1,
++  "repo_head": "ffec7a0182ace897b1732664abcf7ea8d9de4d19",
++  "range": "HEAD..worktree",
++  "mutants": [
++    {
++      "id": "web/src/app/shell.tsx:manual:1",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "  { label: \"Research\", to: \"/research\" },\n",
++      "new": ""
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:2",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "{ label: \"Research\", to: \"/research\" }",
++      "new": "{ label: \"Research\", to: \"/research/compare\" }"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:3",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "{ label: \"Research\", to: \"/research\" }",
++      "new": "{ label: \"Research\", to: \"/search\" }"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:4",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "  { label: \"Settings\", to: \"/settings\" },\n  { label: \"Research\", to: \"/research\" },\n",
++      "new": "  { label: \"Research\", to: \"/research\" },\n  { label: \"Settings\", to: \"/settings\" },\n"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:5",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "label: \"Research\"",
++      "new": "label: \"Researches\""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:1",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research\" element={<ResearchScreen />} />\n",
++      "new": ""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:2",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/stocks/:symbol\" element={<StockEvidenceScreen />} />\n",
++      "new": ""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:3",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/compare\" element={<CompareScreen />} />\n",
++      "new": ""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:4",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/universes\" element={<UniversesScreen />} />\n",
++      "new": ""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:5",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/universes/:universeId\" element={<UniverseDetailScreen />} />\n",
++      "new": ""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:6",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "path=\"/research/compare\" element={<CompareScreen />}",
++      "new": "path=\"/research/compare\" element={<UniversesScreen />}"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:7",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "path=\"/research/universes/:universeId\"",
++      "new": "path=\"/research/universes/:id\""
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:8",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"*\" element={<NotFound />} />",
++      "new": "      <Route path=\"*\" element={<ResearchScreen />} />"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..e82a2c4
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,218 @@
++{
++  "schema": 1,
++  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; node_modules/.bin/vitest run web/src/app",
++  "repo_head": "ffec7a0182ace897b1732664abcf7ea8d9de4d19",
++  "tree_patch_sha256": "04831f50cdbf8f0d463069f118e3def1f7535810a78490c6170fb7f9bce076b5",
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutants-cycle-1.json",
++  "mutants_sha256": "9498ea006ca9c400c4cc5c2a3c7214c1ccd27e26613187c7fe85c43b5598c8ef",
++  "jobs": 3,
++  "started": "2026-11-05T18:18:52Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 4.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "9233e493bd2bc67a3a3725efac968fa1475f092f946cb1e076707a1916774afa"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 4.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "c709a4219720584dcb566ca10390ade616f898e7419b8a95e0a201d5de3de5f4"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 4.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "43b39d7c91e4a5867f8b8e03a0c2f8671e3380085f2c60fba9418cbe1a0171bb"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/shell.tsx:manual:1",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "  { label: \"Research\", to: \"/research\" },\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_shell.tsx_manual_1.log",
++      "log_sha256": "abfd0f8c35e3cb712849143d0abdf7fa1c3ad60812649d0227810bf056a5cd20"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:2",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "{ label: \"Research\", to: \"/research\" }",
++      "new": "{ label: \"Research\", to: \"/research/compare\" }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_shell.tsx_manual_2.log",
++      "log_sha256": "79ff9df81b77fb584f77fb9b1dcfa87029e133e0753db588b1f322f1a21ae07e"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:3",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "{ label: \"Research\", to: \"/research\" }",
++      "new": "{ label: \"Research\", to: \"/search\" }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_shell.tsx_manual_3.log",
++      "log_sha256": "503504807d73bb1f5461c52e0766baf06af16b7456ed01e328f533a1eb588575"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:4",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "  { label: \"Settings\", to: \"/settings\" },\n  { label: \"Research\", to: \"/research\" },\n",
++      "new": "  { label: \"Research\", to: \"/research\" },\n  { label: \"Settings\", to: \"/settings\" },\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_shell.tsx_manual_4.log",
++      "log_sha256": "98c076b7f970b7453e970e7a6fa554840e725cd30afd182dd402a003d0fad6ed"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:5",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "label: \"Research\"",
++      "new": "label: \"Researches\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_shell.tsx_manual_5.log",
++      "log_sha256": "58ee1eadf9676f10cc1dbfe65b9818e008d51743319b5ade03bfff7f8f521ada"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:1",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research\" element={<ResearchScreen />} />\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_1.log",
++      "log_sha256": "ad1a6659bc841282f229ec81e778a6a1db28eb847dab64435c8b532f84b325c7"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:2",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/stocks/:symbol\" element={<StockEvidenceScreen />} />\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_2.log",
++      "log_sha256": "36058b8163f3fe04a554bd8993fc79e9d6d85dabbba43ec480b16fb6854217bc"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:3",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/compare\" element={<CompareScreen />} />\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_3.log",
++      "log_sha256": "6488382139809515aa60ce0b535371c73239036e82b9a57eed8298a4838062b1"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:4",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/universes\" element={<UniversesScreen />} />\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_4.log",
++      "log_sha256": "7ed0061b18099b2f33bd47035dcb805617f1dae591328561aa98ffd6082adbe5"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:5",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"/research/universes/:universeId\" element={<UniverseDetailScreen />} />\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_5.log",
++      "log_sha256": "689ca29e05bd2f4bc067a6a575303dffac5a7c755ac5bfef8e1fa2fea38b10d0"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:6",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "path=\"/research/compare\" element={<CompareScreen />}",
++      "new": "path=\"/research/compare\" element={<UniversesScreen />}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_6.log",
++      "log_sha256": "b49dfc047f353ca5d97adc7c69eadce0f4ba51b732cd88ae16815896f70eb4d2"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:7",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "path=\"/research/universes/:universeId\"",
++      "new": "path=\"/research/universes/:id\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_7.log",
++      "log_sha256": "2251a74f2554881aa62af214344815d477ef6215395a03325e92d29415861881"
++    },
++    {
++      "id": "web/src/app/routes.tsx:manual:8",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/routes.tsx",
++      "old": "      <Route path=\"*\" element={<NotFound />} />",
++      "new": "      <Route path=\"*\" element={<ResearchScreen />} />",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results-logs/web_src_app_routes.tsx_manual_8.log",
++      "log_sha256": "2f54c6ddcb3874dd42d162a5ba1ede7cf06129b1e5753badf720f518dd7893b1"
++    }
++  ],
++  "finished": "2026-11-05T18:19:14Z"
++}
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/red-cycle-1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/red-cycle-1.log
+new file mode 100644
+index 0000000..535341b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/red-cycle-1.log
+@@ -0,0 +1,331 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/app/shell.test.tsx > Shell — no principal is assumed (AC-14) > renders no element matching sign-in, account, or user-menu semantics
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > replaces the main region with the designed state on /coverage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/app/shell.a11y.test.tsx (2 tests | 1 failed) 86ms
++   × Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order 75ms
++     → expected [ …(4) ] to have a length of 5 but got 4
++ ❯ src/app/shell.test.tsx (3 tests | 1 failed) 98ms
++   × Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1) > renders exactly five navigation items in order with exact labels 14ms
++     → expected [ <a …(3)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
++ ❯ src/app/routes.test.tsx (7 tests | 1 failed) 150ms
++   × Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens 75ms
++     → expected [ <a …(2)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
++ ❯ src/app/shell.unreachable.test.tsx (9 tests | 1 failed) 155ms
++   × Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > keeps the navigation rail rendered so the owner is not stranded 13ms
++     → expected [ …(4) ] to have a length of 5 but got 4
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
++AssertionError: expected [ <a …(2)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
++
++- Expected
+++ Received
++
++- 5
+++ 4
++
++ ❯ src/app/routes.test.tsx:76:19
++     74|     const nav = screen.getByRole("navigation");
++     75|     const items = within(nav).getAllByRole("link");
++     76|     expect(items).toHaveLength(5);
++       |                   ^
++     77| 
++     78|     const runsItem = within(nav).getByText("Runs").closest("a");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/app/shell.a11y.test.tsx > Shell — keyboard accessibility (DAC-E1-S4-4) > tabs through all four rail destinations in order
++AssertionError: expected [ …(4) ] to have a length of 5 but got 4
++
++- Expected
+++ Received
++
++- 5
+++ 4
++
++ ❯ src/app/shell.a11y.test.tsx:37:19
++     35|     const nav = screen.getByRole("navigation");
++     36|     const items = within(nav).getAllByRole("link");
++     37|     expect(items).toHaveLength(5);
++       |                   ^
++     38| 
++     39|     for (const item of items) {
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/app/shell.test.tsx > Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1) > renders exactly five navigation items in order with exact labels
++AssertionError: expected [ <a …(3)></a>, <a …(2)></a>, …(2) ] to have a length of 5 but got 4
++
++- Expected
+++ Received
++
++- 5
+++ 4
++
++ ❯ src/app/shell.test.tsx:72:19
++     70|     const items = within(nav).getAllByRole("link");
++     71| 
++     72|     expect(items).toHaveLength(5);
++       |                   ^
++     73|     expect(items.map((el) => el.textContent)).toEqual([
++     74|       "Coverage",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/app/shell.unreachable.test.tsx > Shell — unreachable state replaces the main region on every route (AC-16, DAC-E1-15) > keeps the navigation rail rendered so the owner is not stranded
++AssertionError: expected [ …(4) ] to have a length of 5 but got 4
++
++- Expected
+++ Received
++
++- 5
+++ 4
++
++ ❯ src/app/shell.unreachable.test.tsx:59:19
++     57|     expect(nav).toBeInTheDocument();
++     58|     const items = within(nav).getAllByRole("link");
++     59|     expect(items).toHaveLength(5);
++       |                   ^
++     60|     expect(items.map((el) => el.textContent)).toEqual([
++     61|       "Coverage",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  4 failed (4)
++      Tests  4 failed | 17 passed (21)
++   Start at  12:16:25
++   Duration  801ms (transform 177ms, setup 142ms, collect 644ms, tests 490ms, environment 768ms, prepare 314ms)
++
++===== routes.test.tsx RED (T005, T006; before routes.tsx registers the five routes; T007, T008 are guards that pass) =====
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
++
++ ❯ src/app/routes.test.tsx (19 tests | 6 failed) 182ms
++   × Routes — declares exactly ten routes > routes.tsx defines four destination routes, one run-detail child route and five CAP-002 routes 3ms
++     → expected [ '/coverage', '/instruments', …(3) ] to have a length of 10 but got 5
++   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research inside the shell with Research active 5ms
++     → Unable to find an element by: [data-testid="stub-research"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/stocks/AAPL inside the shell with Research active 4ms
++     → Unable to find an element by: [data-testid="stub-stock-evidence"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/compare inside the shell with Research active 4ms
++     → Unable to find an element by: [data-testid="stub-compare"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes inside the shell with Research active 4ms
++     → Unable to find an element by: [data-testid="stub-universes"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++   × Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes/u1 inside the shell with Research active 4ms
++     → Unable to find an element by: [data-testid="stub-universe-detail"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — declares exactly ten routes > routes.tsx defines four destination routes, one run-detail child route and five CAP-002 routes
++AssertionError: expected [ '/coverage', '/instruments', …(3) ] to have a length of 10 but got 5
++
++- Expected
+++ Received
++
++- 10
+++ 5
++
++ ❯ src/app/routes.test.tsx:136:30
++    134|     // excluded from the count.
++    135|     const storyOwnedRoutes = pathMatches.filter((p) => p !== "/" && p …
++    136|     expect(storyOwnedRoutes).toHaveLength(10);
++       |                              ^
++    137|     expect(storyOwnedRoutes.sort()).toEqual(
++    138|       [
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research inside the shell with Research active
++TestingLibraryElementError: Unable to find an element by: [data-testid="stub-research"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/app/routes.test.tsx:265:27
++    263| 
++    264|       const main = screen.getByRole("main");
++    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
++       |                           ^
++    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
++    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/stocks/AAPL inside the shell with Research active
++TestingLibraryElementError: Unable to find an element by: [data-testid="stub-stock-evidence"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/app/routes.test.tsx:265:27
++    263| 
++    264|       const main = screen.getByRole("main");
++    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
++       |                           ^
++    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
++    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/compare inside the shell with Research active
++TestingLibraryElementError: Unable to find an element by: [data-testid="stub-compare"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/app/routes.test.tsx:265:27
++    263| 
++    264|       const main = screen.getByRole("main");
++    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
++       |                           ^
++    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
++    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes inside the shell with Research active
++TestingLibraryElementError: Unable to find an element by: [data-testid="stub-universes"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/app/routes.test.tsx:265:27
++    263| 
++    264|       const main = screen.getByRole("main");
++    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
++       |                           ^
++    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
++    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
++
++ FAIL  src/app/routes.test.tsx > Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2) > renders the screen for /research/universes/u1 inside the shell with Research active
++TestingLibraryElementError: Unable to find an element by: [data-testid="stub-universe-detail"]
++
++Ignored nodes: comments, script, style
++[36m<main[39m
++  [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col overflow-auto p-5"[39m
++[36m>[39m
++  [36m<p>[39m
++    [0mNot found[0m
++  [36m</p>[39m
++[36m</main>[39m
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/app/routes.test.tsx:265:27
++    263| 
++    264|       const main = screen.getByRole("main");
++    265|       expect(within(main).getByTestId(stub)).toBeInTheDocument();
++       |                           ^
++    266|       expect(within(main).queryByText("Not found")).not.toBeInTheDocum…
++    267|       expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
++
++ Test Files  1 failed (1)
++      Tests  6 failed | 13 passed (19)
++   Start at  12:18:13
++   Duration  727ms (transform 106ms, setup 29ms, collect 169ms, tests 182ms, environment 156ms, prepare 61ms)
++
+diff --git a/web/src/app/routes.test.tsx b/web/src/app/routes.test.tsx
+index f8e36c2..ce16cba 100644
+--- a/web/src/app/routes.test.tsx
++++ b/web/src/app/routes.test.tsx
+@@ -1,12 +1,30 @@
+ import { readFileSync } from "node:fs";
+ import path from "node:path";
+ import { fileURLToPath } from "node:url";
+-import { render, screen, waitFor, within } from "@testing-library/react";
++import { act, render, screen, waitFor, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { MemoryRouter } from "react-router-dom";
+-import { describe, expect, it, vi } from "vitest";
++import { type MockInstance, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { SHELL_ROUTES } from "../screens/research/copy";
++import { AppRoutes } from "./routes";
+ import { Shell } from "./shell";
+ 
++vi.mock("../screens/research", () => ({
++  default: () => <p data-testid="stub-research">Research stub</p>,
++}));
++vi.mock("../screens/research/stocks", () => ({
++  default: () => <p data-testid="stub-stock-evidence">Stock evidence stub</p>,
++}));
++vi.mock("../screens/research/compare", () => ({
++  default: () => <p data-testid="stub-compare">Compare stub</p>,
++}));
++vi.mock("../screens/research/universes", () => ({
++  default: () => <p data-testid="stub-universes">Universes stub</p>,
++}));
++vi.mock("../screens/research/universes/detail", () => ({
++  default: () => <p data-testid="stub-universe-detail">Universe detail stub</p>,
++}));
++
+ vi.mock("../api/client", async () => {
+   const actual = await vi.importActual<typeof import("../api/client")>("../api/client");
+   return {
+@@ -62,7 +80,8 @@ async function settleHealthPoll(): Promise<void> {
+ // child of Runs, and Runs stays the active rail item — no fifth destination
+ // appears.
+ describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
+-  it("keeps Runs active and adds no fifth rail item when a run detail route opens", async () => {
++  // Implements TC-COMP-193
++  it("keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens", async () => {
+     render(
+       <MemoryRouter initialEntries={["/runs/run-123"]}>
+         <Shell />
+@@ -72,7 +91,7 @@ describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
+ 
+     const nav = screen.getByRole("navigation");
+     const items = within(nav).getAllByRole("link");
+-    expect(items).toHaveLength(4);
++    expect(items).toHaveLength(5);
+ 
+     const runsItem = within(nav).getByText("Runs").closest("a");
+     expect(runsItem).toHaveAttribute("aria-current", "page");
+@@ -99,10 +118,12 @@ describe("Routes — unknown route renders not-found inside the frame (DAC-E1-S4
+   });
+ });
+ 
+-// Declares exactly the five routes this story owns: four destinations plus
+-// one run-detail child route, and no additional top-level route.
+-describe("Routes — declares exactly five routes", () => {
+-  it("routes.tsx defines four destination routes plus one run-detail child route", () => {
++// Declares exactly the ten routes the shell owns: four destinations, one
++// run-detail child route and the five CAP-002 routes, and no additional
++// top-level route.
++describe("Routes — declares exactly ten routes", () => {
++  // Implements TC-COMP-194 (route-source enumeration)
++  it("routes.tsx defines four destination routes, one run-detail child route and five CAP-002 routes", () => {
+     const routesPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "routes.tsx");
+     const source = readFileSync(routesPath, "utf-8");
+     const pathMatches = [...source.matchAll(/path=["']([^"']+)["']/g)].map((m) => m[1]);
+@@ -112,9 +133,20 @@ describe("Routes — declares exactly five routes", () => {
+     // catch-all are routing infrastructure, not destinations, and are
+     // excluded from the count.
+     const storyOwnedRoutes = pathMatches.filter((p) => p !== "/" && p !== "*");
+-    expect(storyOwnedRoutes).toHaveLength(5);
++    expect(storyOwnedRoutes).toHaveLength(10);
+     expect(storyOwnedRoutes.sort()).toEqual(
+-      ["/coverage", "/instruments", "/runs", "/runs/:runId", "/settings"].sort(),
++      [
++        "/coverage",
++        "/instruments",
++        "/runs",
++        "/runs/:runId",
++        "/settings",
++        "/research",
++        "/research/compare",
++        "/research/stocks/:symbol",
++        "/research/universes",
++        "/research/universes/:universeId",
++      ].sort(),
+     );
+   });
+ });
+@@ -206,3 +238,116 @@ describe("Routes — Run detail renders its real screen inside the shell (CAP-00
+     expect(within(nav).getByText("Runs").closest("a")).toHaveAttribute("aria-current", "page");
+   });
+ });
++
++// TC-COMP-194 (DAC-E4-S10-2): each CAP-002 route renders its screen inside the
++// shell, and Research stays the active rail item on every /research path.
++describe("Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2)", () => {
++  const cases = [
++    ["/research", "stub-research"],
++    ["/research/stocks/AAPL", "stub-stock-evidence"],
++    ["/research/compare", "stub-compare"],
++    ["/research/universes", "stub-universes"],
++    ["/research/universes/u1", "stub-universe-detail"],
++  ] as const;
++
++  // Implements TC-COMP-194
++  it.each(cases)(
++    "renders the screen for %s inside the shell with Research active",
++    async (route, stub) => {
++      render(
++        <MemoryRouter initialEntries={[route]}>
++          <Shell />
++        </MemoryRouter>,
++      );
++      await settleHealthPoll();
++
++      const main = screen.getByRole("main");
++      expect(within(main).getByTestId(stub)).toBeInTheDocument();
++      expect(within(main).queryByText("Not found")).not.toBeInTheDocument();
++      expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
++      expect(screen.getByTestId("status-region")).toBeInTheDocument();
++
++      const nav = screen.getByRole("navigation");
++      expect(within(nav).getByRole("link", { name: "Research" })).toHaveAttribute(
++        "aria-current",
++        "page",
++      );
++    },
++  );
++
++  // Implements TC-COMP-194
++  it("still redirects / to /coverage and renders no CAP-002 screen", async () => {
++    render(
++      <MemoryRouter initialEntries={["/"]}>
++        <Shell />
++      </MemoryRouter>,
++    );
++    await settleHealthPoll();
++
++    const nav = screen.getByRole("navigation");
++    expect(within(nav).getByRole("link", { name: "Coverage" })).toHaveAttribute(
++      "aria-current",
++      "page",
++    );
++    expect(screen.queryByTestId(/^stub-/)).not.toBeInTheDocument();
++  });
++});
++
++// TC-COMP-195 (DAC-E4-S10-3): the unreachable state replaces the main region on
++// every CAP-002 route. This passes before the routes exist — the unreachable
++// state replaces main on every path — so it is a regression guard, not a RED test.
++describe("Routes — the unreachable state applies to every CAP-002 route (DAC-E4-S10-3)", () => {
++  // Restore only this spy: vi.restoreAllMocks() would also reset the
++  // ../api/client mock's implementations for every describe after this one.
++  let fetchSpy: MockInstance<typeof fetch>;
++  beforeEach(() => {
++    fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
++  });
++  afterEach(() => {
++    fetchSpy.mockRestore();
++  });
++
++  // Implements TC-COMP-195
++  it.each([
++    "/research",
++    "/research/stocks/AAPL",
++    "/research/compare",
++    "/research/universes",
++    "/research/universes/u1",
++  ])("replaces main with the unreachable state at %s", async (route) => {
++    render(
++      <MemoryRouter initialEntries={[route]}>
++        <Shell />
++      </MemoryRouter>,
++    );
++
++    const main = screen.getByRole("main");
++    expect(await within(main).findByTestId("unreachable-state")).toBeInTheDocument();
++    expect(within(main).queryByTestId(/^stub-/)).not.toBeInTheDocument();
++    expect(within(screen.getByRole("navigation")).getAllByRole("link")).toHaveLength(5);
++  });
++});
++
++// TC-COMP-197 (DAC-E4-S10-5): every SHELL_ROUTES target is a routed path. A
++// regression guard: the targets are delivered CAP-001 routes.
++describe("Routes — SHELL_ROUTES targets are routed (DAC-E4-S10-5)", () => {
++  // Implements TC-COMP-197
++  it("renders no not-found state at any SHELL_ROUTES target", async () => {
++    const targets = Object.values(SHELL_ROUTES).map((t) =>
++      typeof t === "function" ? t("run-1") : t,
++    );
++    expect(targets.length).toBeGreaterThanOrEqual(3);
++
++    for (const target of targets) {
++      const { unmount } = render(
++        <MemoryRouter initialEntries={[target]}>
++          <AppRoutes />
++        </MemoryRouter>,
++      );
++      await act(async () => {});
++      // The router's catch-all is a <p>; a screen's own "Not found" option is not.
++      expect(screen.queryByText("Not found", { selector: "p" })).not.toBeInTheDocument();
++      unmount();
++    }
++  });
++});
+diff --git a/web/src/app/routes.tsx b/web/src/app/routes.tsx
+index 6988696..0876a5c 100644
+--- a/web/src/app/routes.tsx
++++ b/web/src/app/routes.tsx
+@@ -2,6 +2,11 @@ import type { JSX } from "react";
+ import { Navigate, Route, Routes } from "react-router-dom";
+ import CoverageScreen from "../screens/coverage";
+ import InstrumentsScreen from "../screens/instruments";
++import ResearchScreen from "../screens/research";
++import CompareScreen from "../screens/research/compare";
++import StockEvidenceScreen from "../screens/research/stocks";
++import UniversesScreen from "../screens/research/universes";
++import UniverseDetailScreen from "../screens/research/universes/detail";
+ import RunsScreen from "../screens/runs";
+ import RunDetailScreen from "../screens/runs/detail";
+ import SettingsScreen from "../screens/settings";
+@@ -11,8 +16,9 @@ function NotFound(): JSX.Element {
+ }
+ 
+ /**
+- * The four destinations this story owns, plus one run-detail child route
+- * nested under Runs (DAC-E1-12, DAC-E1-S4-2). An unmatched route renders a
++ * The four CAP-001 destinations, one run-detail child route nested under Runs
++ * (DAC-E1-12, DAC-E1-S4-2), and the five CAP-002 routes under /research
++ * (DEC-0068, DEC-0084). An unmatched route renders a
+  * not-found state inside the shell's main region (DAC-E1-S4-5) rather than
+  * outside the frame — `AppRoutes` is rendered inside `Shell`'s main region,
+  * so this catch-all stays within it.
+@@ -26,6 +32,11 @@ export function AppRoutes(): JSX.Element {
+       <Route path="/runs" element={<RunsScreen />} />
+       <Route path="/runs/:runId" element={<RunDetailScreen />} />
+       <Route path="/settings" element={<SettingsScreen />} />
++      <Route path="/research" element={<ResearchScreen />} />
++      <Route path="/research/stocks/:symbol" element={<StockEvidenceScreen />} />
++      <Route path="/research/compare" element={<CompareScreen />} />
++      <Route path="/research/universes" element={<UniversesScreen />} />
++      <Route path="/research/universes/:universeId" element={<UniverseDetailScreen />} />
+       <Route path="*" element={<NotFound />} />
+     </Routes>
+   );
+diff --git a/web/src/app/shell.a11y.test.tsx b/web/src/app/shell.a11y.test.tsx
+index f021b72..d9307ba 100644
+--- a/web/src/app/shell.a11y.test.tsx
++++ b/web/src/app/shell.a11y.test.tsx
+@@ -22,6 +22,7 @@ async function settleHealthPoll(): Promise<void> {
+ // destination, and the active one is announced via `aria-current` or an
+ // equivalent accessible mechanism.
+ describe("Shell — keyboard accessibility (DAC-E1-S4-4)", () => {
++  // Implements TC-COMP-193
+   it("tabs through all four rail destinations in order", async () => {
+     const user = userEvent.setup();
+     render(
+@@ -33,7 +34,7 @@ describe("Shell — keyboard accessibility (DAC-E1-S4-4)", () => {
+ 
+     const nav = screen.getByRole("navigation");
+     const items = within(nav).getAllByRole("link");
+-    expect(items).toHaveLength(4);
++    expect(items).toHaveLength(5);
+ 
+     for (const item of items) {
+       await user.tab();
+diff --git a/web/src/app/shell.test.tsx b/web/src/app/shell.test.tsx
+index a2dd041..2e3832b 100644
+--- a/web/src/app/shell.test.tsx
++++ b/web/src/app/shell.test.tsx
+@@ -57,7 +57,8 @@ describe("Shell — no principal is assumed (AC-14)", () => {
+ // TC-COMP-303, TC-COMP-329: the rail presents exactly four destinations, in
+ // order, using the exact product vocabulary (STD-UI-1) — not synonyms.
+ describe("Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1)", () => {
+-  it("renders exactly four navigation items in order with exact labels", async () => {
++  // Implements TC-COMP-193
++  it("renders exactly five navigation items in order with exact labels", async () => {
+     render(
+       <MemoryRouter>
+         <Shell />
+@@ -68,12 +69,13 @@ describe("Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1)", () =
+     const nav = screen.getByRole("navigation");
+     const items = within(nav).getAllByRole("link");
+ 
+-    expect(items).toHaveLength(4);
++    expect(items).toHaveLength(5);
+     expect(items.map((el) => el.textContent)).toEqual([
+       "Coverage",
+       "Instruments",
+       "Runs",
+       "Settings",
++      "Research",
+     ]);
+   });
+ 
+diff --git a/web/src/app/shell.tsx b/web/src/app/shell.tsx
+index 4eed846..2e137f7 100644
+--- a/web/src/app/shell.tsx
++++ b/web/src/app/shell.tsx
+@@ -6,12 +6,15 @@ import { HealthProvider, StatusRegion, UnreachableState, useHealth } from "./sta
+ /**
+  * Product-vocabulary destinations, in the fixed order UX design section 0
+  * and DAC-E1-12 require (STD-UI-1). Not "Jobs", not "Sync", not "Import".
++ * Research is the fifth destination (CAP-002, DEC-0069): the shell capability
++ * removes or replaces this line.
+  */
+ const DESTINATIONS = [
+   { label: "Coverage", to: "/coverage" },
+   { label: "Instruments", to: "/instruments" },
+   { label: "Runs", to: "/runs" },
+   { label: "Settings", to: "/settings" },
++  { label: "Research", to: "/research" },
+ ] as const;
+ 
+ /**
+@@ -35,7 +38,7 @@ function MainRegion(): JSX.Element {
+ 
+ /**
+  * The application shell (UX design section 0; component design section 2.2):
+- * a fixed left navigation rail of `--space-7` width holding the four
++ * a fixed left navigation rail of `--space-7` width holding the five
+  * destinations, a main region, and a persistent status region pinned to the
+  * bottom of the rail. A pure composition, not a design-system component
+  * — no spacing or type value here is a literal; every one resolves to a
+diff --git a/web/src/app/shell.unreachable.test.tsx b/web/src/app/shell.unreachable.test.tsx
+index e242e4a..64586b1 100644
+--- a/web/src/app/shell.unreachable.test.tsx
++++ b/web/src/app/shell.unreachable.test.tsx
+@@ -43,6 +43,7 @@ describe("Shell — unreachable state replaces the main region on every route (A
+     });
+   }
+ 
++  // Implements TC-COMP-193
+   it("keeps the navigation rail rendered so the owner is not stranded", async () => {
+     render(
+       <MemoryRouter initialEntries={["/coverage"]}>
+@@ -55,12 +56,13 @@ describe("Shell — unreachable state replaces the main region on every route (A
+     const nav = screen.getByRole("navigation");
+     expect(nav).toBeInTheDocument();
+     const items = within(nav).getAllByRole("link");
+-    expect(items).toHaveLength(4);
++    expect(items).toHaveLength(5);
+     expect(items.map((el) => el.textContent)).toEqual([
+       "Coverage",
+       "Instruments",
+       "Runs",
+       "Settings",
++      "Research",
+     ]);
+   });
+ 

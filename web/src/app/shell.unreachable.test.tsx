@@ -43,6 +43,7 @@ describe("Shell — unreachable state replaces the main region on every route (A
     });
   }
 
+  // Implements TC-COMP-193
   it("keeps the navigation rail rendered so the owner is not stranded", async () => {
     render(
       <MemoryRouter initialEntries={["/coverage"]}>
@@ -55,12 +56,13 @@ describe("Shell — unreachable state replaces the main region on every route (A
     const nav = screen.getByRole("navigation");
     expect(nav).toBeInTheDocument();
     const items = within(nav).getAllByRole("link");
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(5);
     expect(items.map((el) => el.textContent)).toEqual([
       "Coverage",
       "Instruments",
       "Runs",
       "Settings",
+      "Research",
     ]);
   });
 

@@ -1,11 +1,29 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { type MockInstance, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SHELL_ROUTES } from "../screens/research/copy";
+import { AppRoutes } from "./routes";
 import { Shell } from "./shell";
+
+vi.mock("../screens/research", () => ({
+  default: () => <p data-testid="stub-research">Research stub</p>,
+}));
+vi.mock("../screens/research/stocks", () => ({
+  default: () => <p data-testid="stub-stock-evidence">Stock evidence stub</p>,
+}));
+vi.mock("../screens/research/compare", () => ({
+  default: () => <p data-testid="stub-compare">Compare stub</p>,
+}));
+vi.mock("../screens/research/universes", () => ({
+  default: () => <p data-testid="stub-universes">Universes stub</p>,
+}));
+vi.mock("../screens/research/universes/detail", () => ({
+  default: () => <p data-testid="stub-universe-detail">Universe detail stub</p>,
+}));
 
 vi.mock("../api/client", async () => {
   const actual = await vi.importActual<typeof import("../api/client")>("../api/client");
@@ -59,10 +77,11 @@ async function settleHealthPoll(): Promise<void> {
 }
 
 // TC-COMP-330 (DAC-E1-S4-2): opening a run detail route renders it as a
-// child of Runs, and Runs stays the active rail item — no fifth destination
+// child of Runs, and Runs stays the active rail item — no destination beyond the five
 // appears.
 describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
-  it("keeps Runs active and adds no fifth rail item when a run detail route opens", async () => {
+  // Implements TC-COMP-193
+  it("keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens", async () => {
     render(
       <MemoryRouter initialEntries={["/runs/run-123"]}>
         <Shell />
@@ -72,7 +91,7 @@ describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
 
     const nav = screen.getByRole("navigation");
     const items = within(nav).getAllByRole("link");
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(5);
 
     const runsItem = within(nav).getByText("Runs").closest("a");
     expect(runsItem).toHaveAttribute("aria-current", "page");
@@ -99,22 +118,35 @@ describe("Routes — unknown route renders not-found inside the frame (DAC-E1-S4
   });
 });
 
-// Declares exactly the five routes this story owns: four destinations plus
-// one run-detail child route, and no additional top-level route.
-describe("Routes — declares exactly five routes", () => {
-  it("routes.tsx defines four destination routes plus one run-detail child route", () => {
+// Declares exactly the ten routes the shell owns: four destinations, one
+// run-detail child route and the five CAP-002 routes, and no additional
+// top-level route.
+describe("Routes — declares exactly ten routes", () => {
+  // Implements TC-COMP-194 (route-source enumeration)
+  it("routes.tsx defines four destination routes, one run-detail child route and five CAP-002 routes", () => {
     const routesPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "routes.tsx");
     const source = readFileSync(routesPath, "utf-8");
     const pathMatches = [...source.matchAll(/path=["']([^"']+)["']/g)].map((m) => m[1]);
 
-    // Exactly the five routes this story owns: the four destinations plus
-    // the run-detail child route. A redirect from "/" and a "*" not-found
+    // Exactly the ten routes the shell owns: the four destinations, the
+    // run-detail child route and the five CAP-002 routes. A redirect from "/" and a "*" not-found
     // catch-all are routing infrastructure, not destinations, and are
     // excluded from the count.
     const storyOwnedRoutes = pathMatches.filter((p) => p !== "/" && p !== "*");
-    expect(storyOwnedRoutes).toHaveLength(5);
+    expect(storyOwnedRoutes).toHaveLength(10);
     expect(storyOwnedRoutes.sort()).toEqual(
-      ["/coverage", "/instruments", "/runs", "/runs/:runId", "/settings"].sort(),
+      [
+        "/coverage",
+        "/instruments",
+        "/runs",
+        "/runs/:runId",
+        "/settings",
+        "/research",
+        "/research/compare",
+        "/research/stocks/:symbol",
+        "/research/universes",
+        "/research/universes/:universeId",
+      ].sort(),
     );
   });
 });
@@ -204,5 +236,140 @@ describe("Routes — Run detail renders its real screen inside the shell (CAP-00
 
     const nav = screen.getByRole("navigation");
     expect(within(nav).getByText("Runs").closest("a")).toHaveAttribute("aria-current", "page");
+  });
+});
+
+// TC-COMP-194 (DAC-E4-S10-2): each CAP-002 route renders its screen inside the
+// shell, and Research stays the active rail item on every /research path.
+describe("Routes — CAP-002 routes render inside the shell (DAC-E4-S10-2)", () => {
+  const cases = [
+    ["/research", "stub-research"],
+    ["/research/stocks/AAPL", "stub-stock-evidence"],
+    ["/research/compare", "stub-compare"],
+    ["/research/universes", "stub-universes"],
+    ["/research/universes/u1", "stub-universe-detail"],
+  ] as const;
+
+  // Implements TC-COMP-194
+  it.each(cases)(
+    "renders the screen for %s inside the shell with Research active",
+    async (route, stub) => {
+      render(
+        <MemoryRouter initialEntries={[route]}>
+          <Shell />
+        </MemoryRouter>,
+      );
+      await settleHealthPoll();
+
+      const main = screen.getByRole("main");
+      expect(within(main).getByTestId(stub)).toBeInTheDocument();
+      expect(within(main).queryByText("Not found")).not.toBeInTheDocument();
+      expect(screen.getByTestId("nav-rail")).toBeInTheDocument();
+      expect(screen.getByTestId("status-region")).toBeInTheDocument();
+
+      const nav = screen.getByRole("navigation");
+      expect(within(nav).getByRole("link", { name: "Research" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+    },
+  );
+
+  // Implements TC-COMP-194
+  it("still redirects / to /coverage and renders no CAP-002 screen", async () => {
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const nav = screen.getByRole("navigation");
+    expect(within(nav).getByRole("link", { name: "Coverage" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.queryByTestId(/^stub-/)).not.toBeInTheDocument();
+  });
+});
+
+// TC-COMP-195 (DAC-E4-S10-3): the unreachable state replaces the main region on
+// every CAP-002 route. This passes before the routes exist — the unreachable
+// state replaces main on every path — so it is a regression guard, not a RED test.
+describe("Routes — the unreachable state applies to every CAP-002 route (DAC-E4-S10-3)", () => {
+  // Restore only this spy: vi.restoreAllMocks() would also reset the
+  // ../api/client mock's implementations for every describe after this one.
+  let fetchSpy: MockInstance<typeof fetch>;
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
+  });
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  // Implements TC-COMP-195
+  it.each([
+    "/research",
+    "/research/stocks/AAPL",
+    "/research/compare",
+    "/research/universes",
+    "/research/universes/u1",
+  ])("replaces main with the unreachable state at %s", async (route) => {
+    render(
+      <MemoryRouter initialEntries={[route]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+
+    const main = screen.getByRole("main");
+    expect(await within(main).findByTestId("unreachable-state")).toBeInTheDocument();
+    expect(within(main).queryByTestId(/^stub-/)).not.toBeInTheDocument();
+    expect(within(screen.getByRole("navigation")).getAllByRole("link")).toHaveLength(5);
+  });
+});
+
+// TC-COMP-197 (DAC-E4-S10-5): every SHELL_ROUTES target is a routed path. A
+// regression guard: the targets are delivered CAP-001 routes.
+describe("Routes — SHELL_ROUTES targets are routed (DAC-E4-S10-5)", () => {
+  // Implements TC-COMP-197
+  it("renders no not-found state at any SHELL_ROUTES target", async () => {
+    const targets = Object.values(SHELL_ROUTES).map((t) =>
+      typeof t === "function" ? t("run-1") : t,
+    );
+    expect(targets.length).toBeGreaterThanOrEqual(3);
+
+    for (const target of targets) {
+      const { unmount } = render(
+        <MemoryRouter initialEntries={[target]}>
+          <AppRoutes />
+        </MemoryRouter>,
+      );
+      await act(async () => {});
+      // The router's catch-all is a <p>; a screen's own "Not found" option is not.
+      expect(screen.queryByText("Not found", { selector: "p" })).not.toBeInTheDocument();
+      unmount();
+    }
+  });
+});
+
+// Review v1 IR-001 (DAC-E4-6; DEC-0069, classification-ui 2.2): the Research
+// rail link targets exactly /research, in that case and with no query string.
+// aria-current alone cannot tell, because NavLink matches it case-insensitively
+// and ignores the search.
+describe("Routes — the Research rail link targets exactly /research (DAC-E4-6)", () => {
+  // Implements TC-COMP-193
+  it("links the Research rail item to /research", async () => {
+    render(
+      <MemoryRouter initialEntries={["/coverage"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const nav = screen.getByRole("navigation");
+    expect(within(nav).getByRole("link", { name: "Research" })).toHaveAttribute(
+      "href",
+      "/research",
+    );
   });
 });

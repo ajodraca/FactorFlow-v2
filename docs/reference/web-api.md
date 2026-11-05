@@ -20,8 +20,7 @@ two layers and one codec:
   `use-research-query.ts`, which binds the URL through it; the Filters pane
   and threshold sentence; the save dialog, for `toThresholds`; the results
   table, which reads each page with `toListParams`; and the Members tab, for
-  `ResearchQuery` and `DEFAULT_RESEARCH_QUERY`. No route mounts any of them
-  yet.
+  `ResearchQuery` and `DEFAULT_RESEARCH_QUERY`.
 
 Same-origin only: the bundle is served by the API process, so every path is
 relative.
