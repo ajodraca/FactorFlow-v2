@@ -74,7 +74,8 @@ acquisition run it reflects, in state `building`, `complete` or `failed`, with
 at most one `building` at a time), `classification_set_factor`, `factor_input`
 and `factor_classification`. The classification scheduler is described in
 [`docs/reference/classification-scheduler.md`](docs/reference/classification-scheduler.md);
-no running process starts it yet, and nothing writes the factor tables.
+the API process starts it in its lifespan, and each set it builds writes the
+factor tables.
 What exists today is described
 below and in `docs/reference/` — everything else in `docs/` is
 specification for work not yet implemented.
@@ -182,8 +183,8 @@ variable** — never its value.
 | `FACTORFLOW_RUN_HEARTBEAT_SECONDS` | no | `60` | Minimum 1 second |
 | `FACTORFLOW_RUN_STALE_AFTER_SECONDS` | no | `900` | See the timing rules below |
 | `FACTORFLOW_RUN_POLL_INTERVAL_SECONDS` | no | `5` | Minimum 1 second |
-| `FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS` | no | `5` | Minimum 1 second. Read by `ClassificationSettings`, which no running process uses yet. Must be less than the build timeout, or the settings are refused |
-| `FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS` | no | `300` | Minimum 1 second. Read by `ClassificationSettings`, which no running process uses yet |
+| `FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS` | no | `5` | Minimum 1 second. Read by the API at start; must be less than the build timeout. An invalid value stops the API from starting |
+| `FACTORFLOW_CLASSIFICATION_BUILD_TIMEOUT_SECONDS` | no | `300` | Minimum 1 second. Read by the API at start; an invalid value stops the API from starting |
 | `FACTORFLOW_LOG_LEVEL` | no | `INFO` | Applied to the root logger by `configure_logging()` |
 
 ### Timing rules
@@ -1586,6 +1587,10 @@ a closed pool. Because the sweep lives in the application container rather
 than the ingestion container, it continues operating when ingestion is stopped
 or crash-looping — the property that makes AC-20 hold for a crash-looping
 ingestion container.
+
+The lifespan also starts the classification scheduler beside the reclaim
+sweep and stops it on shutdown; see
+[API lifespan](docs/reference/classification-scheduler.md#api-lifespan).
 
 ### Host and Origin checks
 

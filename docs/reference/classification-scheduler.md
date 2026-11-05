@@ -8,8 +8,8 @@ CAP-002-E2-S8. The loop, `run_classification_loop`, and the build handoff,
 `build_claimed_set`, are CAP-002-E2-S9. The module's three statements are in
 `classification/sql/`, and its settings are in `settings.py`.
 
-No running process starts the loop yet: nothing under `src/` calls
-`run_classification_loop`.
+The API process starts the loop in its lifespan (CAP-002-E3-S6); see
+[API lifespan](#api-lifespan).
 
 ## `claim_next_set`
 
@@ -151,6 +151,34 @@ parameters. The other two take no parameters.
 
 The engine's [safety rules](classification-engine.md#safety-rules) apply to
 these files too.
+
+## API lifespan
+
+`_lifespan` in `src/factorflow/api/app.py` runs the loop as an asyncio task
+beside the run-reclaim task (`component-design-classification-scheduler.md`
+section 2.3, CAP-002-E3-S6):
+
+1. After the pool opens, it reads `RunSettings()` and then
+   `ClassificationSettings()`. An invalid `FACTORFLOW_CLASSIFICATION_*` value
+   raises `ConfigurationError`, whose message names the variable and not the
+   value, and the API does not start: neither task is created.
+2. It creates the reclaim task, then the classification task,
+   `run_classification_loop(pool=pool, settings=classification_settings)`.
+   The loop's first act is the start-up `reclaim_interrupted_sets`, so every
+   API start records a set left `building` by the previous process as
+   `failed`.
+3. On shutdown it cancels and awaits the classification task first, then the
+   reclaim task, then closes the pool. A classification task that had already
+   ended with an exception is logged once, `classification scheduler task
+   ended with an error`, and not re-raised, so the reclaim task is still
+   cancelled and the pool still closed.
+
+`tests/unit/test_api_classification_lifespan.py` holds this order with
+recording doubles (TC-COMP-086, TC-COMP-087). Integration tests that start the
+real app through `classification_app` in
+`tests/integration/api_classification_support.py` run it with a stand-in loop
+that waits to be cancelled, so the start-up reclaim cannot race the rows they
+seed (DEC-0284).
 
 ## Process boundary
 
