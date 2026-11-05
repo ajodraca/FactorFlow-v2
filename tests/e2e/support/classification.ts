@@ -128,6 +128,14 @@ export function seedScoredStore(stocks: readonly StockSeed[]): SeededStore {
     `INSERT INTO instrument (symbol, lifecycle, retired_at) VALUES ${symbols.join(", ")}`,
     ACQUISITION_DATABASE,
   );
+  // Coverage, not lifecycle, decides which stocks a universe accepts (AC-15), so each
+  // seeded stock, retired-at-build ones included, has acquired data on record.
+  sql(
+    `INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to)
+     SELECT instrument_id, 'prices', DATE '2025-01-01', DATE '2026-01-01'
+       FROM instrument WHERE symbol = ANY(ARRAY[${stocks.map((stock) => lit(stock.symbol)).join(", ")}])`,
+    ACQUISITION_DATABASE,
+  );
   const ids = sql(
     `WITH run AS (
        INSERT INTO acquisition_run (state, history_depth_years, started_at, ended_at)
@@ -158,10 +166,15 @@ export function seedScoredStore(stocks: readonly StockSeed[]): SeededStore {
     `INSERT INTO factor_classification (set_id, instrument_id, factor, status, score, percentile,
                                        reason_code, reason_input, reason_detail)
      VALUES ${stocks.flatMap((stock) => classificationRows(seededSetId, stock)).join(", ")}`,
-    `INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, as_of,
-                              known_on, detail)
-     VALUES ${stocks.flatMap((stock) => inputRows(seededSetId, stock)).join(", ")}`,
   ];
+  const inputs = stocks.flatMap((stock) => inputRows(seededSetId, stock));
+  if (inputs.length > 0) {
+    statements.push(
+      `INSERT INTO factor_input (set_id, instrument_id, factor, input_name, status, value, as_of,
+                              known_on, detail)
+     VALUES ${inputs.join(", ")}`,
+    );
+  }
   if (names.length > 0) {
     statements.push(
       `INSERT INTO instrument_reference (instrument_id, value_hash, company_name, payload)
@@ -248,7 +261,8 @@ export function seedUniverseRecorded(
        SELECT universe_id, 'member_added', (SELECT instrument_id FROM instrument WHERE symbol = ${lit(symbol)}), ${at}, ${day}
        FROM universe`,
   );
-  return sql(
+  // psql prints a command tag per statement, so the id is the last line.
+  const output = sql(
     [
       "INSERT INTO universe DEFAULT VALUES",
       `INSERT INTO universe_event (universe_id, event_type, name, recorded_at, recorded_on)
@@ -258,6 +272,7 @@ export function seedUniverseRecorded(
     ].join(";\n"),
     ACQUISITION_DATABASE,
   );
+  return output.split("\n").at(-1) as string;
 }
 
 function jsonHeaders(): Record<string, string> {

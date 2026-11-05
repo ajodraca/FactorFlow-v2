@@ -126,7 +126,8 @@ test("TC-E2E-012: removing the last member is refused and the universe is retire
   const remove = row.getByRole("button", { name: "Remove RRR from Core" });
   await expect(remove).toHaveAttribute("aria-disabled", "true");
   await expect(row).toContainText("This is the last member. Retire the universe instead.");
-  await remove.click();
+  // aria-disabled, not disabled: force the click past Playwright's enabled check.
+  await remove.click({ force: true });
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(row).toBeVisible();
 

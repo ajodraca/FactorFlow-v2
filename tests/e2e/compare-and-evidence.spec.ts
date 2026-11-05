@@ -2,8 +2,8 @@ import { type Page, expect, test } from "@playwright/test";
 import { ACQUISITION_BASE_URL, resetAcquisitionStore } from "./support/acquisition";
 import {
   type StockSeed,
-  fillerStocks,
   createUniverseViaApi,
+  fillerStocks,
   retireInstrument,
   seedScoredStore,
 } from "./support/classification";
