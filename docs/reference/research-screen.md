@@ -69,15 +69,19 @@ the Add stocks and retire dialogs (CAP-002-E1-S9), also in
 and the Compare screen (CAP-002-E5-S1), in `compare/`; see
 [Compare screen](#compare-screen-compare).
 
-No route mounts any of them yet: `/research`, the universes routes and
-`/research/compare` are registered by CAP-002-E4-S10, which imports
-`ResearchScreen`. The dialogs' only importers are
+`web/src/app/routes.tsx` mounts the five screens inside the shell
+(CAP-002-E4-S10): `ResearchScreen` at `/research`, `StockEvidenceScreen` at
+`/research/stocks/:symbol`, `CompareScreen` at `/research/compare`,
+`UniversesScreen` at `/research/universes` and `UniverseDetailScreen` at
+`/research/universes/:universeId`; the rail's Research destination links to
+`/research`. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
 dialogs and the tests, `dialog-frame.tsx` also by the Add stocks dialog. The results table's importers are its test and the
 Members tab (CAP-002-E4-S9 is its other planned host), which also imports
 `filters-pane.tsx` and `use-research-query.ts`. The detail tabs are
-imported by their tests and the detail page (CAP-002-E1-S9), which no route
-mounts yet either. The Compare screen's importer is its test. The factor
+imported by their tests and the detail page (CAP-002-E1-S9), which
+`routes.tsx` mounts. The Compare screen's importers are its test and
+`routes.tsx`. The factor
 cell, the *Possibly restated* mark, the not-current banner, the as-of line,
 the selection tray, the inspector and the comparison table in
 `web/src/components/patterns/` import `copy.ts`, and all but the tray and
@@ -888,8 +892,8 @@ The universes list and its create dialog (UX design 1.3; classification-ui
   `sentence` as a link and leaves the words verbatim (DEC-0254). The Add
   stocks dialog imports `withLink` too.
 
-No route mounts the screen yet (CAP-002-E4-S10), and universe detail is
-CAP-002-E1-S9's ([Universe detail page](#universe-detail-page-universesdetail)).
+`routes.tsx` mounts the screen at `/research/universes` (CAP-002-E4-S10), and
+universe detail is CAP-002-E1-S9's ([Universe detail page](#universe-detail-page-universesdetail)).
 
 ### The list (`index.tsx`)
 
@@ -1240,8 +1244,8 @@ Open warnings from the story's implementation review v1:
 `/research/stocks/:symbol` (AC-12 to AC-17, AC-23; DAC-E5-S3-1 to -5;
 DEC-0184, DEC-0185, DEC-0186; DEC-0279, DEC-0280). It reads the `symbol`
 route parameter and renders an inner view keyed by it, so a changed symbol
-reads once and resets the tab state. `routes.tsx` imports it
-(CAP-002-E4-S10); no route in `web/src` mounts it before that story.
+reads once and resets the tab state. `routes.tsx` mounts it at
+`/research/stocks/:symbol` (CAP-002-E4-S10).
 
 The view reads `getStockEvidence(symbol)` on mount, when the symbol changes
 and on **Try again**; a response from a superseded read is ignored. Above the
@@ -1332,8 +1336,8 @@ DEC-0108, DEC-0109, DEC-0271). Four modules:
   universeName)` and the type `AddStocksError`;
 - `retire-dialog.tsx`, `RetireDialog` and the type `RetireError`.
 
-No route mounts the page yet: CAP-002-E4-S10 registers
-`/research/universes/:universeId`. Every write goes through
+`routes.tsx` mounts the page at
+`/research/universes/:universeId` (CAP-002-E4-S10). Every write goes through
 `classification-client.ts` ([`web-api.md`](web-api.md)).
 
 ### The page (`index.tsx`)
@@ -1523,7 +1527,7 @@ side by side (UX design 1.5; classification-ui 2.5, 2.7; AC-15, AC-16,
 AC-23, DAC-E5-1, DAC-E5-S1-2, DAC-E5-S1-3, DAC-E5-S1-5; CAP-002-E5-S1;
 DEC-0070, DEC-0163, DEC-0175, DEC-0176). It draws the stocks with
 [`ComparisonTable`](component-patterns.md#the-comparison-table-comparison-tabletsx).
-No route mounts it yet: CAP-002-E4-S10 registers `/research/compare`. It
+`routes.tsx` mounts it at `/research/compare` (CAP-002-E4-S10). It
 mounts no as-of line, banner or poll (DEC-0175).
 
 ### The URL

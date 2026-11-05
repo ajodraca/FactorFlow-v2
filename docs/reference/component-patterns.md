@@ -43,7 +43,7 @@ They read their types from `web/src/api/classification-types.ts`
 ([`web-api.md`](web-api.md#types-classification-typests)) and their number
 formatting and owner-facing strings from `web/src/screens/research/`
 ([`research-screen.md`](research-screen.md)); no string shown to the owner is
-written in any of them. No route mounts any of them yet. Outside the
+written in any of them. Outside the
 directory, `web/src/screens/research/results-table.tsx` (CAP-002-E4-S6)
 and `web/src/screens/research/universes/detail/members-tab.tsx`
 (CAP-002-E1-S8, for its as-of table) import the factor cell, and
