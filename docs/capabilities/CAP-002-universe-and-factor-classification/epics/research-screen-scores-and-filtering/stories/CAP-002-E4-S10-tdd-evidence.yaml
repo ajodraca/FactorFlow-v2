@@ -1,0 +1,44 @@
+# TDD evidence for CAP-002-E4-S10 - Shell composition: Research destination and five routes.
+# Decisions: DEC-0173 and DEC-0174 (edit boundary and shape of the new assertions; provisional, per the task plan).
+# One cycle, not the plan's two: the rail edit (T001-T004, T009) cannot kill a wrong-link-target mutant of its own
+# DESTINATIONS entry inside the DAC-E4-S10-4 edit boundary (no new assertion in the three shell test files), so the
+# rail and route cycles are reviewed and mutated together; the route tests (T006) kill those mutants.
+# Reviews: one independent code-review subagent (APPROVED) and one independent spec-drift subagent (no drift) judged the staged diff.
+# T011 audit: git diff --name-only lists exactly shell.tsx, routes.tsx and the four tests plus this story's evidence files;
+# client.ts, copy.ts and copy.test.ts are unchanged; npm run test (77 files, 2100 tests), lint, format, tsc --noEmit and build all pass.
+# Follow-up for the owner: shell.a11y.test.tsx's title still says "all four rail destinations" (DEC-0173 does not list it).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013]
+    description: >
+      Research rail destination and five /research routes: the five count assertions, the two label lists, the route-source
+      enumeration and the named titles move to the five-destination shell; new route-render, unreachable-state and SHELL_ROUTES
+      assertions are appended to routes.test.tsx; shell.tsx gains the Research entry and routes.tsx the five routes.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/red-cycle-1.log
+    red_log_sha256: b2ac70907075dc7e9ea0e299e709283ebd439c066b83009ed2030890a4bcfe51
+    red_evidence: >
+      Rail half: 4 failed, 17 passed (five-item count and Research label) before shell.tsx changed. Routes half: 6 failed,
+      13 passed (route-source enumeration and the five route-render cases) before routes.tsx registered the routes;
+      the unreachable and SHELL_ROUTES cases are guards that pass before the edit, as the plan says.
+    green_evidence: >
+      npx vitest run web/src/app 77 passed; npm run test 77 files, 2100 tests passed; npm run lint, npm run format and
+      npx tsc --noEmit clean; npm run build succeeded.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: bb5273a48ba9aeb2b460555e91447c22c81903ebf127a9de9138f86dcd2357a3
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/research-screen-scores-and-filtering/stories/CAP-002-E4-S10-evidence/mutation-cycle-1-results.json
+      results_sha256: 6463cfd101c14867cb4f231ee2b9abd2cf11fe7c9cff99f7a8dd90764da10a1c
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

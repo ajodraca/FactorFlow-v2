@@ -22,6 +22,7 @@ async function settleHealthPoll(): Promise<void> {
 // destination, and the active one is announced via `aria-current` or an
 // equivalent accessible mechanism.
 describe("Shell — keyboard accessibility (DAC-E1-S4-4)", () => {
+  // Implements TC-COMP-193
   it("tabs through all four rail destinations in order", async () => {
     const user = userEvent.setup();
     render(
@@ -33,7 +34,7 @@ describe("Shell — keyboard accessibility (DAC-E1-S4-4)", () => {
 
     const nav = screen.getByRole("navigation");
     const items = within(nav).getAllByRole("link");
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(5);
 
     for (const item of items) {
       await user.tab();
