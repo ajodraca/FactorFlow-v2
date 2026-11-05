@@ -63,6 +63,15 @@ export function holdSymbol(symbol: string): Promise<void> {
   return stubControl("hold", { symbol });
 }
 
+/** The stub answers no financial statements for `symbol` until `restoreSymbol`. */
+export function withholdSymbol(symbol: string): Promise<void> {
+  return stubControl("withhold", { symbol });
+}
+
+export function restoreSymbol(symbol: string): Promise<void> {
+  return stubControl("restore", { symbol });
+}
+
 export function releaseSymbol(symbol: string): Promise<void> {
   return stubControl("release", { symbol });
 }

@@ -8,6 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-05
 updated: 2026-11-05
+last_reworked_review: e2e-tests-automation-review-v1.md
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"

@@ -1,5 +1,4 @@
-import { execFileSync } from "node:child_process";
-import { type APIRequestContext, expect, type test as playwrightTest } from "@playwright/test";
+import { type APIRequestContext, expect } from "@playwright/test";
 import { ACQUISITION_BASE_URL } from "./acquisition";
 import { sql } from "./database";
 
@@ -8,7 +7,7 @@ import { sql } from "./database";
  * (CAP-002-e2e-tests-automation-tasks T004; DEC-0285): seeding a scored
  * classification set by SQL in the shape `tests/integration/reader_seed.py`
  * uses, creating universes and retiring a followed stock through the API as
- * test preconditions, and a guard for the cases that need a real build.
+ * test preconditions.
  *
  * The behaviour a test asserts is always driven through the interface; the
  * API is used for preconditions only. A test fixture, not a product contract.
@@ -361,27 +360,4 @@ export async function waitForNewSet(
     )
     .toBe(true);
   return found;
-}
-
-/**
- * Skips the calling test, with the reason in the report, while a real build
- * cannot yet score value or growth: the statement payload keys are unresolved
- * (system design section 8 question 1; DEC-0285). Call it first in a guarded
- * test; once `line_items.unresolved()` is empty the test runs unchanged.
- */
-export function skipUnlessLineItemsResolved(test: typeof playwrightTest): void {
-  const output = execFileSync(
-    "uv",
-    [
-      "run",
-      "python",
-      "-c",
-      "from factorflow.classification import line_items; print(len(line_items.unresolved()))",
-    ],
-    { encoding: "utf-8" },
-  ).trim();
-  test.skip(
-    output !== "0",
-    "Blocked: Massive payload keys unresolved (system design section 8 question 1, DEC-0285)",
-  );
 }

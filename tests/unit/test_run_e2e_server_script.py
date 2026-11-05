@@ -50,4 +50,6 @@ def test_script_generates_a_per_run_key_and_launches_the_test_entry_point() -> N
     assert _INGESTION_LAUNCH in lines
     assert "-m factorflow.ingestion_main" not in text
     api_at = lines.index(_API_LAUNCH)
-    assert lines[api_at + 1] == "uv run python -m factorflow.app_main &"
+    # The acquisition API runs through the test-only entry point that installs test statement
+    # payload keys (CAP-002-e2e-tests AR-001; DEC-0290).
+    assert lines[api_at + 1] == "uv run python tests/e2e/support/api_e2e_main.py &"

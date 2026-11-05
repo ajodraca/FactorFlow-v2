@@ -45,11 +45,12 @@ test("TC-E2E-007: sorting, narrowing, comparing three stocks and opening evidenc
 }) => {
   // Implements TC-E2E-007
   seedScoredStore([
-    stock("AAA", 90, 80),
+    // Momentum is not monotone in symbol order, so the default order cannot pass for the sort.
+    stock("AAA", 50, 80),
     stock("BBB", 70, 30),
-    stock("CCC", 50, 60),
-    stock("DDD", 30, 90),
-    stock("EEE", 10, 50),
+    stock("CCC", 90, 60),
+    stock("DDD", 10, 90),
+    stock("EEE", 30, 50),
     stock("FFF", 99, 99),
     ...fillerStocks(),
   ]);
@@ -60,6 +61,10 @@ test("TC-E2E-007: sorting, narrowing, comparing three stocks and opening evidenc
   await lookIn(page, "Core");
   await expect(page.locator("tr[data-symbol]")).toHaveCount(5);
   await page.getByRole("button", { name: "Sort by momentum percentile" }).click();
+  await expect(page.getByRole("columnheader", { name: /Momentum/ })).toHaveAttribute(
+    "aria-sort",
+    "ascending",
+  );
   const growth = page.getByRole("textbox", { name: "Value threshold for growth", exact: true });
   await growth.fill("50");
   await growth.press("Enter");
@@ -67,25 +72,10 @@ test("TC-E2E-007: sorting, narrowing, comparing three stocks and opening evidenc
   // Growth percentile of at least 50 keeps AAA, CCC, DDD and EEE; FFF is outside the universe.
   await expect(page.getByRole("heading", { level: 1, name: "4 stocks match" })).toBeVisible();
   await expect(page.locator("tr[data-symbol]")).toHaveCount(4);
+  // The sort control's first choice is ascending: DDD 10, EEE 30, AAA 50, CCC 90. The default
+  // order is by symbol (AAA, CCC, DDD, EEE), so only a working sort reaches this one.
+  await expect.poll(() => rowSymbols(page)).toEqual(["DDD", "EEE", "AAA", "CCC"]);
   const symbols = await rowSymbols(page);
-  expect([...symbols].sort()).toEqual(["AAA", "CCC", "DDD", "EEE"]);
-  const momentum = (
-    await page
-      .locator("tr[data-symbol]")
-      .evaluateAll((rows) =>
-        rows.map((row) =>
-          Number(
-            row.querySelectorAll('[data-testid="factor-percentile"]')[2]?.textContent ?? Number.NaN,
-          ),
-        ),
-      )
-  ).map(Number);
-  const ascending = [...momentum].sort((a, b) => a - b);
-  const descending = [...momentum].sort((a, b) => b - a);
-  expect(
-    momentum.join(",") === ascending.join(",") || momentum.join(",") === descending.join(","),
-  ).toBe(true);
-
   // Check three stocks and compare them side by side.
   const picked = symbols.slice(0, 3);
   for (const symbol of picked) {
