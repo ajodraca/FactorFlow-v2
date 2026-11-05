@@ -94,6 +94,8 @@ def test_classification_task_created_beside_reclaim_task(events: list[str]) -> N
     assert "classification:start" in seen
     assert seen.index("pool:open") < seen.index("reclaim:start")
     assert seen.index("pool:open") < seen.index("classification:start")
+    # The classification task is created after the reclaim task (design 2.3, plan T007 (3)).
+    assert seen.index("reclaim:start") < seen.index("classification:start")
 
 
 def test_both_tasks_cancelled_before_pool_close(events: list[str]) -> None:
@@ -104,6 +106,8 @@ def test_both_tasks_cancelled_before_pool_close(events: list[str]) -> None:
     assert "reclaim:cancelled" in events
     assert events.index("classification:cancelled") < events.index("pool:close")
     assert events.index("reclaim:cancelled") < events.index("pool:close")
+    # Cancellation order: classification, then reclaim, then the pool (design 2.3, plan T007 (4)).
+    assert events.index("classification:cancelled") < events.index("reclaim:cancelled")
 
 
 def test_reclaim_cancelled_when_classification_task_already_finished(
@@ -198,5 +202,7 @@ def test_invalid_classification_settings_fail_startup_before_any_task(
 
     message = str(excinfo.value)
     assert "FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS" in message
+    # The message names the variable and never the submitted value (DAC-E1-7, plan T006).
+    assert "0" not in message.replace("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "")
     assert "reclaim:start" not in events
     assert "classification:start" not in events

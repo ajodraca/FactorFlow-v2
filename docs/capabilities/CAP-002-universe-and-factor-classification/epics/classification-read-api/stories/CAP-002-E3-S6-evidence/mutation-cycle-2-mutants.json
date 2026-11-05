@@ -1,0 +1,27 @@
+{
+ "schema": "mutation-run/1",
+ "repo_head": "9dd9b2ada38b1b2d9b691910fa6f82be187a84d5",
+ "range": "working-tree",
+ "mutants": [
+  {
+   "id": "src/factorflow/api/app.py:213:manual:r1",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 213,
+   "old": "        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n",
+   "new": "        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n",
+   "note": "cancel order swapped: reclaim block before classification block (plan T007(4), Resolved Conflicts; design 2.3)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "src/factorflow/api/app.py:200:manual:r2",
+   "operator": "manual",
+   "file": "src/factorflow/api/app.py",
+   "line": 200,
+   "old": "    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n",
+   "new": "    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n",
+   "note": "creation order swapped: classification task created before reclaim task (plan T003 Test 3, T007(3); design 2.3)",
+   "cycle": "cycle-2"
+  }
+ ]
+}
