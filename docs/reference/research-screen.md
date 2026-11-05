@@ -64,20 +64,25 @@ and a universe's Members and History tabs with the remove dialog
 and the universe detail page that mounts them, with its summary header and
 the Add stocks and retire dialogs (CAP-002-E1-S9), also in
 `universes/detail/`; see
-[Universe detail page](#universe-detail-page-universesdetail).
+[Universe detail page](#universe-detail-page-universesdetail);
 
-No route mounts any of them yet: `/research` and the universes routes are
-registered by CAP-002-E4-S10, which imports `ResearchScreen`. The dialogs' only importers are
+and the Compare screen (CAP-002-E5-S1), in `compare/`; see
+[Compare screen](#compare-screen-compare).
+
+No route mounts any of them yet: `/research`, the universes routes and
+`/research/compare` are registered by CAP-002-E4-S10, which imports
+`ResearchScreen`. The dialogs' only importers are
 their tests; `notices.tsx` and `dialog-frame.tsx` are imported only by the
 dialogs and the tests, `dialog-frame.tsx` also by the Add stocks dialog. The results table's importers are its test and the
 Members tab (CAP-002-E4-S9 is its other planned host), which also imports
 `filters-pane.tsx` and `use-research-query.ts`. The detail tabs are
 imported by their tests and the detail page (CAP-002-E1-S9), which no route
-mounts yet either. The factor cell, the *Possibly
-restated* mark, the not-current banner, the as-of line, the selection tray
-and the inspector in `web/src/components/patterns/` import `copy.ts`, and
-all but the tray and the mark import `format.ts`
-(CAP-002-E4-S3, CAP-002-E4-S4, CAP-002-E4-S7); see
+mounts yet either. The Compare screen's importer is its test. The factor
+cell, the *Possibly restated* mark, the not-current banner, the as-of line,
+the selection tray, the inspector and the comparison table in
+`web/src/components/patterns/` import `copy.ts`, and all but the tray and
+the mark import `format.ts` (CAP-002-E4-S3, CAP-002-E4-S4, CAP-002-E4-S7,
+CAP-002-E5-S1); see
 [`component-patterns.md`](component-patterns.md). The poll hook's only
 importer is its test. The URL query model the screens read lives in
 `web/src/api/research-query.ts`; see
@@ -144,7 +149,7 @@ section 14.
 | `SELECTION`, `DIALOGS` | the selection tray and inspector, and the save and add dialogs. `SELECTION` entries no design contains carry a doc comment saying so (CAP-002-E4-S7; DEC-0165): `inspectorLoading`, *Loading the selected stock.*, the inspector skeleton's screen-reader text; `inputsLineAsOf(inputs, asOf)`, the inputs clause with no `known_on`; `inputsLineSeparator`, `; `, between clauses of differing dates. `inUniversesLead`, `listComma` and `listAnd` split `inUniverses` so the inspector can link each name. Two `DIALOGS` entries no design contains carry a doc comment saying so (CAP-002-E4-S8): `enterName`, *Enter a name for the universe.*, the one empty-name field error every universe name field shares (DEC-0167, DEC-0169); `universe`, *Universe*, the Add dialog's select label |
 | `NOTICES` | the success notices' `dismiss` label, *Dismiss*, which no design words (CAP-002-E4-S8; DEC-0168) |
 | `UNIVERSES`, `UNIVERSE_DETAIL` | the universes list and create dialog, and one universe's detail. `UNIVERSES` entries no design contains carry a doc comment saying so: `hideDetailsFor(name)`, `loading` (*Loading…*), `noActive`, `resetFilter` (*Reset filter*; DEC-0254), `nameRequired`, and `createdAt(timestamp)`, whose lifecycle twin is `UNIVERSE_LIFECYCLE.retiredAt(timestamp)` (DEC-0256, provisional). CAP-002-E1-S8 added six `UNIVERSE_DETAIL` entries: `removeAction` (*Remove…*) and `renamedDetail(before, after)` (*{before} → {after}*) are UX 1.4's; `asOfFiltersNote` (*Filters and sorting apply to current members only.*; DEC-0105), `malformedDate` (*Enter a date as YYYY-MM-DD.*) and `noLongerMember(symbol, name)` (DEC-0107), and `loadMore` (*Load more*; DEC-0107) are in no design and carry a doc comment saying so. CAP-002-E1-S9 added four (DEC-0109): `addedStocks(added, name, alreadyMembers)`, `DIALOGS.added` with *stock* singular at one; `allAlreadyMembers(count, name)` (*All {n} were already members of {name}.*), in no design; `addNotFollowed(symbols)`, the Add stocks `instrument_not_acquired` refusal, UX 1.4's *as in Section 1.3* with the verb adapted; and `breadcrumb` (*Breadcrumb*), the detail page's breadcrumb `nav` label, which no design words |
-| `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels |
+| `COMPARE`, `EVIDENCE` | Compare, and the stock evidence panels. CAP-002-E5-S1 added to `COMPARE`: `duplicate(symbol)`, *{symbol} is already in this comparison.*, the entry field's duplicate error; `notCompared(symbols)`, *Not compared because there is no current score for {symbols}.*, whose doc comment says the symbols are the reported ones in the order received and why it must not say they are not followed (DEC-0131); `inputLabels`, the eight input rows' names (*Book-to-price* to *12-month return*); `breadcrumb` (*Compare*); `measure` (*Measure*), the label column's header for screen readers only; `removeGlyph` (`×`); `dates` (*Dates*), `asOf` (*As of*) and `knownOn` (*Known on*), the dates disclosure |
 
 ### The retire allow-list
 
@@ -1509,3 +1514,152 @@ Open warnings from the story's implementation review v1:
   conventions require (IR-004).
 - The TDD evidence says T017 (c) and (d) are recorded in the task plan; they
   are in the evidence file's header comment (IR-005).
+
+## Compare screen (`compare/`)
+
+`compare/index.tsx` holds one module, the default export `CompareScreen`: the
+Compare screen at `/research/compare?symbols=A,B`, where 2 to 6 stocks sit
+side by side (UX design 1.5; classification-ui 2.5, 2.7; AC-15, AC-16,
+AC-23, DAC-E5-1, DAC-E5-S1-2, DAC-E5-S1-3, DAC-E5-S1-5; CAP-002-E5-S1;
+DEC-0070, DEC-0163, DEC-0175, DEC-0176). It draws the stocks with
+[`ComparisonTable`](component-patterns.md#the-comparison-table-comparison-tabletsx).
+No route mounts it yet: CAP-002-E4-S10 registers `/research/compare`. It
+mounts no as-of line, banner or poll (DEC-0175).
+
+### The URL
+
+The chosen symbols live in the URL only, as one comma-joined `symbols` value,
+the form the selection tray links with (DEC-0163). The screen reads
+`searchParams.get("symbols")`, splits it on `,`, trims each part, drops empty
+parts, uppercases, and de-duplicates keeping the order. It never calls
+`getAll` or a second `decodeURIComponent`. **Add** and remove write the URL
+by `navigate` to `/research/compare?symbols=` followed by the symbols, each
+`encodeURIComponent`-encoded and joined by literal commas, the exact string
+the tray builds. The list read hands the array to `listClassifications`,
+which alone encodes it for the API ([`web-api.md`](web-api.md)).
+
+### Reads
+
+The reads run again when the URL's symbols change and on **Try again**:
+
+| Symbols in the URL | Reads |
+|--------------------|-------|
+| none, or more than six | none |
+| one | no list read (DEC-0176); `getStockEvidence(symbol)` |
+| two to six | `listClassifications({ symbols })`, then, in parallel, `getStockEvidence` for each symbol the list returned a row for |
+
+Evidence is cached by symbol for the screen's lifetime. A symbol whose
+evidence is cached is not read again unless the list read has a set and the
+cached evidence's `set` is a different one, or none: inputs of another set
+would sit under the list's scores (STD-UI-16). While a later read is in
+flight the table last shown stays, and a read the URL has moved on from is
+dropped. A failed evidence read fails the whole read, except
+`instrument_not_found` for a single symbol (below).
+
+### Columns
+
+With two to six symbols, each symbol with a row in the list read becomes a
+column, in URL order: its name, lifecycle and factor cells from that row, and
+its input rows from its evidence. A symbol without a row is never silently
+absent (DAC-E5-1): one in the list's `unknownSymbols`, or one the server
+neither returned nor reported (once the list read is the current URL's), is
+named in the notice `COMPARE.notCompared(symbols)`, *Not compared because
+there is no current score for {symbols}.*, the symbols joined by `, `. The
+table gets the list read's `factors`, so a factor that is not ranked carries
+its group statement.
+
+With one symbol, the evidence read alone builds the column, without
+`factors` (DEC-0176):
+
+- a `set` of `null` renders `RESULTS.neverScored`, *No stocks have been
+  scored yet.*, and no column;
+- a set and all three factor keys `value`, `growth` and `momentum`, checked
+  at run time, give the column;
+- a set with a missing key, a followed stock with no row in the current set
+  (DEC-0131, DEC-0140), gives no column and the notice naming the symbol;
+- `instrument_not_found` gives no column and the notice naming the symbol.
+
+A list read with `neverClassified` renders `RESULTS.neverScored` too.
+
+### The page
+
+Top to bottom:
+
+- a `nav` labelled `UNIVERSE_DETAIL.breadcrumb`: *Research* (`/research`) ›
+  *Compare* (`COMPARE.breadcrumb`), `aria-current="page"`;
+- one card (`section`, `rounded border border-border bg-card p-4`) holding:
+  1. the `h1`, `COMPARE.comparing(n)`, *Comparing {n} stocks*, in
+     `text-lg`, where `n` is the URL's symbol count;
+  2. the entry row (below);
+  3. `COMPARE.atMost`, *A comparison holds up to 6 stocks.*, at six symbols
+     or more, or when the list read was refused with `validation_error`;
+  4. the prompt: `COMPARE.chooseTwoToSixEmpty`, the long form, with no
+     symbol, when the entry field also takes focus; `COMPARE.chooseTwoToSix`
+     with one;
+  5. the not-compared notice, when it names a symbol;
+  6. while a read is in flight and none has loaded yet (the first read, or
+     **Try again** after a failure), or two or more symbols have no list
+     read yet, a skeleton: an `output` with `aria-busy`, `UNIVERSES.loading`
+     for screen readers, and one `aria-hidden` placeholder per symbol;
+  7. a failed read, other than `validation_error`, as an alert:
+     `failureSentence` of the `ClassificationApiError`, or of
+     `list-classifications` by code for any other error, never its message,
+     with **Try again** (`RESULTS.tryAgain`), which runs the reads again;
+  8. `RESULTS.neverScored`, when never populated;
+  9. the table, and under it `CELL.restatedExplanation` in `text-xs
+     text-muted-foreground` once, when any column's value or growth cell or
+     input has `restatedPossible`. No mark references it by
+     `aria-describedby` (DEC-0176).
+
+`ApiUnreachableError` renders nothing: the shell owns that state.
+
+### Adding and removing
+
+**The entry row** is a `form` holding the text field labelled
+`COMPARE.addAStock`, *Add a stock*, drawn in `border-input`, and **Add**
+(`COMPARE.add`, a submit `button` with `data-variant="secondary"`). A field
+error is a `role="alert"` `p` in `text-sm` and `--destructive` under the
+field; while it shows, the field is `aria-invalid`, described by it, and has
+a `--destructive` border. Typing clears it.
+
+At six symbols or more **Add** is blocked (DEC-0070): `aria-disabled` and described
+by the *A comparison holds up to 6 stocks.* paragraph, never `disabled`, so
+it keeps focus. Submitting while blocked, by a click or Enter, reads and
+adds nothing.
+
+Submitting reads the field trimmed and uppercased:
+
+- empty does nothing;
+- a symbol already in the URL gives the field error `COMPARE.duplicate`,
+  *{symbol} is already in this comparison.*, and reads nothing;
+- otherwise `getStockEvidence(symbol)`. On success the evidence is cached,
+  the field and its error clear, and the URL is written with the symbol
+  appended to the symbols the URL holds by then, unless that would exceed
+  six. On refusal the field error is `failureSentence` of
+  `get-stock-evidence` with the code and the symbol, so
+  `instrument_not_found` reads *FactorFlow doesn't follow a stock named
+  {SYMBOL}.*; no column is added and the URL is unchanged.
+  `ApiUnreachableError` sets no error.
+
+**Removing** a column writes the URL without its symbol. Focus moves to the
+header of the column to its right, else to its left, once that header is on
+screen; with no column left, it moves to the entry field. A target whose
+header never comes once the read settles is dropped.
+
+Tests: `compare.test.tsx` (TC-COMP-128, TC-COMP-129, TC-COMP-190, and the
+entry and bounds, removal and focus, states and read outcome cases), with
+`listClassifications` and `getStockEvidence` mocked over the actual client
+module.
+
+Open warnings from the story's implementation review v3:
+
+- **Add** shows no submitting state while its evidence read is in flight,
+  although the form and button specifications UX 1.5 cites ask for one, so a
+  second press reads again (IR-001).
+- Evidence fetched in the same pass as the list read is not compared with
+  the list's set, so a set completing between the two reads can put the new
+  set's inputs under the old set's scores until the URL next changes
+  (IR-002).
+- With a never-populated list and two or more symbols, every symbol is also
+  named in the not-compared notice beside *No stocks have been scored yet.*
+  (IR-003).
