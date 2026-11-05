@@ -25,9 +25,17 @@ CAP-002-E4-S7 added the two selection controls:
 - `inspector-panel.tsx`, the panel beside the results that reads and
   explains one selected stock.
 
-Six of the seven are pure functions of their props: no state, no effect, no
-fetch. The inspector is the exception: it holds its read's state and issues
+CAP-002-E5-S1 added one:
+
+- `comparison-table.tsx`, the table that sets 2 to 6 stocks side by side,
+  one column each.
+
+Six of the eight are pure functions of their props: no state, no effect, no
+fetch. The inspector is one exception: it holds its read's state and issues
 `getStockEvidence` itself ([The inspector](#the-inspector-inspector-paneltsx)).
+The comparison table is the other: it holds each input row's open or closed
+dates disclosure, and fetches nothing
+([The comparison table](#the-comparison-table-comparison-tabletsx)).
 The poll that feeds the banner and the line lives beside the screen code, in
 `web/src/screens/research/use-score-set-poll.ts`
 ([`research-screen.md`](research-screen.md#the-score-set-poll-use-score-set-pollts)).
@@ -36,14 +44,18 @@ They read their types from `web/src/api/classification-types.ts`
 formatting and owner-facing strings from `web/src/screens/research/`
 ([`research-screen.md`](research-screen.md)); no string shown to the owner is
 written in any of them. No route mounts any of them yet. Outside the
-directory, only `web/src/screens/research/results-table.tsx` (CAP-002-E4-S6)
+directory, `web/src/screens/research/results-table.tsx` (CAP-002-E4-S6)
 and `web/src/screens/research/universes/detail/members-tab.tsx`
-(CAP-002-E1-S8, for its as-of table) import one, the factor cell; otherwise their importers are each other
+(CAP-002-E1-S8, for its as-of table) import the factor cell, and
+`web/src/screens/research/compare/index.tsx` (CAP-002-E5-S1) imports the
+comparison table; otherwise their importers are each other
 (`status-badge.tsx` is imported by the banner and the line, `factor-cell.tsx`
-by the inspector) and their own tests beside them (`factor-cell.test.tsx`,
+by the inspector and the comparison table, `restated-mark.tsx` by the
+comparison table) and their own tests beside them (`factor-cell.test.tsx`,
 `restated-mark.test.tsx`, `not-current-banner.test.tsx`,
-`as-of-line.test.tsx`, `selection-tray.test.tsx`, `inspector-panel.test.tsx`),
-which carry TC-COMP-073, TC-COMP-074, TC-COMP-097, TC-COMP-109, TC-COMP-140 to
+`as-of-line.test.tsx`, `selection-tray.test.tsx`, `inspector-panel.test.tsx`,
+`comparison-table.test.tsx`), which carry TC-COMP-073, TC-COMP-074,
+TC-COMP-097, TC-COMP-109, TC-COMP-114, TC-COMP-127, TC-COMP-140 to
 TC-COMP-143, TC-COMP-174, TC-COMP-175, TC-COMP-176 and TC-COMP-179.
 CAP-002-E4-S9 is the first planned consumer of the banner, the line, the
 tray and the inspector.
@@ -483,3 +495,105 @@ the loading, failure, **Try again**, stale-read, factor-block and explanation
 cases). Open warning IR-001 of implementation review v4: no test yet drives
 the new selection's own read failing after a stale success settles in the
 commit gap; the code handles it.
+
+## The comparison table (`comparison-table.tsx`)
+
+`ComparisonTable({ columns, factors, onRemove })` renders 2 to 6 stocks side
+by side, one column each, with the three factors as row groups
+(classification-ui section 2.5; UX design 1.5; AC-15, AC-16, AC-23,
+DAC-E5-1, DAC-E5-3, DAC-E5-5, DAC-E5-S1-1, DAC-E5-S1-4, DAC-E5-S1-5;
+CAP-002-E5-S1). It is presentational: the Compare screen
+([`research-screen.md`](research-screen.md#compare-screen-compare)) builds
+the columns and removes one on request.
+
+| Prop | Type | Meaning |
+|------|------|---------|
+| `columns` | `ComparisonColumn[]` | one per stock, in screen order: `symbol`, `name`, `lifecycle`, `factors` (the three `FactorCell` results, from the list read) and `inputs` (the `InputRow`s, from the evidence read) |
+| `factors` | `Record<FactorName, FactorSummary>`, optional | the list read's per-factor summary. Absent for a single column, which has no list read (DEC-0176) |
+| `onRemove` | `(symbol: string) => void` | called by a column's remove control |
+
+A stock keeps its column whatever its cells say, and `reasonInput`, a payload
+key, is never read (DEC-0151, STD-UI-1).
+
+**Container.** A `section` named `COMPARE.comparisonOf(n)`, *Comparison of
+{n} stocks*, with `tabIndex={0}` so the keyboard can scroll it, and
+`overflow-x-auto`. It holds one native `table` with the same `aria-label` and
+the classes `w-full border-collapse text-sm`. The row headers and the corner
+header are `sticky left-0` with a right border and the `bg-background` fill,
+so the labels stay in view while the columns scroll.
+
+**Column headers.** The corner is a `th` `scope="col"` holding
+`COMPARE.measure`, *Measure*, for screen readers only. Each stock's header is
+a `th` `scope="col"` with `data-symbol` and `tabIndex={-1}` (focusable by
+script, for the screen's focus after a removal), holding:
+
+1. the symbol as a react-router `Link` to `/research/stocks/{symbol}`, the
+   symbol `encodeURIComponent`-encoded, in `font-semibold underline`;
+2. the name in `text-xs text-muted-foreground`;
+3. for a `retired` stock, the *Not followed* badge: `data-variant`
+   `status-neutral`, `bg-status-neutral-muted text-status-neutral` at the
+   delivered badge size, with the factor cell's dash-in-a-circle shape before
+   `CELL.notFollowed` (STD-UI-8). It repeats that markup, since
+   `factor-cell.tsx` exports no badge;
+4. the remove control: a ghost `button` (`data-variant="ghost"`) showing
+   `COMPARE.removeGlyph`, `×`, named `COMPARE.removeFromComparison(symbol)`,
+   *Remove {symbol} from comparison*, which calls `onRemove(symbol)`.
+
+**Rows.** For each factor in the order value, growth, momentum:
+
+1. the group header, a `th` `scope="row"` spanning every column in
+   `bg-secondary font-semibold`, reading `FACTOR_LABELS[factor]`. When
+   `factors` is given and the factor's summary is not `ranked`, it adds
+   `COMPARE.notEnoughToRankGroup(qualifiedCount, minPeerSetSize)`, *Not
+   enough to rank · {n} qualified, {min} needed*, once for the group, not per
+   cell;
+2. *Percentile* (`COMPARE.percentile`): each cell is
+   [`FactorCell`](#the-factor-cell-factor-celltsx) without `showScore`, so a
+   retired stock reads *Not followed*, an unranked one *Not enough to rank*,
+   an incomplete one *Incomplete* with its `reasonDetail` title, and a
+   restated value or growth percentile carries the mark;
+3. *Standardised score* (`COMPARE.standardisedScore`), in
+   `text-muted-foreground`: `formatScore(score)` in `font-numeric` only for a
+   `classified` cell with a score and a percentile whose `reasonCode` is
+   neither `retired` nor `not_enough_stocks`; any other cell shows
+   `CELL.absentValue`, the em dash;
+4. the factor's input rows, labelled from `COMPARE.inputLabels`: value has
+   *Book-to-price*, *Earnings yield* and *Free-cash-flow yield*, formatted
+   with `formatRatio`; growth has *Revenue growth* and *EPS growth*, and
+   momentum *3-month return*, *6-month return* and *12-month return*, all
+   formatted with `formatRate`.
+
+The percentile and score row headers add `, {factor}` for screen readers
+only, so each row's name says which group it belongs to.
+
+**An input cell** finds the column's `InputRow` by `inputName` (DEC-0077):
+
+| Input | Renders |
+|-------|---------|
+| no row (a retired stock) | the em dash only; no status, since no row is not a fault (DEC-0073, DEC-0077) |
+| `missing` | the em dash and a *Missing* badge (`INPUT_STATUS.missing`; `data-variant="coverage-absent"`, `bg-value-missing-muted text-value-missing`) |
+| `outdated` | the value and an *Outdated* badge (`data-variant="status-warning"`, `bg-status-warning-muted text-status-warning`) with a triangle shape |
+| `not_computable` | the value, or the em dash when it is null, and *Couldn't be computed* in `text-xs text-status-warning` with the triangle, no badge fill |
+| any other status | the value in `font-numeric`, or the em dash when it is null |
+
+A row with `restatedPossible` adds the
+[*Possibly restated* mark](#the-possibly-restated-mark-restated-marktsx),
+which returns nothing on momentum. The explanation sentence is not the
+table's: the screen renders it once under the table.
+
+**Dates disclosure** (DEC-0078). Each input row's header holds a ghost
+**Dates** button (`COMPARE.dates`) named `COMPARE.showDatesFor(label)` with
+the label in lower case, *Show dates for book-to-price*, and carrying
+`aria-expanded`. It toggles that row for every column at once; each row's
+state is its own and starts closed. Open, each cell adds two lines in
+`text-xs text-muted-foreground`: `COMPARE.asOf` and the input's `asOf`, and
+`COMPARE.knownOn` and its `knownOn`, either one the em dash when absent.
+
+Tests: `comparison-table.test.tsx` (TC-COMP-114, TC-COMP-127, and the
+per-input status, structure, dates disclosure and header cases), rendering
+the table with props and mocking nothing.
+
+Open warnings from the story's implementation review v3: the cells take
+`px-3 py-2` with no row height token or row rule, not the `data-table` row
+tokens UX 1.5 cites (IR-004); and the named `section` is a region landmark
+that repeats the table's own name (IR-005).

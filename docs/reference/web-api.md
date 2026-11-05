@@ -10,9 +10,9 @@ two layers and one codec:
   (CAP-002-E4-S1; `component-design-classification-ui.md` sections 2.1 and
   2.4). Its importers are in `web/src/screens/research/`: the score-set
   poll, the Filters pane, the save and add dialogs, the results table, the
-  Universes screen, the universe detail tabs and the universe detail page
-  ([`research-screen.md`](research-screen.md)), none of which a route mounts
-  yet;
+  Universes screen, the universe detail tabs, the universe detail page and
+  the Compare screen ([`research-screen.md`](research-screen.md)), none of
+  which a route mounts yet;
 - the Research URL codec, `research-query.ts`, between the Research URL query
   and the list read's parameters (CAP-002-E4-S2;
   `component-design-classification-ui.md` section 2.4). Its importers are in
