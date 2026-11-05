@@ -19,8 +19,8 @@ the momentum inputs (see [Momentum inputs](#momentum-inputs)). The third forms
 each factor's peer set from the set's `factor_input` rows and writes every
 instrument's classification on each factor (see
 [Classification](#classification)). Only the
-[classification scheduler](classification-scheduler.md) calls `build`, and
-no running process starts it yet.
+[classification scheduler](classification-scheduler.md) calls `build`; the API
+process starts it in its lifespan.
 
 ## `build`
 

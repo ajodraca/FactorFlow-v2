@@ -1,0 +1,38 @@
+# RED for cycle-2 (review v1 IR-001..IR-003). Tree: ea885eb. Each mutant is applied to production, then the
+# lifespan suite is run twice: with the tests as review v1 judged them (9dd9b2a) and as strengthened (ea885eb).
+
+=== mutant src/factorflow/api/app.py:213:manual:r1 (cancel order swapped: reclaim block before classification block (plan T007(4), Resolved Conflicts; design 2.3)) | tests at 9dd9b2a (before rework) | exit 0
+Installed 43 packages in 67ms
+
+=== mutant src/factorflow/api/app.py:213:manual:r1 (cancel order swapped: reclaim block before classification block (plan T007(4), Resolved Conflicts; design 2.3)) | tests at ea885eb (rework) | exit 1
+E       AssertionError: assert 4 < 3
+E        +  where 4 = <built-in method index of list object at 0x10b2a89c0>('classification:cancelled')
+E        +    where <built-in method index of list object at 0x10b2a89c0> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
+E        +  and   3 = <built-in method index of list object at 0x10b2a89c0>('reclaim:cancelled')
+E        +    where <built-in method index of list object at 0x10b2a89c0> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
+FAILED tests/unit/test_api_classification_lifespan.py::test_both_tasks_cancelled_before_pool_close
+1 failed, 5 passed in 0.56s
+
+=== mutant src/factorflow/api/app.py:200:manual:r2 (creation order swapped: classification task created before reclaim task (plan T003 Test 3, T007(3); design 2.3)) | tests at 9dd9b2a (before rework) | exit 0
+6 passed in 0.52s
+
+=== mutant src/factorflow/api/app.py:200:manual:r2 (creation order swapped: classification task created before reclaim task (plan T003 Test 3, T007(3); design 2.3)) | tests at ea885eb (rework) | exit 1
+E       AssertionError: assert 2 < 1
+E        +  where 2 = <built-in method index of list object at 0x10b0b5100>('reclaim:start')
+E        +    where <built-in method index of list object at 0x10b0b5100> = ['pool:open', 'classification:start', 'reclaim:start'].index
+E        +  and   1 = <built-in method index of list object at 0x10b0b5100>('classification:start')
+E        +    where <built-in method index of list object at 0x10b0b5100> = ['pool:open', 'classification:start', 'reclaim:start'].index
+FAILED tests/unit/test_api_classification_lifespan.py::test_classification_task_created_beside_reclaim_task
+1 failed, 5 passed in 0.55s
+
+=== mutant src/factorflow/config/settings.py:66:manual:r3 (the configuration error carries the submitted value (plan T006; DAC-E1-7; review v1 IR-003)) | tests at 9dd9b2a (before rework) | exit 0
+6 passed in 0.52s
+
+=== mutant src/factorflow/config/settings.py:66:manual:r3 (the configuration error carries the submitted value (plan T006; DAC-E1-7; review v1 IR-003)) | tests at ea885eb (rework) | exit 1
+E       assert '0' not in ": Input sho... (input '0')"
+E         
+E         '0' is contained here:
+E           1 (input '0')
+E         ?           +
+FAILED tests/unit/test_api_classification_lifespan.py::test_invalid_classification_settings_fail_startup_before_any_task
+1 failed, 5 passed in 0.54s

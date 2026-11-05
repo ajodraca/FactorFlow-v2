@@ -1,0 +1,31 @@
+.....F
+=================================== FAILURES ===================================
+______ test_invalid_classification_settings_fail_startup_before_any_task _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109068200>
+events = ['pool:open']
+
+    def test_invalid_classification_settings_fail_startup_before_any_task(
+        monkeypatch: pytest.MonkeyPatch, events: list[str]
+    ) -> None:
+        """# Implements TC-COMP-087 (DAC-E3-S6-2): a bad value fails startup, naming the variable."""
+        monkeypatch.setenv("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "0")
+    
+        with pytest.raises(ConfigurationError) as excinfo:
+            asyncio.run(_enter_and_leave())
+    
+        message = str(excinfo.value)
+        assert "FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS" in message
+        # The message names the variable and never the submitted value (DAC-E1-7, plan T006).
+>       assert "0" not in message.replace("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "")
+E       assert '0' not in ": Input sho... (input '0')"
+E         
+E         '0' is contained here:
+E           1 (input '0')
+E         ?           +
+
+tests/unit/test_api_classification_lifespan.py:206: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_api_classification_lifespan.py::test_invalid_classification_settings_fail_startup_before_any_task
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 5 passed in 0.60s

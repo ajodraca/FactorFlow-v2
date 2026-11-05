@@ -1,0 +1,11 @@
+$ uv run pytest -m "not postgres" -q   (before the logger-name assertion was added)
+1636 passed, 919 deselected, 1 xfailed
+$ uv run pytest -m postgres -q
+919 passed, 1637 deselected   (postgres:16 container, outside the sandbox)
+$ uv run pytest tests/unit/test_api_classification_lifespan.py tests/unit/test_api_no_secrets.py tests/unit/test_api_reclaim_lifespan.py tests/unit/test_api_isolation.py -q   (final)
+12 passed
+$ uv run pytest -m postgres tests/integration/test_api_health.py tests/integration/test_api_runs.py tests/integration/test_api_settings.py tests/integration/test_api_static_mount.py -q
+43 passed
+$ uv run ruff check .  -> All checks passed!
+$ uv run ruff format --check .  -> 279 files already formatted
+$ uv run mypy src  -> Success: no issues found in 61 source files

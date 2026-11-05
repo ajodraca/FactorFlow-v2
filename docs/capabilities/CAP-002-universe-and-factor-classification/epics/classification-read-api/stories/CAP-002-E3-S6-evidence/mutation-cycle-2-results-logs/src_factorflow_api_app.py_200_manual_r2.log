@@ -1,0 +1,35 @@
+F
+=================================== FAILURES ===================================
+_____________ test_classification_task_created_beside_reclaim_task _____________
+
+events = ['pool:open', 'classification:start', 'reclaim:start', 'classification:cancelled', 'reclaim:cancelled', 'pool:close']
+
+    def test_classification_task_created_beside_reclaim_task(events: list[str]) -> None:
+        """# Implements TC-COMP-086 (DAC-E3-S6-1): both tasks start after the pool opens."""
+        seen: list[str] = []
+    
+        async def scenario() -> None:
+            async with app_module._lifespan(FastAPI()):
+                await asyncio.sleep(0)
+                await asyncio.sleep(0)
+                seen.extend(events)
+    
+        asyncio.run(scenario())
+    
+        assert "reclaim:start" in seen
+        assert "classification:start" in seen
+        assert seen.index("pool:open") < seen.index("reclaim:start")
+        assert seen.index("pool:open") < seen.index("classification:start")
+        # The classification task is created after the reclaim task (design 2.3, plan T007 (3)).
+>       assert seen.index("reclaim:start") < seen.index("classification:start")
+E       AssertionError: assert 2 < 1
+E        +  where 2 = <built-in method index of list object at 0x108854b80>('reclaim:start')
+E        +    where <built-in method index of list object at 0x108854b80> = ['pool:open', 'classification:start', 'reclaim:start'].index
+E        +  and   1 = <built-in method index of list object at 0x108854b80>('classification:start')
+E        +    where <built-in method index of list object at 0x108854b80> = ['pool:open', 'classification:start', 'reclaim:start'].index
+
+tests/unit/test_api_classification_lifespan.py:98: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_api_classification_lifespan.py::test_classification_task_created_beside_reclaim_task
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.60s

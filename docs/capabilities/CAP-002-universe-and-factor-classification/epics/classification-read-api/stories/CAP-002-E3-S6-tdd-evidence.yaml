@@ -1,0 +1,120 @@
+# TDD evidence for CAP-002-E3-S6 - Scheduler start in the lifespan and no-secrets test over the new routes.
+# cycle-1 (commit_hash stage); cycle-2 reworks review v1 IR-001..IR-003; cycle-3 is DEC-0284 (test helper). Decisions: DEC-0282 (Test 4 reads exc_text: the redaction filter clears exc_info),
+# DEC-0283 (route enumeration through OpenAPI; canary route ahead of the static mount).
+# Mutants are hand-written: the generator found no operator in the added app.py lines. Mutant 213 (task not cancelled)
+# ended as a 90 s timeout because the unguarded await hangs; it is counted as a timeout, not as a kill.
+# test_api_no_secrets.py's sweep passes against the unchanged tree once the routers are mounted (E1-S6, E3-S5); its
+# canary proves the detector, and the lifespan tests carry the red.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010]
+    description: >
+      tests/unit/test_api_classification_lifespan.py (new, six tests: TC-COMP-086, TC-COMP-087 and the settings
+      failure), the route sweep and canary appended to tests/unit/test_api_no_secrets.py (TC-COMP-088), and the
+      additive app.py edit: two imports, _log, ClassificationSettings(), the classification task beside the reclaim
+      task, and its cancel/await/log block before the unchanged reclaim block.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/red-cycle-1.log
+    red_log_sha256: 274c0d6208dd41c656f9fdcda1cb34481c4b4f168ae3a50ce0b2d92aeaffb51d
+    red_evidence: >
+      Observed with the tests written and app.py at 8ee5571: all six lifespan tests error at setup because
+      factorflow.api.app has no run_classification_loop (red-cycle-1.log).
+    green_evidence: >
+      Full not-postgres suite 1636 passed, 1 xfailed; postgres suite 919 passed; ruff check, ruff format --check and
+      mypy src clean (green-cycle-1.log). T009: git diff HEAD shows 0 deleted lines in app.py and
+      test_api_no_secrets.py, every hunk a pure insertion; include_router occurs 7 times as before; no massive
+      reference in app.py.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/green-cycle-1.log
+        sha256: a3fc213cd9fee7f11a389667ae238d01bf0b2d9acb8f88b60ecdc6eeaacefca0
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/code-review-cycle-1.txt
+        sha256: 55a220f3744174ea42e42f62db352127c80e8494e9018bf630ad263fc91176d4
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/spec-drift-cycle-1.txt
+        sha256: 3260a078e7afa0faf77dba33fcce5ba73466b76a1cf030193f63de0b90216098
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 20c4279df217bdd3ee733b33f71e430136eb7e5de544119f443e2aad533fdca2
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-1-results.json
+      results_sha256: c1da31e052f55b86fb5297ca7f43820b56194dcee3cb947298ddcf1b3361911e
+      generated: 12
+      killed: 11
+      survived: 0
+      stillborn: 0
+      timeout: 1
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    tasks: [T003, T006]
+    description: >
+      Rework of implementation review v1 (IR-001 to IR-003), tests only: TC-COMP-086 asserts the classification task
+      is created after the reclaim task and cancelled before it; the settings-failure test asserts the message does not
+      carry the submitted value. Mutation evidence regenerated with three well-formed manual mutants and committed
+      baseline logs (IR-004).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/red-cycle-2.log
+    red_log_sha256: 0ee346c1a83be6c0851dc5468897632c53b584514568b20d73041835cd21e180
+    red_evidence: >
+      Observed after the fact on ea885eb's tree: with each mutant applied (r1 cancel order swapped, r2 creation order
+      swapped, r3 configuration message carries the input), the lifespan suite as review v1 judged it (9dd9b2a) passes
+      and the reworked suite fails on the new assertion (red-cycle-2.log).
+    green_evidence: >
+      On the branch head merged with main ffec7a0: ruff check, ruff format --check and mypy src clean; not-postgres
+      suite 1636 passed, 1 xfailed; postgres suite 919 passed (green-cycle-2.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/green-cycle-2.log
+        sha256: 56a5d1a5e2af121422d871012c786be283d0afe6593806c370a0283fdbdcb478
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/code-review-cycle-2-3.txt
+        sha256: 3c9da70b93d38bdb86ec57b9c8309f3236f723758591d8864f17a30f81135819
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/spec-drift-cycle-2-3.txt
+        sha256: 44bed01e27991f60d763599fdb5b08e7f851103f0addc88b4aa6ff36aab84f56
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: fdd3899c472b07a54b88361b7ade2dfe490488ea2e27ab1b46a53c0645e33d7b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/cycle-2.patch
+    commit_hash: ea885eb1de1c5b6f324ba579c7a92bad44cd7673
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results.json
+      results_sha256: 8801adcbe1762b6718d15357e178e287c72058b6d6efba4080c2f3ff12fc4a97
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-3
+    tasks: [T008]
+    description: >
+      DEC-0284: tests/integration/api_classification_support.py's classification_app replaces
+      factorflow.api.app.run_classification_loop with a stand-in that waits until the lifespan cancels it, so the
+      loop's start-up reclaim no longer races the rows the integration tests seed. Test helper only.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/red-cycle-3.log
+    red_log_sha256: bd208fa7ddc62f11b37e2201b183064287f3b7f3fb2a01c5f667bfc0b4bbe153
+    red_evidence: >
+      On ea885eb, test_api_classifications.py::test_the_sets_list_and_detail_agree failed on its 28th repeat with the
+      seeded building set read back as failed (red-cycle-3.log).
+    green_evidence: >
+      On the branch head: the same test passed 60 of 60 repeats (green-cycle-3.log); postgres suite 919 passed
+      (green-cycle-2.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/green-cycle-3.log
+        sha256: 99a896e31a8de8baea4ede9319e6dca06c75a942de825c90329dfd4cbb9cf6fa
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/code-review-cycle-2-3.txt
+        sha256: 3c9da70b93d38bdb86ec57b9c8309f3236f723758591d8864f17a30f81135819
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 39772be0aaa5449d977bb8ffd4d9c1264713da40f01cf146fb2532da971fad74
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/cycle-3.patch
+    commit_hash: 6e0d8c6628d5
+    mutation:
+      not_applicable: the cycle changes a test helper only; no production file changed

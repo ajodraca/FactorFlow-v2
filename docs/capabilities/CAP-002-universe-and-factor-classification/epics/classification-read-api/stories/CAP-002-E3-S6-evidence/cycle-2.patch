@@ -1,0 +1,231 @@
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-mutants.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-mutants.json
+new file mode 100644
+index 0000000..ac4cb3c
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-mutants.json
+@@ -0,0 +1,27 @@
++{
++ "schema": "mutation-run/1",
++ "repo_head": "9dd9b2ada38b1b2d9b691910fa6f82be187a84d5",
++ "range": "working-tree",
++ "mutants": [
++  {
++   "id": "src/factorflow/api/app.py:213:manual:r1",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 213,
++   "old": "        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n",
++   "new": "        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n",
++   "note": "cancel order swapped: reclaim block before classification block (plan T007(4), Resolved Conflicts; design 2.3)",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "src/factorflow/api/app.py:200:manual:r2",
++   "operator": "manual",
++   "file": "src/factorflow/api/app.py",
++   "line": 200,
++   "old": "    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n",
++   "new": "    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n",
++   "note": "creation order swapped: classification task created before reclaim task (plan T003 Test 3, T007(3); design 2.3)",
++   "cycle": "cycle-2"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w0.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..cf29e83
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cdamuups/w0
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cdamuups/w0
++Installed 43 packages in 90ms
++......                                                                   [100%]
++6 passed in 0.60s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..ee08aae
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cdamuups/w1
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cdamuups/w1
++Installed 43 packages in 90ms
++......                                                                   [100%]
++6 passed in 0.60s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_200_manual_r2.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_200_manual_r2.log
+new file mode 100644
+index 0000000..bf7ea3b
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_200_manual_r2.log
+@@ -0,0 +1,35 @@
++F
++=================================== FAILURES ===================================
++_____________ test_classification_task_created_beside_reclaim_task _____________
++
++events = ['pool:open', 'classification:start', 'reclaim:start', 'classification:cancelled', 'reclaim:cancelled', 'pool:close']
++
++    def test_classification_task_created_beside_reclaim_task(events: list[str]) -> None:
++        """# Implements TC-COMP-086 (DAC-E3-S6-1): both tasks start after the pool opens."""
++        seen: list[str] = []
++    
++        async def scenario() -> None:
++            async with app_module._lifespan(FastAPI()):
++                await asyncio.sleep(0)
++                await asyncio.sleep(0)
++                seen.extend(events)
++    
++        asyncio.run(scenario())
++    
++        assert "reclaim:start" in seen
++        assert "classification:start" in seen
++        assert seen.index("pool:open") < seen.index("reclaim:start")
++        assert seen.index("pool:open") < seen.index("classification:start")
++        # The classification task is created after the reclaim task (design 2.3, plan T007 (3)).
++>       assert seen.index("reclaim:start") < seen.index("classification:start")
++E       AssertionError: assert 2 < 1
++E        +  where 2 = <built-in method index of list object at 0x108ece3c0>('reclaim:start')
++E        +    where <built-in method index of list object at 0x108ece3c0> = ['pool:open', 'classification:start', 'reclaim:start'].index
++E        +  and   1 = <built-in method index of list object at 0x108ece3c0>('classification:start')
++E        +    where <built-in method index of list object at 0x108ece3c0> = ['pool:open', 'classification:start', 'reclaim:start'].index
++
++tests/unit/test_api_classification_lifespan.py:98: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_classification_task_created_beside_reclaim_task
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.52s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_213_manual_r1.log b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_213_manual_r1.log
+new file mode 100644
+index 0000000..22f894e
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_213_manual_r1.log
+@@ -0,0 +1,27 @@
++.F
++=================================== FAILURES ===================================
++_________________ test_both_tasks_cancelled_before_pool_close __________________
++
++events = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close']
++
++    def test_both_tasks_cancelled_before_pool_close(events: list[str]) -> None:
++        """# Implements TC-COMP-086 (DAC-E3-S6-1): cancel and await precede ``pool.close()``."""
++        asyncio.run(_enter_and_leave())
++    
++        assert "classification:cancelled" in events
++        assert "reclaim:cancelled" in events
++        assert events.index("classification:cancelled") < events.index("pool:close")
++        assert events.index("reclaim:cancelled") < events.index("pool:close")
++        # Cancellation order: classification, then reclaim, then the pool (design 2.3, plan T007 (4)).
++>       assert events.index("classification:cancelled") < events.index("reclaim:cancelled")
++E       AssertionError: assert 4 < 3
++E        +  where 4 = <built-in method index of list object at 0x1092ae580>('classification:cancelled')
++E        +    where <built-in method index of list object at 0x1092ae580> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
++E        +  and   3 = <built-in method index of list object at 0x1092ae580>('reclaim:cancelled')
++E        +    where <built-in method index of list object at 0x1092ae580> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
++
++tests/unit/test_api_classification_lifespan.py:110: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_classification_lifespan.py::test_both_tasks_cancelled_before_pool_close
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 1 passed in 0.52s
+diff --git a/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..662020f
+--- /dev/null
++++ b/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,61 @@
++{
++  "schema": 1,
++  "command": "uv run --offline --all-extras pytest tests/unit/test_api_classification_lifespan.py -q -x -p no:cacheprovider",
++  "repo_head": "9dd9b2ada38b1b2d9b691910fa6f82be187a84d5",
++  "tree_patch_sha256": "0acf249bcc3972addc27f5f96fd1f5c99bab00944670bacaf5cab0d1e54706fb",
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-mutants.json",
++  "mutants_sha256": "64e526246f971eee07baf7657e6513b6d6e630984cee59696b2b4fb1d5a07aa0",
++  "jobs": 2,
++  "started": "2026-11-05T00:16:16Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 2.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "1b159e4e4c3249afcf929cea3bee87de562353b991bfd041755040c3e88351ea"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 2.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "34ca548e24b8be3fd70ff4ee7e4c349265d6631937671fcf60dd4cafc1829f0f"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/api/app.py:213:manual:r1",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 213,
++      "old": "        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n",
++      "new": "        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n",
++      "note": "cancel order swapped: reclaim block before classification block (plan T007(4), Resolved Conflicts; design 2.3)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_213_manual_r1.log",
++      "log_sha256": "40eb1dff2971b8f52fdc4b3371241d34626bd8d548ba236d23b76cb70a36d3a0"
++    },
++    {
++      "id": "src/factorflow/api/app.py:200:manual:r2",
++      "operator": "manual",
++      "file": "src/factorflow/api/app.py",
++      "line": 200,
++      "old": "    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n",
++      "new": "    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n",
++      "note": "creation order swapped: classification task created before reclaim task (plan T003 Test 3, T007(3); design 2.3)",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_200_manual_r2.log",
++      "log_sha256": "5971d9bcb8ec0c178d961f114e7beb4743786d6306ea6d4177e165052d2a2ab1"
++    }
++  ],
++  "finished": "2026-11-05T00:16:20Z"
++}
+diff --git a/tests/unit/test_api_classification_lifespan.py b/tests/unit/test_api_classification_lifespan.py
+index 9879972..19f8666 100644
+--- a/tests/unit/test_api_classification_lifespan.py
++++ b/tests/unit/test_api_classification_lifespan.py
+@@ -94,6 +94,8 @@ def test_classification_task_created_beside_reclaim_task(events: list[str]) -> N
+     assert "classification:start" in seen
+     assert seen.index("pool:open") < seen.index("reclaim:start")
+     assert seen.index("pool:open") < seen.index("classification:start")
++    # The classification task is created after the reclaim task (design 2.3, plan T007 (3)).
++    assert seen.index("reclaim:start") < seen.index("classification:start")
+ 
+ 
+ def test_both_tasks_cancelled_before_pool_close(events: list[str]) -> None:
+@@ -104,6 +106,8 @@ def test_both_tasks_cancelled_before_pool_close(events: list[str]) -> None:
+     assert "reclaim:cancelled" in events
+     assert events.index("classification:cancelled") < events.index("pool:close")
+     assert events.index("reclaim:cancelled") < events.index("pool:close")
++    # Cancellation order: classification, then reclaim, then the pool (design 2.3, plan T007 (4)).
++    assert events.index("classification:cancelled") < events.index("reclaim:cancelled")
+ 
+ 
+ def test_reclaim_cancelled_when_classification_task_already_finished(
+@@ -198,5 +202,7 @@ def test_invalid_classification_settings_fail_startup_before_any_task(
+ 
+     message = str(excinfo.value)
+     assert "FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS" in message
++    # The message names the variable and never the submitted value (DAC-E1-7, plan T006).
++    assert "0" not in message.replace("FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS", "")
+     assert "reclaim:start" not in events
+     assert "classification:start" not in events

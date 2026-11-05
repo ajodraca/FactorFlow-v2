@@ -1,0 +1,21 @@
+# GREEN for CAP-002-E3-S6 cycle-2 and cycle-3. Tree: 71bfec3 (ea885eb + 6e0d8c6, merged with main ffec7a0).
+$ uv run --offline --all-extras ruff check .
+All checks passed!
+exit 0
+$ uv run --offline --all-extras ruff format --check .
+279 files already formatted
+exit 0
+$ uv run --offline --all-extras mypy src
+Success: no issues found in 61 source files
+exit 0
+$ uv run --offline --all-extras pytest tests/unit/test_api_classification_lifespan.py -q -p no:cacheprovider
+......                                                                   [100%]
+6 passed in 0.55s
+exit 0
+$ uv run --offline --all-extras pytest -m not\ postgres -q -p no:cacheprovider
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1636 passed, 919 deselected, 1 xfailed, 2 warnings in 28.74s
+exit 0
+$ uv run --offline --all-extras pytest -m postgres -q -p no:cacheprovider
+919 passed, 1637 deselected, 2 warnings in 351.93s (0:05:51)

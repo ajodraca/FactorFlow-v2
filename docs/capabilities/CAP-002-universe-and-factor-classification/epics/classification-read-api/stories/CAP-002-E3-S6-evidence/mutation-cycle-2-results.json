@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "command": "uv run --offline --all-extras pytest tests/unit/test_api_classification_lifespan.py -q -x -p no:cacheprovider",
+  "repo_head": "71bfec3f0337346cbeb2843d00068e56a48e0472",
+  "tree_patch_sha256": "0c93fc75692dad7b6099c5a00d855b504dd19775214b06d73e0ffbac35d3203f",
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-mutants.json",
+  "mutants_sha256": "490f2b58c781bac8b0d1d18d6aebbdfcf5703e9760ec2d4c2f17df76e830e655",
+  "jobs": 3,
+  "started": "2026-11-05T18:50:57Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 3.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
+      "log_sha256": "023fdf09529df4665e29cd811abfc8c3d0a289d17f83d6584057fa2f0d812aad"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 3.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
+      "log_sha256": "dd254e61946d1f26bb018a7f41c49fab524d5b5e7562ff16b1b0cc48f3d61fd4"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 3.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
+      "log_sha256": "d22dbfd35b12c105c71d1569a89a24b9d9fcbb91cded9df328cc18d6b969d9ef"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/api/app.py:213:manual:r1",
+      "operator": "manual",
+      "file": "src/factorflow/api/app.py",
+      "line": 213,
+      "old": "        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n",
+      "new": "        reclaim_task.cancel()\n        try:\n            await reclaim_task\n        except asyncio.CancelledError:\n            pass\n        classification_task.cancel()\n        try:\n            await classification_task\n        except asyncio.CancelledError:\n            pass\n        except Exception:\n            _log.exception(\"classification scheduler task ended with an error\")\n",
+      "note": "cancel order swapped: reclaim block before classification block (plan T007(4), Resolved Conflicts; design 2.3)",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_213_manual_r1.log",
+      "log_sha256": "4a30084f3940b51f36461a9dc4aff27f47c5796e00f00ea8961aa6965ed26ec6"
+    },
+    {
+      "id": "src/factorflow/api/app.py:200:manual:r2",
+      "operator": "manual",
+      "file": "src/factorflow/api/app.py",
+      "line": 200,
+      "old": "    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n",
+      "new": "    classification_task = asyncio.create_task(\n        run_classification_loop(pool=pool, settings=classification_settings)\n    )\n    reclaim_task = asyncio.create_task(\n        _run_reclaim_loop(\n            pool=pool,\n            stale_after_seconds=run_settings.stale_after_seconds,\n            interval_seconds=_reclaim_interval_seconds,\n        )\n    )\n",
+      "note": "creation order swapped: classification task created before reclaim task (plan T003 Test 3, T007(3); design 2.3)",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_api_app.py_200_manual_r2.log",
+      "log_sha256": "ce5d1b970373994f5ad9f66a7cdba27cf906fc33f3d15385944c4719f2f54d2e"
+    },
+    {
+      "id": "src/factorflow/config/settings.py:66:manual:r3",
+      "operator": "manual",
+      "file": "src/factorflow/config/settings.py",
+      "line": 66,
+      "old": "            for error in exc.errors(include_url=False, include_input=False):\n                message = error[\"msg\"]\n",
+      "new": "            for error in exc.errors(include_url=False):\n                message = f\"{error['msg']} (input {error['input']!r})\"\n",
+      "note": "the configuration error carries the submitted value (plan T006; DAC-E1-7; review v1 IR-003)",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-913c58/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/classification-read-api/stories/CAP-002-E3-S6-evidence/mutation-cycle-2-results-logs/src_factorflow_config_settings.py_66_manual_r3.log",
+      "log_sha256": "e53876853d38f01e8bcde32d550abbbf5958584fc3dc75ff5e8f8a6458ddfc86"
+    }
+  ],
+  "finished": "2026-11-05T18:51:01Z"
+}
