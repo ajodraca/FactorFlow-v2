@@ -210,6 +210,24 @@ export function fillerStocks(): StockSeed[] {
 }
 
 /**
+ * Puts the symbols on the acquisition list as active followed stocks, as the
+ * Instruments screen does, without acquiring anything. For the cases that need
+ * a real run to produce the scores: adding thirty stocks one by one through
+ * the screen is a precondition, not the behaviour under test.
+ */
+export function followStocks(symbols: readonly string[]): void {
+  sql(
+    `INSERT INTO instrument (symbol, lifecycle) VALUES ${symbols.map((symbol) => `(${lit(symbol)}, 'active')`).join(", ")}`,
+    ACQUISITION_DATABASE,
+  );
+}
+
+/** `F00` to `F{count-1}`: followed stocks for a real run. */
+export function followerSymbols(count: number): string[] {
+  return Array.from({ length: count }, (_, index) => `F${String(index).padStart(2, "0")}`);
+}
+
+/**
  * Seeds one active universe, named `name`, whose creation and member events
  * were recorded `daysAgo` days ago (America/Chicago), so a test can view the
  * members as of a date before the day's own changes. Needs the stocks to be

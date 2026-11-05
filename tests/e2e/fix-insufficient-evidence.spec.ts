@@ -7,8 +7,13 @@ import {
   stateHistoryDepth,
   waitForRunState,
 } from "./support/acquisition";
-import { sql } from "./support/database";
-import { currentSetId, skipUnlessLineItemsResolved, waitForNewSet } from "./support/classification";
+import {
+  currentSetId,
+  followStocks,
+  followerSymbols,
+  skipUnlessLineItemsResolved,
+  waitForNewSet,
+} from "./support/classification";
 
 /**
  * Fix insufficient evidence (flow 5: TC-E2E-009, TC-E2E-010; AC-12, AC-13,
@@ -29,14 +34,7 @@ test.beforeEach(async () => {
 
 /** Thirty followed stocks, enough for every factor to rank: `symbol` plus 29 fillers. */
 function followThirty(symbol: string): void {
-  const symbols = [
-    symbol,
-    ...Array.from({ length: 29 }, (_, i) => `F${String(i).padStart(2, "0")}`),
-  ];
-  sql(
-    `INSERT INTO instrument (symbol, lifecycle) VALUES ${symbols.map((s) => `('${s}', 'active')`).join(", ")}`,
-    "factorflow_acquisition",
-  );
+  followStocks([symbol, ...followerSymbols(29)]);
 }
 
 /** Starts a run, waits for it to end with data (succeeded or partial), and for its new set. */
