@@ -142,6 +142,7 @@ def test_stock_with_two_of_three_value_inputs_is_outside_the_value_peer_set(
 
 
 # Implements TC-COMP-068
+# Implements CAP-002 TC-INT-026 (part: engine half)
 def test_scores_are_identical_whatever_the_universe_membership(
     store: Store, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -185,6 +186,7 @@ def test_scores_are_identical_whatever_the_universe_membership(
 
 
 # Implements TC-COMP-107
+# Implements CAP-002 TC-INT-036 (part: engine half)
 @pytest.mark.parametrize("qualifying", [29, 30])
 def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
     store: Store, monkeypatch: pytest.MonkeyPatch, qualifying: int
@@ -238,6 +240,7 @@ def test_a_factor_ranks_only_from_thirty_qualifying_stocks(
 
 
 # Implements TC-COMP-111
+# Implements CAP-002 TC-INT-037 (part: engine half)
 def test_retired_instruments_are_in_no_peer_set_and_retired_on_every_factor(
     store: Store, monkeypatch: pytest.MonkeyPatch
 ) -> None:

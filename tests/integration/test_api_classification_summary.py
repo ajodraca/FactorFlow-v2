@@ -29,6 +29,7 @@ def app(
         yield pair
 
 
+# Implements CAP-002 TC-INT-035 (part: missing excluded, not_computable included)
 def test_the_summary_counts_the_current_stocks(
     app: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -44,6 +45,7 @@ def test_the_summary_counts_the_current_stocks(
     assert "stocks" not in body
 
 
+# Implements CAP-002 TC-INT-035 (part: outdated excluded)
 def test_an_outdated_input_makes_a_stock_not_current_and_followed_is_the_set_count(
     app: tuple[TestClient, psycopg.Connection],
 ) -> None:
@@ -58,6 +60,8 @@ def test_an_outdated_input_makes_a_stock_not_current_and_followed_is_the_set_cou
     assert body["stocks_current"] == {"current_count": 1, "followed_count": 5}
 
 
+# Implements CAP-002 TC-INT-050 (part: later set carried, not_current on both reads)
+# Implements CAP-002 TC-INT-051 (part: later.state failed)
 @pytest.mark.parametrize("state", ["building", "failed"])
 def test_a_newer_set_is_carried_as_later_and_equals_the_list_read(
     app: tuple[TestClient, psycopg.Connection], state: str
@@ -76,6 +80,7 @@ def test_a_newer_set_is_carried_as_later_and_equals_the_list_read(
     assert summary["later"] == listed["later"]
 
 
+# Implements CAP-002 TC-INT-057 (part: the summary body)
 def test_before_any_complete_set_the_summary_says_nothing_is_classified(
     app: tuple[TestClient, psycopg.Connection],
 ) -> None:

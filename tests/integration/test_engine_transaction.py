@@ -132,6 +132,7 @@ def write_rows_then_raise(set_id: UUID, instrument_id: int, error: Exception) ->
 
 
 # Implements TC-COMP-166
+# Implements CAP-002 TC-INT-054 (part: store half)
 def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
     conn: psycopg.Connection,
     building_set: tuple[UUID, int],
@@ -186,6 +187,7 @@ def test_failure_after_inputs_written_leaves_zero_rows_and_a_failed_set(
 
 
 # Implements TC-COMP-167
+# Implements CAP-002 TC-INT-052
 @pytest.mark.parametrize("stage_writes_rows", [False, True], ids=["no-stage", "stage-wrote-rows"])
 def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
     conn: psycopg.Connection,
@@ -689,6 +691,8 @@ def backfilled_row(conn: psycopg.Connection, pop: BackdatingPopulation) -> dict[
 
 
 # Implements TC-COMP-162
+# Implements CAP-002 TC-INT-047 (part: store half)
+# Implements CAP-002 TC-INT-049 (part: store half)
 def test_backfill_after_completion_leaves_the_set_unchanged(
     conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
 ) -> None:

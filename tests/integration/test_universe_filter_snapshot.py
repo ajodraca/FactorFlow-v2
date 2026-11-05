@@ -644,6 +644,7 @@ def test_hide_incomplete_hides_exactly_the_input_reason_stocks(
 # --- TC-COMP-016: later sets do not change a saved snapshot ---------------------------
 
 
+# Implements CAP-002 TC-INT-007 (part: store half)
 def test_a_later_set_that_changes_the_matches_leaves_the_members_unchanged(
     conn: psycopg.Connection,
 ) -> None:

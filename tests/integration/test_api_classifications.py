@@ -1,8 +1,9 @@
 """The classification routes against PostgreSQL (CAP-002-E3-S5; task plan T012).
 
 Design section 7 rows "Classification list shape" to "Sets"; AC-9, AC-14 to AC-18, AC-20 to
-AC-23; DAC-E3-7. Overlaps TC-INT-027, 033, 037 to 048, 055 to 058 (cited, not claimed). Each test
-seeds through `reader_seed` (which commits) and calls the real application.
+AC-23; DAC-E3-7. Claims the CAP-002 integration cases its tests carry a
+`# Implements CAP-002 TC-INT-NNN` marker for; overlapping cases without a marker are cited, not
+claimed. Each test seeds through `reader_seed` (which commits) and calls the real application.
 """
 
 import base64
@@ -47,6 +48,7 @@ def _symbols(body: dict[str, object]) -> list[str]:
     return [stock["symbol"] for stock in body["stocks"]]  # type: ignore[attr-defined]
 
 
+# Implements CAP-002 TC-INT-027
 def test_the_list_carries_the_set_the_factors_and_string_scores(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn)
@@ -88,6 +90,7 @@ def test_the_match_count_covers_the_whole_set_on_every_page(app: App) -> None:
     assert pages == 3 and sorted(seen) == sorted(set(seen)) and len(seen) == 7
 
 
+# Implements CAP-002 TC-INT-033 (part: incomplete stock listed under a bound)
 def test_thresholds_and_hide_incomplete_follow_the_documented_rule(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn)
@@ -126,6 +129,7 @@ def test_filters_change_the_match_count_identically_on_every_page(app: App) -> N
     assert _symbols(zero) == ["H0", "H1", "H2", "H3", "HX", "ZZZ"] and zero["match_count"] == 6
 
 
+# Implements CAP-002 TC-INT-057 (part: the list body)
 def test_nothing_classified_says_so(app: App) -> None:
     client, conn = app
     empty = client.get("/api/classifications").json()
@@ -150,6 +154,7 @@ def test_sort_orders_and_bad_input_is_422(app: App) -> None:
     )
 
 
+# Implements CAP-002 TC-INT-043
 def test_a_universe_scopes_the_list_and_an_unknown_one_is_404(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn)
@@ -171,6 +176,9 @@ def test_a_universe_scopes_the_list_and_an_unknown_one_is_404(app: App) -> None:
     assert missing.status_code == 404 and missing.json()["error"]["code"] == "universe_not_found"
 
 
+# Implements CAP-002 TC-INT-038
+# Implements CAP-002 TC-INT-040
+# Implements CAP-002 TC-INT-041
 def test_compare_reports_unknown_symbols_and_enforces_its_bounds(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn)
@@ -193,6 +201,8 @@ def test_compare_reports_unknown_symbols_and_enforces_its_bounds(app: App) -> No
         assert response.status_code == 422 and "`symbols`" in response.json()["error"]["message"]
 
 
+# Implements CAP-002 TC-INT-044 (part: the inputs' keys)
+# Implements CAP-002 TC-INT-045
 def test_the_evidence_shows_inputs_with_their_dates_and_memberships(app: App) -> None:
     client, conn = app
     empty = client.get("/api/classifications/stocks/AAA")
@@ -244,6 +254,7 @@ def test_a_known_stock_before_any_set_has_no_set_factors_or_inputs(app: App) -> 
     assert [m["name"] for m in body["memberships"]] == ["Mine"]
 
 
+# Implements CAP-002 TC-INT-048 (part: unknown symbol is 404)
 def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app: App) -> None:
     client, conn = app
     first = complete_set(conn, started_at=T0.replace(day=10))
@@ -260,6 +271,7 @@ def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app
     assert client.get("/api/classifications/stocks/NOPE/history").status_code == 404
 
 
+# Implements CAP-002 TC-INT-048 (part: never-classified stock has no sets)
 def test_the_history_carries_the_stored_restated_flag_and_a_new_stock_has_none(app: App) -> None:
     client, conn = app
     earlier = complete_set(conn, started_at=T0.replace(day=10))
@@ -287,6 +299,8 @@ def test_the_history_carries_the_stored_restated_flag_and_a_new_stock_has_none(a
     assert fresh.json() == {"symbol": "NEW", "sets": [], "next_cursor": None}
 
 
+# Implements CAP-002 TC-INT-055 (part: run_started_at and detail equals list row)
+# Implements CAP-002 TC-INT-056
 def test_the_sets_list_and_detail_agree(app: App) -> None:
     client, conn = app
     done = complete_set(conn)
@@ -332,6 +346,7 @@ def _forged(cursor: str) -> str:
     return base64.urlsafe_b64encode(text.encode()).decode().rstrip("=")
 
 
+# Implements CAP-002 TC-INT-042
 def test_an_altered_cursor_is_invalid_and_one_for_an_older_set_is_stale(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn, active_instruments=3)

@@ -109,6 +109,7 @@ def today() -> date:
 
 
 # Implements TC-COMP-004
+# Implements CAP-002 TC-INT-002
 def test_create_naming_uncovered_symbols_is_refused_whole(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -161,6 +162,7 @@ def test_adding_a_current_member_reports_already_member_and_appends_no_event(
 
 
 # Implements TC-COMP-041
+# Implements CAP-002 TC-INT-018
 def test_removing_the_sole_member_is_refused_then_retired_refuses_writes(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -183,6 +185,7 @@ def test_removing_the_sole_member_is_refused_then_retired_refuses_writes(
 # --- T011: the lifecycle flows -----------------------------------------------------------
 
 
+# Implements CAP-002 TC-INT-001 (part: create by hand and read back)
 def test_create_by_hand_returns_and_reads_the_replayed_universe(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -206,6 +209,7 @@ def test_create_by_hand_returns_and_reads_the_replayed_universe(
     assert events[-1]["filter_provenance"] is None
 
 
+# Implements CAP-002 TC-INT-010 (part: the 409 refusal)
 def test_names_are_unique_among_active_universes_after_trimming(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -223,6 +227,7 @@ def test_names_are_unique_among_active_universes_after_trimming(
     assert create(client, "Tech", "AAA")["name"] == "Tech"
 
 
+# Implements CAP-002 TC-INT-011
 def test_rename_keeps_the_id_and_the_history(client: TestClient, conn: psycopg.Connection) -> None:
     seed(conn, "AAA")
     universe = create(client, "Old", "AAA")
@@ -239,6 +244,8 @@ def test_rename_keeps_the_id_and_the_history(client: TestClient, conn: psycopg.C
     assert events[1:] == history
 
 
+# Implements CAP-002 TC-INT-003 (part: the add response)
+# Implements CAP-002 TC-INT-016
 def test_add_and_remove_keep_the_dated_record(client: TestClient, conn: psycopg.Connection) -> None:
     seed(conn, "AAA", "BBB")
     universe_id = create(client, "Mine", "AAA")["universe_id"]
@@ -259,6 +266,9 @@ def test_add_and_remove_keep_the_dated_record(client: TestClient, conn: psycopg.
     assert datetime.fromisoformat(events[0]["recorded_at"]) == removed_at
 
 
+# Implements CAP-002 TC-INT-013 (part: 409 universe_retired on PATCH)
+# Implements CAP-002 TC-INT-014 (part: 200 retired, members and events kept)
+# Implements CAP-002 TC-INT-015
 def test_retire_keeps_members_and_events_and_refuses_every_write(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -287,6 +297,7 @@ def test_retire_keeps_members_and_events_and_refuses_every_write(
     assert written(conn) == before
 
 
+# Implements CAP-002 TC-INT-023
 def test_unknown_universes_and_members_are_404(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -307,6 +318,8 @@ def test_unknown_universes_and_members_are_404(
     assert error["resource"] == "universe-member"
 
 
+# Implements CAP-002 TC-INT-020 (part: 200, no members, as_of_before_creation)
+# Implements CAP-002 TC-INT-022
 def test_as_of_reads_past_membership(client: TestClient, conn: psycopg.Connection) -> None:
     seed(conn, "AAA")
     universe_id = create(client, "Mine", "AAA")["universe_id"]
@@ -375,6 +388,7 @@ def test_events_page_newest_first_and_refuse_a_tampered_cursor(
     refusal(tampered, 422, "cursor_invalid")
 
 
+# Implements CAP-002 TC-INT-017
 def test_an_empty_create_is_empty_universe_and_writes_nothing(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -438,6 +452,7 @@ def save_filter(
     )
 
 
+# Implements CAP-002 TC-INT-005 (part: 201 with origin, compared to the reader)
 def test_create_from_a_result_saves_the_filter_match_with_provenance(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -509,6 +524,7 @@ def test_a_symbol_prefix_is_upper_cased_and_saved(
     assert body["origin"]["symbol"] == "AA"
 
 
+# Implements CAP-002 TC-INT-006
 def test_a_newer_complete_set_refuses_the_save(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -526,6 +542,7 @@ def test_a_newer_complete_set_refuses_the_save(
     assert written(conn) == before
 
 
+# Implements CAP-002 TC-INT-008
 def test_a_filter_matching_nothing_is_empty_universe(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
