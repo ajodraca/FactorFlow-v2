@@ -1,0 +1,529 @@
+{
+ "schema": 1,
+ "repo_head": "543198fb17b3dc5f9905e113eb76eeb9a0760ef1",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/research/compare/index.tsx:20:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 20,
+   "original": "const MIN_SYMBOLS = 2;",
+   "mutated": "const MIN_SYMBOLS = 3;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:21:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 21,
+   "original": "const MAX_SYMBOLS = 6;",
+   "mutated": "const MAX_SYMBOLS = 7;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:27:remove-attribute:1",
+   "cycle": "cycle-2",
+   "operator": "remove-attribute",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 27,
+   "original": "    .split(\",\")",
+   "mutated": ""
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:28:remove-attribute:1",
+   "cycle": "cycle-2",
+   "operator": "remove-attribute",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 28,
+   "original": "    .map((part) => part.trim().toUpperCase())",
+   "mutated": ""
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:29:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 29,
+   "original": "    .filter((part) => part.length > 0);",
+   "mutated": "    .filter((part) => part.length >= 0);"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:29:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 29,
+   "original": "    .filter((part) => part.length > 0);",
+   "mutated": "    .filter((part) => part.length > 1);"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:90:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 90,
+   "original": "      FACTORS.some((factor) => factor !== \"momentum\" && column.factors[factor].restatedPossible) ||",
+   "mutated": "      FACTORS.some((factor) => factor !== \"momentum\" || column.factors[factor].restatedPossible) ||"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:91:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 91,
+   "original": "      column.inputs.some((input) => input.factor !== \"momentum\" && input.restatedPossible),",
+   "mutated": "      column.inputs.some((input) => input.factor !== \"momentum\" || input.restatedPossible),"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:108:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 108,
+   "original": "  const blocked = count >= MAX_SYMBOLS;",
+   "mutated": "  const blocked = count > MAX_SYMBOLS;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:111:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 111,
+   "original": "  const [attempt, setAttempt] = useState(0);",
+   "mutated": "  const [attempt, setAttempt] = useState(1);"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:133:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 133,
+   "original": "    if (count === 0 || count > MAX_SYMBOLS) {",
+   "mutated": "    if (count === 0 && count > MAX_SYMBOLS) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:133:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 133,
+   "original": "    if (count === 0 || count > MAX_SYMBOLS) {",
+   "mutated": "    if (count === 0 || count >= MAX_SYMBOLS) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:133:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 133,
+   "original": "    if (count === 0 || count > MAX_SYMBOLS) {",
+   "mutated": "    if (count === 1 || count > MAX_SYMBOLS) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:139:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 139,
+   "original": "    let cancelled = false;",
+   "mutated": "    let cancelled = true;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:142:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 142,
+   "original": "      const result = count >= MIN_SYMBOLS ? await listClassifications({ symbols }) : null;",
+   "mutated": "      const result = count > MIN_SYMBOLS ? await listClassifications({ symbols }) : null;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:149:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 149,
+   "original": "          !reported.includes(symbol) &&",
+   "mutated": "          reported.includes(symbol) &&"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:150:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 150,
+   "original": "          (result === null || result.stocks.some((stock) => stock.symbol.toUpperCase() === symbol)),",
+   "mutated": "          (result === null && result.stocks.some((stock) => stock.symbol.toUpperCase() === symbol)),"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:160:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 160,
+   "original": "        } else if (count < MIN_SYMBOLS && codeOf(outcome.reason) === \"instrument_not_found\") {",
+   "mutated": "        } else if (count < MIN_SYMBOLS || codeOf(outcome.reason) === \"instrument_not_found\") {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:160:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 160,
+   "original": "        } else if (count < MIN_SYMBOLS && codeOf(outcome.reason) === \"instrument_not_found\") {",
+   "mutated": "        } else if (count <= MIN_SYMBOLS && codeOf(outcome.reason) === \"instrument_not_found\") {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:175:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 175,
+   "original": "      if (!cancelled) {",
+   "mutated": "      if (cancelled) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:180:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 180,
+   "original": "      cancelled = true;",
+   "mutated": "      cancelled = false;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:208:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 208,
+   "original": "    if (count === 0) {",
+   "mutated": "    if (count === 1) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:216:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 216,
+   "original": "    if (blocked || symbol.length === 0) {",
+   "mutated": "    if (blocked && symbol.length === 0) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:216:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 216,
+   "original": "    if (blocked || symbol.length === 0) {",
+   "mutated": "    if (blocked || symbol.length === 1) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:230:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 230,
+   "original": "      if (next.length <= MAX_SYMBOLS) {",
+   "mutated": "      if (next.length < MAX_SYMBOLS) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:252:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 252,
+   "original": "    const neighbour = shown[index + 1] ?? shown[index - 1];",
+   "mutated": "    const neighbour = shown[index + 2] ?? shown[index - 1];"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:252:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 252,
+   "original": "    const neighbour = shown[index + 1] ?? shown[index - 1];",
+   "mutated": "    const neighbour = shown[index + 1] ?? shown[index - 2];"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:257:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 257,
+   "original": "  if (read.kind === \"error\" && read.error instanceof ApiUnreachableError) {",
+   "mutated": "  if (read.kind === \"error\" || read.error instanceof ApiUnreachableError) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:262:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 262,
+   "original": "  let neverPopulated = false;",
+   "mutated": "  let neverPopulated = true;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:265:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 265,
+   "original": "  const activeList = count >= MIN_SYMBOLS ? list : null;",
+   "mutated": "  const activeList = count > MIN_SYMBOLS ? list : null;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:276:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 276,
+   "original": "        if (listKey === symbolsKey && !unknown.includes(symbol)) {",
+   "mutated": "        if (listKey === symbolsKey || !unknown.includes(symbol)) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:276:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 276,
+   "original": "        if (listKey === symbolsKey && !unknown.includes(symbol)) {",
+   "mutated": "        if (listKey === symbolsKey && unknown.includes(symbol)) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:282:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 282,
+   "original": "          name: stock.name,",
+   "mutated": "          name: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:283:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 283,
+   "original": "          lifecycle: stock.lifecycle,",
+   "mutated": "          lifecycle: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:284:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 284,
+   "original": "          factors: stock.factors,",
+   "mutated": "          factors: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:289:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 289,
+   "original": "  } else if (count === 1) {",
+   "mutated": "  } else if (count === 2) {"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:290:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 290,
+   "original": "    const only = evidence[symbols[0] as string];",
+   "mutated": "    const only = evidence[symbols[1] as string];"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:293:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 293,
+   "original": "        neverPopulated = true;",
+   "mutated": "        neverPopulated = false;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:296:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 296,
+   "original": "          symbol: symbols[0] as string,",
+   "mutated": "          symbol: symbols[1] as string,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:297:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 297,
+   "original": "          name: only.name,",
+   "mutated": "          name: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:298:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 298,
+   "original": "          lifecycle: only.lifecycle,",
+   "mutated": "          lifecycle: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:299:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 299,
+   "original": "          factors: only.factors,",
+   "mutated": "          factors: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:300:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 300,
+   "original": "          inputs: only.inputs,",
+   "mutated": "          inputs: nil,"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:309:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 309,
+   "original": "    count === 0 ? COMPARE.chooseTwoToSixEmpty : count < MIN_SYMBOLS ? COMPARE.chooseTwoToSix : null;",
+   "mutated": "    count === 0 ? COMPARE.chooseTwoToSixEmpty : count <= MIN_SYMBOLS ? COMPARE.chooseTwoToSix : null;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:309:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 309,
+   "original": "    count === 0 ? COMPARE.chooseTwoToSixEmpty : count < MIN_SYMBOLS ? COMPARE.chooseTwoToSix : null;",
+   "mutated": "    count === 1 ? COMPARE.chooseTwoToSixEmpty : count < MIN_SYMBOLS ? COMPARE.chooseTwoToSix : null;"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:313:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 313,
+   "original": "    read.kind === \"error\" && count >= MIN_SYMBOLS && codeOf(read.error) === \"validation_error\";",
+   "mutated": "    read.kind === \"error\" || count >= MIN_SYMBOLS && codeOf(read.error) === \"validation_error\";"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:313:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 313,
+   "original": "    read.kind === \"error\" && count >= MIN_SYMBOLS && codeOf(read.error) === \"validation_error\";",
+   "mutated": "    read.kind === \"error\" && count >= MIN_SYMBOLS || codeOf(read.error) === \"validation_error\";"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:313:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 313,
+   "original": "    read.kind === \"error\" && count >= MIN_SYMBOLS && codeOf(read.error) === \"validation_error\";",
+   "mutated": "    read.kind === \"error\" && count > MIN_SYMBOLS && codeOf(read.error) === \"validation_error\";"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:351:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 351,
+   "original": "      {blocked || validationBound ? (",
+   "mutated": "      {blocked && validationBound ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:357:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 357,
+   "original": "      {notCompared.length === 0 ? null : (",
+   "mutated": "      {notCompared.length === 1 ? null : ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:361:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 361,
+   "original": "      (read.kind === \"loaded\" && count >= MIN_SYMBOLS && list === null) ? (",
+   "mutated": "      (read.kind === \"loaded\" || count >= MIN_SYMBOLS && list === null) ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:361:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 361,
+   "original": "      (read.kind === \"loaded\" && count >= MIN_SYMBOLS && list === null) ? (",
+   "mutated": "      (read.kind === \"loaded\" && count >= MIN_SYMBOLS || list === null) ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:361:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 361,
+   "original": "      (read.kind === \"loaded\" && count >= MIN_SYMBOLS && list === null) ? (",
+   "mutated": "      (read.kind === \"loaded\" && count > MIN_SYMBOLS && list === null) ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:364:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 364,
+   "original": "      {read.kind === \"error\" && !validationBound ? (",
+   "mutated": "      {read.kind === \"error\" || !validationBound ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:364:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 364,
+   "original": "      {read.kind === \"error\" && !validationBound ? (",
+   "mutated": "      {read.kind === \"error\" && validationBound ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:369:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 369,
+   "original": "            onClick={() => setAttempt((previous) => previous + 1)}",
+   "mutated": "            onClick={() => setAttempt((previous) => previous + 2)}"
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:377:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 377,
+   "original": "      {columns.length > 0 ? (",
+   "mutated": "      {columns.length >= 0 ? ("
+  },
+  {
+   "id": "web/src/screens/research/compare/index.tsx:377:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/research/compare/index.tsx",
+   "line": 377,
+   "original": "      {columns.length > 0 ? (",
+   "mutated": "      {columns.length > 1 ? ("
+  }
+ ]
+}

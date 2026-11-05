@@ -472,6 +472,27 @@ describe("copy.ts completeness and keying", () => {
     expect(copy.thresholdFieldError("momentum", "standardisedScore")).toBe(
       "Could not set the momentum threshold: a standardised score is a finite number.",
     );
+    // CAP-002-E5-S1 T002 (E5-F03, DEC-0176): the compare strings, anchored to the design's words.
+    expect(copy.COMPARE.notCompared("ZZZ, YYY")).toBe(
+      "Not compared because there is no current score for ZZZ, YYY.",
+    );
+    expect(copy.COMPARE.duplicate("AAPL")).toBe("AAPL is already in this comparison.");
+    expect(copy.COMPARE.inputLabels).toEqual({
+      book_to_price: "Book-to-price",
+      earnings_yield: "Earnings yield",
+      fcf_yield: "Free-cash-flow yield",
+      revenue_growth: "Revenue growth",
+      eps_growth: "EPS growth",
+      return_3m: "3-month return",
+      return_6m: "6-month return",
+      return_12m: "12-month return",
+    });
+    expect(copy.COMPARE.dates).toBe("Dates");
+    expect(copy.COMPARE.asOf).toBe("As of");
+    expect(copy.COMPARE.knownOn).toBe("Known on");
+    expect(copy.COMPARE.measure).toBe("Measure");
+    expect(copy.COMPARE.removeGlyph).toBe("×");
+    expect(copy.COMPARE.breadcrumb).toBe("Compare");
     expect(copy.DIALOGS.saved(14, "Tech")).toBe("Saved 14 stocks as Tech");
     expect(copy.NOTICES.dismiss).toBe("Dismiss");
     expect(copy.DIALOGS.enterName).toBe("Enter a name for the universe.");

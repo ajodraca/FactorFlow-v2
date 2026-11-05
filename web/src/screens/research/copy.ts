@@ -807,6 +807,28 @@ export const COMPARE = {
     `Not enough to rank · ${count} qualified, ${needed} needed`,
   percentile: "Percentile",
   standardisedScore: "Standardised score",
+  duplicate: (symbol: string): string => `${symbol} is already in this comparison.`,
+  /** `{SYMBOLS}` is the reported symbols in the order received (DEC-0131 reports followed stocks with no row too). */
+  notCompared: (symbols: string): string =>
+    `Not compared because there is no current score for ${symbols}.`,
+  /** The eight input rows' display names; the dates control names its input in lowercase (UX 1.5). */
+  inputLabels: {
+    book_to_price: "Book-to-price",
+    earnings_yield: "Earnings yield",
+    fcf_yield: "Free-cash-flow yield",
+    revenue_growth: "Revenue growth",
+    eps_growth: "EPS growth",
+    return_3m: "3-month return",
+    return_6m: "6-month return",
+    return_12m: "12-month return",
+  },
+  breadcrumb: "Compare",
+  /** The label column's header, read by screen readers only. */
+  measure: "Measure",
+  removeGlyph: "×",
+  dates: "Dates",
+  asOf: "As of",
+  knownOn: "Known on",
 } as const;
 
 /** Stock evidence: the Now and Earlier scores panels (UX 1.6). */

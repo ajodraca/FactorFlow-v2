@@ -1,0 +1,97 @@
+{
+ "schema": 1,
+ "repo_head": "543198fb17b3dc5f9905e113eb76eeb9a0760ef1",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:84:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 84,
+   "original": "  if (cell.status !== \"classified\" || cell.score === null || cell.percentile === null) {",
+   "mutated": "  if (cell.status !== \"classified\" && cell.score === null || cell.percentile === null) {"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:84:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 84,
+   "original": "  if (cell.status !== \"classified\" || cell.score === null || cell.percentile === null) {",
+   "mutated": "  if (cell.status !== \"classified\" || cell.score === null && cell.percentile === null) {"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:87:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 87,
+   "original": "  if (cell.reasonCode === \"retired\" || cell.reasonCode === \"not_enough_stocks\") {",
+   "mutated": "  if (cell.reasonCode === \"retired\" && cell.reasonCode === \"not_enough_stocks\") {"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:157:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 157,
+   "original": "  const [open, setOpen] = useState(false);",
+   "mutated": "  const [open, setOpen] = useState(true);"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:168:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 168,
+   "original": "          onClick={() => setOpen((current) => !current)}",
+   "mutated": "          onClick={() => setOpen((current) => current)}"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:198:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 198,
+   "original": "      tabIndex={-1}",
+   "mutated": "      tabIndex={-2}"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:237:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 237,
+   "original": "  const span = columns.length + 1;",
+   "mutated": "  const span = columns.length + 2;"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:242:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 242,
+   "original": "      tabIndex={0}",
+   "mutated": "      tabIndex={1}"
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:270:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 270,
+   "original": "                  {summary !== undefined && !summary.ranked ? (",
+   "mutated": "                  {summary !== undefined || !summary.ranked ? ("
+  },
+  {
+   "id": "web/src/components/patterns/comparison-table.tsx:270:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/comparison-table.tsx",
+   "line": 270,
+   "original": "                  {summary !== undefined && !summary.ranked ? (",
+   "mutated": "                  {summary !== undefined && summary.ranked ? ("
+  }
+ ]
+}
