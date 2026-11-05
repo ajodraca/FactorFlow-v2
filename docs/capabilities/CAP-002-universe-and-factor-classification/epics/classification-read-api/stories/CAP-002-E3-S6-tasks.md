@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
-updated: 2026-10-18
+updated: 2026-11-05
+last_reworked_review: CAP-002-E3-S6-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -212,4 +213,5 @@ If no container runtime is available, run `uv run pytest -m 'not postgres'` and 
 - **Story status.** The skill's step of setting the story's frontmatter `status: planning` was not performed: the supervising instruction forbids editing the approved story (editing it would also invalidate its approval revision). The story stays `todo`.
 - **Mapped TCs.** TC-COMP-086 (T003), TC-COMP-087 (T004), TC-COMP-088 (T005), TC-COMP-089 (T009, a verification of the change set, not a pytest case, because it reads `git diff`). No integration or end-to-end case is mapped to this story in the coverage matrix.
 - **Shared file risk.** `app.py` is edited by CAP-002-E1-S6 (universes), CAP-002-E3-S5 (classifications) and this story; this story builds on both and must be applied after them. `tests/unit/test_api_no_secrets.py` is edited only here.
+- **Change set added by DEC-0284.** `tests/integration/api_classification_support.py` joins this story's change set: its `classification_app` helper replaces `factorflow.api.app.run_classification_loop` with a stand-in that waits until the lifespan cancels it, so the loop's start-up reclaim no longer races the rows the integration tests seed (production code unchanged).
 - **Not planned.** The two `include_router` calls (E1-S6, E3-S5, DEC-0086); the loop and its behaviour (E2-S9, TC-COMP-075 to 085); the routes (E1-S6, E3-S5); any edit to `_VALIDATION_ERROR_RESOURCES`.

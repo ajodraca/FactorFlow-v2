@@ -15,13 +15,13 @@ events = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancell
         # Cancellation order: classification, then reclaim, then the pool (design 2.3, plan T007 (4)).
 >       assert events.index("classification:cancelled") < events.index("reclaim:cancelled")
 E       AssertionError: assert 4 < 3
-E        +  where 4 = <built-in method index of list object at 0x1092ae580>('classification:cancelled')
-E        +    where <built-in method index of list object at 0x1092ae580> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
-E        +  and   3 = <built-in method index of list object at 0x1092ae580>('reclaim:cancelled')
-E        +    where <built-in method index of list object at 0x1092ae580> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
+E        +  where 4 = <built-in method index of list object at 0x109b44400>('classification:cancelled')
+E        +    where <built-in method index of list object at 0x109b44400> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
+E        +  and   3 = <built-in method index of list object at 0x109b44400>('reclaim:cancelled')
+E        +    where <built-in method index of list object at 0x109b44400> = ['pool:open', 'reclaim:start', 'classification:start', 'reclaim:cancelled', 'classification:cancelled', 'pool:close'].index
 
 tests/unit/test_api_classification_lifespan.py:110: AssertionError
 =========================== short test summary info ============================
 FAILED tests/unit/test_api_classification_lifespan.py::test_both_tasks_cancelled_before_pool_close
 !!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 failed, 1 passed in 0.52s
+1 failed, 1 passed in 0.60s
