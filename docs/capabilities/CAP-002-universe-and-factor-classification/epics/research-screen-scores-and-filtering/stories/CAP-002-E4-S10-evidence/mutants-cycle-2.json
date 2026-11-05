@@ -1,0 +1,231 @@
+{
+ "schema": "mutation-run/1",
+ "range": "working-tree",
+ "mutants": [
+  {
+   "id": "web/src/app/shell.tsx:manual:1",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "  { label: \"Research\", to: \"/research\" },\n",
+   "new": "",
+   "note": "drop the Research destination",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:2",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "{ label: \"Research\", to: \"/research\" }",
+   "new": "{ label: \"Research\", to: \"/research/compare\" }",
+   "note": "rail link targets a child route",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:3",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "  { label: \"Settings\", to: \"/settings\" },\n  { label: \"Research\", to: \"/research\" },\n",
+   "new": "  { label: \"Research\", to: \"/research\" },\n  { label: \"Settings\", to: \"/settings\" },\n",
+   "note": "Research before Settings",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:4",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "label: \"Research\"",
+   "new": "label: \"Researches\"",
+   "note": "wrong label",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:5",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "{ label: \"Research\", to: \"/research\" }",
+   "new": "{ label: \"Research\", to: \"/RESEARCH\" }",
+   "note": "rail link href differs from /research only by case",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:6",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "{ label: \"Research\", to: \"/research\" }",
+   "new": "{ label: \"Research\", to: \"/research?hide_incomplete=true\" }",
+   "note": "rail link opens Research with incomplete stocks hidden (S03-1 default changed)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:7",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "{ label: \"Research\", to: \"/research\" }",
+   "new": "{ label: \"Research\", to: \"/research/\" }",
+   "note": "trailing slash on the rail link",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/shell.tsx:manual:8",
+   "operator": "manual",
+   "file": "web/src/app/shell.tsx",
+   "old": "  { label: \"Research\", to: \"/research\" },\n",
+   "new": "  { label: \"Research\", to: \"/research\" },\n  { label: \"Research\", to: \"/research\" },\n",
+   "note": "Research destination duplicated",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:1",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "      <Route path=\"/research\" element={<ResearchScreen />} />\n",
+   "new": "",
+   "note": "drop /research",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:2",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "      <Route path=\"/research/stocks/:symbol\" element={<StockEvidenceScreen />} />\n",
+   "new": "",
+   "note": "drop /research/stocks/:symbol",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:3",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "      <Route path=\"/research/compare\" element={<CompareScreen />} />\n",
+   "new": "",
+   "note": "drop /research/compare",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:4",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "      <Route path=\"/research/universes\" element={<UniversesScreen />} />\n",
+   "new": "",
+   "note": "drop /research/universes",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:5",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "      <Route path=\"/research/universes/:universeId\" element={<UniverseDetailScreen />} />\n",
+   "new": "",
+   "note": "drop /research/universes/:universeId",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:6",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research\" element={<ResearchScreen />}",
+   "new": "path=\"/research\" element={<UniversesScreen />}",
+   "note": "/research renders the wrong screen",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:7",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "element={<StockEvidenceScreen />}",
+   "new": "element={<CompareScreen />}",
+   "note": "stock route renders Compare",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:8",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research/compare\" element={<CompareScreen />}",
+   "new": "path=\"/research/compare\" element={<UniversesScreen />}",
+   "note": "compare route renders Universes",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:9",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research/universes\" element={<UniversesScreen />}",
+   "new": "path=\"/research/universes\" element={<ResearchScreen />}",
+   "note": "universes route renders Research",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:10",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "element={<UniverseDetailScreen />}",
+   "new": "element={<UniversesScreen />}",
+   "note": "universe detail route renders the list",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:11",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research/stocks/:symbol\"",
+   "new": "path=\"/research/stocks/:id\"",
+   "note": "stock param renamed (screen reads symbol)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:12",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research/universes/:universeId\"",
+   "new": "path=\"/research/universes/:id\"",
+   "note": "universe param renamed (screen reads universeId)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:13",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research/universes\" element",
+   "new": "path=\"/research/universe\" element",
+   "note": "universes path misspelt",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:14",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "path=\"/research\" element",
+   "new": "path=\"/research/*\" element",
+   "note": "/research made a splat route",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:15",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "import UniversesScreen from \"../screens/research/universes\";",
+   "new": "import UniversesScreen from \"../screens/research/universes/detail\";",
+   "note": "wrong module bound to UniversesScreen",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:16",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "import StockEvidenceScreen from \"../screens/research/stocks\";",
+   "new": "import StockEvidenceScreen from \"../screens/research/compare\";",
+   "note": "wrong module bound to StockEvidenceScreen",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/routes.tsx:manual:17",
+   "operator": "manual",
+   "file": "web/src/app/routes.tsx",
+   "old": "      <Route path=\"/research/compare\" element={<CompareScreen />} />\n",
+   "new": "      <Route path=\"/research/compare/:symbols\" element={<CompareScreen />} />\n",
+   "note": "compare takes a path param instead of ?symbols=",
+   "cycle": "cycle-2"
+  }
+ ]
+}
