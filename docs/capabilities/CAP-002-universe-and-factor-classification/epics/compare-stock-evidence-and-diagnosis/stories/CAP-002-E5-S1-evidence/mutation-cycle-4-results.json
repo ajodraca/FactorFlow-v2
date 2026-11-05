@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "command": "ln -s /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-002-run-7f9510/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules; npx vitest run web/src/components/patterns/comparison-table.test.tsx web/src/screens/research/compare/compare.test.tsx web/src/screens/research/copy.test.ts",
+  "repo_head": "1530ffbec3f10f569caf71bb16dcf784a94a8ed8",
+  "tree_patch_sha256": "887e879ac5e9c13fd67b1eedbfaa1b4ead7404195323bf573ed43cfac8ce4bdf",
+  "mutants_file": "/tmp/claude-501/e5s1/mutants.json",
+  "mutants_sha256": "55194ea957c9136b7508f3a4aff348eb186defde8e1aff1f10ca69504af8354c",
+  "jobs": 3,
+  "started": "2026-11-05T01:06:23Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 2.7,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/baseline-w0.log",
+      "log_sha256": "6d1ca835ac8d9edef550957bc29a2e58d96ff3364017853e6423446e9a0afb94"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 2.7,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/baseline-w1.log",
+      "log_sha256": "6688a272b44619cf0aa2d10c443d2ae273fc6c44b664e5e100985966abeded94"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 2.7,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/baseline-w2.log",
+      "log_sha256": "f78a56e2b5af502ca29e6b22d800183204fac76ba9c4ac218c1a8a5977a22648"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:v2-ix-error-not-destructive",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/research/compare/index.tsx",
+      "old": "<p id={errorId} role=\"alert\" className=\"text-[hsl(var(--destructive))] text-sm\">",
+      "new": "<p id={errorId} role=\"alert\" className=\"text-sm\">",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.5,
+      "worker": 0,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/manual_v2-ix-error-not-destructive.log",
+      "log_sha256": "09737e50320cca2f896e8c11f0f085a7cbe081dbdfeb31a97ec4f41444d3e7c7"
+    },
+    {
+      "id": "manual:ix-activelist-stale",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/research/compare/index.tsx",
+      "old": "const activeList = count >= MIN_SYMBOLS ? list : null;",
+      "new": "const activeList = list;",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.5,
+      "worker": 1,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/manual_ix-activelist-stale.log",
+      "log_sha256": "b1b26e1564bc80fc50c3d39857e345f5973a8ee3ee45e3ada44e4808f8fcec56"
+    },
+    {
+      "id": "manual:v2-ix-set-null-cached-same",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/research/compare/index.tsx",
+      "old": "(cached.set?.setId ?? null) !== result.set.setId",
+      "new": "(cached.set?.setId ?? result.set.setId) !== result.set.setId",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 2,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/manual_v2-ix-set-null-cached-same.log",
+      "log_sha256": "6d35de29ecfde129c886307f8d6b8895bf29df8ed86b8024294137df6f46a602"
+    },
+    {
+      "id": "manual:v3-ix-field-border-token",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/research/compare/index.tsx",
+      "old": "rounded border border-input px-3 py-2 aria-[invalid=true]",
+      "new": "rounded border border-border px-3 py-2 aria-[invalid=true]",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.4,
+      "worker": 1,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/manual_v3-ix-field-border-token.log",
+      "log_sha256": "540be3c62d69ea7438b85819829ad48e215e68648cc1a8497736f559b5aa805c"
+    },
+    {
+      "id": "manual:v3-ix-field-no-error-border",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/research/compare/index.tsx",
+      "old": " aria-[invalid=true]:border-[hsl(var(--destructive))]\"",
+      "new": "\"",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.4,
+      "worker": 0,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/manual_v3-ix-field-no-error-border.log",
+      "log_sha256": "2e68692a299c11972f418531d431cba0b5826734d5ecfa595e54403c984d9dd8"
+    },
+    {
+      "id": "manual:v3-ix-h1-text-xl",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/research/compare/index.tsx",
+      "old": "<h1 className=\"text-lg\">",
+      "new": "<h1 className=\"text-xl font-semibold\">",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.1,
+      "worker": 2,
+      "log": "/tmp/claude-501/e5s1/mutation-logs/manual_v3-ix-h1-text-xl.log",
+      "log_sha256": "692a9b29c32cd59d0840262fb740bc10738daec2959e716f428ff6745bf92212"
+    }
+  ],
+  "finished": "2026-11-05T01:06:31Z"
+}

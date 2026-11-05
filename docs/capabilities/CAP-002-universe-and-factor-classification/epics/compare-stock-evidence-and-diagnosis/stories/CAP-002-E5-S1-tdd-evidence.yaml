@@ -178,3 +178,54 @@ cycles:
           disposition: equivalent
           reason: >
             In steady state the mutant and the code agree: below two symbols no list read runs, and the same effect pass that settles the evidence read replaces the list with null, so the stale list is shown for at most the render before that pass, which no test can observe under act. Adversarial review v1 judged this mutant not equivalent because its test could not tell list from evidence; the new test shows the evidence's cells after a removal (it kills a mutant that builds the single column from the list), and the owner or reviewer may overturn this disposition.
+
+  - id: cycle-4
+    tasks: [T004, T008, T009, T010, T012, T014]
+    description: >
+      Rework of implementation review v2. IR-001 (HIGH): TC-COMP-129, the v1 field-error test and the duplicate test
+      assert the field error's text-[hsl(var(--destructive))] token. IR-002: a removal to one column with a synchronous
+      event asserts, before any await, that the stale list's not-enough-to-rank group statement is not rendered.
+      IR-003: evidence cached with set null (before any set existed) is re-read once the list read has a set, and the
+      evidence of a column already of that set is not. IR-005: the entry field's boundary is border-input with the
+      aria-[invalid=true] destructive border, as the DEC-0257 dialogs draw it. IR-006: the h1 is text-lg, as UX 1.5 and
+      the sibling research screens set it. IR-011: TC-COMP-128 presses Enter in the field at six. IR-007 is met in this
+      cycle's evidence: the RED below is of the final tests, and the patch was written outside the evidence directory
+      before being copied in, so it embeds no evidence file. The LOW findings IR-004 and IR-008 to IR-010 are left, as
+      the report makes them optional.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/red-cycle-4.log
+    red_log_sha256: 88443b2992c32cc97595e5d387bb326c1cd970224a8a343d3675ad833360646f
+    red_evidence: >
+      With the final cycle-4 tests and index.tsx at HEAD 1530ffb, 2 of 58 compare tests failed: the entry field's
+      border-input and destructive error border (IR-005), and the text-lg heading (IR-006). The IR-001, IR-002, IR-003
+      and IR-011 assertions pin behaviour the code already had; each is proved by the mutation run below, in which the
+      review's three surviving mutants (v2-ix-error-not-destructive, ix-activelist-stale, v2-ix-set-null-cached-same)
+      are each killed by the test written for them.
+    green_evidence: >
+      The focused suites passed (3 files, 476 tests); the full suite passed (74 files, 1929 tests); build, tsc --noEmit,
+      biome lint and format clean. Code review first pass APPROVED with three nits (a redundant assertion, a trailing
+      assertion after a waitFor that could run before the read settled, and no check that a same-set column is not
+      re-read): all three applied, the patch regenerated and re-reviewed. Spec-drift none against the story, the plan,
+      UX 1.1 and 1.5 and the form and input specifications.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/full-suite-rework-v2.log
+        sha256: 941456713bb593d10e5e3e529e25d1d5012dc7910ae067f82cca701f6178eebe
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/build-rework-v2.log
+        sha256: e50b194a78afe05ad2f96418cee988dec8069f34f0291f515ea3dedaf4d6dd53
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 887e879ac5e9c13fd67b1eedbfaa1b4ead7404195323bf573ed43cfac8ce4bdf
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/compare-stock-evidence-and-diagnosis/stories/CAP-002-E5-S1-evidence/mutation-cycle-4-results.json
+      results_sha256: 38a72d3cd8616280c7390b785d8a9e46fd5e74266b214009d9f8d65d8f77d795
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -330,7 +330,7 @@ export default function CompareScreen(): JSX.Element | null {
         <span aria-current="page">{COMPARE.breadcrumb}</span>
       </nav>
       <section className="flex flex-col gap-4 rounded border border-border bg-card p-4 text-card-foreground">
-        <h1 className="text-xl font-semibold">{COMPARE.comparing(count)}</h1>
+        <h1 className="text-lg">{COMPARE.comparing(count)}</h1>
         <form onSubmit={(event) => void add(event)} className="flex flex-wrap items-start gap-2">
           <div className="flex flex-col gap-1">
             <label className="flex items-center gap-2 text-sm">
@@ -345,7 +345,7 @@ export default function CompareScreen(): JSX.Element | null {
                 }}
                 aria-invalid={fieldError === null ? undefined : "true"}
                 aria-describedby={fieldError === null ? undefined : errorId}
-                className="rounded border border-border px-3 py-2"
+                className="rounded border border-input px-3 py-2 aria-[invalid=true]:border-[hsl(var(--destructive))]"
               />
             </label>
             {fieldError === null ? null : (

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -169,7 +169,8 @@ describe("CompareScreen mandatory cases", () => {
     expect(add).not.toBeDisabled();
     expect(add).toHaveAccessibleDescription(COMPARE.atMost);
 
-    await user.type(screen.getByLabelText(COMPARE.addAStock), "G");
+    // Enter in the field, then a press of Add and Enter on it (IR-011).
+    await user.type(screen.getByLabelText(COMPARE.addAStock), "G{Enter}");
     await user.click(add);
     await user.keyboard("{Enter}");
 
@@ -212,9 +213,9 @@ describe("CompareScreen mandatory cases", () => {
 
     await user.type(screen.getByLabelText(COMPARE.addAStock), "xyz{Enter}");
 
-    expect(
-      await screen.findByText("FactorFlow doesn't follow a stock named XYZ."),
-    ).toBeInTheDocument();
+    const error = await screen.findByText("FactorFlow doesn't follow a stock named XYZ.");
+    // The field error is in the destructive token (form and input specifications section 6; IR-001).
+    expect(error).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
     expect(stockHeaders()).toHaveLength(2);
     expect(screen.getByTestId("search")).toHaveTextContent("?symbols=AAA,BBB");
     expect(screen.queryByText("RAW")).toBeNull();
@@ -786,6 +787,7 @@ describe("CompareScreen review rework (CAP-002-E5-S1 implementation review v1)",
     expect(field).toHaveAttribute("aria-invalid", "true");
     expect(field).toHaveAccessibleDescription("FactorFlow doesn't follow a stock named XYZ.");
     expect(screen.getByRole("alert")).toHaveTextContent("FactorFlow doesn't follow");
+    expect(screen.getByRole("alert")).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
     await user.type(field, "Q");
     expect(field).not.toHaveAttribute("aria-invalid");
     expect(screen.queryByText("FactorFlow doesn't follow a stock named XYZ.")).toBeNull();
@@ -844,7 +846,8 @@ describe("CompareScreen review rework (CAP-002-E5-S1 implementation review v1)",
     const field = screen.getByLabelText(COMPARE.addAStock);
     await user.type(field, "aapl{Enter}");
 
-    expect(await screen.findByText(COMPARE.duplicate("AAPL"))).toBeInTheDocument();
+    const error = await screen.findByText(COMPARE.duplicate("AAPL"));
+    expect(error).toHaveClass("text-[hsl(var(--destructive))]", "text-sm");
     expect(field).toHaveAttribute("aria-invalid", "true");
     expect(field).toHaveAccessibleDescription(COMPARE.duplicate("AAPL"));
   });
@@ -1021,5 +1024,82 @@ describe("CompareScreen review rework (CAP-002-E5-S1 implementation review v1)",
     await waitFor(() => expect(getStockEvidence).toHaveBeenCalledWith("F"));
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(screen.getByTestId("search")).toHaveTextContent(/^\?symbols=A,B,C,D,E,G$/);
+  });
+});
+
+describe("CompareScreen review rework (CAP-002-E5-S1 implementation review v2)", () => {
+  // IR-005: the field boundary is --input and turns --destructive while the field is in error.
+  it("draws the entry field's boundary in --input with a destructive error border", async () => {
+    answerAll();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+
+    const field = screen.getByLabelText(COMPARE.addAStock);
+    expect(field).toHaveClass(
+      "rounded",
+      "border",
+      "border-input",
+      "aria-[invalid=true]:border-[hsl(var(--destructive))]",
+    );
+    expect(field).not.toHaveClass("border-border");
+  });
+
+  // IR-006: the h1 is at --text-lg, as on the other research screens.
+  it("sets the heading at --text-lg", async () => {
+    answerAll();
+    renderAt("?symbols=AAA,BBB");
+    await screen.findByRole("table");
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveClass("text-lg");
+    expect(heading).not.toHaveClass("text-xl");
+  });
+
+  // IR-002 (v1 IR-008): the render right after a removal to one column, not only the settled one.
+  it("drops the list's group statement in the very render after shrinking to one column", async () => {
+    const ranked = { qualifiedCount: 120, ranked: true, minPeerSetSize: 30 };
+    const unranked = { qualifiedCount: 12, ranked: false, minPeerSetSize: 30 };
+    listClassifications.mockImplementation(async (params = {}) =>
+      list(
+        (params.symbols ?? []).map((symbol) => row(symbol)),
+        { factors: { value: ranked, growth: unranked, momentum: ranked } },
+      ),
+    );
+    getStockEvidence.mockImplementation(async (symbol) => evidence(symbol));
+    renderAt("?symbols=AAA,BBB");
+    const statement = COMPARE.notEnoughToRankGroup(12, 30);
+    expect(await screen.findByText(statement)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: COMPARE.removeFromComparison("BBB") }));
+
+    expect(screen.queryByText(statement)).toBeNull();
+    await waitFor(() => expect(stockHeaders()).toHaveLength(1));
+  });
+
+  // IR-003: evidence read before any set existed is not of the list read's set.
+  it("re-reads a column's evidence cached with no set once the list read has a set", async () => {
+    let setExists = false;
+    listClassifications.mockImplementation(async (params = {}) =>
+      list((params.symbols ?? []).map((symbol) => row(symbol))),
+    );
+    getStockEvidence.mockImplementation(async (symbol) =>
+      setExists
+        ? evidence(symbol, {
+            inputs: [inputRow("book_to_price", "value", symbol === "NEWCO" ? "0.42" : "0.85")],
+          })
+        : evidence(symbol, { set: null, factors: {} as StockEvidence["factors"], inputs: [] }),
+    );
+    const user = userEvent.setup();
+    renderAt("?symbols=NEWCO");
+    expect(await screen.findByText(RESULTS.neverScored)).toBeInTheDocument();
+
+    setExists = true;
+    await user.type(screen.getByLabelText(COMPARE.addAStock), "bbb{Enter}");
+
+    await waitFor(() => expect(stockHeaders()).toHaveLength(2));
+    await waitFor(() => expect(screen.getByRole("table")).toHaveTextContent("0.42"));
+    expect(getStockEvidence.mock.calls.filter(([symbol]) => symbol === "NEWCO")).toHaveLength(2);
+    // BBB's evidence, read by Add under the list's set, is not read again.
+    expect(getStockEvidence.mock.calls.filter(([symbol]) => symbol === "BBB")).toHaveLength(1);
   });
 });
