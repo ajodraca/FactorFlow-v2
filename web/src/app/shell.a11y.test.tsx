@@ -23,7 +23,7 @@ async function settleHealthPoll(): Promise<void> {
 // equivalent accessible mechanism.
 describe("Shell — keyboard accessibility (DAC-E1-S4-4)", () => {
   // Implements TC-COMP-193
-  it("tabs through all four rail destinations in order", async () => {
+  it("tabs through all five rail destinations in order", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={["/coverage"]}>

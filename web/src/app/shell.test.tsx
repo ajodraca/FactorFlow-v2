@@ -54,7 +54,7 @@ describe("Shell — no principal is assumed (AC-14)", () => {
   });
 });
 
-// TC-COMP-303, TC-COMP-329: the rail presents exactly four destinations, in
+// TC-COMP-303, TC-COMP-329: the rail presents exactly five destinations, in
 // order, using the exact product vocabulary (STD-UI-1) — not synonyms.
 describe("Shell — navigation rail destinations (DAC-E1-12, DAC-E1-S4-1)", () => {
   // Implements TC-COMP-193

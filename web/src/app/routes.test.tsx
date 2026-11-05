@@ -77,7 +77,7 @@ async function settleHealthPoll(): Promise<void> {
 }
 
 // TC-COMP-330 (DAC-E1-S4-2): opening a run detail route renders it as a
-// child of Runs, and Runs stays the active rail item — no fifth destination
+// child of Runs, and Runs stays the active rail item — no destination beyond the five
 // appears.
 describe("Routes — run detail is a child of Runs (DAC-E1-S4-2)", () => {
   // Implements TC-COMP-193
@@ -128,8 +128,8 @@ describe("Routes — declares exactly ten routes", () => {
     const source = readFileSync(routesPath, "utf-8");
     const pathMatches = [...source.matchAll(/path=["']([^"']+)["']/g)].map((m) => m[1]);
 
-    // Exactly the five routes this story owns: the four destinations plus
-    // the run-detail child route. A redirect from "/" and a "*" not-found
+    // Exactly the ten routes the shell owns: the four destinations, the
+    // run-detail child route and the five CAP-002 routes. A redirect from "/" and a "*" not-found
     // catch-all are routing infrastructure, not destinations, and are
     // excluded from the count.
     const storyOwnedRoutes = pathMatches.filter((p) => p !== "/" && p !== "*");
@@ -349,5 +349,27 @@ describe("Routes — SHELL_ROUTES targets are routed (DAC-E4-S10-5)", () => {
       expect(screen.queryByText("Not found", { selector: "p" })).not.toBeInTheDocument();
       unmount();
     }
+  });
+});
+
+// Review v1 IR-001 (DAC-E4-6; DEC-0069, classification-ui 2.2): the Research
+// rail link targets exactly /research, in that case and with no query string.
+// aria-current alone cannot tell, because NavLink matches it case-insensitively
+// and ignores the search.
+describe("Routes — the Research rail link targets exactly /research (DAC-E4-6)", () => {
+  // Implements TC-COMP-193
+  it("links the Research rail item to /research", async () => {
+    render(
+      <MemoryRouter initialEntries={["/coverage"]}>
+        <Shell />
+      </MemoryRouter>,
+    );
+    await settleHealthPoll();
+
+    const nav = screen.getByRole("navigation");
+    expect(within(nav).getByRole("link", { name: "Research" })).toHaveAttribute(
+      "href",
+      "/research",
+    );
   });
 });
