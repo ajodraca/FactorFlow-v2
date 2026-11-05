@@ -5,13 +5,22 @@ tests/e2e/support/massive_stub.py <port>`) and bound to 127.0.0.1 only, so no
 e2e request ever reaches the live provider (CAP-001-e2e-tests-automation-tasks
 T001; DEC-0025). It serves every endpoint `src/factorflow/ingestion/massive/
 client.py` calls, with bodies shaped from `tests/fixtures/massive/*.json` and
-no `next_url`. Supports TC-E2E-001, 002, 004-007, 009, 010 and TC-INT-027.
+no `next_url`. Supports TC-E2E-001, 002, 004-007, 009, 010 and TC-INT-027, and CAP-002's
+TC-E2E-001, 002, 009 and 010.
 
 Controlled behaviour, driven by the specs through `tests/e2e/support/
 acquisition.ts`:
 
 - a symbol starting `UNK` answers 404 with `error_not_found.json`;
-- `POST /__stub/mode {"mode": "ok" | "reject-credential" | "unavailable"}`:
+- a symbol starting `NOF` is a stock for which the provider holds no
+  fundamentals: every financial-statement path answers 200 with an empty
+  `results` list (CAP-002-e2e-tests-automation-tasks T002; DEC-0285);
+- every symbol's price bars trend at a yearly rate derived from the symbol, so
+  stocks differ in momentum;
+- `POST /__stub/mode {"mode": "ok" | "reject-credential" | "unavailable" |
+  "no-fundamentals"}`: `no-fundamentals` answers every financial-statement
+  path with an empty `results` list for every symbol (the partial outcome
+  TC-E2E-009 creates, then clears with `{"mode": "ok"}`);
   in `reject-credential` every provider path answers 401 with
   `error_credential_unknown_key.json`; in `unavailable` every provider path
   answers 503 with an envelope naming no known error, which the client
@@ -96,7 +105,7 @@ class StubState:
         self._requests: list[dict[str, str]] = []
 
     def set_mode(self, mode: str) -> None:
-        if mode not in ("ok", "reject-credential", "unavailable"):
+        if mode not in ("ok", "reject-credential", "unavailable", "no-fundamentals"):
             raise ValueError(f"unknown mode {mode!r}")
         with self._lock:
             self.mode = mode
@@ -152,10 +161,27 @@ def _weekdays(start: date, end: date) -> list[date]:
     return days
 
 
-def _bars(start: date, end: date) -> list[dict[str, Any]]:
+_PRICE_FIELDS = ("o", "h", "l", "c", "vw")
+_DRIFT_EPOCH = date(2020, 1, 1).toordinal()
+
+
+def _drift(symbol: str | None, day: date) -> float:
+    """A price multiplier that trends with the symbol's own yearly rate (-0.20 to +0.20).
+
+    The rate depends on the symbol alone and the multiplier on the calendar day alone,
+    so every request for a symbol agrees and stocks differ in momentum.
+    """
+    rate = ((sum(map(ord, symbol or "")) % 41) - 20) / 100
+    return max(0.1, 1 + rate * (day.toordinal() - _DRIFT_EPOCH) / 365)
+
+
+def _bars(start: date, end: date, symbol: str | None = None) -> list[dict[str, Any]]:
     bars = []
     for day in _weekdays(start, end):
         bar = copy.deepcopy(BAR)
+        drift = _drift(symbol, day)
+        for field in _PRICE_FIELDS:
+            bar[field] = bar[field] * drift
         bar["t"] = int(datetime(day.year, day.month, day.day, tzinfo=UTC).timestamp() * 1000)
         bars.append(bar)
     return bars
@@ -193,7 +219,7 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
 
     match = _AGGS_PATH.match(path)
     if match:
-        bars = _bars(date.fromisoformat(match["start"]), date.fromisoformat(match["end"]))
+        bars = _bars(date.fromisoformat(match["start"]), date.fromisoformat(match["end"]), symbol)
         return 200, {**_envelope(bars), "ticker": symbol, "resultsCount": len(bars)}
 
     if _EVENTS_PATH.match(path):
@@ -203,6 +229,8 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
         return 200, _envelope({"name": REFERENCE["name"], "events": [event]})
 
     if path in _FINANCIAL_PATHS:
+        if STATE.mode == "no-fundamentals" or (symbol is not None and symbol.startswith("NOF")):
+            return 200, _envelope([])
         period_end = _first(query, "period_end.gte", "period_end_gte") or FINANCIAL["period_end"]
         row = {
             **FINANCIAL,
