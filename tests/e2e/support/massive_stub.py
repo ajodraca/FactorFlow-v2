@@ -13,26 +13,36 @@ acquisition.ts`:
 
 - a symbol starting `UNK` answers 404 with `error_not_found.json`;
 - a symbol starting `NOF` is a stock for which the provider holds no
-  fundamentals: every financial-statement path answers 200 with an empty
-  `results` list (CAP-002-e2e-tests-automation-tasks T002; DEC-0285);
+  fundamentals: every financial-statement path answers 404 with
+  `error_not_found.json`, which the run records as `not_found`, the outcome the
+  evidence reads as "the provider reports no ..." (CAP-002-e2e-tests-automation-
+  tasks T002; automation review v3 AR-011). A 200 with an empty list would not
+  do: the product records it as `unchanged` (DEC-0047);
+- a symbol starting `NEW` is a recently listed stock: its price bars start 300
+  days before today whatever the requested start, so it has no price for a
+  12-month return and lacks exactly one momentum input (TC-E2E-001);
 - every symbol's price bars trend at a yearly rate derived from the symbol, so
   stocks differ in momentum;
-- `POST /__stub/mode {"mode": "ok" | "reject-credential" | "unavailable" |
-  "no-fundamentals"}`: `no-fundamentals` answers every financial-statement
-  path with an empty `results` list for every symbol (the partial outcome
-  TC-E2E-009 creates, then clears with `{"mode": "ok"}`);
+- `POST /__stub/mode {"mode": "ok" | "reject-credential" | "unavailable"}`:
   in `reject-credential` every provider path answers 401 with
   `error_credential_unknown_key.json`; in `unavailable` every provider path
   answers 503 with an envelope naming no known error, which the client
   classifies as `ProviderUnavailable` (DEC-0048);
+- `POST /__stub/withhold {"symbol": S}` makes S's financial-statement paths
+  answer 503 like `unavailable`, so S's fundamentals are recorded `failed` and
+  the run ends Partial, until `POST /__stub/restore {"symbol": S}` (TC-E2E-009's
+  stock BBB);
 - `POST /__stub/hold {"symbol": S}` makes S's requests block until
   `POST /__stub/release {"symbol": S}`;
 - `GET /__stub/requests` answers `{"requests": [{"method", "path"}, ...]}`,
   every provider request received since the last reset, in arrival order,
   path only with no query string (CAP-001-integration-tests-automation-tasks
   T026);
-- `POST /__stub/reset` restores mode `ok`, releases every hold and clears
-  the request log.
+- `POST /__stub/reset` restores mode `ok`, releases every hold, restores
+  every withheld symbol and clears the request log.
+
+No statement payload key is invented (DEC-0285): the cases above differ by
+status code and dates only.
 
 A test fixture, not a product contract. Not collected by pytest (no `test_`
 prefix) or Playwright (not `*.spec.ts`).
@@ -102,13 +112,26 @@ class StubState:
         self._lock = threading.Lock()
         self.mode = "ok"
         self._holds: dict[str, threading.Event] = {}
+        self._withheld: set[str] = set()
         self._requests: list[dict[str, str]] = []
 
     def set_mode(self, mode: str) -> None:
-        if mode not in ("ok", "reject-credential", "unavailable", "no-fundamentals"):
+        if mode not in ("ok", "reject-credential", "unavailable"):
             raise ValueError(f"unknown mode {mode!r}")
         with self._lock:
             self.mode = mode
+
+    def withhold(self, symbol: str) -> None:
+        with self._lock:
+            self._withheld.add(symbol)
+
+    def restore(self, symbol: str) -> None:
+        with self._lock:
+            self._withheld.discard(symbol)
+
+    def is_withheld(self, symbol: str) -> bool:
+        with self._lock:
+            return symbol in self._withheld
 
     def hold(self, symbol: str) -> None:
         with self._lock:
@@ -133,6 +156,7 @@ class StubState:
             self.mode = "ok"
             held = list(self._holds.values())
             self._holds.clear()
+            self._withheld.clear()
             self._requests.clear()
         for event in held:
             event.set()
@@ -162,6 +186,7 @@ def _weekdays(start: date, end: date) -> list[date]:
 
 
 _PRICE_FIELDS = ("o", "h", "l", "c", "vw")
+_NEW_LISTING_DAYS = 300
 _DRIFT_EPOCH = date(2020, 1, 1).toordinal()
 
 
@@ -219,7 +244,10 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
 
     match = _AGGS_PATH.match(path)
     if match:
-        bars = _bars(date.fromisoformat(match["start"]), date.fromisoformat(match["end"]), symbol)
+        start = date.fromisoformat(match["start"])
+        if symbol is not None and symbol.startswith("NEW"):
+            start = max(start, date.today() - timedelta(days=_NEW_LISTING_DAYS))
+        bars = _bars(start, date.fromisoformat(match["end"]), symbol)
         return 200, {**_envelope(bars), "ticker": symbol, "resultsCount": len(bars)}
 
     if _EVENTS_PATH.match(path):
@@ -229,8 +257,10 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
         return 200, _envelope({"name": REFERENCE["name"], "events": [event]})
 
     if path in _FINANCIAL_PATHS:
-        if STATE.mode == "no-fundamentals" or (symbol is not None and symbol.startswith("NOF")):
-            return 200, _envelope([])
+        if symbol is not None and symbol.startswith("NOF"):
+            return 404, NOT_FOUND
+        if symbol is not None and STATE.is_withheld(symbol):
+            return 503, UNAVAILABLE
         period_end = _first(query, "period_end.gte", "period_end_gte") or FINANCIAL["period_end"]
         row = {
             **FINANCIAL,
@@ -270,6 +300,10 @@ class StubHandler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length) or b"{}")
             if self.path == "/__stub/mode":
                 STATE.set_mode(payload["mode"])
+            elif self.path == "/__stub/withhold":
+                STATE.withhold(payload["symbol"])
+            elif self.path == "/__stub/restore":
+                STATE.restore(payload["symbol"])
             elif self.path == "/__stub/hold":
                 STATE.hold(payload["symbol"])
             elif self.path == "/__stub/release":

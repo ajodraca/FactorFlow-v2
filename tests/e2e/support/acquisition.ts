@@ -53,7 +53,7 @@ async function stubControl(path: string, body: Record<string, string> = {}): Pro
   }
 }
 
-export type ProviderMode = "ok" | "reject-credential" | "unavailable" | "no-fundamentals";
+export type ProviderMode = "ok" | "reject-credential" | "unavailable";
 
 export function setProviderMode(mode: ProviderMode): Promise<void> {
   return stubControl("mode", { mode });
@@ -61,6 +61,18 @@ export function setProviderMode(mode: ProviderMode): Promise<void> {
 
 export function holdSymbol(symbol: string): Promise<void> {
   return stubControl("hold", { symbol });
+}
+
+/**
+ * The stub answers 503 on `symbol`'s financial-statement paths until `restoreSymbol`, so its
+ * fundamentals are recorded `failed` and the run ends Partial (CAP-002 TC-E2E-009).
+ */
+export function withholdSymbol(symbol: string): Promise<void> {
+  return stubControl("withhold", { symbol });
+}
+
+export function restoreSymbol(symbol: string): Promise<void> {
+  return stubControl("restore", { symbol });
 }
 
 export function releaseSymbol(symbol: string): Promise<void> {

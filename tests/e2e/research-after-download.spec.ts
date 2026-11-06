@@ -80,7 +80,7 @@ test("TC-E2E-001: a succeeded run leaves every stock scored on Research without 
   // Implements TC-E2E-001
   skipUnlessLineItemsResolved(test);
   test.setTimeout(120_000);
-  followStocks([...followerSymbols(30), "NOFAAA"]);
+  followStocks([...followerSymbols(30), "NEWAAA"]);
   await stateHistoryDepth(page, HISTORY_YEARS);
 
   const runId = await startRun(page);
@@ -91,7 +91,7 @@ test("TC-E2E-001: a succeeded run leaves every stock scored on Research without 
   await page.goto("/research");
   await expect(page.getByRole("heading", { level: 1, name: "31 stocks match" })).toBeVisible();
   // The table draws a window of the rows, so every drawn row is read, not a fixed count.
-  const scored = page.locator("tr[data-symbol]").filter({ hasNotText: "NOFAAA" });
+  const scored = page.locator("tr[data-symbol]").filter({ hasNotText: "NEWAAA" });
   expect(await scored.count()).toBeGreaterThan(0);
   for (const row of await scored.all()) {
     const percentiles = await row.getByTestId("factor-percentile").allInnerTexts();
@@ -115,17 +115,19 @@ test("TC-E2E-001: a succeeded run leaves every stock scored on Research without 
   const download = page.getByRole("link", { name: /^Open the download started .+ C[SD]T$/ });
   await expect(download).toHaveAttribute("href", `/runs/${runId}`);
 
-  // A stock lacking inputs (NOFAAA: the provider holds no fundamentals for it) reads Incomplete
-  // on value and growth, each naming its first missing input; momentum still scores.
+  // A stock lacking one input (NEWAAA: its prices start ten months ago, so it has no 12-month
+  // return) reads Incomplete on momentum alone, naming that input; value and growth still score.
   const search = page.getByRole("textbox", { name: "Find a stock" });
-  await search.fill("NOFAAA");
+  await search.fill("NEWAAA");
   await search.press("Enter");
-  const row = page.locator('tr[data-symbol="NOFAAA"]');
+  const row = page.locator('tr[data-symbol="NEWAAA"]');
   await expect(row).toBeVisible();
   const cells = row.getByTestId("factor-cell");
-  await expect(cells.nth(0)).toHaveText(/Incomplete/);
-  await expect(cells.nth(0)).toHaveAttribute("title", /^Incomplete: book-to-price .+, so value /);
-  await expect(cells.nth(1)).toHaveText(/Incomplete/);
-  await expect(cells.nth(1)).toHaveAttribute("title", /^Incomplete: revenue growth .+, so growth /);
-  await expect(cells.nth(2).getByTestId("factor-percentile")).toBeVisible();
+  await expect(cells.nth(0).getByTestId("factor-percentile")).toBeVisible();
+  await expect(cells.nth(1).getByTestId("factor-percentile")).toBeVisible();
+  await expect(cells.nth(2)).toHaveText(/Incomplete/);
+  await expect(cells.nth(2)).toHaveAttribute(
+    "title",
+    /^Incomplete: 12-month total return .+, so momentum /,
+  );
 });
