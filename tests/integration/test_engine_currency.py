@@ -119,6 +119,7 @@ def test_fundamentals_outdated_at_six_months_and_a_day(
 
 
 # Implements TC-COMP-100
+# Implements CAP-002 TC-INT-034 (part: store half)
 def test_fundamentals_present_at_exactly_six_months(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:

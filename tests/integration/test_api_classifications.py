@@ -433,16 +433,18 @@ def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app
 
 
 # Implements CAP-002 TC-INT-046
-def test_the_history_lists_three_earlier_complete_sets_newest_first_and_skips_a_failed_one(
+def test_the_history_lists_the_earlier_complete_sets_newest_first_and_skips_a_failed_one(
     app: App,
 ) -> None:
-    """DEC-0287: the current set is excluded from the history (DEC-0137), so three earlier
-    complete sets need a fourth, current one. The failed set holds rows for the stock too."""
+    """DEC-0287 (owner): three complete sets and one failed set give two history results, the
+    two earlier complete sets. The current set is excluded from the history (DEC-0137), and the
+    failed set, which holds rows for the stock too, contributes none. It sits between the two
+    earlier sets, so its absence is not explained by its being newest."""
     client, conn = app
     stock = insert_instrument(conn, "AAA")
-    earlier = [complete_set(conn, started_at=T0.replace(day=day)) for day in (10, 12, 14)]
+    earlier = [complete_set(conn, started_at=T0.replace(day=day)) for day in (10, 12)]
     current = complete_set(conn)
-    failed = later_set(conn, "failed")
+    failed = later_set(conn, "failed", started_at=T0.replace(day=11))
     for number, set_id in enumerate([*earlier, current, failed], start=1):
         score = Decimal(9 if set_id == failed else number)
         for factor in FACTORS:
@@ -450,16 +452,9 @@ def test_the_history_lists_three_earlier_complete_sets_newest_first_and_skips_a_
                 conn, set_id, stock, factor, score=score, percentile=Decimal(number)
             )
     body = client.get("/api/classifications/stocks/AAA/history").json()
-    assert [s["set_id"] for s in body["sets"]] == [
-        str(earlier[2]),
-        str(earlier[1]),
-        str(earlier[0]),
-    ]
-    assert [s["factors"]["value"]["score"] for s in body["sets"]] == [
-        "3.000000",
-        "2.000000",
-        "1.000000",
-    ]
+    assert [s["set_id"] for s in body["sets"]] == [str(earlier[1]), str(earlier[0])]
+    assert [s["factors"]["value"]["score"] for s in body["sets"]] == ["2.000000", "1.000000"]
+    assert [s["factors"]["value"]["percentile"] for s in body["sets"]] == ["2.000000", "1.000000"]
     assert str(failed) not in {s["set_id"] for s in body["sets"]}
     assert str(current) not in {s["set_id"] for s in body["sets"]}
     assert body["next_cursor"] is None

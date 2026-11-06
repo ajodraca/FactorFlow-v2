@@ -276,8 +276,9 @@ def test_one_stock_in_two_universes_is_listed_in_both_and_in_its_evidence(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
     seed_classified(conn)
-    first = create(client, "U1", "AAA")
+    # Created against name order, so the memberships check can tell name order from creation.
     second = create(client, "U2", "AAA")
+    first = create(client, "U1", "AAA")
 
     listed = client.get("/api/universes").json()["universes"]
     evidence = client.get("/api/classifications/stocks/AAA").json()
@@ -400,8 +401,9 @@ def test_as_of_reads_past_membership(client: TestClient, conn: psycopg.Connectio
     assert before["member_count"] == 0
     assert before["as_of_before_creation"] is True
     assert before["created_at"] == universe["created_at"]  # the response states the creation date
-    malformed = client.get(f"/api/universes/{universe_id}", params={"as_of": "2026-13-40"})
-    refusal(malformed, 422, "validation_error")
+    for as_of in ("not-a-date", "2026-13-40"):
+        malformed = client.get(f"/api/universes/{universe_id}", params={"as_of": as_of})
+        refusal(malformed, 422, "validation_error")
 
 
 # Implements CAP-002 TC-INT-019

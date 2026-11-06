@@ -5,6 +5,14 @@ runs the classification loop, ends acquisition runs in the store, and reads the 
 HTTP only. The line items carry their test keys (DEC-0286): these tests prove the cycle, not the
 real provider payload keys. A set is dated the database's day, so every set of one test shares
 a classification date and is told apart by its id.
+
+That date is a dependency on the clock (DEC-0292). The tests seed from ``chicago_today()`` and
+the loop stamps each set from the database clock, so a run that crosses midnight in Chicago
+between the seed and a claim dates the two differently. The TC-INT-049 population is dated
+``chicago_today()`` itself and is not moved off a weekend. Because every set of that test
+shares one date, its "not backdated" check rests on the first set's history entry staying
+identical, not on the dates differing. If these tests flake near midnight in Chicago, pin the
+loop's date rather than widening the waits.
 """
 
 import time

@@ -75,6 +75,7 @@ def test_only_succeeded_and_partial_runs_are_claimed(
 
 
 # Implements TC-COMP-078
+# Implements CAP-002 TC-INT-028 (part: store half)
 def test_qualifying_runs_are_claimed_oldest_first_once_each(
     store: tuple["ConnectionPool[Any]", psycopg.Connection],
 ) -> None:

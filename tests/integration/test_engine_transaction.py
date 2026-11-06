@@ -234,6 +234,7 @@ def test_completing_an_already_failed_set_updates_no_row_and_rolls_back(
     assert row["ended_at"] == other_ended_at  # DAC-E2-S2-2: the other writer's end stands
 
 
+# Implements CAP-002 TC-INT-052
 def test_set_failed_by_another_writer_mid_build_is_left_untouched(
     conn: psycopg.Connection,
     building_set: tuple[UUID, int],
@@ -784,6 +785,7 @@ def test_revised_close_after_completion_leaves_the_set_unchanged(
     assert snapshot_set(conn, set_1) == before
 
 
+# Implements CAP-002 TC-INT-049 (part: store half)
 def test_backfill_before_the_build_is_seen_by_that_set(
     conn: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
 ) -> None:
