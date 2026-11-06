@@ -23,6 +23,7 @@ from factorflow.classification.reader import Thresholds
 from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.db.migrator import apply_pending, discover
 from tests.integration.reader_seed import insert_reference
+from tests.integration.test_universe_as_of import D1, D2, D3, _created, _event, _instrument
 from tests.integration.test_universe_create import count_events, seed_instrument
 from tests.integration.test_universe_filter_snapshot import BASE, SET_DATE, T0, classify, seed_set
 
@@ -209,7 +210,46 @@ def test_create_by_hand_returns_and_reads_the_replayed_universe(
     assert events[-1]["filter_provenance"] is None
 
 
-# Implements CAP-002 TC-INT-010 (part: the 409 refusal)
+# Implements CAP-002 TC-INT-001
+def test_create_with_a_current_set_carries_a_classification_cell_per_member(
+    client: TestClient, conn: psycopg.Connection
+) -> None:
+    set_id = seed_set(conn)
+    symbols = [f"S{n:02d}" for n in range(30)]
+    for symbol in symbols:
+        classify(conn, set_id, seed_instrument(conn, symbol), {})
+
+    created = create(client, "Thirty", *symbols)
+
+    assert created["member_count"] == 30
+    assert created["set"]["set_id"] == str(set_id)
+    for body in (created, client.get(f"/api/universes/{created['universe_id']}").json()):
+        assert [m["symbol"] for m in body["members"]] == symbols
+        for member in body["members"]:
+            assert set(member["factors"]) == {"value", "growth", "momentum"}
+            assert {cell["status"] for cell in member["factors"].values()} == {"classified"}
+
+
+# Implements CAP-002 TC-INT-004
+def test_adding_an_uncovered_symbol_is_refused_and_membership_is_unchanged(
+    client: TestClient, conn: psycopg.Connection
+) -> None:
+    seed(conn, "AAA")
+    universe_id = create(client, "Mine", "AAA")["universe_id"]
+    before = written(conn)
+
+    response = client.post(f"/api/universes/{universe_id}/members", json={"symbols": ["zzz"]})
+
+    error = refusal(response, 409, "instrument_not_acquired")
+    assert error["symbols"] == ["ZZZ"]
+    assert "ZZZ" in error["message"]
+    members = client.get(f"/api/universes/{universe_id}").json()["members"]
+    assert [m["symbol"] for m in members] == ["AAA"]
+    assert written(conn) == before
+
+
+# Implements CAP-002 TC-INT-010
+# Implements CAP-002 TC-INT-012
 def test_names_are_unique_among_active_universes_after_trimming(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
@@ -222,9 +262,29 @@ def test_names_are_unique_among_active_universes_after_trimming(
     assert "Tech" in error["message"]
     patched = client.patch(f"/api/universes/{other['universe_id']}", json={"name": "Tech "})
     refusal(patched, 409, "universe_name_in_use")
+    active = client.get("/api/universes").json()["universes"]
+    assert sorted(u["name"] for u in active) == ["Other", "Tech"]
+    refused = client.get(f"/api/universes/{other['universe_id']}").json()
+    assert refused["name"] == "Other"  # TC-INT-012: the refused rename changed nothing
 
     assert client.delete(f"/api/universes/{first['universe_id']}").status_code == 200
     assert create(client, "Tech", "AAA")["name"] == "Tech"
+
+
+# Implements CAP-002 TC-INT-009
+def test_one_stock_in_two_universes_is_listed_in_both_and_in_its_evidence(
+    client: TestClient, conn: psycopg.Connection
+) -> None:
+    seed_classified(conn)
+    first = create(client, "U1", "AAA")
+    second = create(client, "U2", "AAA")
+
+    listed = client.get("/api/universes").json()["universes"]
+    evidence = client.get("/api/classifications/stocks/AAA").json()
+
+    assert {u["universe_id"] for u in listed} == {first["universe_id"], second["universe_id"]}
+    assert all(u["lifecycle"] == "active" and u["member_count"] == 1 for u in listed)
+    assert [m["name"] for m in evidence["memberships"]] == ["U1", "U2"]
 
 
 # Implements CAP-002 TC-INT-011
@@ -244,7 +304,7 @@ def test_rename_keeps_the_id_and_the_history(client: TestClient, conn: psycopg.C
     assert events[1:] == history
 
 
-# Implements CAP-002 TC-INT-003 (part: the add response)
+# Implements CAP-002 TC-INT-003
 # Implements CAP-002 TC-INT-016
 def test_add_and_remove_keep_the_dated_record(client: TestClient, conn: psycopg.Connection) -> None:
     seed(conn, "AAA", "BBB")
@@ -252,6 +312,8 @@ def test_add_and_remove_keep_the_dated_record(client: TestClient, conn: psycopg.
 
     added = client.post(f"/api/universes/{universe_id}/members", json={"symbols": ["BBB"]})
     assert added.json() == {"added": ["BBB"], "already_member": []}
+    after_add = client.get(f"/api/universes/{universe_id}").json()["members"]
+    assert [m["symbol"] for m in after_add] == ["AAA", "BBB"]
     removed = client.delete(f"/api/universes/{universe_id}/members/bbb")
 
     assert removed.status_code == 200
@@ -266,8 +328,8 @@ def test_add_and_remove_keep_the_dated_record(client: TestClient, conn: psycopg.
     assert datetime.fromisoformat(events[0]["recorded_at"]) == removed_at
 
 
-# Implements CAP-002 TC-INT-013 (part: 409 universe_retired on PATCH)
-# Implements CAP-002 TC-INT-014 (part: 200 retired, members and events kept)
+# Implements CAP-002 TC-INT-013
+# Implements CAP-002 TC-INT-014
 # Implements CAP-002 TC-INT-015
 def test_retire_keeps_members_and_events_and_refuses_every_write(
     client: TestClient, conn: psycopg.Connection
@@ -295,6 +357,12 @@ def test_retire_keeps_members_and_events_and_refuses_every_write(
     ):
         refusal(response, 409, "universe_retired")
     assert written(conn) == before
+    assert client.get(f"/api/universes/{universe_id}").json()["name"] == "Mine"
+    assert universe_id not in [
+        u["universe_id"] for u in client.get("/api/universes").json()["universes"]
+    ]
+    retired_list = client.get("/api/universes", params={"lifecycle": "retired"}).json()
+    assert [u["universe_id"] for u in retired_list["universes"]] == [universe_id]
 
 
 # Implements CAP-002 TC-INT-023
@@ -318,11 +386,12 @@ def test_unknown_universes_and_members_are_404(
     assert error["resource"] == "universe-member"
 
 
-# Implements CAP-002 TC-INT-020 (part: 200, no members, as_of_before_creation)
+# Implements CAP-002 TC-INT-020
 # Implements CAP-002 TC-INT-022
 def test_as_of_reads_past_membership(client: TestClient, conn: psycopg.Connection) -> None:
     seed(conn, "AAA")
-    universe_id = create(client, "Mine", "AAA")["universe_id"]
+    universe = create(client, "Mine", "AAA")
+    universe_id = universe["universe_id"]
 
     current = client.get(f"/api/universes/{universe_id}", params={"as_of": today().isoformat()})
     assert [m["symbol"] for m in current.json()["members"]] == ["AAA"]
@@ -330,8 +399,50 @@ def test_as_of_reads_past_membership(client: TestClient, conn: psycopg.Connectio
     assert before["members"] == []
     assert before["member_count"] == 0
     assert before["as_of_before_creation"] is True
+    assert before["created_at"] == universe["created_at"]  # the response states the creation date
     malformed = client.get(f"/api/universes/{universe_id}", params={"as_of": "2026-13-40"})
     refusal(malformed, 422, "validation_error")
+
+
+# Implements CAP-002 TC-INT-019
+def test_as_of_returns_the_membership_of_each_date(
+    client: TestClient, conn: psycopg.Connection
+) -> None:
+    aaa, bbb, ccc = (_instrument(conn, symbol) for symbol in ("AAA", "BBB", "CCC"))
+    universe = _created(conn, D1, name="Mine")
+    _event(conn, universe, "member_added", D1, instrument_id=aaa)
+    _event(conn, universe, "member_added", D1, instrument_id=bbb)
+    _event(conn, universe, "member_removed", D2, instrument_id=bbb)
+    _event(conn, universe, "member_added", D3, instrument_id=ccc)
+
+    for day, expected in ((D1, ["AAA", "BBB"]), (D2, ["AAA"]), (D3, ["AAA", "CCC"])):
+        body = client.get(f"/api/universes/{universe}", params={"as_of": day.isoformat()}).json()
+        assert [m["symbol"] for m in body["members"]] == expected, day
+        assert body["member_count"] == len(expected)
+        assert body["as_of"] == day.isoformat()
+        assert body["as_of_before_creation"] is False
+
+
+# Implements CAP-002 TC-INT-021
+def test_events_list_every_kind_newest_first(client: TestClient, conn: psycopg.Connection) -> None:
+    seed(conn, "AAA", "BBB")
+    universe_id = create(client, "Old", "AAA")["universe_id"]
+    assert client.post(f"/api/universes/{universe_id}/members", json={"symbols": ["BBB"]})
+    assert client.delete(f"/api/universes/{universe_id}/members/BBB").status_code == 200
+    assert client.patch(f"/api/universes/{universe_id}", json={"name": "New"}).status_code == 200
+
+    events = all_events(client, universe_id)
+
+    assert [e["event_type"] for e in events] == [
+        "renamed",
+        "member_removed",
+        "member_added",
+        "member_added",
+        "created",
+    ]
+    ids = [e["event_id"] for e in events]
+    assert ids == sorted(ids, reverse=True)
+    assert len(set(ids)) == len(ids)
 
 
 def test_the_list_filters_counts_and_pages(client: TestClient, conn: psycopg.Connection) -> None:
@@ -452,11 +563,12 @@ def save_filter(
     )
 
 
-# Implements CAP-002 TC-INT-005 (part: 201 with origin, compared to the reader)
+# Implements CAP-002 TC-INT-005
 def test_create_from_a_result_saves_the_filter_match_with_provenance(
     client: TestClient, conn: psycopg.Connection
 ) -> None:
     set_id, _ = seed_classified(conn)
+    listed = client.get("/api/classifications", params={"value_percentile_min": "80"}).json()
 
     response = save_filter(client, set_id, {"value_percentile_min": "80"})
 
@@ -465,6 +577,8 @@ def test_create_from_a_result_saves_the_filter_match_with_provenance(
     expected = oracle(conn, set_id, Thresholds(bounds={"value_percentile_min": Decimal("80")}))
     assert expected  # the seed matches several stocks
     assert [m["symbol"] for m in body["members"]] == expected
+    assert [stock["symbol"] for stock in listed["stocks"]] == expected
+    assert listed["match_count"] == len(body["members"])
     assert body["origin"] == {
         "kind": "from_filter",
         "set_id": str(set_id),
@@ -475,6 +589,8 @@ def test_create_from_a_result_saves_the_filter_match_with_provenance(
     }
     assert body["set"]["set_id"] == str(set_id)
     read = client.get(f"/api/universes/{body['universe_id']}").json()
+    assert [m["symbol"] for m in read["members"]] == expected
+    assert read["origin"] == body["origin"]
     for member in read["members"]:
         assert member["name"] == NAMES[member["symbol"]]
         assert member["factors"] is not None
@@ -498,6 +614,31 @@ def test_create_from_a_result_saves_the_filter_match_with_provenance(
     assert events[-1]["filter_provenance"] == row[0]
     assert all(e["filter_provenance"] is None for e in events[:-1])
     assert {e["event_type"] for e in events[:-1]} == {"member_added"}
+
+
+# Implements CAP-002 TC-INT-007
+def test_a_filter_universe_keeps_its_members_when_a_newer_set_matches_differently(
+    client: TestClient, conn: psycopg.Connection
+) -> None:
+    old, ids = seed_classified(conn)
+    filter_body = {"value_percentile_min": "80"}
+    saved = save_filter(client, old, filter_body).json()
+    members = [m["symbol"] for m in saved["members"]]
+    assert "EEE" not in members
+    newer = seed_set(
+        conn, classification_date=SET_DATE + timedelta(days=1), ended_at=T0 + timedelta(days=1)
+    )
+    for symbol in BASE:
+        percentile = 99 if symbol == "EEE" else 10
+        classify(conn, newer, ids[symbol], {"value": ("1", percentile)})
+
+    read = client.get(f"/api/universes/{saved['universe_id']}").json()
+    listed = client.get("/api/classifications", params=filter_body).json()
+
+    assert [m["symbol"] for m in read["members"]] == members
+    assert read["origin"]["set_id"] == str(old)
+    assert [s["symbol"] for s in listed["stocks"]] == ["EEE"]
+    assert listed["set"]["set_id"] == str(newer)
 
 
 def test_hide_incomplete_saves_only_complete_stocks(

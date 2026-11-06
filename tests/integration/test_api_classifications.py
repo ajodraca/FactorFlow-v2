@@ -15,6 +15,7 @@ import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
+from factorflow.classification.constants import FACTORS, INPUT_NAMES
 from tests.integration.api_classification_support import (
     SCORE,
     T0,
@@ -70,6 +71,38 @@ def test_the_list_carries_the_set_the_factors_and_string_scores(app: App) -> Non
     assert newer["later"]["run_started_at"] == "2026-10-16T14:30:00Z"
 
 
+def _factor_numbers(stock: dict[str, object]) -> dict[str, tuple[object, object]]:
+    return {
+        factor: (cell["score"], cell["percentile"])  # type: ignore[index]
+        for factor, cell in stock["factors"].items()  # type: ignore[attr-defined]
+    }
+
+
+# Implements CAP-002 TC-INT-026
+def test_a_stocks_scores_are_the_same_unscoped_and_in_each_universe(app: App) -> None:
+    client, conn = app
+    set_id = complete_set(conn)
+    momentum = (Decimal("0.300000"), Decimal("55.000000"))
+    stock = seed_scored_stock(conn, set_id, "AAA", value=SCORE, growth=LOW, momentum=momentum)
+    seed_scored_stock(conn, set_id, "BBB", value=LOW, growth=SCORE, momentum=SCORE)
+    first = insert_universe(conn, "U1", [stock])
+    second = insert_universe(conn, "U2", [stock, insert_instrument(conn, "CCC")])
+
+    reads = [
+        client.get("/api/classifications", params=params).json()
+        for params in ({}, {"universe_id": str(first)}, {"universe_id": str(second)})
+    ]
+
+    numbers = []
+    for body in reads:
+        row = next(s for s in body["stocks"] if s["symbol"] == "AAA")
+        numbers.append(_factor_numbers(row))
+    assert numbers[0] == numbers[1] == numbers[2]
+    assert numbers[0]["value"] == ("1.250000", "87.500000")
+    assert numbers[0]["growth"] == ("-0.500000", "10.000000")
+    assert [len(body["stocks"]) for body in reads] == [2, 1, 1]  # the scope changed, not the cells
+
+
 def test_the_match_count_covers_the_whole_set_on_every_page(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn, active_instruments=7)
@@ -90,7 +123,7 @@ def test_the_match_count_covers_the_whole_set_on_every_page(app: App) -> None:
     assert pages == 3 and sorted(seen) == sorted(set(seen)) and len(seen) == 7
 
 
-# Implements CAP-002 TC-INT-033 (part: incomplete stock listed under a bound)
+# Implements CAP-002 TC-INT-033
 def test_thresholds_and_hide_incomplete_follow_the_documented_rule(app: App) -> None:
     client, conn = app
     set_id = complete_set(conn)
@@ -103,6 +136,11 @@ def test_thresholds_and_hide_incomplete_follow_the_documented_rule(app: App) -> 
     bound = client.get("/api/classifications", params={"value_percentile_min": "90"}).json()
     assert "AAA" not in _symbols(bound)
     assert {"BBB", "CCC"} <= set(_symbols(bound))
+    assert bound["match_count"] == 2
+    seed_scored_stock(conn, set_id, "DDD", value=LOW)  # classified, percentile 10
+    fifty = client.get("/api/classifications", params={"value_percentile_min": "50"}).json()
+    assert _symbols(fifty) == ["AAA", "BBB", "CCC"]  # the classified stock below 50 is excluded
+    assert fifty["match_count"] == 3
 
 
 def test_filters_change_the_match_count_identically_on_every_page(app: App) -> None:
@@ -135,6 +173,9 @@ def test_nothing_classified_says_so(app: App) -> None:
     empty = client.get("/api/classifications").json()
     assert empty["never_classified"] is True and empty["set"] is None and empty["later"] is None
     assert empty["match_count"] == 0 and empty["stocks"] == []
+    summary = client.get("/api/classifications/summary").json()
+    shared = ("never_classified", "set", "later", "factors")
+    assert {key: empty[key] for key in shared} == {key: summary[key] for key in shared}
     later_set(conn, "building")
     assert client.get("/api/classifications").json()["later"]["state"] == "building"
 
@@ -152,6 +193,111 @@ def test_sort_orders_and_bad_input_is_422(app: App) -> None:
         client.get("/api/classifications", params={"value_percentile_min": "101"}).status_code
         == 422
     )
+
+
+def _seed_unranked_growth(conn: psycopg.Connection, set_id: object, symbol: str) -> None:
+    """A stock whose growth the engine left unranked ("29 of 30 stocks qualified") and whose
+    other factors are scored."""
+    stock = insert_instrument(conn, symbol)
+    for factor in ("value", "momentum"):
+        insert_classification(
+            conn,
+            set_id,
+            stock,
+            factor,
+            score=SCORE[0],
+            percentile=SCORE[1],  # type: ignore[arg-type]
+        )
+    insert_classification(
+        conn,
+        set_id,  # type: ignore[arg-type]
+        stock,
+        "growth",
+        "not_classified",
+        reason_code="not_enough_stocks",
+        reason_detail="29 of 30 stocks qualified",
+    )
+
+
+# Implements CAP-002 TC-INT-036
+def test_fewer_than_thirty_qualifying_stocks_show_no_growth_score(app: App) -> None:
+    client, conn = app
+    set_id = complete_set(
+        conn,
+        active_instruments=29,
+        factors={"value": (40, True), "growth": (29, False), "momentum": (40, True)},
+    )
+    for index in range(29):
+        _seed_unranked_growth(conn, set_id, f"S{index:02d}")
+
+    listed = client.get("/api/classifications", params={"limit": 50}).json()
+    summary = client.get("/api/classifications/summary").json()
+
+    assert listed["match_count"] == 29
+    for stock in listed["stocks"]:
+        growth = stock["factors"]["growth"]
+        assert growth["status"] == "not_classified"
+        assert growth["reason_code"] == "not_enough_stocks"
+        assert growth["score"] is None and growth["percentile"] is None
+        assert "29 of 30" in growth["reason_detail"]
+        assert stock["factors"]["value"]["status"] == "classified"
+        assert stock["factors"]["momentum"]["status"] == "classified"
+    for body in (listed, summary):
+        assert body["factors"]["growth"]["ranked"] is False
+        assert body["factors"]["growth"]["qualified_count"] == 29
+        assert body["factors"]["value"]["ranked"] is True
+
+
+# Implements CAP-002 TC-INT-037
+def test_a_retired_stock_is_hidden_unscoped_and_retired_in_its_universe(app: App) -> None:
+    client, conn = app
+    set_id = complete_set(conn)
+    active = seed_scored_stock(conn, set_id, "AAA", value=SCORE)
+    retired = ("retired", None)
+    gone = seed_scored_stock(
+        conn, set_id, "RRR", value=retired, growth=retired, momentum=retired, lifecycle="retired"
+    )
+    universe_id = insert_universe(conn, "U", [active, gone])
+
+    unscoped = client.get("/api/classifications").json()
+    scoped = client.get("/api/classifications", params={"universe_id": str(universe_id)}).json()
+
+    assert _symbols(unscoped) == ["AAA"]
+    assert _symbols(scoped) == ["AAA", "RRR"]
+    row = scoped["stocks"][1]
+    assert row["lifecycle"] == "retired"
+    for cell in row["factors"].values():
+        assert (cell["status"], cell["reason_code"]) == ("not_classified", "retired")
+        assert cell["score"] is None and cell["percentile"] is None
+
+
+# Implements CAP-002 TC-INT-039
+def test_a_sorted_list_pages_with_a_stable_match_count(app: App) -> None:
+    client, conn = app
+    set_id = complete_set(conn, active_instruments=25)
+    for number in range(1, 26):
+        seed_scored_stock(
+            conn,
+            set_id,
+            f"S{number:02d}",
+            value=(Decimal(number), Decimal(number)),
+        )
+    seen: list[str] = []
+    cursor = None
+    sizes: list[int] = []
+    while True:
+        params = {"sort": "value_percentile", "order": "desc", "limit": 10}
+        body = client.get(
+            "/api/classifications", params={**params, **({"cursor": cursor} if cursor else {})}
+        ).json()
+        assert body["match_count"] == 25
+        sizes.append(len(body["stocks"]))
+        seen += _symbols(body)
+        cursor = body["next_cursor"]
+        if cursor is None:
+            break
+    assert sizes == [10, 10, 5]
+    assert seen == [f"S{number:02d}" for number in range(25, 0, -1)]
 
 
 # Implements CAP-002 TC-INT-043
@@ -201,7 +347,7 @@ def test_compare_reports_unknown_symbols_and_enforces_its_bounds(app: App) -> No
         assert response.status_code == 422 and "`symbols`" in response.json()["error"]["message"]
 
 
-# Implements CAP-002 TC-INT-044 (part: the inputs' keys)
+# Implements CAP-002 TC-INT-044
 # Implements CAP-002 TC-INT-045
 def test_the_evidence_shows_inputs_with_their_dates_and_memberships(app: App) -> None:
     client, conn = app
@@ -209,10 +355,25 @@ def test_the_evidence_shows_inputs_with_their_dates_and_memberships(app: App) ->
     assert empty.status_code == 404 and empty.json()["error"]["code"] == "instrument_not_found"
     set_id = complete_set(conn)
     stock = seed_scored_stock(conn, set_id, "AAA", value=SCORE)
-    seed_inputs(conn, set_id, stock)
+    names = [name for factor in FACTORS for name in INPUT_NAMES[factor]]
+    values = {name: Decimal(index) + Decimal("0.25") for index, name in enumerate(names, start=1)}
+    seed_inputs(conn, set_id, stock, values=values)
     insert_universe(conn, "Mine", [stock])
     body = client.get("/api/classifications/stocks/aaa").json()
     assert body["set"]["set_id"] == str(set_id) and len(body["inputs"]) == 8
+    stored = {
+        row[0]: row[1:]
+        for row in conn.execute(
+            "SELECT input_name, value, as_of, known_on FROM factor_input "
+            "WHERE set_id = %s AND instrument_id = %s",
+            (set_id, stock),
+        ).fetchall()
+    }
+    assert len(stored) == 8
+    for shown in body["inputs"]:
+        value, as_of, known_on = stored[shown["input_name"]]
+        assert Decimal(shown["value"]) == value == values[shown["input_name"]]
+        assert (shown["as_of"], shown["known_on"]) == (as_of.isoformat(), known_on.isoformat())
     assert {"factor", "input_name", "label", "status", "value", "as_of", "known_on"} <= set(
         body["inputs"][0]
     )
@@ -271,6 +432,76 @@ def test_the_history_lists_earlier_sets_newest_first_without_the_current_one(app
     assert client.get("/api/classifications/stocks/NOPE/history").status_code == 404
 
 
+# Implements CAP-002 TC-INT-046
+def test_the_history_lists_three_earlier_complete_sets_newest_first_and_skips_a_failed_one(
+    app: App,
+) -> None:
+    """DEC-0287: the current set is excluded from the history (DEC-0137), so three earlier
+    complete sets need a fourth, current one. The failed set holds rows for the stock too."""
+    client, conn = app
+    stock = insert_instrument(conn, "AAA")
+    earlier = [complete_set(conn, started_at=T0.replace(day=day)) for day in (10, 12, 14)]
+    current = complete_set(conn)
+    failed = later_set(conn, "failed")
+    for number, set_id in enumerate([*earlier, current, failed], start=1):
+        score = Decimal(9 if set_id == failed else number)
+        for factor in FACTORS:
+            insert_classification(
+                conn, set_id, stock, factor, score=score, percentile=Decimal(number)
+            )
+    body = client.get("/api/classifications/stocks/AAA/history").json()
+    assert [s["set_id"] for s in body["sets"]] == [
+        str(earlier[2]),
+        str(earlier[1]),
+        str(earlier[0]),
+    ]
+    assert [s["factors"]["value"]["score"] for s in body["sets"]] == [
+        "3.000000",
+        "2.000000",
+        "1.000000",
+    ]
+    assert str(failed) not in {s["set_id"] for s in body["sets"]}
+    assert str(current) not in {s["set_id"] for s in body["sets"]}
+    assert body["next_cursor"] is None
+
+
+# Implements CAP-002 TC-INT-058
+def test_the_restatement_mark_is_on_value_and_growth_in_all_four_reads(app: App) -> None:
+    client, conn = app
+    earlier = complete_set(conn, started_at=T0.replace(day=10))
+    current = complete_set(conn)
+    marked = ("value", "growth")
+    stock = seed_scored_stock(conn, current, "AAA", value=SCORE, restated=marked)
+    seed_scored_stock(conn, current, "BBB", value=SCORE)
+    for factor in FACTORS:
+        insert_classification(
+            conn,
+            earlier,
+            stock,
+            factor,
+            score=SCORE[0],
+            percentile=SCORE[1],
+            restated_possible=factor in marked,
+        )
+    expected = {"value": True, "growth": True, "momentum": False}
+
+    listed = client.get("/api/classifications").json()["stocks"]
+    compared = client.get("/api/classifications", params={"symbols": "AAA,BBB"}).json()["stocks"]
+    evidence = client.get("/api/classifications/stocks/AAA").json()["factors"]
+    history = client.get("/api/classifications/stocks/AAA/history").json()["sets"][0]["factors"]
+
+    for cells in (
+        next(r for r in listed if r["symbol"] == "AAA")["factors"],
+        next(r for r in compared if r["symbol"] == "AAA")["factors"],
+        evidence,
+        history,
+    ):
+        assert {f: cells[f]["restated_possible"] for f in FACTORS} == expected
+    for rows in (listed, compared):
+        other = next(r for r in rows if r["symbol"] == "BBB")["factors"]
+        assert not any(cell["restated_possible"] for cell in other.values())
+
+
 # Implements CAP-002 TC-INT-048 (part: never-classified stock has no sets)
 def test_the_history_carries_the_stored_restated_flag_and_a_new_stock_has_none(app: App) -> None:
     client, conn = app
@@ -299,20 +530,23 @@ def test_the_history_carries_the_stored_restated_flag_and_a_new_stock_has_none(a
     assert fresh.json() == {"symbol": "NEW", "sets": [], "next_cursor": None}
 
 
-# Implements CAP-002 TC-INT-055 (part: run_started_at and detail equals list row)
+# Implements CAP-002 TC-INT-055
 # Implements CAP-002 TC-INT-056
 def test_the_sets_list_and_detail_agree(app: App) -> None:
     client, conn = app
+    earlier = complete_set(conn, started_at=T0.replace(day=10))
     done = complete_set(conn)
     later_set(conn, "failed")
     later_set(conn, "building", started_at=T1.replace(day=20))
     body = client.get("/api/classifications/sets").json()
-    assert [s["state"] for s in body["sets"]] == ["building", "failed", "complete"]
+    assert [s["state"] for s in body["sets"]] == ["building", "failed", "complete", "complete"]
+    assert [s["set_id"] for s in body["sets"][2:]] == [str(done), str(earlier)]
     assert all("run_started_at" in s for s in body["sets"])
     failed = next(s for s in body["sets"] if s["state"] == "failed")
     assert failed["failure_reason"] == "boom" and failed["ended_at"] is not None
     detail = client.get(f"/api/classifications/sets/{done}").json()
     assert detail == next(s for s in body["sets"] if s["set_id"] == str(done))
+    assert detail["ended_at"] is not None  # the set's produced-at, equal on both reads
     missing = client.get("/api/classifications/sets/00000000-0000-0000-0000-000000000000")
     assert missing.status_code == 404
     assert missing.json()["error"]["code"] == "classification_set_not_found"
