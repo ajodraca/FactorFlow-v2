@@ -119,7 +119,8 @@ test("TC-E2E-006: a filter that matches no stock blocks saving and creates no un
   await expect(
     page.getByText("No stocks match these filters, so there is nothing to save.", { exact: true }),
   ).toBeVisible();
-  await save.click();
+  // aria-disabled, not disabled: force the click past Playwright's enabled check.
+  await save.click({ force: true });
   await expect(page.getByRole("dialog")).toHaveCount(0);
 
   await page.goto("/research/universes");

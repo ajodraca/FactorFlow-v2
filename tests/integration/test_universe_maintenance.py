@@ -372,7 +372,8 @@ def test_a_lower_case_non_member_is_reported_normalised(conn: psycopg.Connection
     conn.rollback()
 
     assert "CCC" in str(excinfo.value)
-    assert "ccc" not in str(excinfo.value)
+    # The message also names the universe's random UUID, which can contain "ccc".
+    assert "ccc" not in str(excinfo.value).replace(str(uid), "")
 
 
 def test_a_removed_symbol_is_no_longer_a_member(conn: psycopg.Connection) -> None:

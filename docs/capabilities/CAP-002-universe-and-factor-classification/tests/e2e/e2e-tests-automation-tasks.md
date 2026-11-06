@@ -8,6 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-05
 updated: 2026-11-05
+last_reworked_review: e2e-tests-automation-review-v1.md
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
@@ -168,9 +169,9 @@ TC-E2E-001, 009 and 010 guarded as described), each titled with its TC-E2E id.
 
 **Purpose**: Prove the new specs pass, are isolated, and leave the existing suite green.
 
-- [ ] T011 Run the full Playwright suite (`npm run test:e2e`) with Docker available and confirm the existing CAP-001 specs and the new CAP-002 specs pass, with the guarded tests reported as skipped with the DEC-0285 reason and nothing else skipped. If no container runtime is available, record that and do not report a green suite (tech stack note). Depends on T005 to T010.
-- [ ] T012 Check isolation: run each new spec file alone (`npx playwright test tests/e2e/<file>`) and the six files in reverse order; confirm no test depends on file order or on another test's data, that `resetAcquisitionStore()` empties the CAP-002 tables, and that no run is left non-terminal. Remove any leftover helper, unused import or duplicate seed. Depends on T011.
-- [ ] T013 Run the frontend gates on the changed TypeScript: `npx tsc --noEmit`, `npm run lint`, `npm run format`; and the Python gates for the stub: `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src` (the stub is under `tests/`, so also run `uv run pytest -m 'not postgres'` to confirm nothing collects it). Depends on T012.
+- [x] T011 Run the full Playwright suite (`npm run test:e2e`) with Docker available and confirm the existing CAP-001 specs and the new CAP-002 specs pass, with the guarded tests reported as skipped with the DEC-0285 reason and nothing else skipped. If no container runtime is available, record that and do not report a green suite (tech stack note). Depends on T005 to T010.
+- [x] T012 Check isolation: run each new spec file alone (`npx playwright test tests/e2e/<file>`) and the six files in reverse order; confirm no test depends on file order or on another test's data, that `resetAcquisitionStore()` empties the CAP-002 tables, and that no run is left non-terminal. Remove any leftover helper, unused import or duplicate seed. Depends on T011.
+- [x] T013 Run the frontend gates on the changed TypeScript: `npx tsc --noEmit`, `npm run lint`, `npm run format`; and the Python gates for the stub: `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy src` (the stub is under `tests/`, so also run `uv run pytest -m 'not postgres'` to confirm nothing collects it). Depends on T012.
 
 **Checkpoint**: All new tests pass or skip for the stated reason, no flaky test,
 isolation verified, lint and type checks clean.

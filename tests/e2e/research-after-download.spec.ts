@@ -7,11 +7,7 @@ import {
   stateHistoryDepth,
   summaryOutcome,
 } from "./support/acquisition";
-import {
-  followStocks,
-  followerSymbols,
-  skipUnlessLineItemsResolved,
-} from "./support/classification";
+import { followStocks, followerSymbols } from "./support/classification";
 
 /**
  * Stocks are classified after an acquisition run (flow 1: TC-E2E-001,
@@ -19,11 +15,17 @@ import {
  * through the interface only, against a real run and build on the acquisition
  * stack (CAP-002-e2e-tests-automation-tasks T005).
  *
- * TC-E2E-001 and the second half of TC-E2E-002 are guarded (DEC-0285): while a
- * statement payload key is unresolved (system design section 8 question 1) a
- * build cannot score value or growth, so they skip with that reason and run
- * unchanged once it is resolved. The first half of TC-E2E-002 needs no build.
+ * The acquisition stack's API installs test statement payload keys and the stub
+ * serves statements carrying them (AR-001; DEC-0290), so every test here runs;
+ * none waits on the owner's payload-key answer (system design section 8
+ * question 1).
  */
+/**
+ * Enough history for eight quarterly statements (growth) and thirteen months of
+ * prices (12-month momentum), so a real build scores all three factors.
+ */
+const HISTORY_YEARS = 3;
+
 test.use({ baseURL: ACQUISITION_BASE_URL });
 
 test.beforeEach(async () => {
@@ -45,10 +47,9 @@ test("TC-E2E-002: after a run with 20 stocks, every factor cell reads Not enough
   page,
 }) => {
   // Implements TC-E2E-002 (after the run)
-  skipUnlessLineItemsResolved(test);
   test.setTimeout(120_000);
   followStocks(followerSymbols(20));
-  await stateHistoryDepth(page, 1);
+  await stateHistoryDepth(page, HISTORY_YEARS);
 
   await startRun(page);
   await expect(summaryOutcome(page)).toHaveText("Succeeded", { timeout: 60_000 });
@@ -72,40 +73,52 @@ test("TC-E2E-001: a succeeded run leaves every stock scored on Research without 
   page,
 }) => {
   // Implements TC-E2E-001
-  skipUnlessLineItemsResolved(test);
   test.setTimeout(120_000);
-  followStocks([...followerSymbols(30), "NOFAAA"]);
-  await stateHistoryDepth(page, 1);
+  followStocks([...followerSymbols(30), "GAPAAA"]);
+  await stateHistoryDepth(page, HISTORY_YEARS);
 
   const runId = await startRun(page);
   await expect(summaryOutcome(page)).toHaveText("Succeeded", { timeout: 60_000 });
 
-  // Open Research without acting in between: stocks show a score and a whole-number percentile.
+  // Open Research without acting in between: every stock shows a whole-number percentile
+  // (0 to 100) for each of the three factors, and the percentiles are not all alike.
   await page.goto("/research");
   await expect(page.getByRole("heading", { level: 1, name: "31 stocks match" })).toBeVisible();
-  const first = page.locator('tr[data-symbol="F00"]');
-  const percentiles = await first.getByTestId("factor-percentile").allInnerTexts();
-  expect(percentiles).toHaveLength(3);
-  for (const percentile of percentiles) {
-    expect(percentile).toMatch(/^(100|\d{1,2})$/);
+  // The table draws a window of the rows, so every drawn row is read, not a fixed count.
+  const scored = page.locator("tr[data-symbol]").filter({ hasNotText: "GAPAAA" });
+  expect(await scored.count()).toBeGreaterThan(0);
+  for (const row of await scored.all()) {
+    const percentiles = await row.getByTestId("factor-percentile").allInnerTexts();
+    expect(percentiles).toHaveLength(3);
+    for (const percentile of percentiles) {
+      expect(percentile).toMatch(/^(100|\d{1,2})$/);
+    }
   }
+  const percentiles = await scored.getByTestId("factor-percentile").allInnerTexts();
+  expect(new Set(percentiles).size).toBeGreaterThan(1);
 
-  // The as-of line names the scores' time and the download, and links to that run.
-  await expect(page.getByText(/^Scores from /)).toBeVisible();
-  await expect(page.getByRole("link", { name: /^Open the download started / })).toHaveAttribute(
-    "href",
-    `/runs/${runId}`,
-  );
+  // The standardised score sits on the evidence page of any listed stock, for all three factors.
+  await page.goto("/research/stocks/F00");
+  await expect(page.getByTestId("card-score")).toHaveCount(3);
+  await page.goBack();
+
+  // The as-of line names the scores' time in America/Chicago and the download, and links to that run.
+  await expect(page.getByText(/^Scores from \S+ \S+ C[SD]T/)).toBeVisible();
+  const download = page.getByRole("link", { name: /^Open the download started .+ C[SD]T$/ });
+  await expect(download).toHaveAttribute("href", `/runs/${runId}`);
 
   // A stock lacking an input reads Incomplete on the affected factors; its other factor still scores.
   const search = page.getByRole("textbox", { name: "Find a stock" });
-  await search.fill("NOFAAA");
+  await search.fill("GAPAAA");
   await search.press("Enter");
-  const row = page.locator('tr[data-symbol="NOFAAA"]');
+  const row = page.locator('tr[data-symbol="GAPAAA"]');
   await expect(row).toBeVisible();
   const cells = row.getByTestId("factor-cell");
-  await expect(cells.nth(0)).toHaveText(/Incomplete/);
-  await expect(cells.nth(0)).toHaveAttribute("title", /^Incomplete: .+ can't be compared fairly/);
+  await expect(cells.nth(0).getByTestId("factor-percentile")).toBeVisible();
   await expect(cells.nth(1)).toHaveText(/Incomplete/);
+  await expect(cells.nth(1)).toHaveAttribute(
+    "title",
+    /^Incomplete: .*earnings-per-share growth.*, so growth/,
+  );
   await expect(cells.nth(2).getByTestId("factor-percentile")).toBeVisible();
 });

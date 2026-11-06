@@ -152,8 +152,10 @@ ACQUISITION_ENV=(
   # backoff keeps those retries inside the Playwright timeout (DEC-0048).
   "FACTORFLOW_MASSIVE_BACKOFF_INITIAL_SECONDS=0.05"
 )
+# Its API runs through a test-only entry point that installs test statement
+# payload keys, so a build scores value and growth (AR-001; DEC-0290).
 env "${ACQUISITION_ENV[@]}" FACTORFLOW_API_PORT="$ACQ_PORT" \
-  uv run python -m factorflow.app_main &
+  uv run python tests/e2e/support/api_e2e_main.py &
 BACKGROUND_PIDS+=("$!")
 env "${ACQUISITION_ENV[@]}" uv run python tests/e2e/support/ingestion_e2e_main.py &
 BACKGROUND_PIDS+=("$!")
