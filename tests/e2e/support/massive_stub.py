@@ -13,13 +13,8 @@ acquisition.ts`:
 
 - a symbol starting `UNK` answers 404 with `error_not_found.json`;
 - a symbol starting `NOF` is a stock for which the provider holds no
-  fundamentals: every financial-statement path answers 404 with
-  `error_not_found.json`, which the run records as `not_found`, the outcome the
-  evidence reads as "the provider reports no ..." (CAP-002-e2e-tests-automation-
-  tasks T002; AR-001; DEC-0290);
-- a symbol starting `GAP` holds statements without diluted earnings per share, a stock
-  that lacks one input (growth cannot be scored, value and momentum can) while its
-  run still succeeds (TC-E2E-001);
+  fundamentals: every financial-statement path answers 200 with an empty
+  `results` list (CAP-002-e2e-tests-automation-tasks T002; DEC-0285);
 - every symbol's price bars trend at a yearly rate derived from the symbol, so
   stocks differ in momentum;
 - `POST /__stub/mode {"mode": "ok" | "reject-credential" | "unavailable" |
@@ -30,13 +25,6 @@ acquisition.ts`:
   `error_credential_unknown_key.json`; in `unavailable` every provider path
   answers 503 with an envelope naming no known error, which the client
   classifies as `ProviderUnavailable` (DEC-0048);
-- every other symbol's financial-statement paths answer the quarterly statements of the
-  quarters inside the requested period, newest ending about two months before today,
-  carrying the test payload keys of `e2e_line_items.py` (AR-001; DEC-0290), so a build
-  scores value and growth when the API process installs the same keys;
-- `POST /__stub/withhold {"symbol": S}` makes S's financial-statement paths answer 503
-  like `unavailable`, so S's fundamentals fail and the run ends Partial, until
-  `POST /__stub/restore {"symbol": S}` (TC-E2E-009's stock BBB);
 - `POST /__stub/hold {"symbol": S}` makes S's requests block until
   `POST /__stub/release {"symbol": S}`;
 - `GET /__stub/requests` answers `{"requests": [{"method", "path"}, ...]}`,
@@ -63,8 +51,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
-from e2e_line_items import E2E_LINE_ITEMS
-
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures" / "massive"
 
 # How long a held request waits before answering anyway, so a spec that
@@ -79,6 +65,7 @@ def _fixture(name: str) -> dict[str, Any]:
 
 REFERENCE = _fixture("reference_active.json")
 BAR = _fixture("bar_regular.json")
+FINANCIAL = _fixture("financial_annual.json")
 SPLIT = _fixture("action_split.json")
 DIVIDEND = _fixture("action_dividend.json")
 IPO = _fixture("action_ipo.json")
@@ -115,7 +102,6 @@ class StubState:
         self._lock = threading.Lock()
         self.mode = "ok"
         self._holds: dict[str, threading.Event] = {}
-        self._withheld: set[str] = set()
         self._requests: list[dict[str, str]] = []
 
     def set_mode(self, mode: str) -> None:
@@ -123,18 +109,6 @@ class StubState:
             raise ValueError(f"unknown mode {mode!r}")
         with self._lock:
             self.mode = mode
-
-    def withhold(self, symbol: str) -> None:
-        with self._lock:
-            self._withheld.add(symbol)
-
-    def restore(self, symbol: str) -> None:
-        with self._lock:
-            self._withheld.discard(symbol)
-
-    def is_withheld(self, symbol: str) -> bool:
-        with self._lock:
-            return symbol in self._withheld
 
     def hold(self, symbol: str) -> None:
         with self._lock:
@@ -159,7 +133,6 @@ class StubState:
             self.mode = "ok"
             held = list(self._holds.values())
             self._holds.clear()
-            self._withheld.clear()
             self._requests.clear()
         for event in held:
             event.set()
@@ -214,59 +187,6 @@ def _bars(start: date, end: date, symbol: str | None = None) -> list[dict[str, A
     return bars
 
 
-_QUARTERS_HELD = 16
-_REPORTING_LAG_DAYS = 45
-
-
-def _quarter_ends(today: date) -> list[date]:
-    """Calendar quarter ends that closed at least 45 days ago, newest first."""
-    ends = []
-    for year in range(today.year, today.year - 6, -1):
-        for month, day in ((12, 31), (9, 30), (6, 30), (3, 31)):
-            end = date(year, month, day)
-            if (today - end).days >= _REPORTING_LAG_DAYS:
-                ends.append(end)
-    return ends[:_QUARTERS_HELD]
-
-
-def _statements(symbol: str, statement_type: str, start: date, end: date) -> list[dict[str, Any]]:
-    """The quarterly statements of one type a symbol holds inside [start, end].
-
-    Every amount is positive and rises toward the newest quarter, scaled by a factor of the
-    symbol, so revenue and earnings-per-share growth are positive and stocks differ.
-    """
-    scale = 1 + (sum(map(ord, symbol)) % 9) / 10
-    rows = []
-    for k, period_end in enumerate(_quarter_ends(date.today())):
-        if not start <= period_end <= end:
-            continue
-        rise = 1 + 0.03 * (_QUARTERS_HELD - k)
-        base = {
-            "book_equity": 1000 * scale,
-            "shares_outstanding": 100,
-            "net_income": 50 * scale * rise,
-            "diluted_eps": 2 * scale * rise,
-            "revenue": 500 * scale * rise,
-            "operating_cash_flow": 80 * scale * rise,
-            "capital_expenditure": 30,
-        }
-        row: dict[str, Any] = {
-            "cik": "0000000001",
-            "tickers": [symbol],
-            "period_end": period_end.isoformat(),
-            "filing_date": (period_end + timedelta(days=30)).isoformat(),
-            "fiscal_year": period_end.year,
-            "fiscal_quarter": (period_end.month - 1) // 3 + 1,
-            "timeframe": "quarterly",
-            "statement_type": statement_type,
-        }
-        for name, (kind, key) in E2E_LINE_ITEMS.items():
-            if kind == statement_type and not (name == "diluted_eps" and symbol.startswith("GAP")):
-                row[key] = round(base[name], 2)
-        rows.append(row)
-    return rows
-
-
 def _first(query: dict[str, list[str]], *names: str) -> str | None:
     for name in names:
         values = query.get(name)
@@ -309,22 +229,18 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
         return 200, _envelope({"name": REFERENCE["name"], "events": [event]})
 
     if path in _FINANCIAL_PATHS:
-        if symbol is None or STATE.mode == "no-fundamentals":
+        if STATE.mode == "no-fundamentals" or (symbol is not None and symbol.startswith("NOF")):
             return 200, _envelope([])
-        if symbol.startswith("NOF"):
-            return 404, NOT_FOUND
-        if STATE.is_withheld(symbol):
-            return 503, UNAVAILABLE
-        start = _first(query, "period_end.gte", "period_end_gte")
-        end = _first(query, "period_end.lte", "period_end_lte")
-        return 200, _envelope(
-            _statements(
-                symbol,
-                _FINANCIAL_PATHS[path],
-                date.fromisoformat(start) if start else date.min,
-                date.fromisoformat(end) if end else date.max,
-            )
-        )
+        period_end = _first(query, "period_end.gte", "period_end_gte") or FINANCIAL["period_end"]
+        row = {
+            **FINANCIAL,
+            "tickers": [symbol],
+            "statement_type": _FINANCIAL_PATHS[path],
+            "period_end": period_end,
+            "filing_date": period_end,
+            "fiscal_year": date.fromisoformat(period_end).year,
+        }
+        return 200, _envelope([row])
 
     if path in _ACTION_PATHS:
         body, date_field = _ACTION_PATHS[path]
@@ -354,10 +270,6 @@ class StubHandler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length) or b"{}")
             if self.path == "/__stub/mode":
                 STATE.set_mode(payload["mode"])
-            elif self.path == "/__stub/withhold":
-                STATE.withhold(payload["symbol"])
-            elif self.path == "/__stub/restore":
-                STATE.restore(payload["symbol"])
             elif self.path == "/__stub/hold":
                 STATE.hold(payload["symbol"])
             elif self.path == "/__stub/release":

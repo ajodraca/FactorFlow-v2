@@ -2,16 +2,16 @@ import { type APIRequestContext, type Page, expect, test } from "@playwright/tes
 import {
   ACQUISITION_BASE_URL,
   resetAcquisitionStore,
-  restoreSymbol,
+  setProviderMode,
   startRun,
   stateHistoryDepth,
   waitForRunState,
-  withholdSymbol,
 } from "./support/acquisition";
 import {
   currentSetId,
   followStocks,
   followerSymbols,
+  skipUnlessLineItemsResolved,
   waitForNewSet,
 } from "./support/classification";
 
@@ -21,13 +21,19 @@ import {
  * acquisition run and build on the acquisition stack
  * (CAP-002-e2e-tests-automation-tasks T009).
  *
- * The acquisition stack's API installs test statement payload keys and the stub
- * serves statements carrying them (AR-001; DEC-0290), so both tests run; none
- * waits on the owner's payload-key answer (system design section 8 question 1).
- * BBB's fundamentals fail at the provider (a Partial run) and are then restored;
- * NOFCCC's are not found (the provider holds none).
+ * Both tests are guarded (DEC-0285): while a statement payload key is
+ * unresolved (system design section 8 question 1) a build cannot score value
+ * or growth, so they skip with that reason and run unchanged once it is
+ * resolved. The stub must then serve those keys; that is a further stub task.
+ */
+/**
+ * Three years of history: thirteen months of prices for 12-month momentum, and
+ * earlier statements for growth.
  */
 const HISTORY_YEARS = 3;
+
+/** Every state a run can end in. */
+const TERMINAL_STATES = ["succeeded", "partial", "failed", "cancelled", "abandoned"];
 
 test.use({ baseURL: ACQUISITION_BASE_URL });
 
@@ -36,21 +42,23 @@ test.beforeEach(async () => {
 });
 
 /**
- * `symbol` plus thirty fillers: with `symbol` unscored on growth the other thirty still
- * reach the peer-set floor of 30, so growth ranks for them.
+ * `symbol` plus thirty fillers, so the peer-set floor of 30 is reached without
+ * the stock under test.
  */
 function followWithThirtyOthers(symbol: string): void {
   followStocks([symbol, ...followerSymbols(30)]);
 }
 
-/** Starts a run, waits for it to end with data (succeeded or partial), and for its new set. */
+/** Starts a run, expects it to end in one of `outcomes`, and waits for its new set. */
 async function runAndWait(
   page: Page,
   request: APIRequestContext,
   previousSetId: string | null,
+  outcomes: string[],
 ): Promise<string> {
   const runId = await startRun(page);
-  await waitForRunState(request, runId, ["succeeded", "partial"], 90_000);
+  const state = await waitForRunState(request, runId, TERMINAL_STATES, 90_000);
+  expect(outcomes, `run ${runId} ended ${state}`).toContain(state);
   return waitForNewSet(request, previousSetId);
 }
 
@@ -63,13 +71,14 @@ test("TC-E2E-009: a missing fundamental is fixed by the next run and the earlier
   request,
 }) => {
   // Implements TC-E2E-009
+  skipUnlessLineItemsResolved(test);
   test.setTimeout(240_000);
   followWithThirtyOthers("BBB");
   await stateHistoryDepth(page, HISTORY_YEARS);
 
-  // A partial run: BBB's statements fail at the provider, so growth cannot be scored.
-  await withholdSymbol("BBB");
-  const first = await runAndWait(page, request, await currentSetId(request));
+  // A partial run: the provider holds no fundamentals, so growth cannot be scored.
+  await setProviderMode("no-fundamentals");
+  const first = await runAndWait(page, request, await currentSetId(request), ["partial"]);
   await page.goto("/research/stocks/BBB");
   // Names the missing input and the rule, then how to recover.
   await expect(growthCard(page)).toContainText(
@@ -81,8 +90,8 @@ test("TC-E2E-009: a missing fundamental is fixed by the next run and the earlier
   await expect(growthCard(page).getByRole("link", { name: "Data health" })).toBeVisible();
 
   // The data completes on the next run; growth then shows a score and percentile.
-  await restoreSymbol("BBB");
-  const second = await runAndWait(page, request, first);
+  await setProviderMode("ok");
+  const second = await runAndWait(page, request, first, ["succeeded"]);
   await page.goto("/research/stocks/BBB");
   await expect(growthCard(page).getByTestId("factor-percentile")).toBeVisible();
   await expect(growthCard(page).getByTestId("card-score")).toBeVisible();
@@ -97,7 +106,7 @@ test("TC-E2E-009: a missing fundamental is fixed by the next run and the earlier
 
   // With one more run the list holds two results, newest first: the classified one above the
   // Incomplete one, by the date of each set and the time it was produced.
-  const third = await runAndWait(page, request, second);
+  const third = await runAndWait(page, request, second, ["succeeded"]);
   expect(third).not.toBe(second);
   await page.goto("/research/stocks/BBB");
   await page.getByRole("tab", { name: "Earlier scores" }).click();
@@ -122,17 +131,21 @@ test("TC-E2E-010: a stock the provider holds no fundamentals for stays not class
   request,
 }) => {
   // Implements TC-E2E-010
+  skipUnlessLineItemsResolved(test);
   test.setTimeout(180_000);
   followWithThirtyOthers("NOFCCC");
   await stateHistoryDepth(page, HISTORY_YEARS);
 
-  const first = await runAndWait(page, request, await currentSetId(request));
+  const first = await runAndWait(page, request, await currentSetId(request), [
+    "succeeded",
+    "partial",
+  ]);
   await page.goto("/research/stocks/NOFCCC");
   await expect(growthCard(page)).toContainText("the provider reports no");
   await expect(growthCard(page)).toContainText("No action in FactorFlow changes this.");
   await expect(growthCard(page).getByRole("link", { name: "Data health" })).toHaveCount(0);
 
-  await runAndWait(page, request, first);
+  await runAndWait(page, request, first, ["succeeded", "partial"]);
   await page.goto("/research/stocks/NOFCCC");
   await expect(growthCard(page).getByTestId("factor-cell")).toHaveText(/Incomplete/);
   await expect(growthCard(page)).toContainText("the provider reports no");

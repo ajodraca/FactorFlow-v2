@@ -8,7 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-05
 updated: 2026-11-05
-last_reworked_review: e2e-tests-automation-review-v1.md
+last_reworked_review: e2e-tests-automation-review-v2.md
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
@@ -28,7 +28,7 @@ ai_provenance:
 **Test Specification**: `docs/capabilities/CAP-002-universe-and-factor-classification/tests/e2e/e2e-tests.md`
 **Component(s)**: `FactorFlow-v2`
 **Test Scope**: e2e
-**Branch**: `usr/alvaro-de-jodra/CAP-002-automation`
+**Branch**: `usr/alvaro-de-jodra/CAP-002-automation-rework`
 **Date**: 2026-11-05
 
 ## Summary
