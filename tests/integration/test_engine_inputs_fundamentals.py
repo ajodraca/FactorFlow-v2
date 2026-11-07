@@ -852,8 +852,9 @@ def test_fcf_yield_subtracts_signed_capital_expenditure(
 def test_market_capitalisation_is_latest_close_times_newest_shares(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """DEC-0055 (6): the latest session's latest observation of the close, times shares
-    outstanding from the most recent quarterly balance sheet; detail carries the parts."""
+    """DEC-0055 (6) as revised by DEC-0295: the latest session's latest observation of the
+    close, times shares outstanding from the most recent quarterly income statement; detail
+    carries the parts."""
     add_quarters(env.conn, env.stock, P1, 8, standard())
     add_bar(env.conn, env.stock, L - timedelta(days=1), close=99)
     add_bar(env.conn, env.stock, L, close=12, observed_on=L + timedelta(days=1))

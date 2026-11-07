@@ -292,6 +292,28 @@ def test_mixed_statement_input_is_dated_by_its_earliest_latest_period(
     }
 
 
+def test_an_old_income_statement_dates_every_value_input(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0116 (3), DEC-0295: the most recent income statement supplies shares to every
+    value input, so when it is the oldest of the latest periods it dates all three, and
+    their staleness, even where the balance sheet and cash-flow statement are current."""
+    _statements(env, "balance_sheet", date(2026, 9, 30))
+    _statements(env, "income_statement", date(2026, 3, 31))
+    _statements(env, "cash_flow_statement", date(2026, 6, 30))
+
+    rows = build(env, monkeypatch)
+
+    for name in ("book_to_price", "earnings_yield", "fcf_yield"):
+        assert (rows[name]["status"], rows[name]["as_of"]) == (
+            "outdated",
+            date(2026, 3, 31),
+        ), name
+        assert rows[name]["detail"]["outdated"] == {
+            "fundamentals": {"latest_period_end": "2026-03-31", "stale_before": "2026-04-17"}
+        }, name
+
+
 def test_growth_ignores_bar_currency(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     """AC-13, design 2.4: growth depends on no price, so a year-old bar leaves it present."""
     old = add_instrument(env.conn, "OLDBAR")
