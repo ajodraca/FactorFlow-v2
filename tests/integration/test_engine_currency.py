@@ -267,26 +267,27 @@ def test_mixed_statement_input_is_dated_by_its_earliest_latest_period(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """DEC-0116 (3): as_of and the staleness test use the earliest of the latest period
-    ends an input reads."""
-    _statements(env, "balance_sheet", date(2026, 9, 30))
-    _statements(env, "income_statement", date(2026, 3, 31))
-    _statements(env, "cash_flow_statement", date(2026, 6, 30))
+    ends an input reads. Every value input also reads the most recent income statement for
+    shares (DEC-0295), so book_to_price and fcf_yield each read two statement types."""
+    _statements(env, "balance_sheet", date(2026, 6, 30))
+    _statements(env, "income_statement", date(2026, 9, 30))
+    _statements(env, "cash_flow_statement", date(2026, 3, 31))
 
     rows = build(env, monkeypatch)
 
     assert (rows["book_to_price"]["status"], rows["book_to_price"]["as_of"]) == (
         "present",
-        date(2026, 9, 30),
-    )
-    assert (rows["fcf_yield"]["status"], rows["fcf_yield"]["as_of"]) == (
-        "present",
         date(2026, 6, 30),
     )
     assert (rows["earnings_yield"]["status"], rows["earnings_yield"]["as_of"]) == (
+        "present",
+        date(2026, 9, 30),
+    )
+    assert (rows["fcf_yield"]["status"], rows["fcf_yield"]["as_of"]) == (
         "outdated",
         date(2026, 3, 31),
     )
-    assert rows["earnings_yield"]["detail"]["outdated"] == {
+    assert rows["fcf_yield"]["detail"]["outdated"] == {
         "fundamentals": {"latest_period_end": "2026-03-31", "stale_before": "2026-04-17"}
     }
 

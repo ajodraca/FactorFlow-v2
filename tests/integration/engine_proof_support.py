@@ -58,7 +58,8 @@ SELECT i.id, s.session_date, s.session_date,
 # Quarterly statements keyed by the test keys, observed and filed on one day, so none is
 # backfilled. k = 1 is the newest quarter. Every value is positive and varies by stock and
 # quarter, except capital expenditure, which is reported as an outflow (negative), as
-# engine_inputs_support's test signs expect; the prior-year bases are positive.
+# capital expenditure is read by magnitude (DEC-0295); shares are on the income
+# statement; the prior-year bases are positive.
 _STATEMENTS_SQL = """
 INSERT INTO fundamental_observation (instrument_id, fiscal_period_end, fiscal_period,
                                      statement_type, observed_on, value_hash,
@@ -68,9 +69,9 @@ SELECT i.id, q.period_end, q.fiscal_period, t.statement_type, %(observed_on)s::d
        %(observed_on)s::date,
        CASE t.statement_type
             WHEN 'balance_sheet' THEN jsonb_build_object(
-                %(book_equity)s::text, 500 + (i.id %% 101) * 3 + q.k * 7,
-                %(shares_outstanding)s::text, 100 + i.id %% 53 + q.k)
+                %(book_equity)s::text, 500 + (i.id %% 101) * 3 + q.k * 7)
             WHEN 'income_statement' THEN jsonb_build_object(
+                %(shares_outstanding)s::text, 100 + i.id %% 53 + q.k,
                 %(net_income)s::text, 10 + i.id %% 61 + q.k,
                 %(diluted_eps)s::text, round(1 + (i.id %% 97) / 40.0 + (9 - q.k) / 20.0, 4),
                 %(revenue)s::text, 100 + (i.id %% 89) * 2 + (9 - q.k) * (i.id %% 7 + 1))

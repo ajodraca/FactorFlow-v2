@@ -1,4 +1,4 @@
-"""The seven fundamentals line items and their unresolved payload keys (CAP-002-E2-S2).
+"""The seven fundamentals line items and their payload keys (CAP-002-E2-S2; DEC-0295).
 
 Traces to AC-7 and DAC-E2-S2-5.
 """
@@ -18,7 +18,7 @@ from factorflow.classification.line_items import (
 
 EXPECTED_STATEMENTS = {
     "book_equity": "balance_sheet",
-    "shares_outstanding": "balance_sheet",
+    "shares_outstanding": "income_statement",  # DEC-0295: no share count on the balance sheet
     "net_income": "income_statement",
     "diluted_eps": "income_statement",
     "revenue": "income_statement",
@@ -51,18 +51,33 @@ def test_the_sentinel_is_the_designs_text() -> None:
     assert REQUIRES_INPUT == "[REQUIRES INPUT: Massive payload key]"
 
 
-def test_every_key_is_unresolved_and_every_sign_positive() -> None:
-    for item in LINE_ITEMS.values():
-        assert item.payload_key == REQUIRES_INPUT
-        assert item.sign == 1
-    assert sorted(unresolved()) == sorted(EXPECTED_STATEMENTS)
+EXPECTED_KEYS = {
+    "book_equity": "total_equity_attributable_to_parent",
+    "shares_outstanding": "diluted_shares_outstanding",
+    "net_income": "net_income_loss_attributable_common_shareholders",
+    "diluted_eps": "diluted_earnings_per_share",
+    "revenue": "revenue",
+    "operating_cash_flow": "net_cash_from_operating_activities",
+    "capital_expenditure": "purchase_of_property_plant_and_equipment",
+}
 
 
-def test_a_resolved_key_is_no_longer_reported(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_every_key_is_the_owners_and_every_sign_positive() -> None:
+    """DEC-0295: the Massive keys; capex is a magnitude, book equity less preferred stock."""
+    assert {name: item.payload_key for name, item in LINE_ITEMS.items()} == EXPECTED_KEYS
+    assert {item.sign for item in LINE_ITEMS.values()} == {1}
+    assert [n for n, item in LINE_ITEMS.items() if item.magnitude] == ["capital_expenditure"]
+    assert {n: item.less_key for n, item in LINE_ITEMS.items() if item.less_key} == {
+        "book_equity": "preferred_stock"
+    }
+    assert unresolved() == []
+
+
+def test_an_unset_key_is_reported(monkeypatch: pytest.MonkeyPatch) -> None:
     patched = dict(LINE_ITEMS)
-    patched["revenue"] = dataclasses.replace(patched["revenue"], payload_key="X")
+    patched["revenue"] = dataclasses.replace(patched["revenue"], payload_key=REQUIRES_INPUT)
     monkeypatch.setattr(line_items, "LINE_ITEMS", patched)
-    assert sorted(unresolved()) == sorted(set(EXPECTED_STATEMENTS) - {"revenue"})
+    assert unresolved() == ["revenue"]
 
 
 def test_unresolved_cause_is_the_shared_constant() -> None:
