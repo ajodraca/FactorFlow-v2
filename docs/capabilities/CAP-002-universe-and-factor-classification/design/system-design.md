@@ -91,7 +91,9 @@ market capitalisation now uses the diluted weighted-average shares of the most
 recent quarterly income statement (Section 5 constraint 8, which revises
 DEC-0055 (6)). The keys come from the provider's published schema, not from
 acquired data, because no fundamentals have yet been acquired; Section 6
-assumption 1 keeps the part only a real run can confirm. Nothing else changes.
+assumption 1 keeps the part only a real run can confirm. On specification
+review v4 capital expenditure became a magnitude and book equity excludes
+preferred stock (owner, FINDING-4 and FINDING-5). Nothing else changes.
 
 ## 1. Design Overview
 
@@ -767,10 +769,10 @@ capability's own test module scans every `.sql` file and SQL string for one.
    **Version 4.** The field names are now fixed by the provider's published
    schema (Section 8 question 1). Still unconfirmed, because no fundamentals
    have been acquired yet: that quarterly statements exist for every fiscal
-   quarter, the fourth included, and that capital expenditure arrives negative
-   on every record. The first real run with the Financials endpoints confirms
-   both; until then a missing quarter still leaves an input `missing`, never
-   wrong.
+   quarter, the fourth included. The first real run with the Financials
+   endpoints confirms it; until then a missing quarter still leaves an input
+   `missing`, never wrong. The sign of capital expenditure needs no
+   confirmation, because it is read as a magnitude (Section 8 question 1).
 2. **The stated history depth is deep enough**: at least 13 months of bars for
    momentum and at least two years of quarterly statements for growth, as the
    capability assumes. Shallower depth yields `missing` inputs, not wrong
@@ -854,23 +856,28 @@ as against the criteria above (`docs/ux/README.md`).
    **Answered by the owner, 2026-11-06 (version 4).** The keys are the field
    names of the provider's statement schema, as the `massive` SDK 2.8.0 models
    them (`massive/rest/models/financials.py`: `FinancialBalanceSheet`,
-   `FinancialIncomeStatement`, `FinancialCashFlowStatement`). The sign of
-   capital expenditure follows Massive's cash-flow statement reference, which
-   reports purchases of property, plant and equipment as negative values
-   (https://massive.com/docs/rest/stocks/fundamentals/cash-flow-statements):
+   `FinancialIncomeStatement`, `FinancialCashFlowStatement`). Massive's
+   cash-flow statement reference reports purchases of property, plant and
+   equipment as *typically* negative
+   (https://massive.com/docs/rest/stocks/fundamentals/cash-flow-statements), so
+   capital expenditure is read as a magnitude, whatever sign a record carries:
 
    | Line item | Statement type | Massive payload key | Sign |
    |-----------|----------------|---------------------|------|
-   | book equity | `balance_sheet` | `total_equity_attributable_to_parent` | +1 |
+   | book equity | `balance_sheet` | `total_equity_attributable_to_parent` less `preferred_stock` (absent read as 0) | +1 |
    | shares outstanding | `income_statement` | `diluted_shares_outstanding` | +1 |
    | net income | `income_statement` | `net_income_loss_attributable_common_shareholders` | +1 |
    | diluted earnings per share | `income_statement` | `diluted_earnings_per_share` | +1 |
    | revenue | `income_statement` | `revenue` | +1 |
    | operating cash flow | `cash_flow_statement` | `net_cash_from_operating_activities` | +1 |
-   | capital expenditure | `cash_flow_statement` | `purchase_of_property_plant_and_equipment` | −1 |
+   | capital expenditure | `cash_flow_statement` | `purchase_of_property_plant_and_equipment` | magnitude |
 
    Book equity and net income are the amounts attributable to common
    shareholders, so that they match a market capitalisation of common shares.
+   Net income is defined by the provider after preferred dividends. Book equity
+   is parent equity, which excludes noncontrolling interests but includes
+   preferred stock, less `preferred_stock` from the same balance sheet (owner,
+   2026-11-06, on specification review v4 FINDING-4 and FINDING-5).
    The balance sheet carries no shares count, so shares outstanding is the
    diluted weighted average of the most recent quarterly income statement. It is
    read from that one statement and never summed across the trailing window

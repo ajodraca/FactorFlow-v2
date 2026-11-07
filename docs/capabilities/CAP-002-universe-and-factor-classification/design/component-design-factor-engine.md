@@ -52,8 +52,8 @@ fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
 (DEC-0064 to DEC-0067) and marked **PROVISIONAL**; the system design's
 DEC-0052 (SQL window functions), DEC-0053 (composite construction), DEC-0055
 (input derivation) and DEC-0056 (backfill rule) are honoured, not re-decided.
-One owner question blocks part of this component and is carried, not answered:
-the Massive payload keys for the seven line items (section 14).
+The owner question that blocked part of this component, the Massive payload
+keys for the seven line items, is answered in version 3 (section 14).
 
 **Version 2 (2026-10-17)** is the consistency pass the owner directed on
 specification review v2 (`specifications-review-report-v2.md`), and it applies
@@ -102,7 +102,11 @@ recent quarterly income statement, because Massive's balance sheet carries no
 shares count. Market capitalisation reads that one statement's diluted weighted
 average and never sums it across a trailing window (Section 2.4). Section 14
 question 1 is closed. Review v2's FINDING-2 (the line-item mapping) is closed
-with it.
+with it. On specification review v4 it also reads capital expenditure by
+magnitude and subtracts preferred stock from book equity (owner, FINDING-4 and
+FINDING-5), states DEC-0221's consecutive-quarter windows and DEC-0242's null
+`known_on` (FINDING-2), and carries the shares source into the statements
+rule, the input table, the constraints and the test plan (FINDING-6).
 
 ## 1. Overview
 
@@ -325,12 +329,18 @@ DEC-0055 (5)); every value input and every momentum input depends on price.
 
 **Statements.** The trailing-twelve-month window for an instrument and
 statement type is the four most recent distinct quarterly `fiscal_period_end`
-values P1 > P2 > P3 > P4 on or before `D` with P4 later than P1 minus 12
-months; the prior-year window is the four most recent on or before P1 minus 12
-months under the same span rule (DEC-0055 (1)). Fewer than four periods in
-either window, or a line item absent from a period's payload, makes the input
-`missing`, with `detail.periods_found` listing what exists. Balance-sheet items
-use the single most recent quarterly statement.
+values P1 > P2 > P3 > P4 on or before `D`; the prior-year window is the next
+four, P5 > P6 > P7 > P8 (DEC-0055 (1), DEC-0221, owner 2026-10-28). A window is
+formed only when its quarter ends are consecutive: each adjacent pair of period
+ends is at most 4 months apart. An input that uses only trailing figures needs
+P1 to P4 consecutive; a growth input needs P1 to P8 consecutive. A gap of more
+than 4 months, fewer periods than the window needs, or a line item absent from
+a period's payload makes the input `missing`, with `detail.periods_found`
+listing what exists. DEC-0221 replaces the 12-month span rule of versions 1
+and 2. Balance-sheet items use the single most recent quarterly balance sheet.
+Shares outstanding is the one exception to the trailing sum: every value input
+reads it from the single most recent quarterly income statement, never summed,
+so `book_to_price` and `fcf_yield` also read that one income statement.
 
 **Line items.** The seven line items are read as `payload ->> key` with the
 key and sign from `line_items.py` (DEC-0066, PROVISIONAL):
@@ -347,15 +357,19 @@ class LineItem:
     statement_type: str   # balance_sheet | income_statement | cash_flow_statement
     payload_key: str      # the Massive statement field, owner input
     sign: int             # +1, or -1 when the provider reports an outflow negative
+    magnitude: bool = False       # read |value|: the field's sign carries no meaning
+    less_key: str | None = None   # a field of the same statement subtracted, absent read as 0
 
 LINE_ITEMS: dict[str, LineItem] = {
-    "book_equity":        LineItem("book equity", "balance_sheet", "total_equity_attributable_to_parent", 1),
+    "book_equity":        LineItem("book equity", "balance_sheet", "total_equity_attributable_to_parent", 1,
+                                   less_key="preferred_stock"),
     "shares_outstanding": LineItem("shares outstanding", "income_statement", "diluted_shares_outstanding", 1),
     "net_income":         LineItem("net income", "income_statement", "net_income_loss_attributable_common_shareholders", 1),
     "diluted_eps":        LineItem("diluted earnings per share", "income_statement", "diluted_earnings_per_share", 1),
     "revenue":            LineItem("revenue", "income_statement", "revenue", 1),
     "operating_cash_flow": LineItem("operating cash flow", "cash_flow_statement", "net_cash_from_operating_activities", 1),
-    "capital_expenditure": LineItem("capital expenditure", "cash_flow_statement", "purchase_of_property_plant_and_equipment", -1),
+    "capital_expenditure": LineItem("capital expenditure", "cash_flow_statement", "purchase_of_property_plant_and_equipment", 1,
+                                    magnitude=True),
 }
 
 def unresolved() -> list[str]:
@@ -373,6 +387,18 @@ architecture's (system design section 8 question 1). The owner supplied them
 in version 3 (section 14 question 1), so `unresolved()` is empty and the
 mechanism above remains only as the guard a future unset key would trip.
 
+Two line items are not a single signed field (owner, 2026-11-06, on
+specification review v4 FINDING-4 and FINDING-5). **Capital expenditure is a
+magnitude:** Massive reports purchases of property, plant and equipment as
+*typically* negative, and sales are a separate field, so the amount read is
+`|purchase_of_property_plant_and_equipment|` and free cash flow is operating
+cash flow minus that magnitude whatever sign a record carries. **Book equity is
+common equity:** `total_equity_attributable_to_parent` excludes noncontrolling
+interests but includes preferred stock, so `preferred_stock` from the same
+balance sheet is subtracted, and an absent `preferred_stock` reads as zero
+because most issuers have none. A present `preferred_stock` that is not a plain
+number makes book equity absent, as any unreadable field does.
+
 **The eight inputs.** `MC` is market capitalisation, `close(L) ×
 shares_outstanding(P1)`, where P1 is the most recent quarterly **income
 statement** and `shares_outstanding` is its diluted weighted average, read from
@@ -381,9 +407,9 @@ that one statement and never summed (DEC-0055 (6) as revised by the owner on
 
 | Input | Factor | Formula | Statements | Price | `not_computable` when |
 |-------|--------|---------|------------|-------|-----------------------|
-| `book_to_price` | value | `book_equity(P1) / MC` | balance sheet, most recent | yes | `MC <= 0` |
-| `earnings_yield` | value | `TTM(net_income) / MC` | income, TTM | yes | `MC <= 0` |
-| `fcf_yield` | value | `(TTM(operating_cash_flow) - TTM(capital_expenditure)) / MC` | cash flow, TTM | yes | `MC <= 0` |
+| `book_to_price` | value | `book_equity(P1) / MC` | balance sheet, most recent; income, most recent (MC) | yes | `MC <= 0` |
+| `earnings_yield` | value | `TTM(net_income) / MC` | income, TTM; income, most recent (MC) | yes | `MC <= 0` |
+| `fcf_yield` | value | `(TTM(operating_cash_flow) - TTM(\|capital_expenditure\|)) / MC` | cash flow, TTM; income, most recent (MC) | yes | `MC <= 0` |
 | `revenue_growth` | growth | `TTM(revenue) / TTM_prior(revenue) - 1` | income, TTM and prior | no | `TTM_prior(revenue) <= 0` |
 | `eps_growth` | growth | `TTM(diluted_eps) / TTM_prior(diluted_eps) - 1` | income, TTM and prior | no | `TTM_prior(diluted_eps) <= 0` |
 | `return_3m` | momentum | total return over `(S_3, E]` | none | yes | never (prices are positive by acquisition) |
@@ -394,8 +420,12 @@ A growth input whose prior-year base is zero or negative is `not_computable`
 (DEC-0055 (2)); a market capitalisation that is not positive makes the ratio
 undefined and is treated by the same rule, with `detail.cause =
 "market_capitalisation_not_positive"`. `as_of` is P1 for a fundamental input
-and `E` for a momentum input; `known_on` is the latest `observed_on` across
-every statement, bar and corporate-action row the input used (DEC-0055 (7));
+and `E` for a momentum input; where one input reads two statement types, P1 is
+the earliest of their latest period ends (DEC-0116 (3)). `known_on` is the
+latest `observed_on` across every statement, bar and corporate-action row the
+input used (DEC-0055 (7)), and null for a `missing` input of any factor
+(DEC-0116 (5), DEC-0242, owner 2026-10-30). Whether a non-positive price is
+its own `price_not_positive` cause (DEC-0241) is open with the owner;
 `restated_possible` is true when any statement row used is `backfilled`
 (DEC-0056). `detail` records, for a fundamental input, each period end used
 with its `observed_on`, `provider_filing_date` and `backfilled` flag plus the
@@ -572,7 +602,8 @@ reports through the set row and its return value.
   `stddev_samp`, equal-weight mean, re-standardise, `percent_rank × 100`; zero
   dispersion contributes zero; nothing else.
 - **Inputs are DEC-0055's**, exactly: quarterly TTM sums, prior-year
-  comparison, most recent balance sheet, read-time split and dividend
+  comparison, most recent balance sheet, shares from the most recent
+  income statement (owner 2026-11-06), read-time split and dividend
   adjustment of unadjusted bars (DEC-0001), per-stock window boundaries,
   latest-trading-day price currency, latest `observed_on` as `known_on`.
 - **The backfill rule is DEC-0056's**: `provider_filing_date` earlier than the
@@ -596,7 +627,9 @@ reports through the set row and its return value.
   momentum is unaffected.
 - **Assumption (system design 6.1):** the acquired statements carry the seven
   line items under stable keys and quarterly statements exist for every
-  quarter. Where they do not, inputs are `missing`, never wrong.
+  quarter. Where a quarter or a line item is absent, the input is `missing`,
+  never wrong; a record whose capital expenditure carries an unexpected sign
+  is read by magnitude (section 2.4), so it is not wrong either.
 - **Assumption (system design 6.4):** dividend payloads carry `cash_amount`
   and split payloads `split_from` and `split_to`, as the `CorporateAction`
   model records.
@@ -700,11 +733,15 @@ them to the engine, so the tests do not wait on the owner's answer.
 | Outdated fundamentals | `tests/integration/test_engine_currency.py` | Latest period end 6 months and a day before D: `outdated`; exactly 6 months: `present` (AC-13) |
 | Outdated prices | `tests/integration/test_engine_currency.py` | A stock whose latest bar precedes `latest_trading_day`: every value and momentum input `outdated`; growth unaffected (AC-13, DEC-0055 (5)) |
 | Non-positive growth base | `tests/integration/test_engine_inputs_fundamentals.py` | Prior-year revenue zero or negative: `not_computable`, stock not classified on growth, `reason_input = revenue_growth` (DEC-0055 (2)) |
-| Market capitalisation | `tests/integration/test_engine_inputs_fundamentals.py` | `close(L) × shares_outstanding(P1)` in `detail`; non-positive shares: value inputs `not_computable` |
+| Market capitalisation | `tests/integration/test_engine_inputs_fundamentals.py` | `close(L) × shares_outstanding(P1)` in `detail`, P1 the latest quarterly income statement; non-positive shares: value inputs `not_computable` |
+| Shares are never summed | `tests/integration/test_engine_inputs_fundamentals.py` | With four income statements of 100 shares each, MC uses 100, not 400, for all three value inputs; a stock with balance sheets and cash-flow statements but no income statement has `book_to_price` and `fcf_yield` `missing` |
+| Capital expenditure by magnitude | `tests/integration/test_engine_inputs_fundamentals.py` | A purchase reported as −X and one reported as +X give the same `fcf_yield`, OCF − X |
+| Book equity less preferred | `tests/integration/test_engine_inputs_fundamentals.py` | Parent equity 1000 with `preferred_stock` 200 gives book equity 800; `preferred_stock` absent gives 1000 |
+| Consecutive windows | `tests/integration/test_engine_inputs_fundamentals.py` | A gap of more than 4 months between adjacent quarter ends makes the dependent input `missing`; 52-week quarter ends are consecutive (DEC-0221) |
 | Momentum boundaries per stock | `tests/integration/test_engine_inputs_momentum.py` | E is the latest bar on or before D minus one month; S_k the latest on or before E minus k months; a stock lacking a bar before S_12 has `return_12m` missing and the others present |
 | Split adjustment | `tests/integration/test_engine_inputs_momentum.py` | A 2-for-1 split inside the window halves pre-split prices; the return equals the unsplit series' return (DEC-0001, DEC-0055 (4)) |
 | Dividend compounding | `tests/integration/test_engine_inputs_momentum.py` | One dividend of 1 against a prior close of 100 multiplies the return factor by 1.01 |
-| Known-on is the latest observation | `tests/integration/test_engine_inputs_momentum.py` | `known_on` equals the max `observed_on` over bars and actions used (AC-17) |
+| Known-on is the latest observation | `tests/integration/test_engine_inputs_momentum.py` | `known_on` equals the max `observed_on` over bars and actions used (AC-17); null on a `missing` input (DEC-0242) |
 | Composite arithmetic | `tests/unit/test_composite_arithmetic.py` | On a hand-built peer set, z-scores, equal-weight mean, re-standardisation to mean 0 and sd 1, `percent_rank × 100` in 0 to 100; zero-dispersion input contributes 0 (AC-9, DEC-0053); `hypothesis` over random peer sets |
 | One peer set | `tests/integration/test_engine_peer_set.py` | Scores for a stock are identical whether or not it belongs to any universe; universes are never read (AC-8) |
 | Fewer than 30 qualify | `tests/integration/test_engine_peer_set.py` | 29 qualifying stocks: `ranked = false`, every active stock `not_enough_stocks` with `reason_detail` `29 of 30 stocks qualified`, no score written; 30 qualify: ranked (AC-14) |
@@ -794,13 +831,13 @@ of system design section 4.2 and consumes the SQL interfaces of
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | Section 2 factor definitions; AC-7 to AC-15, AC-17, AC-19, AC-23; section 6 assumptions | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v3 | Section 3.1 steps 8 to 14b, 22 to 31; constraints 2, 4 to 10; section 6; section 8 questions 1, 6, 7, 9 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| System design | CAP-002 system design v4 | Section 3.1 steps 8 to 14b, 22 to 31; constraints 2, 4 to 10; section 6; section 8 questions 1, 6, 7, 9 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
 | Component design | CAP-001 market data store v9 | Table shapes, sizing basis, append-only enforcement | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Component design | CAP-001 massive client | Section 2.5 statement and corporate-action fields; line items not enumerated | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-massive-client.md` |
 | Component design | CAP-002 research store v2 | Migration `0006` | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-research-store.md` |
 | Implemented code | `src/factorflow/ingestion/writer.py`, `src/factorflow/ingestion/massive/models.py` | `fiscal_period` derivation; payload shapes for statements and actions | `src/factorflow/ingestion/` |
 | Implemented schema | Migrations `0001` to `0003` | Columns read | `src/factorflow/db/migrations/` |
-| Decision records | DEC-0001, DEC-0052, DEC-0053, DEC-0055, DEC-0056, DEC-0066, DEC-0067 | Unadjusted bars; SQL arithmetic; composite; inputs; backfill; engine mechanics; timeout | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decision records | DEC-0001, DEC-0052, DEC-0053, DEC-0055, DEC-0056, DEC-0066, DEC-0067, DEC-0116, DEC-0221, DEC-0241, DEC-0242 | Unadjusted bars; SQL arithmetic; composite; inputs; backfill; engine mechanics; timeout; input status and `as_of`; consecutive windows; non-positive price (open); `known_on` of a missing input | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
