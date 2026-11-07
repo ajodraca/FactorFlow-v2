@@ -10,7 +10,7 @@ created: 2026-10-15
 updated: 2026-11-06
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.1"
@@ -40,9 +40,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-17T03:35:36Z
-  reviewed_revision: sha256:569e796803c16dae26aa43c915f6ac8c230b20ac8e49610ea57679917049fd4f
-  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v3.md"
+  approved_at: 2026-11-07T02:40:00Z
+  reviewed_revision: sha256:5ab3d9c3374a63b721e9a3a465218683f9ac52b82b37b02c6b9db7f4f82c753c
+  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v5.md"
 ---
 
 # System Design: Universe & Factor Classification
