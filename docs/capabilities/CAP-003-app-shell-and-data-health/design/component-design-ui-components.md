@@ -14,7 +14,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.318"
-  timestamp: 2026-11-07T23:05:00Z
+  timestamp: 2026-11-07T23:23:46Z
   source_artifacts:
     - id: CAP-003
       version: "2, draft (2e6bfeb, 3174b50)"
@@ -23,7 +23,7 @@ ai_provenance:
     - id: CAP-003-ux-brief
       version: "1"
     - id: CAP-003-ux-design
-      version: "1"
+      version: "2, draft (d0af566)"
     - id: PRODUCT-UX
       version: "6"
     - id: STD-UI
@@ -60,7 +60,9 @@ and system design v2 (AC-29, AC-30). It adds one pattern,
 `failureRecovery`, the one mapping from a failure's outcome and cause to its
 fix, used by *Needs fixing* and by the download detail screen (system design
 §3.6 note 7; review v14 FINDING-64). Nothing else here changes. Sections 1,
-2.1, 2.2, 2.7a, 7, 8, 12, 13 and 14 carry the change.
+2.1, 2.2, 2.7a, 7, 8, 12, 13 and 14 carry the change. The two new fixes'
+constants hold UX design v2's words (`d0af566`), closing section 14,
+question 3.
 
 ## 1. Overview
 
@@ -442,15 +444,14 @@ export function failureCause(reason: string | null): FailureCause | null {
   return match ? (match[1] as FailureCause) : null;
 }
 
-/** UX design v2 fixes these words; until it does, they are this design's
- *  proposal (section 14, question 3). */
+/** UX design v2 §1.4 and §1.8 (d0af566), word for word (section 14, question 3). */
 export const PLAN_FIX_TEXT =
   "Your Massive plan doesn't include this data, so downloading again won't help. " +
   "Add it to your plan with Massive; the next download after that gets it.";
 export const RATE_LIMIT_FIX_TEXT =
   "Download again later; data already stored is never duplicated or overwritten. " +
   "If this keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no " +
-  "higher than your Massive plan's request limit.";
+  "higher than your Massive plan's request limit; restart FactorFlow after changing it.";
 
 export type FailureFix =
   | { kind: "download_again" }                    // copy: each screen's delivered Download again line
@@ -491,11 +492,17 @@ Three rules hold the mapping to the system design:
    whole outcome and cause product (section 7).
 
 The words of the two new fixes are the UX design's to fix (system design §3.6
-note 7); `ux-design.md` v1 has none yet, so this design carries the proposal
-recorded in section 14, question 3, and the screens import the two constants
-from here rather than holding their own copy. The two existing fixes keep
-each screen's delivered words (UX design 1.4 and 1.8), which this change does
-not touch.
+note 7), and the two constants hold UX design v2's words exactly (1.4 and
+1.8, `d0af566`; section 14, question 3), so the screens import them from here
+rather than holding their own copy. UX design v2 sets
+`FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` in code formatting; this design
+reads that as marking the literal name, as the UX design does for
+`FACTORFLOW_MASSIVE_API_KEY`, which the delivered Settings line renders as
+plain text (`web/src/screens/settings/credential-status.tsx`). The constant
+is therefore the plain text of the line, the name included, and
+`owner-web-app`'s `fixText` returns it as a `string`. The two existing fixes keep each
+screen's delivered words (UX design 1.4 and 1.8), which this change does not
+touch.
 
 ### 2.8 Messages
 
@@ -576,6 +583,7 @@ Vitest with React Testing Library, as the tech stack approves.
 | Agrees with `retryable` | `web/src/components/patterns/failure-recovery.test.ts` | Over every outcome and every cause including `null`, `offersDownload(failureRecovery(o, c))` equals `o === "failed" && c !== "not_entitled"`, the server's rule (system design §4.2) |
 | Cause from the reason | `web/src/components/patterns/failure-recovery.test.ts` | `failureCause` returns each of the six kinds for `"[<kind>] symbol=KO data_type=prices request_id=r1: …"`; `null` for `null`, `""`, `"[foo] …"`, `"[not_entitled]x"` and `"x [not_entitled] …"` (system design §3.6 note 6) |
 | Plan fix offers no download | `web/src/components/patterns/failure-recovery.test.ts` | `PLAN_FIX_TEXT` contains *plan* and contains neither *Download again* nor *Download now* (AC-29) |
+| Fix words | `web/src/components/patterns/failure-recovery.test.ts` | `PLAN_FIX_TEXT` equals *Your Massive plan doesn't include this data, so downloading again won't help. Add it to your plan with Massive; the next download after that gets it.* and `RATE_LIMIT_FIX_TEXT` equals *Download again later; data already stored is never duplicated or overwritten. If this keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no higher than your Massive plan's request limit; restart FactorFlow after changing it.*, UX design v2 1.4 and 1.8 word for word (AC-29, AC-30) |
 | Eight states | `web/src/components/patterns/state-region.test.tsx` | Each `ScreenState` kind renders its renderer; omitting one without a reason fails to type-check (AC-24) |
 | Component contracts | `web/src/components/ui/*.test.tsx` | `button` `blocked` stays focusable with its reason described; `dialog` `confirm` puts cancel first and focuses it; `stepper` sets `aria-current="step"`; `progress` exposes `progressbar` with its label; `command` loops and restores focus |
 | Token discipline | `web/src/app/shell.tokens.test.tsx` (delivered, unchanged) | The extended Tailwind keys resolve only to custom properties (STD-UI-29) |
@@ -673,7 +681,7 @@ N/A, not applicable for this component. It makes no request; the
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| UX design | CAP-003 v1 | §0.6, §0.7, §3, §5; every screen's Component Mapping; 1.4 and 1.8 fix lines | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
+| UX design | CAP-003 v2 (draft, `d0af566`) | §0.6, §0.7, §3, §5; every screen's Component Mapping; 1.4 and 1.8 fix lines, the words of `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
 | System design | CAP-003 v2 | §3.4 note 9, §3.6 notes 6, 7, §4.1 (`ui-components`), constraint 17 (c) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
 | Review | CAP-001 specification review v14 | FINDING-64: the run detail named a re-run as the recovery for every failure | `git show b69facd:docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v14.md` |
 | UX brief | CAP-003 v1 | §12.2 status tier table | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-brief.md` |
@@ -712,16 +720,15 @@ N/A, not applicable for this component. It makes no request; the
    OQ-2) with its Research-specialised file (DEC-0073); this component takes
    the file over and generalises it to `AsOfLine`, and CAP-002's Research line
    composes it (2.1).
-3. **The words of the two new fixes await UX design v2.** System design §3.6
-   note 7 leaves the words to the UX design, and `ux-design.md` v1 (the
-   `$ux-design` skill's artifact) has none. This design proposes
-   `PLAN_FIX_TEXT`, *Your Massive plan doesn't include this data, so
+3. ~~**The words of the two new fixes await UX design v2.**~~ **Answered
+   2026-11-07 by UX design v2** (draft, `d0af566`), 1.4 and 1.8:
+   `PLAN_FIX_TEXT` is *Your Massive plan doesn't include this data, so
    downloading again won't help. Add it to your plan with Massive; the next
-   download after that gets it.*, and `RATE_LIMIT_FIX_TEXT`, *Download again
-   later; data already stored is never duplicated or overwritten. If this
-   keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no
-   higher than your Massive plan's request limit.* Naming the environment
-   variable follows the delivered Settings copy, which names
-   `FACTORFLOW_MASSIVE_API_KEY` (UX design 1.9). *Owner: capability owner,
-   through `$ux-design`. Blocks: the story that writes the two constants'
-   final text, not the mapping.*
+   download after that gets it.*, as proposed, and `RATE_LIMIT_FIX_TEXT` is
+   *Download again later; data already stored is never duplicated or
+   overwritten. If this keeps happening, check that
+   `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` is no higher than your Massive
+   plan's request limit; restart FactorFlow after changing it.*, the proposal
+   with the restart added. Section 2.7a holds both word for word, the name as
+   plain text, and section 7's *Fix words* test asserts them.
+   *Blocks: nothing.*

@@ -14,16 +14,18 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.318"
-  timestamp: 2026-11-07T23:05:00Z
+  timestamp: 2026-11-07T23:23:46Z
   source_artifacts:
     - id: CAP-003
       version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "2, draft (c33a8f1)"
+      version: "2, draft (c5add7f)"
+    - id: CAP-003-component-design-owner-shell
+      version: "2, draft (ca2eb41)"
     - id: CAP-003-ux-brief
       version: "1"
     - id: CAP-003-ux-design
-      version: "1"
+      version: "2, draft (d0af566)"
     - id: PRODUCT-UX-S09
       version: "4"
     - id: STD-UI
@@ -243,14 +245,15 @@ row is `retryable`. One `li` per `problems.rows` entry, ordered by symbol:
   not an attempt (AC-30), and the delivered writer never records the attempt
   count, so the column would read 1 (`src/factorflow/db/migrations/0004_runs.sql`
   line 41, `DEFAULT 1`; `src/factorflow/ingestion/outcomes.py` writes no
-  `attempts`). The words of both new fixes and of this line are the UX
-  design's (section 14, question 4).
+  `attempts`). The words of both new fixes and of this line are UX design
+  v2's, 1.4 (`d0af566`; section 14, question 4).
 
 The header's **Download now** appears only when a loaded row is `retryable`,
 which the server computes excluding `not_entitled` failures, so a stock whose
 only failures are plan refusals never shows **Download now** on its account
 (system design §3.4 note 9). `failure.cause` reaches this screen through the
-`ProblemPage` failure type in `web/src/app/shell-types.ts` (section 14,
+`ProblemPage` failure type in `web/src/app/shell-types.ts`, which
+`owner-shell` §2.3 gives `cause: FailureCause | null` (section 14,
 question 5).
 
 **Show more** (`button` `outline`) after the loaded rows when `next_cursor` is
@@ -443,8 +446,9 @@ apart, Recent downloads and What you follow.
 
 **Version 2 copy.** The two new fixes render as one `--text-xs` line under the
 failure, like the delivered fix line, with no control; their words are
-`ui-components`' `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT`, pending UX design
-v2 (section 14, question 4). No component, variant or token is added.
+`ui-components`' `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT`, which hold UX
+design v2 1.4's words (section 14, question 4). No component, variant or
+token is added.
 
 **Component mapping.**
 
@@ -534,10 +538,11 @@ Consumed; none exposed.
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| UX design | CAP-003 v1 | §1.4 Data health, §0.8 departures | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
+| UX design | CAP-003 v2 (draft, `d0af566`) | §1.4 Data health, its fix by cause and what-failed line; §0.8 departures | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
 | Screen spec | PRODUCT-UX-S09 v4 | Regions, copy, states, S09-1 to S09-5 | `docs/ux/screens/S09-data-health.md` |
-| System design | CAP-003 v2 | §3.4 and notes (note 9), §3.6 notes 6, 7 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| System design | CAP-003 v2 (draft, `c5add7f`) | §3.4 and notes (note 9), §3.6 notes 6, 7; §4.1 `owner-shell` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
 | Component design | CAP-003 UI components | `failureRecovery`, `PLAN_FIX_TEXT`, `RATE_LIMIT_FIX_TEXT` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-ui-components.md` |
+| Component design | CAP-003 owner shell v2 (draft, `ca2eb41`) | §2.3 `ProblemPage` failure type with `cause`; §7 `shell-types.test.ts`; acceptance criterion 9 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-owner-shell.md` |
 | Blueprint | PRODUCT-UX v6 | §9 confirm wording; D-9 | `docs/ux/product-ux-blueprint.md` |
 | Decisions | DEC-0200, DEC-0201, DEC-0210, DEC-0213, DEC-0217, DEC-0220 | Reads, definitions, verdict (as amended 2026-10-25), counts, the full tier order (as amended 2026-10-25), exception count | `projects/factorflow-v2/decisions/` (harness repository) |
 
@@ -570,19 +575,11 @@ Consumed; none exposed.
 3. **Latency target for the aggregate: answered.** The owner set AC-28 on
    2026-10-25 (p95 ≤ 2 s at 3,000 followed stocks; system design open
    question 7).
-4. **The words of the two new fixes, and of their what-failed line, await UX
-   design v2** (system design §3.6 note 7). `ux-design.md` v1 §1.4 has the
-   *Failed* and *Not found* fixes only. This design uses `ui-components`'
-   proposed constants and drops the attempt count for the two causes; the
-   exact copy change recommended for `ux-design.md` is in `ui-components`
-   section 14, question 3. *Owner: capability owner, through `$ux-design`.
-   Blocks: final copy only.*
-5. **`cause` must be added to the shell's wire types.** `web/src/app/shell-types.ts`,
-   which `owner-shell` owns, holds the `DataHealth` and `ProblemPage` types
-   this screen reads; its failure type needs `cause: FailureCause | null`
-   (importing `FailureCause` from `ui-components`). System design v2 §4.1 does
-   not list `owner-shell` among the components it changes, so this one-line
-   type change has no owning design yet. *Owner: capability owner, to assign
-   it to `owner-shell` (a refinement of its design) or to state that its
-   types mirror `data-health-api`'s models field for field. Blocks: the story
-   that renders the cause.*
+4. ~~**The words of the two new fixes, and of their what-failed line, await UX
+   design v2.**~~ **Answered 2026-11-07 by UX design v2** (draft, `d0af566`)
+   §1.4: the plan-refusal and rate-limit fixes are the words
+   `ui-components`' `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT` hold
+   (`ui-components` section 14, question 3), and for those two causes the
+   what-failed line ends at *{reason}*, without *, {attempts} attempts*, as
+   2.5 renders it. *Blocks: nothing.*
+5. ~~**`cause` must be added to the shell's wire types.**~~ **Answered 2026-11-07 by the owner:** system design v2 §4.1 (`c5add7f`) assigns the change to `owner-shell`, and `component-design-owner-shell.md` v2 §2.3 (`ca2eb41`) adds `cause: FailureCause | null` to the `ProblemPage` failure type in `web/src/app/shell-types.ts` (shared by `DataHealth.problems.rows`), with `FailureCause` imported from `ui-components`, tested type-level in `web/src/app/shell-types.test.ts` (owner-shell section 7, acceptance criterion 9). *Blocks: nothing.*
