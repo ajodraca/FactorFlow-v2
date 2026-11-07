@@ -428,7 +428,7 @@ No hard edge is added: every DOM contract the specs observe is produced by a scr
    - **The gap.** `tests/e2e/research-after-download.spec.ts` asserts `expect(summaryOutcome(page)).toHaveText("Succeeded")` at lines 60 and 87. After CAP-003-E7-S5 relabels the state and this story re-points `summaryOutcome`, the label is *Complete*, so those two lines fail. Line 116 asserts `href` `/runs/${runId}`; register G15 assigns it to CAP-003-E7-S8's `SHELL_ROUTES` change. Owner-web-app 2.6 lists only the eleven CAP-001 specs, and no artifact assigns the two label lines.
    - **What the plan does.** It does not edit the file: it is outside the story's Implementation list and the approved scope. T018 runs it and reports the two lines by name as a known, out-of-scope failure, never as green.
    - **Absorb at the next revision of** `component-design-owner-web-app.md` §2.6, which should list the CAP-002 specs that import `tests/e2e/support/acquisition.ts` (`research-after-download`, `fix-insufficient-evidence`, `universe-from-result`) and say who follows their labels.
-   - This is a scope gap, not an undetermined value, so no DEC-PENDING is raised.
+   - This is a scope gap, not an undetermined value, so no provisional decision is raised.
 2. **Consumed provisional decisions of other plans.** This plan writes assertions against values other plans adopted provisionally; it adopts none of its own. If the owner changes one, the matching e2e assertion fails loudly, which is the intent.
    - DEC-0387: present presence is `StatusBadge` `good`, so `status-good`; the owner-web-app §10 mapping was `coverage-present`.
    - DEC-0299: the depth field's name is *History depth years*.

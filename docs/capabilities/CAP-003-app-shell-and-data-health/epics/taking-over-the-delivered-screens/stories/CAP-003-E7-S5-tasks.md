@@ -212,7 +212,7 @@ Mapped test cases (`tests/component/owner-web-app-tests.md`; `tests/coverage-mat
     - `Last updated ${formatClock(fetchedAt)}` at `text-xs`;
     - `<CancelRunControl key={run.runId} …>`, unchanged in its props;
     - for `failed` or `partial`, `RECOVERY_SENTENCE` and `<StartRunControl label="Download now" />`.
-  - Remove the imports from `../outcome-badge`, `./result-outcome-badge` and `../../../app/status-region`. That module's `formatTimestamp` goes, and CAP-003-E3-S6 deletes the module. The doc comment cites UX design 1.8, DAC-E7-8, DEC-0214 and the three DEC-PENDING tokens, with no literal.
+  - Remove the imports from `../outcome-badge`, `./result-outcome-badge` and `../../../app/status-region`. That module's `formatTimestamp` goes, and CAP-003-E3-S6 deletes the module. The doc comment cites UX design 1.8, DAC-E7-8, DEC-0214 and the three provisional decision IDs (DEC-NNNN) from Open Gaps, with no literal.
   - Depends on T004, T008, T009, T012 (makes T004 and the summary cases of T007–T009 and T011 pass)
 - [ ] T014 Rewrite `web/src/screens/runs/cancel-run.tsx` onto `ConfirmDialog`. Keep `CancelRunControl`'s props, its settle logic (`settled`, `alreadyCompleted`, null once the `state` prop moves past `requested` / `running`) and the `cancelAcquisitionRun` call exactly as delivered (AC-17).
   - The trigger is `<Button variant="secondary" onClick=…>Cancel download</Button>`.
