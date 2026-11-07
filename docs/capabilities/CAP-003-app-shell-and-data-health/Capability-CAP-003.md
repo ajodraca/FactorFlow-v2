@@ -364,9 +364,9 @@ the change is owned here.
 
 | Target | Not depended on for | Why |
 |--------|--------------------|-----|
-| CAP-001 | Any change to what it acquires, stores, records, refuses or exposes | CAP-001 is approved and delivered; blueprint D-8 gives it no new work. This capability presents its results and actions and changes their place and words, never their behaviour (AC-17). Anything found missing in CAP-001's results is recorded as an open question, not written into CAP-001. |
+| CAP-001 | Any change to what it acquires, stores, records, refuses or exposes, other than the provider-refusal reasons of AC-29 and AC-30 | CAP-001 is approved and delivered; blueprint D-8 gives it no new work. This capability presents its results and actions and changes their place and words, never their behaviour (AC-17). The one exception, how a provider refusal is retried and reported (AC-29, AC-30), is owned and designed here, and CAP-001's approved designs stay as they are (AGT-SCOPE-002). Anything else found missing in CAP-001's results is recorded as an open question, not written into CAP-001. |
 | CAP-002 | Research, stock evidence, compare and universe screens | CAP-002 owns them. This capability gives them their place in the rail and otherwise leaves them alone (AC-27). |
-| Massive (market data provider) | Any provider read | Every figure this capability shows was recorded by CAP-001 or produced by CAP-002; it makes no provider request of its own. |
+| Massive (market data provider) | Any new provider read | Every figure this capability shows was recorded by CAP-001 or produced by CAP-002, and its screens make no provider request of their own. AC-29 and AC-30 change how CAP-001's existing reads are retried and how their refusals are recorded; they add no endpoint and no request. |
 | Alpaca / the broker port, the kill switch | Anything | No order path exists in M1. The kill switch and the environment region ship with paper trading (blueprint D-7). |
 
 ### 5.3 Constraints
