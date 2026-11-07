@@ -2,36 +2,30 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-component-design-data-health-api
 artifact_type: component-design
-artifact_version: 1
-status: approved
+artifact_version: 2
+status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-07
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-25T19:45:46Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:05:00Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c33a8f1)"
     - id: tech-stack
-      version: "6"
+      version: "7, approved"
     - id: CAP-001-component-design-ingestion-api
       version: "8"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:25Z
-  reviewed_revision: sha256:9d33b8d79004e9ea4d147fdbf456cce4f174a2d684f8a324140c1a52f5dbdc3f
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # Component: Data Health API
@@ -39,7 +33,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-003
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-11-07
 
 This design was produced in an unattended `$design-run`. It applies DEC-0200,
 DEC-0201, DEC-0203 and DEC-0208 without re-deciding them, DEC-0211 for the
@@ -47,6 +41,12 @@ delivered files it does not edit, and DEC-0220 for the one field it adds to
 the system design's response shape; decisions live under
 `projects/factorflow-v2/decisions/` in the harness repository. Positions
 resting on a decision are marked **PROVISIONAL**.
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29): each failure in a problem row gains `cause`, and
+`retryable` follows `data-health-reader`'s rule that excludes a plan refusal
+(system design §4.2 `GET /api/data-health`). No route, parameter, status code
+or other field changes. Sections 1, 2.4, 7, 8, 12 and 13 carry the change.
 
 ## 1. Overview
 
@@ -67,6 +67,8 @@ Use cases addressed:
 - Data health's verdict counts, check cards and the first *Needs fixing* page,
   on demand (AC-11, AC-13, AC-14, AC-21).
 - Further *Needs fixing* pages by keyset (STD-UI-30).
+- Each failure's cause, so the interface can choose its fix by cause and a
+  plan refusal is never offered a download (AC-29; version 2).
 
 Support matrix: the application container's single uvicorn worker bound to
 `127.0.0.1:8000`, one browser client, no authentication (capability §5.3).
@@ -201,8 +203,35 @@ Timestamps serialise as ISO-8601 with offset; session dates as `YYYY-MM-DD`.
 | `DataHealthResponse` | `checked_at`; `never_acquired`; `followed_count`; `affected_count`; `checks {daily_prices, company_financials}`, each null exactly when `never_acquired` is true; `problems {rows, next_cursor}` |
 | `DailyPricesCheckResponse` | `status` (`ok`, `exceptions`, `not_determinable`); `absent_count`; `gap_stock_count` (int or null); `behind_count`; `latest_session` (date or null); `gap_detection {available, reason}`; `exception_count`; `exception_symbols[≤5]` |
 | `CompanyFinancialsCheckResponse` | `status` (`ok`, `exceptions`); `absent_count`; `problem_count`; `as_of` (timestamp or null); `exception_count`; `exception_symbols[≤5]` |
-| `ProblemRowResponse` | `symbol`; `failures[] {data_type, outcome (failed or not_found), reason, attempts, completed_at, run_id}`; `retryable` |
+| `ProblemRowResponse` | `symbol`; `failures[] {data_type, outcome (failed or not_found), cause, reason, attempts, completed_at, run_id}`; `retryable` |
 | `ProblemPageResponse` | `rows[]`; `next_cursor` (symbol or null) |
+
+**`cause` (version 2; AC-29).** `FailureResponse.cause` is the reader's
+`cause`, passed through: one of `not_found`, `credential_rejected`,
+`unavailable`, `contract_violation`, `not_entitled`, `rate_limited`, or `null`
+when the stored reason does not begin with one of them. It is serialised as
+`null`, never omitted, so the interface treats an unknown cause as an
+ordinary failure. `retryable` is the reader's value, true when any failure is
+`failed` with a cause other than `not_entitled` (system design §4.2). Both are
+domain vocabulary: the API composes no fix and no sentence (DEC-0200).
+
+```python
+# src/factorflow/api/data_health_models.py
+FailureCause = Literal[
+    "not_found", "credential_rejected", "unavailable",
+    "contract_violation", "not_entitled", "rate_limited",
+]
+
+
+class FailureResponse(BaseModel):
+    data_type: Literal["reference", "prices", "fundamentals", "corporate_actions"]
+    outcome: Literal["failed", "not_found"]
+    cause: FailureCause | None      # version 2; always present, null when unknown
+    reason: str | None
+    attempts: int
+    completed_at: datetime
+    run_id: UUID
+```
 
 `gap_stock_count` and the nullable dates are serialised as `null`, never
 omitted and never `0`, so the interface can render not determinable and
@@ -289,11 +318,13 @@ polls `GET /api/attention` at the cadences `owner-shell` owns.
 | Test | File | What it proves |
 |------|------|----------------|
 | Shapes | `tests/unit/test_api_data_health_models.py` | Each model serialises every §4.2 field; nullable counts and dates serialise as `null`, never omitted, never 0 |
+| Cause serialised | `tests/unit/test_api_data_health_models.py` | A failure with each of the six causes serialises it; a failure with cause `None` serialises `"cause": null`, present, not omitted; a value outside the six is refused by the model (version 2; AC-29) |
 | Problems validation | `tests/unit/test_api_data_health_routes.py` | `limit` 0 and 501 give `422 validation_error`; a malformed cursor gives `422` with `resource` `data-health` and does not echo the value |
 | Delegation | `tests/unit/test_api_data_health_routes.py` | Each handler calls its reader function once with one connection and returns its value unchanged |
 | Database down | `tests/unit/test_api_data_health_routes.py` | A reader raising `psycopg.Error` yields the `500` `internal_error` envelope with `X-Request-Id` |
 | End to end | `tests/integration/test_api_data_health.py` | Against a seeded PostgreSQL: attention and data-health bodies match the reader's values; `affected_count` equals the row count; keyset pages concatenate to the full problem set (AC-13, AC-16) |
 | Empty store | `tests/integration/test_api_data_health.py` | `200` with `never_acquired` true and both checks `null` (AC-21) |
+| Plan refusal through the route | `tests/integration/test_api_data_health.py` | Against a store seeded with one stock whose only failure reason begins `[not_entitled] ` and one whose reason begins `[rate_limited] `: `GET /api/data-health` and `GET /api/data-health/problems` return `cause` `not_entitled` with `retryable` false and `cause` `rate_limited` with `retryable` true; `affected_count` is 2 (AC-29, AC-30) |
 | Host and Origin | `tests/integration/test_api_data_health_host_origin.py` | A foreign `Host` gets `400 host_not_allowed` on all three routes; a foreign `Origin` on a `GET` is not refused (GET changes no state) |
 | Latency | `tests/integration/test_data_health_volume.py` (`data-health-reader` §7) | With 3,000 followed stocks, `GET /api/data-health` has a 95th percentile of at most 2 seconds (AC-28) |
 
@@ -312,6 +343,9 @@ The no-credential assertion over these routes lives in the delivered
    delivered middleware before reaching a handler.
 6. With 3,000 followed stocks, `GET /api/data-health` answers within 2
    seconds at the 95th percentile, measured by the volume test (AC-28).
+7. Every failure in a problem row carries `cause`, one of the six kinds or
+   `null`, and `retryable` is false for a row whose failures are all plan
+   refusals or `not_found` (version 2; AC-29).
 
 ## 9. Workflows
 
@@ -346,7 +380,7 @@ envelope and pool.
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| System design | CAP-003 v1 | §3.3, §3.4, §4.2, constraints 2, 3, 7, 9, 10 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| System design | CAP-003 v2 | §3.3, §3.4 (note 9), §3.6 note 6, §4.2, constraints 2, 3, 7, 9, 10 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
 | Component design | CAP-001 ingestion API v8 | Middleware, error envelope, bounds, `app.state.db_pool` | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-ingestion-api.md` |
 | Component design | CAP-003 data health reader | The functions and dataclasses this router serves | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-data-health-reader.md` |
 | Component design | CAP-003 ingestion API changes | The `include_router` line and the no-secrets test | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-ingestion-api.md` |
@@ -363,6 +397,7 @@ envelope and pool.
 | AC-11 | `GET /api/data-health` | `DataHealthResponse` with `affected_count` and checks | 2.4 |
 | AC-13 | Problem rows | `ProblemRowResponse` | 2.4 |
 | AC-14 | `retryable` | `ProblemRowResponse.retryable` | 2.4 |
+| AC-29 | `cause`; `retryable` excluding `not_entitled` | `FailureResponse.cause`; `retryable` passed through | 2.4 |
 | AC-16 | `problems.stock_count` | `AttentionResponse.problems` | 2.4 |
 | AC-21 | `never_acquired`; `latest_terminal_download` | Checks null, `never_acquired` true (check cards' null state); `latest_terminal_download` null is the screen's empty-state trigger | 2.4 |
 | AC-23 | Health answers independently | These routes play no part in liveness; health stays the delivered route | 3 |
