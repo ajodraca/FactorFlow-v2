@@ -2,22 +2,22 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-system-design
 artifact_type: system-design
-artifact_version: 4
+artifact_version: 5
 capability: CAP-002
 title: Universe & Factor Classification
 ui_facing: true
 created: 2026-10-15
-updated: 2026-11-06
+updated: 2026-11-07
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: approved
+status: draft
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-06T12:00:00Z
+  timestamp: 2026-11-07T16:00:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
@@ -94,6 +94,15 @@ acquired data, because no fundamentals have yet been acquired; Section 6
 assumption 1 keeps the part only a real run can confirm. On specification
 review v4 capital expenditure became a magnitude and book equity excludes
 preferred stock (owner, FINDING-4 and FINDING-5). Nothing else changes.
+
+**Version 5 (2026-11-07)** closes CAP-002 release blocker B3 (DEC-0397,
+owner). A momentum return applies the splits and dividends in its window only
+where the stock's corporate actions are known to have been acquired over that
+window, recorded by CAP-001 as `corporate_actions` coverage; otherwise the
+input is `missing` and the stock is not classified on momentum with the input
+named (Section 5 constraint 8, Section 4.2 `Observation read`). Version 4
+treated an absent corporate-action row as "no split or dividend" whether or
+not the data had ever been acquired. Nothing else changes.
 
 ## 1. Design Overview
 
@@ -530,7 +539,7 @@ that design names it (Section 8, question 10; skill constraint 6c).
 | Filter snapshot evaluation | `classification-reader` | `universe-service` | Python call `evaluate_filter(conn, set_id, thresholds)` with the reader's `Thresholds` object (bounds, `hide_incomplete`, `symbol` prefix), inside the universe write transaction, returning the instruments the list read would return for the same filter against `set_id` — the one predicate for the list and the snapshot (S03-7; Section 3.2 step 3a; review v2 FINDING-4, FINDING-5) | n/a — in-process | n/a | stable within this capability |
 | Set build | `factor-engine` | `classification-scheduler` | `build(set_id)`: synchronous, dispatched off the event loop; returns the terminal set state | n/a — in-process | n/a | stable within this capability |
 | Qualifying-run read | `market-data-store` | `classification-scheduler` | SQL read of `acquisition_run` rows in `succeeded` or `partial` with no `classification_set` row, oldest `ended_at` first; read-only | n/a — in-process | n/a | depends on the published `acquisition_run` shape (migration `0004`) |
-| Observation read | `market-data-store` | `factor-engine` | SQL reads of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action` and `acquisition_state`; read-only, never an UPDATE or DELETE | n/a — in-process | n/a | depends on the published observation shapes (migration `0002`, `0003`) |
+| Observation read | `market-data-store` | `factor-engine` | SQL reads of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action`, `coverage_segment` and `acquisition_state`; read-only, never an UPDATE or DELETE | n/a — in-process | n/a | depends on the published observation shapes (migration `0002`, `0003`) |
 | Coverage check | `market-data-store` | `universe-service` | SQL read: does an `instrument` row with at least one `coverage_segment` exist for the symbol | n/a — in-process | n/a | depends on migration `0001`, `0003` |
 | Universe event append | `research-store` | `universe-service` | SQL `INSERT` into `universe` and `universe_event`; no UPDATE or DELETE | n/a — in-process | n/a | **critical — C5, unrecoverable if wrong** |
 | Universe event read | `research-store` | `universe-service` | SQL reads over `universe_event` for replay | n/a — in-process | n/a | stable within this capability |
@@ -647,7 +656,12 @@ capability's own test module scans every `.sql` file and SQL string for one.
    calendar months before that end, each resolved against the stock's own
    bars. Total return is computed from the **unadjusted** bars the store holds
    (DEC-0001, owner) by applying splits and compounding dividends from
-   `corporate_action` at read time. A growth input whose prior-year base is not
+   `corporate_action` at read time. A momentum input is computed only when the
+   stock's `corporate_actions` coverage (`coverage_segment`, CAP-001 AC-7)
+   contains its whole window; otherwise it is `missing` with the cause
+   `corporate_actions_not_covered`, because an absent action row means "no
+   split or dividend" only where corporate actions were acquired (AC-7, AC-12;
+   DEC-0397, owner 2026-11-07). A growth input whose prior-year base is not
    positive is `not_computable` and leaves the stock not classified on growth
    with the input named.
 9. **The restatement mark follows the data (AC-23; DEC-0056, PROVISIONAL).** A
