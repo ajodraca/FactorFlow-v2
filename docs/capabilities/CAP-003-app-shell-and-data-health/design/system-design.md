@@ -2,29 +2,29 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-system-design
 artifact_type: system-design
-artifact_version: 1
+artifact_version: 2
 capability: CAP-003
 title: App Shell & Data Health
 ui_facing: true
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-07
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: approved
+status: draft
 ai_provenance:
   agent_id: system-design-agent
-  agent_version: "1.1"
+  agent_version: "1.2"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-26T02:17:21Z
+  timestamp: 2026-11-07T22:52:00Z
   source_artifacts:
     - id: CAP-003
-      version: "1, draft 2026-10-24"
+      version: "2, draft 2026-11-07"
     - id: product-charter
       version: "2, approved"
     - id: tech-stack
-      version: "6, draft 2026-10-25"
+      version: "7, approved"
     - id: STD-UI
       version: "6, approved"
     - id: PRODUCT-UX
@@ -39,14 +39,20 @@ ai_provenance:
       version: "8, approved"
     - id: CAP-002-system-design
       version: "3, approved 2026-10-17"
+    - id: CAP-001-component-design-massive-client
+      version: "15, approved"
+    - id: CAP-001-component-design-rate-limit-governor
+      version: "8, approved"
+    - id: CAP-001-component-design-acquisition-runner
+      version: "9, approved"
+    - id: CAP-001-component-design-runtime-config
+      version: "14, approved"
+    - id: CAP-001-specifications-review-report
+      version: "14 (b69facd, branch usr/alvaro-de-jodra/CAP-001-design-provider-refusals)"
+    - id: CAP-002-release
+      version: "1 (docs/releases/CAP-002-release-v1.md, follow-up F1)"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:24Z
-  reviewed_revision: sha256:b53713f1a7d809d62700b3482de28dc1b0131ef8c03b4a5ff9fffaa6e24dc98d
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # System Design: App Shell & Data Health
@@ -66,6 +72,17 @@ and marked **PROVISIONAL** where it rests on a derivation rather than an
 approved artifact. The owner upholds or reverts each with `scripts/sdd
 decisions`. Commits carrying this design carry those `Decision-Id` trailers.
 
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2,
+which adds AC-29 and AC-30 (follow-up F1 of CAP-002's release: provider
+refusals reported by cause). It changes three components CAP-001 delivered,
+`massive-client`, `rate-limit-governor` and `acquisition-runner`, whose approved
+CAP-001 designs stay as they are; CAP-003 records its changes in its own
+component designs, as it already does for `ingestion-api` (AGT-SCOPE-002;
+review v14 FINDING-56 of CAP-001, answered by the owner). The design choices
+this revision makes are stated where they apply and gathered in constraint 16
+and Section 8 for the owner's review. Section 1's last paragraph, Section 3.6
+and constraints 16 and 17 carry the change.
+
 Read Section 4 first: it is the vocabulary the rest of this document uses.
 
 ## 1. Design Overview
@@ -80,8 +97,9 @@ map, redirects, unreachable state and the shell-wide polled state),
 the shared patterns), `setup-ui`, `home-ui` and `data-health-ui`. Two live in
 the application container: `data-health-reader`, which computes the
 aggregates Home and Data health need, and `data-health-api`, the router that
-serves them. The ingestion container is not touched, no table is added, and
-nothing is written by any new component (capability §1, §5.2).
+serves them. No table is added and nothing is written by any new component
+(capability §1, §5.2). The ingestion container is touched only by the
+provider-refusal change described at the end of this section.
 
 The shape follows the delivered topology. The browser talks only to the
 loopback JSON API that `ingestion-api` builds; `data-health-api` registers its
@@ -113,6 +131,31 @@ currency is not re-derived here: `owner-shell` reads the classification summary
 `classification-api` publishes and shares it with Home and Data health through
 the shell context (capability §5.1).
 
+**Provider refusals by cause (version 2; AC-29, AC-30).** On 2026-11-07
+production stored every provider refusal, a plan not entitled to company
+financials and a rate limit alike, as `[unavailable] … The provider failed 3
+consecutive attempts.` (CAP-002 release manifest B1, B2 and follow-up F1).
+The cause is in the ingestion container: under the SDK's `retries=0` a `429`
+reaches `massive-client` as a urllib3 `MaxRetryError` whose `reason` is
+`ResponseError("too many 429 error responses")`, which the classifier counted
+as a failed attempt, so the governor's throttle path never ran; and a `403`
+"not entitled" body fell to the retryable default (reproduced socket-free in
+review v14 of CAP-001). This design changes three delivered components and
+nothing else in that container. `massive-client` classifies the `429`
+`MaxRetryError` as throttling and the "not entitled" body as a new
+`ProviderNotEntitled`, which the governor never retries. `rate-limit-governor`
+spends **one throttle wait budget per stock**, shared across that stock's
+requests, never takes a wait that would cross it, and raises a new
+`ProviderRateLimited` when it is spent. `acquisition-runner` starts each
+stock's budget at the same checkpoint where it refreshes its heartbeat, and
+records both refusals as `failed` with the reason kinds `not_entitled` and
+`rate_limited`. No outcome value, column or migration is added. On the
+interface side, `data-health-reader` reads each failure's cause from the kind
+the stored reason already leads with, and `data-health-ui` and the download
+detail screen of `owner-web-app` choose each failure's fix by that cause, so a
+plan refusal names the provider plan and never offers a download (Section
+3.6).
+
 ## 2. Architectural Block Diagram
 
 The diagram shows the three deployed units and where this design's eight
@@ -124,10 +167,16 @@ five delivered screens of `owner-web-app` and the research screens of
 attention, classification summary) every screen shares. In the application
 container, `data-health-api` is included in the application `ingestion-api`
 builds and delegates to `data-health-reader`, which reads the market data
-store directly and calls `coverage-service` in process. The ingestion
-container appears only to show that it is untouched; the outcome is that every
-new read reaches PostgreSQL through the application container's existing pool
-and nothing new crosses a container boundary.
+store directly and calls `coverage-service` in process. In the ingestion
+container, the three delivered components this design changes for provider
+refusals keep their delivered call chain: `acquisition-runner` calls
+`massive-client`, which sends every request to the provider under
+`rate-limit-governor`'s permits and retry rules, and the runner records each
+result in the store. The outcome is
+that every new read reaches PostgreSQL through the application container's
+existing pool, nothing new crosses a container boundary, and the refusal cause
+travels from the ingestion container to Data health only as the reason text
+already stored with each result.
 
 ```mermaid
 flowchart TB
@@ -150,9 +199,13 @@ flowchart TB
         CAPI["[B13] classification-api<br/>/api/classifications/summary, /api/universes"]
     end
 
-    subgraph INGC["Ingestion container (unchanged)"]
-        RUN["[B14] acquisition-runner"]
+    subgraph INGC["Ingestion container (changed for provider refusals only)"]
+        RUN["[B14] acquisition-runner<br/>per-stock budget start, refusal outcomes"]
+        MC["[B16] massive-client<br/>429 throttled, 403 not entitled"]
+        GOV["[B17] rate-limit-governor<br/>one throttle budget per stock"]
     end
+
+    PRV["[B18] Massive REST API (external)"]
 
     subgraph DB["PostgreSQL container"]
         MDS[("[B15] market-data-store<br/>instrument, acquisition_state,<br/>run_instrument_result, acquisition_run,<br/>coverage_segment")]
@@ -178,7 +231,10 @@ flowchart TB
     DHR -->|"[E17] in-process read_coverage"| COV
     DHR -->|"[E18] SQL reads"| MDS
     COV -->|"[E19] SQL reads"| MDS
-    RUN -->|"[E20] writes results"| MDS
+    RUN -->|"[E20] writes results, reason [kind]"| MDS
+    RUN -->|"[E21] start_instrument, fetch"| MC
+    MC -->|"[E22] start_throttle_budget, execute"| GOV
+    MC -->|"[E23] HTTPS through the SDK, retries=0"| PRV
 ```
 
 ## 3. Architectural Control Flow
@@ -517,6 +573,13 @@ sequenceDiagram
    latest terminal download, with the sentence composed from `affected_count`
    and `followed_count`; the check cards do not feed it (DEC-0210 as amended
    by the owner on 2026-10-25).
+9. **A failure's fix follows its cause, not only its outcome** (version 2,
+   AC-29). Each failure carries `cause`, the kind its stored reason leads
+   with, and `retryable` excludes a `not_entitled` failure as it excludes a
+   `not_found` one. A plan refusal's fix names the provider plan, which is
+   changed outside the product, and never offers **Download now**; a stock
+   whose only failures are plan refusals therefore never shows the header's
+   **Download now** on its account (Section 3.6, constraint 16).
 
 ### 3.5 Reaching the delivered screens and the palette
 
@@ -558,6 +621,138 @@ flowchart TD
    (*Data health › Coverage*, *Data health › Downloads › Download*), so no
    delivered screen needs to know about the top bar.
 
+### 3.6 A provider refusal, from the request to *Needs fixing* (version 2)
+
+The sequence shows one stock's download meeting both refusals AC-29 and AC-30
+name, and how each reaches Data health. `acquisition-runner` starts the
+stock's throttle budget right after its heartbeat; `massive-client` classifies
+what the SDK raises and hands the decision to `rate-limit-governor`, which
+waits out throttling against the stock's one budget and never retries a plan
+refusal; the runner records each data type's result with the reason
+`massive-client` composed. The decision points are whether the provider
+answers `403` "not entitled", whether a `429` wait still fits the stock's
+remaining budget, and, on Data health, whether a failure's cause is a plan
+refusal. The expected outcome is that the refused request is sent once, a
+rate limit costs no attempt and ends as `rate_limited` only past the stock's
+budget, the download continues to the next data type and stock, and *Needs
+fixing* names the plan as the fix for the first and a later download for the
+second.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant RUN as acquisition-runner
+    participant MC as massive-client
+    participant GOV as rate-limit-governor
+    participant PRV as Massive REST API
+    participant MDS as market-data-store
+    participant DHR as data-health-reader
+    participant DHU as data-health-ui
+
+    RUN->>MDS: heartbeat, cancellation check (top of stock)
+    RUN->>MC: start_instrument()
+    MC->>GOV: start_throttle_budget() (spent = 0)
+    RUN->>MC: fetch_financials(KO)
+    MC->>GOV: execute(send, classify)
+    GOV->>PRV: GET /stocks/financials/v1/... (one request)
+    PRV-->>GOV: 403 "You are not entitled to this data..."
+    GOV->>MC: classify(BadResponse) -> ProviderNotEntitled, FATAL
+    GOV-->>RUN: ProviderNotEntitled re-raised, no retry
+    RUN->>MDS: fundamentals failed, "[not_entitled] symbol=KO data_type=fundamentals request_id=<id>: ..."
+    RUN->>MC: fetch_reference(KO)
+    loop while the provider answers 429
+        GOV->>PRV: GET /v3/reference/tickers/KO
+        PRV-->>GOV: 429 (urllib3 MaxRetryError, ResponseError 429)
+        GOV->>MC: classify -> THROTTLED, not an attempt
+        alt spent + next wait <= budget
+            GOV->>GOV: wait to the next minute boundary; spent += waited
+        else the next wait would cross the stock's budget
+            GOV-->>RUN: ProviderRateLimited, no wait taken
+        end
+    end
+    RUN->>MDS: reference failed, "[rate_limited] ... request_id=unavailable: ..."
+    Note over RUN,GOV: The stock's later data types share the spent budget: a further 429 raises ProviderRateLimited at once
+    RUN->>MDS: next stock: heartbeat, then start_instrument() resets the budget
+    DHU->>DHR: GET /api/data-health (through data-health-api)
+    DHR->>MDS: problem rows with reason
+    DHR-->>DHU: failures with cause not_entitled / rate_limited; retryable excludes not_entitled
+    DHU-->>DHU: plan refusal: fix names the provider plan, no Download now; rate limit: download again
+```
+
+1. **One request for a plan refusal** (AC-29). `massive-client` matches the
+   marker `not entitled`, case-insensitively, in **both** the envelope's
+   `error` and `message` fields (review v14 FINDING-59: the production `403`'s
+   field layout was not captured, so neither reading of "the failure text" is
+   safe alone). The rule sits after the not-found and credential rules and
+   before the default, so a body naming the API key still stops the run.
+   `ProviderNotEntitled` is `FATAL` for the governor, raised from the one
+   response with its `request_id`. It is per data type, not per run: the plan
+   may include prices and exclude financials, so the other data types are
+   still downloaded. Each stock sends one refused request per data type the
+   plan excludes; short-circuiting the endpoint for the rest of a download is
+   not designed (Section 8 question 14).
+2. **A `429` is recognised by urllib3's own constant** (AC-30). The classifier
+   maps a `MaxRetryError` whose `reason` is a `ResponseError` equal to
+   `ResponseError.SPECIFIC_ERROR.format(status_code=429)` to `THROTTLED`;
+   every other `MaxRetryError` stays `RETRYABLE`. A refused redirect is a
+   `MaxRetryError` from `PoolManager.urlopen`'s redirect branch, not from the
+   status forcelist, and stays `RETRYABLE` and refused, so DEC-0038 and
+   DEC-0042's redirect and proxy controls are untouched (review v14 FINDING-63
+   (a)). The SDK's `retries=0` is kept.
+3. **One throttle wait budget per stock** (AC-30's "the wait budget for one
+   stock"; owner decision on review v14 FINDING-55, option (a)). The budget,
+   `FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS` (300 s), is spent across all
+   of a stock's requests rather than per request. The governor checks before
+   it waits: a wait that would take the spent total past the budget is not
+   taken, and `ProviderRateLimited` is raised instead, so the throttle wait
+   between two heartbeats never exceeds the budget, including the boundary
+   wait's jitter that review v14 found could overrun a check made after the
+   wait. Throttle waits never count as attempts; transport and server errors
+   keep their attempt bound unchanged.
+4. **Finishes, never abandoned** (AC-30). The runner refreshes its heartbeat
+   only at the top of each stock, and starts the stock's budget at that same
+   checkpoint. Under persistent throttling every request answers `429`
+   without a timeout, so the time between heartbeats is the budget (300 s)
+   plus the time to send the stock's few requests under the configured pace,
+   well inside the 900 s staleness window. That is the one throttle wait per
+   stock the staleness derivation already reserves (`runtime-config` §2.2a,
+   invariant 2: 900 > 660), so no timing value or invariant changes, and the
+   sweeper never reclaims a run that is waiting out a rate limit. The run
+   continues to the remaining data types and stocks and is finalised by the
+   delivered outcome rule: `partial` when anything was stored, `failed` when
+   nothing was (Section 8 question 13).
+5. **Each refusal keeps outcome `failed` and names its cause in the reason.**
+   `compose_failure_reason` gains two kinds, looked up by exact class:
+   `not_entitled`, whose variable segment is the fixed *the provider plan is
+   not entitled to this data* (never the provider's text), and
+   `rate_limited`, the governor's fixed text with `request_id=unavailable`,
+   because urllib3 drains the `429` body before the SDK sees it.
+   `classify_provider_error` maps both classes to `failed`. The store's
+   allowed outcomes are unchanged, so no migration follows.
+6. **Data health reads the cause from the reason's leading kind** (AC-29).
+   `compose_failure_reason` always begins a stored reason with `[<kind>] `
+   from a closed table, ahead of any variable text, so provider text can never
+   occupy that position. `data-health-reader` reads it with an anchored match
+   against the six kinds and returns it as `cause`, or null for a reason that
+   does not begin with one (rows recorded before the reason format existed).
+   `retryable` is true when any failure is `failed` with a cause other than
+   `not_entitled`. This keeps the problem set, the counts and the verdict
+   exactly as they were: a plan refusal is still a problem, it is the fix
+   that changes. A new outcome value was rejected: it would change the
+   store's persistent schema and the delivered outcome rule for a distinction
+   the stored reason already carries.
+7. **One fix per cause, everywhere a failure is shown** (AC-29; review v14
+   FINDING-64). `ui-components` holds one function, `failureRecovery(outcome,
+   cause)`, used by *Needs fixing* and by the download detail screen at
+   `/data/downloads/:id`, which reads the same leading kind from the delivered
+   run-detail response's `reason` through one browser function,
+   `failureCause(reason)`, beside it. A `not_entitled` failure's fix names the
+   provider plan and offers no download; a `rate_limited` failure's fix is a
+   later download, with the plan's request limit and the configured request
+   rate named as what to check when it recurs (CAP-002 release manifest B2);
+   every other `failed` failure keeps *Download again*; `not_found` is
+   unchanged. The UX design fixes the words.
+
 ## 4. Components, Interfaces and Technology
 
 ### 4.1 Components Introduced
@@ -566,11 +761,11 @@ flowchart TD
 |--------------|------|----------------|----------|
 | `owner-shell` | Owner interface shell | React composition root of the owner interface: the rail in two groups listing only shipped destinations with their attention counts, the sticky top bar with the route-derived title and the palette button, the route map with the `/` redirect and the four legacy redirects, the unreachable state, and the shell-wide polled reads (health 30 s; attention and classification summary 60 s, 10 s while a download is non-terminal or scores are building; all paused while the document is hidden, DEC-0212) shared through the shell context. Replaces the delivered shell and route composition in `web/src/app/` (DEC-0204) | this design |
 | `command-palette` | Command palette | The `command` `dialog` opened by the shell: Stocks from the followed list (server prefix search), Universes and Pages filtered locally, targets per DEC-0207; never a trading action. `web/src/app/command-palette/` | this design |
-| `ui-components` | Design-system components and shared patterns | The design-system components vendored as shadcn/ui ships them in `web/src/components/ui/` (badge, button, card, data-table, dialog, form, input, textarea, select, checkbox, radio-group, progress, stepper, command, toast; `form` per DEC-0215) and the blueprint §4 patterns in `web/src/components/patterns/` (Needs-you item and `sortAttention`, `worstDataTier`, as-of line, status badge with tier shape, state-coverage region), consuming only `theme.css` tokens (DEC-0205). The as-of line is taken over, not created: CAP-002 lands first with its Research-specialised `web/src/components/patterns/as-of-line.tsx`, and `ui-components` generalises that file to `AsOfLine`, with the Research line composing it (owner decision 2026-10-25) | this design |
+| `ui-components` | Design-system components and shared patterns | The design-system components vendored as shadcn/ui ships them in `web/src/components/ui/` (badge, button, card, data-table, dialog, form, input, textarea, select, checkbox, radio-group, progress, stepper, command, toast; `form` per DEC-0215) and the blueprint §4 patterns in `web/src/components/patterns/` (Needs-you item and `sortAttention`, `worstDataTier`, as-of line, status badge with tier shape, state-coverage region, and, in version 2, `failureCause` and `failureRecovery`, the one mapping from a failure's outcome and cause to its fix), consuming only `theme.css` tokens (DEC-0205). The as-of line is taken over, not created: CAP-002 lands first with its Research-specialised `web/src/components/patterns/as-of-line.tsx`, and `ui-components` generalises that file to `AsOfLine`, with the Research line composing it (owner decision 2026-10-25) | this design |
 | `setup-ui` | Setup screen | S02 steps 1 to 4 at `/setup`: stepper, each step's values saved on Continue through the delivered endpoints, unsaved input held in app memory above the `/setup` route for the session (never browser storage), *Add later* leading to step 4's blocked **Start download** with its two exits, the first download started and its progress shown (DEC-0202) | this design |
 | `home-ui` | Home screen | S01 M1 regions at `/home`: date and market state (DEC-0206), the data tile, and the *Needs you* list merged from the attention items and the score-derived items (DEC-0203) | this design |
 | `data-health-ui` | Data health screen | S09 M1 regions at `/data`: verdict, Daily prices, Company financials and Factor scores cards, *Needs fixing* with its recoveries, Recent downloads, What you follow | this design |
-| `data-health-reader` | Data health reader | Read-only Python module computing the problem-stock set, the latest and latest-terminal downloads with progress, the followed count, the prices as-of, the server-derived attention items, the verdict counts and the Daily prices and Company financials checks (DEC-0200, DEC-0201). `src/factorflow/data_health/` | this design |
+| `data-health-reader` | Data health reader | Read-only Python module computing the problem-stock set, each failure's cause from its stored reason's leading kind (version 2), the latest and latest-terminal downloads with progress, the followed count, the prices as-of, the server-derived attention items, the verdict counts and the Daily prices and Company financials checks (DEC-0200, DEC-0201). `src/factorflow/data_health/` | this design |
 | `data-health-api` | Data health JSON API | FastAPI router serving `GET /api/attention`, `GET /api/data-health` and `GET /api/data-health/problems`, registered on the application `ingestion-api` builds and therefore behind its request-id, Host and Origin middleware and error envelope. `src/factorflow/api/routes/data_health.py` | this design |
 
 **Existing components this design changes.** `owner-web-app` keeps the five
@@ -590,17 +785,48 @@ question 6). Its shell and route composition pass to `owner-shell`, and its
 the last successful answer to the unreachable state and pauses polling while
 the document is hidden, with an immediate read when it is shown (DEC-0212).
 `ingestion-api` gains one `include_router` call in `src/factorflow/api/app.py`
-for `data-health-api`. No other delivered component changes.
+for `data-health-api`. In version 2, `owner-web-app`'s download detail screen
+also states each failed data type's fix through `failureRecovery`, reading the
+cause from the delivered response's `reason` (Section 3.6 note 7).
+
+**Delivered ingestion components this design changes (version 2; AC-29,
+AC-30).** Each change is recorded in a CAP-003 component design that names
+only what this capability changes, with the delivered component's approved
+design left as it is, as for `ingestion-api` (AGT-SCOPE-002):
+
+- `massive-client` (`src/factorflow/ingestion/massive/client.py`,
+  `errors.py`): the `429` `MaxRetryError` rule and the both-fields
+  `not entitled` rule (Section 3.6 notes 1, 2); `ProviderNotEntitled` and
+  `ProviderRateLimited(ProviderUnavailable)` in the error taxonomy;
+  `compose_failure_reason`'s two new kinds (note 5); and
+  `start_instrument()`, which starts the governor's per-stock budget.
+- `rate-limit-governor` (`src/factorflow/ingestion/rate_limit.py`): the
+  throttle wait budget becomes per stock, started by
+  `start_throttle_budget()` and checked before each wait; budget exhaustion
+  raises `ProviderRateLimited` instead of plain `ProviderUnavailable`
+  (note 3).
+- `acquisition-runner` (`src/factorflow/ingestion/runner.py`, `outcomes.py`):
+  calls `start_instrument()` at the top-of-stock checkpoint, after the
+  heartbeat and cancellation check, and maps both new classes to `failed`
+  with the composed reason (notes 4, 5).
+
+`runtime-config`, `run-journal`, `market-data-store` and the delivered
+endpoints do not change: no timing value, invariant, outcome value, column or
+response model is added.
 
 ### 4.2 Interfaces
 
 | Interface | Provider component | Consumer component | Shape | Stability |
 |-----------|--------------------|--------------------|-------|-----------|
 | `GET /api/attention` | `data-health-api` | `owner-shell` | Request: none. Response: `checked_at`; `followed_count` (active instruments; the verdict tier's denominator, and Home's tile denominator only while the summary is not served); `prices_as_of` (latest `prices` `covered_to` over active instruments, a session date, or null); `credential_present`; `problems` `{stock_count, symbols (first three by symbol), newest_completed_at}`; `latest_download` `{run_id, state, requested_at, started_at, ended_at, progress {done, total}}` or null, where `done` counts instruments with a result for all four data types in that run and `total` is `instruments_named`; `latest_terminal_download` `{run_id, state, ended_at, failure_reason}` or null; `items` — the server-derived attention items, each `{kind, recorded_at}` plus `run_id` for `download_not_complete`, kinds `data_problems`, `download_not_complete`, `credential_missing` (DEC-0203). Domain vocabulary; no tier, no sentence. `200` always when the database answers; `500` envelope otherwise | new, provisional (DEC-0200) |
-| `GET /api/data-health` | `data-health-api` | `data-health-ui` | Request: none. Response: `checked_at`; `never_acquired` (from `coverage-service`); `followed_count`; `affected_count` (= `problems.stock_count`); `checks.daily_prices` `{status: ok, exceptions or not_determinable, absent_count, gap_stock_count, behind_count, exception_count, latest_session, gap_detection {available, reason}, exception_symbols (first five)}`; `checks.company_financials` `{status, absent_count, problem_count, exception_count, as_of, exception_symbols}`, where `exception_count` is the number of distinct stocks in the check's exceptions (DEC-0220) and both checks are null when `never_acquired` (DEC-0213); `problems` `{rows, next_cursor}` — first page of 50, one row per stock `{symbol, failures: [{data_type, outcome (failed or not_found), reason, attempts, completed_at, run_id}], retryable}` ordered by symbol (DEC-0201) | new, provisional (DEC-0200) |
+| `GET /api/data-health` | `data-health-api` | `data-health-ui` | Request: none. Response: `checked_at`; `never_acquired` (from `coverage-service`); `followed_count`; `affected_count` (= `problems.stock_count`); `checks.daily_prices` `{status: ok, exceptions or not_determinable, absent_count, gap_stock_count, behind_count, exception_count, latest_session, gap_detection {available, reason}, exception_symbols (first five)}`; `checks.company_financials` `{status, absent_count, problem_count, exception_count, as_of, exception_symbols}`, where `exception_count` is the number of distinct stocks in the check's exceptions (DEC-0220) and both checks are null when `never_acquired` (DEC-0213); `problems` `{rows, next_cursor}` — first page of 50, one row per stock `{symbol, failures: [{data_type, outcome (failed or not_found), cause, reason, attempts, completed_at, run_id}], retryable}` ordered by symbol (DEC-0201), where `cause` is the stored reason's leading kind (`not_found`, `credential_rejected`, `unavailable`, `contract_violation`, `not_entitled`, `rate_limited`) or null, and `retryable` is true when any failure is `failed` with a cause other than `not_entitled` (version 2, AC-29) | new, provisional (DEC-0200) |
 | `GET /api/data-health/problems` | `data-health-api` | `data-health-ui` | Request: `limit` (default 50, max 500 — the canonical bounds in `api/bounds.py`), `cursor` (the last symbol, validated as a symbol). Response: `{rows, next_cursor}` as above. `422 validation_error` on a bad bound or cursor | new, provisional (DEC-0200) |
 | `Data health queries` | `data-health-reader` | `data-health-api` | Python calls on a pooled connection: `read_attention(conn)`, `read_data_health(conn)`, `read_problems(conn, cursor, limit)`, returning frozen dataclasses mirroring the three responses; read-only, no transaction left open | new |
-| `Problem and download read` | `market-data-store` | `data-health-reader` | SQL reads only: `instrument` (active), `acquisition_state` (latest outcome per instrument and data type), `run_instrument_result` (reason, attempts, completed_at for that outcome's `last_run_id`), `acquisition_run` (latest by `requested_at`, latest terminal by `ended_at`), `coverage_segment` (`prices` `covered_to`). Parameterised `psycopg` 3 queries; no INSERT, UPDATE or DELETE | new consumer of an existing component |
+| `Problem and download read` | `market-data-store` | `data-health-reader` | SQL reads only: `instrument` (active), `acquisition_state` (latest outcome per instrument and data type), `run_instrument_result` (reason, attempts, completed_at for that outcome's `last_run_id`; the reason's leading `[<kind>] ` is read as the failure's cause, version 2), `acquisition_run` (latest by `requested_at`, latest terminal by `ended_at`), `coverage_segment` (`prices` `covered_to`). Parameterised `psycopg` 3 queries; no INSERT, UPDATE or DELETE | new consumer of an existing component |
+| `Per-stock throttle budget` | `rate-limit-governor` | `massive-client` | In-process: `start_throttle_budget()` sets the spent throttle wait to zero; every `THROTTLED` wait in `execute` is charged to it; a wait that would take it past `max_throttle_wait_seconds` is not taken and `ProviderRateLimited` is raised `from` the last exception, with the governor's fixed message and no provider `request_id`. Attempts for `RETRYABLE` outcomes are unchanged. One governor per client, and one runner per ingestion process, so the budget is never shared between stocks | changed, version 2 (AC-30; replaces the per-request budget) |
+| `Stock boundary` | `massive-client` | `acquisition-runner` | In-process: `start_instrument()` delegates to `start_throttle_budget()`; called once per stock at the top-of-stock checkpoint, after the heartbeat and the cancellation check | new, version 2 (AC-30) |
+| `Throttle classification` | `massive-client` | `rate-limit-governor` | The `classify` callable `execute` receives: a `MaxRetryError` whose `reason` is the urllib3 `429` `ResponseError` is `THROTTLED`; any other `MaxRetryError` is `RETRYABLE`; a `BadResponse` classified `ProviderNotEntitled`, `InstrumentNotFound` or `CredentialRejected` is `FATAL`; one classified `ProviderUnavailable` (an unrecognised envelope or a non-JSON body) stays `RETRYABLE` | changed, version 2 (AC-29, AC-30) |
+| `Typed provider refusals` | `massive-client` | `acquisition-runner` | Raised errors `ProviderNotEntitled` (per data type, one request, carries `request_id`) and `ProviderRateLimited`, a `ProviderUnavailable`; `compose_failure_reason` gives `[not_entitled] symbol=… data_type=… request_id=<id>: the provider plan is not entitled to this data` and `[rate_limited] symbol=… data_type=… request_id=unavailable: <governor text>`; `classify_provider_error` records both as `failed` | changed, version 2 (AC-29, AC-30) |
 | `Coverage page read` | `coverage-service` | `data-health-reader` | In-process Python call `read_coverage(conn, lifecycle="active", cursor=..., limit=500)`, iterated to the last page; per-instrument presence, `covered_to`, gap detection and the view-level `never_acquired` and `gap_detection` exactly as `GET /api/coverage` returns them. The delivered function, called unchanged | new consumer of an existing component |
 | `Router registration` | `data-health-api` | `ingestion-api` | The application factory includes this router under `/api` before the static mount, beside the delivered routers | new |
 | `Shell context` | `owner-shell` | `home-ui` | React context `useShell()`: `health` (liveness, `credential_present`, `most_recent_run`, last answered time), `attention` (the attention response and its fetch state), `scores` (the summary response, or `not_served` on `404`, or an error), and `refresh(kind)` to re-read one of them after an action | new |
@@ -635,8 +861,16 @@ for `data-health-api`. No other delivered component changes.
 
 **Data classification.** Every element the three new responses introduce —
 counts, run states and outcomes, failure reasons, symbols, session dates and
-timestamps — is Internal under SEC-DAT-001, as all CAP-001 data is; none is
-personal data or a secret (component design `data-health-reader` §4).
+timestamps, and in version 2 each failure's `cause` — is Internal under
+SEC-DAT-001, as all CAP-001 data is; none is personal data or a secret
+(component design `data-health-reader` §4). The two new stored reason kinds
+carry no provider free text: `not_entitled`'s description is fixed and
+`rate_limited`'s is the governor's own text (AGT-PROHIB-003).
+
+The delivered `GET /api/acquisition-runs/{id}` (provider `ingestion-api`,
+consumer `owner-web-app`, already in the architecture inventory) is reused
+unchanged; the download detail screen reads its per-data-type `reason` for the
+leading kind (Section 3.6 note 7).
 
 ### 4.3 Technology Selections
 
@@ -644,9 +878,13 @@ personal data or a secret (component design `data-health-reader` §4).
 |----------------|----------|-----------|-------|---------------|--------|
 | FactorFlow-v2 (`owner-shell`, `command-palette`, `ui-components`, `setup-ui`, `home-ui`, `data-health-ui`, and the changes to `owner-web-app`) | TypeScript 5.x | React 18 with Vite; `react-router-dom` 6 (routes, `NavLink` `aria-current`, `Navigate replace`) | none (no browser storage; DEC-0202) | `tailwindcss` with `autoprefixer` bound to `design-system/theme.css`; **`shadcn/ui` on Radix primitives** vendored into `web/src/components/ui/`, importing `@radix-ui/react-*` and, confirmed by the owner on 2026-10-25 in `tech-stack.md` v6 (OQ-TS-10; capability OQ-4), `cmdk`, `sonner`, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` (DEC-0205) and `@tanstack/react-table`, `react-hook-form`, `zod`, `@hookform/resolvers`, `@radix-ui/react-label` (DEC-0215); tests with `vitest`, `@testing-library/react`, `@playwright/test`; `biome` | tech-stack |
 | FactorFlow-v2 (`data-health-reader`, `data-health-api`, and the one line in `ingestion-api`) | Python 3.12+ | FastAPI on uvicorn, Pydantic response models | PostgreSQL 16, read only; no ORM, no migration | `psycopg` 3 through the delivered `psycopg_pool`; `pytest`, `testcontainers[postgres]`; `ruff`, `mypy` | tech-stack |
+| FactorFlow-v2 (version 2 changes to `massive-client`, `rate-limit-governor`, `acquisition-runner`; ingestion container) | Python 3.12+ | none (the ingestion process) | PostgreSQL 16 through the delivered journal and writer; no migration | Massive's official Python client `massive` as locked (2.8.0) and its `urllib3` transport (2.7.0), whose `MaxRetryError` and `ResponseError.SPECIFIC_ERROR` the `429` rule reads; no new package. Tests through the delivered socket-free harness `tests/unit/massive_transport_fakes.py`; `pytest`, `ruff`, `mypy` | tech-stack |
 
-No third-party repository is involved, and no provider is read (capability
-§5.2). The validation commands are the tech stack's table, unchanged.
+No third-party repository is involved. No component this design introduces
+reads the provider (capability §5.2); the three ingestion components it changes
+keep the delivered reads and change only how a refusal is classified, waited
+out and recorded (Section 3.6). The validation commands are the tech stack's
+table, unchanged.
 
 ### 4.4 Persistent Data and Migration Strategy
 
@@ -658,12 +896,21 @@ setup's unsaved input lives in app memory for the session and is lost on a
 page reload.
 Rollback is therefore a redeploy of the previous image, with no data step.
 
+Version 2 keeps this. A provider refusal stays outcome `failed`, which the
+store already allows; its cause is the kind at the start of the reason text
+`run_instrument_result.reason` already holds. `not_entitled` and
+`rate_limited` are new text values in that column, not schema. Rows recorded
+before the upgrade keep `[unavailable]` and are not rewritten (constraint 17).
+
 ## 5. Architectural Constraints
 
 1. **Presentation only.** No component introduced here acquires, writes or
    redefines market data, and none reads the provider (capability §1, §5.2).
    `data-health-reader` is read-only by construction: its SQL is `SELECT` only,
    and a test asserts the module contains no `INSERT`, `UPDATE` or `DELETE`.
+   The one exception, in version 2, is constraint 16: three delivered
+   ingestion components change how they report a provider refusal, and
+   nothing else about what they acquire or store.
 2. **Delivered endpoints are consumed unchanged.** Every write the new screens
    offer goes through the existing `ingestion-api` endpoint, so its
    confirmations and refusals are unchanged (AC-17). No delivered request or
@@ -759,6 +1006,70 @@ Rollback is therefore a redeploy of the previous image, with no data step.
     paths change with them (blueprint §2.2). Design decomposition enumerates
     every delivered file and test this design edits, each with one owner,
     before any story is written (open question 8).
+16. **Provider refusals are reported by cause, and only those two change**
+    (version 2; AC-29, AC-30). The rules, each a design choice of this
+    revision (Section 3.6):
+    - (a) A body whose `error` or `message` contains `not entitled` is
+         `ProviderNotEntitled`: sent once, never retried, recorded `failed`
+         with kind `not_entitled` per data type, and the download continues.
+    - (b) A `429` is never an attempt. One throttle wait budget per stock is
+         shared across that stock's requests, started at the top-of-stock
+         checkpoint, and never crossed: the governor checks before it waits.
+         Past it the data type is recorded `failed` with kind `rate_limited`,
+         and the download continues (owner decision on CAP-001 review v14
+         FINDING-55, option (a)).
+    - (c) **An unrecognised error envelope is still retried** (review v14
+         FINDING-57, decided here). An envelope that matches none of the
+         not-found, credential or entitlement rules, and a body that is not
+         JSON, stay `ProviderUnavailable` and `RETRYABLE`, as delivered. Making
+         them `FATAL` would change what is recorded for refusals other than
+         the two the capability brings into scope, which capability §2 *Out of
+         Scope* excludes. The governor's seam is therefore stated as it
+         behaves: it retries exactly what `massive-client` classifies
+         `RETRYABLE`, and "a `4xx` other than `429` is not retried" holds only
+         for the refusals `massive-client` recognises. A real-transport test
+         pins an unrecognised `4xx` body as retried to the attempt limit, so the
+         behaviour is deliberate rather than accidental (Section 8 question 12).
+    - (d) **No persistent-schema change.** Outcome stays `failed`; the cause is
+         the stored reason's leading kind (Section 3.6 note 6). A new outcome
+         value would change the store's allowed values, the delivered outcome
+         rule and the change's risk lane, for a distinction the reason already
+         carries.
+    - (e) **The delivered components' approved designs are not reopened.** The
+         CAP-003 designs of `massive-client`, `rate-limit-governor` and
+         `acquisition-runner` record only these changes. The tests they name
+         run through the real SDK and urllib3 path of
+         `tests/unit/massive_transport_fakes.py`, never a patched `RESTClient`
+         raising a `BadResponse` the real SDK cannot raise for a `429`. The
+         harness injects the governor's wall clock `now` with `sleep`, `jitter`
+         and `monotonic`, and the fake `sleep` advances `monotonic` and `now`
+         together, so boundary waits are deterministic and the budget can be
+         exhausted (review v14 FINDING-60). An integration test drives a
+         persistent `429` on all four data types of a stock under the default
+         timing set with a fake clock, and asserts that no throttle wait between
+         two heartbeats exceeds the budget, that each data type records
+         `[rate_limited]`, and that the run is finalised by the outcome rule and
+         never reclaimed as abandoned (review v14 FINDING-55).
+17. **The upgrade changes observable behaviour, and says so** (review v14
+    FINDING-58). The three ingestion components are released: 0.1.0
+    (2026-10-16) and 0.2.0 (deployed 2026-11-07, `factorflow:0.2.0-829c9e1`).
+    Each CAP-003 change design's upgrade section names the release it
+    upgrades from and these changes:
+    - (a) A throttled stock now waits to the minute boundary, for up to the 300 s
+         budget per stock, instead of failing within seconds, so a download on
+         a plan whose request limit is below the configured rate takes longer.
+         Under throttling that persists, the worst case grows by up to one
+         budget per followed stock, and cancelling takes effect after the
+         current stock as delivered (Section 8 question 14).
+    - (b) A plan refusal costs one request instead of three.
+    - (c) Stored reasons gain the kinds `not_entitled` and `rate_limited`.
+         Results recorded before the upgrade keep `[unavailable]` and are not
+         rewritten, so *Needs fixing* shows them as ordinary failures, with
+         *Download again*, until the next download re-records that data type
+         under its cause.
+    - (d) Rollback is a redeploy of the previous image with no data step: the
+         new kinds are text in an existing column, and the delivered download
+         detail screen shows them as the reason text it already renders.
 
 ## 6. Architectural Assumptions
 
@@ -784,6 +1095,24 @@ Rollback is therefore a redeploy of the previous image, with no data step.
    the one carrying this design (capability assumption 3).
 7. **The rail in M1 holds Home, Research (once its screens are registered),
    Data health and Settings** (capability assumption 1; DEC-0204).
+8. **A stored reason leads with its kind.** Every reason the ingestion
+   container records is composed by `compose_failure_reason` as `[<kind>]
+   symbol=… data_type=… request_id=…: …`, the kind from a closed table and
+   placed before any variable text (delivered `errors.py`; CAP-001
+   massive-client design §4). Data health's causes rest on that prefix; a
+   reason without it reads as an unknown cause and keeps the ordinary
+   *Download again* fix.
+9. **The provider's plan refusal says "not entitled".** The marker is the
+   production text of 2026-11-07, "You are not entitled to this data. Please
+   upgrade your plan" (CAP-002 release manifest B1). Its field, `status` value
+   and `request_id` were not captured, so the rule reads both text fields and
+   reads `request_id` when present. Another wording would fall to the
+   delivered retryable default (constraint 16 (c)).
+10. **The SDK and urllib3 stay as locked** (`massive` 2.8.0, `urllib3` 2.7.0).
+    The `429` rule compares against urllib3's own
+    `ResponseError.SPECIFIC_ERROR`, so a reworded message changes both sides
+    together; an SDK that dropped `429` from its forcelist would hand the body
+    to the delivered `is_rate_limited_body` check, which still throttles.
 
 ## 7. Traceability
 
@@ -801,7 +1130,7 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 | AC-10 | Nothing unshipped on Home | `home-ui` M1 regions only | 5.11 |
 | AC-11 | Data health verdict and check cards | `GET /api/data-health` `affected_count`, `checks`; verdict from `worstDataTier` over the problem set and latest terminal download; Factor scores from summary | 3.4 note 8, 5.4; DEC-0201, DEC-0210 |
 | AC-12 | A partial download is never complete | Recorded run states only; checks carry exceptions | 5.6 |
-| AC-13 | Every problem names its fix | Problem rows with data type, outcome, reason, attempts; consequence text; one set with the count | 3.4; DEC-0201 |
+| AC-13 | Every problem names its fix | Problem rows with data type, outcome, cause, reason, attempts; consequence text; one set with the count; the fix from `failureRecovery(outcome, cause)` | 3.4, 3.4 note 9, 3.6 note 7; DEC-0201 |
 | AC-14 | Not found is not retried | `retryable` false for `not_found`; Stop following and Follow a different symbol | 3.4 note 2 |
 | AC-15 | Download now is the retry; queued when running | `POST /api/acquisition-runs`, `queued_behind` | 3.4 |
 | AC-16 | Attention counts, absent at zero | `owner-shell` counts from `problems.stock_count` and the merged list | 3.3 boxes 17, 18 |
@@ -817,6 +1146,8 @@ Rollback is therefore a redeploy of the previous image, with no data step.
 | AC-26 | Built from the design system | `ui-components`; tokens only; approved-specification layout dimensions in `owner-shell`'s `web/src/app/layout.ts` | 4.1, 5.12; DEC-0205 |
 | AC-27 | CAP-002 keeps its routes | `classification-ui` `Screen registration` into `owner-shell`, routes unchanged | 4.2; DEC-0204 |
 | AC-28 | With 3,000 followed stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th percentile, measured by the volume test | `data-health-reader` coverage derivation over the active roster; `data-health-api` `GET /api/data-health`; read on demand by Data health only | 3.4 note 1, 5.7, 6.4 |
+| AC-29 | A plan refusal is not retried: sent once, recorded under its own reason; its *Needs fixing* row names the provider plan as the fix and offers no download | `massive-client` both-fields `not entitled` rule and `ProviderNotEntitled` (`FATAL` for `rate-limit-governor`, one request); `acquisition-runner` records `failed` with kind `not_entitled`; `data-health-reader` `cause` and `retryable` excluding `not_entitled`; `data-health-ui` and `owner-web-app` download detail fix from `failureRecovery` in `ui-components` | 1, 3.4 note 9, 3.6 notes 1, 5 to 7; 4.1, 4.2; 5.16 (a), (d) |
+| AC-30 | Throttling is waited out, then named: never a failed attempt; past the wait budget for one stock recorded under its own rate-limit reason; the download still finishes, never abandoned | `massive-client` `429` `MaxRetryError` rule (`THROTTLED`); `rate-limit-governor` per-stock budget checked before each wait, `ProviderRateLimited`; `acquisition-runner` `start_instrument()` at the heartbeat checkpoint and `failed` with kind `rate_limited`; staleness window unchanged (one budget per stock) | 1, 3.6 notes 2 to 5; 4.1, 4.2; 5.16 (b), (e); 5.17 |
 
 Screen acceptance checks: S01-3, S01-4 (DEC-0203), S01-6 (box 6) and S01-7
 (5.11); S02-1 to S02-6 (Section 3.2, DEC-0202); S09-1 to S09-5 (Sections 3.4,
@@ -893,18 +1224,73 @@ not in M1.
     this design and in their decision records; the owner may promote them to a
     `decision-record` constitution artifact via `$constitution`. *Owner:
     capability owner. Blocks: nothing now.*
+11. **Capability §5.2 still excludes the change v2 brings into scope.** Its
+    CAP-001 row says this capability is not depended on for "any change to
+    what it acquires, stores, records, refuses or exposes", and its Massive
+    row says it makes no provider request of its own. Version 2's In Scope
+    bullet, the Out of Scope bullet, the §5.1 row and AC-29 and AC-30 make
+    the provider-refusal change the one exception, but §5.2 was not edited.
+    This design follows the scope sections and the criteria. *Owner:
+    capability owner, to align §5.2 with the exception. Blocks: nothing here;
+    specification review will meet the contradiction.*
+12. **Should an unrecognised provider refusal also be sent once?** Constraint
+    16 (c) keeps the delivered behaviour: an envelope matching no known rule
+    is retried to the attempt limit and recorded `[unavailable] … failed 3
+    consecutive attempts`, so a refusal worded differently from the
+    production `403` would still read as an outage (review v14 FINDING-57).
+    Treating an unrecognised JSON envelope as `FATAL` would close that, at the
+    cost of not retrying a rare non-forcelisted `5xx` that answers with an
+    envelope. *Owner: capability owner; a yes is a new criterion. Blocks:
+    nothing in this design.*
+13. **AC-30's "finish as partial" when nothing was stored.** This design
+    reads it as: the download continues and is finalised by the delivered
+    outcome rule, `partial` when anything was stored and `failed` when every
+    data type of every stock failed, because §5.1 keeps CAP-001's criteria
+    standing and its honest-outcome rule says a download that stored nothing
+    failed; "never abandoned" holds either way (Section 3.6 note 4). *Owner:
+    capability owner, to confirm the reading. Blocks: the AC-30 test's
+    expected outcome in the all-throttled case only.*
+14. **Persistent throttling now costs time per stock.** With one 300 s budget
+    per stock, a provider that throttles every request for a whole download
+    of 3,000 stocks would wait about 250 hours before finishing; the
+    delivered behaviour failed each request within seconds. Short-circuiting
+    a refused endpoint, or a stock-independent run-level throttle bound, for
+    the rest of a download is not designed; the owner can cancel, and the
+    production cause (B2) is closed by setting
+    `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` to the plan's limit. *Owner:
+    capability owner. Blocks: nothing in AC-29 or AC-30.*
+15. **The staleness derivation's attempt term predates this change.**
+    `runtime-config` §2.2a counts four requests per stock (4 × 3 × 30 s) where
+    the client sends nine first-page requests per stock (CAP-001 review
+    FINDING-29, carried). This design changes only the throttle term, which
+    stays one budget per stock and is never crossed, so the persistently
+    throttled path AC-30 names stays inside the window (Section 3.6 note 4).
+    A stock whose requests all time out is the delivered worst case and is
+    not touched here. *Owner: capability owner, for a later change to the
+    delivered timing set. Blocks: nothing here.*
+16. **Recording the owner's answers and a cross-capability rule.** The answers
+    to CAP-001 review v14 FINDING-56 (this change belongs to CAP-003) and
+    FINDING-55 (option (a), one budget per stock) are recorded in capability
+    v2's revision note and in this design, not yet as decision records under
+    `projects/factorflow-v2/decisions/`. Two rules here bind more than this
+    capability and could be revisited by a later one (skill constraint 6d):
+    the per-stock throttle budget in a delivered component, and Data health
+    reading a cause from the stored reason's leading kind, which makes that
+    prefix a read contract. *Owner: capability owner, to record the two
+    answers and decide whether the rules warrant a `decision-record` via
+    `$constitution`. Blocks: nothing in this design.*
 
 ## 9. Source Documents
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-003 v1 (draft) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
+| Capability CAP-003 v2 (draft, `2e6bfeb`) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Version 2: AC-29 and AC-30; In Scope *Provider refusals reported by cause*, changing `massive-client`, `rate-limit-governor` and `acquisition-runner` with CAP-001's designs left as they are; the Out of Scope exception; the §5.1 CAP-001 row; the plan-ownership assumption; §5.2 unchanged (open question 11). Version 1: 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
 | Product UX blueprint `PRODUCT-UX` v6 (approved) | `docs/ux/product-ux-blueprint.md` | §0 patterns in `web/src/components/patterns/`; principles 4, 5, 7, 8; §2.1 rail groups and count chips; §2.2 routes, `/` redirect and the four legacy redirects; §3.1 layout; §3.4 palette and the single keydown listener; §3.5 shell states; §4.1 Needs-you item and sort; §4.8 as-of line; §4.10 states; §6 first-run and data-problem flows; §7 vocabulary; §8 tiers; §9 action tiers and confirm wording; §10 M1 row (three palette groups, CAP-001 API as it is); §12 D-2, D-7, D-8, D-9 |
 | Home `PRODUCT-UX-S01` v4 (approved) | `docs/ux/screens/S01-home.md` | M1 regions; view model with an attention service and server sort; 60 s polling with *checked*; data item copy; states; S01-3, S01-4, S01-6, S01-7 |
 | Setup `PRODUCT-UX-S02` v4 (approved) | `docs/ux/screens/S02-setup.md` | Four M1 steps on CAP-001's API; credential variable name; parse rules and the 30-stock warning; complete when the first download is started; progress polled 10 s; reopen from Settings; S02-1 to S02-6 |
 | Data health `PRODUCT-UX-S09` v4 (approved) | `docs/ux/screens/S09-data-health.md` | Verdict, check cards, Needs fixing from the latest failures, Download now as the retry, Stop following and Follow a different symbol, Recent downloads polled 10 s while running, What you follow; states; S09-1 to S09-5 |
 | STD-UI v6 (approved) | `docs/constitution/standards/ui-conventions.md` | STD-UI-1 display labels; STD-UI-4, 14 not determinable; STD-UI-8, 12 tiers and shapes; STD-UI-23 eight states; STD-UI-24 keyboard and polite updates; STD-UI-25 polled freshness and recorded cadence; STD-UI-26 multi-step; STD-UI-29 tokens; STD-UI-30 volume |
-| Tech stack v5 (approved) | `docs/constitution/tech-stack.md` | Single repository; Python 3.12, FastAPI, PostgreSQL 16 without ORM; React 18, Vite, `react-router-dom`, Tailwind, `shadcn/ui` on Radix (OQ-TS-6); C1, C8, C11; Massive has no historical calendar; validation commands |
+| Tech stack v7 (approved; v5 read at version 1, v7's change concerns classification only) | `docs/constitution/tech-stack.md` | Single repository; Python 3.12, FastAPI, PostgreSQL 16 without ORM; React 18, Vite, `react-router-dom`, Tailwind, `shadcn/ui` on Radix (OQ-TS-6); C1, C8, C11; Massive has no historical calendar; validation commands |
 | Product charter v2 | `docs/constitution/product-charter.md` | One owner-operator; modular monolith with ingestion apart; M1 2026-Q4 |
 | Design system README and specs | `design-system/README.md`, `design-system/components/*/design-spec.md` | shadcn/ui vendored components over `theme.css`; `command` built on cmdk in Radix Dialog; `toast` on Sonner; `stepper` bespoke; `progress`, `radio-group` on Radix; `badge` tiers always carry an icon and label |
 | Architecture inventory | `docs/architecture.md` | Published identifiers reused: `owner-web-app`, `ingestion-api`, `coverage-service`, `market-data-store`, `acquisition-runner`, `classification-api`, `classification-ui`; the summary interface's unpublished consumer |
@@ -913,11 +1299,28 @@ not in M1.
 | Implemented schema and code | `src/factorflow/db/migrations/0001` to `0004`; `src/factorflow/coverage/service.py` `read_coverage`; `src/factorflow/api/models.py`; `web/src/app/shell.tsx`, `routes.tsx`; `web/src/screens/*`; `package.json` | `acquisition_state` latest outcome per stock and data type; `run_instrument_result` reason and attempts; `read_coverage` keyset pages up to 500 with `lifecycle`; four delivered destinations and routes; no component package installed yet |
 | Harness constitutions | `docs/constitutions/security.constitution.md` (SEC-ENC-001 host-local loopback exception, SEC-DEP-003, SEC-INP-001), `agent-governance.constitution.md` | Loopback exception bookkeeping; licence recording; bounded input |
 | Decision records read | `projects/factorflow-v2/decisions/DEC-0050.md`, `DEC-0058.md` (harness repository) | Loopback-exception reliance and its extension to a later design |
+| CAP-001 specification review v14 and the draft it reviewed | `git show b69facd:docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v14.md`; `git show 90b4ff0` (massive-client v16, rate-limit-governor v9, acquisition-runner v10 drafts, branch `usr/alvaro-de-jodra/CAP-001-design-provider-refusals`) | Source material, not adopted into CAP-001: the reproduced root cause (`429` as `MaxRetryError(ResponseError 429)` under `retries=0`; `403` "not entitled" falling to the retryable default); `ProviderNotEntitled`, `ProviderRateLimited`, kinds `not_entitled` and `rate_limited`; FINDING-55 (per-request budget against the per-stock window), FINDING-56 (AGT-SCOPE-002), FINDING-57 to FINDING-60, FINDING-63, FINDING-64 |
+| CAP-001 component designs (approved, unchanged) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-massive-client.md` v15, `component-design-rate-limit-governor.md` v8, `component-design-acquisition-runner.md` v9, `component-design-runtime-config.md` v14 §2.2a | Classifier and taxonomy as delivered; throttle path and budget; per-data-type outcomes and top-of-stock heartbeat; staleness derivation and invariant 2 (900 > 660) |
+| CAP-002 release manifest v1 | `docs/releases/CAP-002-release-v1.md` (branch `usr/alvaro-de-jodra/CAP-002-automation-rework`) | B1 (`403` on financial statements), B2 (`429` at 60 requests per minute), follow-up F1, deployed `factorflow:0.2.0-829c9e1` |
+| Implemented ingestion code | `src/factorflow/ingestion/massive/client.py` `_through_governor`, `errors.py` `classify_error_body`, `_ERROR_KIND_BY_TYPE`, `compose_failure_reason`; `src/factorflow/ingestion/rate_limit.py` `execute`; `src/factorflow/ingestion/runner.py` top-of-stock checkpoint; `src/factorflow/runs/journal.py` `finalise`; `src/factorflow/config/settings.py` invariant 2; `uv.lock` | Current classification, per-request throttle budget, reason format with leading kind, outcome rule (none stored is `failed`), locked `massive` 2.8.0 and `urllib3` 2.7.0 |
 | Decision records written by this design | `projects/factorflow-v2/decisions/DEC-0200.md` to `DEC-0208.md` (harness repository) | Server-side reads (0188); problem and check definitions (0189); setup completion (0190); Needs-you catalogue (0191); shell layout and destinations (0192); vendored packages (0193); market state (0194); palette (0195); loopback exception (0196) |
 
 ## 10. Design Readiness
 
-**Design Readiness Score: 80/100**
+**Design Readiness Score: 78/100** (version 2; 80 at version 1)
+
+Version 2 covers AC-29 and AC-30 end to end: the three delivered ingestion
+components it changes are named with their changes and interfaces (Section
+4.1, 4.2), the per-stock throttle budget is shown to keep the staleness window
+as derived (Section 3.6 note 4), and *Needs fixing* tells a plan refusal apart
+by the stored reason's kind without a schema change. Every acceptance
+criterion, now 30, traces to a design element. The two points it loses are
+the design choices this revision made on the owner's behalf for review: the
+unrecognised-refusal default (constraint 16 (c)) and the reading of AC-30's
+*partial* (open question 13); and capability §5.2, which still contradicts
+the scope this revision implements (open question 11).
+
+Version 1's assessment follows.
 
 All ten sections carry substantive content. Section 4 declares eight
 components with stable identifiers, records every cross-boundary interface
