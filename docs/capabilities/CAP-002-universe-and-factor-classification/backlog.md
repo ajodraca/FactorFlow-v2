@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-002-backlog
 artifact_type: backlog
 artifact_version: 5
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
@@ -39,9 +39,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-17T18:06:07Z
-  reviewed_revision: sha256:195b8dfac315b44b960f811ca33c03cb862d6b0901790e1eeb4a2e2b64850282
-  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/backlog-review-report-v5.md"
+  approved_at: 2026-11-07T23:26:36Z
+  reviewed_revision: sha256:46fe5ac503377c3724c47c8f1c4a3330e284cb17bf81e320a4ca70f2cec7969f
+  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/backlog-review-report-v7.md"
 ---
 
 # Backlog: Universe & Factor Classification
