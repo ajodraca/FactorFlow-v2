@@ -88,7 +88,7 @@ Mapped test cases (`tests/component/owner-web-app-tests.md`; `tests/coverage-mat
   - **CAP-003-E3-S6.** `web/src/app/shell.tsx` mounts `ShellProvider` and renders a `main` element, and `web/src/app/status-region.tsx` is gone.
   - **CAP-003-E2-S5.** `src/factorflow/api/app.py` includes `data_health.router`.
   - **CAP-003-E7-S1.** `web/src/screens/settings/` names the depth field *History depth* with the `years` suffix.
-  - **CAP-003-E7-S2.** `web/src/screens/coverage/copy.ts` exports `NEVER_DOWNLOADED`, and `coverage-table.tsx` renders `DataTable` with `expansion`.
+  - **CAP-003-E7-S2.** `web/src/screens/coverage/copy.ts` exports `NEVER_DOWNLOADED`, and `coverage-table.tsx` renders `DataTable` with `renderExpansion`.
   - **CAP-003-E7-S3.** `web/src/screens/instruments/add-field.tsx` labels the field *Symbol of the stock to follow*.
   - **CAP-003-E7-S4.** `web/src/screens/runs/run-controls.tsx` defaults to *Download now*, and `web/src/screens/runs/outcome-badge.tsx` is gone.
   - **CAP-003-E7-S5.** `web/src/screens/runs/detail/run-summary.tsx` holds `aria-label="Download summary"`, and `detail/result-outcome-badge.tsx` is gone.
@@ -147,7 +147,7 @@ The guard is one new file, `web/src/screens/e2e-journeys.test.ts`. Vitest's root
   - **`startRun`.** The doc says "Starts a download from the Downloads screen, which routes to the new download's detail (UX design 1.7: **Download now** lives on Coverage and Downloads), and returns its id". It goes to `page.goto("/data/downloads")`, clicks `page.getByRole("button", { name: "Download now" })` and then expects `toHaveURL(/\/data\/downloads\/[0-9a-f-]{36}$/)`.
   - **New `export const STATUS_BADGE = '[data-variant^="status-"]'`.** Its doc comment says that CAP-003-E1-S5's `StatusBadge` renders `data-variant="status-<tier>"` on CAP-003-E1-S1's `Badge` `span` and carries no test id, and that a status is located by it and asserted by its label.
   - **`summaryOutcome`.** It becomes `page.getByRole("region", { name: "Download summary" }).locator(STATUS_BADGE)`, which is CAP-003-E7-S5's `Card` `summary`. The doc says *the download-state badge in the download detail's summary card*.
-  - **`rosterExpander`.** It becomes `page.getByRole("button", { name: new RegExp(\`details for ${symbol}$\`) })`. The doc names CAP-003-E1-S4's expander, *Show details for {SYMBOL}*.
+  - **`rosterExpander`.** It becomes `page.getByRole("button", { name: new RegExp(\`^Expand ${symbol}$\`) })`. The doc names CAP-003-E1-S4's expander, *Expand {SYMBOL}*, whose name is fixed and whose open or closed state is carried by `aria-expanded` (DEC-0307).
   - **`expandInstrument`.** The logic is unchanged; the doc says *one stock*.
   - **New `dataTypeRow(group: Locator, name: string): Locator`.** It returns `group.getByRole("listitem").filter({ hasText: new RegExp(\`^${name}\`) })`. CAP-003-E7-S5 T012 renders an expanded stock's data types as one `li` each, beginning with the data type label. The doc says it replaces the delivered `tr` with a `rowheader`.
   - **New `presenceBadge(cell: Locator): Locator`.** It returns `cell.locator("[data-variant]")`. A Coverage presence cell holds exactly one variant-bearing element: `StatusBadge` for present or absent, or `NotDeterminable`'s `coverage-unknown` badge (CAP-003-E7-S2 T017; CAP-003-E1-S6 T007).
@@ -262,7 +262,8 @@ The guard is one new file, `web/src/screens/e2e-journeys.test.ts`. Vitest's root
   - **Literal `td` indexes, each one higher** (Coverage has the leading expander cell, CAP-003-E1-S4): presence columns `[1, 2]` become `[2, 3]` and `[3, 4]` become `[4, 5]`; the last-downloaded cell `nth(9)` becomes `nth(10)`; `gapsCell` `nth(7)` becomes `nth(8)`; the covered-from cell `nth(5)` becomes `nth(6)`. A comment states that cell 0 is the expander.
   - **The last-downloaded instant.** `"2024-01-05 16:14:03 America/Chicago"` becomes `"2024-01-05 16:14 CST"`. The seed holds `2024-01-05T22:14:03Z`, and the takeover renders it with `formatInstant` in UX design 0.7's `YYYY-MM-DD HH:MM zone` (CAP-003-E7-S2 T019; Resolved Conflict 2).
   - **Comment.** "last-acquired time" becomes "last-downloaded time".
-  - **Unchanged.** The *Show details for CVC* expander, the `2024-01-04` list item, the `2024-01-02` value, the no-page-scroll check and the 15 s no-poll check are unchanged.
+  - **Expander.** `{ name: "Show details for CVC" }` becomes `{ name: "Expand CVC" }` (DEC-0307). The focus-and-Enter step is unchanged; the expander keeps focus when pressed.
+  - **Unchanged.** The `2024-01-04` list item, the `2024-01-02` value, the no-page-scroll check and the 15 s no-poll check are unchanged.
 
   Kills: `swap-case` of `NotDeterminable`'s `coverage-unknown` → `coverage-absent` in Coverage's unknown presence; `drop-field-copy` of the `expand=` request de-duplication (the `toHaveLength(1)` fails).
 - [ ] T015 [P] Edit `tests/e2e/instruments-add-retire.spec.ts` (depends on T012) (traces to AC-17, AC-18, AC-19):
@@ -276,7 +277,7 @@ The guard is one new file, `web/src/screens/e2e-journeys.test.ts`. Vitest's root
 - [ ] T016 Edit `tests/e2e/run-detail.spec.ts` (depends on T005, T012). It now imports `STATUS_BADGE` and `dataTypeRow` from `./support/acquisition`, which has no import-time effect on this default-stack spec (traces to AC-17, AC-18, AC-19):
   - **Navigation and expanders.**
     - `page.goto(\`/runs/${runId}\`)` becomes `\`/data/downloads/${runId}\``.
-    - The local `expander` regex becomes `details for ${symbol}$`, and the count check becomes `/^Show details for /` with 2.
+    - The local `expander` regex becomes `^Expand ${symbol}$`, and the count check becomes `/^Expand /` with 2.
   - **Before expansion.** For each data type, `dataTypeRow(page.getByRole("main"), name)` has count 0. This replaces `getByRole("rowheader", { name, exact: true })`, which can no longer match a data type and would pass vacuously.
   - **After expanding DIAGA.**
     - `dataTypeRow(diaga, name)` has count 1.
@@ -288,7 +289,7 @@ The guard is one new file, `web/src/screens/e2e-journeys.test.ts`. Vitest's root
     - `notFound = diagzStock.locator(STATUS_BADGE).filter({ hasText: "Not found" })`.
     - Each badge in it is still `"status-warning"`.
   - **Recovery.** `"Re-run acquisition"` becomes `getByRole("button", { name: "Download now" })` (DEC-0395).
-  - **The outcome filter.** `selectOption({ label: "Not found" })` becomes `await page.getByRole("combobox", { name: "Outcome" }).click()` followed by `await page.getByRole("option", { name: "Not found" }).click()`. The filter is now Radix `select` `inline` (CAP-003-E7-S5 T015). The two expander count checks after it use `/details for DIAGA$/` and `expander(page, "DIAGZ")`.
+  - **The outcome filter.** `selectOption({ label: "Not found" })` becomes `await page.getByRole("combobox", { name: "Outcome" }).click()` followed by `await page.getByRole("option", { name: "Not found" }).click()`. The filter is now Radix `select` `inline` (CAP-003-E7-S5 T015). The two expander count checks after it use `/^Expand DIAGA$/` and `expander(page, "DIAGZ")`.
 
   Kills: `swap-case` of `not_found`'s tier `warning` → `critical` (the `status-warning` loop fails); `drop-field-copy` of `outcome` from the filter request (DIAGA stays, its count is 1).
 - [ ] T017 [P] Edit `tests/e2e/runs-start-cancel.spec.ts` (depends on T012) (traces to AC-17, AC-18, AC-19, DAC-E7-1):
@@ -362,7 +363,7 @@ The guard is one new file, `web/src/screens/e2e-journeys.test.ts`. Vitest's root
 | CAP-003-E1-S1 | context | `Badge` puts `data-variant` on the badge `span`, the hook `STATUS_BADGE` and `presenceBadge` select by. It is observed only through E7-S2–E7-S5's screens, which hard-depend on it; nothing is imported |
 | CAP-003-E1-S2 | context | Its DEC-0299 fixes the depth field's accessible name, and its `Select` is the combobox T016 clicks. Both are observed through E7-S1 and E7-S5, which hard-depend on it |
 | CAP-003-E1-S3 | context | `ConfirmDialog` keeps `role="dialog"` (its Resolved Conflict 2), so `getByRole("dialog")` still finds the confirmations. It is reached through E7-S3 and E7-S5 |
-| CAP-003-E1-S4 | context | The leading expander cell and the *Show details for {label}* name. Reached through E7-S2 and E7-S5 |
+| CAP-003-E1-S4 | context | The leading expander cell and the *Expand {label}* name (DEC-0307). Reached through E7-S2 and E7-S5 |
 | CAP-003-E1-S5 | context | `StatusBadge` renders `data-variant="status-<tier>"` and no test id. Reached through E7-S2–E7-S5 |
 | CAP-003-E1-S6 | context | `NotDeterminable` keeps `coverage-unknown`, and `Absent` keeps the hidden text *Not recorded*. Reached through E7-S2 and E7-S5 |
 | CAP-003-E7-S6 | context | Its sweep and `requestJson` check are the rest of DAC-E7-12, over the screens and `client.ts`. No file is shared with this story |
@@ -433,7 +434,7 @@ No hard edge is added: every DOM contract the specs observe is produced by a scr
    - DEC-0387: present presence is `StatusBadge` `good`, so `status-good`; the owner-web-app §10 mapping was `coverage-present`.
    - DEC-0299: the depth field's name is *History depth years*.
    - DEC-0395: the recovery action is **Download now**.
-   - DEC-0307: the expander is named *Show details for {label}*, in a leading column.
+   - DEC-0307 (now an owner decision, blind review 2026-11-07): the expander is named *Expand {label}*, with `aria-expanded` carrying open or closed, in a leading column.
 
 ### Other Notes
 
@@ -474,7 +475,8 @@ No hard edge is added: every DOM contract the specs observe is produced by a scr
   | *No data has been acquired yet.* | *No data has been downloaded yet.* | UX design 1.5 |
   | *No instrument matches this filter.* | *No stock matches this filter.* | UX design 1.5 |
   | `Acquiring {type} for {SYM}` | `Downloading {type} for {SYM}` | owner-web-app 2.3 |
-  | `Show data types for {SYM}` | `Show details for {SYM}` | CAP-003-E1-S4 DEC-0307 |
+  | `Show data types for {SYM}` | `Expand {SYM}` | CAP-003-E1-S4 DEC-0307 |
+  | `Show details for {SYM}` (Coverage) | `Expand {SYM}` | CAP-003-E1-S4 DEC-0307 |
   | `… 16:14:03 America/Chicago` | `… 16:14 CST` | UX design 0.7 (Resolved Conflict 2) |
 
   Kept unchanged: `Failed`, `Partial`, `Not found`, `Present`, `Unknown`, `Not recorded`, `Reference`, `Prices`, `Fundamentals`, `Corporate actions`, `Outcome`, *Filter by symbol*, `Started` (the `dt`), `status-critical`, `status-warning`, `coverage-unknown`, every reason and request id.

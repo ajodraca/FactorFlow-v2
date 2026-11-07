@@ -90,12 +90,12 @@ The test specification is `status: draft`. Its steps are used as written and sha
   - **CAP-003-E6-S7.** `web/src/app/routes.tsx` has `path="/data"` bound to the lazy `DataHealthScreen`. `web/src/app/destinations.ts` has `{ group: "data", label: "Data health", to: "/data", count: "problems" }`.
   - **CAP-003-E2-S5.** `src/factorflow/api/app.py` includes `data_health.router`, so `GET /api/attention`, `GET /api/data-health` and `GET /api/data-health/problems` are served by every stack `scripts/run-e2e-server.sh` starts, the acquisition stack included.
   - **CAP-003-E3-S4.** `routes.tsx` binds `/data/coverage` and `/data/followed`.
-  - **CAP-003-E7-S2** (the edge this plan adds; Resolved Conflict 2). `web/src/screens/coverage/index.tsx` seeds its symbol filter from `?symbol=`, the field is named *Filter by symbol*, and the *Lifecycle* column renders *Stopped following* for a `retired` row through CAP-003-E7-S3's `LifecycleBadge`. The table is `DataTable` labelled *Coverage table*, with the symbol as row header.
+  - **CAP-003-E7-S2** (the edge this plan adds; Resolved Conflict 2). `web/src/screens/coverage/index.tsx` seeds its symbol filter from `?symbol=`, the field is named *Filter by symbol*, and the *Lifecycle* column renders *Stopped following* for a `retired` row through CAP-003-E7-S3's `LifecycleBadge`. The table is a `DataTable` inside a `section` named *Coverage table* (DataTable takes no label; DEC-0307), with the symbol as row header.
   - **The screen's DOM contracts** (reached through CAP-003-E6-S7 → CAP-003-E6-S5; read, not imported):
     - CAP-003-E6-S1: the `h1` *Is the data good enough to trust?*, and `data-testid="verdict-sentence"` holding the badge and the sentence.
     - CAP-003-E6-S3: the *Needs fixing* `section` labelled by its `h2` *Needs fixing · {n}*; one `li` per row; the symbol link named *{SYMBOL}, show in the coverage table*; **Stop following** named *Stop following {SYMBOL}*; the link named *Follow a different symbol than {SYMBOL}*.
     - CAP-003-E6-S2: `DownloadNow` named *Download now*; the confirm dialog titled *Stop following {SYMBOL}*, **Cancel** first and focused; the polite live region *Stopped following {SYMBOL}*.
-    - CAP-003-E6-S4: the *Recent downloads* table (`DataTable` label *Recent downloads*); the running row's `progressbar` named *{done} of {total} stocks*; the sub-line *Starts when you press Download now · checked {time}*.
+    - CAP-003-E6-S4: the *Recent downloads* table (a `DataTable` inside the `section` labelled by its `h2` *Recent downloads*); the running row's `progressbar` named *{done} of {total} stocks*; the sub-line *Starts when you press Download now · checked {time}*.
 
     If one of these names differs in the delivered code, use the delivered name and record it in the cycle's evidence. Never change production code from this story.
   - Run `npx tsc --noEmit -p tsconfig.e2e.json` and `npm run test`, and record both as green.
@@ -147,7 +147,7 @@ The test specification is `status: draft`. Its steps are used as written and sha
     - Each row contains *Its scores show as Incomplete until this is fixed, and so does every universe holding it.* and *Download again to retry; data already stored is never duplicated or overwritten.*
     - Each row has no `button` named `/^Stop following/`: a failed row offers no per-row control.
     - `needsFixing(page).getByRole("button", { name: "Download now" })` has count 1: the header action, present because a row is retryable.
-  - **AC-12 (TC-E2E-003 edge; data-health-ui §7 *Partial is never complete*).** In `page.getByRole("table", { name: "Recent downloads" })`, the row whose row-header link `href` is `/data/downloads/${firstRunId}` contains a status badge with text *Partial*, and no badge in it reads *Complete*.
+  - **AC-12 (TC-E2E-003 edge; data-health-ui §7 *Partial is never complete*).** In `page.getByRole("region", { name: "Recent downloads" }).getByRole("table")`, the row whose row-header link `href` is `/data/downloads/${firstRunId}` contains a status badge with text *Partial*, and no badge in it reads *Complete*.
   - **Step 3, Download now (AC-15).**
     - `restoreSymbol` each of DHA, DHB and DHC, so the retry can succeed. Then `holdSymbol("DHE")`, so the download stays running long enough to be observed.
     - Start `aggregateReads` here, at length 0.
@@ -199,7 +199,7 @@ The test specification is `status: draft`. Its steps are used as written and sha
     - `page.goto("/data/coverage?symbol=UNKSF")`.
     - The first coverage request's `searchParams.get("symbol")` is `UNKSF`.
     - `page.getByRole("textbox", { name: "Filter by symbol" })` has value `UNKSF`.
-    - In `page.getByRole("table", { name: "Coverage table" })`, the row with row header `UNKSF` is visible and contains *Stopped following*. No row has row header `SFA`, which proves the query seeded the filter.
+    - In `page.getByRole("region", { name: "Coverage table" }).getByRole("table")`, the row with row header `UNKSF` is visible and contains *Stopped following*. No row has row header `SFA`, which proves the query seeded the filter.
     - Through `request`: `GET /api/instruments?symbol=UNKSF&lifecycle=retired` answers `200` with an `instruments` row whose `symbol` is `UNKSF`. The record is kept, not deleted.
   - **Kills** (T006):
     - negate-boolean on the `not_found` test that gives a row **Stop following** in `web/src/screens/data-health/problem-row.tsx`: the button is missing.
