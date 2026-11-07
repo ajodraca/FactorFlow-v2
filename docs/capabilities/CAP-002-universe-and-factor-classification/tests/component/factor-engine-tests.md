@@ -746,14 +746,14 @@ ai_provenance:
 **Type:** functional
 
 #### Preconditions
-- The acquisition runner with a provider stub whose corporate-actions fetch succeeds with no action, then one whose fetch fails
+- The acquisition runner with a provider stub whose corporate-actions fetch succeeds with no action, then one whose fetch fails and one whose fetch ends `not_found`
 
 #### Steps
 1. An instrument is acquired in each case.
 
 #### Expected Result
 - The successful fetch records one `corporate_actions` segment over the range requested.
-- The failed fetch records no segment and leaves an existing one unchanged.
+- The failed and the `not_found` fetch each record no segment and leave an existing one unchanged.
 
 #### Error / Edge Cases
 - This scenario is itself the named condition in DAC-E2-S10-7; no further cases are invented.
