@@ -2,24 +2,26 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-component-design-owner-shell
 artifact_type: component-design
-artifact_version: 1
-status: approved
+artifact_version: 2
+status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-07
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-26T02:20:00Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:20:52Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c5add7f)"
+    - id: CAP-003-component-design-ui-components
+      version: "2, draft (522d447)"
     - id: CAP-003-ux-brief
       version: "1"
     - id: CAP-003-ux-design
@@ -29,17 +31,11 @@ ai_provenance:
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "6"
+      version: "7, approved"
     - id: CAP-001-component-design-owner-web-app
       version: "4"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:27Z
-  reviewed_revision: sha256:4c0865ac001c6556ad83246816159cf101e3ebe6d343bf2c09ff3ab037891b01
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # Component: Owner Shell
@@ -47,7 +43,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-003
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-11-07
 
 This design was produced in an unattended `$design-run`. It applies DEC-0202,
 DEC-0203, DEC-0204, DEC-0207 and DEC-0208 without re-deciding them, and
@@ -58,6 +54,14 @@ the routed screen) and DEC-0219 (the on-demand aggregate hook Home shared
 with Data health, withdrawn by the owner on 2026-10-25, so only Data health
 uses the hook), all under `projects/factorflow-v2/decisions/` in the
 harness repository and all **PROVISIONAL**.
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29), whose §4.1 names `owner-shell` as changed in
+one place: the `ProblemPage` failure type in `web/src/app/shell-types.ts`
+gains `cause: FailureCause | null`, with `FailureCause` imported from
+`ui-components` (its section 2.7a), so `data-health-ui` receives each
+failure's cause and chooses a plan refusal's fix from it. Nothing else here
+changes. Sections 2.1, 2.3, 7, 8, 12 and 13 carry the change.
 
 ## 1. Overview
 
@@ -118,7 +122,8 @@ web/src/app/shell-context.tsx            new: ShellProvider and useShell()
 web/src/app/use-polled-read.ts           new: interval read paused while the document is hidden
 web/src/app/shell-client.ts              new: fetchAttention(), fetchScoreSummary() (404 -> not_served),
                                          fetchDataHealth(), fetchProblems(cursor, limit)
-web/src/app/shell-types.ts               new: Attention, DataHealth, ProblemPage, ScoreSummary, ScoreState, ReadState
+web/src/app/shell-types.ts               new: Attention, DataHealth, ProblemPage, ScoreSummary, ScoreState, ReadState;
+                                         version 2: the ProblemPage failure type gains cause (AC-29; 2.3)
 web/src/app/use-data-health.ts           new: the on-demand aggregate hook data-health-ui uses (Home does not; DEC-0219 withdrawn)
 web/src/app/layout.ts                    new: the approved-specification layout dimensions (AC-26; review v1 FINDING-6)
 web/src/app/count-chip.tsx               new: the rail count chip
@@ -142,6 +147,7 @@ web/src/app/shell-context.test.tsx       new
 web/src/app/legacy-redirects.test.tsx    new
 web/src/app/titles.test.tsx              new
 web/src/app/download-toast.test.tsx      new
+web/src/app/shell-types.test.ts          new (version 2): type-level, the failure type's cause (AC-29)
 tests/e2e/startup-health.spec.ts         delivered; status-region test ids replaced (DEC-0211)
 tests/e2e/startup-refusal.spec.ts        delivered; status-region test ids replaced (DEC-0211)
 tests/e2e/shell-navigation.spec.ts       new
@@ -241,6 +247,31 @@ as published (`never_classified`, `set`, `later`, `factors`,
 re-reads at once and keeps the cadence; `data-health-ui` calls
 `refresh("attention")` after **Download now** and **Stop following** so the
 rail chip and Home follow without waiting a full interval.
+
+**`cause` on a problem failure (version 2; AC-29; system design §4.1).** The
+failure type of `ProblemPage`'s rows, which `DataHealth`'s first page of
+problems shares (system design §4.2 `GET /api/data-health`: `problems
+{rows, next_cursor}`, the same row), gains one field. It mirrors
+`data-health-api`'s `FailureResponse.cause`, which is always serialised and
+is `null` when the stored reason leads with no known kind; the type is
+`ui-components`' `FailureCause`, not a second copy of the six kinds. The
+failure type's other fields are unchanged.
+
+```typescript
+// web/src/app/shell-types.ts, version 2: one import and one field
+import type { FailureCause } from "../components/patterns/failure-recovery";
+
+//   in the failure type of ProblemPage's rows (and so of DataHealth.problems.rows):
+//     cause: FailureCause | null;   // required, never optional; null = unknown kind
+```
+
+The import is type-only, as `ui-components`' own imports of `Attention` and
+`ScoreState` from this file are (its section 11), so the two modules reference
+each other's types with no runtime import cycle. `shell-client.ts`, which
+returns these types, passes the served `cause` through, `null` included; with
+the field required, `npx tsc --noEmit` refuses a mapping that drops it.
+`data-health-ui` passes it to `failureRecovery(failure.outcome,
+failure.cause)` (its section 2.5); the shell reads it nowhere itself.
 
 `shell-client.ts` is the one fetch module for `data-health-api`'s three routes
 and the summary, so the screens share one mapping from the wire shapes.
@@ -527,6 +558,7 @@ interface learns by polling at the cadences in 2.4.
 | Cadences | `web/src/app/shell-context.test.tsx` | 60 s idle, 10 s while a download is non-terminal or scores build, back to 60 s after; no read while hidden and one at once on show (constraint 8; DEC-0212) |
 | Summary not served | `web/src/app/shell-context.test.tsx` | A `404` yields `not_served`, not `error`, and is re-read |
 | On-demand aggregate | `web/src/app/use-data-health.test.tsx` | One read on mount, one on `retry()`, one when the latest download turns terminal, none on a timer (DEC-0219) |
+| Failure cause type (version 2) | `web/src/app/shell-types.test.ts` | Type-level, with Vitest's `expectTypeOf` as the delivered `web/src/api/classification-client.test.ts` uses it, enforced by `npx tsc --noEmit`: `ProblemPage["rows"][number]["failures"][number]["cause"]` and `DataHealth["problems"]["rows"][number]["failures"][number]["cause"]` each `toEqualTypeOf<FailureCause \| null>()`, where `FailureCause` is imported from `web/src/components/patterns/failure-recovery.ts`; the equality also fails if the field is optional, since that adds `undefined` (AC-29) |
 | Unreachable | `web/src/app/shell.unreachable.test.tsx` | Main region replaced on every route; rail and top bar stay; *Last answered* line from the last success; recovery remounts the same URL without reload (AC-23) |
 | Health provider | `web/src/app/health.test.tsx` | The delivered polling, unknown-state and cleanup cases, plus `lastAnsweredAt` and the pause (DEC-0212) |
 | Palette shortcut | `web/src/app/shell.test.tsx` | `⌘K` and `Ctrl+K` open the palette outside text fields; ignored inside an input; the top-bar opener opens it on every route (AC-22) |
@@ -552,6 +584,10 @@ interface learns by polling at the cadences in 2.4.
 7. No interval runs while the page is hidden.
 8. Failure scenario: an attention or summary read that fails leaves the chips
    at their last value marked stale and never removes the rail.
+9. Every failure in a `ProblemPage` row, and in `DataHealth`'s first page of
+   problems, carries a required `cause` typed `FailureCause | null`, with
+   `FailureCause` imported from `ui-components`, so `data-health-ui` can name
+   the provider plan as a plan refusal's fix (version 2; AC-29).
 
 ## 9. Workflows
 
@@ -634,7 +670,9 @@ This component exposes none. It consumes:
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | UX design | CAP-003 v1 | §0 Application Shell, §2 Cross-Screen Navigation | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
-| System design | CAP-003 v1 | §3.1, §3.3, §3.5, §4.1, §4.2, constraints 8, 11, 13, 14 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| System design | CAP-003 v2 (draft, `c5add7f`) | §3.1, §3.3, §3.5, §4.1, §4.2, constraints 8, 11, 13, 14; version 2: §4.1 `owner-shell` row and the AC-29 traceability row (the `ProblemPage` failure type carrying `cause`) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| Component design | CAP-003 ui-components v2 (draft, `522d447`) | §2.7a `FailureCause`, `failureRecovery` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-ui-components.md` |
+| Component design | CAP-003 data-health-api v2 (draft) | `FailureResponse.cause`, always serialised, `null` when unknown | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-data-health-api.md` |
 | Blueprint | PRODUCT-UX v6 | §2.1, §2.2, §3.1, §3.4, §3.5 | `docs/ux/product-ux-blueprint.md` |
 | Component design | CAP-001 owner web app v4 (approved, not edited) | The delivered shell, status region and HealthProvider | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-owner-web-app.md` |
 | Component design | CAP-002 classification UI v3 (approved) | §2.2 composition into the shell, research titles | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-classification-ui.md` |
@@ -654,6 +692,7 @@ This component exposes none. It consumes:
 | AC-25 | Cadences and *checked {time}*; keyboard | 2.4 cadences; chips stood for by the Home and Data health *checked {time}* lines (STD-UI-25 specialization); listener, focus management | 2.4, 2.7 |
 | AC-26 | Built from `ui-components`; layout dimensions in one module | Component mapping and tokens; `layout.ts` | 2.1, 10 |
 | AC-27 | `classification-ui` screen registration | Research entry and five routes kept | 2.6 |
+| AC-29 | `owner-shell` `ProblemPage` failure type carrying `cause` (§4.1, version 2) | `cause: FailureCause \| null` in `shell-types.ts`; `shell-types.test.ts`; acceptance criterion 9 | 2.3, 7, 8 |
 | AC-10 | Only shipped destinations | No Strategies or Portfolio item | 2.6 |
 
 ## 14. Open Questions
