@@ -178,6 +178,8 @@ def _line_item_parameters() -> dict[str, object]:
             for item in items.values()
         ],
         "line_item_signs": [item.sign for item in items.values()],
+        "line_item_magnitudes": [item.magnitude for item in items.values()],
+        "line_item_less_keys": [item.less_key for item in items.values()],
         "unresolved": line_items.unresolved(),
         "unresolved_cause": line_items.UNRESOLVED_CAUSE,
     }

@@ -12,6 +12,7 @@ Expected returns are computed from the closes with ``Decimal`` and compared to 8
 places; the stored column is ``numeric(30,10)``.
 """
 
+import dataclasses
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
@@ -1043,10 +1044,17 @@ def test_a_missing_boundary_ranks_before_outdated(
 def test_unresolved_line_items_leave_the_momentum_inputs_present(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Supporting case for TC-COMP-059 (AC-12, design 2.4): with the real LINE_ITEMS, every
-    key REQUIRES_INPUT, value and growth are missing naming the cause, the three momentum
-    inputs are present and the set completes. "Momentum still classifies" is CAP-002-E2-S7's."""
+    """Supporting case for TC-COMP-059 (AC-12, design 2.4): with every LINE_ITEMS key set
+    back to REQUIRES_INPUT (DEC-0295 binds them), value and growth are missing naming the
+    cause, the three momentum inputs are present and the set completes. "Momentum still
+    classifies" is CAP-002-E2-S7's."""
     add_close_series(env.conn, env.stock, STANDARD)
+    unresolved = {
+        name: dataclasses.replace(item, payload_key=line_items.REQUIRES_INPUT)
+        for name, item in line_items.LINE_ITEMS.items()
+    }
+    for name, item in unresolved.items():
+        monkeypatch.setitem(line_items.LINE_ITEMS, name, item)
 
     result = run_momentum_stages(env.conn, env.set_id, monkeypatch)
 

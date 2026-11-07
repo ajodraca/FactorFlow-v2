@@ -79,7 +79,8 @@ synchronous database call runs on the event loop.
 2. One `WARNING` is logged for each key that `line_items.unresolved()` returns:
    `line item <key> has no payload key; its inputs will be missing`. It is
    logged once per start, before the first claim (see
-   [Line items](classification-engine.md#line-items)).
+   [Line items](classification-engine.md#line-items)). With every key bound
+   (DEC-0295), none is logged.
 
 The reclaim is not inside the loop's error handling. When it raises, for
 example because the database is unreachable, the exception ends the coroutine.

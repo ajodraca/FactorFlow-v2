@@ -25,6 +25,9 @@ PARAMETERS_BEFORE = {
         "classification_date",
         "latest_trading_day",
         "line_item_keys",
+        # DEC-0295 binds two more line-item fields; neither feeds the mark (DEC-0119).
+        "line_item_less_keys",
+        "line_item_magnitudes",
         "line_item_names",
         "line_item_signs",
         "line_item_statement_types",

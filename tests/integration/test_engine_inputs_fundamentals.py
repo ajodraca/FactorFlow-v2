@@ -6,6 +6,7 @@ of ``engine_inputs_support`` (factor-engine design section 7); no real Massive k
 used.
 """
 
+import dataclasses
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
@@ -18,15 +19,17 @@ import pytest
 
 from factorflow.classification import engine, line_items
 from factorflow.classification.engine import BuildContext, BuildResult
-from factorflow.classification.line_items import UNRESOLVED_CAUSE, LineItem
+from factorflow.classification.line_items import REQUIRES_INPUT, UNRESOLVED_CAUSE
 from tests.integration.engine_inputs_support import (
     TEST_KEYS,
+    TEST_LESS_KEY,
     add_bar,
     add_building_set,
     add_instrument,
     add_quarters,
     add_run,
     add_statement,
+    fixture_line_item,
     inputs_for,
     install_test_line_items,
     migrate_through_classification,
@@ -116,15 +119,22 @@ def build(env: Env, monkeypatch: pytest.MonkeyPatch) -> BuildResult:
     return result
 
 
+def unresolve_all(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Set every line item's key back to ``REQUIRES_INPUT`` (DEC-0295 binds them all)."""
+    items = {
+        name: dataclasses.replace(item, payload_key=REQUIRES_INPUT)
+        for name, item in line_items.LINE_ITEMS.items()
+    }
+    for name, item in items.items():
+        monkeypatch.setitem(line_items.LINE_ITEMS, name, item)
+
+
 def resolve_only(monkeypatch: pytest.MonkeyPatch, *names: str) -> None:
-    """Resolve the named line items to their test keys; the rest stay ``REQUIRES_INPUT``."""
-    for name in names:
-        item = line_items.LINE_ITEMS[name]
-        monkeypatch.setitem(
-            line_items.LINE_ITEMS,
-            name,
-            LineItem(item.label, item.statement_type, TEST_KEYS[name], item.sign),
-        )
+    """Resolve the named line items to their test keys; the rest are ``REQUIRES_INPUT``."""
+    unresolve_all(monkeypatch)
+    items = {name: fixture_line_item(name) for name in names}
+    for name, item in items.items():
+        monkeypatch.setitem(line_items.LINE_ITEMS, name, item)
 
 
 def period(statement_type: str, end: date, observed: date, filed: date | None, backfilled: bool):
@@ -292,7 +302,8 @@ def test_quarter_absent_from_the_trailing_window_forms_no_window(
     """DAC-E2-S3-2, DEC-0221: with the third quarter absent the second and third periods
     held are six months apart, so the trailing window is not formed. A missing value input
     lists what exists of every type it reads (design 2.4, AC-12), in the stage's order:
-    statement type, then newest first."""
+    statement type, then newest first. earnings_yield reads only income statements
+    (DEC-0295)."""
     found = _income_with_gap(env, gap=2)
 
     build(env, monkeypatch)
@@ -302,9 +313,8 @@ def test_quarter_absent_from_the_trailing_window_forms_no_window(
         assert rows[name]["status"] == "missing", name
         assert rows[name]["detail"]["cause"] == "periods_missing"
     assert ends_of(rows["revenue_growth"]["detail"]["periods_found"]) == [str(e) for e in found]
-    balance_sheets = [months_before(P1, 3 * k) for k in range(8)]
     assert rows["earnings_yield"]["detail"]["periods_found"] == periods_found(
-        ("balance_sheet", balance_sheets), ("income_statement", found)
+        ("income_statement", found)
     )
     assert rows["book_to_price"]["status"] == "present"
     assert rows["fcf_yield"]["status"] == "present"
@@ -327,8 +337,9 @@ def test_gap_between_third_and_fourth_quarters_forms_no_trailing_window(
 
 def test_three_quarters_form_no_trailing_window(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     """DEC-0221: a trailing-only input needs four periods, P1 to P4; the most recent
-    balance sheet alone still serves book_to_price. Design 2.4, AC-12: each missing value
-    input lists the balance sheets and its window type's periods that exist."""
+    balance sheet and income statement still serve book_to_price. Design 2.4, AC-12: each
+    missing value input lists the periods that exist of every type it reads; the most
+    recent income statement supplies shares to all three (DEC-0295)."""
     ends = _quarters_at(env, [months_before(P1, 3 * k) for k in range(3)])
 
     build(env, monkeypatch)
@@ -337,13 +348,13 @@ def test_three_quarters_form_no_trailing_window(env: Env, monkeypatch: pytest.Mo
     for name in ("earnings_yield", "fcf_yield", *GROWTH):
         assert rows[name]["status"] == "missing", name
         assert rows[name]["detail"]["cause"] == "periods_missing"
-    for name, window_type in (
-        ("earnings_yield", "income_statement"),
-        ("fcf_yield", "cash_flow_statement"),
+    for name, parts in (
+        ("earnings_yield", (("income_statement", ends),)),
+        ("fcf_yield", (("cash_flow_statement", ends), ("income_statement", ends))),
     ):
         assert rows[name]["detail"] == {
             "cause": "periods_missing",
-            "periods_found": periods_found(("balance_sheet", ends), (window_type, ends)),
+            "periods_found": periods_found(*parts),
         }, name
     assert rows["book_to_price"]["status"] == "present"
 
@@ -519,15 +530,16 @@ def test_later_observation_of_a_period_is_used_and_earlier_untouched(
     _seven_older_quarters(env, latest)
     newest = standard()[0]
     for statement_type, names in (
-        ("balance_sheet", ("book_equity", "shares_outstanding")),
+        ("balance_sheet", ("book_equity",)),
         ("cash_flow_statement", ("operating_cash_flow", "capital_expenditure")),
     ):
         payload = {TEST_KEYS[n]: newest[n] for n in names}
         add_statement(
             env.conn, env.stock, latest, statement_type, payload, observed_on=date(2026, 6, 1)
         )
-    first = {TEST_KEYS["revenue"]: Decimal(130), TEST_KEYS["net_income"]: Decimal(13)}
-    second = {TEST_KEYS["revenue"]: Decimal(140), TEST_KEYS["net_income"]: Decimal(23)}
+    shares = {TEST_KEYS["shares_outstanding"]: newest["shares_outstanding"]}
+    first = {TEST_KEYS["revenue"]: Decimal(130), TEST_KEYS["net_income"]: Decimal(13), **shares}
+    second = {TEST_KEYS["revenue"]: Decimal(140), TEST_KEYS["net_income"]: Decimal(23), **shares}
     add_statement(
         env.conn, env.stock, latest, "income_statement", first, observed_on=date(2026, 6, 1)
     )
@@ -698,6 +710,7 @@ def test_unresolved_line_items_leave_value_and_growth_missing(
     """Supporting case for TC-COMP-059 (AC-12): with every key REQUIRES_INPUT the five
     inputs are missing naming the line items each needs, and the set completes."""
     add_quarters(env.conn, env.stock, P1, 8, standard())
+    unresolve_all(monkeypatch)
 
     result = run_fundamentals_stage(env.conn, env.set_id, monkeypatch)
 
@@ -839,8 +852,9 @@ def test_fcf_yield_subtracts_signed_capital_expenditure(
 def test_market_capitalisation_is_latest_close_times_newest_shares(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """DEC-0055 (6): the latest session's latest observation of the close, times shares
-    outstanding from the most recent quarterly balance sheet; detail carries the parts."""
+    """DEC-0055 (6) as revised by DEC-0295: the latest session's latest observation of the
+    close, times shares outstanding from the most recent quarterly income statement; detail
+    carries the parts."""
     add_quarters(env.conn, env.stock, P1, 8, standard())
     add_bar(env.conn, env.stock, L - timedelta(days=1), close=99)
     add_bar(env.conn, env.stock, L, close=12, observed_on=L + timedelta(days=1))
@@ -909,8 +923,9 @@ def test_equal_bar_observation_is_decided_by_the_later_recorded_at(
 def test_value_detail_lists_the_balance_sheet_and_trailing_rows(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Design 2.4 and DEC-0122: each period used, balance sheet first; book_to_price reads
-    the balance sheet only."""
+    """Design 2.4 and DEC-0122: each period used, by statement type then newest first. Every
+    value input reads the most recent income statement for shares (DEC-0295), and only
+    book_to_price reads a balance sheet."""
     ends = add_quarters(env.conn, env.stock, P1, 8, standard())
 
     build(env, monkeypatch)
@@ -920,14 +935,15 @@ def test_value_detail_lists_the_balance_sheet_and_trailing_rows(
     def used(detail: dict[str, Any]) -> list[tuple[str, str]]:
         return [(p["statement_type"], p["fiscal_period_end"]) for p in detail["periods"]]
 
-    balance = [("balance_sheet", str(P1))]
-    assert used(rows["book_to_price"]["detail"]) == balance
-    assert used(rows["earnings_yield"]["detail"]) == balance + [
+    shares = [("income_statement", str(P1))]
+    assert used(rows["book_to_price"]["detail"]) == [("balance_sheet", str(P1)), *shares]
+    assert used(rows["earnings_yield"]["detail"]) == [
         ("income_statement", str(e)) for e in ends[:4]
     ]
-    assert used(rows["fcf_yield"]["detail"]) == balance + [
-        ("cash_flow_statement", str(e)) for e in ends[:4]
-    ]
+    assert (
+        used(rows["fcf_yield"]["detail"])
+        == [("cash_flow_statement", str(e)) for e in ends[:4]] + shares
+    )
 
 
 # --- T012 (e), (f): which statements are read -----------------------------------------------
@@ -975,7 +991,8 @@ def test_absent_item_in_newest_balance_sheet_does_not_fall_back(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """DEC-0055 (1): the single most recent quarterly balance sheet, never an older one.
-    Design 2.4, AC-12: the missing input lists every balance sheet that exists."""
+    Design 2.4, AC-12: the missing input lists every balance sheet and income statement
+    that exists (DEC-0295: shares come from the income statement)."""
     values = standard()
     del values[0]["book_equity"]
     ends = add_quarters(env.conn, env.stock, P1, 8, values)
@@ -987,7 +1004,7 @@ def test_absent_item_in_newest_balance_sheet_does_not_fall_back(
     assert rows["book_to_price"]["detail"] == {
         "cause": "line_item_absent",
         "line_items": ["book_equity"],
-        "periods_found": periods_found(("balance_sheet", ends)),
+        "periods_found": periods_found(("balance_sheet", ends), ("income_statement", ends)),
     }
     assert rows["earnings_yield"]["status"] == "present"
 
@@ -1164,7 +1181,7 @@ def test_absent_line_item_and_stale_is_missing(env: Env, monkeypatch: pytest.Mon
     assert rows["earnings_yield"]["detail"] == {
         "cause": "line_item_absent",
         "line_items": ["net_income"],
-        "periods_found": periods_found(("balance_sheet", ends), ("income_statement", ends)),
+        "periods_found": periods_found(("income_statement", ends)),
     }
     assert rows["book_to_price"]["status"] == "outdated"
 
@@ -1384,18 +1401,22 @@ def test_statement_committed_during_the_build_is_not_used(
 # --- CAP-002-E2-S7 T014: unresolved line items still classify momentum ------------------------
 
 
-def test_unresolved_line_items_still_classify_momentum(postgres_connection_string: str) -> None:
+def test_unresolved_line_items_still_classify_momentum(
+    postgres_connection_string: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """TC-COMP-059's end-to-end clause, shared with CAP-002-E2-S2 (DAC-E2-S2-5; factor-engine
-    section 8 acceptance criterion 13 and section 7 row "Unresolved line items"). With the real,
-    unresolved ``LINE_ITEMS``, the real stages and the real peer-set floor, the value and growth
-    inputs are missing with the unresolved cause, momentum is ranked and every stock classified
-    on it, value and growth are unranked, and the set completes (AC-7, AC-12, AC-14). An
-    unranked factor's reason wins over the input's (factor-engine 2.5), and factor_classification
-    has no detail, so the cause is asserted on factor_input only."""
+    section 8 acceptance criterion 13 and section 7 row "Unresolved line items"). With every
+    ``LINE_ITEMS`` key set back to unresolved (DEC-0295 binds them), the real stages and the
+    real peer-set floor, the value and growth inputs are missing with the unresolved cause,
+    momentum is ranked and every stock classified on it, value and growth are unranked, and
+    the set completes (AC-7, AC-12, AC-14). An unranked factor's reason wins over the
+    input's (factor-engine 2.5), and factor_classification has no detail, so the cause is
+    asserted on factor_input only."""
     conn = migrate_through_classification(postgres_connection_string)
     try:
         ids, classification_date = populate_volume(conn, 40, last_session=date(2026, 11, 13))
         set_id = complete_and_open_next(conn, classification_date)
+        unresolve_all(monkeypatch)
         assert line_items.unresolved() == list(line_items.LINE_ITEMS)
         assert len(line_items.unresolved()) == 7
 
@@ -1453,3 +1474,117 @@ def test_unresolved_line_items_still_classify_momentum(postgres_connection_strin
         ]
     finally:
         conn.close()
+
+
+# --- DEC-0295: shares, capital expenditure and book equity --------------------------------
+
+
+def test_shares_are_read_from_the_latest_income_statement_and_never_summed(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Factor-engine v3 section 7, DEC-0295: four income statements of 100 shares each give
+    a market capitalisation of 10 x 100 for all three value inputs, not 10 x 400."""
+    values = standard()
+    for period_values in values:
+        period_values["shares_outstanding"] = Decimal(100)
+    add_quarters(env.conn, env.stock, P1, 8, values)
+
+    build(env, monkeypatch)
+
+    rows = inputs_for(env.conn, env.set_id, env.stock)
+    for name in VALUE:
+        assert rows[name]["status"] == "present", name
+        assert rows[name]["detail"]["shares_outstanding"] == 100, name
+        assert rows[name]["detail"]["market_capitalisation"] == 1000, name
+
+
+def test_without_an_income_statement_every_value_input_is_missing(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0295: shares come only from the income statement, so balance sheets and cash-flow
+    statements alone leave book_to_price and fcf_yield missing, never present without a
+    market capitalisation."""
+    ends = [months_before(P1, 3 * k) for k in range(8)]
+    for k, end in enumerate(ends):
+        period_values = standard()[k]
+        for statement_type in ("balance_sheet", "cash_flow_statement"):
+            payload = {
+                TEST_KEYS[name]: value
+                for name, value in period_values.items()
+                if line_items.LINE_ITEMS[name].statement_type == statement_type
+            }
+            add_statement(env.conn, env.stock, end, statement_type, payload)
+
+    build(env, monkeypatch)
+
+    rows = inputs_for(env.conn, env.set_id, env.stock)
+    for name in VALUE:
+        assert rows[name]["status"] == "missing", name
+        assert rows[name]["detail"]["cause"] == "periods_missing", name
+
+
+def test_capital_expenditure_is_read_by_magnitude(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Factor-engine v3 section 7, DEC-0295: a purchase reported as -X and one reported as
+    +X give the same fcf_yield, OCF - X."""
+    other = add_instrument(env.conn, "POS")
+    add_bar(env.conn, other, L)
+    add_quarters(env.conn, env.stock, P1, 8, standard())  # reported negative
+    positive = standard()
+    for period_values in positive:
+        period_values["capital_expenditure"] = -period_values["capital_expenditure"]
+    add_quarters(env.conn, other, P1, 8, positive)
+
+    build(env, monkeypatch)
+
+    for stock in (env.stock, other):
+        row = inputs_for(env.conn, env.set_id, stock)["fcf_yield"]
+        assert (row["status"], row["value"]) == ("present", FCF_YIELD), stock
+
+
+@pytest.mark.parametrize(
+    ("preferred", "book_equity"),
+    [
+        (Decimal(200), Decimal(300)),
+        ("absent", Decimal(500)),
+        (None, Decimal(500)),  # JSON null reads as zero (DEC-0295)
+    ],
+)
+def test_book_equity_is_parent_equity_less_preferred_stock(
+    env: Env, monkeypatch: pytest.MonkeyPatch, preferred: Any, book_equity: Decimal
+) -> None:
+    """Factor-engine v3 section 7, DEC-0295: parent equity 500 less preferred stock; an
+    absent or null preferred stock reads as zero."""
+    add_quarters(env.conn, env.stock, P1, 8, standard())
+    payload: dict[str, Any] = {TEST_KEYS["book_equity"]: Decimal(500)}
+    if preferred != "absent":
+        payload[TEST_LESS_KEY] = preferred
+    # A later observation of the newest balance sheet replaces the fixture's.
+    add_statement(
+        env.conn, env.stock, P1, "balance_sheet", payload, observed_on=P1 + timedelta(days=20)
+    )
+
+    build(env, monkeypatch)
+
+    row = inputs_for(env.conn, env.set_id, env.stock)["book_to_price"]
+    assert (row["status"], row["value"]) == ("present", ratio(book_equity, Decimal(1000)))
+
+
+def test_unreadable_preferred_stock_makes_book_equity_absent(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DEC-0295, DEC-0116 (4): a preferred stock that is present but not a plain number is
+    unreadable, so book equity is absent rather than read as zero."""
+    add_quarters(env.conn, env.stock, P1, 8, standard())
+    payload = {TEST_KEYS["book_equity"]: Decimal(500), TEST_LESS_KEY: "n/a"}
+    add_statement(
+        env.conn, env.stock, P1, "balance_sheet", payload, observed_on=P1 + timedelta(days=20)
+    )
+
+    build(env, monkeypatch)
+
+    row = inputs_for(env.conn, env.set_id, env.stock)["book_to_price"]
+    assert row["status"] == "missing"
+    assert row["detail"]["cause"] == "line_item_absent"
+    assert row["detail"]["line_items"] == ["book_equity"]

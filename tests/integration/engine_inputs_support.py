@@ -1,13 +1,14 @@
 """Helpers for the factor engine's fundamentals-stage tests (CAP-002-E2-S3).
 
 A plain module rather than ``conftest.py``. It builds on CAP-002-E2-S2's
-``engine_support`` without editing it. The real Massive payload keys are the owner's
-open question (factor-engine design section 14 question 1), so the tests install their
-own keys (design section 7: "fixtures declare their own payload keys"). Every writing
+``engine_support`` without editing it. The tests install their own payload keys (design
+section 7: "fixtures declare their own payload keys"), keeping each line item's statement
+type, sign, magnitude and deduction as production binds them (DEC-0295). Every writing
 helper commits, so the build's connection sees what a test wrote.
 """
 
 import calendar
+import dataclasses
 import hashlib
 import json
 from datetime import date, datetime, timedelta
@@ -31,6 +32,7 @@ from tests.integration.engine_support import (
 
 __all__ = [
     "TEST_KEYS",
+    "TEST_LESS_KEY",
     "add_bar",
     "add_building_set",
     "add_instrument",
@@ -42,6 +44,7 @@ __all__ = [
     "migrate_through_classification",
     "months_before",
     "run_fundamentals_stage",
+    "fixture_line_item",
 ]
 
 TEST_KEYS: dict[str, str] = {
@@ -55,9 +58,24 @@ TEST_KEYS: dict[str, str] = {
 }
 """A test payload key per line item; never a real Massive key."""
 
-# Capital expenditure is reported as an outflow (negative) in the fixtures, so the
-# sign path of design 2.4 ``LineItem.sign`` is exercised.
-_TEST_SIGNS: dict[str, int] = {"capital_expenditure": -1}
+TEST_LESS_KEY = "t_preferred_stock"
+"""The test key standing in for a line item's ``less_key`` (book equity's preferred stock)."""
+
+
+def fixture_line_item(name: str, key: str | None = None, sign: int | None = None) -> LineItem:
+    """``LINE_ITEMS[name]`` with its test key (or ``key``), and ``sign`` when given.
+
+    The statement type, magnitude and deduction stay as production binds them; a deduction
+    is read from ``TEST_LESS_KEY``.
+    """
+    item = line_items.LINE_ITEMS[name]
+    return dataclasses.replace(
+        item,
+        payload_key=TEST_KEYS[name] if key is None else key,
+        sign=item.sign if sign is None else sign,
+        less_key=None if item.less_key is None else TEST_LESS_KEY,
+    )
+
 
 STATEMENT_TYPES = ("balance_sheet", "income_statement", "cash_flow_statement")
 
@@ -65,14 +83,13 @@ STATEMENT_TYPES = ("balance_sheet", "income_statement", "cash_flow_statement")
 def install_test_line_items(
     monkeypatch: pytest.MonkeyPatch, overrides: dict[str, tuple[str, int]] | None = None
 ) -> None:
-    """Replace every ``LINE_ITEMS`` entry with its test key; ``overrides`` sets (key, sign)."""
-    for name, item in line_items.LINE_ITEMS.items():
-        key, sign = TEST_KEYS[name], _TEST_SIGNS.get(name, 1)
-        if overrides and name in overrides:
-            key, sign = overrides[name]
-        monkeypatch.setitem(
-            line_items.LINE_ITEMS, name, LineItem(item.label, item.statement_type, key, sign)
-        )
+    """Replace every ``LINE_ITEMS`` entry with its test item; ``overrides`` sets (key, sign)."""
+    items = {
+        name: fixture_line_item(name, *(overrides or {}).get(name, (None, None)))
+        for name in line_items.LINE_ITEMS
+    }
+    for name, item in items.items():
+        monkeypatch.setitem(line_items.LINE_ITEMS, name, item)
 
 
 def months_before(day: date, months: int) -> date:

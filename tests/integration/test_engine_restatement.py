@@ -360,7 +360,7 @@ def test_filing_date_boundary_and_null_filing_date(
     assert run_two_stage_build(conn, set_id, monkeypatch).state == "complete"
 
     assert input_flags(conn, set_id, a) == expect()
-    assert input_flags(conn, set_id, b) == expect(*VALUE)  # every value input reads it
+    assert input_flags(conn, set_id, b) == expect("book_to_price")  # its only reader
     assert input_flags(conn, set_id, c) == expect()
     assert input_flags(conn, set_id, d) == expect()
     flags = classification_flags(conn, set_id)
@@ -510,14 +510,15 @@ def test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark(
     positive and its three value inputs are not computable, and its prior-year revenue
     sums below zero, so revenue_growth is not computable too. Each lists its periods, and
     exactly those that list one of A's backfilled income statements are marked, as are
-    A's input_not_computable value and growth rows."""
+    A's input_not_computable value and growth rows. Shares come from the income statement
+    (DEC-0295), so every value input lists one."""
     conn, set_id = store
     stocks = build_fixture(conn, {}, statement_types={"A": ("cash_flow_statement",)})
     a = stocks["A"]
     for k, end in enumerate(PERIOD_ENDS):
         balance_sheet = statement_payload(a, "balance_sheet", k)
-        balance_sheet[TEST_KEYS["shares_outstanding"]] = Decimal(-100)
         income = statement_payload(a, "income_statement", k)
+        income[TEST_KEYS["shares_outstanding"]] = Decimal(-100)
         if k >= 4:  # the prior-year window
             income[TEST_KEYS["revenue"]] = Decimal(-100)
         for statement_type, payload, filed in (
@@ -544,7 +545,7 @@ def test_not_computable_inputs_and_their_not_classified_rows_carry_the_mark(
         "revenue_growth": "not_computable",
         "eps_growth": "present",
     }
-    assert input_flags(conn, set_id, a) == expect("earnings_yield", *GROWTH)
+    assert input_flags(conn, set_id, a) == expect(*VALUE, *GROWTH)
     assert_column_agrees_with_detail(conn, set_id, a)
     rows = classifications_for(conn, set_id)
     for factor, first_input in (("value", "book_to_price"), ("growth", "revenue_growth")):

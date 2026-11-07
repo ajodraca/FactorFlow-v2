@@ -9,24 +9,28 @@ WITH roster AS (
 line_item AS (
     -- The seven line items with their bound payload keys and signs. A NULL key is one the
     -- owner has not supplied yet (line_items.REQUIRES_INPUT).
-    SELECT m.name, m.statement_type, m.payload_key, m.sign
+    SELECT m.name, m.statement_type, m.payload_key, m.sign, m.magnitude, m.less_key
       FROM unnest(%(line_item_names)s::text[], %(line_item_statement_types)s::text[],
-                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[])
-           AS m (name, statement_type, payload_key, sign)
+                  %(line_item_keys)s::text[], %(line_item_signs)s::integer[],
+                  %(line_item_magnitudes)s::boolean[], %(line_item_less_keys)s::text[])
+           AS m (name, statement_type, payload_key, sign, magnitude, less_key)
 ),
 needed (input_name, line_items, window_type) AS (
     -- The line items each input reads and the statement type of its trailing window.
-    -- Market capitalisation needs shares outstanding for every input.
+    -- Market capitalisation needs shares outstanding for every input. Each input reads
+    -- the most recent quarterly statement of every type its line items name.
     VALUES ('book_to_price', ARRAY['book_equity', 'shares_outstanding'], NULL::text),
            ('earnings_yield', ARRAY['net_income', 'shares_outstanding'], 'income_statement'),
            ('fcf_yield', ARRAY['operating_cash_flow', 'capital_expenditure',
                                'shares_outstanding'], 'cash_flow_statement')
 ),
 used AS (
-    -- The rows an input reads: the most recent quarterly balance sheet and the four
-    -- quarters of its trailing window.
+    -- The rows an input reads: the most recent quarterly balance sheet, the four quarters
+    -- of its trailing window, and the most recent quarterly income statement, whose
+    -- shares outstanding every value input reads (DEC-0295).
     SELECT r.instrument_id, n.input_name, s.statement_type, s.fiscal_period_end,
            s.observed_on, s.period_rank, s.payload, s.backfilled,
+           s.statement_type = n.window_type AND s.ttm_slot IS NOT NULL AS in_window,
            jsonb_build_object('statement_type', s.statement_type,
                               'fiscal_period_end', s.fiscal_period_end,
                               'observed_on', s.observed_on,
@@ -35,22 +39,39 @@ used AS (
       FROM roster r
       CROSS JOIN needed n
       JOIN stmt s ON s.instrument_id = r.instrument_id
-     WHERE (s.statement_type = 'balance_sheet' AND s.period_rank = 1)
+     WHERE (s.period_rank = 1 AND s.statement_type IN (
+                SELECT m.statement_type FROM line_item m WHERE m.name = ANY(n.line_items)))
         OR (s.statement_type = n.window_type AND s.ttm_slot IS NOT NULL)
 ),
 amount AS (
     -- Each needed line item of each row used, times its sign. A value is read only from a
     -- JSON number or a JSON string holding a plain decimal, checked before the cast, so
     -- anything else reads as absent rather than failing the set (DEC-0116 (4),
-    -- DEC-0117 (2)).
+    -- DEC-0117 (2)). A magnitude item is read as its absolute value; a less_key field is
+    -- subtracted, absent or JSON null reading as zero and anything else unreadable making
+    -- the item absent (DEC-0295). Shares outstanding is read from the single most recent
+    -- income statement only; every other item from the balance sheet or the window.
     SELECT u.instrument_id, u.input_name, m.name,
            CASE WHEN jsonb_typeof(u.payload -> m.payload_key) IN ('number', 'string')
                  AND u.payload ->> m.payload_key ~ '^-?[0-9]+(\.[0-9]+)?$'
-                THEN (u.payload ->> m.payload_key)::numeric * m.sign
+                THEN CASE WHEN m.magnitude THEN abs((u.payload ->> m.payload_key)::numeric)
+                          ELSE (u.payload ->> m.payload_key)::numeric
+                     END * m.sign
+                     - CASE WHEN m.less_key IS NULL
+                              OR coalesce(jsonb_typeof(u.payload -> m.less_key), 'null') = 'null'
+                            THEN 0
+                            WHEN jsonb_typeof(u.payload -> m.less_key) IN ('number', 'string')
+                             AND u.payload ->> m.less_key ~ '^-?[0-9]+(\.[0-9]+)?$'
+                            THEN (u.payload ->> m.less_key)::numeric
+                       END
            END AS amount
       FROM used u
       JOIN needed n USING (input_name)
       JOIN line_item m ON m.statement_type = u.statement_type AND m.name = ANY(n.line_items)
+     WHERE CASE WHEN m.name = 'shares_outstanding' THEN u.period_rank = 1
+                WHEN u.statement_type = 'balance_sheet' THEN true
+                ELSE u.in_window
+           END
 ),
 items AS (
     SELECT instrument_id, input_name,
@@ -66,7 +87,9 @@ items AS (
 periods AS (
     SELECT instrument_id, input_name,
            count(*) FILTER (WHERE statement_type = 'balance_sheet') AS balance_sheets,
-           count(*) FILTER (WHERE statement_type <> 'balance_sheet') AS window_quarters,
+           count(*) FILTER (WHERE statement_type = 'income_statement' AND period_rank = 1)
+               AS income_statements,
+           count(*) FILTER (WHERE in_window) AS window_quarters,
            max(fiscal_period_end) FILTER (WHERE statement_type = 'balance_sheet')
                AS balance_sheet_period_end,
            -- The earliest of the latest period ends used (DEC-0116 (3)).
@@ -86,7 +109,9 @@ found AS (
       FROM roster r
       CROSS JOIN needed n
       JOIN stmt s ON s.instrument_id = r.instrument_id
-                 AND s.statement_type IN ('balance_sheet', n.window_type)
+                 AND (s.statement_type = n.window_type OR s.statement_type IN (
+                      SELECT m.statement_type FROM line_item m
+                       WHERE m.name = ANY(n.line_items)))
      GROUP BY r.instrument_id, n.input_name
 ),
 bar AS (
@@ -102,7 +127,9 @@ bar AS (
       ) b
 ),
 judged AS (
-    SELECT r.instrument_id, n.input_name, n.window_type, p.balance_sheets, p.window_quarters,
+    SELECT r.instrument_id, n.input_name, n.window_type, p.balance_sheets,
+           p.income_statements, p.window_quarters,
+           n.input_name = 'book_to_price' AS needs_balance_sheet,
            p.as_of, p.periods, p.restated, i.absent, f.periods_found, b.session_date AS bar_date,
            -- DEC-0055 (7): the latest observation among the statement rows and the bar.
            greatest(p.known_on, b.observed_on) AS known_on,
@@ -111,7 +138,8 @@ judged AS (
                 WHEN 'earnings_yield' THEN i.net_income
                 WHEN 'fcf_yield' THEN i.operating_cash_flow - i.capital_expenditure
            END AS numerator,
-           -- DEC-0055 (6): the latest close times the newest balance sheet's shares.
+           -- DEC-0055 (6) as revised by DEC-0295: the latest close times the shares of the
+           -- most recent quarterly income statement.
            b.close_price * i.shares_outstanding AS market_capitalisation,
            ARRAY(SELECT u.x FROM unnest(n.line_items) WITH ORDINALITY AS u (x, k)
                   WHERE u.x = ANY(%(unresolved)s::text[]) ORDER BY u.k) AS unresolved,
@@ -137,8 +165,9 @@ decided AS (
     -- Missing before outdated before not computable (DEC-0116 (1), (2)).
     SELECT j.*,
            CASE WHEN cardinality(j.unresolved) > 0 THEN %(unresolved_cause)s::text
-                WHEN coalesce(j.balance_sheets, 0) = 0
-                  OR (j.window_type IS NOT NULL AND j.window_quarters = 0)
+                WHEN (j.needs_balance_sheet AND coalesce(j.balance_sheets, 0) = 0)
+                  OR coalesce(j.income_statements, 0) = 0
+                  OR (j.window_type IS NOT NULL AND coalesce(j.window_quarters, 0) = 0)
                 THEN 'periods_missing'
                 WHEN j.absent IS NOT NULL THEN 'line_item_absent'
                 WHEN NOT j.has_bar THEN 'price_missing'

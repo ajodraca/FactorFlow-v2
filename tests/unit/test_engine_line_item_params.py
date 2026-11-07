@@ -42,37 +42,45 @@ def strings(value: object) -> list[str]:
     return []
 
 
-def test_real_line_items_pass_every_key_as_none_and_every_item_unresolved() -> None:
-    """Design 2.4, AC-12: while every key is REQUIRES_INPUT each is bound as None."""
+def test_real_line_items_bind_every_key_and_none_is_unresolved() -> None:
+    """Design 2.4, DEC-0295: every line item is bound with its Massive key and sign."""
     params = engine._line_item_parameters()
 
     assert params["line_item_names"] == NAMES
     assert by_name(params) == {
-        name: (item.statement_type, None, item.sign) for name, item in LINE_ITEMS.items()
+        name: (item.statement_type, item.payload_key, item.sign)
+        for name, item in LINE_ITEMS.items()
     }
-    assert params["unresolved"] == NAMES
+    assert params["line_item_magnitudes"] == [item.magnitude for item in LINE_ITEMS.values()]
+    assert params["line_item_less_keys"] == [item.less_key for item in LINE_ITEMS.values()]
+    assert params["unresolved"] == []
     assert params["unresolved_cause"] == UNRESOLVED_CAUSE
 
 
-def test_a_resolved_item_carries_its_key_and_sign(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Design 2.4 LineItem, AC-7: a resolved item is bound with its own key and sign, read
-    from line_items.LINE_ITEMS at call time."""
+def test_dec_0295_binds_shares_capex_and_book_equity() -> None:
+    """DEC-0295: shares from the income statement, capex by magnitude, book equity less
+    preferred stock."""
+    assert LINE_ITEMS["shares_outstanding"].statement_type == "income_statement"
+    assert LINE_ITEMS["shares_outstanding"].payload_key == "diluted_shares_outstanding"
+    assert LINE_ITEMS["capital_expenditure"].magnitude is True
+    assert LINE_ITEMS["book_equity"].less_key == "preferred_stock"
+
+
+def test_an_unresolved_item_is_bound_as_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Design 2.4, AC-12: an item set back to REQUIRES_INPUT is bound as None and named
+    unresolved, read from line_items.LINE_ITEMS at call time; the rest keep their keys."""
     item = LINE_ITEMS["capital_expenditure"]
     monkeypatch.setitem(
         line_items.LINE_ITEMS,
         "capital_expenditure",
-        LineItem(item.label, item.statement_type, "X", -1),
+        LineItem(item.label, item.statement_type, REQUIRES_INPUT, -1),
     )
 
     resolved = by_name(engine._line_item_parameters())
 
-    assert resolved["capital_expenditure"] == ("cash_flow_statement", "X", -1)
-    assert {
-        name: value[1] for name, value in resolved.items() if name != "capital_expenditure"
-    } == {name: None for name in NAMES if name != "capital_expenditure"}
-    assert engine._line_item_parameters()["unresolved"] == [
-        name for name in NAMES if name != "capital_expenditure"
-    ]
+    assert resolved["capital_expenditure"] == ("cash_flow_statement", None, -1)
+    assert resolved["revenue"] == ("income_statement", "revenue", 1)
+    assert engine._line_item_parameters()["unresolved"] == ["capital_expenditure"]
 
 
 def test_a_replaced_mapping_is_read_at_call_time(monkeypatch: pytest.MonkeyPatch) -> None:
