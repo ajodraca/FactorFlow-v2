@@ -14,14 +14,14 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-07T22:35:00Z
+  timestamp: 2026-11-07T23:20:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
       version: "5"
     - id: CAP-002-specification-review
-      version: "6"
+      version: "7"
     - id: STD-UI
       version: "6"
     - id: tech-stack
@@ -122,7 +122,12 @@ DEC-0398 (owner) adopts as the contract. On specification review v6 the
 revision also states the momentum causes' data types (FINDING-44), the cause
 order as the owner's (FINDING-41), why coverage does not enter `known_on`
 (FINDING-43), the upgrade from version 3 (FINDING-40), the boundary and order
-tests (FINDING-42), and DEC-0295's JSON-null `preferred_stock` (FINDING-3). The
+tests (FINDING-42), and DEC-0295's JSON-null `preferred_stock` (FINDING-3). On
+review v7 it identifies a pre-version-4 set by its rows rather than its date
+(FINDING-47), drops the first-release Upgrade bullets (FINDING-48 and
+FINDING-49), lists the new `detail` key with the others (FINDING-50), adds a
+test pinning the coverage contract (FINDING-51) and cites DEC-0295 for the
+shares source (FINDING-4). The
 change touches Sections 1, 2.2, 2.3, 2.4, 3, 6, 7, 8, 11, 12 and 13. System
 design v5 carries the same rule into constraint 8, Section 3.1 step 8a, the
 `Observation read` interface and Section 6 assumption 2.
@@ -426,7 +431,8 @@ a plain number makes book equity absent, as any unreadable field does
 shares_outstanding(P1)`, where P1 is the most recent quarterly **income
 statement** and `shares_outstanding` is its diluted weighted average, read from
 that one statement and never summed (DEC-0055 (6) as revised by the owner on
-2026-11-06: Massive's balance sheet carries no shares count).
+2026-11-06 and recorded in DEC-0295: Massive's balance sheet carries no shares
+count).
 
 | Input | Factor | Formula | Statements | Price | `not_computable` when |
 |-------|--------|---------|------------|-------|-----------------------|
@@ -453,7 +459,8 @@ its own `price_not_positive` cause (DEC-0241) is open with the owner;
 (DEC-0056). `detail` records, for a fundamental input, each period end used
 with its `observed_on`, `provider_filing_date` and `backfilled` flag plus the
 market-capitalisation components; for a momentum input, `E`, `S_k`, the two
-closes, and every split and dividend applied.
+closes, every split and dividend applied, and the `corporate_actions` coverage
+segment that contains the window (`corporate_actions_covered_by`).
 
 **Momentum** (DEC-0055 (3), (4)). Per stock, `E` is the latest
 `session_date <= D - MOMENTUM_LAG_MONTHS months` among its bars, and `S_k` is
@@ -684,7 +691,7 @@ reports through the set row and its return value.
   dispersion contributes zero; nothing else.
 - **Inputs are DEC-0055's**, exactly: quarterly TTM sums, prior-year
   comparison, most recent balance sheet, shares from the most recent
-  income statement (owner 2026-11-06), read-time split and dividend
+  income statement (owner 2026-11-06, DEC-0295), read-time split and dividend
   adjustment of unadjusted bars (DEC-0001), per-stock window boundaries,
   latest-trading-day price currency, latest `observed_on` as `known_on`.
 - **The backfill rule is DEC-0056's**: `provider_filing_date` earlier than the
@@ -800,26 +807,24 @@ reports through the set row and its return value.
   of AC-12.
 - **Sets built before version 4** stay as recorded and are not marked (C5,
   AC-18): their momentum ignored whether corporate actions were acquired. They
-  are the sets whose `classification_date` precedes the release that carries
-  CAP-002-E2-S10, which its release manifest records, so the M4 backtest can
-  tell them apart without any row changing.
-- **Behaviour change after upgrade.** Classification sets appear after the
-  first qualifying run following deployment. A set built before the owner
-  supplies the payload keys shows value and growth as not classified with the
-  cause named; sets built afterwards classify them. Earlier sets are not
-  rebuilt, by C5; the next qualifying run produces the first classified set.
-- **Manual actions required.** The owner's answer to section 14 question 1,
-  recorded in `line_items.py` by the implementing story. For version 4, a
-  download that acquires corporate actions once the provider accepts the
-  request rate (CAP-002 release blockers B1 and B2); the next qualifying run
-  then builds a set that classifies the covered stocks.
+  are told apart by their rows, not their dates: every `present` or `outdated`
+  momentum `factor_input` row version 4 writes carries
+  `detail.corporate_actions_covered_by`, and no version 3 row does. A set with
+  such a momentum row and without that key was built by version 3, including a
+  set built after a rollback to 0.2.0. A set none of whose momentum rows is
+  `present` or `outdated` scored nobody on momentum, so the distinction does
+  not matter for it. The M4 backtest can apply this test without any row
+  changing.
+- **Manual actions required.** None for the upgrade itself. Momentum
+  classifies a stock again once a download acquires its corporate actions,
+  which needs the provider to accept corporate-actions requests at the
+  configured rate; the next qualifying run then builds a set that classifies
+  the covered stocks.
 - **Rollback (OPS-MIG-003).** Reverting the image to 0.2.0 restores version
-  3's momentum, which ignores coverage; sets built by version 4 stay readable
-  because no row shape changes. Reverting the image stops builds; the store
-  rollback is `runtime-config` section 2.8.4's. A set built by a newer engine
-  and left in the store after an image rollback is still readable by the
-  older reader, because the row shapes are `0006`'s and do not change within
-  this capability.
+  3's momentum, which ignores coverage. Sets built by version 4 stay readable
+  by the older reader, because the row shapes are `0006`'s and do not change
+  within this capability; the store rollback is `runtime-config` section
+  2.8.4's.
 - **Forward compatibility (AGT-SCOPE-005).** Backtesting at M4 replays sets by
   `classification_date`; every row this engine writes carries the set it
   belongs to and the dates it was computed from, so a later capability reads
@@ -852,6 +857,8 @@ them to the engine, so the tests do not wait on the owner's answer.
 | Split adjustment | `tests/integration/test_engine_inputs_momentum.py` | A 2-for-1 split inside the window halves pre-split prices; the return equals the unsplit series' return (DEC-0001, DEC-0055 (4)) |
 | Dividend compounding | `tests/integration/test_engine_inputs_momentum.py` | One dividend of 1 against a prior close of 100 multiplies the return factor by 1.01 |
 | Corporate actions not covered | `tests/integration/test_engine_inputs_momentum.py` | A stock with every bar but no `corporate_actions` coverage has all three momentum inputs `missing`, `detail.cause = corporate_actions_not_covered`, `detail.corporate_actions_coverage = []`, `known_on` null and `last_acquisition.data_type = corporate_actions`, and is `not_classified` on momentum naming the input; coverage that starts after `S_k + 1` or ends before `E` makes only the windows it does not contain `missing`, and `detail.corporate_actions_coverage` lists that segment; coverage from exactly `S_k + 1` to exactly `E` leaves the input `present`; coverage containing the window with no action rows leaves the input `present`, its return the price return, with `detail.corporate_actions_covered_by` naming the segment (AC-7, AC-12, DEC-0397) |
+| Covered by on an outdated input | `tests/integration/test_engine_inputs_momentum.py` | A covered stock whose latest bar precedes the latest trading day has all three momentum inputs `outdated`, each with `detail.corporate_actions_covered_by` naming the segment (DEC-0397) |
+| Coverage contract pinned | `tests/integration/test_runner_acquires.py` | A successful corporate-actions fetch returning no action records one `corporate_actions` segment over the range requested; a failed fetch records none and leaves an existing segment unchanged (DEC-0398) |
 | Order of momentum causes | `tests/integration/test_engine_inputs_momentum.py` | No `S_k` bar and no coverage: the boundary is named, `last_acquisition.data_type = prices`; no coverage and an unusable payload in the window: `corporate_actions_not_covered`; no coverage and a non-positive `E` close: `corporate_actions_not_covered` (DEC-0397, DEC-0243) |
 | Known-on is the latest observation | `tests/integration/test_engine_inputs_momentum.py` | `known_on` equals the max `observed_on` over bars and actions used (AC-17); null on a `missing` input (DEC-0242) |
 | Composite arithmetic | `tests/unit/test_composite_arithmetic.py` | On a hand-built peer set, z-scores, equal-weight mean, re-standardisation to mean 0 and sd 1, `percent_rank × 100` in 0 to 100; zero-dispersion input contributes 0 (AC-9, DEC-0053); `hypothesis` over random peer sets |

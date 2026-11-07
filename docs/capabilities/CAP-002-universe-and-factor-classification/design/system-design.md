@@ -17,12 +17,12 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-07T22:35:00Z
+  timestamp: 2026-11-07T23:20:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
-    - id: CAP-002-specifications-review-report
-      version: "6"
+    - id: CAP-002-specification-review
+      version: "7"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
@@ -106,7 +106,8 @@ row as "no split or dividend" whether or not the data had ever been acquired.
 The coverage relied on is CAP-001's released behaviour, which DEC-0398 (owner)
 adopts as the contract on specification review v6 FINDING-39. The same review
 moved DEC-0295's JSON-null `preferred_stock` into Section 8 question 1
-(FINDING-3). Nothing else changes.
+(FINDING-3), and review v7 had constraint 8 cite DEC-0295 for the shares
+source (FINDING-4). Nothing else changes.
 
 ## 1. Design Overview
 
@@ -654,8 +655,8 @@ capability's own test module scans every `.sql` file and SQL string for one.
    four before them; balance-sheet inputs use the most recent quarterly
    statement; market capitalisation is the latest close times the diluted
    weighted-average shares outstanding of the most recent quarterly income
-   statement (owner, 2026-11-06: Massive's balance sheet carries no shares
-   count; revises DEC-0055 (6)). Momentum windows end at the latest session on or before one
+   statement (owner, 2026-11-06, DEC-0295: Massive's balance sheet carries no
+   shares count; revises DEC-0055 (6)). Momentum windows end at the latest session on or before one
    calendar month before the classification date and start 3, 6 and 12
    calendar months before that end, each resolved against the stock's own
    bars. Total return is computed from the **unadjusted** bars the store holds
