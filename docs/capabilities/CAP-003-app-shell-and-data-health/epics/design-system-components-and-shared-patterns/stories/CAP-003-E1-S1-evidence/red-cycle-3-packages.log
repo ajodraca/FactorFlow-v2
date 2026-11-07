@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/ui/vendoring.test.ts (5 tests | 2 failed) 5ms
+   × vendored sources are first-party code (DAC-E1-S1-1) > imports nothing through an @/ alias, and scans at least one file 2ms
+     → expected 0 to be greater than 0
+   × package.json dependencies and licences (DAC-E1-12, DAC-E1-S1-5) > lists the five packages the vendored components need 2ms
+     → expected [ 'clsx', 'tailwind-merge', …(3) ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/vendoring.test.ts > vendored sources are first-party code (DAC-E1-S1-1) > imports nothing through an @/ alias, and scans at least one file
+AssertionError: expected 0 to be greater than 0
+ ❯ src/components/ui/vendoring.test.ts:24:26
+     22|   it("imports nothing through an @/ alias, and scans at least one file…
+     23|     const files = sourceFiles(UI_DIR);
+     24|     expect(files.length).toBeGreaterThan(0);
+       |                          ^
+     25|     const offenders = files
+     26|       .filter((file) => /from "@\/|import\("@\//.test(readFileSync(fil…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/vendoring.test.ts > package.json dependencies and licences (DAC-E1-12, DAC-E1-S1-5) > lists the five packages the vendored components need
+AssertionError: expected [ 'clsx', 'tailwind-merge', …(3) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "clsx",
++   "tailwind-merge",
++   "class-variance-authority",
++   "lucide-react",
++   "@radix-ui/react-slot",
++ ]
+
+ ❯ src/components/ui/vendoring.test.ts:76:21
+     74|   it("lists the five packages the vendored components need", () => {
+     75|     const missing = ADDED_PACKAGES.filter((name) => !dependencies.incl…
+     76|     expect(missing).toEqual([]);
+       |                     ^
+     77|   });
+     78| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  17:48:55
+   Duration  830ms (transform 30ms, setup 80ms, collect 10ms, tests 5ms, environment 343ms, prepare 211ms)
+

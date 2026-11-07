@@ -1,0 +1,93 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/token-literals.test.ts (16 tests | 7 failed) 13ms
+   × literal scan (AC-26, DAC-E1-S1-2) > rejects a spacing literal 3ms
+     → expected [] to deeply equal [ Array(1) ]
+   × literal scan (AC-26, DAC-E1-S1-2) > rejects a short hex colour 0ms
+     → expected [] to deeply equal [ Array(1) ]
+   × literal scan (AC-26, DAC-E1-S1-2) > rejects an rgb colour 1ms
+     → expected [] to deeply equal [ Array(1) ]
+   × literal scan (AC-26, DAC-E1-S1-2) > rejects an hsl colour 0ms
+     → expected [] to deeply equal [ Array(1) ]
+   × literal scan (AC-26, DAC-E1-S1-2) > rejects an rgba colour 0ms
+     → expected [] to deeply equal [ Array(1) ]
+   × literal scan (AC-26, DAC-E1-S1-2) > allows the command dialog's width in command.tsx only 0ms
+     → expected [] to deeply equal [ Array(1) ]
+   × literal scan (AC-26, DAC-E1-S1-2) > skips web/src/app/layout.ts wholesale and nothing else under web/src/app/ 0ms
+     → expected [] to deeply equal [ 'web/src/app/shell.tsx: 208px' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > rejects a spacing literal
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > rejects a short hex colour
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > rejects an rgb colour
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > rejects an hsl colour
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > rejects an rgba colour
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- Array [
+-   "web/src/components/ui/planted.tsx: 12px",
+- ]
++ Array []
+
+ ❯ src/components/token-literals.test.ts:183:41
+    181|     ["an rgba colour", 'const a = "rgba(0, 0, 0, 0.5)";', "rgba("],
+    182|   ])("rejects %s", (_name, source, match) => {
+    183|     expect(literalsIn(PLANTED, source)).toEqual([`${PLANTED}: ${match}…
+       |                                         ^
+    184|   });
+    185| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > allows the command dialog's width in command.tsx only
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- Array [
+-   "web/src/components/ui/badge.tsx: 560px",
+- ]
++ Array []
+
+ ❯ src/components/token-literals.test.ts:193:67
+    191|     const source = 'const a = "max-w-[560px]";';
+    192|     expect(literalsIn(COMMAND_MODULE, source)).toEqual([]);
+    193|     expect(literalsIn("web/src/components/ui/badge.tsx", source)).toEq…
+       |                                                                   ^
+    194|       "web/src/components/ui/badge.tsx: 560px",
+    195|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > skips web/src/app/layout.ts wholesale and nothing else under web/src/app/
+AssertionError: expected [] to deeply equal [ 'web/src/app/shell.tsx: 208px' ]
+
+- Expected
++ Received
+
+- Array [
+-   "web/src/app/shell.tsx: 208px",
+- ]
++ Array []
+
+ ❯ src/components/token-literals.test.ts:201:57
+    199|     const source = 'export const width = "208px";';
+    200|     expect(literalsIn(LAYOUT_MODULE, source)).toEqual([]);
+    201|     expect(literalsIn("web/src/app/shell.tsx", source)).toEqual(["web/…
+       |                                                         ^
+    202|   });
+    203| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 9 passed (16)
+   Start at  17:47:44
+   Duration  461ms (transform 24ms, setup 32ms, collect 13ms, tests 13ms, environment 159ms, prepare 73ms)
+

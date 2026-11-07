@@ -1,0 +1,49 @@
+{
+ "schema": 1,
+ "repo_head": "eaaa2308b90e3c74ae84d50b5eca3ec883c80260",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/ui/button.tsx:40:negate-boolean:1",
+   "cycle": "cycle-6",
+   "operator": "negate-boolean",
+   "file": "web/src/components/ui/button.tsx",
+   "line": 40,
+   "original": "  ({ className, variant = \"default\", asChild = false, onClick, ...props }, ref) => {",
+   "mutated": "  ({ className, variant = \"default\", asChild = true, onClick, ...props }, ref) => {"
+  },
+  {
+   "id": "web/src/components/ui/button.tsx:manual:1",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/ui/button.tsx",
+   "line": 0,
+   "original": "aria-disabled={blocked ? \"true\" : undefined}",
+   "mutated": "aria-disabled={undefined}",
+   "old": "aria-disabled={blocked ? \"true\" : undefined}",
+   "new": "aria-disabled={undefined}"
+  },
+  {
+   "id": "web/src/components/ui/button.tsx:manual:2",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/ui/button.tsx",
+   "line": 0,
+   "original": "(event: MouseEvent<HTMLButtonElement>) => event.preventDefault()",
+   "mutated": "(_event: MouseEvent<HTMLButtonElement>) => undefined",
+   "old": "(event: MouseEvent<HTMLButtonElement>) => event.preventDefault()",
+   "new": "(_event: MouseEvent<HTMLButtonElement>) => undefined"
+  },
+  {
+   "id": "web/src/components/ui/button.tsx:manual:3",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/components/ui/button.tsx",
+   "line": 0,
+   "original": "const blocked = variant === \"blocked\";",
+   "mutated": "const blocked = variant !== \"blocked\";",
+   "old": "const blocked = variant === \"blocked\";",
+   "new": "const blocked = variant !== \"blocked\";"
+  }
+ ]
+}

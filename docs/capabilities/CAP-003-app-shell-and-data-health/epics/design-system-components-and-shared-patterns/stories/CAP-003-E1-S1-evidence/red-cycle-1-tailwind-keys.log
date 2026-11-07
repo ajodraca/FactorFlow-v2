@@ -1,0 +1,93 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/token-literals.test.ts (4 tests | 2 failed) 90ms
+   × tailwind.config.js keys (DAC-E1-11) > gains only the vendored colour keys, no other 29ms
+     → expected [ 'background', 'border', …(23) ] to deeply equal [ Array(37) ]
+   × tailwind.config.js keys (DAC-E1-11) > binds the default radius and ring width to their tokens 16ms
+     → expected undefined to deeply equal { DEFAULT: 'var(--radius)' }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > tailwind.config.js keys (DAC-E1-11) > gains only the vendored colour keys, no other
+AssertionError: expected [ 'background', 'border', …(23) ] to deeply equal [ Array(37) ]
+
+- Expected
++ Received
+
+  Array [
+-   "accent",
+-   "accent-foreground",
+    "background",
+    "border",
+    "card",
+    "card-foreground",
+-   "destructive",
+-   "destructive-foreground",
+    "foreground",
+    "input",
+-   "muted",
+    "muted-foreground",
+-   "popover",
+-   "popover-foreground",
+-   "primary",
+-   "primary-foreground",
+-   "ring",
+    "secondary",
+    "secondary-foreground",
+-   "seq-1",
+    "status-active",
+    "status-active-muted",
+    "status-critical",
+    "status-critical-muted",
+-   "status-foreground",
+    "status-good",
+    "status-good-muted",
+    "status-neutral",
+    "status-neutral-muted",
+    "status-serious",
+    "status-serious-muted",
+    "status-warning",
+    "status-warning-muted",
+    "value-indeterminate",
+    "value-indeterminate-muted",
+    "value-missing",
+    "value-missing-muted",
+  ]
+
+ ❯ src/components/token-literals.test.ts:72:60
+     70|   it("gains only the vendored colour keys, no other", async () => {
+     71|     const config = await loadConfig();
+     72|     expect(Object.keys(config.theme.extend.colors).sort()).toEqual(
+       |                                                            ^
+     73|       [...DELIVERED_COLOR_KEYS, ...ADDED_COLOR_KEYS].sort(),
+     74|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > tailwind.config.js keys (DAC-E1-11) > binds the default radius and ring width to their tokens
+AssertionError: expected undefined to deeply equal { DEFAULT: 'var(--radius)' }
+
+- Expected: 
+Object {
+  "DEFAULT": "var(--radius)",
+}
+
++ Received: 
+undefined
+
+ ❯ src/components/token-literals.test.ts:79:46
+     77|   it("binds the default radius and ring width to their tokens", async …
+     78|     const config = await loadConfig();
+     79|     expect(config.theme.extend.borderRadius).toEqual({ DEFAULT: "var(-…
+       |                                              ^
+     80|     expect(config.theme.extend.ringWidth).toEqual({ DEFAULT: "var(--fo…
+     81|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  17:45:49
+   Duration  1.92s (transform 74ms, setup 170ms, collect 21ms, tests 90ms, environment 615ms, prepare 430ms)
+
