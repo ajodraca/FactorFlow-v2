@@ -7,8 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-05
-updated: 2026-11-06
-last_reworked_review: e2e-tests-automation-review-v3.md
+updated: 2026-11-07
+last_reworked_review: e2e-tests-automation-review-v4.md
 ai_provenance:
   agent_id: automation-planning-agent
   agent_version: "1.0"
@@ -68,6 +68,12 @@ data" nor a partial run. The stub therefore says both with status codes alone:
 a per-symbol 404 for a stock the provider holds no fundamentals for (recorded
 `not_found`), and a per-symbol 503 for a stock whose fundamentals fail on one
 run (recorded `failed`, so the run ends Partial). Neither invents a payload key.
+
+**Resolved 2026-11-07 (DEC-0295).** The owner answered question 1: the seven keys
+are bound in `line_items.py` and `line_items.unresolved()` is empty, so the guard
+lets the four cases run. T014 makes the stub serve quarterly statements under
+those keys, which is the "additional stub task" the Notes reserved. The SQL seeds
+and the guard stay as they are.
 
 ## Test Case Traceability
 
@@ -187,6 +193,19 @@ TC-E2E-001, 009 and 010 guarded as described), each titled with its TC-E2E id.
 
 ---
 
+- [x] T014 Serve quarterly statements under the resolved keys in `tests/e2e/support/massive_stub.py` (DEC-0295; review v4 AR-010; the Notes' reserved stub task). In mode `ok`, for a symbol that is neither `NOF*` nor withheld, each financial-statement path answers one row per calendar quarter end within `[period_end.gte, period_end.lte]`. A row is answered only when its `filing_date`, 35 days after the period end, is on or before `period_end.lte`, so a 3-year window holds at least eight consecutive quarters ending within the last six months. Each row carries `timeframe: "quarterly"`, `fiscal_quarter`, `fiscal_year`, `period_end`, `filing_date`, `tickers` and `statement_type`, and that statement type's keys from `line_items.LINE_ITEMS`:
+  - balance sheet: `total_equity_attributable_to_parent`;
+  - income statement: `diluted_shares_outstanding`, `net_income_loss_attributable_common_shareholders`, `diluted_earnings_per_share`, `revenue`;
+  - cash-flow statement: `net_cash_from_operating_activities`, `purchase_of_property_plant_and_equipment` (reported negative).
+
+  Values are positive apart from capital expenditure. They vary by symbol, so value and growth percentiles differ, and revenue and EPS grow quarter on quarter, so every prior-year base is positive. They are a deterministic function of symbol and quarter, so every run serves the same rows. Extend `tests/unit/test_massive_stub.py`:
+  - each statement type's keys equal the `LINE_ITEMS` keys of that type;
+  - a 3-year window yields at least eight consecutive quarter ends, all filed by its end;
+  - repeated requests agree;
+  - `NOF*` and withheld symbols keep their 404 and 503.
+
+  Depends on T002. TC-E2E-001, 002 (after the run), 009 and 010.
+
 ## Phase 4: Test Validation & Cleanup
 
 **Purpose**: Prove the new specs pass, are isolated, and leave the existing suite green.
@@ -247,7 +266,7 @@ Phase 1 and T003 before T004; Phase 2 before Phase 3; Phase 3 before Phase 4.
   growth, so TC-E2E-001, TC-E2E-002 (after the run), TC-E2E-009 and TC-E2E-010 are
   guarded. The owner resolving that question is what unblocks them; the stub
   must then serve the real keys (an additional stub task at that point, not
-  guessed here). That task must also date the statements: today the `ok`-mode
+  guessed here). Resolved by DEC-0295 on 2026-11-07; that task is T014. That task must also date the statements: today the `ok`-mode
   statement row is dated at the request's `period_end.gte`, the start of the
   history window, so it must serve recent and earlier quarters or value and
   growth read outdated or uncomputable (automation review v3, AR-011 note).

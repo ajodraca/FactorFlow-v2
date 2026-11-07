@@ -4,9 +4,9 @@
 provider (CAP-002-e2e-tests-automation-tasks T002; automation review v3
 AR-011; DEC-0047): a 404 for a stock the provider holds no fundamentals for, a
 503 for a withheld stock's statements, and price bars from 300 days ago for a
-recently listed stock. TC-E2E-001, 009 and 010 are skipped while the payload
-keys are unresolved (DEC-0285), so this checks the stub on its own. It calls
-`provider_response` directly: no socket, no container.
+recently listed stock. It also checks the quarterly statements the stub serves
+under the resolved payload keys (T014; DEC-0295). It calls `provider_response`
+directly: no socket, no container.
 """
 
 from __future__ import annotations
@@ -18,6 +18,8 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
+
+from factorflow.classification.line_items import LINE_ITEMS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STUB = REPO_ROOT / "tests/e2e/support/massive_stub.py"
@@ -79,7 +81,7 @@ def test_a_stock_with_statements_answers_them(stub: types.ModuleType) -> None:
     status, body = stub.provider_response(STATEMENT_PATHS[0], {"ticker": ["BBB"]})
 
     assert status == 200
-    assert len(body["results"]) == 1
+    assert len(body["results"]) >= 8
 
 
 @pytest.mark.parametrize("path", STATEMENT_PATHS)
@@ -142,3 +144,72 @@ def test_a_new_stock_answers_its_statements(stub: types.ModuleType) -> None:
 def test_the_no_fundamentals_mode_is_gone(stub: types.ModuleType) -> None:
     with pytest.raises(ValueError, match="unknown mode"):
         stub.STATE.set_mode("no-fundamentals")
+
+
+# --- T014: quarterly statements under the resolved keys (DEC-0295) -----------------------
+
+TYPES = dict(
+    zip(STATEMENT_PATHS, ("balance_sheet", "income_statement", "cash_flow_statement"), strict=True)
+)
+
+
+def _rows(stub: types.ModuleType, path: str, symbol: str, gte: str, lte: str) -> list[dict]:
+    status, body = stub.provider_response(
+        path, {"ticker": [symbol], "period_end.gte": [gte], "period_end.lte": [lte]}
+    )
+    assert status == 200
+    rows: list[dict] = body["results"]
+    return rows
+
+
+@pytest.mark.parametrize("path", STATEMENT_PATHS)
+def test_each_statement_carries_its_types_resolved_keys(stub: types.ModuleType, path: str) -> None:
+    statement_type = TYPES[path]
+    keys = {i.payload_key for i in LINE_ITEMS.values() if i.statement_type == statement_type}
+
+    rows = _rows(stub, path, "F00", "2023-11-07", "2026-11-07")
+
+    for row in rows:
+        assert row["statement_type"] == statement_type
+        assert row["timeframe"] == "quarterly"
+        assert keys <= row.keys()
+        assert not (row.keys() & ({i.payload_key for i in LINE_ITEMS.values()} - keys))
+
+
+def test_a_three_year_window_holds_eight_consecutive_filed_quarters(
+    stub: types.ModuleType,
+) -> None:
+    rows = _rows(stub, STATEMENT_PATHS[1], "F00", "2023-11-07", "2026-11-07")
+    ends = [date.fromisoformat(row["period_end"]) for row in rows]
+
+    assert len(ends) >= 8
+    assert ends[-1] >= date(2026, 11, 7) - timedelta(days=183)
+    assert all(
+        later - earlier <= timedelta(days=92)
+        for earlier, later in zip(ends, ends[1:], strict=False)
+    )
+    assert all(date.fromisoformat(row["filing_date"]) <= date(2026, 11, 7) for row in rows)
+    assert [row["fiscal_quarter"] for row in rows[:4]] == [
+        (end.month - 1) // 3 + 1 for end in ends[:4]
+    ]
+
+
+def test_values_are_positive_growing_and_differ_by_symbol(stub: types.ModuleType) -> None:
+    income = {
+        symbol: _rows(stub, STATEMENT_PATHS[1], symbol, "2023-11-07", "2026-11-07")
+        for symbol in ("F00", "F01")
+    }
+    cash = _rows(stub, STATEMENT_PATHS[2], "F00", "2023-11-07", "2026-11-07")
+    revenue = [row["revenue"] for row in income["F00"]]
+
+    assert all(value > 0 for value in revenue)
+    assert revenue == sorted(revenue) and len(set(revenue)) == len(revenue)
+    assert income["F00"][-1]["revenue"] != income["F01"][-1]["revenue"]
+    assert all(row["purchase_of_property_plant_and_equipment"] < 0 for row in cash)
+    assert all(row["net_cash_from_operating_activities"] > 0 for row in cash)
+
+
+def test_repeated_requests_agree(stub: types.ModuleType) -> None:
+    first = _rows(stub, STATEMENT_PATHS[0], "BBB", "2023-11-07", "2026-11-07")
+
+    assert _rows(stub, STATEMENT_PATHS[0], "BBB", "2023-11-07", "2026-11-07") == first

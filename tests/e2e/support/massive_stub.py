@@ -41,8 +41,16 @@ acquisition.ts`:
 - `POST /__stub/reset` restores mode `ok`, releases every hold, restores
   every withheld symbol and clears the request log.
 
-No statement payload key is invented (DEC-0285): the cases above differ by
-status code and dates only.
+In mode `ok`, every other symbol's financial-statement paths answer one
+quarterly row per calendar quarter end within `[period_end.gte,
+period_end.lte]`, kept only when it was filed (35 days after the period end) by
+`period_end.lte`. Each row carries its statement type's line items under the
+keys `factorflow.classification.line_items.LINE_ITEMS` binds (DEC-0295). Values
+are a deterministic function of the symbol and the quarter. They are positive
+apart from capital expenditure, which is reported as an outflow, they differ
+across symbols, and revenue and earnings per share grow every quarter, so a run
+scores value and growth for every stock that has them (CAP-002-e2e-tests-
+automation-tasks T014; automation review v4 AR-010).
 
 A test fixture, not a product contract. Not collected by pytest (no `test_`
 prefix) or Playwright (not `*.spec.ts`).
@@ -60,6 +68,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
+
+from factorflow.classification.line_items import LINE_ITEMS
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures" / "massive"
 
@@ -103,6 +113,74 @@ _ACTION_PATHS = {
     "/stocks/v1/dividends": (DIVIDEND, "ex_dividend_date"),
     "/vX/reference/ipos": (IPO, "listing_date"),
 }
+
+
+_FILING_LAG_DAYS = 35
+_DEFAULT_WINDOW_DAYS = 3 * 365
+
+
+def _quarter_ends(start: date, end: date) -> list[date]:
+    """Every calendar quarter end in ``[start, end]``, oldest first."""
+    ends = []
+    for year in range(start.year, end.year + 1):
+        for month, day in ((3, 31), (6, 30), (9, 30), (12, 31)):
+            quarter_end = date(year, month, day)
+            if start <= quarter_end <= end:
+                ends.append(quarter_end)
+    return ends
+
+
+def _line_item_values(symbol: str, quarter_end: date) -> dict[str, Any]:
+    """The seven line items of one symbol's quarter, by ``LINE_ITEMS`` name.
+
+    ``k`` counts quarters from 2015, so revenue and earnings per share grow every
+    quarter; ``h`` spreads the symbols apart.
+    """
+    h = sum(map(ord, symbol))
+    k = (quarter_end.year - 2015) * 4 + (quarter_end.month - 1) // 3 + 1
+    revenue = (1_000_000_000 + (h % 97) * 10_000_000) * (100 + (h % 7 + 1) * k) // 100
+    net_income = revenue * (5 + h % 11) // 100
+    return {
+        "book_equity": revenue * (2 + h % 5),
+        "shares_outstanding": 100_000_000 + (h % 37) * 5_000_000,
+        "net_income": net_income,
+        "diluted_eps": round(1 + (h % 13) / 10 + k * (h % 5 + 1) / 100, 2),
+        "revenue": revenue,
+        "operating_cash_flow": net_income * 6 // 5,
+        "capital_expenditure": -(revenue * (2 + h % 4) // 100),
+    }
+
+
+def _statements(symbol: str, statement_type: str, query: dict[str, list[str]]) -> list[Any]:
+    """The quarterly rows of one statement type filed within the requested window."""
+    lte = _first(query, "period_end.lte", "period_end_lte")
+    gte = _first(query, "period_end.gte", "period_end_gte")
+    end = date.today() if lte is None else date.fromisoformat(lte)
+    start = end - timedelta(days=_DEFAULT_WINDOW_DAYS) if gte is None else date.fromisoformat(gte)
+    rows = []
+    for quarter_end in _quarter_ends(start, end):
+        filed = quarter_end + timedelta(days=_FILING_LAG_DAYS)
+        if filed > end:
+            continue
+        values = _line_item_values(symbol, quarter_end)
+        rows.append(
+            {
+                "cik": FINANCIAL["cik"],
+                "tickers": [symbol],
+                "statement_type": statement_type,
+                "timeframe": "quarterly",
+                "fiscal_year": quarter_end.year,
+                "fiscal_quarter": (quarter_end.month - 1) // 3 + 1,
+                "period_end": quarter_end.isoformat(),
+                "filing_date": filed.isoformat(),
+                **{
+                    item.payload_key: values[name]
+                    for name, item in LINE_ITEMS.items()
+                    if item.statement_type == statement_type
+                },
+            }
+        )
+    return rows
 
 
 class StubState:
@@ -261,16 +339,7 @@ def provider_response(path: str, query: dict[str, list[str]]) -> tuple[int, dict
             return 404, NOT_FOUND
         if symbol is not None and STATE.is_withheld(symbol):
             return 503, UNAVAILABLE
-        period_end = _first(query, "period_end.gte", "period_end_gte") or FINANCIAL["period_end"]
-        row = {
-            **FINANCIAL,
-            "tickers": [symbol],
-            "statement_type": _FINANCIAL_PATHS[path],
-            "period_end": period_end,
-            "filing_date": period_end,
-            "fiscal_year": date.fromisoformat(period_end).year,
-        }
-        return 200, _envelope([row])
+        return 200, _envelope(_statements(symbol or "", _FINANCIAL_PATHS[path], query))
 
     if path in _ACTION_PATHS:
         body, date_field = _ACTION_PATHS[path]
