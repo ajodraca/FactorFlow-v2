@@ -17,7 +17,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-07T22:52:00Z
+  timestamp: 2026-11-07T23:17:49Z
   source_artifacts:
     - id: CAP-003
       version: "2, draft 2026-11-07"
@@ -151,7 +151,8 @@ stock's budget at the same checkpoint where it refreshes its heartbeat, and
 records both refusals as `failed` with the reason kinds `not_entitled` and
 `rate_limited`. No outcome value, column or migration is added. On the
 interface side, `data-health-reader` reads each failure's cause from the kind
-the stored reason already leads with, and `data-health-ui` and the download
+the stored reason already leads with, `owner-shell`'s `ProblemPage` failure
+type carries it to the browser, and `data-health-ui` and the download
 detail screen of `owner-web-app` choose each failure's fix by that cause, so a
 plan refusal names the provider plan and never offers a download (Section
 3.6).
@@ -759,7 +760,7 @@ sequenceDiagram
 
 | Component ID | Name | Responsibility | Owned by |
 |--------------|------|----------------|----------|
-| `owner-shell` | Owner interface shell | React composition root of the owner interface: the rail in two groups listing only shipped destinations with their attention counts, the sticky top bar with the route-derived title and the palette button, the route map with the `/` redirect and the four legacy redirects, the unreachable state, and the shell-wide polled reads (health 30 s; attention and classification summary 60 s, 10 s while a download is non-terminal or scores are building; all paused while the document is hidden, DEC-0212) shared through the shell context. Replaces the delivered shell and route composition in `web/src/app/` (DEC-0204) | this design |
+| `owner-shell` | Owner interface shell | React composition root of the owner interface: the rail in two groups listing only shipped destinations with their attention counts, the sticky top bar with the route-derived title and the palette button, the route map with the `/` redirect and the four legacy redirects, the unreachable state, and the shell-wide polled reads (health 30 s; attention and classification summary 60 s, 10 s while a download is non-terminal or scores are building; all paused while the document is hidden, DEC-0212) shared through the shell context. Replaces the delivered shell and route composition in `web/src/app/` (DEC-0204). In version 2 it changes in one place: the `ProblemPage` failure type in its `web/src/app/shell-types.ts` gains the field `cause`, a `FailureCause` or null, with `FailureCause` imported from `ui-components`, so `data-health-ui` receives each failure's cause (AC-29, AC-30) | this design |
 | `command-palette` | Command palette | The `command` `dialog` opened by the shell: Stocks from the followed list (server prefix search), Universes and Pages filtered locally, targets per DEC-0207; never a trading action. `web/src/app/command-palette/` | this design |
 | `ui-components` | Design-system components and shared patterns | The design-system components vendored as shadcn/ui ships them in `web/src/components/ui/` (badge, button, card, data-table, dialog, form, input, textarea, select, checkbox, radio-group, progress, stepper, command, toast; `form` per DEC-0215) and the blueprint §4 patterns in `web/src/components/patterns/` (Needs-you item and `sortAttention`, `worstDataTier`, as-of line, status badge with tier shape, state-coverage region, and, in version 2, `failureCause` and `failureRecovery`, the one mapping from a failure's outcome and cause to its fix), consuming only `theme.css` tokens (DEC-0205). The as-of line is taken over, not created: CAP-002 lands first with its Research-specialised `web/src/components/patterns/as-of-line.tsx`, and `ui-components` generalises that file to `AsOfLine`, with the Research line composing it (owner decision 2026-10-25) | this design |
 | `setup-ui` | Setup screen | S02 steps 1 to 4 at `/setup`: stepper, each step's values saved on Continue through the delivered endpoints, unsaved input held in app memory above the `/setup` route for the session (never browser storage), *Add later* leading to step 4's blocked **Start download** with its two exits, the first download started and its progress shown (DEC-0202) | this design |
@@ -1146,7 +1147,7 @@ before the upgrade keep `[unavailable]` and are not rewritten (constraint 17).
 | AC-26 | Built from the design system | `ui-components`; tokens only; approved-specification layout dimensions in `owner-shell`'s `web/src/app/layout.ts` | 4.1, 5.12; DEC-0205 |
 | AC-27 | CAP-002 keeps its routes | `classification-ui` `Screen registration` into `owner-shell`, routes unchanged | 4.2; DEC-0204 |
 | AC-28 | With 3,000 followed stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th percentile, measured by the volume test | `data-health-reader` coverage derivation over the active roster; `data-health-api` `GET /api/data-health`; read on demand by Data health only | 3.4 note 1, 5.7, 6.4 |
-| AC-29 | A plan refusal is not retried: sent once, recorded under its own reason; its *Needs fixing* row names the provider plan as the fix and offers no download | `massive-client` both-fields `not entitled` rule and `ProviderNotEntitled` (`FATAL` for `rate-limit-governor`, one request); `acquisition-runner` records `failed` with kind `not_entitled`; `data-health-reader` `cause` and `retryable` excluding `not_entitled`; `data-health-ui` and `owner-web-app` download detail fix from `failureRecovery` in `ui-components` | 1, 3.4 note 9, 3.6 notes 1, 5 to 7; 4.1, 4.2; 5.16 (a), (d) |
+| AC-29 | A plan refusal is not retried: sent once, recorded under its own reason; its *Needs fixing* row names the provider plan as the fix and offers no download | `massive-client` both-fields `not entitled` rule and `ProviderNotEntitled` (`FATAL` for `rate-limit-governor`, one request); `acquisition-runner` records `failed` with kind `not_entitled`; `data-health-reader` `cause` and `retryable` excluding `not_entitled`; `owner-shell` `ProblemPage` failure type carrying `cause`; `data-health-ui` and `owner-web-app` download detail fix from `failureRecovery` in `ui-components` | 1, 3.4 note 9, 3.6 notes 1, 5 to 7; 4.1, 4.2; 5.16 (a), (d) |
 | AC-30 | Throttling is waited out, then named: never a failed attempt; past the wait budget for one stock recorded under its own rate-limit reason; the download still finishes, never abandoned | `massive-client` `429` `MaxRetryError` rule (`THROTTLED`); `rate-limit-governor` per-stock budget checked before each wait, `ProviderRateLimited`; `acquisition-runner` `start_instrument()` at the heartbeat checkpoint and `failed` with kind `rate_limited`; staleness window unchanged (one budget per stock) | 1, 3.6 notes 2 to 5; 4.1, 4.2; 5.16 (b), (e); 5.17 |
 
 Screen acceptance checks: S01-3, S01-4 (DEC-0203), S01-6 (box 6) and S01-7
@@ -1232,7 +1233,13 @@ not in M1.
     the provider-refusal change the one exception, but §5.2 was not edited.
     This design follows the scope sections and the criteria. *Owner:
     capability owner, to align §5.2 with the exception. Blocks: nothing here;
-    specification review will meet the contradiction.*
+    specification review will meet the contradiction.* **Answered 2026-11-07
+    by the owner** (capability `3174b50`, still v2): §5.2's CAP-001 row now
+    excepts the provider-refusal reasons of AC-29 and AC-30, owned and
+    designed here with CAP-001's approved designs left as they are, and its
+    Massive row now reads *Any new provider read*, the change adding no
+    endpoint and no request. This design already followed that reading;
+    nothing in it changes.
 12. **Should an unrecognised provider refusal also be sent once?** Constraint
     16 (c) keeps the delivered behaviour: an envelope matching no known rule
     is retried to the attempt limit and recorded `[unavailable] … failed 3
@@ -1284,7 +1291,7 @@ not in M1.
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-003 v2 (draft, `2e6bfeb`) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Version 2: AC-29 and AC-30; In Scope *Provider refusals reported by cause*, changing `massive-client`, `rate-limit-governor` and `acquisition-runner` with CAP-001's designs left as they are; the Out of Scope exception; the §5.1 CAP-001 row; the plan-ownership assumption; §5.2 unchanged (open question 11). Version 1: 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
+| Capability CAP-003 v2 (draft, `3174b50`) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Version 2: AC-29 and AC-30; In Scope *Provider refusals reported by cause*, changing `massive-client`, `rate-limit-governor` and `acquisition-runner` with CAP-001's designs left as they are; the Out of Scope exception; the §5.1 CAP-001 row; the plan-ownership assumption; §5.2 aligned for AC-29 and AC-30 in `3174b50` (the CAP-001 row's provider-refusal exception, the Massive row's *Any new provider read*; open question 11, answered). Version 1: 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
 | Product UX blueprint `PRODUCT-UX` v6 (approved) | `docs/ux/product-ux-blueprint.md` | §0 patterns in `web/src/components/patterns/`; principles 4, 5, 7, 8; §2.1 rail groups and count chips; §2.2 routes, `/` redirect and the four legacy redirects; §3.1 layout; §3.4 palette and the single keydown listener; §3.5 shell states; §4.1 Needs-you item and sort; §4.8 as-of line; §4.10 states; §6 first-run and data-problem flows; §7 vocabulary; §8 tiers; §9 action tiers and confirm wording; §10 M1 row (three palette groups, CAP-001 API as it is); §12 D-2, D-7, D-8, D-9 |
 | Home `PRODUCT-UX-S01` v4 (approved) | `docs/ux/screens/S01-home.md` | M1 regions; view model with an attention service and server sort; 60 s polling with *checked*; data item copy; states; S01-3, S01-4, S01-6, S01-7 |
 | Setup `PRODUCT-UX-S02` v4 (approved) | `docs/ux/screens/S02-setup.md` | Four M1 steps on CAP-001's API; credential variable name; parse rules and the 30-stock warning; complete when the first download is started; progress polled 10 s; reopen from Settings; S02-1 to S02-6 |
@@ -1307,18 +1314,18 @@ not in M1.
 
 ## 10. Design Readiness
 
-**Design Readiness Score: 78/100** (version 2; 80 at version 1)
+**Design Readiness Score: 79/100** (version 2; 80 at version 1)
 
 Version 2 covers AC-29 and AC-30 end to end: the three delivered ingestion
 components it changes are named with their changes and interfaces (Section
 4.1, 4.2), the per-stock throttle budget is shown to keep the staleness window
 as derived (Section 3.6 note 4), and *Needs fixing* tells a plan refusal apart
 by the stored reason's kind without a schema change. Every acceptance
-criterion, now 30, traces to a design element. The two points it loses are
-the design choices this revision made on the owner's behalf for review: the
+criterion, now 30, traces to a design element. The point it loses is the
+design choices this revision made on the owner's behalf for review: the
 unrecognised-refusal default (constraint 16 (c)) and the reading of AC-30's
-*partial* (open question 13); and capability §5.2, which still contradicts
-the scope this revision implements (open question 11).
+*partial* (open question 13). Capability §5.2, which contradicted the scope
+this revision implements, has been aligned (open question 11, answered).
 
 Version 1's assessment follows.
 
