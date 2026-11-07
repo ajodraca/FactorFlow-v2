@@ -2,12 +2,12 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-ux-design
 artifact_type: ux-design
-artifact_version: 1
+artifact_version: 2
 capability_id: CAP-003
 title: App Shell & Data Health
 created: 2026-10-25
-updated: 2026-10-26
-status: approved
+updated: 2026-11-07
+status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 design_source: Generated from UX brief, starting from PRODUCT-UX-S01, PRODUCT-UX-S02 and PRODUCT-UX-S09
@@ -18,15 +18,15 @@ theme: design-system/theme.css
 ai_provenance:
   agent_id: ux-design-agent
   agent_version: "1.2"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-26T02:17:21Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:18:50Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c33a8f1)"
     - id: CAP-003-ux-brief
       version: "1"
     - id: PRODUCT-UX
@@ -41,16 +41,18 @@ ai_provenance:
       version: "6"
     - id: CAP-001-ux-design
       version: "5"
+    - id: CAP-003-component-design-ui-components
+      version: "2, draft (522d447)"
+    - id: CAP-003-component-design-data-health-ui
+      version: "2, draft (522d447)"
+    - id: CAP-003-component-design-owner-web-app
+      version: "2, draft (522d447)"
+    - id: CAP-001-specifications-review-report
+      version: "14 (b69facd, branch usr/alvaro-de-jodra/CAP-001-design-provider-refusals)"
     - id: factorflow-design-system
       version: "18 components as of 2026-10-15"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:25Z
-  reviewed_revision: sha256:4d7a816572b09884ffa98872f0a7b5e75a850281a01492378ad46b792b38f7bc
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # UX Design: App Shell & Data Health
@@ -84,6 +86,19 @@ only where this capability is the one that builds them, because the shell and
 the patterns are its deliverable (capability §2, §5.3). Every departure from an
 approved screen specification is listed in Section 0.8 with its reason, as
 blueprint §0 requires.
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29, AC-30). A failure's fix now follows its cause,
+the leading kind of its stored reason, through `ui-components`'
+`failureRecovery(outcome, cause)` (system design §3.6 note 7): a plan refusal
+names the provider plan and is never offered a download, and a rate limit is
+offered a later download with what to check if it recurs. *Needs fixing* (1.4)
+and the download detail (1.8) say the same, which also answers CAP-001
+specification review v14 FINDING-64 (the download detail offered a new
+download as every failure's recovery). This revision fixes the words the
+component designs deferred to it (`ui-components` §14 question 3); it adds no
+component, variant, token or decision. Sections 1.4, 1.8, 4, 5 and 6 carry
+the change.
 
 **Vocabulary in this document.** As STD-UI-1 v6 and blueprint §7 require,
 every string the owner reads uses the display labels: *stock*, *followed
@@ -814,23 +829,45 @@ Reading width, 1180 px cap, regions stacked `--space-5` apart (S09 §3).
    sub-line *From your most recent downloads · checked {time}* (problems are
    each stock's latest recorded outcome, which may span downloads, DEC-0201),
    and **Download now** (`button` `default`) only when at least one row is
-   `retryable` (S09 §3; AC-14). One row per stock from `problems.rows`,
+   `retryable` (S09 §3; AC-14). A row is `retryable` when any of its
+   failures is *Failed* for a cause other than a plan refusal, so a row whose
+   failures are all plan refusals is not retryable (AC-29; system design §3.6
+   note 6). One row per stock from `problems.rows`,
    ordered by symbol, a `ul` of `li`s:
    - the symbol at weight 600 as a link to `/data/coverage?symbol={SYMBOL}`;
    - per failure in `failures[]`, the outcome `badge`, `status-critical`
      *Failed* or `status-warning` *Not found*, then what failed in words:
      *Downloading {daily prices / company financials / corporate actions /
      reference data} failed: {reason}, {attempts} attempts* or *The provider
-     doesn't recognise this symbol.* (S09 §8; S09-2);
+     doesn't recognise this symbol.* (S09 §8; S09-2). For a failure whose
+     `cause` is `not_entitled` or `rate_limited` the line ends at
+     *{reason}*, without *, {attempts} attempts*: a plan refusal is one
+     request and a rate limit is not an attempt (AC-30), and the stored count
+     would read 1 (`data-health-ui` §2.5);
    - a second line at `--text-xs` with the M1 consequence, *Its scores show
      as Incomplete until this is fixed, and so does every universe holding
      it.* (DEC-0201; universes are not enumerated);
-   - the fix: for *Failed*, *Download again to retry; data already stored is
-     never duplicated or overwritten.* (S09 §8), no per-row control, the
-     header's **Download now** being the action (D-9); for *Not found*, the
-     row's own **Stop following** (`button` `ghost`) and **Follow a different
-     symbol** (`button` `outline`, a link) with *Probably a typo or a delisted
-     ticker. Downloading again won't help.* (AC-13, AC-14; S09-3).
+   - the fix, one `--text-xs` line chosen by
+     `failureRecovery(failure.outcome, failure.cause)` from `ui-components`,
+     never by a mapping of this screen's own (version 2; system design §3.6
+     note 7):
+     - *Failed*, cause `not_entitled` (a plan refusal): *Your Massive plan
+       doesn't include this data, so downloading again won't help. Add it to
+       your plan with Massive; the next download after that gets it.* No
+       per-row control and no download offered (AC-29);
+     - *Failed*, cause `rate_limited`: *Download again later; data already
+       stored is never duplicated or overwritten. If this keeps happening,
+       check that `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` is no higher than
+       your Massive plan's request limit; restart FactorFlow after changing
+       it.* No per-row control, the header's **Download now** being the
+       action (AC-30);
+     - *Failed*, any other cause or none: *Download again to retry; data
+       already stored is never duplicated or overwritten.* (S09 §8), no
+       per-row control, the header's **Download now** being the action (D-9);
+     - *Not found*: the row's own **Stop following** (`button` `ghost`) and
+       **Follow a different symbol** (`button` `outline`, a link) with
+       *Probably a typo or a delisted ticker. Downloading again won't help.*
+       (AC-13, AC-14; S09-3).
    After 50 rows, **Show more** (`button` `outline`) appends the next page
    from `GET /api/data-health/problems?cursor={last symbol}&limit=50`
    (STD-UI-30).
@@ -887,7 +924,9 @@ This starts when it finishes.* (AC-15). `409` `history_depth_not_set`:
 depth** linking to `/settings`; `409` `no_active_instruments`: *Couldn't start
 the download: no stocks are followed.* with **Follow stocks** linking to
 `/data/followed`. Download now downloads the whole followed list; there is no
-per-stock retry (D-9), and the row copy says so.
+per-stock retry (D-9), and the row copy says so. A plan refusal is not fixed
+by a download (AC-29): its row names the plan instead, and it never brings
+**Download now** into *Needs fixing* on its own account.
 
 **Stop following {SYMBOL}** (a *Not found* row) is consequential: `dialog`
 `confirm` titled *Stop following {SYMBOL}* with the description *Stop
@@ -1206,6 +1245,7 @@ title is *Data health › Downloads › Download {start time}*.
 | The download finished first | *This download had already finished.* with its outcome (CAP-001 AC-19) |
 | Interrupted explanation | *FactorFlow stopped before this download finished, and the download was picked up as interrupted. Coverage written before it stopped is kept. Download again to continue.* (`status-serious`) |
 | Not found | A stock the provider does not recognise is distinguished from other failures with `status-warning` *Not found* and the sentence *The provider doesn't recognise this symbol. Downloading again won't help; stop following it or follow a different symbol.* with **Open Data health** linking to `/data` |
+| Fix by cause (version 2) | Each expanded data type whose outcome is *Failed* follows its reason sentence with the fix `failureRecovery(outcome, failureCause(reason))` from `ui-components` chooses, by the kind the stored reason begins with: `[not_entitled]` → *Your Massive plan doesn't include this data, so downloading again won't help. Add it to your plan with Massive; the next download after that gets it.*, offering no download; `[rate_limited]` → *Download again later; data already stored is never duplicated or overwritten. If this keeps happening, check that `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` is no higher than your Massive plan's request limit; restart FactorFlow after changing it.*; anything else, no kind included → *Download again; data already stored is never duplicated or overwritten.* A *Not found* data type keeps the row above. The choice is the same function as 1.4's and the two new fixes are the same words, so the two screens cannot disagree; the default keeps each screen's delivered words (AC-29, AC-30; CAP-001 review v14 FINDING-64) |
 | Components | Rebuilt from `ui-components`: `card` `summary`, `data-table` `expandable`, `badge`, `button` `secondary`, `dialog` `confirm`, `progress` `determinate`, `select` `inline`; the completion `toast` raised when the download finishes while the owner is elsewhere (0.6) |
 | Internal links | A stock's symbol opens `/data/coverage?symbol={SYMBOL}` |
 
@@ -1228,8 +1268,11 @@ v5 §1.5 unchanged in outcome: cancelling is consequential and cooperative,
 confirmed in the `confirm` dialog with cancel first; reading a failure
 expands the stock to its four data types, each with its outcome and reason in
 the three STD-UI-19 parts (*Downloading daily prices for KO failed: the
-provider timed out 3 times.*) and the recovery (*Download again; data already
-stored is never duplicated or overwritten.*); progress polls every 10 s and
+provider timed out 3 times.*) and the recovery its cause calls for, from the
+*Fix by cause* row above: the plan sentence for a plan refusal, which offers
+no download; the later-download sentence for a rate limit; *Download again;
+data already stored is never duplicated or overwritten.* for every other
+failure (version 2; AC-29, AC-30; FINDING-64). Progress polls every 10 s and
 announces politely.
 
 #### States
@@ -1451,7 +1494,7 @@ table so a reviewer does not raise them.
 |-------|--------|-------|
 | Consistency with product patterns | pass | The shell, the patterns and the three M1 screens are the blueprint's, built from the approved S01, S02 and S09 and the §7 labels, §8 status map and §9 action tiers; the five CAP-001 screens are restyled into them with their behaviour intact (AC-17). No destination, pattern or label is invented: Section 0.8 lists the seven departures, each with its source and reason. Compositions have one name each (Section 3) so later capabilities reuse rather than restyle them (capability §5.3) |
 | Progressive disclosure | pass | Blueprint principle 4 throughout: Home shows the topmost item and one tile; Data health shows the verdict, then three cards, then only the rows that need fixing, with the full coverage table, the followed list and the download detail one link away; setup shows one step at a time with the whole path visible; the palette reaches any page without adding navigation. Expandable rows keep 3000-stock tables readable (STD-UI-30) |
-| Error clarity | pass | Every refusal and failure names the operation, the stock or download and the reason, and offers the recovery (STD-UI-19): the step to fix in setup, Settings or Followed stocks for a refused download, **Try again** for a failed read, *Download again* or **Stop following** / **Follow a different symbol** per problem row, *Downloading again won't help* for a not-found symbol. No code, `request_id`, payload key or implementation word reaches the owner (STD-UI-1); the unreachable state names the likely cause and where to look |
+| Error clarity | pass | Every refusal and failure names the operation, the stock or download and the reason, and offers the recovery (STD-UI-19): the step to fix in setup, Settings or Followed stocks for a refused download, **Try again** for a failed read, *Download again* or **Stop following** / **Follow a different symbol** per problem row, *Downloading again won't help* for a not-found symbol; in version 2 the fix follows the cause on *Needs fixing* and the download detail alike, a plan refusal naming the Massive plan and a rate limit a later download with the request rate to check (AC-29, AC-30). No code, `request_id`, payload key or implementation word reaches the owner (STD-UI-1); the unreachable state names the likely cause and where to look |
 | Accessibility | pass | WCAG 2.1 AA per STD-UI-24, specified per surface in Sections 0 and 1: landmarks and names, keyboard completion of every operation, focus management on route changes, dialogs, the palette and the stepper, polite announcement of every polled change, `blocked` instead of `disabled` wherever a precondition gates an action, 4.5:1 text and 3:1 boundaries with the chip and as-of pairs checked against `theme-validation.md`. Radix, cmdk and native-list contracts carry the dialog, radio, command, stepper and table semantics. Enforcement is human review, which the standard acknowledges |
 | States and feedback (empty, loading, error, success, partial) | pass | All five, plus the three more STD-UI-23 requires, enumerated per surface in a States table (AC-24), starting from S01 §7, S02 §7, S09 §7 and CAP-001 v5 §1.1 to §1.5. Never-populated (*No data has been downloaded yet.*) and nothing-found (*Nothing needs you right now.*, *Nothing needs fixing.*) are distinct everywhere both can occur (AC-21); stale is a marked state where it can be detected (*Not reflecting the latest download*), and the check cards state the currency they cannot judge; unavailable is `coverage-unknown` with a reason; progress shows *{done} of {total}*; a download that completes while the owner is elsewhere raises a `toast`, and a change the owner can see (a row leaving) is announced politely rather than toasted |
 
@@ -1480,7 +1523,7 @@ delivers is the blueprint's approved navigation, not a new item.
 | AC-10 | Nothing unshipped on Home | 1.3 page layout: one tile, no strategy, paper or live region, empty grid columns not placeholders | `card` `metric` |
 | AC-11 | Data health verdict and check cards | 1.4 verdict composed from `affected_count` and `followed_count` with its tier; three cards each with tier, result and as-of | `badge` `status-*` / `coverage-unknown`; `card` `metric` |
 | AC-12 | A partial download is never complete | 0.7 one tier function; 1.4 Recent downloads and checks; 1.7, 1.8 outcomes: *Partial* warning, *Interrupted* serious | `badge` `status-warning` / `status-serious` |
-| AC-13 | Every problem names its fix | 1.4 problem row: symbol, what failed, reason, attempts, consequence, the fix | problem row composition; `badge`; `button` `ghost` / `outline` |
+| AC-13 | Every problem names its fix | 1.4 problem row: symbol, what failed, reason, attempts (not for a plan refusal or a rate limit), consequence, the fix by cause; 1.8 *Fix by cause* | problem row composition; `badge`; `button` `ghost` / `outline` |
 | AC-14 | Not found is not retried | 1.4 *Not found* rows offer **Stop following** and **Follow a different symbol**, never a download; header **Download now** only when a row is retryable | `button` `ghost` / `outline`; `dialog` `confirm` |
 | AC-15 | Download now is the retry; queued when running | 1.4, 1.5, 1.7 **Download now**; *A download is running. This starts when it finishes.* | `button` `default` |
 | AC-16 | Attention counts, absent at zero | 0.2 count chips from the merged list and `problems.stock_count`, absent at zero | `badge` `status-warning` at `--text-xs` |
@@ -1495,6 +1538,8 @@ delivers is the blueprint's approved navigation, not a new item.
 | AC-25 | Keyboard and freshness | 0.4 cadences and *checked {time}* on every polled region; Accessibility subsections of every surface | all |
 | AC-26 | Built from the design system | Component Mapping and Token Usage of every surface; no literal outside `theme.css` except the approved-specification layout widths in `web/src/app/layout.ts` (0.7) | all, vendored per DEC-0205 |
 | AC-27 | CAP-002 keeps its routes | 0.2 Research in the static list when its routes are registered; 0.3 the five `/research` routes unchanged | shell composition |
+| AC-29 | A plan refusal is not retried; its row names the plan | 1.4 problem row: a `not_entitled` failure's fix names the Massive plan, no per-row control, no attempt count; a row of plan refusals only is not retryable, so it brings no **Download now** into *Needs fixing*; 1.8 *Fix by cause*: the same sentence on the download detail, no download offered | problem row composition; `failureRecovery` in `ui-components`; `badge` `status-critical` |
+| AC-30 | A rate limit is waited out, then named | 1.4 problem row: a `rate_limited` failure's fix is a later download with the request rate to check, no attempt count, **Download now** the action; 1.8 *Fix by cause*: the same sentence; the download's *Partial* outcome is unchanged (1.7, 1.8) | problem row composition; `failureRecovery` in `ui-components`; `badge` `status-critical` / `status-warning` |
 
 **Screen acceptance checks.** S01-3 and S01-4 (1.3 catalogue and
 `sortAttention`), S01-6 (1.3 as-of lines), S01-7 (1.3 layout); S01-1, S01-2
@@ -1510,8 +1555,10 @@ outcomes), S09-2 and S09-3 (1.4 problem rows), S09-4 (1.4 What you follow,
 | Source | Reference | Verification Method | Date |
 |--------|-----------|---------------------|------|
 | UX brief v1 (draft, 41ff183) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-brief.md` | Text reference. Eight screens and two shell surfaces, information architecture, interactions, component proposals, constraints, accessibility, the STD-UI conformance record and the eight-state enumeration read in full; its suggested copy finalised here in the shapes it fixed | 2026-10-25 |
-| Capability CAP-003 v1 (draft) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Text reference. All 28 acceptance criteria (AC-28 added 2026-10-25), the 27 interface-facing ones traced in Section 5; five user flows drawn in Section 2; §5.3 constraints and OQ-1 to OQ-4 carried | 2026-10-25 |
-| System design CAP-003 v1 (draft, 4c663e2) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` | Text reference. The eight components, the three new reads and their fields, the shell context, screen registration, control flows §3.1 to §3.5 with every state source and cadence, constraints 1 to 15 | 2026-10-25 |
+| Capability CAP-003 v2 (draft, 2e6bfeb, 3174b50) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Text reference. All 30 acceptance criteria (AC-28 added 2026-10-25, AC-29 and AC-30 in v2), the 29 interface-facing ones traced in Section 5; five user flows drawn in Section 2; §5.3 constraints and OQ-1 to OQ-4 carried | 2026-11-07 |
+| System design CAP-003 v2 (draft, c33a8f1) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` | Text reference. The eight components, the three new reads and their fields, the shell context, screen registration, control flows §3.1 to §3.5 with every state source and cadence, constraints 1 to 15; in v2, §3.4 note 9 and §3.6 notes 6 and 7 (the cause, `retryable` and one fix per cause, its words left to this design) | 2026-11-07 |
+| Component designs v2 (draft, 522d447) | `component-design-ui-components.md` §2.7a and §14 question 3, `component-design-data-health-ui.md` §2.5, `component-design-owner-web-app.md` §2.3, beside this file | Text reference. `failureCause`, `failureRecovery` and the proposed `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT`, applied in 1.4 and 1.8 with the wording changes reported for this revision | 2026-11-07 |
+| CAP-001 specification review v14 (b69facd) | `docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v14.md` on branch `usr/alvaro-de-jodra/CAP-001-design-provider-refusals` | Text reference. FINDING-64: the download detail offered a new download as every failure's recovery, answered by 1.8 *Fix by cause* | 2026-11-07 |
 | Product UX blueprint `PRODUCT-UX` v6 (approved 2026-10-16) | `docs/ux/product-ux-blueprint.md` | Text reference. §0 how a design uses it; §2.1, §2.2 rail, routes and redirects; §3.1, §3.4, §3.5 shell; §4.1, §4.8, §4.10 patterns; §6 flows; §7 vocabulary; §8 status map; §9 action tiers; §10 M1 row; D-2, D-7, D-8, D-9 | 2026-10-25 |
 | Home `PRODUCT-UX-S01` v4 (approved) | `docs/ux/screens/S01-home.md` | Text reference. Starting layout for 1.3; M1 regions, mapping, interactions, states, copy, accessibility, S01-3 to S01-7; departed from on the `h1` date (DEC-0209) | 2026-10-25 |
 | Setup `PRODUCT-UX-S02` v4 (approved) | `docs/ux/screens/S02-setup.md` | Text reference. Starting layout for 1.2; steps 1 to 4, mapping, interactions, states, copy, accessibility, S02-1 to S02-6; departed from on *Upload a CSV* (OQ-3) | 2026-10-25 |
