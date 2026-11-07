@@ -17,16 +17,16 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-07T16:00:00Z
+  timestamp: 2026-11-07T22:35:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-specifications-review-report
-      version: "2"
+      version: "6"
     - id: product-charter
       version: "2, approved 2026-09-03"
     - id: tech-stack
-      version: "5, approved 2026-10-13"
+      version: "7, approved 2026-10-27"
     - id: STD-UI
       version: "6"
     - id: PRODUCT-UX
@@ -100,9 +100,13 @@ owner). A momentum return applies the splits and dividends in its window only
 where the stock's corporate actions are known to have been acquired over that
 window, recorded by CAP-001 as `corporate_actions` coverage; otherwise the
 input is `missing` and the stock is not classified on momentum with the input
-named (Section 5 constraint 8, Section 4.2 `Observation read`). Version 4
-treated an absent corporate-action row as "no split or dividend" whether or
-not the data had ever been acquired. Nothing else changes.
+named (Section 5 constraint 8, Section 3.1 step 8a, Section 4.2 `Observation
+read`, Section 6 assumption 2). Version 4 treated an absent corporate-action
+row as "no split or dividend" whether or not the data had ever been acquired.
+The coverage relied on is CAP-001's released behaviour, which DEC-0398 (owner)
+adopts as the contract on specification review v6 FINDING-39. The same review
+moved DEC-0295's JSON-null `preferred_stock` into Section 8 question 1
+(FINDING-3). Nothing else changes.
 
 ## 1. Design Overview
 
@@ -253,7 +257,7 @@ sequenceDiagram
         else 7. qualifying run found
             C->>T: 7a. INSERT classification_set (run_id, state=building,<br/>classification_date = today America/Chicago)
             C->>E: 8. build(set_id) off the event loop
-            E->>S: 8a. read active instruments, latest trading day,<br/>bars, statements, actions, acquisition_state
+            E->>S: 8a. read active instruments, latest trading day,<br/>bars, statements, actions,<br/>corporate_actions coverage, acquisition_state
             E->>T: 8b. INSERT factor_input rows: value, known_on,<br/>present | missing | outdated | not_computable, restated_possible
             E->>T: 9. per factor: count qualifying stocks;<br/>INSERT classification_set_factor (qualified_count, ranked = count >= 30)
             alt 10. ranked
@@ -539,7 +543,7 @@ that design names it (Section 8, question 10; skill constraint 6c).
 | Filter snapshot evaluation | `classification-reader` | `universe-service` | Python call `evaluate_filter(conn, set_id, thresholds)` with the reader's `Thresholds` object (bounds, `hide_incomplete`, `symbol` prefix), inside the universe write transaction, returning the instruments the list read would return for the same filter against `set_id` — the one predicate for the list and the snapshot (S03-7; Section 3.2 step 3a; review v2 FINDING-4, FINDING-5) | n/a — in-process | n/a | stable within this capability |
 | Set build | `factor-engine` | `classification-scheduler` | `build(set_id)`: synchronous, dispatched off the event loop; returns the terminal set state | n/a — in-process | n/a | stable within this capability |
 | Qualifying-run read | `market-data-store` | `classification-scheduler` | SQL read of `acquisition_run` rows in `succeeded` or `partial` with no `classification_set` row, oldest `ended_at` first; read-only | n/a — in-process | n/a | depends on the published `acquisition_run` shape (migration `0004`) |
-| Observation read | `market-data-store` | `factor-engine` | SQL reads of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action`, `coverage_segment` and `acquisition_state`; read-only, never an UPDATE or DELETE | n/a — in-process | n/a | depends on the published observation shapes (migration `0002`, `0003`) |
+| Observation read | `market-data-store` | `factor-engine` | SQL reads of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action`, `coverage_segment` and `acquisition_state`; read-only, never an UPDATE or DELETE | n/a — in-process | n/a | depends on the published observation shapes (migration `0002`, `0003`) and on CAP-001's released coverage of a successful fetch, the range requested (DEC-0398) |
 | Coverage check | `market-data-store` | `universe-service` | SQL read: does an `instrument` row with at least one `coverage_segment` exist for the symbol | n/a — in-process | n/a | depends on migration `0001`, `0003` |
 | Universe event append | `research-store` | `universe-service` | SQL `INSERT` into `universe` and `universe_event`; no UPDATE or DELETE | n/a — in-process | n/a | **critical — C5, unrecoverable if wrong** |
 | Universe event read | `research-store` | `universe-service` | SQL reads over `universe_event` for replay | n/a — in-process | n/a | stable within this capability |
@@ -657,11 +661,15 @@ capability's own test module scans every `.sql` file and SQL string for one.
    bars. Total return is computed from the **unadjusted** bars the store holds
    (DEC-0001, owner) by applying splits and compounding dividends from
    `corporate_action` at read time. A momentum input is computed only when the
-   stock's `corporate_actions` coverage (`coverage_segment`, CAP-001 AC-7)
-   contains its whole window; otherwise it is `missing` with the cause
+   stock's `corporate_actions` coverage (`coverage_segment`) contains its whole
+   window; otherwise it is `missing` with the cause
    `corporate_actions_not_covered`, because an absent action row means "no
    split or dividend" only where corporate actions were acquired (AC-7, AC-12;
-   DEC-0397, owner 2026-11-07). A growth input whose prior-year base is not
+   DEC-0397, owner 2026-11-07). The coverage contract is CAP-001's released
+   behaviour (DEC-0398): a successful fetch, an empty one included, covers the
+   range the acquisition runner requested (`src/factorflow/ingestion/runner.py`),
+   and a failed or `not_found` fetch covers nothing, so a failed fetch never
+   presents as covered (CAP-001 AC-12). A growth input whose prior-year base is not
    positive is `not_computable` and leaves the stock not classified on growth
    with the input named.
 9. **The restatement mark follows the data (AC-23; DEC-0056, PROVISIONAL).** A
@@ -787,9 +795,10 @@ capability's own test module scans every `.sql` file and SQL string for one.
    endpoints confirms it; until then a missing quarter still leaves an input
    `missing`, never wrong. The sign of capital expenditure needs no
    confirmation, because it is read as a magnitude (Section 8 question 1).
-2. **The stated history depth is deep enough**: at least 13 months of bars for
-   momentum and at least two years of quarterly statements for growth, as the
-   capability assumes. Shallower depth yields `missing` inputs, not wrong
+2. **The stated history depth is deep enough**: at least 13 months of bars and
+   of corporate-actions coverage for momentum (from the day after `S_12` to
+   `E`, DEC-0397) and at least two years of quarterly statements for growth, as
+   the capability assumes. Shallower depth yields `missing` inputs, not wrong
    scores.
 3. **US-listed equities**, one session per calendar day, as both capabilities
    assume; `observed_on`, `recorded_on` and `classification_date` share the
@@ -878,7 +887,7 @@ as against the criteria above (`docs/ux/README.md`).
 
    | Line item | Statement type | Massive payload key | Sign |
    |-----------|----------------|---------------------|------|
-   | book equity | `balance_sheet` | `total_equity_attributable_to_parent` less `preferred_stock` (absent read as 0) | +1 |
+   | book equity | `balance_sheet` | `total_equity_attributable_to_parent` less `preferred_stock` (absent or JSON null read as 0; any other non-numeric value makes book equity absent, DEC-0295) | +1 |
    | shares outstanding | `income_statement` | `diluted_shares_outstanding` | +1 |
    | net income | `income_statement` | `net_income_loss_attributable_common_shareholders` | +1 |
    | diluted earnings per share | `income_statement` | `diluted_earnings_per_share` | +1 |
