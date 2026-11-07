@@ -43,6 +43,7 @@ def volume_set(postgres_connection_string: str) -> Iterator[tuple[psycopg.Connec
 
 
 # Implements TC-COMP-091
+# Implements CAP-002 TC-INT-031 (part: engine budget half)
 @pytest.mark.slow
 @pytest.mark.postgres
 def test_3000_instruments_build_within_the_budget(

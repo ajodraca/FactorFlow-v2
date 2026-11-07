@@ -19,7 +19,10 @@ export const ACQUISITION_BASE_URL = "http://127.0.0.1:8125";
 const STUB_BASE_URL = "http://127.0.0.1:8126";
 const ACQUISITION_DATABASE = "factorflow_acquisition";
 
-/** Every table `src/factorflow/db/migrations/0001`-`0004` create, except `applied_migrations`. */
+/**
+ * Every table `src/factorflow/db/migrations/0001`-`0006` create, except `applied_migrations`
+ * (0005 and 0006 are CAP-002's universes and classifications).
+ */
 const DATA_TABLES = [
   "instrument",
   "owner_setting",
@@ -31,6 +34,12 @@ const DATA_TABLES = [
   "acquisition_state",
   "acquisition_run",
   "run_instrument_result",
+  "universe",
+  "universe_event",
+  "classification_set",
+  "classification_set_factor",
+  "factor_input",
+  "factor_classification",
 ];
 
 async function stubControl(path: string, body: Record<string, string> = {}): Promise<void> {
@@ -52,6 +61,18 @@ export function setProviderMode(mode: ProviderMode): Promise<void> {
 
 export function holdSymbol(symbol: string): Promise<void> {
   return stubControl("hold", { symbol });
+}
+
+/**
+ * The stub answers 503 on `symbol`'s financial-statement paths until `restoreSymbol`, so its
+ * fundamentals are recorded `failed` and the run ends Partial (CAP-002 TC-E2E-009).
+ */
+export function withholdSymbol(symbol: string): Promise<void> {
+  return stubControl("withhold", { symbol });
+}
+
+export function restoreSymbol(symbol: string): Promise<void> {
+  return stubControl("restore", { symbol });
 }
 
 export function releaseSymbol(symbol: string): Promise<void> {

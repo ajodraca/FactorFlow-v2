@@ -145,6 +145,7 @@ def assert_column_agrees_with_detail(conn: psycopg.Connection, set_id: UUID, sto
 
 
 # Implements TC-COMP-186
+# Implements CAP-002 TC-INT-058 (part: engine half)
 def test_statement_filed_before_first_observation_marks_its_inputs_and_classifications(
     store: Store, monkeypatch: pytest.MonkeyPatch
 ) -> None:

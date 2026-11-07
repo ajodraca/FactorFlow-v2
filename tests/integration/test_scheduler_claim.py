@@ -52,6 +52,8 @@ def _complete(conn: psycopg.Connection, set_id: Any) -> None:
 
 
 # Implements TC-COMP-077
+# Implements CAP-002 TC-INT-028 (part: store half)
+# Implements CAP-002 TC-INT-029 (part: store half)
 @pytest.mark.parametrize("qualifying", ["succeeded", "partial"])
 def test_only_succeeded_and_partial_runs_are_claimed(
     store: tuple["ConnectionPool[Any]", psycopg.Connection], qualifying: str
@@ -73,6 +75,7 @@ def test_only_succeeded_and_partial_runs_are_claimed(
 
 
 # Implements TC-COMP-078
+# Implements CAP-002 TC-INT-028 (part: store half)
 def test_qualifying_runs_are_claimed_oldest_first_once_each(
     store: tuple["ConnectionPool[Any]", psycopg.Connection],
 ) -> None:
@@ -199,6 +202,7 @@ def test_failed_set_for_run_a_does_not_block_later_run_b(
     assert [(r[1], r[2]) for r in rows if r[1] == run_b] == [(run_b, "building")]
 
 
+# Implements CAP-002 TC-INT-030
 def test_claim_returns_none_when_the_run_acquired_a_set_between_statements(
     store: tuple["ConnectionPool[Any]", psycopg.Connection],
     monkeypatch: pytest.MonkeyPatch,

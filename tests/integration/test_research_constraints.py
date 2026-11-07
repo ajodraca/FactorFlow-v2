@@ -361,6 +361,7 @@ def _scalar(conn: psycopg.Connection, query: str) -> Any:
 
 
 # Implements TC-COMP-075
+# Implements CAP-002 TC-INT-030
 def test_a_second_set_for_the_same_run_is_refused(
     classification_connection: psycopg.Connection,
 ) -> None:

@@ -207,6 +207,7 @@ def test_short_build_timeout_reaches_the_engine_and_fails_the_set(
     assert elapsed < 4  # the stage sleeps 5 s: the timeout, not the sleep, ended the build
 
 
+# Implements CAP-002 TC-INT-053 (part: store half)
 def test_restart_reclaims_the_stale_set_then_builds_the_next_qualifying_run(
     store: tuple["ConnectionPool[Any]", psycopg.Connection],
     monkeypatch: pytest.MonkeyPatch,

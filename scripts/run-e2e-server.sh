@@ -26,7 +26,8 @@
 #   `factorflow_acquisition`: its own API plus an ingestion runner whose
 #   provider is `tests/e2e/support/massive_stub.py` on
 #   127.0.0.1:${FACTORFLOW_E2E_STUB_PORT:-8126}. TC-E2E-001, 002, 004-007,
-#   009 and 010 use it.
+#   009 and 010 use it, and so do CAP-002's TC-E2E-001 to 012 (the scored
+#   sets they read are classified or seeded in this database).
 # - Refused, 127.0.0.1:${FACTORFLOW_E2E_REFUSED_PORT:-8124}, database
 #   `factorflow_ahead`: a store ahead of this build. The production start
 #   chain (Dockerfile `CMD`) is run against it once and must exit 2
@@ -144,6 +145,9 @@ ACQUISITION_ENV=(
   "FACTORFLOW_MASSIVE_API_KEY=$E2E_PROVIDER_KEY"
   "FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=6000"
   "FACTORFLOW_RUN_POLL_INTERVAL_SECONDS=1"
+  # The classification loop checks for a finished run every second, not every
+  # 5 (default); it must stay below build_timeout_seconds (default 300).
+  "FACTORFLOW_CLASSIFICATION_POLL_INTERVAL_SECONDS=1"
   # The stub's `unavailable` mode is retried to the attempt limit; a short
   # backoff keeps those retries inside the Playwright timeout (DEC-0048).
   "FACTORFLOW_MASSIVE_BACKOFF_INITIAL_SECONDS=0.05"

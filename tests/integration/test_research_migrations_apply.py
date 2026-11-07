@@ -183,6 +183,31 @@ def test_migration_0006_applies_without_touching_earlier_rows(
         conn.close()
 
 
+# Implements CAP-002 TC-INT-024
+def test_migrator_applies_0005_and_0006_from_0004_and_reapplies_nothing(
+    postgres_connection_string: str,
+) -> None:
+    conn = psycopg.connect(postgres_connection_string)
+    try:
+        files = discover(MIGRATIONS_DIR)
+        assert apply_pending(conn, [f for f in files if f.version <= 4]) == [1, 2, 3, 4]
+        seed_cap_001_rows(conn)
+        tables = cap_001_tables(conn)
+        before = snapshot_cap_001(conn, tables)
+
+        assert apply_pending(conn, files) == [5, 6]
+
+        after = snapshot_cap_001(conn, tables)
+        assert {table: rows for table, rows in after.items() if table != "applied_migrations"} == {
+            table: rows for table, rows in before.items() if table != "applied_migrations"
+        }
+        assert set(before["applied_migrations"]) <= set(after["applied_migrations"])
+        assert apply_pending(conn, files) == []
+        assert snapshot_cap_001(conn, tables)["applied_migrations"] == after["applied_migrations"]
+    finally:
+        conn.close()
+
+
 # Implements DAC-E2-S1-1
 def test_a_second_apply_after_0006_changes_nothing(postgres_connection_string: str) -> None:
     conn = psycopg.connect(postgres_connection_string)
