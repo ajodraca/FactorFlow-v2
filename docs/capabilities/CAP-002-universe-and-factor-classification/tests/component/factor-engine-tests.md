@@ -2,28 +2,28 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-factor-engine-component-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
-updated: 2026-10-17
+updated: 2026-11-07
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
   model: claude-sonnet-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T18:38:08Z
+  timestamp: 2026-11-07T22:55:59Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "3"
+      version: "5"
     - id: CAP-002-backlog
-      version: "4"
+      version: "5"
     - id: CAP-002-component-design-factor-engine
-      version: "2"
+      version: "4"
   invoking_user: ajodraca
   correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
 ---
@@ -610,3 +610,150 @@ ai_provenance:
 #### Error / Edge Cases
 - This scenario is itself the named condition in DAC-E2-S6-3; no further cases are invented.
 
+### TC-COMP-381: Momentum without corporate-actions coverage is missing and not classified
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-1, DAC-E2-13, AC-12
+**Priority:** P0
+**Type:** functional
+
+#### Preconditions
+- A stock with a bar on every momentum boundary and no `corporate_actions` coverage segment
+
+#### Steps
+1. The set is built.
+
+#### Expected Result
+- `return_3m`, `return_6m` and `return_12m` are `missing` with `detail.cause = corporate_actions_not_covered`, `detail.window_months`, `detail.E`, `detail.S` and `detail.corporate_actions_coverage = []`.
+- Each has a null value and a null `known_on`.
+- The stock is `not_classified` on momentum with reason `input_missing` naming `return_3m`.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-1; no further cases are invented.
+
+### TC-COMP-382: A missing momentum input names the corporate-actions acquisition
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-2, AC-12
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- The stock of TC-COMP-381 with an `acquisition_state` row for `corporate_actions` whose `last_outcome` is `failed`
+
+#### Steps
+1. The inputs are written.
+
+#### Expected Result
+- Each missing momentum input's `detail.last_acquisition` has `data_type = corporate_actions` and `outcome = failed`.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-2; no further cases are invented.
+
+### TC-COMP-383: Coverage must contain the window, bounds inclusive
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-3, DAC-E2-13
+**Priority:** P0
+**Type:** functional
+
+#### Preconditions
+- A covered stock whose one `corporate_actions` segment is varied per case
+
+#### Steps
+1. The set is built for each case.
+
+#### Expected Result
+- A segment from exactly `S_k + 1` to exactly `E` leaves `return_k` `present`.
+- A segment starting on `S_k + 2`, or ending on `E - 1`, makes `return_k` `missing` with `detail.corporate_actions_coverage` listing that segment.
+- A window the segment does contain stays `present`.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-3; no further cases are invented.
+
+### TC-COMP-384: A covered window with no actions gives the price return and names its segment
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-4, DAC-E2-13, AC-7
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- A segment containing every window and no corporate-action rows
+
+#### Steps
+1. The set is built, then again with the stock's latest bar before the latest trading day.
+
+#### Expected Result
+- Each input is `present`, its value `close(E) / close(S_k) - 1`, with `detail.corporate_actions_covered_by` equal to the segment's `{covered_from, covered_to}`.
+- In the second build each input is `outdated` and carries the same `detail.corporate_actions_covered_by`.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-4; no further cases are invented.
+
+### TC-COMP-385: Order of momentum missing causes
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-5, DAC-E2-13, AC-12
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Three stocks without coverage: one lacking an `S_k` bar, one with an unusable payload in the window, one with a non-positive `E` close
+
+#### Steps
+1. The set is built.
+
+#### Expected Result
+- The first names the boundary and its `last_acquisition` names `prices`.
+- The second and third have cause `corporate_actions_not_covered`.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-5; no further cases are invented.
+
+### TC-COMP-386: Covered stocks keep every delivered momentum result
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-6, DAC-E2-1
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- The delivered momentum fixtures (splits, dividends, boundaries, currency, `known_on`, unusable payloads, `price_not_positive`) with corporate-actions coverage over their windows
+
+#### Steps
+1. The set is built.
+
+#### Expected Result
+- Every delivered expectation holds unchanged.
+- Value and growth inputs are the same with and without coverage.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-6; no further cases are invented.
+
+### TC-COMP-387: A successful empty corporate-actions fetch covers the range requested
+
+**Scope:** component
+**Component(s):** factor-engine
+**Traces to:** DAC-E2-S10-7, DAC-E2-13
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- The acquisition runner with a provider stub whose corporate-actions fetch succeeds with no action, then one whose fetch fails
+
+#### Steps
+1. An instrument is acquired in each case.
+
+#### Expected Result
+- The successful fetch records one `corporate_actions` segment over the range requested.
+- The failed fetch records no segment and leaves an existing one unchanged.
+
+#### Error / Edge Cases
+- This scenario is itself the named condition in DAC-E2-S10-7; no further cases are invented.
