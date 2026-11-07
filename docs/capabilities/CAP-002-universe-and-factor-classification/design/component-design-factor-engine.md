@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-factor-engine
 artifact_type: component-design
-artifact_version: 2
-status: approved
+artifact_version: 3
+status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-10-17
+updated: 2026-11-06
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T02:35:00Z
+  timestamp: 2026-11-06T12:00:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "3"
+      version: "4"
     - id: CAP-002-specification-review
       version: "2"
     - id: STD-UI
@@ -45,7 +45,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-17
+**Last Updated:** 2026-11-06
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
@@ -94,6 +94,15 @@ class and message), FINDING-17 (append-only scan scope), FINDING-19
 FINDING-30 (`hypothesis` is not in `tech-stack.md` v5) and FINDING-34
 (provenance timestamp), are carried, not fixed: FINDING-1 and FINDING-2 are the
 owner's, and the rest of the design is as version 1 left it.
+
+**Version 3 (2026-11-06)** applies the owner's answer to system design v4
+Section 8 question 1. It sets the seven payload keys and signs in
+`line_items.py` and moves shares outstanding from the balance sheet to the most
+recent quarterly income statement, because Massive's balance sheet carries no
+shares count. Market capitalisation reads that one statement's diluted weighted
+average and never sums it across a trailing window (Section 2.4). Section 14
+question 1 is closed. Review v2's FINDING-2 (the line-item mapping) is closed
+with it.
 
 ## 1. Overview
 
@@ -340,13 +349,13 @@ class LineItem:
     sign: int             # +1, or -1 when the provider reports an outflow negative
 
 LINE_ITEMS: dict[str, LineItem] = {
-    "book_equity":        LineItem("book equity", "balance_sheet", REQUIRES_INPUT, 1),
-    "shares_outstanding": LineItem("shares outstanding", "balance_sheet", REQUIRES_INPUT, 1),
-    "net_income":         LineItem("net income", "income_statement", REQUIRES_INPUT, 1),
-    "diluted_eps":        LineItem("diluted earnings per share", "income_statement", REQUIRES_INPUT, 1),
-    "revenue":            LineItem("revenue", "income_statement", REQUIRES_INPUT, 1),
-    "operating_cash_flow": LineItem("operating cash flow", "cash_flow_statement", REQUIRES_INPUT, 1),
-    "capital_expenditure": LineItem("capital expenditure", "cash_flow_statement", REQUIRES_INPUT, 1),
+    "book_equity":        LineItem("book equity", "balance_sheet", "total_equity_attributable_to_parent", 1),
+    "shares_outstanding": LineItem("shares outstanding", "income_statement", "diluted_shares_outstanding", 1),
+    "net_income":         LineItem("net income", "income_statement", "net_income_loss_attributable_common_shareholders", 1),
+    "diluted_eps":        LineItem("diluted earnings per share", "income_statement", "diluted_earnings_per_share", 1),
+    "revenue":            LineItem("revenue", "income_statement", "revenue", 1),
+    "operating_cash_flow": LineItem("operating cash flow", "cash_flow_statement", "net_cash_from_operating_activities", 1),
+    "capital_expenditure": LineItem("capital expenditure", "cash_flow_statement", "purchase_of_property_plant_and_equipment", -1),
 }
 
 def unresolved() -> list[str]:
@@ -360,10 +369,15 @@ classified rather than failing the set (AC-12). `tests/unit/test_line_items_reso
 fails while any key is unresolved, so the gap cannot be forgotten once the
 owner answers, and `classification-scheduler` logs a warning at start naming
 the unresolved items. The seven keys are the stories' blocker, not the
-architecture's (system design section 8 question 1).
+architecture's (system design section 8 question 1). The owner supplied them
+in version 3 (section 14 question 1), so `unresolved()` is empty and the
+mechanism above remains only as the guard a future unset key would trip.
 
 **The eight inputs.** `MC` is market capitalisation, `close(L) ×
-shares_outstanding(P1)` (DEC-0055 (6)).
+shares_outstanding(P1)`, where P1 is the most recent quarterly **income
+statement** and `shares_outstanding` is its diluted weighted average, read from
+that one statement and never summed (DEC-0055 (6) as revised by the owner on
+2026-11-06: Massive's balance sheet carries no shares count).
 
 | Input | Factor | Formula | Statements | Price | `not_computable` when |
 |-------|--------|---------|------------|-------|-----------------------|
@@ -577,8 +591,9 @@ reports through the set row and its return value.
   month windows (capability section 2, owner 2026-10-12); 5 minutes (AC-11,
   owner 2026-10-12); 3000 instruments (CAP-001 AC-4); 252 sessions a year
   (`component-design-market-data-store.md` section 5). No other number appears.
-- **The payload keys are the owner's** (section 14). Until supplied, value and
-  growth inputs are `missing` with the cause named; momentum is unaffected.
+- **The payload keys are the owner's** (section 14, answered in version 3).
+  An unset key would still leave its inputs `missing` with the cause named;
+  momentum is unaffected.
 - **Assumption (system design 6.1):** the acquired statements carry the seven
   line items under stable keys and quarterly statements exist for every
   quarter. Where they do not, inputs are `missing`, never wrong.
@@ -809,16 +824,12 @@ of system design section 4.2 and consumes the SQL interfaces of
 
 1. **Which Massive statement payload keys supply each line item, with what
    sign conventions, and do quarterly statements exist for every quarter?**
-   Carried from system design section 8 question 1, **abstained in that run
-   and in this one**. `[REQUIRES INPUT: the payload key, statement type and
-   sign convention for each of the seven line items, book equity, shares
-   outstanding, net income, diluted earnings per share, revenue, operating
-   cash flow and capital expenditure, confirmed against statements acquired
-   by a real run with the Financials add-on]`. *Owner: capability owner,
-   against acquired data. Blocks: the values in `line_items.py` and the
-   stories that implement value and growth inputs; not the momentum inputs,
-   the peer sets, the composite, the transaction or the volume test, which
-   section 2.4 isolates from the answer.*
+   **Answered by the owner, 2026-11-06**, in system design v4 section 8
+   question 1. The keys and signs are those in section 2.4's `line_items.py`.
+   Shares outstanding is the diluted weighted average of the most recent
+   quarterly income statement. Still to be confirmed at the first real run
+   with the Financials endpoints: that every quarter, the fourth included, is
+   present (system design section 6, assumption 1).
 2. **Growth with a non-positive prior-year base** is `not_computable`
    (DEC-0055 (2), PROVISIONAL; system design section 8 question 6). This
    design applies the same rule to a non-positive market capitalisation,

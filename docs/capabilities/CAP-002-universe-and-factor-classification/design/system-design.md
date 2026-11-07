@@ -2,22 +2,22 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-system-design
 artifact_type: system-design
-artifact_version: 3
+artifact_version: 4
 capability: CAP-002
 title: Universe & Factor Classification
 ui_facing: true
 created: 2026-10-15
-updated: 2026-10-17
+updated: 2026-11-06
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: approved
+status: draft
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.1"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T01:55:00Z
+  timestamp: 2026-11-06T12:00:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
@@ -84,6 +84,14 @@ threshold-exclusion statements of DEC-0071 and DEC-0076; DEC-0082, DEC-0083
 (superseding DEC-0079 (e)) and DEC-0084 (superseding DEC-0069's "nothing else
 in the shell is edited" and extending DEC-0064) are **PROVISIONAL**. Review
 v2's other findings are carried, not fixed, here.
+
+**Version 4 (2026-11-06)** records the owner's answer to Section 8 question 1,
+the Massive payload keys. Massive's balance sheet carries no shares count, so
+market capitalisation now uses the diluted weighted-average shares of the most
+recent quarterly income statement (Section 5 constraint 8, which revises
+DEC-0055 (6)). The keys come from the provider's published schema, not from
+acquired data, because no fundamentals have yet been acquired; Section 6
+assumption 1 keeps the part only a real run can confirm. Nothing else changes.
 
 ## 1. Design Overview
 
@@ -629,8 +637,10 @@ capability's own test module scans every `.sql` file and SQL string for one.
    Section 5.2; DEC-0055, PROVISIONAL).** Trailing-twelve-month figures sum the
    four most recent quarterly statements; the year-earlier comparison sums the
    four before them; balance-sheet inputs use the most recent quarterly
-   statement; market capitalisation is the latest close times shares
-   outstanding. Momentum windows end at the latest session on or before one
+   statement; market capitalisation is the latest close times the diluted
+   weighted-average shares outstanding of the most recent quarterly income
+   statement (owner, 2026-11-06: Massive's balance sheet carries no shares
+   count; revises DEC-0055 (6)). Momentum windows end at the latest session on or before one
    calendar month before the classification date and start 3, 6 and 12
    calendar months before that end, each resolved against the stock's own
    bars. Total return is computed from the **unadjusted** bars the store holds
@@ -753,6 +763,14 @@ capability's own test module scans every `.sql` file and SQL string for one.
    architecture does not depend on it: an absent item leaves a stock not
    classified with the input named (AC-12), and a widespread absence leaves a
    factor unranked (AC-14) rather than wrong.
+
+   **Version 4.** The field names are now fixed by the provider's published
+   schema (Section 8 question 1). Still unconfirmed, because no fundamentals
+   have been acquired yet: that quarterly statements exist for every fiscal
+   quarter, the fourth included, and that capital expenditure arrives negative
+   on every record. The first real run with the Financials endpoints confirms
+   both; until then a missing quarter still leaves an input `missing`, never
+   wrong.
 2. **The stated history depth is deep enough**: at least 13 months of bars for
    momentum and at least two years of quarterly statements for growth, as the
    capability assumes. Shallower depth yields `missing` inputs, not wrong
@@ -833,16 +851,32 @@ as against the criteria above (`docs/ux/README.md`).
 
 1. **Which Massive statement payload keys supply each factor input, with what
    sign conventions, and do quarterly statements exist for every quarter?**
-   The inputs are book equity, net income, diluted earnings per share, revenue,
-   operating cash flow, capital expenditure and shares outstanding. The
-   committed fixtures and the massive-client design do not enumerate them
-   (Section 6, assumption 1) and this design cannot read the provider.
-   `[REQUIRES INPUT: the payload key, statement type and sign convention for
-   each of the seven factor inputs, confirmed against statements acquired by a
-   real run with the Financials add-on]`. *Owner: capability owner, against
-   acquired data. Blocks: the `factor-engine` component design's input SQL and
-   the stories that implement it; not the architecture, which treats an absent
-   key as a missing input (AC-12).* **Abstained in this run.**
+   **Answered by the owner, 2026-11-06 (version 4).** The keys are the field
+   names of the provider's statement schema, as the `massive` SDK 2.8.0 models
+   them (`massive/rest/models/financials.py`: `FinancialBalanceSheet`,
+   `FinancialIncomeStatement`, `FinancialCashFlowStatement`). The sign of
+   capital expenditure follows Massive's cash-flow statement reference, which
+   reports purchases of property, plant and equipment as negative values
+   (https://massive.com/docs/rest/stocks/fundamentals/cash-flow-statements):
+
+   | Line item | Statement type | Massive payload key | Sign |
+   |-----------|----------------|---------------------|------|
+   | book equity | `balance_sheet` | `total_equity_attributable_to_parent` | +1 |
+   | shares outstanding | `income_statement` | `diluted_shares_outstanding` | +1 |
+   | net income | `income_statement` | `net_income_loss_attributable_common_shareholders` | +1 |
+   | diluted earnings per share | `income_statement` | `diluted_earnings_per_share` | +1 |
+   | revenue | `income_statement` | `revenue` | +1 |
+   | operating cash flow | `cash_flow_statement` | `net_cash_from_operating_activities` | +1 |
+   | capital expenditure | `cash_flow_statement` | `purchase_of_property_plant_and_equipment` | −1 |
+
+   Book equity and net income are the amounts attributable to common
+   shareholders, so that they match a market capitalisation of common shares.
+   The balance sheet carries no shares count, so shares outstanding is the
+   diluted weighted average of the most recent quarterly income statement. It is
+   read from that one statement and never summed across the trailing window
+   (Section 5 constraint 8). The quarter coverage is not yet confirmed (Section
+   6, assumption 1). *Owner: capability owner. Was blocking: the
+   `factor-engine` input SQL and the stories that implement it.*
 2. **What is the maximum length of a universe name?** SEC-INP-001 requires a
    bound and no artifact states one. `[REQUIRES INPUT: maximum universe name
    length in characters]`. *Owner: capability owner. Blocks: the API bounds
@@ -972,6 +1006,8 @@ carries; the rest are positions taken and recorded for the owner's verdict.
 Question 4 now carries the complete edit list the owner confirms (DEC-0084),
 and question 11 is new (DEC-0083). Review v2's findings outside this pass
 (FINDING-1, 2, 9 to 11, 13, 16 to 34) are carried as it recorded them.
+
+**Version 4.** Question 1 is answered.
 
 ## 9. Source Documents
 
