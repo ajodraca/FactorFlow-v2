@@ -185,19 +185,26 @@ Each line item is read from a row's `payload` under its payload key and
 multiplied by its sign. A value is used only when it is a JSON number or a
 JSON string holding a plain decimal (`^-?[0-9]+(\.[0-9]+)?$`), checked before
 the cast. Anything else, including an absent key or JSON `null`, reads as
-absent rather than failing the set (DEC-0116 (4)).
+absent rather than failing the set (DEC-0116 (4)). A `magnitude` item is read
+as its absolute value. A `less_key` field of the same row is subtracted: when
+it is absent or JSON `null` it reads as zero, and any other unreadable value
+makes the item absent (DEC-0295).
 
 | Input | Value | Rows read |
 |---|---|---|
-| `book_to_price` | `book_equity` / market capitalisation | The newest balance sheet |
-| `earnings_yield` | Trailing sum of `net_income` / market capitalisation | The newest balance sheet and the trailing window's income statements |
-| `fcf_yield` | (trailing sum of `operating_cash_flow` minus trailing sum of `capital_expenditure`) / market capitalisation | The newest balance sheet and the trailing window's cash flow statements |
+| `book_to_price` | `book_equity` / market capitalisation | The newest balance sheet and the newest income statement |
+| `earnings_yield` | Trailing sum of `net_income` / market capitalisation | The trailing window's income statements |
+| `fcf_yield` | (trailing sum of `operating_cash_flow` minus trailing sum of `capital_expenditure`) / market capitalisation | The trailing window's cash flow statements and the newest income statement |
 | `revenue_growth` | Trailing sum of `revenue` / prior-year sum, minus 1 | The trailing and prior-year windows' income statements |
 | `eps_growth` | Trailing sum of `diluted_eps` / prior-year sum, minus 1 | The trailing and prior-year windows' income statements |
 
-The newest balance sheet is the one at P1 and needs no window. Market
+Each value input reads the newest row, the one at P1, of every statement type
+its line items name, and the trailing window of its window type. Neither the
+newest balance sheet nor the newest income statement needs a window. Market
 capitalisation is the close of the instrument's latest bar times
-`shares_outstanding` from the newest balance sheet (DEC-0055 (6)). The latest
+`shares_outstanding` from the newest income statement, read from that one row
+and never summed (DEC-0055 (6) as revised by DEC-0295: Massive's balance sheet
+carries no share count). The latest
 bar is the one with the latest `session_date`, then the latest `observed_on`,
 then the latest `recorded_at` (DEC-0055 (5), DEC-0117 (1)). Growth inputs read
 no bar.
@@ -212,7 +219,7 @@ is named.
 | Status | When | `detail.cause` |
 |---|---|---|
 | `missing` | A line item the input needs has no payload key yet | `line_item_mapping_unresolved` |
-| `missing` | The instrument has no quarterly balance sheet (value inputs), or a window the input needs is not formed | `periods_missing` |
+| `missing` | The instrument has no quarterly income statement (value inputs), no quarterly balance sheet (`book_to_price`), or a window the input needs is not formed | `periods_missing` |
 | `missing` | A needed line item is absent from a row read | `line_item_absent` |
 | `missing` | Value inputs only: the instrument has no bar (DEC-0116 (2)) | `price_missing` |
 | `outdated` | `as_of` is earlier than `D` minus `FUNDAMENTALS_STALE_AFTER_MONTHS` months, or, for a value input, the latest bar's `session_date` is earlier than `L` (AC-13) | `outdated` |
@@ -229,8 +236,9 @@ A latest period end exactly 6 months before `D` is still current.
   (DEC-0116 (5)).
 - `as_of` is P1 of the income statements for a growth input. For a value
   input it is the earliest of the newest period ends it read, so
-  `earnings_yield` takes the earlier of the newest balance sheet and the
-  newest income statement (DEC-0116 (3)). The fundamentals staleness test uses
+  `book_to_price` takes the earlier of the newest balance sheet and the newest
+  income statement, and `fcf_yield` the earlier of the newest cash flow
+  statement and the newest income statement (DEC-0116 (3)). The fundamentals staleness test uses
   the same date.
 - `known_on` is the latest `observed_on` of every statement row the input
   read, and of its bar for a value input (DEC-0055 (7)).
@@ -239,7 +247,7 @@ A latest period end exactly 6 months before `D` is still current.
 
 | Status | Keys |
 |---|---|
-| `present`, value input | `periods`, `balance_sheet_period_end`, `shares_outstanding`, `close`, `bar_date`, `bar_observed_on`, `market_capitalisation` |
+| `present`, value input | `periods`, `balance_sheet_period_end`, `shares_outstanding`, `close`, `bar_date`, `bar_observed_on`, `market_capitalisation`. `balance_sheet_period_end` is the newest balance sheet's period end for `book_to_price` and null for the other two; the period that `shares_outstanding` comes from is the income statement row in `periods` |
 | `present`, growth input | `periods` |
 | `outdated` | The `present` keys, plus `cause` and `outdated`. `outdated.fundamentals` holds `latest_period_end` and `stale_before`, and, for a value input, `outdated.prices` holds `bar_date` and `latest_trading_day`. Only the rules that applied appear |
 | `not_computable` | The `present` keys plus `cause`. A growth input also has `prior_year_base` |
@@ -269,8 +277,9 @@ row among them is enough to mark it.
   it does read is backfilled.
 - No value, status, date or `detail` key depends on the mark.
 
-While every line item is unresolved (see [Line items](#line-items)), every
-value and growth input is `missing`, so none is marked yet.
+An input that reads the newest income statement for shares is marked when that
+row is backfilled, so a backfilled income statement marks all three value
+inputs.
 
 ### Writing to `factor_input`
 
@@ -302,8 +311,9 @@ cursor:
 
 Only the second statement writes to the store. Every active instrument gets
 exactly three rows, even one with no bar, and a retired instrument gets none.
-The stage reads no fundamental row and no line item, so the unresolved line
-items that leave every value and growth input `missing` do not affect it.
+The stage reads no fundamental row and no line item, so an unresolved line
+item, which leaves the value and growth inputs that need it `missing`, does
+not affect it.
 `test_the_momentum_stage_is_registered_once_between_fundamentals_and_classification`
 in `tests/integration/test_engine_inputs_momentum.py` fails unless the stage
 is registered once, between the other two. Below, `D` is the set's
@@ -618,51 +628,50 @@ momentum stage, and `FACTORS`, `INPUT_NAMES`, `INPUT_LABELS` and
 `line_items.py` names the seven fundamentals line items that the value and
 growth inputs are derived from (`component-design-factor-engine.md` section
 2.4). `LINE_ITEMS` maps each key to a frozen `LineItem(label, statement_type,
-payload_key, sign)`. The `label` is the product's word for the item.
+payload_key, sign, magnitude=False, less_key=None)`. The `label` is the
+product's word for the item.
 
-| Key | Label | Statement type |
-|---|---|---|
-| `book_equity` | book equity | `balance_sheet` |
-| `shares_outstanding` | shares outstanding | `balance_sheet` |
-| `net_income` | net income | `income_statement` |
-| `diluted_eps` | diluted earnings per share | `income_statement` |
-| `revenue` | revenue | `income_statement` |
-| `operating_cash_flow` | operating cash flow | `cash_flow_statement` |
-| `capital_expenditure` | capital expenditure | `cash_flow_statement` |
+| Key | Label | Statement type | Massive payload key |
+|---|---|---|---|
+| `book_equity` | book equity | `balance_sheet` | `total_equity_attributable_to_parent`, less `preferred_stock` (`less_key`) |
+| `shares_outstanding` | shares outstanding | `income_statement` | `diluted_shares_outstanding` |
+| `net_income` | net income | `income_statement` | `net_income_loss_attributable_common_shareholders` |
+| `diluted_eps` | diluted earnings per share | `income_statement` | `diluted_earnings_per_share` |
+| `revenue` | revenue | `income_statement` | `revenue` |
+| `operating_cash_flow` | operating cash flow | `cash_flow_statement` | `net_cash_from_operating_activities` |
+| `capital_expenditure` | capital expenditure | `cash_flow_statement` | `purchase_of_property_plant_and_equipment` (`magnitude`) |
 
-The Massive payload key, sign and quarterly availability of each item are an
-open owner question (system design section 8, question 1). Until it is
-answered, every `payload_key` is `REQUIRES_INPUT`
-(`"[REQUIRES INPUT: Massive payload key]"`) and every `sign` is `1`. A sign of
-`-1` would mark an item the provider reports as a negative outflow. Nothing is
-guessed.
+The keys are the owner's answer to system design section 8, question 1
+(DEC-0295): the statement field names of the provider's schema. Every `sign`
+is `1`. Capital expenditure is read as a magnitude, because Massive reports it
+only typically negative. Whether quarterly statements exist for every quarter,
+the fourth included, is still to be confirmed by the first real acquisition
+of fundamentals.
 
 - `unresolved()` lists the keys whose payload key is still `REQUIRES_INPUT`.
-  Today that is all seven.
+  Today it is empty. `REQUIRES_INPUT`
+  (`"[REQUIRES INPUT: Massive payload key]"`) remains as the guard a key set
+  back to it would trip.
 - `UNRESOLVED_CAUSE` (`"line_item_mapping_unresolved"`) is defined beside
   them as the cause of an input left missing by an unresolved line item
   (DAC-E2-S2-5). `value_inputs.sql` and `growth_inputs.sql` write it as
   `detail.cause`.
 - `_line_item_parameters()` in `engine.py` binds the seven items for the
   fundamentals stage as parallel arrays of names, statement types, payload
-  keys and signs, with `unresolved()` and `UNRESOLVED_CAUSE`. It reads
-  `LINE_ITEMS` when called, not at import. A `REQUIRES_INPUT` key is bound as
-  `None`, so the sentinel never reaches SQL. With every key unresolved today,
-  every value and growth input is `missing` with this cause, and the build
+  keys, signs, magnitudes and less keys, with `unresolved()` and
+  `UNRESOLVED_CAUSE`. It reads `LINE_ITEMS` when called, not at import. A
+  `REQUIRES_INPUT` key is bound as `None`, so the sentinel never reaches SQL,
+  and every input that needs it is `missing` with this cause while the build
   still completes.
 - `tests/unit/test_line_items_resolved.py` (TC-COMP-059) asserts
-  `unresolved() == []` under a strict `xfail` (DEC-0113). While any key is
-  unresolved, the suite reports it as an expected failure (`xfailed`). Once
-  every key is resolved, the strict XPASS fails the suite until the marker is
-  removed.
+  `unresolved() == []`, so a key set back to `REQUIRES_INPUT` fails the suite.
 - `test_unresolved_line_items_still_classify_momentum` in
   `tests/integration/test_engine_inputs_fundamentals.py` (CAP-002-E2-S7;
-  TC-COMP-059, DAC-E2-S2-5) builds 40 stocks with the real `LINE_ITEMS`,
-  `_STAGES` and `MIN_PEER_SET_SIZE`. Every value and growth input is `missing`
-  with this cause, value and growth are `not_enough_stocks`, momentum is
-  ranked and every stock is classified on it, and the set is `complete`. It
-  first asserts that all seven keys are unresolved, so it fails as soon as any
-  key is resolved.
+  TC-COMP-059, DAC-E2-S2-5) sets all seven keys back to `REQUIRES_INPUT` and
+  builds 40 stocks with the real `_STAGES` and `MIN_PEER_SET_SIZE`. Every value
+  and growth input is `missing` with this cause, value and growth are
+  `not_enough_stocks`, momentum is ranked and every stock is classified on it,
+  and the set is `complete`.
 
 ## Safety rules
 
@@ -693,8 +702,8 @@ Two promises of the whole build are proved by tests (CAP-002-E2-S7): 3000
 instruments build within the budget, and later data never changes a completed
 set. Both proofs run the real `_STAGES` and `MIN_PEER_SET_SIZE`, build their
 populations with `tests/integration/engine_proof_support.py`, and install the
-test line items, because the real ones are unresolved (see
-[Line items](#line-items)).
+test line items, which keep the real items' statement types and flags under
+test payload keys (see [Line items](#line-items)).
 
 ### Volume budget
 
