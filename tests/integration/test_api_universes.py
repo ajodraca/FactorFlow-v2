@@ -17,11 +17,13 @@ import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
+from factorflow.api import app as app_module
 from factorflow.api.app import create_app
 from factorflow.classification import reader
 from factorflow.classification.reader import Thresholds
 from factorflow.db.migrate_main import MIGRATIONS_DIR
 from factorflow.db.migrator import apply_pending, discover
+from tests.integration.api_classification_support import _idle_scheduler
 from tests.integration.reader_seed import insert_reference
 from tests.integration.test_universe_as_of import D1, D2, D3, _created, _event, _instrument
 from tests.integration.test_universe_create import count_events, seed_instrument
@@ -53,8 +55,15 @@ def conn(database: str) -> Iterator[psycopg.Connection]:
 @pytest.fixture
 def client(database: str, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     monkeypatch.setenv("FACTORFLOW_DATABASE_URL", database)
+    monkeypatch.setattr(app_module, "run_classification_loop", _idle_scheduler)
     with TestClient(create_app(), base_url="http://127.0.0.1:8000") as test_client:
         yield test_client
+
+
+def test_the_client_runs_no_classification_scheduler(client: TestClient) -> None:
+    """`seed_set` commits a succeeded run before inserting its set, so a live scheduler can
+    claim the run in between and the seed fails on `classification_set_run_id_key`."""
+    assert app_module.run_classification_loop is _idle_scheduler
 
 
 def count_universes(conn: psycopg.Connection) -> int:
