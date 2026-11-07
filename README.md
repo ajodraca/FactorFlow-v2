@@ -1312,7 +1312,7 @@ secure generator and using only URL-safe characters so it composes into
 export FACTORFLOW_POSTGRES_PASSWORD="$(openssl rand -hex 24)"
 export FACTORFLOW_MASSIVE_API_KEY="<your-massive-api-key>"
 export FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60
-export FACTORFLOW_IMAGE_TAG="0.1.0-$(git rev-parse --short HEAD)"
+export FACTORFLOW_IMAGE_TAG="0.2.0-$(git rev-parse --short HEAD)"
 ```
 
 All four variables (`FACTORFLOW_POSTGRES_PASSWORD`, `FACTORFLOW_MASSIVE_API_KEY`,
@@ -1320,7 +1320,7 @@ All four variables (`FACTORFLOW_POSTGRES_PASSWORD`, `FACTORFLOW_MASSIVE_API_KEY`
 required `${VAR:?...}` interpolation in `compose.yaml`: a missing or empty
 variable stops `docker compose` before starting any container and names the
 variable. Every build uses an immutable `<version>-<shortsha>` tag (for example
-`0.1.0-ef2dd7c`) that is **never reused**, so the previous image remains
+`0.2.0-ef2dd7c`) that is **never reused**, so the previous image remains
 available for rollback.
 
 **Step 2 — Build and start PostgreSQL and the application container.**
