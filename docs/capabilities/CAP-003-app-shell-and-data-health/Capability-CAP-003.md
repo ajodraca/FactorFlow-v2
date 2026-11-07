@@ -2,7 +2,7 @@
 artifact_schema_version: 1
 artifact_id: CAP-003
 artifact_type: capability
-artifact_version: 1
+artifact_version: 2
 id: CAP-003
 title: App Shell & Data Health
 description: >-
@@ -11,17 +11,17 @@ description: >-
   whether the data can be trusted, with CAP-001's market data surfaces reached
   through it in the product's own words.
 created: 2026-10-24
-updated: 2026-10-26
+updated: 2026-11-07
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: approved
+status: draft
 ai_provenance:
   agent_id: capability-definition-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
   tool_version: unknown
-  timestamp: 2026-10-25T19:41:02Z
+  timestamp: 2026-11-07T21:30:00Z
   source_artifacts:
     - id: PRODUCT-UX
       version: "6"
@@ -39,12 +39,6 @@ ai_provenance:
       version: "6"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
-approval:
-  approval_policy: owner-allowed
-  approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:24Z
-  reviewed_revision: sha256:52cd12cd9b606e6691d9ba1617949d778a1e7431d646c157c0b393a016d8a3f8
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
 ---
 
 # App Shell & Data Health
@@ -74,8 +68,15 @@ following.
 It completes M1 (2026-Q4) together with CAP-002. Delivered before CAP-002's
 screens land, it saves them from being built in one shell and moved to another;
 delivered after, it takes over the interim shell they were placed in. Either
-way, nothing CAP-001 recorded or does changes: this capability presents
-CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
+way, this capability presents CAP-001's data and actions, it does not
+re-acquire, re-store or re-define them. The one exception is how a provider
+refusal is reported: on 2026-11-07 production recorded every refusal by the
+market data provider, a plan not entitled to company financials and a rate
+limit alike, as the same generic unavailability after three attempts, so
+*Needs fixing* could not name the cause or the fix that applies (follow-up F1
+of CAP-002's release). This capability makes those two refusals reach the
+owner by cause (AC-29, AC-30); CAP-001 is approved and takes no new work, so
+the change is owned here.
 
 ## 2. Scope
 
@@ -112,6 +113,11 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
 - **The product's own building blocks**: every surface above is built from the
   design system's components and tokens, so a later capability adds screens
   without restyling shared ones.
+- **Provider refusals reported by cause** (F1, production 2026-11-07). A
+  download the owner's plan is not entitled to, and one the provider
+  rate-limits past the wait budget, are recorded under their own reasons. This
+  changes CAP-001's massive-client, rate-limit-governor and acquisition-runner.
+  CAP-001's approved designs stay as they are (AGT-SCOPE-002).
 
 ### Out of Scope
 
@@ -129,9 +135,10 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
   over the followed list, which CAP-001 AC-6 makes safe (blueprint D-9).
 - **Research, stock evidence, compare and universe screens** — CAP-002 owns
   them; this capability only gives them their place in the rail.
-- **Any change to what CAP-001 acquires, stores, records or refuses.** Its
-  acceptance criteria stand; this capability changes where and in which words
-  its results are shown.
+- **Any other change to what CAP-001 acquires, stores, records or refuses.** Its
+  acceptance criteria stand; apart from the provider-refusal reasons in scope
+  above (AC-29, AC-30), this capability changes where and in which words its
+  results are shown.
 - **Settings sections for the review gate and live limits** (M5, M6).
 - **Removing the redirects from CAP-001's old paths**, due one release after
   this capability ships.
@@ -331,6 +338,15 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
     stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th
     percentile, measured by the volume test (owner decision 2026-10-25, review
     v1 FINDING-4).
+29. **AC-29 — A plan refusal is not retried:** When the provider refuses a data
+    type because the owner's plan is not entitled to it, the product MUST send
+    that request once and MUST record the refusal under its own reason; its
+    *Needs fixing* row MUST name the provider plan as the fix and MUST NOT
+    offer a download as its fix.
+30. **AC-30 — Throttling is waited out, then named:** A provider rate limit MUST
+    NOT count as a failed attempt; when it persists past the wait budget for
+    one stock, the product MUST record it under its own rate-limit reason, and
+    the download MUST still finish as partial, never abandoned.
 
 ## 5. Dependencies and Constraints
 
@@ -338,7 +354,7 @@ CAP-001's data and actions, it does not re-acquire, re-store or re-define them.
 
 | Target | Type | What is needed | Satisfied when |
 |--------|------|----------------|----------------|
-| CAP-001 | requires-runtime | Everything the shell presents about market data, as CAP-001 already provides it: the acquisition list with add, remove and retire (`CAP-001 AC-1`, `AC-21`, `AC-25`); the stated history depth and deepening (`AC-2`, `AC-22`); starting, queueing and cancelling runs and the refusal of an empty run (`AC-19`, `AC-23`, `AC-24`, `AC-26`); per-instrument coverage and gaps (`AC-7`, `AC-8`); each run's honest outcome and terminal state (`AC-9`, `AC-12`, `AC-20`); failure diagnosis including unrecognised instruments (`AC-10`, `AC-11`); re-run safety, which makes **Download now** a safe retry (`AC-6`); credential presence without its value (`AC-13`); the honest empty state and health (`AC-17`, `AC-18`); and the loopback posture the shell inherits (`AC-14`). | The running product serves these and Setup, Home, Data health and the five taken-over screens render them end to end; AC-7, AC-11 to AC-17 and AC-21 of this capability pass against it. |
+| CAP-001 | requires-runtime | Everything the shell presents about market data, as CAP-001 already provides it: the acquisition list with add, remove and retire (`CAP-001 AC-1`, `AC-21`, `AC-25`); the stated history depth and deepening (`AC-2`, `AC-22`); starting, queueing and cancelling runs and the refusal of an empty run (`AC-19`, `AC-23`, `AC-24`, `AC-26`); per-instrument coverage and gaps (`AC-7`, `AC-8`); each run's honest outcome and terminal state (`AC-9`, `AC-12`, `AC-20`); failure diagnosis including unrecognised instruments (`AC-10`, `AC-11`); re-run safety, which makes **Download now** a safe retry (`AC-6`); credential presence without its value (`AC-13`); the honest empty state and health (`AC-17`, `AC-18`); and the loopback posture the shell inherits (`AC-14`). AC-29 and AC-30 change how three of CAP-001's components report a provider refusal; the change is owned here and leaves CAP-001's criteria standing (`AC-10` keeps holding: the reason reported names the refusal). | The running product serves these and Setup, Home, Data health and the five taken-over screens render them end to end; AC-7, AC-11 to AC-17, AC-21, AC-29 and AC-30 of this capability pass against it. |
 | CAP-002 | requires-runtime | The score currency Home's data tile and Data health's *Factor scores* card show: when the current scores were produced and which download they reflect (`CAP-002 AC-21`), the previous set marked as not reflecting the latest download or the failure and its reason (`AC-20`), the honest state before any scores exist (`AC-22`), which stocks are current — every input present and current (`AC-12`, `AC-13`) — and the 30-stock ranking floor setup warns about (`AC-14`). The read that carries these is specified in CAP-002's system design (DEC-0071) and consumed, not defined, here. Also the seam CAP-002 decided for the interim shell (DEC-0069): one appended Research entry this capability replaces, with CAP-002's `/research/*` routes untouched (AC-27). | CAP-002's read surface serves score currency on the running product and AC-8 and AC-11 render it; AC-27 passes with CAP-002's routes reachable from the new rail. Until then the *Factor scores* card and the score as-of render as not determinable, never as a value. |
 | `docs/ux/product-ux-blueprint.md` (PRODUCT-UX v6) and `docs/ux/screens/S01`, `S02`, `S09` (v4) | conforms-to | The approved product-wide interface this capability builds the M1 part of: navigation and routes (§2), the shell without the kill switch and environment region (§3), shared patterns (§4), vocabulary (§7), status map (§8), action tiers (§9), the M1 row of the milestone map (§10) and decisions D-2, D-7, D-8, D-9 (§12); S01 §2 M1 regions and S01-3 to S01-7; S02 steps 1 to 4 and S02-1 to S02-6; S09 and S09-1 to S09-5. | The UX brief claims the §10 M1 row and cites PRODUCT-UX; the UX design starts from S01, S02 and S09 and lists every departure; specification review confirms the screen specs' acceptance checks. |
 | STD-UI (`docs/constitution/standards/ui-conventions.md`, v6) | conforms-to | The owner-interface standard. This capability delivers the shell every screen renders in and takes over five screens, so every rule governing a surface it renders binds it; STD-UI-1 v6 fixes the display labels AC-19 requires and STD-UI-26 governs setup. | Section 5.4 accounts for all 30 rules, and specification review confirms the UX brief and UX design satisfy each rule marked yes or partial. |
@@ -428,6 +444,11 @@ mirror of it, and the two must agree.
   the owner on 2026-10-25** (specification review v1).
 - **Setup is complete when the first download has been started, not finished**
   (S02 §6), so an owner who leaves mid-download still lands on Home.
+- **Whether the provider plan should cover a data type is the owner's.** On
+  2026-11-07 the deployed plan was refused company financials and was
+  rate-limited on reference and split reads. AC-29 and AC-30 report such
+  refusals by cause; they do not change the plan, and CAP-001 AC-3 and AC-4
+  are met only when the owner's plan covers what they acquire.
 
 ## 7. Open Questions
 
@@ -478,4 +499,7 @@ every dependency is typed and cited. The four product questions raised at
 definition — the visible download number (OQ-1), delivery order relative to
 CAP-002 (OQ-2), CSV upload in M1 (OQ-3) and the tech-stack standing of the
 vendored components (OQ-4) — were answered by the owner on 2026-10-25 after
-specification review v1; none changed the scope or a criterion.
+specification review v1; none changed the scope or a criterion. Version 2
+(2026-11-07, owner decision) adds AC-29 and AC-30 for follow-up F1 of
+CAP-002's release, after specification review v14 of CAP-001 (FINDING-56)
+placed the change here rather than in delivered CAP-001.
