@@ -1,0 +1,29 @@
+# Independent code-review subagent (general-purpose, agentId a88d15cd9fe02f78e), cycle-2, judged cycle-2.patch
+# (diff_sha256 2a464b6236aeedd5a19182d67c88622d5aba35cd8e4b095fd0f2fb4b0ef46cf1) and mutation-cycle-2-results.json.
+VERDICT: APPROVED
+
+Re-ran: focused suite (52) passes; ruff check, ruff format --check and mypy src clean. The errors.py diff matches T011
+and the massive-client section 2.5 snippet (kind-table row, _NOT_ENTITLED_DESCRIPTION and docstring, the
+`elif type(error) is ProviderNotEntitled` branch); the docstring and TypeError rewording is the one the plan's
+Resolved Conflicts asks for. Nothing beyond what the tests need.
+
+Findings
+- NON-BLOCKING, tests/unit/test_massive_error_classification.py:412. The leak check on the composed reason leaves out
+  "massive.com" although the check on the error includes it; with the identity redact a branch composing provider text
+  fails anyway on "Please upgrade". Adding it would only make the two lists match.
+- NON-BLOCKING, errors.py:338. The new TypeError message is pinned by no test (the delivered test accepts either
+  exception class); matches the delivered test and the plan says so; cosmetic.
+- NON-BLOCKING, errors.py:346-348. CredentialRejected branch uses isinstance, the new branch `type(...) is`; mandated by
+  the design; harmless because the class lookup runs first.
+Test quality: independent literals with the `[not_entitled] ` prefix and trailing space; the identity spy asserted to
+receive nothing makes the credential assertion meaningful; the five-row test keeps the four delivered kinds fixed;
+TypeError cases are an unlisted subclass and a ProviderNotEntitled subclass; T008 uses the identity redact as planned.
+Security: the fixed description never passes through redact (a killed mutant confirms it); no provider text, URL or
+credential reaches the error or the reason.
+The added negative row (:372) is sound: the body falls through to ProviderUnavailable and alone kills the
+marker-widened-to-entitled mutant; filing it under TC-COMP-228 as a negative row is reasonable.
+Mutant adequacy: 7 of 8 killed, logs show the failing tests; no surviving non-equivalent mutant found on the changed
+lines (swapping the CredentialRejected/ProviderNotEntitled branches is equivalent, the classes are unrelated).
+EQUIVALENT-DISPOSITION: AGREE. _ERROR_KIND_BY_TYPE.get(type(error)) raises TypeError for any class that is not an exact
+key, so the branch is reached only for exact listed classes; none subclasses ProviderNotEntitled; isinstance and
+`type(...) is` agree on every input that can reach the branch, and T006 (c) shows the subclass case never gets there.

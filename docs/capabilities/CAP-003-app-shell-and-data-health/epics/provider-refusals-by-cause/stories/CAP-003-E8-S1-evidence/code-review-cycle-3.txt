@@ -1,0 +1,35 @@
+# Independent code-review subagents, cycle-3. Three rounds; each judged the cycle's patch as it stood. The recorded
+# verdict is round 3's, on the final cycle-3.patch (diff_sha256 45a13cbf5fb91095ddc728febfb9e9c0450a88877631b9dfbbadd5b21cf97c02)
+# and mutation-cycle-3-results.json (5 mutants, 5 killed).
+
+== Round 3 (agentId ae92f5229806a1058), final patch
+VERDICT: APPROVED
+Re-ran: 16 tests in tests/unit/test_outcomes.py pass; ruff check, ruff format --check, mypy src (61 files) clean.
+Correctness: the outcomes.py change (lines 33, 125, 150-151, 160-161) matches T012 word for word (import, failed tuple,
+docstring line, section 2.3 comment, TypeError text). ProviderNotEntitled subclasses MassiveError directly, so it must
+be in the tuple. CredentialRejected still runs first and raises ValueError. No new outcome value, column, timing value
+or migration (DAC-E8-8).
+Tests: :393 compares the whole InstrumentOutcomeRecord with a hand-written reason literal; the TypeError test at :420
+matches the full list of four accepted types; :437 (MassiveError subclass outside the list) catches any widening of the
+failed check. Together these cover DAC-E8-S1-6.
+Mutants: all 5 killed; no realistic surviving mutant on the changed lines found.
+Findings: 1. NON-BLOCKING outcomes.py:150 the comment names ProviderRateLimited, which arrives in CAP-003-E8-S2; T012
+and section 2.3 ask for it; S2 should add it as a ProviderUnavailable subclass. 2. NON-BLOCKING outcomes.py:125 the
+docstring line stands alone; cosmetic, T012's wording. 3. NON-BLOCKING test_outcomes.py:420 overlaps the delivered :321
+test, which accepts (TypeError, ValueError); stricter, no conflict.
+
+== Round 2 (agentId a674a8a18a5be6041), patch 351c30097291c6f75daa1be1a218c56eb810c6bd149bb31ef3d161788fabfb4e
+VERDICT: APPROVED
+Findings: 1. NON-BLOCKING test_outcomes.py:428 vs outcomes.py:160-161: the TypeError test matched only
+"ProviderNotEntitled"; a mutant dropping the three delivered names from the changed message line survived. Fixed for
+round 3: the test matches the full sentence, and mutant type-error-text-omits-delivered-types was added (killed).
+2. NON-BLOCKING: the CredentialRejected and _Unlisted tests pass on the base too (guards, not red-first). 3. NON-BLOCKING
+the ProviderRateLimited comment is a forward reference. Contrived survivors that branch on the single test input (the
+message "x", provider_request_id None, a "Provider" name prefix) were judged not worth a fix.
+
+== Round 1 (agentId aaaa793cc40700433), patch fcef9885ce23a3af7b889edf5287b897282f7a47526a24003ad1bb09ac52383e
+VERDICT: APPROVED
+Findings: 1. NON-BLOCKING (mutant adequacy) outcomes.py:151: widening the check to isinstance(error, (MassiveError,))
+survived; every unrecognised-type test used a plain Exception subclass. Fixed for round 2:
+test_an_unlisted_massive_error_subclass_raises_type_error and mutant failed-widened-to-massive-error (killed).
+2. NON-BLOCKING outcomes.py:150 the ProviderRateLimited comment is intended per T012.

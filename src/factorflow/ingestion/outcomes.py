@@ -30,6 +30,7 @@ from factorflow.ingestion.massive.errors import (
     InstrumentNotFound,
     MassiveError,
     ProviderContractViolation,
+    ProviderNotEntitled,
     ProviderUnavailable,
 )
 from factorflow.ingestion.writer import WriteResult
@@ -121,6 +122,7 @@ def classify_provider_error(
     ``ProviderUnavailable`` and ``ProviderContractViolation`` both map to
     ``"failed"`` — the provider is unavailable in both cases from the run's
     perspective.
+    ``ProviderNotEntitled`` (a plan refusal, per data type, AC-29) maps to ``"failed"``.
 
     ``CredentialRejected`` is a run-level failure that must not become a
     per-data-type outcome. This function raises ``ValueError`` for it so
@@ -145,7 +147,8 @@ def classify_provider_error(
             reason=reason,
         )
 
-    if isinstance(error, (ProviderUnavailable, ProviderContractViolation)):
+    # ProviderUnavailable includes its subclass ProviderRateLimited.
+    if isinstance(error, (ProviderUnavailable, ProviderContractViolation, ProviderNotEntitled)):
         return InstrumentOutcomeRecord(
             data_type=data_type,
             outcome="failed",
@@ -154,8 +157,8 @@ def classify_provider_error(
 
     raise TypeError(
         f"classify_provider_error does not support {type(error).__name__}; "
-        "only InstrumentNotFound, ProviderUnavailable, and ProviderContractViolation "
-        "are accepted as per-data-type outcomes."
+        "only InstrumentNotFound, ProviderUnavailable, ProviderContractViolation and "
+        "ProviderNotEntitled are accepted as per-data-type outcomes."
     )
 
 

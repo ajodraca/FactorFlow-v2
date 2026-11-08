@@ -1,0 +1,265 @@
+# RED cycle-2 (T006, T008 and the marker row) after cycle-1 (index tree 087e447), errors.py as cycle-1 left it (93bee0f2e6b9ab4fc27ac2005bdbfca10170824c, staged blob 93bee0f2e6b9ab4fc27ac2005bdbfca10170824c)
+# $ PYTHONPATH=src python -m pytest tests/unit/test_massive_failure_reasons.py tests/unit/test_massive_error_classification.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collected 52 items
+
+tests/unit/test_massive_failure_reasons.py .............F....F..         [ 40%]
+tests/unit/test_massive_error_classification.py ........................ [ 86%]
+......F                                                                  [100%]
+
+=================================== FAILURES ===================================
+_ test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text _
+
+    def test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text() -> None:
+        """CAP-003 TC-COMP-232 / DAC-E8-S1-5: a plan refusal composes the fixed
+        description whatever its message holds; `redact` is never called with
+        that message, and the credential fixture appears nowhere. The spy
+        returns its argument unchanged, so a branch that composed the message
+        would leak the fixture into the reason."""
+        seen: list[str] = []
+    
+        def _spy_redact(text: str) -> str:
+            seen.append(text)
+            return text
+    
+        error = ProviderNotEntitled(
+            f"Please upgrade your plan {_CREDENTIAL_FIXTURE}", provider_request_id="req_ne_001"
+        )
+    
+>       reason = compose_failure_reason(
+            error, symbol="KO", data_type="fundamentals", redact=_spy_redact
+        )
+
+tests/unit/test_massive_failure_reasons.py:303: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+error = ProviderNotEntitled('Please upgrade your plan SECRET_TEST_TOKEN_ABC123')
+symbol = 'KO', data_type = 'fundamentals'
+redact = <function test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text.<locals>._spy_redact at 0x10aca4360>
+
+    def compose_failure_reason(
+        error: MassiveError,
+        *,
+        symbol: str,
+        data_type: str,
+        redact: Callable[[str], str],
+    ) -> str:
+        """Compose a safe, owner-visible failure reason from a typed `error`
+        (DAC-E3-13, AC-13, AC-11).
+    
+        The stable fields -- the error kind, `symbol`, `data_type`, and the
+        provider request ID (explicit even when absent, DAC-E3-S5-1) -- are
+        composed first and are never subject to truncation or redaction: they
+        never carry provider-supplied free text. Only `error`'s own message is
+        variable diagnostic text; it is passed through `redact` *before* it is
+        bounded to `MAX_FAILURE_REASON_VARIABLE_TEXT` characters, so a
+        credential sitting anywhere in the raw text -- including near the
+        truncation boundary -- is removed before the cut is made, not after.
+    
+        `redact` is supplied by the caller (`MassiveClient`, which owns the
+        usable credential) and is invoked only with `error`'s own message --
+        never with `symbol`, `data_type`, or the request ID mixed in.
+    
+        `CredentialRejected` never composes its own message into the reason,
+        even redacted: it always uses a fixed rejection description
+        (DAC-E3-S5-2), because stating "credential rejected" must not depend
+        on trusting redaction to catch every way a credential could appear in
+        provider-echoed text.
+    
+        Raises `TypeError` if `error` is not one of the four typed
+        `MassiveError` subclasses this module defines -- this composer never
+        emits an untyped reason for an unrecognised error class.
+        """
+        kind = _ERROR_KIND_BY_TYPE.get(type(error))
+        if kind is None:
+>           raise TypeError(
+                f"compose_failure_reason does not support {type(error).__name__}; "
+                "only the four typed MassiveError subclasses are accepted."
+            )
+E           TypeError: compose_failure_reason does not support ProviderNotEntitled; only the four typed MassiveError subclasses are accepted.
+
+src/factorflow/ingestion/massive/errors.py:324: TypeError
+_____ test_each_kind_composes_its_own_reason_by_exact_class[not_entitled] ______
+
+error_type = <class 'factorflow.ingestion.massive.errors.ProviderNotEntitled'>
+expected = '[not_entitled] symbol=AAPL data_type=prices request_id=r1: the provider plan is not entitled to this data'
+
+    @pytest.mark.parametrize(
+        ("error_type", "expected"),
+        [
+            pytest.param(
+                InstrumentNotFound,
+                "[not_found] symbol=AAPL data_type=prices request_id=r1: diag text",
+                id="not_found",
+            ),
+            pytest.param(
+                CredentialRejected,
+                "[credential_rejected] symbol=AAPL data_type=prices request_id=r1: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                ProviderUnavailable,
+                "[unavailable] symbol=AAPL data_type=prices request_id=r1: diag text",
+                id="unavailable",
+            ),
+            pytest.param(
+                ProviderContractViolation,
+                "[contract_violation] symbol=AAPL data_type=prices request_id=r1: diag text",
+                id="contract_violation",
+            ),
+            pytest.param(
+                ProviderNotEntitled,
+                "[not_entitled] symbol=AAPL data_type=prices request_id=r1: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-232
+    def test_each_kind_composes_its_own_reason_by_exact_class(
+        error_type: type[MassiveError], expected: str
+    ) -> None:
+        """CAP-003 TC-COMP-232 / DAC-E8-S1-5: every delivered kind still
+        composes its own reason, and the new `not_entitled` row its fixed
+        description, each beginning `[<kind>] `."""
+        error = error_type("diag text", provider_request_id="r1")
+    
+>       reason = compose_failure_reason(
+            error, symbol="AAPL", data_type="prices", redact=_identity_redact
+        )
+
+tests/unit/test_massive_failure_reasons.py:357: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+error = ProviderNotEntitled('diag text'), symbol = 'AAPL', data_type = 'prices'
+redact = <function _identity_redact at 0x10ac7f9c0>
+
+    def compose_failure_reason(
+        error: MassiveError,
+        *,
+        symbol: str,
+        data_type: str,
+        redact: Callable[[str], str],
+    ) -> str:
+        """Compose a safe, owner-visible failure reason from a typed `error`
+        (DAC-E3-13, AC-13, AC-11).
+    
+        The stable fields -- the error kind, `symbol`, `data_type`, and the
+        provider request ID (explicit even when absent, DAC-E3-S5-1) -- are
+        composed first and are never subject to truncation or redaction: they
+        never carry provider-supplied free text. Only `error`'s own message is
+        variable diagnostic text; it is passed through `redact` *before* it is
+        bounded to `MAX_FAILURE_REASON_VARIABLE_TEXT` characters, so a
+        credential sitting anywhere in the raw text -- including near the
+        truncation boundary -- is removed before the cut is made, not after.
+    
+        `redact` is supplied by the caller (`MassiveClient`, which owns the
+        usable credential) and is invoked only with `error`'s own message --
+        never with `symbol`, `data_type`, or the request ID mixed in.
+    
+        `CredentialRejected` never composes its own message into the reason,
+        even redacted: it always uses a fixed rejection description
+        (DAC-E3-S5-2), because stating "credential rejected" must not depend
+        on trusting redaction to catch every way a credential could appear in
+        provider-echoed text.
+    
+        Raises `TypeError` if `error` is not one of the four typed
+        `MassiveError` subclasses this module defines -- this composer never
+        emits an untyped reason for an unrecognised error class.
+        """
+        kind = _ERROR_KIND_BY_TYPE.get(type(error))
+        if kind is None:
+>           raise TypeError(
+                f"compose_failure_reason does not support {type(error).__name__}; "
+                "only the four typed MassiveError subclasses are accepted."
+            )
+E           TypeError: compose_failure_reason does not support ProviderNotEntitled; only the four typed MassiveError subclasses are accepted.
+
+src/factorflow/ingestion/massive/errors.py:324: TypeError
+_____ test_a_plan_refusal_carries_no_provider_free_text_or_spurious_field ______
+
+    def test_a_plan_refusal_carries_no_provider_free_text_or_spurious_field() -> None:
+        """CAP-003 TC-COMP-234 / DAC-E8-S1-7 (AGT-PROHIB-003, SEC-INP-001): a
+        plan refusal carrying a spurious credential-bearing field classifies
+        with its request id, and neither the error nor its composed reason --
+        under an identity `redact`, so nothing is hidden by redaction -- holds
+        the provider's text, the field or the credential."""
+        body = {
+            "status": "ERROR",
+            "request_id": "req_leak_403",
+            "message": "You are not entitled to this data. Please upgrade your plan",
+            "debug_request_url": "https://api.massive.com/v3/reference/tickers/KO?apiKey=SECRET_TEST_TOKEN_ABC123",
+        }
+    
+        result = classify_error_body(json.dumps(body))
+    
+        assert type(result) is ProviderNotEntitled
+        assert result.provider_request_id == "req_leak_403"
+        for leaked in ("SECRET_TEST_TOKEN_ABC123", "massive.com", "Please upgrade"):
+            assert leaked not in str(result)
+            assert leaked not in repr(result)
+    
+>       reason = compose_failure_reason(
+            result, symbol="KO", data_type="fundamentals", redact=lambda text: text
+        )
+
+tests/unit/test_massive_error_classification.py:408: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+error = ProviderNotEntitled('The provider plan is not entitled to this data.')
+symbol = 'KO', data_type = 'fundamentals'
+redact = <function test_a_plan_refusal_carries_no_provider_free_text_or_spurious_field.<locals>.<lambda> at 0x10ae49440>
+
+    def compose_failure_reason(
+        error: MassiveError,
+        *,
+        symbol: str,
+        data_type: str,
+        redact: Callable[[str], str],
+    ) -> str:
+        """Compose a safe, owner-visible failure reason from a typed `error`
+        (DAC-E3-13, AC-13, AC-11).
+    
+        The stable fields -- the error kind, `symbol`, `data_type`, and the
+        provider request ID (explicit even when absent, DAC-E3-S5-1) -- are
+        composed first and are never subject to truncation or redaction: they
+        never carry provider-supplied free text. Only `error`'s own message is
+        variable diagnostic text; it is passed through `redact` *before* it is
+        bounded to `MAX_FAILURE_REASON_VARIABLE_TEXT` characters, so a
+        credential sitting anywhere in the raw text -- including near the
+        truncation boundary -- is removed before the cut is made, not after.
+    
+        `redact` is supplied by the caller (`MassiveClient`, which owns the
+        usable credential) and is invoked only with `error`'s own message --
+        never with `symbol`, `data_type`, or the request ID mixed in.
+    
+        `CredentialRejected` never composes its own message into the reason,
+        even redacted: it always uses a fixed rejection description
+        (DAC-E3-S5-2), because stating "credential rejected" must not depend
+        on trusting redaction to catch every way a credential could appear in
+        provider-echoed text.
+    
+        Raises `TypeError` if `error` is not one of the four typed
+        `MassiveError` subclasses this module defines -- this composer never
+        emits an untyped reason for an unrecognised error class.
+        """
+        kind = _ERROR_KIND_BY_TYPE.get(type(error))
+        if kind is None:
+>           raise TypeError(
+                f"compose_failure_reason does not support {type(error).__name__}; "
+                "only the four typed MassiveError subclasses are accepted."
+            )
+E           TypeError: compose_failure_reason does not support ProviderNotEntitled; only the four typed MassiveError subclasses are accepted.
+
+src/factorflow/ingestion/massive/errors.py:324: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_failure_reasons.py::test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_kind_composes_its_own_reason_by_exact_class[not_entitled]
+FAILED tests/unit/test_massive_error_classification.py::test_a_plan_refusal_carries_no_provider_free_text_or_spurious_field
+========================= 3 failed, 49 passed in 0.26s =========================
+# exit 1

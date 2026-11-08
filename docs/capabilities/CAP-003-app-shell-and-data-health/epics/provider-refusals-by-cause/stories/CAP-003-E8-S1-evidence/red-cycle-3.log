@@ -1,0 +1,119 @@
+# RED cycle-3 (T007) after cycle-2 (index tree 695abeb), outcomes.py unchanged from base (6beb7a31b23acc0d5f0eb2912e1a378af2fa2818, HEAD blob 6beb7a31b23acc0d5f0eb2912e1a378af2fa2818)
+# $ PYTHONPATH=src python -m pytest tests/unit/test_outcomes.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collected 15 items
+
+tests/unit/test_outcomes.py ............F.F                              [100%]
+
+=================================== FAILURES ===================================
+_____ test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded _____
+
+    def test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded() -> None:
+        """CAP-003 TC-COMP-233 / DAC-E8-S1-6: ``ProviderNotEntitled`` is recorded
+        ``failed`` for its data type with the composed reason exactly as given."""
+        from factorflow.ingestion.outcomes import InstrumentOutcomeRecord, classify_provider_error
+    
+>       record = classify_provider_error(
+            ProviderNotEntitled("x"), data_type="fundamentals", reason=_NOT_ENTITLED_REASON
+        )
+
+tests/unit/test_outcomes.py:397: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+error = ProviderNotEntitled('x'), data_type = 'fundamentals'
+reason = '[not_entitled] symbol=KO data_type=fundamentals request_id=req_403_001: the provider plan is not entitled to this data'
+
+    def classify_provider_error(
+        error: MassiveError,
+        *,
+        data_type: str,
+        reason: str,
+    ) -> InstrumentOutcomeRecord:
+        """Map a typed ``MassiveError`` to a per-data-type ``InstrumentOutcomeRecord``.
+    
+        ``InstrumentNotFound`` maps to ``"not_found"``.
+        ``ProviderUnavailable`` and ``ProviderContractViolation`` both map to
+        ``"failed"`` — the provider is unavailable in both cases from the run's
+        perspective.
+    
+        ``CredentialRejected`` is a run-level failure that must not become a
+        per-data-type outcome. This function raises ``ValueError`` for it so
+        callers cannot accidentally create a data-type row for it.
+    
+        Any other (unrecognised) type raises ``TypeError``.
+    
+        The ``reason`` argument is the already-composed, credential-safe reason
+        string from the Massive-client boundary (``compose_failure_reason``).
+        This module does not re-compose or re-redact it.
+        """
+        if isinstance(error, CredentialRejected):
+            raise ValueError(
+                "CredentialRejected is a run-level failure and must not become a "
+                "per-data-type outcome. Fail the run instead."
+            )
+    
+        if isinstance(error, InstrumentNotFound):
+            return InstrumentOutcomeRecord(
+                data_type=data_type,
+                outcome="not_found",
+                reason=reason,
+            )
+    
+        if isinstance(error, (ProviderUnavailable, ProviderContractViolation)):
+            return InstrumentOutcomeRecord(
+                data_type=data_type,
+                outcome="failed",
+                reason=reason,
+            )
+    
+>       raise TypeError(
+            f"classify_provider_error does not support {type(error).__name__}; "
+            "only InstrumentNotFound, ProviderUnavailable, and ProviderContractViolation "
+            "are accepted as per-data-type outcomes."
+        )
+E       TypeError: classify_provider_error does not support ProviderNotEntitled; only InstrumentNotFound, ProviderUnavailable, and ProviderContractViolation are accepted as per-data-type outcomes.
+
+src/factorflow/ingestion/outcomes.py:155: TypeError
+____ test_an_unrecognised_type_raises_type_error_naming_the_accepted_types _____
+
+    def test_an_unrecognised_type_raises_type_error_naming_the_accepted_types() -> None:
+        """CAP-003 TC-COMP-233 / DAC-E8-S1-6: the ``TypeError`` text names the
+        accepted types, ``ProviderNotEntitled`` among them."""
+        from factorflow.ingestion.outcomes import classify_provider_error
+    
+        class UnknownError(Exception):
+            pass
+    
+>       with pytest.raises(TypeError, match="ProviderNotEntitled"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'ProviderNotEntitled'
+E         Actual message: 'classify_provider_error does not support UnknownError; only InstrumentNotFound, ProviderUnavailable, and ProviderContractViolation are accepted as per-data-type outcomes.'
+
+tests/unit/test_outcomes.py:427: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_outcomes.py::test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded
+FAILED tests/unit/test_outcomes.py::test_an_unrecognised_type_raises_type_error_naming_the_accepted_types
+========================= 2 failed, 13 passed in 0.15s =========================
+# exit 1
+
+# Re-observed with the final cycle-3 tests (after the two review-driven strengthenings) in a scratch copy of the tree:
+# errors.py as cycle-2 left it (274c8d021cd373d3790ffbc3984eedf58a5671d6), outcomes.py = base blob 6beb7a31b23acc0d5f0eb2912e1a378af2fa2818, tests/unit/test_outcomes.py = 39b5df02c3b9bceb77e21b0190239b3a995803c7
+# $ PYTHONPATH=src python -m pytest tests/unit/test_outcomes.py
+_____ test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded _____
+    def test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded() -> None:
+        ``failed`` for its data type with the composed reason exactly as given."""
+        ``"failed"`` — the provider is unavailable in both cases from the run's
+                outcome="failed",
+E       TypeError: classify_provider_error does not support ProviderNotEntitled; only InstrumentNotFound, ProviderUnavailable, and ProviderContractViolation are accepted as per-data-type outcomes.
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'only InstrumentNotFound, ProviderUnavailable, ProviderContractViolation and ProviderNotEntitled are accepted'
+E         Actual message: 'classify_provider_error does not support UnknownError; only InstrumentNotFound, ProviderUnavailable, and ProviderContractViolation are accepted as per-data-type outcomes.'
+FAILED tests/unit/test_outcomes.py::test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded
+FAILED tests/unit/test_outcomes.py::test_an_unrecognised_type_raises_type_error_naming_the_accepted_types
+========================= 2 failed, 14 passed in 0.26s =========================
+# exit 1

@@ -1,0 +1,238 @@
+# TDD evidence for CAP-003-E8-S1 - A plan refusal is sent once and recorded as not_entitled.
+# Base commit (T001): 0c0c7ad6ada5b161b567787e3277bc888e8a4811; focused suite there: 49 passed.
+# Four cycles, as the task plan's T016 defines them: C1 (T002, T003 -> T010), C2 (T006, T008 -> T011),
+# C3 (T007 -> T012), C4 (T009, T004, T005 -> T013). Story coding makes one commit for the story, so every cycle
+# records commit_hash: stage and cites its reviewed_patch. cycle-1's patch is the staged diff against HEAD
+# (check-tdd-evidence.py fingerprint --staged); each later cycle's patch is the diff from the index tree the previous
+# cycle was reviewed at to the index tree after staging its own hunks (fingerprint --range <previous tree>..<new tree>),
+# so the patches apply in order onto the base and rebuild the story commit.
+# Mutation: scripts/mutation-run.py generates no mutant for these lines (none of its operators matches a Python
+# membership test, a non-default keyword argument or a tuple literal), so every cycle runs the task plan's hand-written
+# mutants plus the plan's named generated-operator mutants written by hand (operator "manual").
+# Reviews: per cycle, one independent code-review subagent and one independent spec-drift subagent judged the patch;
+# their verdicts are recorded verbatim in code-review-cycle-N.txt and spec-drift-cycle-N.txt.
+# Interpreter: no venv in this clone; every command ran as PYTHONPATH=src <main checkout>/.venv/bin/python -m <tool>.
+# No exception and no decision record: no TDD or review step was skipped.
+# T014 (final bytes): full suite 2639 passed, postgres tests included (testcontainers postgres:16); uv build ok;
+# ruff check, ruff format --check and mypy src clean (CAP-003-E8-S1-evidence/final-validation.log).
+# T015 against the base: (a) uv.lock and pyproject.toml unchanged; (b) no hunk touches _safe_fields (base lines
+# 110-135), which still returns exactly status, message, error and request_id; (c) no added test line reads attempts;
+# (d) the change set is errors.py, __init__.py, outcomes.py, the four test files, the task plan, the story status, this
+# file and the CAP-003-E8-S1-evidence folder (logs, review records, patches, mutation results, as earlier stories keep
+# them); no migration. client.py, rate_limit.py, runner.py, models.py and paging.py are unchanged.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T010]
+    description: >
+      TC-COMP-228 and TC-COMP-229 in tests/unit/test_massive_error_classification.py (five not-entitled bodies,
+      including the owner-confirmed NOT_AUTHORIZED row, the no-marker Forbidden body, rule order against the
+      credential and not-found rules, fatal and MassiveError subclass), then T010 in errors.py: the
+      _NOT_ENTITLED_MARKER constant, ProviderNotEntitled(MassiveError) with the design docstring,
+      _mentions_not_entitled, the entitlement rule after the credential rule and before the default, __all__, and
+      "(401/403)" dropped from the CredentialRejected docstring.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/red-cycle-1.log
+    red_log_sha256: 77af37a38e92e83b2a73f263bc8a224e21b58eb1fdaa83e2d4c97df9489d93ff
+    red_evidence: >
+      With only the cycle's tests written and errors.py unchanged, the module fails at collection with ImportError
+      naming ProviderNotEntitled (1 error, exit 2), as the plan's "RED by import" note expects.
+    green_evidence: >
+      tests/unit/test_massive_error_classification.py 29 passed; the four-file focused suite 57 passed; ruff check,
+      ruff format --check and mypy src clean (green-cycle-1.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/green-cycle-1.log
+        sha256: 7b5cbf89550f0d6fdfe33d91cf5fc3600a4dc2a5b002027a3fc42a4002043f45
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/code-review-cycle-1.txt
+        sha256: 5bafb8546633091f54811787a87f3e7c88a6567d2d09660619502bd383f920a4
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/spec-drift-cycle-1.txt
+        sha256: 234c3bedbe2471b9ff407c59329461c470fd2451510dd8c900654c8b2b39955f
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f93d3487bb24cda6c5c821e4165e6713adf3faeb95a4afd969aee1fc0497f989
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/cycle-1.patch
+    index_tree: 087e44728337f17d439c0cd627a26bc40756d835
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: 67398e962099433812ee66227fa287eb06c82ad1445857307271c9a94c4616d0
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T006, T008, T011]
+    description: >
+      TC-COMP-232 in tests/unit/test_massive_failure_reasons.py (the fixed not_entitled reason with an identity spy
+      that is never called, the five kinds composed by exact class against literal reasons, an unlisted subclass and a
+      ProviderNotEntitled subclass raising TypeError) and TC-COMP-234's automatable half in
+      tests/unit/test_massive_error_classification.py, then T011 in errors.py: the not_entitled row of
+      _ERROR_KIND_BY_TYPE, _NOT_ENTITLED_DESCRIPTION, the exact-class branch in compose_failure_reason, and the
+      docstring and TypeError text naming the kind table rather than a count.
+    deviations: >
+      One test beyond T008: test_a_body_that_says_entitled_without_not_entitled_stays_provider_unavailable, a negative
+      TC-COMP-228 row taken from the cycle-1 code review's non-blocking finding that widening the marker to "entitled"
+      would survive. It pins behaviour cycle-1 delivered, so it passes at this cycle's RED (a guard row, like T005), and
+      it is the only test that kills the marker-widened-to-entitled mutant scored here.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/red-cycle-2.log
+    red_log_sha256: 248e2239b40d8b83027ac9b7312ed85ab83ee91630cb080fc551b7cfdefb1e17
+    red_evidence: >
+      With the cycle's tests written and errors.py as cycle-1 left it: 3 failed, 49 passed. The fixed-description
+      test, the not_entitled row of the five-kind test and the TC-COMP-234 test fail with TypeError "compose_failure_reason
+      does not support ProviderNotEntitled". The four delivered-kind rows, the two TypeError rows and the marker row
+      pass, as guards of delivered behaviour.
+    green_evidence: >
+      The two cycle files 52 passed; the four-file focused suite 67 passed; ruff check, ruff format --check and
+      mypy src clean (green-cycle-2.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/green-cycle-2.log
+        sha256: f981feb194cbb0fa4dc6054784e4bb7d396f18eab6f2aa1c18447fbbac042d29
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/code-review-cycle-2.txt
+        sha256: 44ad10527f5df980d2f6e7e64b31bbc2733a708d893b52c1c2e01ba29220163b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/spec-drift-cycle-2.txt
+        sha256: fc705002c71fcc70cc9e94615509aa0ff918d3cd2f5dce8194adf4787f03066d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2a464b6236aeedd5a19182d67c88622d5aba35cd8e4b095fd0f2fb4b0ef46cf1
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/cycle-2.patch
+    diff_from_tree: 087e44728337f17d439c0cd627a26bc40756d835
+    index_tree: 695abebc85c8d083c371b12728ea07bd5edc3b9c
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 7866a87a47fad142dba6ce395ae9a6f2fd1fd7d18e5a6157fc4b8622652f544a
+      generated: 8
+      killed: 7
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.875
+      survivors:
+        - id: src/factorflow/ingestion/massive/errors.py:manual:exact-class-to-isinstance
+          disposition: equivalent
+          reason: >
+            The task plan's named equivalent mutant (Other Notes). compose_failure_reason looks the kind up by
+            exact class first, _ERROR_KIND_BY_TYPE.get(type(error)), and raises TypeError for any class that is not a
+            key, so the branch is reached only by an exact listed class; no listed class subclasses
+            ProviderNotEntitled, so isinstance(error, ProviderNotEntitled) and type(error) is ProviderNotEntitled agree
+            on every input that reaches it. T006 (c) proves a ProviderNotEntitled subclass raises before the branch.
+            The cycle-2 code reviewer agreed (code-review-cycle-2.txt).
+
+  - id: cycle-3
+    tasks: [T007, T012]
+    description: >
+      TC-COMP-233 in tests/unit/test_outcomes.py (ProviderNotEntitled recorded failed with an independent literal
+      reason, compared as a whole InstrumentOutcomeRecord; CredentialRejected still ValueError; an unrecognised type
+      raises TypeError naming the accepted types), then T012 in outcomes.py: the import, ProviderNotEntitled in the
+      failed tuple with acquisition-runner section 2.3's comment line, the docstring sentence and the TypeError text.
+    deviations: >
+      Two test strengthenings beyond T007's list, each from a non-blocking finding of this cycle's code review, after
+      which the cycle was re-fingerprinted, re-mutated and re-reviewed: (1) test_an_unlisted_massive_error_subclass_raises_type_error,
+      because widening the failed check to any MassiveError survived the planned tests (round 1); (2) the TypeError test
+      matches the full sentence naming all four accepted types rather than "ProviderNotEntitled" alone, because a mutant
+      dropping the three delivered names from the changed message line survived (round 2). T007's three checks are
+      written as three tests. The section 2.3 comment names ProviderRateLimited, which CAP-003-E8-S2 adds; T012 asks
+      for the line as the design gives it.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/red-cycle-3.log
+    red_log_sha256: 973fe1dd6e27781a751761e00dabab78cd2f1e1c4eba2f408d3cad636d4b8bd4
+    red_evidence: >
+      With T007's tests written and outcomes.py unchanged from the base: 2 failed, 13 passed (TypeError
+      "does not support ProviderNotEntitled"; the TypeError message did not match). Re-observed with the final tests
+      in a scratch copy of the tree holding the base outcomes.py: 2 failed, 14 passed, the same two tests; the
+      CredentialRejected and unlisted-subclass tests are guards that pass on the base.
+    green_evidence: >
+      tests/unit/test_outcomes.py 16 passed; the four-file focused suite 71 passed; ruff check, ruff format --check
+      and mypy src clean (green-cycle-3.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/green-cycle-3.log
+        sha256: 203dc0c51f7fb163577edbda7fc844033216effd826b19b511b079d37b31a259
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/code-review-cycle-3.txt
+        sha256: 69fa1de9c748d1ee6eaf9676e1bd3deac7f889252c15c9ac7e0c0f340c3e73e0
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/spec-drift-cycle-3.txt
+        sha256: 0f0f58131fc210ce9406a5e2465225843284c3e1c973dc5666d1f7a581944db2
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 45a13cbf5fb91095ddc728febfb9e9c0450a88877631b9dfbbadd5b21cf97c02
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/cycle-3.patch
+    diff_from_tree: 695abebc85c8d083c371b12728ea07bd5edc3b9c
+    index_tree: cd4142de4d60a71d1a6e0eaa184e002912c6aa39
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: 307613834a8a7f3350703dcd8c493dc527929386d7e372213559b9c1928d54d0
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T009, T004, T005, T013]
+    description: >
+      T009 in tests/unit/test_massive_error_classification.py (the export in errors.__all__, the package __all__ and
+      identity), the CAP-003 real-transport harness in tests/unit/test_massive_retry.py (_CLOCK_START,
+      _production_settings, _real_transport_client) with TC-COMP-230 (a real 403 plan refusal in message, in error, and
+      beside error "Forbidden": one balance-sheets request, no wait, no socket, the exact not_entitled reason) and
+      TC-COMP-231 (a Forbidden envelope and a non-JSON 403: three requests, plain ProviderUnavailable, the unavailable
+      prefix), then T013: ProviderNotEntitled imported and re-exported by the package, and "the five" dropped from its
+      docstring. client.py, rate_limit.py and runner.py unchanged; the CAP-001 TC-INT-026 test untouched.
+    deviations: >
+      The responder answers every path other than balance-sheets with an empty success, so a read that went on to the
+      income-statement or cash-flow paths would show in the recorded paths. T004 raises under pytest.raises(MassiveError)
+      and then asserts the exact type. The plan attributes the negate-entitlement-match kill to T004; under that mutant
+      the absent field reads "" so the row still classifies, and T005's Forbidden row and the classification tests kill
+      it instead; the entitlement-rule-removed mutant is the one T004 kills (three requests).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/red-cycle-4.log
+    red_log_sha256: a51645d22e28c95d2c551d4575f0d539e99ff2ebb1633e455bc7817439d5ef7b
+    red_evidence: >
+      With the cycle's tests written and __init__.py unchanged: tests/unit/test_massive_retry.py fails at collection
+      with ImportError "cannot import name 'ProviderNotEntitled' from 'factorflow.ingestion.massive'"; run without it,
+      the T009 row fails (1 failed, 34 passed) on "ProviderNotEntitled" in the package __all__. T005 is the plan's guard
+      row: it pins delivered retry behaviour and takes its RED from T004 and T009. The behavioural RED of T004 on the
+      unchanged tree is the plan's socket-free spike (three requests, ProviderUnavailable, sleeps [0.0, 0.0]) and is
+      reproduced here by the entitlement-rule-removed mutant, which fails all three T004 rows.
+    green_evidence: >
+      The cycle's three files 44 passed (both real-transport tests in all their rows); the four-file focused suite 78
+      passed; client.py, rate_limit.py and runner.py show no diff against the base; ruff check, ruff format --check
+      and mypy src clean (green-cycle-4.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/green-cycle-4.log
+        sha256: 4c8848a0b3573d7266dc9825cc3eda14f146f2e1f92826fb06a4fc2a25df1809
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/code-review-cycle-4.txt
+        sha256: cc08d6105168689e72e2eb75cc5e5f5e96fa37820fffde42869d559b304a6308
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/spec-drift-cycle-4.txt
+        sha256: e1e5a42d38f368b0de2d92f967c31afd06be0ccaf0f22e6da7021506a35a491e
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: dca6c502c3db5e0fea835feeac73af0bd7aeac542cb3ad5856a79b966e3c9e8a
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/cycle-4.patch
+    diff_from_tree: cd4142de4d60a71d1a6e0eaa184e002912c6aa39
+    index_tree: 66e35d08dd0d5b45645df52a77ff5f4b069e737e
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/mutation-cycle-4-results.json
+      results_sha256: 7015dba6487f67804e3d44370705e78a8062cbb751544165457b4ff3d3f25001
+      generated: 8
+      killed: 8
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

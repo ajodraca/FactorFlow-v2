@@ -17,7 +17,9 @@ import pytest
 from factorflow.ingestion.massive.errors import (
     CredentialRejected,
     InstrumentNotFound,
+    MassiveError,
     ProviderContractViolation,
+    ProviderNotEntitled,
     ProviderUnavailable,
     compose_failure_reason,
 )
@@ -375,3 +377,72 @@ def test_provider_contract_violation_maps_to_failed() -> None:
     record = classify_provider_error(err, data_type="fundamentals", reason=reason)
     assert record.outcome == "failed"
     assert record.data_type == "fundamentals"
+
+
+# ---------------------------------------------------------------------------
+# CAP-003 TC-COMP-233 — a plan refusal is a per-data-type failure
+# ---------------------------------------------------------------------------
+
+_NOT_ENTITLED_REASON = (
+    "[not_entitled] symbol=KO data_type=fundamentals request_id=req_403_001: "
+    "the provider plan is not entitled to this data"
+)
+
+
+# Implements CAP-003 TC-COMP-233
+def test_provider_not_entitled_maps_to_failed_with_the_reason_unreworded() -> None:
+    """CAP-003 TC-COMP-233 / DAC-E8-S1-6: ``ProviderNotEntitled`` is recorded
+    ``failed`` for its data type with the composed reason exactly as given."""
+    from factorflow.ingestion.outcomes import InstrumentOutcomeRecord, classify_provider_error
+
+    record = classify_provider_error(
+        ProviderNotEntitled("x"), data_type="fundamentals", reason=_NOT_ENTITLED_REASON
+    )
+
+    assert record == InstrumentOutcomeRecord(
+        data_type="fundamentals", outcome="failed", reason=_NOT_ENTITLED_REASON
+    )
+
+
+# Implements CAP-003 TC-COMP-233
+def test_credential_rejected_still_raises_value_error_beside_the_plan_refusal() -> None:
+    """CAP-003 TC-COMP-233 / DAC-E8-S1-6: the credential stays the one
+    run-level refusal."""
+    from factorflow.ingestion.outcomes import classify_provider_error
+
+    with pytest.raises(ValueError, match="CredentialRejected"):
+        classify_provider_error(
+            CredentialRejected("x"), data_type="fundamentals", reason=_NOT_ENTITLED_REASON
+        )
+
+
+# Implements CAP-003 TC-COMP-233
+def test_an_unrecognised_type_raises_type_error_naming_the_accepted_types() -> None:
+    """CAP-003 TC-COMP-233 / DAC-E8-S1-6: the ``TypeError`` text names the
+    accepted types, ``ProviderNotEntitled`` among them."""
+    from factorflow.ingestion.outcomes import classify_provider_error
+
+    class UnknownError(Exception):
+        pass
+
+    accepted = (
+        "only InstrumentNotFound, ProviderUnavailable, ProviderContractViolation and "
+        "ProviderNotEntitled are accepted"
+    )
+    with pytest.raises(TypeError, match=accepted):
+        classify_provider_error(UnknownError("oops"), data_type="prices", reason="r")  # type: ignore[arg-type]
+
+
+# Implements CAP-003 TC-COMP-233
+def test_an_unlisted_massive_error_subclass_raises_type_error() -> None:
+    """CAP-003 TC-COMP-233 / DAC-E8-S1-6: the accepted types are a closed
+    list, so a ``MassiveError`` subclass outside it -- a refusal type no
+    mapping names yet -- raises ``TypeError`` rather than being recorded
+    ``failed``."""
+    from factorflow.ingestion.outcomes import classify_provider_error
+
+    class _Unlisted(MassiveError):
+        pass
+
+    with pytest.raises(TypeError, match="_Unlisted"):
+        classify_provider_error(_Unlisted("x"), data_type="fundamentals", reason="r")

@@ -48,6 +48,7 @@ __all__ = [
     "CredentialRejected",
     "ProviderUnavailable",
     "ProviderContractViolation",
+    "ProviderNotEntitled",
     "classify_error_body",
     "is_rate_limited_body",
     "is_fatal_for_governor",
@@ -63,6 +64,7 @@ _NOT_FOUND_MESSAGE_MARKER = "ticker not found"
 _API_KEY_ERROR_MARKERS = ("api key", "authorization header")
 # Section 2.6a: the observed 429 body's `error` text.
 _RATE_LIMIT_MARKER = "exceeded the maximum requests"
+_NOT_ENTITLED_MARKER = "not entitled"  # production 403 text, 2026-11-07 (CAP-002 manifest B1)
 
 
 class MassiveError(Exception):
@@ -89,7 +91,7 @@ class InstrumentNotFound(MassiveError):
 
 class CredentialRejected(MassiveError):
     """The API key was missing, unknown, or the `Authorization` header was
-    malformed (401/403). Not retried -- every remaining instrument in the
+    malformed. Not retried -- every remaining instrument in the
     run would fail identically."""
 
 
@@ -105,6 +107,15 @@ class ProviderContractViolation(MassiveError):
     exclusively for that case. Distinct from unavailability because it
     means the provider's contract changed, not that it is down, so
     retrying will not help (DAC-E3-S3-4)."""
+
+
+class ProviderNotEntitled(MassiveError):
+    """The owner's plan is not entitled to this endpoint (the observed 403
+    body, marker "not entitled" in `error` or `message`). Fatal for the
+    governor: sent once, never retried. Per data type, not per run: prices may
+    succeed while financials are refused, so the data type is recorded failed
+    and the run continues. Carries the provider request_id when the body has
+    one (AC-29)."""
 
 
 def _safe_fields(raw_body: bytes | str) -> dict[str, str | None] | None:
@@ -135,6 +146,12 @@ def _safe_fields(raw_body: bytes | str) -> dict[str, str | None] | None:
     }
 
 
+def _mentions_not_entitled(fields: dict[str, str | None]) -> bool:
+    return any(
+        _NOT_ENTITLED_MARKER in (fields[name] or "").lower() for name in ("error", "message")
+    )
+
+
 def is_rate_limited_body(raw_body: bytes | str) -> bool:
     """True when `raw_body` is Massive's 429 envelope (DAC-E3-S3-6).
 
@@ -162,6 +179,11 @@ def classify_error_body(raw_body: bytes | str) -> MassiveError:
     reserved for a *successful* response failing model validation
     (`wrap_validation_error`), per the owner's precedence resolution
     recorded in this story's task plan.
+
+    A plan refusal -- `not entitled` in `error` or in `message`, each field
+    searched on its own, case-insensitively -- classifies as
+    `ProviderNotEntitled`, after the not-found and credential rules and
+    before the default (CAP-003 massive-client section 2.4, AC-29).
     """
     fields = _safe_fields(raw_body)
     if fields is None:
@@ -180,6 +202,12 @@ def classify_error_body(raw_body: bytes | str) -> MassiveError:
     if any(marker in reason.lower() for marker in _API_KEY_ERROR_MARKERS):
         return CredentialRejected(
             "The provider rejected the configured credential.",
+            provider_request_id=request_id,
+        )
+
+    if _mentions_not_entitled(fields):
+        return ProviderNotEntitled(
+            "The provider plan is not entitled to this data.",
             provider_request_id=request_id,
         )
 
@@ -249,6 +277,7 @@ _ERROR_KIND_BY_TYPE: dict[type[MassiveError], str] = {
     CredentialRejected: "credential_rejected",
     ProviderUnavailable: "unavailable",
     ProviderContractViolation: "contract_violation",
+    ProviderNotEntitled: "not_entitled",
 }
 
 _CREDENTIAL_REJECTED_DESCRIPTION = "the provider rejected the configured credential"
@@ -256,6 +285,12 @@ _CREDENTIAL_REJECTED_DESCRIPTION = "the provider rejected the configured credent
 from the error's own message, which may itself embed provider-supplied
 diagnostic text -- only the fixed kind and the typed fields (symbol, data
 type, request ID) are safe to compose unconditionally."""
+
+_NOT_ENTITLED_DESCRIPTION = "the provider plan is not entitled to this data"
+"""A fixed description for `ProviderNotEntitled` (CAP-003 massive-client
+section 2.5, AC-29). Never built from the provider's text, which is free
+text the stored reason must not carry (AGT-PROHIB-003), and never passed to
+`redact`."""
 
 
 def compose_failure_reason(
@@ -287,15 +322,20 @@ def compose_failure_reason(
     on trusting redaction to catch every way a credential could appear in
     provider-echoed text.
 
-    Raises `TypeError` if `error` is not one of the four typed
-    `MassiveError` subclasses this module defines -- this composer never
-    emits an untyped reason for an unrecognised error class.
+    `ProviderNotEntitled` likewise composes a fixed description, never its
+    own message and never through `redact`: the provider's text tells the
+    owner nothing the kind and the data type do not, and is provider free
+    text the stored reason must not carry (AGT-PROHIB-003).
+
+    Raises `TypeError` if `error`'s exact class is not one of the typed
+    `MassiveError` subclasses in this module's kind table -- this composer
+    never emits an untyped reason for an unrecognised error class.
     """
     kind = _ERROR_KIND_BY_TYPE.get(type(error))
     if kind is None:
         raise TypeError(
             f"compose_failure_reason does not support {type(error).__name__}; "
-            "only the four typed MassiveError subclasses are accepted."
+            "only the typed MassiveError subclasses in its kind table are accepted."
         )
 
     if error.provider_request_id is None:
@@ -305,6 +345,8 @@ def compose_failure_reason(
 
     if isinstance(error, CredentialRejected):
         variable_segment = _CREDENTIAL_REJECTED_DESCRIPTION
+    elif type(error) is ProviderNotEntitled:
+        variable_segment = _NOT_ENTITLED_DESCRIPTION  # never the provider's text; redact not called
     else:
         variable_segment = _bound_variable_text(redact(str(error)))
 

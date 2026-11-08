@@ -17,7 +17,9 @@ from factorflow.ingestion.massive.errors import (
     MAX_FAILURE_REASON_VARIABLE_TEXT,
     CredentialRejected,
     InstrumentNotFound,
+    MassiveError,
     ProviderContractViolation,
+    ProviderNotEntitled,
     ProviderUnavailable,
     compose_failure_reason,
 )
@@ -274,5 +276,111 @@ def test_composer_rejects_a_raw_exception_not_in_the_taxonomy() -> None:
             ValueError("not a MassiveError"),  # type: ignore[arg-type]
             symbol="AAPL",
             data_type="daily_bars",
+            redact=_identity_redact,
+        )
+
+
+# --- CAP-003 TC-COMP-232 / DAC-E8-S1-5: the not_entitled reason ----------
+
+
+# Implements CAP-003 TC-COMP-232
+def test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text() -> None:
+    """CAP-003 TC-COMP-232 / DAC-E8-S1-5: a plan refusal composes the fixed
+    description whatever its message holds; `redact` is never called with
+    that message, and the credential fixture appears nowhere. The spy
+    returns its argument unchanged, so a branch that composed the message
+    would leak the fixture into the reason."""
+    seen: list[str] = []
+
+    def _spy_redact(text: str) -> str:
+        seen.append(text)
+        return text
+
+    error = ProviderNotEntitled(
+        f"Please upgrade your plan {_CREDENTIAL_FIXTURE}", provider_request_id="req_ne_001"
+    )
+
+    reason = compose_failure_reason(
+        error, symbol="KO", data_type="fundamentals", redact=_spy_redact
+    )
+
+    assert reason == (
+        "[not_entitled] symbol=KO data_type=fundamentals request_id=req_ne_001: "
+        "the provider plan is not entitled to this data"
+    )
+    assert seen == []
+    assert _CREDENTIAL_FIXTURE not in reason
+    assert "Please upgrade" not in reason
+
+
+@pytest.mark.parametrize(
+    ("error_type", "expected"),
+    [
+        pytest.param(
+            InstrumentNotFound,
+            "[not_found] symbol=AAPL data_type=prices request_id=r1: diag text",
+            id="not_found",
+        ),
+        pytest.param(
+            CredentialRejected,
+            "[credential_rejected] symbol=AAPL data_type=prices request_id=r1: "
+            "the provider rejected the configured credential",
+            id="credential_rejected",
+        ),
+        pytest.param(
+            ProviderUnavailable,
+            "[unavailable] symbol=AAPL data_type=prices request_id=r1: diag text",
+            id="unavailable",
+        ),
+        pytest.param(
+            ProviderContractViolation,
+            "[contract_violation] symbol=AAPL data_type=prices request_id=r1: diag text",
+            id="contract_violation",
+        ),
+        pytest.param(
+            ProviderNotEntitled,
+            "[not_entitled] symbol=AAPL data_type=prices request_id=r1: "
+            "the provider plan is not entitled to this data",
+            id="not_entitled",
+        ),
+    ],
+)
+# Implements CAP-003 TC-COMP-232
+def test_each_kind_composes_its_own_reason_by_exact_class(
+    error_type: type[MassiveError], expected: str
+) -> None:
+    """CAP-003 TC-COMP-232 / DAC-E8-S1-5: every delivered kind still
+    composes its own reason, and the new `not_entitled` row its fixed
+    description, each beginning `[<kind>] `."""
+    error = error_type("diag text", provider_request_id="r1")
+
+    reason = compose_failure_reason(
+        error, symbol="AAPL", data_type="prices", redact=_identity_redact
+    )
+
+    assert reason == expected
+
+
+class _Unlisted(MassiveError):
+    """A `MassiveError` subclass the kind table does not list."""
+
+
+class _NotEntitledSubclass(ProviderNotEntitled):
+    """A subclass of a listed class: the lookup is by exact class."""
+
+
+@pytest.mark.parametrize("error_type", [_Unlisted, _NotEntitledSubclass])
+# Implements CAP-003 TC-COMP-232
+def test_an_unlisted_massive_error_subclass_raises_type_error(
+    error_type: type[MassiveError],
+) -> None:
+    """CAP-003 TC-COMP-232 / DAC-E8-S1-5: a class absent from the closed
+    kind table -- including a subclass of `ProviderNotEntitled` -- raises
+    `TypeError` rather than composing an untyped reason."""
+    with pytest.raises(TypeError):
+        compose_failure_reason(
+            error_type("diag text", provider_request_id="r1"),
+            symbol="AAPL",
+            data_type="prices",
             redact=_identity_redact,
         )

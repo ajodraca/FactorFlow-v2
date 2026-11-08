@@ -1,0 +1,25 @@
+# Independent code-review subagent (general-purpose, agentId a706e0b8b615dff69), cycle-1, judged cycle-1.patch
+# (diff_sha256 f93d3487bb24cda6c5c821e4165e6713adf3faeb95a4afd969aee1fc0497f989) and mutation-cycle-1-results.json.
+VERDICT: APPROVED
+
+No blocking defects. Checked the patch against T002, T003, T010, massive-client section 2.4 and the Other Notes
+mutant list. All 29 tests in tests/unit/test_massive_error_classification.py pass; ruff check, ruff format --check
+and mypy src (61 files) are clean.
+
+Correctness and design fidelity: every part of T010 matches the plan and section 2.4 (marker constant and comment,
+ProviderNotEntitled docstring verbatim, _mentions_not_entitled, the rule after not-found and credential and before the
+default, the __all__ entry, "(401/403)" removed from CredentialRejected). Rules 1 and 2 still read `error or message`.
+_safe_fields, is_rate_limited_body, is_fatal_for_governor and wrap_validation_error unchanged. The production change
+is the minimum the tests need; T011, T012 and T013 correctly absent.
+Security: fixed message, only request_id carried (already filtered by _safe_fields); no provider text or credential.
+Tests: independent literals; `type(...) is` throughout; the five rows split the fields as planned; the Forbidden
+no-marker body pins the safe default; rule-order bodies and fatal/base-class checks match T003.
+Mutants: all 9 hand-written mutants killed. Dropping `or ""` would also be killed (upper-case row has no message).
+
+Findings
+1. NON-BLOCKING, errors.py:67. Widening the marker literal ("not entitled" -> "entitled") would survive: every positive
+   row contains "entitled" and every negative row lacks it. A negative row such as {"message": "entitled plan required"}
+   would kill it; could go into C2's T008 or a later cycle.
+2. NON-BLOCKING, errors.py:51. No test covers the "ProviderNotEntitled" entry in errors.__all__; acceptable here, the
+   package re-export is pinned in C4 (T009/T013).
+3. NON-BLOCKING, errors.py:149. _mentions_not_entitled has no docstring; it matches the design snippet exactly.

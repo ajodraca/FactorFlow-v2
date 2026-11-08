@@ -1,0 +1,170 @@
+{
+  "command": "PYTHONPATH=src /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python -m pytest tests/unit/test_massive_error_classification.py -q -p no:cacheprovider",
+  "repo_head": "0c0c7ad6ada5b161b567787e3277bc888e8a4811",
+  "tree_patch_sha256": "efb0239d9617bdf625d490a9b328bdbbb4b41e15a7d162f4f5b9db52cb3d65c2",
+  "mutants_sha256": "3e19e5ed4b0d8240d07c96a6e6fb6a28247042576f3262552e8a76a5e50ab0b9",
+  "schema": 1,
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutants-cycle-1.json",
+  "jobs": 4,
+  "planned": 9,
+  "started": "2026-11-08T21:11:11Z",
+  "baselines": [
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 0.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/baseline-w2.log",
+      "log_sha256": "c3501712bd4a41be469ad95787136227043c648a64eee2a680aa5fdbe968b761"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 0.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/baseline-w1.log",
+      "log_sha256": "796baadbd3505252bffc0ec11fc6418c1a66ded311dfb992a2c358e13ec4d9dc"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 0.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/baseline-w3.log",
+      "log_sha256": "796baadbd3505252bffc0ec11fc6418c1a66ded311dfb992a2c358e13ec4d9dc"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 0.8,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/baseline-w0.log",
+      "log_sha256": "796baadbd3505252bffc0ec11fc6418c1a66ded311dfb992a2c358e13ec4d9dc"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:fields-message-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "for name in (\"error\", \"message\")",
+      "new": "for name in (\"message\",)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.7,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_fields-message-only.log",
+      "log_sha256": "4062d04fac8db637a36253a959e1abc91518c7e50cb26fbc96bf6a0df826e8df"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:fields-error-only",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "for name in (\"error\", \"message\")",
+      "new": "for name in (\"error\",)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.7,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_fields-error-only.log",
+      "log_sha256": "a96b4af775726f8cf7fa93122a1216af1e58c79517f53f80fe05f8fe5c4c49e2"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:drop-lower",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "_NOT_ENTITLED_MARKER in (fields[name] or \"\").lower()",
+      "new": "_NOT_ENTITLED_MARKER in (fields[name] or \"\")",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_drop-lower.log",
+      "log_sha256": "d8ffbb3902ef6e2ad323da2eb2fd817d62f8f6f2e21749faa7e90966494de5bb"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:any-to-all",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "return any(\n        _NOT_ENTITLED_MARKER",
+      "new": "return all(\n        _NOT_ENTITLED_MARKER",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.7,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_any-to-all.log",
+      "log_sha256": "0f1e490d61227f52e9b1627806c45c3c0bf2d1bab4c14b6febb4d1d456d8935a"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:rule-above-credential",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "    if any(marker in reason.lower() for marker in _API_KEY_ERROR_MARKERS):\n        return CredentialRejected(\n            \"The provider rejected the configured credential.\",\n            provider_request_id=request_id,\n        )\n\n    if _mentions_not_entitled(fields):\n        return ProviderNotEntitled(\n            \"The provider plan is not entitled to this data.\",\n            provider_request_id=request_id,\n        )\n\n",
+      "new": "    if _mentions_not_entitled(fields):\n        return ProviderNotEntitled(\n            \"The provider plan is not entitled to this data.\",\n            provider_request_id=request_id,\n        )\n\n    if any(marker in reason.lower() for marker in _API_KEY_ERROR_MARKERS):\n        return CredentialRejected(\n            \"The provider rejected the configured credential.\",\n            provider_request_id=request_id,\n        )\n\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.6,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_rule-above-credential.log",
+      "log_sha256": "7de9c8159a7921df32b42c05823def243562a4c9d868dc81145d59d39957b412"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:rule-above-not-found",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "    if status == _NOT_FOUND_STATUS or _NOT_FOUND_MESSAGE_MARKER in reason.lower():\n        return InstrumentNotFound(\n            \"The provider does not recognise this instrument.\",\n            provider_request_id=request_id,\n        )\n\n    if any(marker in reason.lower() for marker in _API_KEY_ERROR_MARKERS):\n        return CredentialRejected(\n            \"The provider rejected the configured credential.\",\n            provider_request_id=request_id,\n        )\n\n    if _mentions_not_entitled(fields):\n        return ProviderNotEntitled(\n            \"The provider plan is not entitled to this data.\",\n            provider_request_id=request_id,\n        )\n\n",
+      "new": "    if _mentions_not_entitled(fields):\n        return ProviderNotEntitled(\n            \"The provider plan is not entitled to this data.\",\n            provider_request_id=request_id,\n        )\n\n    if status == _NOT_FOUND_STATUS or _NOT_FOUND_MESSAGE_MARKER in reason.lower():\n        return InstrumentNotFound(\n            \"The provider does not recognise this instrument.\",\n            provider_request_id=request_id,\n        )\n\n    if any(marker in reason.lower() for marker in _API_KEY_ERROR_MARKERS):\n        return CredentialRejected(\n            \"The provider rejected the configured credential.\",\n            provider_request_id=request_id,\n        )\n\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.5,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_rule-above-not-found.log",
+      "log_sha256": "d364ec6f7bae2d921636e9ff0641e8f5095339cc9ae33b28b45c05279e86b752"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:base-class-provider-unavailable",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "class ProviderNotEntitled(MassiveError):",
+      "new": "class ProviderNotEntitled(ProviderUnavailable):",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.6,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_base-class-provider-unavailable.log",
+      "log_sha256": "0256afe16959f98b4359b9b3c7476a2e20e1abc969216de572e1e9982d8ae3c0"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:negate-entitlement-match",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "_NOT_ENTITLED_MARKER in (fields[name] or \"\").lower()",
+      "new": "_NOT_ENTITLED_MARKER not in (fields[name] or \"\").lower()",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.6,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_negate-entitlement-match.log",
+      "log_sha256": "cca404b628ea757d029c852e43fcc750c0887d442b889f09e6cbfecda6eb94a7"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/errors.py:manual:drop-request-id-argument",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/errors.py",
+      "old": "\"The provider plan is not entitled to this data.\",\n            provider_request_id=request_id,\n",
+      "new": "\"The provider plan is not entitled to this data.\",\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 0.5,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_errors.py_manual_drop-request-id-argument.log",
+      "log_sha256": "8607fae128b19f2d035f84d2cc8354618140fb8db155afdd17346f8ca5382c66"
+    }
+  ],
+  "finished": "2026-11-08T21:11:14Z"
+}
