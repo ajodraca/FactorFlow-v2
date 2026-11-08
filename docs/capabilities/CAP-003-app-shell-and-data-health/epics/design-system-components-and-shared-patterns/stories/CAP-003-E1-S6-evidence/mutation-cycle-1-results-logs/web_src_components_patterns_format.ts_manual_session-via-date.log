@@ -1,0 +1,55 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w0/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 4 failed) 215ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > returns a session date unshifted 6ms
+     → expected '2026-03-07' to be '2026-03-08' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 2ms
+     → expected '2026-03-07' to be '2026-03-08' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 3ms
+     → expected '2026-03-07' to be '2026-03-08' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 2ms
+     → expected '2026-03-07' to be '2026-03-08' // Object.is equality
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 106ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > returns a session date unshifted
+AssertionError: expected '2026-03-07' to be '2026-03-08' // Object.is equality
+
+Expected: "2026-03-08"
+Received: "2026-03-07"
+
+ ❯ src/components/patterns/format.test.ts:43:45
+     41| 
+     42|   it("returns a session date unshifted", () => {
+     43|     expect(formatSessionDate("2026-03-08")).toBe("2026-03-08");
+       |                                             ^
+     44|   });
+     45| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+AssertionError: expected '2026-03-07' to be '2026-03-08' // Object.is equality
+
+Expected: "2026-03-08"
+Received: "2026-03-07"
+
+ ❯ src/components/patterns/format.test.ts:64:47
+     62|       expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 1…
+     63|       expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+     64|       expect(formatSessionDate("2026-03-08")).toBe("2026-03-08");
+       |                                               ^
+     65|     });
+     66|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 36 passed (40)
+   Start at  16:52:25
+   Duration  2.40s (transform 832ms, setup 186ms, collect 357ms, tests 321ms, environment 1.05s, prepare 1.67s)
+

@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w2/web
+
+ ✓ src/components/patterns/format.test.ts (33 tests) 31ms
+ ❯ src/components/patterns/presence.test.tsx (7 tests | 1 failed) 66ms
+   × NotDeterminable (TC-COMP-025) > describes itself by its reason, which is also visible beside the badge 38ms
+     → expect(element).not.toHaveClass("sr-only")
+
+Expected the element not to have class:
+  sr-only
+Received:
+  sr-only
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/presence.test.tsx > NotDeterminable (TC-COMP-025) > describes itself by its reason, which is also visible beside the badge
+Error: expect(element).not.toHaveClass("sr-only")
+
+Expected the element not to have class:
+  sr-only
+Received:
+  sr-only
+ ❯ src/components/patterns/presence.test.tsx:21:24
+     19|     const reason = screen.getByText(REASON);
+     20|     expect(reason.closest("[data-variant]")).toBeNull();
+     21|     expect(reason).not.toHaveClass("sr-only");
+       |                        ^
+     22|   });
+     23| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  16:52:40
+   Duration  1.24s (transform 120ms, setup 214ms, collect 265ms, tests 97ms, environment 560ms, prepare 697ms)
+

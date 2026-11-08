@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w1/web
+
+ ✓ src/components/patterns/format.test.ts (33 tests) 23ms
+ ❯ src/components/patterns/presence.test.tsx (7 tests | 2 failed) 101ms
+   × NotDeterminable (TC-COMP-025) > is the coverage-unknown badge, never a passed check or a dimmed absent 5ms
+     → expect(element).toHaveAttribute("data-variant", "coverage-unknown") // element.getAttribute("data-variant") === "coverage-unknown"
+
+Expected the element to have attribute:
+  data-variant="coverage-unknown"
+Received:
+  data-variant="status-good"
+   × NotDeterminable (TC-COMP-025) > takes a caller's label and keeps the badge and the description 3ms
+     → expect(element).toHaveAttribute("data-variant", "coverage-unknown") // element.getAttribute("data-variant") === "coverage-unknown"
+
+Expected the element to have attribute:
+  data-variant="coverage-unknown"
+Received:
+  data-variant="status-good"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/presence.test.tsx > NotDeterminable (TC-COMP-025) > is the coverage-unknown badge, never a passed check or a dimmed absent
+Error: expect(element).toHaveAttribute("data-variant", "coverage-unknown") // element.getAttribute("data-variant") === "coverage-unknown"
+
+Expected the element to have attribute:
+  data-variant="coverage-unknown"
+Received:
+  data-variant="status-good"
+ ❯ src/components/patterns/presence.test.tsx:27:19
+     25|     const { container } = render(<NotDeterminable reason={REASON} />);
+     26|     const badge = badgeOf(container);
+     27|     expect(badge).toHaveAttribute("data-variant", "coverage-unknown");
+       |                   ^
+     28|     expect(badge).toHaveClass(
+     29|       "bg-pattern-indeterminate",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/presence.test.tsx > NotDeterminable (TC-COMP-025) > takes a caller's label and keeps the badge and the description
+Error: expect(element).toHaveAttribute("data-variant", "coverage-unknown") // element.getAttribute("data-variant") === "coverage-unknown"
+
+Expected the element to have attribute:
+  data-variant="coverage-unknown"
+Received:
+  data-variant="status-good"
+ ❯ src/components/patterns/presence.test.tsx:41:32
+     39|     expect(screen.getByText("Unknown")).toHaveAccessibleDescription(RE…
+     40|     expect(screen.queryByText("Not determinable")).toBeNull();
+     41|     expect(badgeOf(container)).toHaveAttribute("data-variant", "covera…
+       |                                ^
+     42|   });
+     43| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 38 passed (40)
+   Start at  16:52:35
+   Duration  2.04s (transform 115ms, setup 150ms, collect 265ms, tests 124ms, environment 1.12s, prepare 960ms)
+

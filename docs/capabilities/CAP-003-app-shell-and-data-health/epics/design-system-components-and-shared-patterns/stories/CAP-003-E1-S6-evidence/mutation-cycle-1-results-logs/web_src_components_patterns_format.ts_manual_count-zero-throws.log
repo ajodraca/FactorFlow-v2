@@ -1,0 +1,28 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w2/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 1 failed) 29ms
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 0 as 0 4ms
+     → Not a count: 0
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 135ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 0 as 0
+RangeError: Not a count: 0
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (!Number.isSafeInteger(n) || n <= 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  16:52:26
+   Duration  2.34s (transform 86ms, setup 161ms, collect 429ms, tests 164ms, environment 1.08s, prepare 382ms)
+

@@ -1,0 +1,181 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w1/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 11 failed) 173ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > reads CDT for an October instant and CST for a January one 12ms
+     → expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > shows seconds only when asked 1ms
+     → expected '10-10-15 17:52:10 CDT' to be '2026-10-15 17:52:10 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > takes a Date as well as a string (DEC-0309) 0ms
+     → expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > takes the zone as the instant falls across the autumn change 0ms
+     → expected '11-11-01 01:30 CDT' to be '2026-11-01 01:30 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > spells midnight 00, never 24 0ms
+     → expected '10-10-16 00:00 CDT' to be '2026-10-16 00:00 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > accepts an explicit offset 0ms
+     → expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 40ms
+     → expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 7ms
+     → expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 4ms
+     → expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from requested_at when started_at is null 0ms
+     → expected 'Download 10-10-15 17:46 CDT' to be 'Download 2026-10-15 17:46 CDT' // Object.is equality
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one 0ms
+     → expected 'Download 01-01-15 17:46 CST' to be 'Download 2026-01-15 17:46 CST' // Object.is equality
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 58ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > reads CDT for an October instant and CST for a January one
+AssertionError: expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "10-10-15 17:46 CDT"
+
+ ❯ src/components/patterns/format.test.ts:13:51
+     11| describe("formatInstant and formatSessionDate (TC-COMP-023)", () => {
+     12|   it("reads CDT for an October instant and CST for a January one", () …
+     13|     expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 17:…
+       |                                                   ^
+     14|     expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 17:…
+     15|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > shows seconds only when asked
+AssertionError: expected '10-10-15 17:52:10 CDT' to be '2026-10-15 17:52:10 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:52:10 CDT"
+Received: "10-10-15 17:52:10 CDT"
+
+ ❯ src/components/patterns/format.test.ts:18:70
+     16| 
+     17|   it("shows seconds only when asked", () => {
+     18|     expect(formatInstant("2026-10-15T22:52:10Z", { seconds: true })).t…
+       |                                                                      ^
+     19|       "2026-10-15 17:52:10 CDT",
+     20|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > takes a Date as well as a string (DEC-0309)
+AssertionError: expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "10-10-15 17:46 CDT"
+
+ ❯ src/components/patterns/format.test.ts:26:61
+     24| 
+     25|   it("takes a Date as well as a string (DEC-0309)", () => {
+     26|     expect(formatInstant(new Date("2026-10-15T22:46:00Z"))).toBe("2026…
+       |                                                             ^
+     27|   });
+     28| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > takes the zone as the instant falls across the autumn change
+AssertionError: expected '11-11-01 01:30 CDT' to be '2026-11-01 01:30 CDT' // Object.is equality
+
+Expected: "2026-11-01 01:30 CDT"
+Received: "11-11-01 01:30 CDT"
+
+ ❯ src/components/patterns/format.test.ts:30:51
+     28| 
+     29|   it("takes the zone as the instant falls across the autumn change", (…
+     30|     expect(formatInstant("2026-11-01T06:30:00Z")).toBe("2026-11-01 01:…
+       |                                                   ^
+     31|     expect(formatInstant("2026-11-01T07:30:00Z")).toBe("2026-11-01 01:…
+     32|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > spells midnight 00, never 24
+AssertionError: expected '10-10-16 00:00 CDT' to be '2026-10-16 00:00 CDT' // Object.is equality
+
+Expected: "2026-10-16 00:00 CDT"
+Received: "10-10-16 00:00 CDT"
+
+ ❯ src/components/patterns/format.test.ts:35:51
+     33| 
+     34|   it("spells midnight 00, never 24", () => {
+     35|     expect(formatInstant("2026-10-16T05:00:00Z")).toBe("2026-10-16 00:…
+       |                                                   ^
+     36|   });
+     37| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > accepts an explicit offset
+AssertionError: expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "10-10-15 17:46 CDT"
+
+ ❯ src/components/patterns/format.test.ts:39:56
+     37| 
+     38|   it("accepts an explicit offset", () => {
+     39|     expect(formatInstant("2026-10-15T17:46:00-05:00")).toBe("2026-10-1…
+       |                                                        ^
+     40|   });
+     41| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+AssertionError: expected '10-10-15 17:46 CDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "10-10-15 17:46 CDT"
+
+ ❯ src/components/patterns/format.test.ts:61:53
+     59| 
+     60|     it("does not read the machine zone", () => {
+     61|       expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 1…
+       |                                                     ^
+     62|       expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 1…
+     63|       expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from requested_at when started_at is null
+AssertionError: expected 'Download 10-10-15 17:46 CDT' to be 'Download 2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "Download 2026-10-15 17:46 CDT"
+Received: "Download 10-10-15 17:46 CDT"
+
+ ❯ src/components/patterns/format.test.ts:82:62
+     80| 
+     81|   it("names a download from requested_at when started_at is null", () …
+     82|     expect(formatDownloadName(null, "2026-10-15T22:46:00Z")).toBe("Dow…
+       |                                                              ^
+     83|   });
+     84| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one
+AssertionError: expected 'Download 01-01-15 17:46 CST' to be 'Download 2026-01-15 17:46 CST' // Object.is equality
+
+Expected: "Download 2026-01-15 17:46 CST"
+Received: "Download 01-01-15 17:46 CST"
+
+ ❯ src/components/patterns/format.test.ts:86:80
+     84| 
+     85|   it("names a download from its start time when there is one", () => {
+     86|     expect(formatDownloadName("2026-01-15T23:46:00Z", "2026-01-15T23:4…
+       |                                                                                ^
+     87|       "Download 2026-01-15 17:46 CST",
+     88|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  11 failed | 29 passed (40)
+   Start at  16:52:32
+   Duration  2.03s (transform 93ms, setup 153ms, collect 302ms, tests 231ms, environment 1.03s, prepare 687ms)
+
