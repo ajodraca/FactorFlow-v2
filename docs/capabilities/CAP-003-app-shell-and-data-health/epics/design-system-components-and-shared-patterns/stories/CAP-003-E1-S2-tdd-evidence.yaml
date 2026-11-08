@@ -220,7 +220,7 @@ cycles:
   - id: cycle-9
     tasks: [T021, T022]
     description: >
-      Format-only cycle: biome format --write on input.tsx, select.tsx and select.test.tsx after npm run format flagged them (T022). Whitespace, line wrapping and three trailing commas only; no token, class or assertion changed.
+      Format-only cycle: biome format --write on input.tsx, select.tsx and select.test.tsx after npm run format flagged them (T022). Whitespace, line wrapping and three trailing commas only; no token, class or assertion changed. The generator finds no catalogue mutant on re-wrapped lines, so four hand-written mutants over them were scored.
     red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-9-format.log
     red_log_sha256: a3a554b26464eb9c07f7f9089d37f52935ac5fd69c2001221aec9c589a6f293e
     red_evidence: >
@@ -235,4 +235,13 @@ cycles:
     reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-9.patch
     commit_hash: ebac20f0e7cc82ef63dc5ebdf6f5c367ac29a445
     mutation:
-      not_applicable: "format-only change: the formatter re-wraps lines and adds trailing commas, no token changed"
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-9-results.json
+      results_sha256: 6b25f02fa3f09c61fc5549cbfdcce67526a432fc27025e51ba420800863cfefe
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
