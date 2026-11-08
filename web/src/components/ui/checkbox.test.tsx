@@ -1,0 +1,111 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Checkbox } from "./checkbox";
+
+// Radix renders a hidden bubble input inside a form and measures it with
+// ResizeObserver, which jsdom lacks. The shared test setup unstubs globals
+// after each test, so it is stubbed again here.
+beforeEach(() => {
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+});
+
+const LABEL = "Hide stocks with an incomplete score";
+
+// Implements TC-COMP-009
+describe("checkbox toggles on Space (DAC-E1-S2-1, AC-25)", () => {
+  function renderField() {
+    const changeSpy = vi.fn();
+    render(
+      <>
+        <Checkbox id="hide" onCheckedChange={changeSpy} />
+        <label htmlFor="hide">{LABEL}</label>
+      </>,
+    );
+    return { changeSpy, box: screen.getByRole("checkbox", { name: LABEL }) };
+  }
+
+  it("takes focus, toggles on Space and ignores Enter", async () => {
+    const user = userEvent.setup();
+    const { box, changeSpy } = renderField();
+    await user.tab();
+    expect(box).toHaveFocus();
+    expect(box).toHaveAttribute("aria-checked", "false");
+    await user.keyboard(" ");
+    expect(box).toHaveAttribute("aria-checked", "true");
+    expect(changeSpy).toHaveBeenLastCalledWith(true);
+    await user.keyboard(" ");
+    expect(box).toHaveAttribute("aria-checked", "false");
+    expect(changeSpy).toHaveBeenLastCalledWith(false);
+    expect(changeSpy).toHaveBeenCalledTimes(2);
+    await user.keyboard("{Enter}");
+    expect(box).toHaveAttribute("aria-checked", "false");
+    expect(changeSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("toggles when the label is clicked", async () => {
+    const user = userEvent.setup();
+    const { box, changeSpy } = renderField();
+    await user.click(screen.getByText(LABEL));
+    expect(box).toHaveAttribute("aria-checked", "true");
+    expect(changeSpy).toHaveBeenCalledWith(true);
+  });
+
+  it("exposes the indeterminate state as mixed", () => {
+    render(<Checkbox checked="indeterminate" aria-label="All" />);
+    expect(screen.getByRole("checkbox", { name: "All" })).toHaveAttribute("aria-checked", "mixed");
+  });
+
+  it("is the default variant with the contract classes", () => {
+    const { box } = renderField();
+    expect(box).toHaveAttribute("data-variant", "default");
+    for (const name of [
+      "h-4",
+      "w-4",
+      "rounded-none",
+      "border",
+      "border-input",
+      "bg-background",
+      "data-[state=checked]:bg-primary",
+      "data-[state=checked]:text-primary-foreground",
+      "data-[state=indeterminate]:bg-primary",
+      "data-[state=indeterminate]:text-primary-foreground",
+      "focus-visible:ring",
+      "focus-visible:ring-ring",
+    ]) {
+      expect(box).toHaveClass(name);
+    }
+    expect(box).not.toHaveClass("border-primary");
+  });
+
+  it("draws a check when checked and a dash when mixed", () => {
+    const { rerender } = render(<Checkbox checked aria-label="One" />);
+    expect(document.querySelector("svg.lucide-check")).not.toBeNull();
+    expect(document.querySelector("svg.lucide-minus")).toBeNull();
+    rerender(<Checkbox checked="indeterminate" aria-label="One" />);
+    expect(document.querySelector("svg.lucide-minus")).not.toBeNull();
+    expect(document.querySelector("svg.lucide-check")).toBeNull();
+  });
+
+  it("toggles on Space inside a form without submitting it", async () => {
+    const user = userEvent.setup();
+    const submitSpy = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+    render(
+      <form onSubmit={submitSpy}>
+        <Checkbox aria-label="Agree" />
+      </form>,
+    );
+    const box = screen.getByRole("checkbox", { name: "Agree" });
+    await user.tab();
+    await user.keyboard(" ");
+    expect(box).toHaveAttribute("aria-checked", "true");
+    expect(submitSpy).not.toHaveBeenCalled();
+  });
+});
