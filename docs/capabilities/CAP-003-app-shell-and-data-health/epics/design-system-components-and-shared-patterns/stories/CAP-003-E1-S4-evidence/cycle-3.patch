@@ -1,0 +1,251 @@
+diff --git a/web/src/components/ui/data-table.test.tsx b/web/src/components/ui/data-table.test.tsx
+index 80e6659..31faf3d 100644
+--- a/web/src/components/ui/data-table.test.tsx
++++ b/web/src/components/ui/data-table.test.tsx
+@@ -573,11 +573,13 @@ describe("virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2,
+     const user = userEvent.setup();
+     const first = stocks(100);
+     const { rerender, element } = paged(first.slice(0, 50), { hasMore: true }, true);
++    screen.getByRole("button", { name: "Expand Stock 3" }).focus();
++    await user.keyboard("{Enter}");
++    expect(screen.getByText("Detail S0003")).toBeInTheDocument();
++    // TanStack resets its own page state in a microtask after `data` changes; await it inside act.
+     await act(async () => {
+-      await user.click(screen.getByRole("button", { name: "Expand Stock 3" }));
++      rerender(element(first));
+     });
+-    expect(screen.getByText("Detail S0003")).toBeInTheDocument();
+-    rerender(element(first));
+     expect(screen.getByRole("button", { name: "Expand Stock 3" })).toHaveAttribute(
+       "aria-expanded",
+       "true",
+@@ -773,3 +775,201 @@ describe("virtualised measuring (DAC-E1-S4-1, AC-26)", () => {
+     expect(bodyRowIds()[0]).toBe("S0037");
+   });
+ });
++
++// Review v1 rework (IR-001 to IR-005): the contracts the first suites left unpinned.
++function scrollToPx(scrollTop: number) {
++  const scroller = document.querySelector<HTMLElement>('[data-slot="data-table-scroller"]');
++  if (!scroller) {
++    throw new Error("no scroller");
++  }
++  act(() => {
++    scroller.scrollTop = scrollTop;
++    fireEvent.scroll(scroller);
++  });
++}
++
++function rowIndexOf(id: string): string | null {
++  return document.querySelector(`tr[data-row-id="${id}"]`)?.getAttribute("aria-rowindex") ?? null;
++}
++
++function windowedTable(
++  data: Stock[],
++  options: { columns?: DataTableProps<Stock>["columns"]; expansion?: boolean } = {},
++) {
++  return (
++    <DataTable
++      variant="virtualised"
++      columns={options.columns ?? columns}
++      data={data}
++      getRowId={getRowId}
++      hasMore={false}
++      onEndReached={vi.fn()}
++      {...expansionProps(options.expansion ?? false)}
++    />
++  );
++}
++
++describe("windowed row numbering and the row memo (DAC-E1-S4-1, AC-25)", () => {
++  it("numbers every windowed row by its position in the loaded list after a scroll", () => {
++    stubRowHeight(32, 96);
++    render(windowedTable(stocks(3000)));
++    scrollTo(1000, 32);
++    expect(rowIndexOf("S0990")).toBe("992");
++    expect(rowIndexOf("S1024")).toBe("1026");
++  });
++
++  it("renumbers later rows when a record is removed and the others keep their identity", () => {
++    stubRowHeight(32, 96);
++    const data = stocks(40);
++    const view = render(windowedTable(data));
++    expect(rowIndexOf("S0004")).toBe("6");
++    view.rerender(windowedTable(data.filter((_, i) => i !== 3)));
++    expect(rowIndexOf("S0004")).toBe("5");
++    expect(rowIndexOf("S0024")).toBe("25");
++  });
++
++  it("re-renders the cells of kept rows when the columns change", () => {
++    stubRowHeight(32, 96);
++    const data = stocks(40);
++    const view = render(windowedTable(data));
++    expect(screen.getByText("Stock 3")).toBeInTheDocument();
++    const renamed: DataTableProps<Stock>["columns"] = columns.map((column) =>
++      column.id === "name" ? { ...column, cell: (ctx) => `Renamed ${ctx.getValue()}` } : column,
++    );
++    view.rerender(windowedTable(data, { columns: renamed }));
++    expect(screen.getByText("Renamed Stock 3")).toBeInTheDocument();
++    expect(screen.queryByText("Stock 3")).toBeNull();
++  });
++
++  it("credits an open expansion's height to its own row, not to the next one", async () => {
++    stubRowHeight(32, 96);
++    const user = userEvent.setup();
++    render(windowedTable(stocks(100), { expansion: true }));
++    scrollTo(40, 32);
++    await user.click(screen.getByRole("button", { name: "Expand Stock 40" }));
++    // 1350 lies inside row 40's detail (1312 to 1408), so row 40 is still the first visible row.
++    scrollToPx(1350);
++    expect(bodyRowIds()[0]).toBe("S0030");
++  });
++});
++
++describe("expanded rows follow what the caller renders (DEC-0307, IR-005)", () => {
++  // Stable, so a test changes one of the two functions and not both.
++  const nameLabel = (row: Stock) => row.name;
++  const symbolDetail = (row: Stock) => row.symbol;
++  function expandable(
++    renderExpansion: (row: Stock) => string,
++    getRowLabel: (row: Stock) => string = nameLabel,
++  ) {
++    return (
++      <DataTable
++        variant="expandable"
++        columns={columns}
++        data={DATA}
++        getRowId={getRowId}
++        renderExpansion={renderExpansion}
++        getRowLabel={getRowLabel}
++      />
++    );
++  }
++  const DATA = stocks(3);
++
++  it("shows a changed renderExpansion in an open row, and re-renders no collapsed row", async () => {
++    const user = userEvent.setup();
++    const view = render(expandable((row) => `Loading ${row.symbol}`));
++    await user.click(screen.getByRole("button", { name: "Expand Stock 1" }));
++    expect(screen.getByText("Loading S0001")).toBeInTheDocument();
++    renders = [];
++    view.rerender(expandable((row) => `Loaded ${row.symbol}`));
++    expect(screen.getByText("Loaded S0001")).toBeInTheDocument();
++    expect(screen.queryByText("Loading S0001")).toBeNull();
++    expect(Array.from(new Set(renders))).toEqual(["S0001"]);
++  });
++
++  it("shows a changed getRowLabel on an open row's expander", async () => {
++    const user = userEvent.setup();
++    const view = render(expandable(symbolDetail));
++    await user.click(screen.getByRole("button", { name: "Expand Stock 1" }));
++    view.rerender(expandable(symbolDetail, (row) => `Row ${row.symbol}`));
++    expect(screen.getByRole("button", { name: "Expand Row S0001" })).toHaveAttribute(
++      "aria-expanded",
++      "true",
++    );
++  });
++});
++
++describe("data-table token classes and targets (AC-25, AC-26, IR-003, IR-004)", () => {
++  const PADDING = ["px-[var(--cell-padding-x)]", "py-[var(--cell-padding-y)]", "align-middle"];
++
++  it("sets the table in the dense text size and gives the header and body rows their separators", () => {
++    render(<DataTable {...variantProps("compact", stocks(2))} />);
++    expect(screen.getByRole("table")).toHaveClass("w-full", "caption-bottom", "text-sm");
++    expect(document.querySelector("thead tr")).toHaveClass("h-row", "border-b", "border-border");
++    expect(document.querySelector("tbody tr")).toHaveClass(
++      "h-row",
++      "border-b",
++      "border-border",
++      "hover:bg-muted",
++    );
++  });
++
++  it("pads and colours the header cells and pads the body cells with the cell tokens", () => {
++    render(<DataTable {...variantProps("compact", stocks(2))} />);
++    expect(screen.getByRole("columnheader", { name: "Symbol" })).toHaveClass(
++      ...PADDING,
++      "text-left",
++      "font-medium",
++      "text-muted-foreground",
++    );
++    for (const cell of screen.getAllByRole("cell")) {
++      expect(cell).toHaveClass(...PADDING);
++    }
++  });
++
++  it("sets a row header left-aligned in the medium weight with the cell padding", () => {
++    render(<DataTable {...variantProps("history", stocks(2))} />);
++    for (const cell of screen.getAllByRole("rowheader")) {
++      expect(cell).toHaveClass(...PADDING, "text-left", "font-medium");
++    }
++  });
++
++  it("separates the detail row, and gives the expander column the same padding", async () => {
++    const user = userEvent.setup();
++    render(<DataTable {...variantProps("expandable", stocks(2))} />);
++    await user.click(screen.getByRole("button", { name: "Expand Stock 0" }));
++    expect(document.querySelector("tr[data-expansion-for]")).toHaveClass(
++      "border-b",
++      "border-border",
++    );
++    expect(screen.getByRole("button", { name: "Expand Stock 0" }).closest("td")).toHaveClass(
++      ...PADDING,
++    );
++    expect(screen.getByText("Details").closest("th")).toHaveClass(
++      ...PADDING,
++      "text-muted-foreground",
++    );
++  });
++
++  it("hides the Details header text visually and sizes the expander to the 24 px target", () => {
++    render(<DataTable {...variantProps("expandable", stocks(2))} />);
++    expect(screen.getByText("Details")).toHaveClass("sr-only");
++    expect(screen.getByRole("button", { name: "Expand Stock 0" })).toHaveClass("h-5", "w-5", "p-0");
++  });
++
++  it("sizes a sort button to the 24 px target", () => {
++    render(<Sortable {...variantProps("compact", stocks(2))} />);
++    expect(screen.getByRole("button", { name: "Name" })).toHaveClass("h-5");
++  });
++
++  it("gives the virtualised scroller its overflow and the sticky header its background", () => {
++    stubRowHeight(32, 96);
++    const { unmount } = render(<DataTable {...variantProps("virtualised", stocks(30))} />);
++    expect(document.querySelector('[data-slot="data-table-scroller"]')).toHaveClass(
++      "overflow-y-auto",
++    );
++    expect(document.querySelector("thead tr")).toHaveClass("sticky", "top-0", "bg-background");
++    unmount();
++    render(<DataTable {...variantProps("compact", stocks(30))} />);
++    expect(document.querySelector("thead tr")).not.toHaveClass("bg-background");
++  });
++});
+diff --git a/web/src/components/ui/data-table.tsx b/web/src/components/ui/data-table.tsx
+index 26cbea3..bf2f0a8 100644
+--- a/web/src/components/ui/data-table.tsx
++++ b/web/src/components/ui/data-table.tsx
+@@ -202,8 +202,9 @@ function RowImpl<TRow>({
+  * TanStack recreates `Row` objects on every new `data`, so the comparison is
+  * by the record's identity, which an appended keyset page leaves unchanged.
+  * Callers keep `columns` and loaded records referentially stable, or earlier
+- * rows re-render on every page; `renderExpansion` and `getRowLabel` are read
+- * when a row renders, so a row shows the closures it last rendered with.
++ * rows re-render on every page. An open row also follows `renderExpansion` and
++ * `getRowLabel`, so detail the caller loads into its own state reaches it
++ * (DEC-0307); a collapsed row reads them when it opens and stays memoised.
+  */
+ const DataTableRow = memo(
+   RowImpl,
+@@ -212,7 +213,10 @@ const DataTableRow = memo(
+     a.expanded === b.expanded &&
+     a.index === b.index &&
+     a.columns === b.columns &&
+-    a.rowHeader === b.rowHeader,
++    a.rowHeader === b.rowHeader &&
++    (!a.expanded ||
++      (a.expansion?.renderExpansion === b.expansion?.renderExpansion &&
++        a.expansion?.getRowLabel === b.expansion?.getRowLabel)),
+ ) as typeof RowImpl;
+ 
+ /**

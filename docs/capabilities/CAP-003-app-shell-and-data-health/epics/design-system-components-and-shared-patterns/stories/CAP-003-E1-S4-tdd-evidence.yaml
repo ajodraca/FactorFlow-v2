@@ -61,3 +61,32 @@ cycles:
           disposition: equivalent
           reason: >
             The non-windowed window literal is typed VisibleWindow; dropping padTop leaves undefined, and the only read, padTop > 0, is false for undefined exactly as for 0.
+
+  - id: cycle-3
+    tasks: [T002, T004, T006, T009, T010, T011]
+    description: >
+      Review v1 rework (IR-001 to IR-005, IR-008). Tests now pin the windowed aria-rowindex after a scroll, the memo's index and columns invalidation, the open expansion's height credited to its own row (IR-001, IR-002); the virtualised scroller's overflow-y-auto, the 24 px h-5 / h-5 w-5 sort and expander targets and the sr-only Details header (IR-003); the ten spec section 6 token classes and the sticky header background (IR-004). Production: an expanded row now also compares renderExpansion and getRowLabel in the row memo, so detail a caller loads into its own state reaches it (IR-005, DEC-0307); collapsed rows stay memoised. IR-008: the append test expands with Enter and awaits the rerender inside act, because TanStack resets its own page state in a microtask after data changes. Deviations, recorded here (IR-007): manualSorting and autoResetExpanded are not set, as cycle-2's header says (inert; no sorted or grouped row model is wired, TanStack table-core 8.21.3 index.esm.js:2740 and :3377); the expansion row's colSpan is columns.length + 1; heights are measured in a layout effect on every render; the prefetch key is the first row id plus the count; plan cycles 2 to 5 are cycle-2. IR-006 (aria-rowcount states the loaded count while hasMore) is not changed: T011 prescribes rowCount + 1 and a -1 or a total-count prop is a change to DEC-0307's owning design, so it is the owner's to decide.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-3-review-survivors.log
+    red_log_sha256: 391e2af2e82bf34f21e180afc4e9efaf6c734ab1b07b536664a113b06646d94c
+    red_evidence: >
+      Against the cycle-2 production code the two IR-005 tests fail (a changed renderExpansion and a changed getRowLabel never reach an open row); the other new tests pin behaviour the code already has, and the review's 18 surviving mutants fail them (mutation below).
+    green_evidence: >
+      data-table.test.tsx 100 passed with no act() warning; the full suite is 95 files and 2380 tests; npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 62bcc5af0b6c47c501516d9d5f198c13f4017c253c7237682f966aa2a8b71f36
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/cycle-3.patch
+    commit_hash: 12058ad2938a98c700c70299fa33ed7c96da3a85
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: cfe35ae0f5f0c8d37e53227184a084d9c1d05e7bf03cbe02b95974be5d094f6e
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

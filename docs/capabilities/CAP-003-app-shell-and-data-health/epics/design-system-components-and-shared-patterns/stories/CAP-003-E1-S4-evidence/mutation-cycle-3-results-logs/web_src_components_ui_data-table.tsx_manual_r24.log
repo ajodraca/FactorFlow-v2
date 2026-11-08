@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w0/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 18ms
+ ✓ src/components/token-literals.test.ts (30 tests) 151ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 5675ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 3875ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > sets the table in the dense text size and gives the header and body rows their separators 9ms
+     → expect(element).toHaveClass("h-row border-b border-border hover:bg-muted")
+
+Expected the element to have class:
+  h-row border-b border-border hover:bg-muted
+Received:
+  h-row hover:bg-muted
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > sets the table in the dense text size and gives the header and body rows their separators
+Error: expect(element).toHaveClass("h-row border-b border-border hover:bg-muted")
+
+Expected the element to have class:
+  h-row border-b border-border hover:bg-muted
+Received:
+  h-row hover:bg-muted
+ ❯ src/components/ui/data-table.test.tsx:908:48
+    906|     expect(screen.getByRole("table")).toHaveClass("w-full", "caption-b…
+    907|     expect(document.querySelector("thead tr")).toHaveClass("h-row", "b…
+    908|     expect(document.querySelector("tbody tr")).toHaveClass(
+       |                                                ^
+    909|       "h-row",
+    910|       "border-b",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:22:38
+   Duration  9.95s (transform 244ms, setup 553ms, collect 2.06s, tests 5.84s, environment 2.93s, prepare 1.06s)
+

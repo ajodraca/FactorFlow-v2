@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w1/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 11ms
+ ✓ src/components/token-literals.test.ts (30 tests) 25ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 6617ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 4003ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > gives the virtualised scroller its overflow and the sticky header its background 24ms
+     → expect(element).toHaveClass("sticky top-0 bg-background")
+
+Expected the element to have class:
+  sticky top-0 bg-background
+Received:
+  h-row border-b border-border sticky top-0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > gives the virtualised scroller its overflow and the sticky header its background
+Error: expect(element).toHaveClass("sticky top-0 bg-background")
+
+Expected the element to have class:
+  sticky top-0 bg-background
+Received:
+  h-row border-b border-border sticky top-0
+ ❯ src/components/ui/data-table.test.tsx:970:48
+    968|       "overflow-y-auto",
+    969|     );
+    970|     expect(document.querySelector("thead tr")).toHaveClass("sticky", "…
+       |                                                ^
+    971|     unmount();
+    972|     render(<DataTable {...variantProps("compact", stocks(30))} />);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:22:48
+   Duration  10.90s (transform 251ms, setup 1.40s, collect 2.42s, tests 6.65s, environment 2.26s, prepare 1.22s)
+
