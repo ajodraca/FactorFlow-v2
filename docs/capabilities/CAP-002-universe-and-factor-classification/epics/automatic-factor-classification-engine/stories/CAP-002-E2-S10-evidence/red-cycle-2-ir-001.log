@@ -1,0 +1,45 @@
+# RED, CAP-002-E2-S10 cycle-2 (review v1 IR-001): the new test against HEAD 5ba778c4a11c79860beb207aecf4f810c1fe5315's src with manual:review-outdated-before-not-covered applied (git archive into a scratch copy imported first through PYTHONPATH; the working tree untouched)
+# factorflow imported from: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-confident-shtern-083e4b/32dcd9ff-fb53-4005-8409-e856d3707e6f/scratchpad/s10/rework/mutant-src/src/factorflow/classification/engine.py
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=59164 user=test database=test_d6712c2ee4424774acae313e691108d...d393380>, stock=1, set_id=UUID('5190e3ad-516f-49a7-8c2b-f39998b5caba'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d3913d0>
+
+    def test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-13, DAC-E2-S10-1, DEC-0397, DEC-0116 (1) (review v1 IR-001): an uncovered stock
+        whose latest bar precedes the latest trading day is missing, corporate_actions_not_covered,
+        with no known_on and the corporate_actions acquisition named, never outdated; built with
+        every stage and two covered peers, it is not classified on momentum, input_missing (not
+        input_outdated), naming return_3m."""
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+        stale = add_instrument(env.conn, "STALEBARE", corporate_actions_covered=False)
+        record_outcomes(env.conn, stale)
+        peer = add_instrument(env.conn, "PEER")
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+        for stock in (env.stock, peer):
+            add_close_series(env.conn, stock, STANDARD)
+    
+        result = engine.build(env.conn, env.set_id, 60)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = momentum(env.conn, env.set_id, stale)
+        for name in MOMENTUM:
+            row = rows[name]
+>           assert row["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'outdated' == 'missing'
+E             
+E             - missing
+E             + outdated
+
+tests/integration/test_engine_inputs_momentum.py:1682: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated
+1 failed in 3.09s
+# control: the same test against the unmutated HEAD src copy
+.                                                                        [100%]
+1 passed in 2.58s

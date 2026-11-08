@@ -1,0 +1,47 @@
+........................................................................ [ 49%]
+.................F
+=================================== FAILURES ===================================
+_ test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-2] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49505 user=test database=test_dd6a387e50d6406980620126ef42f18...b7253a0>, stock=1, set_id=UUID('e069f7b6-5187-46f4-9207-d408ba63fb5f'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b727a40>
+covered_from = datetime.date(2026, 6, 14), present = False
+
+    @pytest.mark.parametrize(
+        ("covered_from", "present"),
+        [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
+        ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
+        env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
+    ) -> None:
+        """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
+        on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
+        from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        e, s3 = date(2026, 9, 15), date(2026, 6, 12)
+        cover(env.conn, bare, covered_from, e)
+        add_close_series(
+            env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
+        )
+    
+        build(env, monkeypatch)
+        row = momentum(env.conn, env.set_id, bare)["return_3m"]
+    
+        if present:
+            assert row["status"] == "present"
+            assert_close(row["value"], ret(120, 100))
+            assert row["detail"]["corporate_actions_covered_by"] == segment(covered_from, e)
+        else:
+>           assert row["status"] == "missing"
+E           AssertionError: assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1790: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-2]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 89 passed in 18.38s

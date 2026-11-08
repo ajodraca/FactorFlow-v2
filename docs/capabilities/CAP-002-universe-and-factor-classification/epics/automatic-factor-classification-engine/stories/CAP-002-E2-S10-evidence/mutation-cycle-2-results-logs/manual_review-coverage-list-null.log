@@ -1,0 +1,44 @@
+........................................................................ [ 49%]
+.......F
+=================================== FAILURES ===================================
+_ test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=50195 user=test database=test_53b2cea46bb64e2aa6b2e8c7442a27d...ce57ad0>, stock=1, set_id=UUID('799be93f-a722-4cf1-9d09-5478b5cd7ce3'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ce573e0>
+
+    def test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-1, DAC-E2-13, AC-12, DEC-0397: with every boundary bar and no
+        corporate_actions segment (a prices segment does not count), all three inputs are
+        missing, naming the cause, with no value and no known_on (DEC-0242); the same bars with
+        the default segment are present."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        cover(env.conn, bare, *DEFAULT_CORPORATE_ACTIONS_COVERAGE, data_type="prices")
+        add_close_series(env.conn, bare, STANDARD)
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+        rows = build(env, monkeypatch)
+        bare_rows = momentum(env.conn, env.set_id, bare)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            row = bare_rows[name]
+            assert row["status"] == "missing", name
+            assert row["value"] is None
+            assert row["known_on"] is None
+            assert row["as_of"] == E
+>           assert row["detail"] == not_covered(name, []), name
+E           AssertionError: return_3m
+E           assert {'E': {'close...nths': 3, ...} == {'cause': 'co...-06-17'}, ...}
+E             
+E             Omitting 4 identical items, use -vv to show
+E             Differing items:
+E             {'corporate_actions_coverage': None} != {'corporate_actions_coverage': []}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:1617: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 79 passed in 12.13s

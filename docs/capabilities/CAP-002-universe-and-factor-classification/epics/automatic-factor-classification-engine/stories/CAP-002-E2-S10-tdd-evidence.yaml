@@ -7,6 +7,8 @@
 # Reviews: one independent code-review subagent and one independent spec-drift subagent judged the RED commit's diff
 # together with the staged GREEN diff (cycle-1.patch): APPROVED, drift_detected false. diff_sha256 and reviewed_patch
 # are of the staged GREEN diff, which is exactly the GREEN commit's diff.
+# Cycle 2 is the review-rework of CAP-002-E2-S10-implementation-review-v1 (IR-001; one test, no production change). Its
+# staged diff was judged by a fresh code-review subagent and a fresh spec-drift subagent: APPROVED, drift_detected false.
 
 cycles:
   - id: cycle-1
@@ -97,6 +99,120 @@ cycles:
         corporate_actions_covered_by dropped from base, the status term dropped, covered forced true, the bounds read
         from the S_k and E targets instead of the bars, and a probe that ignores S_k. All 17 are killed. Of the 20
         generated, the 4 outside a SQL comment that change behaviour are killed; the 16 survivors are equivalent.
+      survivors:
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:9:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:10:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:10:off-by-one:2
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:10:off-by-one:3
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:56:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:64:off-by-one:1
+          disposition: equivalent
+          reason: >
+            LIMIT 1 to LIMIT 2 on the containing-segment probe. Two corporate_actions segments of one instrument that both
+            contain a window would overlap, which coverage_no_overlap (an EXCLUDE constraint in migration 0003) forbids,
+            so the probe never matches more than one row and LIMIT 2 returns the same row (design 2.4: segments never
+            overlap, a window is covered when one segment contains it). No fixture can make the two differ.
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:237:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:237:off-by-one:2
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:237:off-by-one:3
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:237:off-by-one:4
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:238:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:239:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:239:off-by-one:2
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:306:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:308:off-by-one:1
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+        - id: src/factorflow/classification/sql/momentum_inputs.sql:308:off-by-one:2
+          disposition: equivalent
+          reason: the mutated text is inside a -- comment of the SQL file (the runner masks only // and # comments), so the executed statement is unchanged
+
+  - id: cycle-2
+    tasks: [T004]
+    description: >
+      Review rework of CAP-002-E2-S10-implementation-review-v1, IR-001 (HIGH). Test only; momentum_inputs.sql is
+      unchanged, as the review states its production code correct. The new TC-COMP-381 test
+      test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated builds, with every stage and two covered
+      peers (floor 2), an uncovered stock with every boundary bar whose latest bar (2026-10-15) precedes the latest
+      trading day (2026-10-16), and asserts that each momentum input is missing, not outdated (DAC-E2-13, DEC-0397,
+      DEC-0116 (1)): null value and known_on, as_of E, the whole not-covered detail with corporate_actions_coverage [],
+      last_acquisition naming corporate_actions (missing_data_type), and the stock not_classified on momentum,
+      input_missing (not input_outdated), naming return_3m.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S10-evidence/red-cycle-2-ir-001.log
+    red_log_sha256: cb80cadfd3d0ddc0ebc999daa136d25095b6225aabe923cebc719f8e8fa7360f
+    red_evidence: >
+      Observed against HEAD 5ba778c's production code with the review's surviving mutant
+      manual:review-outdated-before-not-covered applied (git archive of src into a scratch copy imported first through
+      PYTHONPATH; the working tree untouched): the new test fails, 1 failed, on return_3m 'outdated' == 'missing'. The
+      unmutated control copy passes it, 1 passed (same log).
+    green_evidence: >
+      Focused suite on the staged diff: 145 passed (green-cycle-2.log). Full suites on the same bytes: uv run pytest -m
+      'not postgres', 1659 passed (full-not-postgres-cycle-2.log); uv run pytest -m postgres, 970 passed, slow volume and latency builds included (full-postgres-cycle-2.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S10-evidence/green-cycle-2.log
+        sha256: 284e077728d396c44e9eb0d85ce07ff6b7fc5a4264f89f13bd80c9756e9c2f9f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S10-evidence/full-not-postgres-cycle-2.log
+        sha256: 34dada301942f4480e2c41b4dea1a1613154193b36f595f2178d6b1c92ef923b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S10-evidence/full-postgres-cycle-2.log
+        sha256: cb776374022a64ea6faf008f8c5929d96dc586c964ce7bf07fa15cb19539e1e4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    code_review_notes: >
+      Fresh code-review subagent on the staged diff: APPROVED. It confirmed the case really is stale and uncovered, that
+      every item IR-001 requires is asserted against literals, that the RED log shows the mutant failing the test and
+      the control passing, and ran the test with its siblings (5 passed). Non-blocking: the classification check reads
+      status, reason_code and reason_input only (the sibling TC-COMP-381 test covers reason_detail, score and peers).
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Fresh spec-drift subagent: no drift; every assertion traces to DAC-E2-13, DAC-E2-S10-1, DEC-0397, DEC-0116 (1)
+        and design 2.4/2.5. Not drift: the precondition goes beyond TC-COMP-381's literal one (a stale bar), which is the
+        case IR-001 asks for; the floor of 2 as already accepted for the sibling test.
+    diff_sha256: 54b2f1f730c36d6e82b690a7e2bc5ff3bb3f0287bdcaac74f68c54aea0fa49fa
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S10-evidence/cycle-2.patch
+    commit_hash: cce88c95b033ecad91909707c47526c2e29cbe85
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-002-universe-and-factor-classification/epics/automatic-factor-classification-engine/stories/CAP-002-E2-S10-evidence/mutation-cycle-2-results.json
+      results_sha256: 42b79d2fd6e15c31e25154c969cdee66f8d68c8bab6e5ddcd42165748ee8cfe8
+      generated: 50
+      killed: 34
+      survived: 16
+      stillborn: 0
+      timeout: 0
+      score: 0.68
+      manual_mutants: >
+        No production line changed, so the catalogue generates nothing new. The review's own 50 mutants (20 generated,
+        the coder's 17 manual and the reviewer's 13; CAP-002-E2-S10-implementation-review-v1-mutation.json) were
+        re-tagged cycle-2 (mutants-cycle-2.json) and re-run with the plan's focused command: 34 killed, among them
+        manual:review-outdated-before-not-covered, the v1 survivor IR-001 names. The 16 survivors are the same 16
+        equivalents as cycle-1 and the review (15 inside SQL comments, LIMIT 2 under coverage_no_overlap).
       survivors:
         - id: src/factorflow/classification/sql/momentum_inputs.sql:9:off-by-one:1
           disposition: equivalent

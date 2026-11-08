@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-08
+last_reworked_review: CAP-002-E2-S10-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -218,3 +219,4 @@ None. Every bound is fixed by an artifact: the inclusive bounds and the cause or
 - T006 gained one case during GREEN, `test_coverage_bounds_are_the_resolved_bars_not_their_targets`: the `STANDARD` bars sit on their targets, so no planned case told the resolved `S_k` and `E` bars from their targets, and the hand-written mutants that read the targets survived that suite. Both reviewers judged it in scope (it pins design 2.4's bounds).
 - T011: a successful corporate-actions fetch that returns no action records `run_instrument_result.outcome = unchanged` (no row written), not `written`; the guard asserts the released value.
 - The mutation run's one non-comment survivor, `LIMIT 1` → `LIMIT 2` on the containing-segment probe, is equivalent under `coverage_no_overlap` (migration 0003).
+- Review v1 rework (2026-11-08), IR-001: one TC-COMP-381 test added under T004, `test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated` (an uncovered stock whose latest bar precedes the latest trading day is missing, not outdated, and `input_missing` on momentum). No production change; the review's mutant `manual:review-outdated-before-not-covered` is now killed (TDD evidence cycle-2).
