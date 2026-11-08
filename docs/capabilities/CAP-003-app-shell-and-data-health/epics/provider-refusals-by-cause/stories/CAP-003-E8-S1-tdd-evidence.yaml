@@ -20,6 +20,8 @@
 # (d) the change set is errors.py, __init__.py, outcomes.py, the four test files, the task plan, the story status, this
 # file and the CAP-003-E8-S1-evidence folder (logs, review records, patches, mutation results, as earlier stories keep
 # them); no migration. client.py, rate_limit.py, runner.py, models.py and paging.py are unchanged.
+# Cycle-5 is the rework for implementation review v1 (IR-001): a test-only negative TC-COMP-228 row; its mutation run is
+# the review's 33 mutants (scratchpad review-e8s1/mutants.json, sha256 c0dff37c...) retagged cycle-5, on the review's command.
 
 cycles:
   - id: cycle-1
@@ -236,3 +238,64 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-5
+    tasks: [T002]
+    description: >
+      Review rework for implementation review v1, finding IR-001 (HIGH): no test failed if the entitlement rule also
+      searched status or request_id. One parametrised negative TC-COMP-228 test in
+      tests/unit/test_massive_error_classification.py, test_a_marker_outside_error_and_message_stays_provider_unavailable,
+      with the marker only in status ({"status": "NOT ENTITLED", "request_id": "r7"}) and only in request_id
+      ({"status": "ERROR", "request_id": "not entitled"}), each asserting type(result) is ProviderUnavailable
+      (massive-client section 2.4 rule 3 reads only error and message; DAC-E8-1, DAC-E8-3). Test-only: no production
+      file changes. Its commit is the rework commit after the review commit 64b68c9, so commit_hash: stage resolves to
+      it and the patch is the staged diff over 64b68c9.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/red-cycle-5.log
+    red_log_sha256: 0a50d1dbad06f86e8effc957812efbb6d3e1c91c61191f7757e612f3ec1ba2bb
+    red_evidence: >
+      The rows pin behaviour the story already delivered, so they pass on HEAD; their RED is the review's two surviving
+      mutants. In a scratch copy of HEAD with the new test file, each mutant applied on its own: the status-also-searched
+      mutant fails the in-status row (1 failed, 33 passed) and the request-id-also-searched mutant fails the
+      in-request-id row (1 failed, 33 passed), each with ProviderNotEntitled returned instead of ProviderUnavailable.
+    green_evidence: >
+      tests/unit/test_massive_error_classification.py 34 passed; the five-file focused suite the review ran 83 passed;
+      ruff check, ruff format --check and mypy src clean (green-cycle-5.log). Full suite on the final bytes 2641 passed,
+      postgres tests included, 2 pre-existing deprecation warnings (full-suite-cycle-5.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/green-cycle-5.log
+        sha256: c23007ff3b62e96e31c63ce6c89bb98eaab1bf4cd01784411fcb471bf15f88cc
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/code-review-cycle-5.txt
+        sha256: 98b156d551454de13184742b3835b4e33b55469d4003c4d6f799e81788523238
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/spec-drift-cycle-5.txt
+        sha256: 763e70ca134f36928a663e47919569e697b76074ef770a197413ce12ccb79434
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/full-suite-cycle-5.log
+        sha256: 1906a7001fb555e025a642a5c31c127158db6b579915c0108163be583c91592b
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 82a5523c27ce8398beb7f10f10ffc6809646036a8ce49ea0637faa5e0b850c1f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S1-evidence/mutation-cycle-5-results.json
+      results_sha256: e7ba1bc5b648e50b255c5ca99e71ac9c2d17a0529b85f0999d60bea41fd99127
+      generated: 33
+      killed: 31
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.939
+      survivors:
+        - id: src/factorflow/ingestion/massive/errors.py:manual:coder-exact-class-to-isinstance
+          disposition: equivalent
+          reason: >
+            As in cycle-2 and the review's disposition: compose_failure_reason looks the kind up by exact class and
+            raises TypeError for any class not in _ERROR_KIND_BY_TYPE before the branch; no listed class subclasses
+            ProviderNotEntitled, so isinstance and type(error) is agree on every input that reaches the branch.
+        - id: src/factorflow/ingestion/massive/errors.py:manual:reviewer-compose-type-error-text-reverted
+          disposition: equivalent
+          reason: >
+            The review's disposition: DAC-E8-4 specifies the exception type, not its text, and the task plan's
+            Resolved Conflicts classes this wording as a message consequence of the required row, not new behaviour.

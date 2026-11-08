@@ -1,0 +1,26 @@
+# GREEN cycle-5 (review rework, IR-001) on HEAD 64b68c9 plus the staged test row; production unchanged.
+
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_error_classification.py
+tests/unit/test_massive_error_classification.py ........................ [ 70%]
+..........                                                               [100%]
+
+============================== 34 passed in 0.52s ==============================
+# exit code: 0
+
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_error_classification.py tests/unit/test_massive_failure_reasons.py tests/unit/test_massive_retry.py tests/unit/test_outcomes.py tests/unit/test_massive_package_boundary.py -q
+........................................................................ [ 86%]
+...........                                                              [100%]
+83 passed in 0.89s
+# exit code: 0
+
+# $ python -m ruff check .
+All checks passed!
+# exit code: 0
+
+# $ python -m ruff format --check .
+285 files already formatted
+# exit code: 0
+
+# $ python -m mypy src
+Success: no issues found in 61 source files
+# exit code: 0

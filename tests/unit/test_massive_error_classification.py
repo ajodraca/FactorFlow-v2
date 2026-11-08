@@ -341,6 +341,25 @@ def test_a_forbidden_body_without_the_marker_stays_provider_unavailable() -> Non
     assert type(result) is ProviderUnavailable
 
 
+@pytest.mark.parametrize(
+    "body",
+    [
+        pytest.param({"status": "NOT ENTITLED", "request_id": "r7"}, id="in-status"),
+        pytest.param({"status": "ERROR", "request_id": "not entitled"}, id="in-request-id"),
+    ],
+)
+# Implements CAP-003 TC-COMP-228
+def test_a_marker_outside_error_and_message_stays_provider_unavailable(
+    body: dict[str, str],
+) -> None:
+    """CAP-003 TC-COMP-228 / DAC-E8-1, DAC-E8-3: the entitlement rule reads
+    only `error` and `message` (massive-client section 2.4 rule 3); the
+    marker in `status` or in `request_id` alone leaves the safe default."""
+    result = classify_error_body(json.dumps(body))
+
+    assert type(result) is ProviderUnavailable
+
+
 # --- CAP-003 TC-COMP-229 / DAC-E8-S1-2: rule order; fatal ---------------
 
 
