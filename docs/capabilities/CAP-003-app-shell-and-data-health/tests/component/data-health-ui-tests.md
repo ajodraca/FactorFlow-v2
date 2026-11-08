@@ -2,33 +2,33 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-data-health-ui-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
 
 # data-health-ui Component Test Specification
 
-Component tests for `data-health-ui` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 33 cases (TC-COMP-148 to TC-COMP-180, not necessarily contiguous).
+Component tests for `data-health-ui` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 43 cases (TC-COMP-148 to TC-COMP-289, not necessarily contiguous).
 
 ### TC-COMP-148: Verdict skeleton while attention loads; error with Try again while it fails
 
@@ -411,17 +411,19 @@ Component tests for `data-health-ui` (CAP-003). Each case verifies one story-lev
 **Type:** functional
 
 #### Preconditions
-- A row with a `failed` prices failure and a `not_found` reference failure
+- A row served `retryable: true` with a `failed` prices failure whose reason begins `[unavailable] ` and a `not_found` reference failure; when CAP-003-E8-S8 has landed, the failures also carry `cause` `"unavailable"` and `null`
 
 #### Steps
 1. Render the row
 
 #### Expected Result
-- Both badges render; the row is retryable
-- *Not found* fix controls **Stop following** and **Follow a different symbol** render; no per-row download control
+- Both badges render
+- The *Failed* failure reads *Downloading daily prices failed: {reason}, {attempts} attempts* with its served `attempts`, then *Download again to retry; data already stored is never duplicated or overwritten.*
+- *Not found* fix controls **Stop following** and **Follow a different symbol** render; no per-row download control exists
 
 #### Error / Edge Cases
-- Per-failure copy per DAC-E6-8: *Downloading {data type} failed: {reason}, {attempts} attempts* / *The provider doesn't recognise this symbol.* and the consequence sentence
+- Per-failure copy per DAC-E6-8: *The provider doesn't recognise this symbol.* and the consequence sentence
+- No fixture of this case carries a reason beginning `[not_entitled] ` or `[rate_limited] `, whose rendering is CAP-003-E8-S9's (TC-COMP-282, TC-COMP-283; E6-S3 v2)
 
 ### TC-COMP-166: Show more appends pages with served cursors and keeps focus
 
@@ -445,7 +447,7 @@ Component tests for `data-health-ui` (CAP-003). Each case verifies one story-lev
 #### Error / Edge Cases
 - `422`: *Couldn't read more problems: {reason}.* with **Try again** restarting from the first page (DAC-E6-9)
 
-### TC-COMP-167: Provider reason renders as text; no request_id
+### TC-COMP-167: Provider reason renders verbatim as text; no request ID beyond it
 
 **Scope:** component
 **Component(s):** data-health-ui
@@ -454,15 +456,18 @@ Component tests for `data-health-ui` (CAP-003). Each case verifies one story-lev
 **Type:** security
 
 #### Preconditions
-- A row whose `reason` contains markup
+- A row whose `reason` contains markup, begins `[unavailable] ` and holds `request_id=r1`
 
 #### Steps
 1. Render
 2. Search the DOM
 
 #### Expected Result
-- The reason is text, never markup
-- No `request_id` appears
+- The reason is text, never markup, shown verbatim as stored, its leading kind and its `request_id=r1` included
+- No request ID appears anywhere beyond the reason text
+
+#### Error / Edge Cases
+- How a stored reason is shown to the owner is capability OQ-5's separate follow-up (E6-S3 v2; backlog review v6 FINDING-12)
 
 #### Error / Edge Cases
 - None beyond the scenario
@@ -746,3 +751,224 @@ Component tests for `data-health-ui` (CAP-003). Each case verifies one story-lev
 
 #### Error / Edge Cases
 - None beyond the scenario
+
+### TC-COMP-226: The what-failed line shows the served attempts value, never a literal 3
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-13, DAC-E6-S3-6, DAC-E6-8
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `problem-row.test.tsx`; *Failed* failures with reasons beginning `[unavailable] ` (or `null`) serving `attempts` 1 and, in a second fixture, 2
+
+#### Steps
+1. Render each row
+2. Read the what-failed line
+
+#### Expected Result
+- The line reads *Downloading {data type} failed: {reason}, {attempts} attempts* with `{attempts}` the value that fixture serves, unchanged
+- No assertion in the story's tests expects a recorded 3
+
+#### Error / Edge Cases
+- Production rows serve the column default, 1, because the delivered writer never records `attempts` (specification review v5 FINDING-29)
+
+### TC-COMP-227: The fix is chosen in one place keyed by outcome, the attempt count part of it
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-13, AC-14, DAC-E6-S3-7, DAC-E6-8
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- `problem-row.tsx` after CAP-003-E6-S3
+
+#### Steps
+1. Read where a failure's fix is chosen
+2. Render a *Failed* and a *Not found* failure
+
+#### Expected Result
+- One choice per failure keyed by its outcome: *Failed* gives the *Download again* line; *Not found* gives its controls and sentence
+- The what-failed line's attempt count is rendered inside that per-failure rendering, so CAP-003-E8-S9 can route the choice through `failureRecovery` without changing TC-COMP-165's or TC-COMP-226's assertions
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-282: A plan-refusal failure names the plan, drops the attempts and offers no download
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-29, AC-13, DAC-E8-S9-1, DAC-E8-17
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `problem-row.test.tsx`; failure `{ data_type: "fundamentals", outcome: "failed", cause: "not_entitled", reason: "[not_entitled] symbol=KO data_type=fundamentals request_id=r1: the provider plan is not entitled to this data", attempts: 1 }`
+
+#### Steps
+1. Render the row
+2. Query buttons and links by accessible name
+
+#### Expected Result
+- *Failed* renders through `StatusBadge`
+- The what-failed line reads exactly *Downloading company financials failed: {reason}* with no *attempts* text
+- `PLAN_FIX_TEXT` renders as one `--text-xs` line
+- No button and no link whose accessible name contains *Download*; no per-row control
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-283: A rate-limited failure offers the later download with no per-row control
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-30, AC-13, DAC-E8-S9-2, DAC-E8-17
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `problem-row.test.tsx`; a `failed` failure with cause `rate_limited` and a reason beginning `[rate_limited] `
+
+#### Steps
+1. Render the row
+
+#### Expected Result
+- The what-failed line ends at *{reason}* with no *attempts* text
+- `RATE_LIMIT_FIX_TEXT` renders as one `--text-xs` line
+- The row holds no per-row control; the header's **Download now** is the action
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-284: Unavailable and null causes keep Download again with the served attempts
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-13, AC-29, AC-30, DAC-E8-S9-3, DAC-E8-17, DAC-E8-19
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `problem-row.test.tsx`; `failed` failures with cause `unavailable` and with cause `null`, each serving its fixture's `attempts`
+
+#### Steps
+1. Render each row
+
+#### Expected Result
+- Each reads *Downloading {data type} failed: {reason}, {attempts} attempts* with the served value, as E6-S3 renders it
+- Each is followed by *Download again to retry; data already stored is never duplicated or overwritten.*
+- The assertion uses the served value, never a literal 3
+
+#### Error / Edge Cases
+- A result recorded before the upgrade (`[unavailable]`) reads as an ordinary failure (DAC-E8-19)
+
+### TC-COMP-285: A not-found failure keeps its fixes whatever its cause
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-14, DAC-E8-S9-4, DAC-E8-15
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `problem-row.test.tsx`; `not_found` failures whose cause is `not_entitled`, `rate_limited` and `null`
+
+#### Steps
+1. Render each row
+
+#### Expected Result
+- Each renders E6-S3's *Not found* fix: **Stop following**, **Follow a different symbol** and *Probably a typo or a delisted ticker. Downloading again won't help.*
+- No download is offered and neither new fix text renders
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-286: Download now hides when only plan refusals load and returns with one rate limit
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-29, AC-30, AC-16, DAC-E8-S9-5, DAC-E8-17
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `needs-fixing.test.tsx`; every loaded row `retryable: false` because its failures are `not_entitled`
+
+#### Steps
+1. Render the card and read the header
+2. Add one row with a `rate_limited` failure and `retryable: true`; re-render
+
+#### Expected Result
+- Step 1: no **Download now**; the header reads *Needs fixing · {affected_count}*, plan refusals included
+- Step 2: **Download now** renders; the header count is still `affected_count`
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-287: The data-health screen holds no copy of the fix words or of the cause mapping
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-29, AC-30, DAC-E8-S9-6, DAC-E8-16
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- A source check in the story's tests reading the non-test sources under `web/src/screens/data-health/`, as `web/src/components/token-literals.test.ts` reads sources
+
+#### Steps
+1. Run the check
+2. Plant `"not_entitled"` in a source and re-run
+
+#### Expected Result
+- Neither *Your Massive plan doesn't include this data* nor *FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE* appears, nor the string literals `"not_entitled"` and `"rate_limited"`
+- The planted literal fails the check naming the file
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-288: The new fix lines pass the literal scan with the delivered text-xs class
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-26, DAC-E8-S9-7
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- The AC-26 literal scan as CAP-003-E6-S5 widens it to `web/src/screens/data-health/`
+
+#### Steps
+1. Run it after the story
+2. Read the class of each new fix line
+
+#### Expected Result
+- It passes
+- Each new fix line takes the delivered fix line's `--text-xs` class; no component, variant, token or literal is added
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-289: The two new row states keep the display vocabulary and render the reason as text
+
+**Scope:** component
+**Component(s):** data-health-ui
+**Traces to:** AC-19, DAC-E8-S9-8
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- Rows rendered with a `not_entitled` and a `rate_limited` failure; a reason containing markup
+
+#### Steps
+1. Run E6-S3's DAC-E6-S3-4 term scan over the visible text and accessible names
+2. Search the DOM for elements created from the reason
+
+#### Expected Result
+- None of *instrument*, *acquisition*, *acquire*, *run*, *runs*, *Retire*, *Retired*, *Provider credential* appears as a whole word in any case
+- The reason renders as text, never markup (AGT-PROHIB-003)
+
+#### Error / Edge Cases
+- The stored reason's leading kind and `request_id=` render verbatim as part of the reason text (capability OQ-5 is a separate follow-up)

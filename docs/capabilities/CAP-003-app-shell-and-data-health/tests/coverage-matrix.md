@@ -2,26 +2,26 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-coverage-matrix
 artifact_type: coverage-matrix
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
@@ -45,22 +45,24 @@ ai_provenance:
 | AC-10 | Capability | Nothing unshipped on Home | TC-COMP-063, TC-COMP-130 | — | TC-E2E-005 | Covered |
 | AC-11 | Capability | Data health verdict | TC-COMP-026, TC-COMP-027, TC-COMP-035, TC-COMP-038, TC-COMP-047, TC-COMP-052, TC-COMP-137, TC-COMP-138, TC-COMP-148, TC-COMP-149, TC-COMP-150, TC-COMP-156, TC-COMP-157, TC-COMP-158, TC-COMP-176 | TC-INT-010, TC-INT-011, TC-INT-014, TC-INT-015, TC-INT-017, TC-INT-026 | TC-E2E-003, TC-E2E-004 | Covered |
 | AC-12 | Capability | A partial download is never complete | TC-COMP-021, TC-COMP-044, TC-COMP-094, TC-COMP-095, TC-COMP-170, TC-COMP-171, TC-COMP-204, TC-COMP-206, TC-COMP-213 | TC-INT-021, TC-INT-036 | TC-E2E-003 | Covered |
-| AC-13 | Capability | Every problem names its fix | TC-COMP-040, TC-COMP-049, TC-COMP-051, TC-COMP-067, TC-COMP-152, TC-COMP-165, TC-COMP-166 | TC-INT-014, TC-INT-016, TC-INT-017, TC-INT-018, TC-INT-037 | TC-E2E-003 | Covered |
-| AC-14 | Capability | Not found is not retried | TC-COMP-041, TC-COMP-153, TC-COMP-162, TC-COMP-165, TC-COMP-166, TC-COMP-192, TC-COMP-198, TC-COMP-211, TC-COMP-212 | TC-INT-018, TC-INT-019, TC-INT-020, TC-INT-039 | TC-E2E-003 | Covered |
+| AC-13 | Capability | Every problem names its fix | TC-COMP-040, TC-COMP-049, TC-COMP-051, TC-COMP-067, TC-COMP-152, TC-COMP-165, TC-COMP-166, TC-COMP-226, TC-COMP-227, TC-COMP-282, TC-COMP-283, TC-COMP-284 | TC-INT-014, TC-INT-016, TC-INT-017, TC-INT-018, TC-INT-037, TC-INT-049 | TC-E2E-003 | Covered |
+| AC-14 | Capability | Not found is not retried | TC-COMP-041, TC-COMP-153, TC-COMP-162, TC-COMP-165, TC-COMP-166, TC-COMP-192, TC-COMP-198, TC-COMP-211, TC-COMP-212, TC-COMP-227, TC-COMP-260, TC-COMP-261, TC-COMP-268, TC-COMP-285, TC-COMP-293 | TC-INT-018, TC-INT-019, TC-INT-020, TC-INT-039 | TC-E2E-003 | Covered |
 | AC-15 | Capability | Download now is the retry | TC-COMP-101, TC-COMP-161 | TC-INT-014, TC-INT-021, TC-INT-022, TC-INT-023, TC-INT-024, TC-INT-035 | TC-E2E-003, TC-E2E-004 | Covered |
-| AC-16 | Capability | Attention counts | TC-COMP-002, TC-COMP-049, TC-COMP-060, TC-COMP-068 | TC-INT-013, TC-INT-025, TC-INT-026, TC-INT-027, TC-INT-028 | TC-E2E-003, TC-E2E-005 | Covered |
-| AC-17 | Capability | CAP-001's behaviour is preserved | TC-COMP-039, TC-COMP-042, TC-COMP-054, TC-COMP-065, TC-COMP-075, TC-COMP-078, TC-COMP-079, TC-COMP-102, TC-COMP-108, TC-COMP-126, TC-COMP-154, TC-COMP-162, TC-COMP-181, TC-COMP-183, TC-COMP-185, TC-COMP-191, TC-COMP-192, TC-COMP-193, TC-COMP-197, TC-COMP-198, TC-COMP-199, TC-COMP-203, TC-COMP-210, TC-COMP-211, TC-COMP-212, TC-COMP-217, TC-COMP-220, TC-COMP-222 | TC-INT-005, TC-INT-006, TC-INT-007, TC-INT-019, TC-INT-020, TC-INT-023, TC-INT-024, TC-INT-028, TC-INT-029, TC-INT-030, TC-INT-031, TC-INT-032, TC-INT-033, TC-INT-034, TC-INT-035, TC-INT-036, TC-INT-037, TC-INT-038, TC-INT-039, TC-INT-040 | TC-E2E-007, TC-E2E-008 | Covered |
+| AC-16 | Capability | Attention counts | TC-COMP-002, TC-COMP-049, TC-COMP-060, TC-COMP-068, TC-COMP-269, TC-COMP-271, TC-COMP-286 | TC-INT-013, TC-INT-025, TC-INT-026, TC-INT-027, TC-INT-028, TC-INT-048, TC-INT-049 | TC-E2E-003, TC-E2E-005 | Covered |
+| AC-17 | Capability | CAP-001's behaviour is preserved | TC-COMP-039, TC-COMP-042, TC-COMP-054, TC-COMP-065, TC-COMP-075, TC-COMP-078, TC-COMP-079, TC-COMP-102, TC-COMP-108, TC-COMP-126, TC-COMP-154, TC-COMP-162, TC-COMP-181, TC-COMP-183, TC-COMP-185, TC-COMP-191, TC-COMP-192, TC-COMP-193, TC-COMP-197, TC-COMP-198, TC-COMP-199, TC-COMP-203, TC-COMP-210, TC-COMP-211, TC-COMP-212, TC-COMP-217, TC-COMP-220, TC-COMP-222, TC-COMP-271, TC-COMP-276, TC-COMP-294, TC-COMP-297 | TC-INT-005, TC-INT-006, TC-INT-007, TC-INT-019, TC-INT-020, TC-INT-023, TC-INT-024, TC-INT-028, TC-INT-029, TC-INT-030, TC-INT-031, TC-INT-032, TC-INT-033, TC-INT-034, TC-INT-035, TC-INT-036, TC-INT-037, TC-INT-038, TC-INT-039, TC-INT-040, TC-INT-050 | TC-E2E-007, TC-E2E-008 | Covered |
 | AC-18 | Capability | Old paths still arrive | TC-COMP-077, TC-COMP-183, TC-COMP-221, TC-COMP-223, TC-COMP-224 | TC-INT-040 | TC-E2E-008 | Covered |
-| AC-19 | Capability | Product vocabulary | TC-COMP-037, TC-COMP-080, TC-COMP-085, TC-COMP-092, TC-COMP-096, TC-COMP-107, TC-COMP-111, TC-COMP-117, TC-COMP-123, TC-COMP-134, TC-COMP-139, TC-COMP-145, TC-COMP-159, TC-COMP-163, TC-COMP-168, TC-COMP-173, TC-COMP-179, TC-COMP-184, TC-COMP-186, TC-COMP-189, TC-COMP-195, TC-COMP-201, TC-COMP-208, TC-COMP-215, TC-COMP-218, TC-COMP-219, TC-COMP-220, TC-COMP-221 | TC-INT-040 | TC-E2E-007 | Covered |
+| AC-19 | Capability | Product vocabulary | TC-COMP-037, TC-COMP-080, TC-COMP-085, TC-COMP-092, TC-COMP-096, TC-COMP-107, TC-COMP-111, TC-COMP-117, TC-COMP-123, TC-COMP-134, TC-COMP-139, TC-COMP-145, TC-COMP-159, TC-COMP-163, TC-COMP-168, TC-COMP-173, TC-COMP-179, TC-COMP-184, TC-COMP-186, TC-COMP-189, TC-COMP-195, TC-COMP-201, TC-COMP-208, TC-COMP-215, TC-COMP-218, TC-COMP-219, TC-COMP-220, TC-COMP-221, TC-COMP-264, TC-COMP-276, TC-COMP-289, TC-COMP-296 | TC-INT-040 | TC-E2E-007 | Covered |
 | AC-20 | Capability | One tier per status | TC-COMP-020, TC-COMP-021, TC-COMP-022, TC-COMP-030, TC-COMP-086, TC-COMP-093, TC-COMP-097, TC-COMP-112, TC-COMP-118, TC-COMP-124, TC-COMP-135, TC-COMP-140, TC-COMP-146, TC-COMP-160, TC-COMP-164, TC-COMP-169, TC-COMP-174, TC-COMP-180, TC-COMP-190, TC-COMP-196, TC-COMP-202, TC-COMP-204, TC-COMP-206, TC-COMP-209, TC-COMP-213, TC-COMP-216 | — | TC-E2E-003, TC-E2E-007 | Covered |
 | AC-21 | Capability | Honest empty state | TC-COMP-026, TC-COMP-043, TC-COMP-044, TC-COMP-048, TC-COMP-052, TC-COMP-056, TC-COMP-106, TC-COMP-115, TC-COMP-120, TC-COMP-127, TC-COMP-136, TC-COMP-151, TC-COMP-175 | TC-INT-002, TC-INT-004, TC-INT-017, TC-INT-032 | TC-E2E-001, TC-E2E-002, TC-E2E-005 | Covered |
 | AC-22 | Capability | Command palette | TC-COMP-081, TC-COMP-082, TC-COMP-088 | TC-INT-041, TC-INT-042, TC-INT-043, TC-INT-044, TC-INT-045 | TC-E2E-007 | Covered |
 | AC-23 | Capability | Unreachable is a designed state | TC-COMP-061, TC-COMP-071, TC-COMP-089 | TC-INT-046 | TC-E2E-009, TC-E2E-010 | Covered |
-| AC-24 | Capability | Every region defines its states | TC-COMP-025, TC-COMP-031, TC-COMP-032, TC-COMP-035, TC-COMP-050, TC-COMP-058, TC-COMP-059, TC-COMP-062, TC-COMP-066, TC-COMP-070, TC-COMP-104, TC-COMP-106, TC-COMP-122, TC-COMP-131, TC-COMP-132, TC-COMP-133, TC-COMP-143, TC-COMP-148, TC-COMP-151, TC-COMP-155, TC-COMP-157, TC-COMP-158, TC-COMP-167, TC-COMP-177, TC-COMP-191, TC-COMP-197, TC-COMP-203, TC-COMP-210, TC-COMP-217 | TC-INT-011, TC-INT-012, TC-INT-015, TC-INT-027, TC-INT-042, TC-INT-045 | TC-E2E-004, TC-E2E-006, TC-E2E-009 | Covered |
+| AC-24 | Capability | Every region defines its states | TC-COMP-025, TC-COMP-031, TC-COMP-032, TC-COMP-035, TC-COMP-050, TC-COMP-058, TC-COMP-059, TC-COMP-062, TC-COMP-066, TC-COMP-070, TC-COMP-104, TC-COMP-106, TC-COMP-122, TC-COMP-131, TC-COMP-132, TC-COMP-133, TC-COMP-143, TC-COMP-148, TC-COMP-151, TC-COMP-155, TC-COMP-157, TC-COMP-158, TC-COMP-167, TC-COMP-177, TC-COMP-191, TC-COMP-197, TC-COMP-203, TC-COMP-210, TC-COMP-217, TC-COMP-275 | TC-INT-011, TC-INT-012, TC-INT-015, TC-INT-027, TC-INT-042, TC-INT-045 | TC-E2E-004, TC-E2E-006, TC-E2E-009 | Covered |
 | AC-25 | Capability | Keyboard and freshness | TC-COMP-006, TC-COMP-009, TC-COMP-010, TC-COMP-012, TC-COMP-013, TC-COMP-014, TC-COMP-015, TC-COMP-018, TC-COMP-023, TC-COMP-024, TC-COMP-060, TC-COMP-069, TC-COMP-073, TC-COMP-074, TC-COMP-080, TC-COMP-083, TC-COMP-088, TC-COMP-116, TC-COMP-119, TC-COMP-138, TC-COMP-141, TC-COMP-142, TC-COMP-170, TC-COMP-171, TC-COMP-182, TC-COMP-205, TC-COMP-211, TC-COMP-212 | TC-INT-001, TC-INT-008, TC-INT-009, TC-INT-021, TC-INT-027, TC-INT-036 | TC-E2E-001, TC-E2E-003, TC-E2E-005 | Covered |
-| AC-26 | Capability | Built from the design system | TC-COMP-003, TC-COMP-004, TC-COMP-005, TC-COMP-007, TC-COMP-008, TC-COMP-011, TC-COMP-016, TC-COMP-017, TC-COMP-019, TC-COMP-033, TC-COMP-034, TC-COMP-072, TC-COMP-084, TC-COMP-090, TC-COMP-091, TC-COMP-110, TC-COMP-144, TC-COMP-178, TC-COMP-188, TC-COMP-193, TC-COMP-194, TC-COMP-200, TC-COMP-207, TC-COMP-214 | — | TC-E2E-007 | Covered |
+| AC-26 | Capability | Built from the design system | TC-COMP-003, TC-COMP-004, TC-COMP-005, TC-COMP-007, TC-COMP-008, TC-COMP-011, TC-COMP-016, TC-COMP-017, TC-COMP-019, TC-COMP-033, TC-COMP-034, TC-COMP-072, TC-COMP-084, TC-COMP-090, TC-COMP-091, TC-COMP-110, TC-COMP-144, TC-COMP-178, TC-COMP-188, TC-COMP-193, TC-COMP-194, TC-COMP-200, TC-COMP-207, TC-COMP-214, TC-COMP-265, TC-COMP-288, TC-COMP-296 | — | TC-E2E-007 | Covered |
 | AC-27 | Capability | CAP-002 keeps its routes | TC-COMP-057, TC-COMP-081, TC-COMP-082, TC-COMP-223, TC-COMP-225 | TC-INT-044 | TC-E2E-007 | Covered |
 | AC-28 | Capability | Data health answers in bounded time | TC-COMP-046, TC-COMP-049, TC-COMP-064, TC-COMP-176 | TC-INT-047 | — | Covered |
+| AC-29 | Capability | A plan refusal is not retried | TC-COMP-228, TC-COMP-229, TC-COMP-230, TC-COMP-231, TC-COMP-232, TC-COMP-233, TC-COMP-234, TC-COMP-249, TC-COMP-253, TC-COMP-256, TC-COMP-257, TC-COMP-258, TC-COMP-259, TC-COMP-260, TC-COMP-261, TC-COMP-262, TC-COMP-263, TC-COMP-266, TC-COMP-267, TC-COMP-268, TC-COMP-269, TC-COMP-272, TC-COMP-273, TC-COMP-274, TC-COMP-277, TC-COMP-278, TC-COMP-279, TC-COMP-280, TC-COMP-281, TC-COMP-282, TC-COMP-284, TC-COMP-286, TC-COMP-287, TC-COMP-290, TC-COMP-292, TC-COMP-295 | TC-INT-048, TC-INT-049, TC-INT-050 | — | Covered |
+| AC-30 | Capability | Throttling is waited out, then named | TC-COMP-235, TC-COMP-236, TC-COMP-237, TC-COMP-238, TC-COMP-239, TC-COMP-240, TC-COMP-241, TC-COMP-242, TC-COMP-243, TC-COMP-244, TC-COMP-245, TC-COMP-246, TC-COMP-247, TC-COMP-248, TC-COMP-250, TC-COMP-251, TC-COMP-252, TC-COMP-254, TC-COMP-255, TC-COMP-256, TC-COMP-257, TC-COMP-258, TC-COMP-259, TC-COMP-260, TC-COMP-262, TC-COMP-263, TC-COMP-266, TC-COMP-267, TC-COMP-268, TC-COMP-270, TC-COMP-274, TC-COMP-283, TC-COMP-284, TC-COMP-286, TC-COMP-287, TC-COMP-291, TC-COMP-292, TC-COMP-295 | TC-INT-048, TC-INT-049, TC-INT-050 | — | Covered |
 | DAC-E1-1 | Derived (E1) | `tierOf` and `labelOf` MUST implement every row of UX brief §12.2 verbatim: download `requested` / `running`… | TC-COMP-021 | — | — | Covered |
 | DAC-E1-2 | Derived (E1) | `StatusBadge` MUST render the `badge` `status-<tier>` variant with the label as text and the tier shape… | TC-COMP-022 | — | — | Covered |
 | DAC-E1-3 | Derived (E1) | `worstDataTier` MUST return `null` whenever `latestTerminalDownload` is null, for `affectedCount` 0 and above… | TC-COMP-026 | — | — | Covered |
@@ -273,7 +275,7 @@ ai_provenance:
 | DAC-E6-5 | Derived (E6) | The Factor scores card MUST read the shell's summary: `coverage-unknown` *Not determinable* with *FactorFlow… | TC-COMP-150 | — | — | Covered |
 | DAC-E6-6 | Derived (E6) | While attention's `latest_terminal_download` is null the screen MUST render, in place of the verdict, the… | TC-COMP-175 | — | — | Covered |
 | DAC-E6-7 | Derived (E6) | When `never_acquired` is true but a download has ended, the verdict, *Needs fixing* and Recent downloads MUST… | TC-COMP-151 | — | — | Covered |
-| DAC-E6-8 | Derived (E6) | Each *Needs fixing* row MUST render the symbol (weight 600, a link to `/data/coverage?symbol={SYMBOL}`), per… | TC-COMP-165 | — | — | Covered |
+| DAC-E6-8 | Derived (E6) | Each *Needs fixing* row MUST render the symbol (weight 600, a link to `/data/coverage?symbol={SYMBOL}`), per… | TC-COMP-165, TC-COMP-226, TC-COMP-227 | — | — | Covered |
 | DAC-E6-9 | Derived (E6) | The *Needs fixing* header MUST read *Needs fixing · {n}* from `affected_count` with the sub-line *From your… | TC-COMP-166 | — | — | Covered |
 | DAC-E6-10 | Derived (E6) | When `affected_count` is 0 the card MUST read *Nothing needs fixing.* and *Last complete download {start… | TC-COMP-152 | — | — | Covered |
 | DAC-E6-11 | Derived (E6) | **Download now** (header, *Needs fixing* and the empty state's **Start the first download**) MUST be one… | TC-COMP-161 | — | — | Covered |
@@ -297,6 +299,8 @@ ai_provenance:
 | DAC-E6-S3-3 | Derived (E6-S3) | Given `reason` text from the provider, When rendered, Then it is text, never markup (AGT-PROHIB-003), and no… | TC-COMP-167 | — | — | Covered |
 | DAC-E6-S3-4 | Derived (E6-S3) | Given the Needs fixing card, its rows, Show more, the empty card and the error states rendered in every state… | TC-COMP-168 | — | — | Covered |
 | DAC-E6-S3-5 | Derived (E6-S3) | Given each failure's outcome badge (*Failed* critical, *Not found* warning) through `StatusBadge`, When… | TC-COMP-169 | — | — | Covered |
+| DAC-E6-S3-6 | Derived (E6-S3) | Given a *Failed* failure, When its what-failed line renders, Then `{attempts}` is the served value unchan… | TC-COMP-226 | — | — | Covered |
+| DAC-E6-S3-7 | Derived (E6-S3) | Given `problem-row.tsx`, When a failure's fix is chosen, Then the choice is made in one place keyed by th… | TC-COMP-227 | — | — | Covered |
 | DAC-E6-S4-1 | Derived (E6-S4) | Given a `partial` and an `abandoned` run, When rendered, Then *Partial* is warning with *{written} of {named}… | TC-COMP-170 | — | — | Covered |
 | DAC-E6-S4-2 | Derived (E6-S4) | Given three attention answers with `latest_download` `running`, When they arrive, Then `listAcquisitionRuns`… | TC-COMP-171 | — | — | Covered |
 | DAC-E6-S4-3 | Derived (E6-S4) | Given health unreachable, When *What you follow* renders, Then the key badge is `coverage-unknown`, never… | TC-COMP-172 | — | — | Covered |
@@ -364,15 +368,108 @@ ai_provenance:
 | DAC-E7-S8-1 | Derived (E7-S8) | Given the diff of this story, When reviewed, Then the only non-test file changed is… | TC-COMP-223 | — | — | Covered |
 | DAC-E7-S8-2 | Derived (E7-S8) | Given a Research screen rendering each of the three links, When followed, Then the download link lands on the… | TC-COMP-224 | — | — | Covered |
 | DAC-E7-S8-3 | Derived (E7-S8) | Given the description's departure note, When the story is planned, Then the task plan cites DEC-0224 as the… | TC-COMP-225 | — | — | Covered |
+| DAC-E8-1 | Derived (E8) | A provider error body whose `error` or `message` field contains `not entitled`, in any case, MUST classif… | TC-COMP-228, TC-COMP-229, TC-COMP-230 | — | — | Covered |
+| DAC-E8-2 | Derived (E8) | A `urllib3` `MaxRetryError` whose `reason` is a `ResponseError` equal to `ResponseError.SPECIFIC_ERROR.fo… | TC-COMP-243, TC-COMP-247, TC-COMP-248 | — | — | Covered |
+| DAC-E8-3 | Derived (E8) | An error envelope matching none of the not-found, credential or entitlement rules, and a body that is not… | TC-COMP-231, TC-COMP-249 | — | — | Covered |
+| DAC-E8-4 | Derived (E8) | `compose_failure_reason` MUST choose a reason's kind by the error's exact class from the closed table `no… | TC-COMP-230, TC-COMP-232, TC-COMP-240 | — | — | Covered |
+| DAC-E8-5 | Derived (E8) | `RateLimitGovernor.start_throttle_budget()` MUST set the spent throttle wait to zero, and every throttle… | TC-COMP-235, TC-COMP-237, TC-COMP-238, TC-COMP-244, TC-COMP-245, TC-COMP-246 | — | — | Covered |
+| DAC-E8-6 | Derived (E8) | `ProviderRateLimited` MUST be a `ProviderUnavailable` with the governor's fixed message, no provider `req… | TC-COMP-235, TC-COMP-236, TC-COMP-239, TC-COMP-242, TC-COMP-244 | — | — | Covered |
+| DAC-E8-7 | Derived (E8) | `MassiveClient.start_instrument()` MUST call the governor's `start_throttle_budget()` once and send no re… | TC-COMP-245, TC-COMP-250, TC-COMP-252 | — | — | Covered |
+| DAC-E8-8 | Derived (E8) | `classify_provider_error` MUST record `ProviderNotEntitled` and `ProviderRateLimited` as outcome `failed`… | TC-COMP-233, TC-COMP-241, TC-COMP-254, TC-COMP-256 | — | — | Covered |
+| DAC-E8-9 | Derived (E8) | With every financial-statements request of two followed stocks answering `403` with *You are not entitled… | TC-COMP-253, TC-COMP-259 | — | — | Covered |
+| DAC-E8-10 | Derived (E8) | With every request for one stock answering `429`, at the default timing set and `FACTORFLOW_MASSIVE_REQUE… | TC-COMP-254, TC-COMP-255, TC-COMP-259 | — | — | Covered |
+| DAC-E8-11 | Derived (E8) | `data-health-reader` MUST read each failure's `cause` with a match anchored at the start of the stored re… | TC-COMP-267, TC-COMP-268, TC-COMP-269, TC-COMP-270, TC-COMP-272, TC-COMP-273 | — | — | Covered |
+| DAC-E8-12 | Derived (E8) | A plan refusal MUST stay in the problem set: in `affected_count`, attention's `problems.stock_count`, the… | TC-COMP-269, TC-COMP-271 | — | — | Covered |
+| DAC-E8-13 | Derived (E8) | `data-health-api`'s `FailureResponse` MUST carry `cause`, one of the six kinds or `null`, always serialis… | TC-COMP-274, TC-COMP-275, TC-COMP-276, TC-COMP-277 | TC-INT-048 | — | Covered |
+| DAC-E8-14 | Derived (E8) | The failure type of `owner-shell`'s `ProblemPage` rows, and so of `DataHealth.problems.rows`, MUST carry… | TC-COMP-278, TC-COMP-279, TC-COMP-280, TC-COMP-281 | TC-INT-049 | — | Covered |
+| DAC-E8-15 | Derived (E8) | `web/src/components/patterns/failure-recovery.ts` MUST hold the only mapping from a failure to its fix: `… | TC-COMP-260, TC-COMP-261, TC-COMP-262, TC-COMP-266, TC-COMP-285 | — | — | Covered |
+| DAC-E8-16 | Derived (E8) | `PLAN_FIX_TEXT` MUST equal *Your Massive plan doesn't include this data, so downloading again won't help.… | TC-COMP-263, TC-COMP-287, TC-COMP-295 | — | — | Covered |
+| DAC-E8-17 | Derived (E8) | On *Needs fixing*, a failure with cause `not_entitled` MUST render *Failed*, the what-failed line ending… | TC-COMP-282, TC-COMP-283, TC-COMP-284, TC-COMP-286 | TC-INT-049 | — | Covered |
+| DAC-E8-18 | Derived (E8) | On the download detail, each expanded data type whose outcome is `failed` MUST follow its reason sentence… | TC-COMP-290, TC-COMP-291, TC-COMP-292, TC-COMP-293, TC-COMP-294 | TC-INT-050 | — | Covered |
+| DAC-E8-19 | Derived (E8) | Results recorded before the upgrade MUST keep `[unavailable]` and MUST NOT be rewritten, so they read as… | TC-COMP-257, TC-COMP-258, TC-COMP-270, TC-COMP-284, TC-COMP-292 | TC-INT-050 | — | Covered |
+| DAC-E8-20 | Derived (E8) | Every test of a `429` or a `403` MUST run through the real SDK and `urllib3` path of `tests/unit/massive_… | TC-COMP-230, TC-COMP-243, TC-COMP-251, TC-COMP-253, TC-COMP-254 | — | — | Covered |
+| DAC-E8-S1-1 | Derived (E8-S1) | Given `tests/unit/test_massive_error_classification.py`, When a body carries `not entitled` in `message`,… | TC-COMP-228 | — | — | Covered |
+| DAC-E8-S1-2 | Derived (E8-S1) | Given a body with `error` "Unknown API Key" and `not entitled` in `message`, When classified, Then it is… | TC-COMP-229 | — | — | Covered |
+| DAC-E8-S1-3 | Derived (E8-S1) | Given `tests/unit/test_massive_retry.py` with a real `MassiveClient` built as CAP-001 v15 §2.2b builds it… | TC-COMP-230 | — | — | Covered |
+| DAC-E8-S1-4 | Derived (E8-S1) | Given the same real-transport harness and a `403` with `{"status": "ERROR", "request_id": "r1", "error":… | TC-COMP-231 | — | — | Covered |
+| DAC-E8-S1-5 | Derived (E8-S1) | Given `tests/unit/test_massive_failure_reasons.py`, When `compose_failure_reason` composes a `ProviderNot… | TC-COMP-232 | — | — | Covered |
+| DAC-E8-S1-6 | Derived (E8-S1) | Given `tests/unit/test_outcomes.py`, When `classify_provider_error(ProviderNotEntitled("x"), data_type="f… | TC-COMP-233 | — | — | Covered |
+| DAC-E8-S1-7 | Derived (E8-S1) | Given the change, When reviewed, Then `_safe_fields` still reads only `status`, `message`, `error` and `r… | TC-COMP-234 | — | — | Covered |
+| DAC-E8-S2-1 | Derived (E8-S2) | Given `tests/unit/test_governor_retry.py` with every row passing one `FakeClock` as both `monotonic` and… | TC-COMP-235 | — | — | Covered |
+| DAC-E8-S2-2 | Derived (E8-S2) | Given a classifier always `THROTTLED`, When the budget is spent, Then the raised error is a `ProviderRate… | TC-COMP-236 | — | — | Covered |
+| DAC-E8-S2-3 | Derived (E8-S2) | Given budget 300 s and unjittered boundary waits, When a first `execute` is throttled three times then su… | TC-COMP-237 | — | — | Covered |
+| DAC-E8-S2-4 | Derived (E8-S2) | Given budget 300 s, `SequenceJitter([0.999])` and a classifier always `THROTTLED`, When the governor rais… | TC-COMP-238 | — | — | Covered |
+| DAC-E8-S2-5 | Derived (E8-S2) | Given the delivered `test_repeated_throttled_outcomes_do_not_consume_attempts`, `test_throttled_outcomes_… | TC-COMP-239 | — | — | Covered |
+| DAC-E8-S2-6 | Derived (E8-S2) | Given `tests/unit/test_massive_failure_reasons.py`, When each of the six classes is composed, Then each g… | TC-COMP-240 | — | — | Covered |
+| DAC-E8-S2-7 | Derived (E8-S2) | Given `tests/unit/test_outcomes.py`, When `classify_provider_error(ProviderRateLimited("x"), data_type="r… | TC-COMP-241 | — | — | Covered |
+| DAC-E8-S2-8 | Derived (E8-S2) | Given `rate_limit.py`, When reviewed, Then the governor still never inspects an exception (it imports `Pr… | TC-COMP-242 | — | — | Covered |
+| DAC-E8-S3-1 | Derived (E8-S3) | Given real transport answering `429` with the `tests/fixtures/massive/error_rate_limited.json` body to th… | TC-COMP-243 | — | — | Covered |
+| DAC-E8-S3-2 | Derived (E8-S3) | Given real transport answering every request `429` and jitter `[0.0]`, When `start_instrument()` is calle… | TC-COMP-244 | — | — | Covered |
+| DAC-E8-S3-3 | Derived (E8-S3) | Given the previous row continued without `start_instrument()`, When `fetch_daily_bars("AAPL", ...)` runs,… | TC-COMP-245 | — | — | Covered |
+| DAC-E8-S3-4 | Derived (E8-S3) | Given real transport answering every request `429` and jitter `[0.999]`, When the read runs, Then `Provid… | TC-COMP-246 | — | — | Covered |
+| DAC-E8-S3-5 | Derived (E8-S3) | Given real transport answering a `302` to `https://198.51.100.7/` and, separately, a `503`, When each rea… | TC-COMP-247 | — | — | Covered |
+| DAC-E8-S3-6 | Derived (E8-S3) | Given `classify_for_governor`, When called directly, Then it returns `THROTTLED` for `MaxRetryError(pool,… | TC-COMP-248 | — | — | Covered |
+| DAC-E8-S3-7 | Derived (E8-S3) | Given CAP-003-E8-S1's real-transport `403` plan-refusal and unrecognised-`403` rows, When they run throug… | TC-COMP-249 | — | — | Covered |
+| DAC-E8-S3-8 | Derived (E8-S3) | Given `tests/unit/test_massive_client_governor_integration.py`, When `MassiveClient.start_instrument()` i… | TC-COMP-250 | — | — | Covered |
+| DAC-E8-S3-9 | Derived (E8-S3) | Given the change, When reviewed, Then `client.py` imports `MaxRetryError` and `ResponseError` from `urlli… | TC-COMP-251 | — | — | Covered |
+| DAC-E8-S4-1 | Derived (E8-S4) | Given a `MagicMock` client over a two-stock roster and the journal spies attached to one parent `Mock`, W… | TC-COMP-252 | — | — | Covered |
+| DAC-E8-S4-2 | Derived (E8-S4) | Given the real `MassiveClient` and governor over `tests/unit/massive_transport_fakes.py` with production… | TC-COMP-253 | — | — | Covered |
+| DAC-E8-S4-3 | Derived (E8-S4) | Given settings at every default with `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60` (`max_throttle_wait_seco… | TC-COMP-254 | — | — | Covered |
+| DAC-E8-S4-4 | Derived (E8-S4) | Given the previous row with jitter `[0.0]` and a roster of `KO` alone, When the download runs, Then four… | TC-COMP-255 | — | — | Covered |
+| DAC-E8-S4-5 | Derived (E8-S4) | Given the delivered runner tests (every `tests/integration/test_runner_*.py`, among them `test_runner_iso… | TC-COMP-256 | — | — | Covered |
+| DAC-E8-S4-6 | Derived (E8-S4) | Given `README.md`, When this story lands, Then *Deploying and operating FactorFlow* holds the subsection… | TC-COMP-257 | — | — | Covered |
+| DAC-E8-S4-7 | Derived (E8-S4) | Given the store after these tests, When `run_instrument_result` rows recorded earlier with `[unavailable]… | TC-COMP-258 | — | — | Covered |
+| DAC-E8-S4-8 | Derived (E8-S4) | Given the tests, When reviewed, Then request counts come from `RecordingMakeRequest` and no assertion rea… | TC-COMP-259 | — | — | Covered |
+| DAC-E8-S5-1 | Derived (E8-S5) | Given `failure-recovery.test.ts`, When `failureRecovery` is called, Then `("failed", "not_entitled")` is… | TC-COMP-260 | — | — | Covered |
+| DAC-E8-S5-2 | Derived (E8-S5) | Given every pair of outcome in `["failed", "not_found"]` and cause in `[...FAILURE_CAUSES, null]`, When `… | TC-COMP-261 | — | — | Covered |
+| DAC-E8-S5-3 | Derived (E8-S5) | Given `failureCause`, When called with `"[<kind>] symbol=KO data_type=prices request_id=r1: …"` for each… | TC-COMP-262 | — | — | Covered |
+| DAC-E8-S5-4 | Derived (E8-S5) | Given the two constants, When the test compares them, Then each equals DAC-E8-16's words exactly; `PLAN_F… | TC-COMP-263 | — | — | Covered |
+| DAC-E8-S5-5 | Derived (E8-S5) | Given the two constants scanned for *instrument*, *acquisition*, *acquire*, *run*, *runs*, *Retire*, *Ret… | TC-COMP-264 | — | — | Covered |
+| DAC-E8-S5-6 | Derived (E8-S5) | Given the AC-26 literal scan `web/src/components/token-literals.test.ts` (CAP-003-E1-S1), which reads eve… | TC-COMP-265 | — | — | Covered |
+| DAC-E8-S5-7 | Derived (E8-S5) | Given the module, When compiled under `npx tsc --noEmit`, Then `failureRecovery`'s `outcome` parameter ac… | TC-COMP-266 | — | — | Covered |
+| DAC-E8-S6-1 | Derived (E8-S6) | Given `tests/unit/test_data_health_cause.py` (new), When `cause_of` is called, Then it returns each of th… | TC-COMP-267 | — | — | Covered |
+| DAC-E8-S6-2 | Derived (E8-S6) | Given the same file, When `_retryable` is evaluated, Then it is false for failures all `not_entitled`, al… | TC-COMP-268 | — | — | Covered |
+| DAC-E8-S6-3 | Derived (E8-S6) | Given `tests/integration/test_data_health_problems.py` (CAP-003-E2-S1's file) with a stock whose only lat… | TC-COMP-269 | — | — | Covered |
+| DAC-E8-S6-4 | Derived (E8-S6) | Given a stock whose failure reason begins `[rate_limited] `, When `read_problems` runs, Then the failure… | TC-COMP-270 | — | — | Covered |
+| DAC-E8-S6-5 | Derived (E8-S6) | Given CAP-003-E2-S1's `test_data_health_sql_is_read_only.py` and its keyset-paging and `retryable` tests,… | TC-COMP-271 | — | — | Covered |
+| DAC-E8-S6-6 | Derived (E8-S6) | Given the change, When reviewed, Then `cause` is chosen only by the closed six-kind table at position 0,… | TC-COMP-272 | — | — | Covered |
+| DAC-E8-S6-7 | Derived (E8-S6) | Given every test that constructs the reader's failure dataclass when this story lands, including CAP-003-… | TC-COMP-273 | — | — | Covered |
+| DAC-E8-S7-1 | Derived (E8-S7) | Given `tests/unit/test_api_data_health_models.py`, When a failure with each of the six causes is serialis… | TC-COMP-274 | — | — | Covered |
+| DAC-E8-S7-2 | Derived (E8-S7) | Given CAP-003-E2-S4's DAC-E2-S4-1 test, When this story lands, Then it asserts every system design §4.2 f… | TC-COMP-275 | — | — | Covered |
+| DAC-E8-S7-3 | Derived (E8-S7) | Given `tests/integration/test_api_data_health.py` (pytest, `testcontainers[postgres]`, marked `postgres`,… | — | TC-INT-048 | — | Covered |
+| DAC-E8-S7-4 | Derived (E8-S7) | Given the routes, When compared with CAP-003-E2-S4 and E2-S6, Then no route, query parameter, status code… | TC-COMP-276 | — | — | Covered |
+| DAC-E8-S7-5 | Derived (E8-S7) | Given every `FailureResponse` constructed, and every failure body spelled in full, in CAP-003-E2-S4's `te… | TC-COMP-277 | — | — | Covered |
+| DAC-E8-S8-1 | Derived (E8-S8) | Given `web/src/app/shell-types.test.ts`, When `npx tsc --noEmit` and `npm run test` run, Then `ProblemPag… | TC-COMP-278 | — | — | Covered |
+| DAC-E8-S8-2 | Derived (E8-S8) | Given `web/src/app/shell-client.test.ts` with a doubled `fetch`, When `fetchProblems(cursor, limit)` and… | TC-COMP-279 | — | — | Covered |
+| DAC-E8-S8-3 | Derived (E8-S8) | Given `shell-types.ts`, When reviewed, Then `FailureCause` is not redefined there (no second copy of the… | TC-COMP-280 | — | — | Covered |
+| DAC-E8-S8-4 | Derived (E8-S8) | Given every test fixture typed as a `ProblemPage` or `DataHealth` failure when this story lands, When `np… | TC-COMP-281 | — | — | Covered |
+| DAC-E8-S9-1 | Derived (E8-S9) | Given `problem-row.test.tsx` and a failure `{ data_type: "fundamentals", outcome: "failed", cause: "not_e… | TC-COMP-282 | — | — | Covered |
+| DAC-E8-S9-2 | Derived (E8-S9) | Given a failure with cause `rate_limited`, When the row renders, Then the what-failed line ends at *{reas… | TC-COMP-283 | — | — | Covered |
+| DAC-E8-S9-3 | Derived (E8-S9) | Given failures with cause `unavailable` and with cause `null`, each serving its fixture's `attempts` valu… | TC-COMP-284 | — | — | Covered |
+| DAC-E8-S9-4 | Derived (E8-S9) | Given a `not_found` failure whose cause is `not_entitled`, `rate_limited` or `null`, When the row renders… | TC-COMP-285 | — | — | Covered |
+| DAC-E8-S9-5 | Derived (E8-S9) | Given `needs-fixing.test.tsx` with every loaded row `retryable: false` because its failures are `not_enti… | TC-COMP-286 | — | — | Covered |
+| DAC-E8-S9-6 | Derived (E8-S9) | Given the sources under `web/src/screens/data-health/`, test files excluded, When a source check in this… | TC-COMP-287 | — | — | Covered |
+| DAC-E8-S9-7 | Derived (E8-S9) | Given the AC-26 literal scan, which CAP-003-E6-S5 widens to `web/src/screens/data-health/`, When it runs,… | TC-COMP-288 | — | — | Covered |
+| DAC-E8-S9-8 | Derived (E8-S9) | Given the two new states rendered, When E6-S3's DAC-E6-S3-4 term scan (*instrument*, *acquisition*, *acqu… | TC-COMP-289 | — | — | Covered |
+| DAC-E8-S10-1 | Derived (E8-S10) | Given `run-detail.test.tsx` and a stock whose `fundamentals` row is `failed` with reason `[not_entitled]… | TC-COMP-290 | — | — | Covered |
+| DAC-E8-S10-2 | Derived (E8-S10) | Given a `failed` row whose reason begins `[rate_limited] `, When expanded, Then `RATE_LIMIT_FIX_TEXT` ren… | TC-COMP-291 | — | — | Covered |
+| DAC-E8-S10-3 | Derived (E8-S10) | Given a `failed` row whose reason begins `[unavailable] `, and one whose reason has no prefix or is `null… | TC-COMP-292 | — | — | Covered |
+| DAC-E8-S10-4 | Derived (E8-S10) | Given a `not_found` row, When expanded, Then E7-S5's *The provider doesn't recognise this symbol. Downloa… | TC-COMP-293 | — | — | Covered |
+| DAC-E8-S10-5 | Derived (E8-S10) | Given the run-detail request and the summary card, When the detail renders a download whose every failure… | TC-COMP-294 | — | — | Covered |
+| DAC-E8-S10-6 | Derived (E8-S10) | Given the sources under `web/src/screens/runs/detail/`, test files excluded, When a source check in this… | TC-COMP-295 | — | — | Covered |
+| DAC-E8-S10-7 | Derived (E8-S10) | Given the AC-26 literal scan, which CAP-003-E7-S5 widens to `web/src/screens/runs/detail/`, and E7-S5's D… | TC-COMP-296 | — | — | Covered |
+| DAC-E8-S10-8 | Derived (E8-S10) | Given E7-S5's relabelled delivered tests (`run-detail.test.tsx`, `run-detail.polling.test.tsx`, `run-deta… | TC-COMP-297 | — | — | Covered |
 
 ## Coverage Summary
 
-- **Total ACs:** 331 (capability: 28, derived: 303 — 103 epic-level, 200 story-level)
-- **Covered:** 331
+- **Total ACs:** 426 (capability: 30, derived: 396 — 123 epic-level, 273 story-level)
+- **Covered:** 426
 - **Gaps:** 0
-- **Component test cases:** 225
-- **Integration test cases:** 47
+- **Component test cases:** 297
+- **Integration test cases:** 50
 - **E2E test cases:** 10
+
+Version 2 (2026-11-08) refines version 1 for capability v2 (AC-29, AC-30), epic CAP-003-E8 and its stories E8-S1 to E8-S10, and the v2 refinements of E2-S1, E2-S4, E3-S1, E6-S3 and E7-S5: 95 criteria added (2 capability, 20 epic-level, 73 story-level), 72 component cases (TC-COMP-226 to TC-COMP-297) and 3 integration cases (TC-INT-048 to TC-INT-050) added, no E2E case added, and four version 1 cases adjusted to the v2 wording (TC-COMP-041, TC-COMP-050, TC-COMP-165, TC-COMP-167).
 
 ### Extraction Audit
 
@@ -424,7 +521,7 @@ DACs extracted from each file's `### Derived` section (N extracted out of M pres
 | `CAP-003-E6.md` | 17 of 17 |
 | `CAP-003-E6-S1.md` | 5 of 5 |
 | `CAP-003-E6-S2.md` | 4 of 4 |
-| `CAP-003-E6-S3.md` | 5 of 5 |
+| `CAP-003-E6-S3.md` | 7 of 7 |
 | `CAP-003-E6-S4.md` | 5 of 5 |
 | `CAP-003-E6-S5.md` | 6 of 6 |
 | `CAP-003-E6-S6.md` | 2 of 2 |
@@ -438,7 +535,18 @@ DACs extracted from each file's `### Derived` section (N extracted out of M pres
 | `CAP-003-E7-S6.md` | 3 of 3 |
 | `CAP-003-E7-S7.md` | 2 of 2 |
 | `CAP-003-E7-S8.md` | 3 of 3 |
-| **Total** | **303** |
+| `CAP-003-E8.md` | 20 of 20 |
+| `CAP-003-E8-S1.md` | 7 of 7 |
+| `CAP-003-E8-S2.md` | 8 of 8 |
+| `CAP-003-E8-S3.md` | 9 of 9 |
+| `CAP-003-E8-S4.md` | 8 of 8 |
+| `CAP-003-E8-S5.md` | 7 of 7 |
+| `CAP-003-E8-S6.md` | 7 of 7 |
+| `CAP-003-E8-S7.md` | 5 of 5 |
+| `CAP-003-E8-S8.md` | 4 of 4 |
+| `CAP-003-E8-S9.md` | 8 of 8 |
+| `CAP-003-E8-S10.md` | 8 of 8 |
+| **Total** | **396** |
 
 ### Scenario Inventory
 
@@ -447,7 +555,14 @@ The inventory the test cases were generated from (unattended run; the owner's co
 - **Component scenarios: 225** — one per story-level DAC verifiable in a unit test harness (185), plus one per epic-level DAC that no story-level DAC refines (40: DAC-E1-5, DAC-E1-7, DAC-E1-11, DAC-E2-4, DAC-E2-6, DAC-E2-12, DAC-E2-15, DAC-E3-1, DAC-E3-2, DAC-E3-4, DAC-E3-6, DAC-E3-7, DAC-E3-8, DAC-E3-12, DAC-E3-17, DAC-E3-19, DAC-E4-1, DAC-E4-3, DAC-E4-7, DAC-E4-9, DAC-E4-10, DAC-E4-11, DAC-E4-12, DAC-E5-1, DAC-E5-4, DAC-E5-5, DAC-E5-10, DAC-E5-11, DAC-E6-2, DAC-E6-4, DAC-E6-5, DAC-E6-7, DAC-E6-10, DAC-E6-13, DAC-E6-16, DAC-E6-17, DAC-E7-1, DAC-E7-4, DAC-E7-7, DAC-E7-10).
 - **Integration scenarios: 47** — the 16 story-level DACs whose steps require a real HTTP contract between two components (DAC-E3-S8-2, DAC-E4-S6-3, DAC-E5-S5-2, DAC-E4-S5-2, DAC-E4-S5-1, DAC-E5-S4-2, DAC-E6-S6-1, DAC-E2-S6-1, DAC-E2-S6-2, DAC-E6-S6-2, DAC-E5-S4-1, DAC-E2-S7-1, DAC-E2-10, DAC-E3-S8-3, DAC-E3-S8-1, DAC-E2-S7-2), plus one scenario per external-protocol contract (request/response pair) of system design §4.2 not already covered by those, and one per error propagation path the system design names across such a boundary (31 scenarios).
 - **E2E scenarios: 10** — one happy path and one error path per user flow of capability §3 (five flows).
-- **TOTAL: 225 component + 47 integration + 10 e2e = 282 test cases.**
+- **TOTAL (version 1): 225 component + 47 integration + 10 e2e = 282 test cases.**
+
+Version 2 refinement inventory (unattended; same granularity rule as version 1):
+
+- **Component scenarios: 72** — one per story-level DAC added in v2 that a unit test harness can verify (72 of 73: DAC-E6-S3-6, DAC-E6-S3-7, and every DAC-E8-S1 to DAC-E8-S10 criterion except DAC-E8-S7-3). Every one of the 20 epic-level DAC-E8 criteria is refined by at least one story-level DAC, so none receives a case of its own. By component: `massive-client` 16 (new file), `rate-limit-governor` 6 (new file), `acquisition-runner` 10 (new file), `ui-components` 7, `data-health-reader` 7, `data-health-api` 4, `owner-shell` 4, `data-health-ui` 10, `owner-web-app` 8.
+- **Integration scenarios: 3** — DAC-E8-S7-3, whose steps request both routes through `create_app` (TC-INT-048); and one per external-protocol contract system design v2 §3.6 note 7 carries the cause across: `GET /api/data-health` and `/problems` to *Needs fixing* (TC-INT-049) and the delivered `GET /api/acquisition-runs/{id}` to the download detail (TC-INT-050).
+- **E2E scenarios: 0** — capability v2 adds no user flow and changes none (§3), so the one-happy-one-error rule per flow adds nothing (note 12).
+- **TOTAL (version 2): 297 component + 50 integration + 10 e2e = 357 test cases** (282 + 75).
 
 ### Coverage Notes
 
@@ -461,3 +576,9 @@ The inventory the test cases were generated from (unattended run; the owner's co
 8. **Wording observations.** (a) DAC-E7-2 (epic) sends `/runs` to `/data` while system design §4.1 and capability OQ-6 send it to `/data/downloads`; the epic records this as a departure under DEC-0224 and E7-S8's tests follow the epic. (b) The capability's AC-18 bookmark example and the system design name `/runs/:runId`; DAC-E7-2 writes `/data/downloads/:id` — the same route. (c) The specs use *stock* and *download* in owner-facing text and `instrument` and `acquisition_run` in the API; E2E steps use the display words, integration and component tests the API names (DAC-E2-12). (d) The Factor scores card and Home's score figures depend on CAP-002's summary route; TC-INT-010 to TC-INT-012 assume it is deployed and verify the `404` rendering when it is not (capability assumption 2).
 9. **Behaviour in flows not decomposed into an AC.** Flow 1 step 3's "plan's limit on what the provider holds" is copy only (DAC-E4-S1-3); flow 2 step 1's "strategies skip them until fixed" is the verdict sentence (DAC-E6-1). Neither needed a separate test. The STD-UI-18 scope note under the daily prices card (capability §5.4) is covered by DAC-E6-3's test (TC-COMP-157) only as the presence of the note.
 10. **Constitution-driven cases.** AC-28's 2 s p95 (TC-INT-047, TC-COMP-049) is the only performance SLA; security cases cover the credential never appearing in any response or DOM (TC-COMP-045, TC-COMP-053, TC-COMP-055, TC-COMP-076, TC-COMP-099, TC-COMP-106, TC-COMP-172, TC-COMP-187), bound SQL parameters (TC-COMP-042, TC-COMP-053), provider text rendered as text (TC-COMP-167) and the Host/Origin posture (TC-INT-028). Tier names in E2E steps are avoided; E2E steps use the owner's words.
+11. **Provider-side tests are component scope (version 2).** `massive-client`, `rate-limit-governor` and `acquisition-runner` list only `Python call` entries in their API tables, and the Massive REST API has no component design here, so every DAC-E8-S1 to DAC-E8-S4 case is a component test, including the PostgreSQL-backed runner rows in `tests/integration/test_runner_provider_refusals.py` (as note 3 places the reader's). DAC-E8-20 confines every `403` and `429` to `tests/unit/massive_transport_fakes.py`, where a real `429` arrives as urllib3's `MaxRetryError` with reason `ResponseError("too many 429 error responses")` under the SDK's `retries=0`; the three integration cases therefore seed stored reasons (`[not_entitled] `, `[rate_limited] `, `[unavailable] `) instead of driving a provider stub.
+12. **No E2E case for AC-29 or AC-30.** Capability v2 adds two criteria and no flow; both refusals are error paths of flow 2, whose error-path case (TC-E2E-004) covers the dominant failure mode the spec names. AC-29 and AC-30 are covered by component cases at every hop and by TC-INT-048 to TC-INT-050 at the HTTP contracts, as AC-28 is covered without an E2E case. A dedicated E2E journey would also have to produce a `403` or a `429` against the deployed product, which DAC-E8-20 confines to the transport harness.
+13. **CAP-001 test IDs in E8 stories.** DAC-E8-S1-4, DAC-E8-S3-1 and DAC-E8-S3-7 name *TC-INT-025* and *TC-INT-026*; those are CAP-001's delivered test IDs in `tests/unit/test_massive_retry.py`, not this capability's TC-INT-025 (Home's partial-download item) or TC-INT-026 (the 3000-instrument counts). TC-COMP-231, TC-COMP-243 and TC-COMP-249 say so.
+14. **The production 403 body.** System design assumption 9 records it as not captured; the stories' fixtures use `"status": "ERROR"`. TC-COMP-228 adds, as a PROVISIONAL input variant, the `"status": "NOT_AUTHORIZED"` shape reported by the production diagnosis; the entitlement rule reads only `error` and `message`, so the expected result is unchanged.
+15. **v2 re-check of the earlier stories.** E2-S1 v2 (no `cause`, v1 `retryable`): TC-COMP-041's `failed` fixture is pinned to an `[unavailable]` or null reason so it holds after E8-S6. E2-S4 v2: TC-COMP-050 excludes `failures[].cause`, which TC-COMP-275 adds after E8-S7. E3-S1 v2: no case asserted the failure type's fields, so none changed (TC-COMP-278 to TC-COMP-281 cover `cause`). E6-S3 v2: TC-COMP-165 asserts the *Download again* line for an `[unavailable]` failure with its served attempts, and TC-COMP-167 now expects the reason verbatim, its kind and `request_id=` included, with no request ID beyond it. E7-S5 v2: no case asserted a fix line after a *Failed* reason, so none changed (TC-COMP-290 to TC-COMP-297 cover it).
+16. **Wording observations (version 2).** (a) DAC-E8-17's rate-limit clause says the what-failed line ends at *{reason}*; E8-S9 records its reading (backlog review v5 FINDING-2) and TC-COMP-283 follows it. (b) The download detail's *Download again* line (*Download again; data already stored…*) differs from *Needs fixing*'s (*Download again to retry; data already stored…*); both are the approved UX design's words for their screen and the cases keep them apart. (c) Whether the detail's summary card should stop offering a download when every failure is a plan refusal is `owner-web-app` §14 question 3; TC-COMP-294 asserts the delivered behaviour.

@@ -2,26 +2,26 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-integration-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
@@ -1067,3 +1067,77 @@ Each case asserts at an external-protocol boundary named in a component design's
 
 #### Error / Edge Cases
 - Memory stays bounded during the loop
+
+### TC-INT-048: Both data-health routes serve each failure's cause and the server's retryable
+
+**Scope:** integration
+**Component(s):** data-health-api, data-health-reader (via HTTP)
+**Traces to:** AC-29, AC-30, AC-16, DAC-E8-S7-3, DAC-E8-13
+**Priority:** P1
+**Type:** functional
+**Contract:** GET /api/data-health, GET /api/data-health/problems (version 2: `failures[].cause`)
+
+#### Preconditions
+- `tests/integration/test_api_data_health.py` (pytest, `testcontainers[postgres]`, marker `postgres`), `TestClient` on `create_app`
+- PostgreSQL seeded with two active stocks: one whose only failure reason begins `[not_entitled] `, one whose only failure reason begins `[rate_limited] `; no provider request is made (the stored reasons stand for what CAP-003-E8-S1 to S4 record)
+
+#### Steps
+1. GET `/api/data-health`
+2. GET `/api/data-health/problems`
+
+#### Expected Result
+- Each response returns the plan-refused stock's failure with `cause` `not_entitled` and its row `retryable` false, and the rate-limited stock's failure with `cause` `rate_limited` and its row `retryable` true
+- `GET /api/data-health` returns `affected_count` 2
+
+#### Error / Edge Cases
+- `cause` is present on every failure, `null` when the reason carries no known kind, never omitted
+- Status codes, parameters and every other field are as TC-INT-016 and TC-INT-017 assert
+
+### TC-INT-049: Needs fixing renders each served cause's fix; plan refusals alone show no Download now
+
+**Scope:** integration
+**Component(s):** data-health-ui, owner-shell, data-health-api
+**Traces to:** AC-29, AC-30, AC-13, AC-16, DAC-E8-17, DAC-E8-14
+**Priority:** P1
+**Type:** functional
+**Contract:** GET /api/data-health, GET /api/data-health/problems → *Needs fixing* (system design §3.6 note 7)
+
+#### Preconditions
+- Real stack; PostgreSQL seeded so that every problem stock's failures are `fundamentals` `failed` with reasons beginning `[not_entitled] symbol=<symbol> data_type=fundamentals request_id=…: the provider plan is not entitled to this data`; no provider request is made
+
+#### Steps
+1. Open `/data` and read the *Needs fixing* header and its rows
+2. Seed one more stock whose `reference` failure reason begins `[rate_limited] `; reload `/data`
+
+#### Expected Result
+- Step 1: *Needs fixing · {n}* counts every plan-refused stock; each row shows *Failed*, *Downloading company financials failed: {reason}* without an attempt count, and *Your Massive plan doesn't include this data, so downloading again won't help. Add it to your plan with Massive; the next download after that gets it.*; the *Needs fixing* card shows no **Download now** and no row holds a control whose name contains *Download*
+- Step 2: the header count rises by one and **Download now** appears; the new row shows *Download again later; data already stored is never duplicated or overwritten. If this keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no higher than your Massive plan's request limit; restart FactorFlow after changing it.* with no per-row control
+
+#### Error / Edge Cases
+- A seeded `[unavailable]` failure (recorded before the upgrade) renders *Download again to retry; data already stored is never duplicated or overwritten.* with its served attempt count (DAC-E8-19)
+
+### TC-INT-050: The download detail reads the delivered run response unchanged and shows the fix by the reason's kind
+
+**Scope:** integration
+**Component(s):** owner-web-app, ingestion-api
+**Traces to:** AC-17, AC-29, AC-30, DAC-E8-18, DAC-E8-19
+**Priority:** P1
+**Type:** functional
+**Contract:** GET /api/acquisition-runs/{id} (delivered, reused unchanged; system design §4.2)
+
+#### Preconditions
+- Real stack; PostgreSQL seeded with one `partial` download whose results hold, for three stocks, a `fundamentals` `failed` reason beginning `[not_entitled] `, a `reference` `failed` reason beginning `[rate_limited] `, and a `prices` `failed` reason beginning `[unavailable] `; no provider request is made
+
+#### Steps
+1. Open `/data/downloads/{id}` for the download
+2. Expand each of the three stocks
+3. Compare the `GET /api/acquisition-runs/{id}` request and response with the delivered contract
+
+#### Expected Result
+- The plan-refused data type shows its reason sentence followed by the plan fix and no text *Download again*
+- The rate-limited data type shows its reason sentence followed by the later-download fix
+- The `[unavailable]` data type shows *Download again; data already stored is never duplicated or overwritten.*
+- The request and the response fields are the delivered ones, unchanged; the summary card's recovery renders as E7-S5 delivers it
+
+#### Error / Edge Cases
+- A `not_found` data type keeps *The provider doesn't recognise this symbol. Downloading again won't help; stop following it or follow a different symbol.* and **Open Data health**

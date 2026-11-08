@@ -2,33 +2,33 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-owner-web-app-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
 
 # owner-web-app Component Test Specification
 
-Component tests for `owner-web-app` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 43 cases (TC-COMP-183 to TC-COMP-225, not necessarily contiguous).
+Component tests for `owner-web-app` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 51 cases (TC-COMP-183 to TC-COMP-297, not necessarily contiguous).
 
 ### TC-COMP-183: Delivered screens open at new paths; links and navigate() target them
 
@@ -966,3 +966,171 @@ Component tests for `owner-web-app` (CAP-003). Each case verifies one story-leve
 
 #### Error / Edge Cases
 - Process check, not a product behaviour (coverage note)
+
+### TC-COMP-290: A plan-refused data type on the detail shows the plan fix and no Download again
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-29, DAC-E8-S10-1, DAC-E8-18
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `run-detail.test.tsx`; a stock whose `fundamentals` row is `failed` with reason `[not_entitled] symbol=KO data_type=fundamentals request_id=r1: the provider plan is not entitled to this data`
+
+#### Steps
+1. Expand the stock
+
+#### Expected Result
+- The reason sentence and `PLAN_FIX_TEXT` render
+- No text *Download again* appears in that row
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-291: A rate-limited data type on the detail shows the later-download fix
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-30, DAC-E8-S10-2, DAC-E8-18
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `run-detail.test.tsx`; a `failed` row whose reason begins `[rate_limited] `
+
+#### Steps
+1. Expand the stock
+
+#### Expected Result
+- `RATE_LIMIT_FIX_TEXT` renders after the reason sentence
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-292: Any other prefix, none, or a null reason keeps the Download again fix
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-29, AC-30, DAC-E8-S10-3, DAC-E8-18, DAC-E8-19
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `run-detail.test.tsx`; `failed` rows whose reason begins `[unavailable] `, has no prefix, and is `null`
+
+#### Steps
+1. Expand each
+
+#### Expected Result
+- Each shows *Download again; data already stored is never duplicated or overwritten.* after the reason sentence
+
+#### Error / Edge Cases
+- A result recorded before the upgrade (`[unavailable]`) reads as an ordinary failure (DAC-E8-19)
+
+### TC-COMP-293: A not-found data type keeps its sentence and Open Data health with no fix line
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-14, DAC-E8-S10-4, DAC-E8-18
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `run-detail.test.tsx`; a `not_found` row
+
+#### Steps
+1. Expand the stock
+
+#### Expected Result
+- E7-S5's *The provider doesn't recognise this symbol. Downloading again won't help; stop following it or follow a different symbol.* and **Open Data health** to `/data` render
+- No fix line is added
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-294: The run-detail request and the summary card's recovery are unchanged
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-17, DAC-E8-S10-5, DAC-E8-18
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `run-detail.test.tsx` with `fetch` doubled; a download whose every failure is a plan refusal
+
+#### Steps
+1. Render the detail
+2. Read the request sent and the summary card
+
+#### Expected Result
+- The request to `GET /api/acquisition-runs/{id}` and its parsing are unchanged
+- The summary card's recovery renders as E7-S5 delivers it
+
+#### Error / Edge Cases
+- Whether the summary card should drop its download recovery when every failure is a plan refusal is `owner-web-app` §14 question 3, the owner's; this case asserts the delivered behaviour
+
+### TC-COMP-295: The detail holds no copy of the fix words or of the cause mapping
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-29, AC-30, DAC-E8-S10-6, DAC-E8-16
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- A source check in the story's tests reading the non-test sources under `web/src/screens/runs/detail/`
+
+#### Steps
+1. Run the check
+
+#### Expected Result
+- Neither *Your Massive plan doesn't include this data* nor *FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE* appears, nor the string literals `"not_entitled"` and `"rate_limited"`
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-296: Literal scan and term scan pass with the fix lines rendered
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-19, AC-26, DAC-E8-S10-7
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- The AC-26 literal scan as CAP-003-E7-S5 widens it to `web/src/screens/runs/detail/`; E7-S5's DAC-E7-S5-5 term scan; the detail with each fix line rendered
+
+#### Steps
+1. Run both scans
+2. Read the fix line's class
+
+#### Expected Result
+- Both pass
+- The fix line takes the screen's existing small-text token class; no component, variant, token or literal is added
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-297: E7-S5's relabelled detail tests keep every outcome; only full failed-row text gains its fix
+
+**Scope:** component
+**Component(s):** owner-web-app
+**Traces to:** AC-17, DAC-E8-S10-8
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `run-detail.test.tsx`, `run-detail.polling.test.tsx`, `run-detail.reason.test.tsx` as E7-S5 leaves them
+
+#### Steps
+1. Run them after the story
+2. Diff their assertions with E7-S5's
+
+#### Expected Result
+- Every request, confirmation, refusal and cadence keeps its outcome
+- An assertion of a failed row's full text is extended with its fix line; no other assertion changes
+
+#### Error / Edge Cases
+- None beyond the scenario
