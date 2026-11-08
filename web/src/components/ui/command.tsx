@@ -82,7 +82,10 @@ const CommandInput = forwardRef<
   ElementRef<typeof CommandPrimitive.Input>,
   ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center gap-2 border-b border-border px-3" cmdk-input-wrapper="">
+  <div
+    className="flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"
+    cmdk-input-wrapper=""
+  >
     <Search aria-hidden="true" className="size-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}

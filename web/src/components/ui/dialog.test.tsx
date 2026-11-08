@@ -191,3 +191,50 @@ describe("ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15)", () => {
     expect(dialog.className).not.toContain("bg-destructive");
   });
 });
+
+function tokensOf(node: Element | null | undefined): string[] {
+  if (!node) throw new Error("node not rendered");
+  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
+}
+
+// AC-26, DAC-E1-12: the confirm dialog's surface takes the popover tokens and none of the
+// Tailwind-default literals the shadcn source ships (dialog spec section 6, DEC-0305).
+describe("dialog confirm resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003)", () => {
+  async function openContent() {
+    const user = userEvent.setup();
+    render(<Harness onConfirm={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: TITLE }));
+    return screen.findByRole("dialog", { name: TITLE });
+  }
+
+  it("styles the content with the popover surface, the prose measure and the theme radius", async () => {
+    const tokens = tokensOf(await openContent());
+    for (const token of [
+      "max-w-prose",
+      "rounded",
+      "border",
+      "border-border",
+      "bg-popover",
+      "text-popover-foreground",
+      "p-6",
+    ]) {
+      expect(tokens, token).toContain(token);
+    }
+    for (const shipped of [
+      "max-w-lg",
+      "rounded-lg",
+      "shadow-lg",
+      "bg-background",
+      "text-foreground",
+    ]) {
+      expect(tokens, shipped).not.toContain(shipped);
+    }
+  });
+
+  it("styles the overlay with the foreground scrim, not black", async () => {
+    await openContent();
+    const tokens = tokensOf(overlay());
+    expect(tokens).toContain("bg-foreground/40");
+    expect(tokens).not.toContain("bg-black/80");
+  });
+});

@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast as sonnerToast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -12,7 +12,13 @@ afterEach(() => {
   act(() => {
     sonnerToast.dismiss();
   });
-  vi.runOnlyPendingTimers();
+  // Let sonner's removal timers fire inside act while the fake clock still owns them, so none
+  // survives the test environment's teardown.
+  act(() => {
+    vi.advanceTimersByTime(1000);
+    vi.runOnlyPendingTimers();
+  });
+  cleanup();
   vi.useRealTimers();
 });
 
@@ -39,7 +45,7 @@ async function raiseAll() {
 // Implements TC-COMP-013
 describe("toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25)", () => {
   it("keeps error and warning, drops success, and never moves focus", async () => {
-    const user = setup();
+    setup();
     const before = screen.getByRole("button", { name: "Before" });
     before.focus();
     await raiseAll();
@@ -61,8 +67,6 @@ describe("toast error and warning persist, never take focus, announce politely (
     }
     expect(document.querySelector('[aria-live="assertive"]')).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
-    // The user object is unused beyond the shared timer wiring.
-    expect(user).toBeDefined();
   });
 
   it("reaches a close button on a persisting toast by keyboard and dismisses only that toast", async () => {
@@ -116,5 +120,65 @@ describe("toast variants (DEC-0302, DAC-E1-S3-2)", () => {
     };
     expect(typeChecked).toBeTypeOf("function");
     expect("info" in toast).toBe(false);
+  });
+});
+
+function tokensOf(node: Element | null | undefined): string[] {
+  if (!node) throw new Error("node not rendered");
+  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
+}
+
+// AC-26, DAC-E1-12: the toast's surface and the outcome accents carry their tier in a token
+// (toast spec section 6; UX design 0.6), and the close control meets the 24 px target (IR-006).
+describe("toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006)", () => {
+  it("marks the region with both toaster and group, so the group-[.toaster] tokens apply", async () => {
+    setup();
+    await raiseAll();
+    const region = document.querySelector("[data-sonner-toaster]");
+    expect(tokensOf(region)).toEqual(expect.arrayContaining(["toaster", "group"]));
+  });
+
+  it("gives each toast the popover surface and the theme radius, with no shipped shadow", async () => {
+    setup();
+    await raiseAll();
+    const tokens = tokensOf(screen.getByText("Download failed").closest("[data-sonner-toast]"));
+    for (const token of [
+      "group-[.toaster]:bg-popover",
+      "group-[.toaster]:text-popover-foreground",
+      "group-[.toaster]:border-border",
+      "group-[.toaster]:rounded",
+    ]) {
+      expect(tokens, token).toContain(token);
+    }
+    for (const shipped of [
+      "group-[.toaster]:bg-background",
+      "group-[.toaster]:text-foreground",
+      "group-[.toaster]:shadow-lg",
+    ]) {
+      expect(tokens, shipped).not.toContain(shipped);
+    }
+  });
+
+  it("colours the icon by outcome: critical, warning, good", async () => {
+    setup();
+    await raiseAll();
+    const accentOf = (message: string) =>
+      tokensOf(screen.getByText(message).closest("[data-sonner-toast]")).filter((token) =>
+        token.includes("data-icon"),
+      );
+    expect(accentOf("Download failed")).toEqual(["[&_[data-icon]]:text-status-critical"]);
+    expect(accentOf("Download partial")).toEqual(["[&_[data-icon]]:text-status-warning"]);
+    expect(accentOf("Download complete")).toEqual(["[&_[data-icon]]:text-status-good"]);
+  });
+
+  it("sizes the dismiss control from the spacing token, 24 px and no smaller", async () => {
+    setup();
+    await raiseAll();
+    const close = screen
+      .getByText("Download failed")
+      .closest("[data-sonner-toast]")
+      ?.querySelector("[data-close-button]");
+    const tokens = tokensOf(close);
+    expect(tokens).toContain("!size-5");
   });
 });

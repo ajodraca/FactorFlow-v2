@@ -135,3 +135,86 @@ describe("overlay family scan and packages (TC-COMP-016)", () => {
     }
   });
 });
+
+function tokensOf(node: Element | null | undefined): string[] {
+  if (!node) throw new Error("node not rendered");
+  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
+}
+
+// AC-26, DAC-E1-12, AC-25: the palette's classes take design-system tokens and none of the
+// Tailwind-default literals the shadcn source ships (command spec section 6, DEC-0305), and the
+// input keeps a visible focus indicator (UX design 0.6).
+describe("command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005)", () => {
+  async function openPalette() {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Open the command palette" }));
+    return screen.findByRole("dialog", { name: "Search FactorFlow" });
+  }
+
+  it("styles the dialog content and scrim with the popover and foreground tokens", async () => {
+    const dialog = await openPalette();
+    const content = tokensOf(dialog);
+    expect(content).toContain("bg-popover");
+    expect(content).not.toContain("shadow-lg");
+    const scrim = tokensOf(document.querySelector("[data-state='open'].fixed.inset-0"));
+    expect(scrim).toContain("bg-foreground/40");
+    expect(scrim).not.toContain("bg-black/80");
+  });
+
+  it("caps the list by the row height token and gives the input no fixed height", async () => {
+    const dialog = await openPalette();
+    expect(tokensOf(dialog.querySelector("[cmdk-list]"))).toContain(
+      "max-h-[calc(var(--row-height)*10)]",
+    );
+    expect(tokensOf(dialog.querySelector("[cmdk-list]"))).not.toContain("max-h-80");
+    const input = tokensOf(dialog.querySelector("[cmdk-input]"));
+    expect(input).not.toContain("h-11");
+  });
+
+  it("styles the active item with the accent tokens and the item with the theme radius", async () => {
+    const dialog = await openPalette();
+    const item = tokensOf(dialog.querySelector("[cmdk-item]"));
+    for (const token of [
+      "rounded",
+      "px-2",
+      "py-2",
+      "data-[selected=true]:bg-accent",
+      "data-[selected=true]:text-accent-foreground",
+    ]) {
+      expect(item, token).toContain(token);
+    }
+    for (const shipped of [
+      "rounded-sm",
+      "py-1.5",
+      "data-[selected=true]:bg-muted",
+      "data-[selected=true]:text-foreground",
+    ]) {
+      expect(item, shipped).not.toContain(shipped);
+    }
+  });
+
+  it("sets group headings in the small muted face", async () => {
+    const dialog = await openPalette();
+    const root = tokensOf(dialog.querySelector("[cmdk-root]"));
+    for (const token of [
+      "[&_[cmdk-group-heading]]:text-xs",
+      "[&_[cmdk-group-heading]]:font-medium",
+      "[&_[cmdk-group-heading]]:text-muted-foreground",
+    ]) {
+      expect(root, token).toContain(token);
+    }
+  });
+
+  it("keeps a visible, token-backed focus indicator around the input", async () => {
+    const dialog = await openPalette();
+    const wrapper = tokensOf(dialog.querySelector("[cmdk-input-wrapper]"));
+    for (const token of [
+      "focus-within:ring",
+      "focus-within:ring-inset",
+      "focus-within:ring-ring",
+    ]) {
+      expect(wrapper, token).toContain(token);
+    }
+  });
+});

@@ -25,6 +25,8 @@ const Toaster = (props: ToasterProps) => (
         toast:
           "group toast group-[.toaster]:bg-popover group-[.toaster]:text-popover-foreground group-[.toaster]:border-border group-[.toaster]:rounded",
         description: "group-[.toast]:text-muted-foreground",
+        // Sonner draws a 20 px close button; the toast spec asks for 24 px (section 5).
+        closeButton: "!size-5",
         actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
         success: "[&_[data-icon]]:text-status-good",
         warning: "[&_[data-icon]]:text-status-warning",

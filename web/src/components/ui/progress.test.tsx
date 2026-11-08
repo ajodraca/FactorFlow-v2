@@ -107,3 +107,35 @@ describe("progress indicator and tokens (DEC-0303)", () => {
     expect(typeChecked).toBeTypeOf("function");
   });
 });
+
+function tokensOf(node: Element | null | undefined): string[] {
+  if (!node) throw new Error("node not rendered");
+  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
+}
+
+// AC-26, DAC-E1-12: the track takes the spec's 6-8 px height and the theme radius (progress spec
+// section 3), and an indeterminate bar moves when motion is allowed (progress spec section 4).
+describe("progress resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-004)", () => {
+  function renderBar(value: number | null) {
+    render(
+      <>
+        <p id="p1">label</p>
+        <Progress value={value} max={2} aria-labelledby="p1" />
+      </>,
+    );
+    return screen.getByRole("progressbar");
+  }
+
+  it("sets the track at the 8 px spacing height with the theme radius", () => {
+    const tokens = tokensOf(renderBar(1));
+    expect(tokens).toContain("h-2");
+    expect(tokens).toContain("rounded");
+    expect(tokens).not.toContain("h-4");
+    expect(tokens).not.toContain("rounded-full");
+  });
+
+  it("pulses the indeterminate indicator only when motion is allowed", () => {
+    const indicator = indicatorOf(renderBar(null));
+    expect(tokensOf(indicator)).toContain("motion-safe:animate-pulse");
+  });
+});
