@@ -35,6 +35,38 @@ function tags(icon: SVGElement): string[] {
   return Array.from(icon.children).map((child) => child.tagName.toLowerCase());
 }
 
+const GEOMETRY = ["cx", "cy", "r", "d", "x", "y", "width", "height"] as const;
+
+/**
+ * What a tier draws, in the 24-unit viewBox: each element's tag, geometry and the fill it renders
+ * with (its own, else the svg's). Two tiers that draw the same thing look the same in greyscale.
+ */
+function shapeOf(icon: SVGElement): string[] {
+  const inherited = icon.getAttribute("fill");
+  return Array.from(icon.children).map((child) =>
+    [
+      child.tagName.toLowerCase(),
+      ...GEOMETRY.filter((name) => child.hasAttribute(name)).map(
+        (name) => `${name}=${child.getAttribute(name)}`,
+      ),
+      `fill=${child.getAttribute("fill") ?? inherited}`,
+    ].join(" "),
+  );
+}
+
+const SHAPE: Record<Tier, string[]> = {
+  neutral: ["circle cx=12 cy=12 r=10 fill=none"],
+  active: ["circle cx=12 cy=12 r=1 fill=none", "circle cx=12 cy=12 r=10 fill=none"],
+  good: ["circle cx=12 cy=12 r=10 fill=currentColor"],
+  warning: [
+    "path d=M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z fill=currentColor",
+  ],
+  serious: [
+    "path d=M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z fill=currentColor",
+  ],
+  critical: ["rect x=3 y=3 width=18 height=18 fill=currentColor"],
+};
+
 // Implements TC-COMP-022
 describe("StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3)", () => {
   it.each(TIERS)("%s: the label is the accessible name and the shape is aria-hidden", (tier) => {
@@ -100,16 +132,30 @@ describe("StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3)", () => {
     expect(badgeOf(tier).firstChild).toBe(icon);
   });
 
+  it.each(TIERS)(
+    "%s draws its fixed shape: geometry inside the viewBox, fill as planned",
+    (tier) => {
+      render(<StatusBadge tier={tier}>{LABEL[tier]}</StatusBadge>);
+
+      expect(shapeOf(iconOf(tier))).toEqual(SHAPE[tier]);
+    },
+  );
+
+  it("active's ring is not filled, so it differs from good's disc in greyscale", () => {
+    render(<StatusBadge tier="active">{LABEL.active}</StatusBadge>);
+
+    expect(iconOf("active")).toHaveAttribute("fill", "none");
+  });
+
   it("no two tiers share a shape", () => {
-    const signatures = TIERS.map((tier) => {
+    const shapes = TIERS.map((tier) => {
       const { unmount } = render(<StatusBadge tier={tier}>{LABEL[tier]}</StatusBadge>);
-      const icon = iconOf(tier);
-      const signature = `${icon.getAttribute("fill")}|${icon.innerHTML}`;
+      const shape = shapeOf(iconOf(tier)).join("|");
       unmount();
-      return signature;
+      return shape;
     });
 
-    expect(new Set(signatures).size).toBe(6);
+    expect(new Set(shapes).size).toBe(6);
   });
 });
 
@@ -131,6 +177,12 @@ describe("StatusBadge composition (DAC-E1-2)", () => {
 
     expect(badge).toHaveAttribute("title", "2026-10-16 17:40 CDT");
     expect(badge).toHaveClass("w-fit", "text-status-warning");
+  });
+
+  it("has no title attribute when the caller passes none", () => {
+    render(<StatusBadge tier="good">{LABEL.good}</StatusBadge>);
+
+    expect(badgeOf("good")).not.toHaveAttribute("title");
   });
 
   it("is not a tab stop and has no ARIA role", async () => {

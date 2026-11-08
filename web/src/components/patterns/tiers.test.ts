@@ -40,12 +40,41 @@ function functionRange(source: string, name: string): [number, number] {
   throw new Error(`function ${name} not found in tiers.ts`);
 }
 
-/** Insert a union member after the last member of a type literal member's union, found by AST. */
-function plant(source: string, target: (file: ts.SourceFile) => ts.UnionTypeNode, text: string) {
+/** Append a union member after the end of a type, found by AST: a union, or a reference such as `RunState`. */
+function plant(source: string, target: (file: ts.SourceFile) => ts.TypeNode, text: string) {
   const file = ts.createSourceFile(TIERS_PATH, source, ts.ScriptTarget.ES2022, true);
-  const union = target(file);
-  const end = union.types[union.types.length - 1].getEnd();
+  const end = target(file).getEnd();
   return `${source.slice(0, end)} | ${text}${source.slice(end)}`;
+}
+
+/** The type of one property of one `Status` member, such as `state` of the `download` member. */
+function memberType(of: string, prop: string): (file: ts.SourceFile) => ts.TypeNode {
+  return (file) => {
+    for (const member of statusUnion(file).types) {
+      if (!ts.isTypeLiteralNode(member)) continue;
+      const props = member.members.filter(ts.isPropertySignature);
+      const tag = props.find((p) => p.name.getText(file) === "of");
+      const found = props.find((p) => p.name.getText(file) === prop);
+      if (
+        tag?.type &&
+        ts.isLiteralTypeNode(tag.type) &&
+        tag.type.literal.getText(file) === `"${of}"` &&
+        found?.type
+      ) {
+        return found.type;
+      }
+    }
+    throw new Error(`the ${of} member's ${prop} type was not found in tiers.ts`);
+  };
+}
+
+function needsYouKindUnion(file: ts.SourceFile): ts.UnionTypeNode {
+  for (const statement of file.statements) {
+    if (ts.isTypeAliasDeclaration(statement) && statement.name.text === "NeedsYouKind") {
+      if (ts.isUnionTypeNode(statement.type)) return statement.type;
+    }
+  }
+  throw new Error("NeedsYouKind union not found in tiers.ts");
 }
 
 function statusUnion(file: ts.SourceFile): ts.UnionTypeNode {
@@ -105,6 +134,28 @@ describe("Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1)", { timeout: 30_000 }
       expect(starts.some((start) => start >= from && start < to)).toBe(true);
     }
   });
+
+  // IR-001: every `switch` over a union that can gain a value ends in a `never` default, not only
+  // the two planted above. Each planted value must fail to type-check inside every function that
+  // switches on that union, so a `default: return "neutral"` or `""` in any of them is caught.
+  it.each([
+    ["download state", memberType("download", "state"), '"planted"', ["tierOf", "labelOf"]],
+    ["result outcome", memberType("result", "outcome"), '"planted"', ["tierOf", "labelOf"]],
+    ["check status", memberType("check", "status"), '"planted"', ["tierOf", "labelOf"]],
+    ["check name", memberType("check", "check"), '"planted"', ["labelOf"]],
+    ["item kind", needsYouKindUnion, '"planted"', ["tierOf", "labelOf"]],
+  ] as const)(
+    "a new %s fails to type-check inside every function that switches on it",
+    (_name, target, text, functions) => {
+      const planted = plant(source, target, text);
+      expect(planted).not.toBe(source);
+      const starts = diagnosticsFor(planted).map((d) => d.start ?? -1);
+      for (const name of functions) {
+        const [from, to] = functionRange(planted, name);
+        expect(starts.some((start) => start >= from && start < to)).toBe(true);
+      }
+    },
+  );
 
   it("Not determinable is not a tier: the check status type refuses it", () => {
     expect(() =>
