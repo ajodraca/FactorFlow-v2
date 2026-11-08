@@ -3,7 +3,7 @@ artifact_schema_version: 1
 artifact_id: CAP-003-backlog
 artifact_type: backlog
 artifact_version: 4
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-28
@@ -66,6 +66,12 @@ ai_provenance:
       version: "7"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-11-08T17:10:59Z
+  reviewed_revision: sha256:4d81f0ec387ff197c485d62b7ebd6055002e70f4666058810d7d37a2948e0696
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/backlog-review-report-v7.md"
 ---
 
 # Backlog: App Shell & Data Health
