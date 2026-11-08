@@ -1,0 +1,16 @@
+# GREEN cycle-1 (T013, T014): the cycle-1 focused suite
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_failure_reasons.py tests/unit/test_massive_error_classification.py tests/unit/test_massive_package_boundary.py tests/unit/test_outcomes.py -q
+........................................................................ [ 83%]
+..............                                                           [100%]
+86 passed in 0.99s
+# exit 0
+# GREEN cycle-1: the whole-story focused suite (both lists)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_failure_reasons.py tests/unit/test_massive_error_classification.py tests/unit/test_massive_package_boundary.py tests/unit/test_outcomes.py tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_pacing.py tests/unit/test_governor_settings.py tests/unit/test_massive_retry.py tests/unit/test_massive_client_governor_integration.py -q
+........................................................................ [ 56%]
+........................................................                 [100%]
+128 passed in 1.29s
+# exit 0
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+285 files already formatted
+Success: no issues found in 61 source files

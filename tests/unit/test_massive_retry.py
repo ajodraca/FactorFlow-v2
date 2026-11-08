@@ -68,7 +68,8 @@ def _governor() -> RateLimitGovernor:
             requests_per_minute=60,
             max_attempts=3,
             initial_backoff_seconds=0.0,
-            max_throttle_wait_seconds=1.0,
+            # Checked before each wait; the FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS default.
+            max_throttle_wait_seconds=300.0,
         ),
         sleep=lambda _seconds: None,
     )

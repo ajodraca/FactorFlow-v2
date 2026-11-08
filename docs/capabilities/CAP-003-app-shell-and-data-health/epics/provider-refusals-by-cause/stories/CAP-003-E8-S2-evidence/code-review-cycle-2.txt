@@ -1,0 +1,22 @@
+# Independent code-review subagent (general-purpose, agentId aca1e70ccf00c43ea), cycle-2, judged cycle-2.patch
+# (diff_sha256 3a28bfe48d1753b559d864a9d1ba69db89f698b2103fea8faa17c9ab8b9eb0c6) and mutation-cycle-2-results.json.
+VERDICT: APPROVED
+
+What I checked
+- Patch identity. `git diff b4013603... 337511a8...` hashes to sha256 3a28bfe4..., which matches cycle-2.patch. The working tree's src/ and tests/ match the index.
+- Validation. The six named suites pass (48 passed). `ruff check`, `ruff format --check` and `mypy src` are clean. `start_throttle_budget` exists only at its definition (rate_limit.py:124), so nothing in src calls it yet.
+- Against design 2.2 and 2.3. The permit is acquired before the pending throttle is charged (rate_limit.py:162-165). The budget check runs before the sleep (:178), and the strict `>` matches the design. The error is `raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc`; ruff format joined the message into one string with identical text. `throttled_at` is set just before the sleep. The spent total is instance state that `start_throttle_budget` resets, so it persists across `execute` calls. The FATAL re-raise, the RETRYABLE branch (comment, message, backoff), `_acquire_permit`, `_throttle_delay`, `_boundary_wait_with_jitter`, `_backoff_delay`, `GovernorSettings` and `from_massive_settings` have no hunks. Attempt exhaustion still raises a plain `ProviderUnavailable`, and T007(b) asserts it.
+- Docstrings (T015 f). The module, `execute` "Raises" and `start_throttle_budget` docstrings match the plan, and no stale "per request" wording is left in src.
+- Tests. T006 changes only the two planned expectations and adds `now=clock`. The zero-stated-delay test is byte-for-byte unchanged. T010 adds only `# Implements` comments, with no body hunks in retry, backoff, pacing or settings. T007-T009 and T011 follow the plan with literal expectations and the 20-send guard. I traced the T008, T009 and T012 sequences by hand and they hold.
+- Mutation evidence. All 15 mutants are `state: killed`.
+- My own mutants, run in a scratch copy under $TMPDIR and then deleted: charging before the permit, overwriting instead of accumulating, a nonzero starting spend, and a scaled check. All four were killed.
+- T012 deviation. I reproduced it. With the budget at 120.0, the "charge the backoff sleep" mutant survives (20 passed). At 119.5 it is killed, and unmutated code passes at both values. The 0.5 s of slack is less than the 1.0 s backoff and keeps the 119 s legitimate total inside the budget, and the test's docstring explains this. It is the right fix: the plan's own kill claim was arithmetically wrong at 120.
+- T016. A one-line value change plus the planned comment, owner-confirmed. It is deterministic: the sleep is a no-op so almost nothing is charged, and every computed delay stays under 120 s, so a 300 s budget always fits.
+
+Findings
+1. NON-BLOCKING, CAP-003-E8-S2-tasks.md:107. T012 in the plan still says `max_throttle_wait=120.0` and "60 + 59 = 119 <= 120", but the test uses 119.5 (test_governor_retry.py:586). Record the deviation and why it was made in the plan or cycle record before the story commit, so the evidence matches the code.
+2. NON-BLOCKING, mutation-cycle-2-results.json. The recorded `tree_patch_sha256` (2e99de3f...) can't be reproduced now. The current `git diff --binary HEAD` (d6fec335...) also includes the unstaged edits to the tasks and story docs. Each mutant's `original` line matches the current rate_limit.py, so the src/tests binding looks right, but it can't be checked by hash. Rerun or re-stamp before the story commit if the gate needs that.
+3. NON-BLOCKING, test_governor_retry.py:228 and :247. The two delivered exhaustion tests have no 20-send guard, so a mutant that never charges the budget loops up to 1,000,000 sends before failing instead of failing at once. They still fail, and the plan limits T006 to changing expectations, so no change is needed this cycle.
+4. NON-BLOCKING, design section 2.1. It says "three delivered budget tests" change; two did. This is already covered by Resolved Conflicts 1 and is for the design's next revision only.
+
+I found no surviving mutant and no defect this cycle must fix.

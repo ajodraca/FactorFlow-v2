@@ -1,0 +1,25 @@
+# Independent spec-drift subagent (general-purpose, agentId a1e75b4f14d263e7f), cycle-1, judged cycle-1.patch
+# (diff_sha256 2e6937646a29d44aeb5985d1042f1ac8cd68351152b37ad9f77a5632d2c27c47).
+DRIFT_DETECTED: false
+
+What I checked:
+- Patch integrity: the patch's sha256 matches 2e69376...7c45c27. `git diff --cached` hashes to the same value and touches only six files: `errors.py`, `massive/__init__.py` and four unit-test files. `outcomes.py` and `rate_limit.py` are not in it.
+- T013, the class (`errors.py:106-111`): `ProviderRateLimited(ProviderUnavailable)` sits directly after `ProviderUnavailable`. Its docstring is word-for-word the one in design section 2.4.
+- T013, the kind table (`errors.py:290`): the new row `ProviderRateLimited: "rate_limited"` comes after the `not_entitled` row. The table now has exactly the six rows in section 2.5.
+- T013, `__all__` (`errors.py:50`): `ProviderRateLimited` is listed next to `ProviderUnavailable`.
+- T013, things left alone: `compose_failure_reason`'s body is unchanged, so the default branch still redacts then bounds the text, as section 2.5 says. `is_fatal_for_governor` is unchanged, as section 2.4 says. The docstring and `TypeError` text were already count-free after S1, so they correctly stay as they are.
+- T014 (`massive/__init__.py`): the import and `__all__` entries keep the existing sorted order. The package docstring has no count to raise, so leaving it is correct.
+- T002 (TC-COMP-240, DAC-E8-S2-6, DAC-E8-4):
+  - The six kinds are parametrised with hand-written literals, and the `rate_limited` literal matches the design and plan exactly, including `request_id=unavailable`.
+  - It asserts that no reason starts with `[unavailable]`.
+  - The credential fixture goes through `_redact_fixture` and comes out as `[redacted]`.
+  - The `_UnlistedUnavailable` and `_UnlistedMassiveError` classes each raise `TypeError`.
+  - `issubclass(ProviderRateLimited, ProviderUnavailable)` holds.
+  - Each new test has its `# Implements CAP-003 TC-COMP-240` marker and imports `ProviderRateLimited` inside the function.
+- T003 (TC-COMP-241, DAC-E8-S2-7, DAC-E8-8): the reason `r` is a literal. The test asserts outcome `failed`, `data_type` `"reference"`, and `record.reason is r`. `outcomes.py` is not changed, and its line 151 already reaches `failed` for this subclass through the `ProviderUnavailable` `isinstance` branch.
+- T004 (section 7 "Fatal and subclass"): the test checks both `issubclass` relations, membership in `errors.__all__`, and that `is_fatal_for_governor(ProviderRateLimited("x"))` is False.
+- T005: the test checks that `ProviderRateLimited` is in the package `__all__` and is the same object as the one in `errors`.
+- Hand-written mutants: each one in the cycle 1 list (deleted row, row changed to `"unavailable"`, base class changed to `MassiveError`, entry dropped from `__all__`, `isinstance` tuple changed in `outcomes.py`) is caught by at least one of the new assertions.
+- Nothing beyond scope: the patch adds no behaviour, names, messages, kinds or exports beyond the story, design and task plan. Cycle 2 (`rate_limit.py`, T006-T012, T015-T016) is absent, as expected.
+
+Drift items: none.

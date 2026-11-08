@@ -1,7 +1,8 @@
 """The rate-limit governor: pacing, throttle waits and bounded backoff.
 
 Component design: `component-design-rate-limit-governor.md` sections
-2.2-2.5. Story: `CAP-001-E3-S4`.
+2.2-2.5, and its CAP-003 changes, sections 2.2-2.3. Stories:
+`CAP-001-E3-S4`, `CAP-003-E8-S2`.
 
 The governor paces every request through a token bucket sized to the
 owner's configured `requests_per_minute` (DAC-E3-S4-5), then classifies
@@ -17,9 +18,11 @@ exception's type or fields, only the `Outcome` `classify` returns. The
 one exception is `ProviderUnavailable`, the typed failure
 CAP-001-E3-S3 defines for a caller's governor classifier to treat as
 retryable (`massive/errors.py` `is_fatal_for_governor`); this module
-raises that same type on exhausted attempts or throttle budget so every
-caller, present and future, catches one exhaustion type regardless of
-provider.
+raises that same type on exhausted attempts, and its subclass
+`ProviderRateLimited` when the per-stock throttle wait budget is spent,
+so every caller, present and future, catches one exhaustion type
+regardless of provider. `ProviderRateLimited` is imported only to be
+raised.
 """
 
 from __future__ import annotations
@@ -31,7 +34,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import TYPE_CHECKING, TypeVar
 
-from factorflow.ingestion.massive.errors import ProviderUnavailable
+from factorflow.ingestion.massive.errors import ProviderRateLimited, ProviderUnavailable
 
 if TYPE_CHECKING:
     from factorflow.config.settings import MassiveSettings
@@ -39,6 +42,10 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 _SECONDS_PER_MINUTE = 60.0
+
+_THROTTLE_BUDGET_SPENT_MESSAGE = (
+    "The provider kept rate-limiting requests until this stock's throttle wait budget was spent."
+)
 
 
 class Outcome(StrEnum):
@@ -112,6 +119,14 @@ class RateLimitGovernor:
         self._tokens = self._capacity
         self._last_refill = monotonic()
 
+        self._throttle_spent = 0.0  # seconds of throttle wait charged to the current stock
+
+    def start_throttle_budget(self) -> None:
+        """Start a new stock's throttle wait budget (CAP-003 system design
+        section 3.6 note 3). The budget is spent across every `execute`
+        call until the next call, never per request."""
+        self._throttle_spent = 0.0
+
     def execute(
         self,
         send: Callable[[], T],
@@ -134,14 +149,21 @@ class RateLimitGovernor:
         against the only provider this capability has; it is retained
         because the governor is provider-agnostic.
 
-        Raises `ProviderUnavailable` when attempts are exhausted or the
-        request is throttled beyond the throttle wait budget.
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
         """
         attempts = 0
-        throttle_wait_started_at: float | None = None
+        throttled_at: float | None = None
 
         while True:
             self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
 
             try:
                 result = send()
@@ -152,16 +174,11 @@ class RateLimitGovernor:
                     raise
 
                 if outcome is Outcome.THROTTLED:
-                    if throttle_wait_started_at is None:
-                        throttle_wait_started_at = self._monotonic()
                     delay = self._throttle_delay(exc, stated_delay_seconds)
+                    if self._throttle_spent + delay > self._settings.max_throttle_wait_seconds:
+                        raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc
+                    throttled_at = self._monotonic()
                     self._sleep(delay)
-                    throttle_wait_used = self._monotonic() - throttle_wait_started_at
-                    if throttle_wait_used > self._settings.max_throttle_wait_seconds:
-                        raise ProviderUnavailable(
-                            "The provider throttled every attempt until the "
-                            "throttle wait budget was exhausted."
-                        ) from exc
                     continue
 
                 # Outcome.RETRYABLE (or Outcome.OK, which classify should

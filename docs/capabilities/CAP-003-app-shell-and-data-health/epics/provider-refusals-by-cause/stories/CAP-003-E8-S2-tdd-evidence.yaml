@@ -1,0 +1,160 @@
+# TDD evidence for CAP-003-E8-S2 - One throttle wait budget per stock, checked before each wait, and ProviderRateLimited.
+# Base commit (T001): 201442b37d064dddc5df1edb00c188b0e23b746f (CAP-003-E8-S1 coded, adversarial review v2 PASS and
+# doc-synced on this branch's ancestry: 3888727, 75f2162, ee9c56f, 201442b); whole-story focused suite there: 116 passed.
+# T001 records: (a) errors.py defines ProviderNotEntitled(MassiveError), lists it in __all__, holds five
+# _ERROR_KIND_BY_TYPE rows including not_entitled, and composes _NOT_ENTITLED_DESCRIPTION for it; S1 left
+# compose_failure_reason's docstring ("one of the typed `MassiveError` subclasses in this module's kind table") and its
+# TypeError text ("only the typed MassiveError subclasses in its kind table are accepted.") count-free, so T013 leaves
+# both unchanged. (b) massive/__init__.py re-exports ProviderNotEntitled; its docstring says "the `MassiveError` types"
+# with no count, so T014 changes no count. (c) outcomes.py line 151,
+# `if isinstance(error, (ProviderUnavailable, ProviderContractViolation, ProviderNotEntitled)):`, already carries the
+# comment naming ProviderRateLimited; T003's hand-written mutant targets that line. (d) S1's tests:
+# test_massive_failure_reasons.py test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text,
+# test_each_kind_composes_its_own_reason_by_exact_class (five kinds), test_an_unlisted_massive_error_subclass_raises_type_error;
+# test_massive_error_classification.py the TC-COMP-228/229/234 rows and
+# test_provider_not_entitled_is_exported_from_errors_and_the_package; test_outcomes.py the four TC-COMP-233 tests. T002's
+# tests carry new names beside them; its six-kind test is TC-COMP-240's own mapped case and repeats S1's five delivered
+# rows with its own literals, as T002 specifies.
+# Two cycles, as the task plan's Other Notes define them: cycle-1 (T002-T005 -> T013, T014) and cycle-2 (T006-T012 ->
+# T015, T016). Story coding makes one commit for the story, so both cycles record commit_hash: stage and cite their
+# reviewed_patch. cycle-1's patch is the staged diff against HEAD (check-tdd-evidence.py fingerprint --staged); cycle-2's
+# is the diff from the index tree cycle-1 was reviewed at to the index tree after staging its own files
+# (fingerprint --range <tree>..<tree>), so the patches apply in order onto the base and rebuild the story's code.
+# Mutation: scripts/mutation-run.py generates no mutant for cycle-1's lines (a class statement, a dict row and list
+# entries) and four for cycle-2's; each cycle also runs the task plan's hand-written mutants (operator "manual") plus a
+# few the coder added for the same lines.
+# Reviews: per cycle, one independent code-review subagent and one independent spec-drift subagent judged the patch;
+# their verdicts are recorded in code-review-cycle-N.txt and spec-drift-cycle-N.txt.
+# Interpreter: no venv in this clone; every command ran as <main checkout>/.venv/bin/python -m <tool> from the clone
+# root, with pytest given -o pythonpath=src.
+# No exception and no decision record: no TDD or review step was skipped.
+# T017 (final bytes): full suite 2659 passed, postgres tests included (testcontainers postgres:16), 1 pre-existing
+# StarletteDeprecationWarning; uv build ok; ruff check, ruff format --check and mypy src clean; start_throttle_budget has
+# no caller in src; no rate_limit.py hunk inside GovernorSettings or from_massive_settings, no logging, no new message
+# other than _THROTTLE_BUDGET_SPENT_MESSAGE; client.py and outcomes.py not in the diff (final-validation.log).
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T013, T014]
+    description: >
+      TC-COMP-240 in tests/unit/test_massive_failure_reasons.py (the six kinds by exact class against literal reasons,
+      ProviderRateLimited composing exactly the rate_limited reason with request_id=unavailable and never [unavailable],
+      the credential fixture redacted out of a rate_limited reason, an unlisted ProviderUnavailable subclass and an
+      unlisted MassiveError subclass raising TypeError, ProviderRateLimited a ProviderUnavailable), TC-COMP-241 in
+      tests/unit/test_outcomes.py (failed through the delivered isinstance branch, the reason the same object), T004's
+      subclass row in tests/unit/test_massive_error_classification.py and T005's identity re-export in
+      tests/unit/test_massive_package_boundary.py; then T013 in errors.py (ProviderRateLimited(ProviderUnavailable) after
+      ProviderUnavailable with the design docstring, the rate_limited row after not_entitled, __all__) and T014 in
+      massive/__init__.py (import and __all__ in sorted order). outcomes.py, compose_failure_reason's body and
+      is_fatal_for_governor are unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/red-cycle-1.log
+    red_log_sha256: da53d080423c2e464657e2bd50099b0de1d978c30017a16872ed92c275899091
+    red_evidence: >
+      With the cycle's tests written and errors.py and __init__.py unchanged from the base: 11 failed, 75 passed. Ten
+      new tests fail with ImportError "cannot import name 'ProviderRateLimited'" (the six-kind rows, the credential
+      row, the subclass rows, the outcome row) and the package row fails on "ProviderRateLimited" in the package
+      __all__. The unlisted-subclass test passes on the base: it is a guard of the delivered exact-class lookup.
+    green_evidence: >
+      The cycle-1 focused suite 86 passed; the whole-story focused suite 128 passed; ruff check, ruff format --check
+      and mypy src clean (green-cycle-1.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/green-cycle-1.log
+        sha256: 0c48b63689713effb139ceec7d09c2ecfd0a9465856859028d5546ab83aa6ff1
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/code-review-cycle-1.txt
+        sha256: 866742560549dd50841321fd6eb7a52412d004718564f51a2ecb6660323cd7c7
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/spec-drift-cycle-1.txt
+        sha256: a05f9b239c3b390bca0b9ac133c5639c118f8b6a7f5188fc59b3f6550387faf5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2e6937646a29d44aeb5985d1042f1ac8cd68351152b37ad9f77a5632d2c27c47
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/cycle-1.patch
+    index_tree: b4013603c6d41fde77dee25260adbe470a6a1966
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: a0d3b7a3a7ca86b543493f4b156f4da2cc2c1a74d2bb3726209e5d284ec45348
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T006, T007, T008, T009, T010, T011, T012, T015, T016]
+    description: >
+      tests/unit/test_governor_retry.py: T006 (TC-COMP-235) the two delivered exhaustion tests take now=clock,
+      ProviderRateLimited and [60.0] / [10.0, 10.0], the zero-stated-delay test unchanged; T007 (TC-COMP-236) the spent
+      budget raises ProviderRateLimited with the fixed message, no request_id and the last exception as __cause__, and
+      attempt exhaustion a plain ProviderUnavailable; T008 (TC-COMP-237) one 300 s budget spans execute calls until
+      start_throttle_budget(); T009 (TC-COMP-238) jitter [0.999] never takes the sleeps past 300 s; T010 (TC-COMP-239)
+      an Implements comment only, the delivered throttle-no-attempt, retry, fatal, backoff, pacing and settings rows
+      unchanged; T011 (TC-COMP-242) an AST check that the governor inspects no exception, imports ProviderRateLimited
+      only to raise it, logs nothing and keeps its settings; T012 backoff and its permit wait are not charged. Then
+      T015 in rate_limit.py (the import, _THROTTLE_BUDGET_SPENT_MESSAGE, self._throttle_spent, start_throttle_budget(),
+      the check before each wait, the charge from the sleep's start to the retried request's permit, docstrings) and
+      T016 (tests/unit/test_massive_retry.py _governor() helper budget 1.0 -> 300.0, owner-confirmed 2026-11-08).
+      Nothing in src calls start_throttle_budget() yet (CAP-003-E8-S3, CAP-003-E8-S4).
+    deviations: >
+      (1) T012 uses max_throttle_wait=119.5, not the plan's 120.0. At 120.0 the plan's hand-written "charge the backoff
+      sleep" mutant survived (round 1, mutation-cycle-2-round1-results.json: 14 killed, 1 survived), because the
+      mutated total 60 + 1 + 59 = 120 is not > 120. At 119.5 the delivered sequence [60.0, 1.0, 59.0] still holds
+      (60 + 59 = 119 fits, the next 90 s wait is declined) and the mutant is killed; the scenario, jitter, sleeps and
+      assertions are otherwise as planned, and the test docstring says why. The cycle was re-staged, re-mutated (round
+      2, all killed) and reviewed on the strengthened test; both reviewers accepted the change. (2) ruff format joined
+      the design snippet's two-part _THROTTLE_BUDGET_SPENT_MESSAGE literal into one string; the text is identical.
+      (3) T007, T008, T009 and T012 share a module-level _THROTTLE_SEND_GUARD = 20 and a _guarded_throttle(send)
+      classifier for the plan's 20-send guard. (4) T016's comment reads "Checked before each wait; the
+      FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS default." to stay within the 100-character line limit.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/red-cycle-2.log
+    red_log_sha256: 2bac083acd210777c390da50ab45cc8b24112d91a28490fd2051bbbb087d5f11
+    red_evidence: >
+      With the final cycle-2 tests and the base rate_limit.py and test_massive_retry.py (a scratch copy of the tree,
+      cycle-1 applied): 7 failed, 41 passed. T006's two tests and T007 (a) fail with the delivered ProviderUnavailable
+      "throttled every attempt" instead of ProviderRateLimited; T008 with AttributeError (no start_throttle_budget); T009
+      and T012 with the delivered ProviderUnavailable; T011 on the error import naming only ProviderUnavailable. T007 (b)
+      and the T010 rows pass, as the plan's guards. The first observation in the repository, with T012 at 120.0, failed
+      the same seven tests. T016's own RED (red-cycle-2-t016.log): with T015 applied and the helper still at 1.0,
+      test_rate_limited_responses_are_paced_without_consuming_attempts fails (1 failed, 8 passed), as Open Gaps 1
+      predicted.
+    green_evidence: >
+      The cycle-2 focused suite 48 passed; the whole-story focused suite 134 passed; ruff check, ruff format --check
+      and mypy src clean (green-cycle-2.log). grep -rn start_throttle_budget src lists only the definition. Full suite on the
+      final bytes 2659 passed (final-validation.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/red-cycle-2-t016.log
+        sha256: 34534312a1f21fabd4463b3998ffcc60bf27d2664a83d8c95577eae56cf49896
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/green-cycle-2.log
+        sha256: 3003da00c52d580b57dc822eb2da0902d3367d9a84d73b14f5155ed8ee8681a3
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/mutation-cycle-2-round1-results.json
+        sha256: 6d62028853c6733aa9b9748c99051e0bff859a60d82719c14419262a7dd53f0a
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/code-review-cycle-2.txt
+        sha256: af2f23a4054dec8e07670bafb5075d1540db54a830cd372f86a9249a9d6056fb
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/spec-drift-cycle-2.txt
+        sha256: 08866c199ba00b07c0c15f2f50918ee8edec6af3e76042aaf2481d8ab9ef10fb
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/final-validation.log
+        sha256: ee392dd9af876a6c7e2278d7b8ee90ae4dfa95ffd056d6a399c07cf158c35c44
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3a28bfe48d1753b559d864a9d1ba69db89f698b2103fea8faa17c9ab8b9eb0c6
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/cycle-2.patch
+    diff_from_tree: b4013603c6d41fde77dee25260adbe470a6a1966
+    index_tree: 337511a8aa06165833a76c4d501894bfe3b6f90b
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 6aa0fc6a7c0f07ff7acba84999c4d6800736b00d16e7e6c89f22fb7a9fd0e490
+      generated: 15
+      killed: 15
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

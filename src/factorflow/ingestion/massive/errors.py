@@ -47,6 +47,7 @@ __all__ = [
     "InstrumentNotFound",
     "CredentialRejected",
     "ProviderUnavailable",
+    "ProviderRateLimited",
     "ProviderContractViolation",
     "ProviderNotEntitled",
     "classify_error_body",
@@ -100,6 +101,14 @@ class ProviderUnavailable(MassiveError):
     module does not recognise -- the safe default (DAC-E3-S3-3). The only
     taxonomy type a caller's governor classifier should treat as
     retryable."""
+
+
+class ProviderRateLimited(ProviderUnavailable):
+    """Raised by the rate-limit governor when the provider keeps throttling
+    past the stock's throttle wait budget (AC-30). A ProviderUnavailable, so
+    every delivered `except ProviderUnavailable` still catches it. Never built
+    from a response: under retries=0 urllib3 drains the 429 body, so it never
+    carries a provider request_id."""
 
 
 class ProviderContractViolation(MassiveError):
@@ -278,6 +287,7 @@ _ERROR_KIND_BY_TYPE: dict[type[MassiveError], str] = {
     ProviderUnavailable: "unavailable",
     ProviderContractViolation: "contract_violation",
     ProviderNotEntitled: "not_entitled",
+    ProviderRateLimited: "rate_limited",
 }
 
 _CREDENTIAL_REJECTED_DESCRIPTION = "the provider rejected the configured credential"

@@ -384,3 +384,129 @@ def test_an_unlisted_massive_error_subclass_raises_type_error(
             data_type="prices",
             redact=_identity_redact,
         )
+
+
+# --- CAP-003 TC-COMP-240 / DAC-E8-S2-6: the rate_limited reason ----------
+
+_RATE_LIMITED_MESSAGE = (
+    "The provider kept rate-limiting requests until this stock's throttle wait budget was spent."
+)
+
+
+@pytest.mark.parametrize(
+    ("kind", "expected"),
+    [
+        pytest.param(
+            "not_found",
+            "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+            id="not_found",
+        ),
+        pytest.param(
+            "credential_rejected",
+            "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+            "the provider rejected the configured credential",
+            id="credential_rejected",
+        ),
+        pytest.param(
+            "unavailable",
+            "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+            id="unavailable",
+        ),
+        pytest.param(
+            "contract_violation",
+            "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+            id="contract_violation",
+        ),
+        pytest.param(
+            "not_entitled",
+            "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+            "the provider plan is not entitled to this data",
+            id="not_entitled",
+        ),
+        pytest.param(
+            "rate_limited",
+            "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+            "The provider kept rate-limiting requests until this stock's throttle wait "
+            "budget was spent.",
+            id="rate_limited",
+        ),
+    ],
+)
+# Implements CAP-003 TC-COMP-240
+def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+    """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+    its own kind, chosen by exact class, and every reason begins
+    `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+    `request_id=unavailable`, never its parent's `unavailable`."""
+    from factorflow.ingestion.massive.errors import ProviderRateLimited
+
+    errors: dict[str, MassiveError] = {
+        "not_found": InstrumentNotFound("x", provider_request_id="r1"),
+        "credential_rejected": CredentialRejected("x", provider_request_id="r2"),
+        "unavailable": ProviderUnavailable("x", provider_request_id="r3"),
+        "contract_violation": ProviderContractViolation("x", provider_request_id="r4"),
+        "not_entitled": ProviderNotEntitled("other text", provider_request_id="r5"),
+        "rate_limited": ProviderRateLimited(_RATE_LIMITED_MESSAGE),
+    }
+
+    reason = compose_failure_reason(
+        errors[kind], symbol="AAPL", data_type="reference", redact=_identity_redact
+    )
+
+    assert reason == expected
+    assert reason.startswith(f"[{kind}] ")
+    if kind == "rate_limited":
+        assert not reason.startswith("[unavailable]")
+
+
+# Implements CAP-003 TC-COMP-240
+def test_rate_limited_reason_never_carries_the_credential() -> None:
+    """CAP-003 TC-COMP-240 / DAC-E8-S2-6 (CAP-001 AC-13): the `rate_limited`
+    variable segment is redacted then bounded, as delivered, so the
+    credential fixture inside a `ProviderRateLimited` message never reaches
+    the reason."""
+    from factorflow.ingestion.massive.errors import ProviderRateLimited
+
+    reason = compose_failure_reason(
+        ProviderRateLimited(f"throttled near {_CREDENTIAL_FIXTURE}"),
+        symbol="AAPL",
+        data_type="reference",
+        redact=_redact_fixture,
+    )
+
+    assert _CREDENTIAL_FIXTURE not in reason
+    assert "[redacted]" in reason
+    assert reason == (
+        "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+        "throttled near [redacted]"
+    )
+
+
+# Implements CAP-003 TC-COMP-240
+def test_an_unlisted_subclass_of_a_listed_class_raises_type_error() -> None:
+    """CAP-003 TC-COMP-240 / DAC-E8-S2-6: the lookup is by exact class, so a
+    subclass of `ProviderUnavailable` the table does not list -- as
+    `ProviderRateLimited` would be without its own row -- raises
+    `TypeError` rather than falling back to its parent's kind."""
+
+    class _UnlistedUnavailable(ProviderUnavailable):
+        pass
+
+    class _UnlistedMassiveError(MassiveError):
+        pass
+
+    for error_type in (_UnlistedUnavailable, _UnlistedMassiveError):
+        with pytest.raises(TypeError):
+            compose_failure_reason(
+                error_type("x"), symbol="AAPL", data_type="reference", redact=_identity_redact
+            )
+
+
+# Implements CAP-003 TC-COMP-240
+def test_provider_rate_limited_subclasses_provider_unavailable() -> None:
+    """CAP-003 TC-COMP-240 / DAC-E8-S2-6: a spent throttle budget is a
+    `ProviderUnavailable`, so every delivered `except ProviderUnavailable`
+    still catches it."""
+    from factorflow.ingestion.massive.errors import ProviderRateLimited
+
+    assert issubclass(ProviderRateLimited, ProviderUnavailable)

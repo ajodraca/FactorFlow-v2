@@ -1,0 +1,649 @@
+# RED cycle-2 (T006-T012), re-observed with the final cycle-2 tests (test_governor_retry.py blob 1b3c1833557ba512b6febc6a0a0b2bc498ed5dfd) in a scratch copy of the tree holding the base rate_limit.py (blob 9a6c5f1bc42b9bc02eb3801fb104278b4eb0bcb3) and the base tests/unit/test_massive_retry.py, cycle-1 applied
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_governor_retry.py tests/unit/test_governor_backoff.py tests/unit/test_governor_pacing.py tests/unit/test_governor_settings.py tests/unit/test_massive_retry.py tests/unit/test_massive_client_governor_integration.py -q -rf
+......FF......F.FFFF............................                         [100%]
+=================================== FAILURES ===================================
+__________ test_boundary_throttle_wait_exhausts_the_budget_and_raises __________
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10cee97b0>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10cee99d0>
+classify = <function _always_throttled at 0x10cc07740>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.unit.governor_fakes.FlakySender object at 0x10cee99d0>
+
+    def __call__(self) -> object:
+        self.calls += 1
+        if self.calls <= self.fail_count:
+>           raise self._exception_factory(f"attempt {self.calls} failed")
+E           RuntimeError: attempt 2 failed
+
+tests/unit/governor_fakes.py:67: RuntimeError
+
+The above exception was the direct cause of the following exception:
+
+    def test_boundary_throttle_wait_exhausts_the_budget_and_raises() -> None:
+        """Persistent throttling exhausts the throttle-wait budget rather than
+        looping forever (DAC-E3-9, DAC-E3-S4-6)."""
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(
+            60, clock, sleeper, max_throttle_wait=90.0, jitter=SequenceJitter([0.0]), now=clock
+        )
+        send = FlakySender(fail_count=1_000_000)
+    
+        with pytest.raises(ProviderRateLimited):
+>           governor.execute(send, classify=_always_throttled)
+
+tests/unit/test_governor_retry.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10cee97b0>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10cee99d0>
+classify = <function _always_throttled at 0x10cc07740>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    if throttle_wait_started_at is None:
+                        throttle_wait_started_at = self._monotonic()
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    self._sleep(delay)
+                    throttle_wait_used = self._monotonic() - throttle_wait_started_at
+                    if throttle_wait_used > self._settings.max_throttle_wait_seconds:
+>                       raise ProviderUnavailable(
+                            "The provider throttled every attempt until the "
+                            "throttle wait budget was exhausted."
+                        ) from exc
+E                       factorflow.ingestion.massive.errors.ProviderUnavailable: The provider throttled every attempt until the throttle wait budget was exhausted.
+
+src/factorflow/ingestion/rate_limit.py:161: ProviderUnavailable
+________ test_stated_delay_throttle_wait_exhausts_the_budget_and_raises ________
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10ceea360>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10ceea470>
+classify = <function _always_throttled at 0x10cc07740>
+stated_delay_seconds = <function test_stated_delay_throttle_wait_exhausts_the_budget_and_raises.<locals>.<lambda> at 0x10ce79bc0>
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.unit.governor_fakes.FlakySender object at 0x10ceea470>
+
+    def __call__(self) -> object:
+        self.calls += 1
+        if self.calls <= self.fail_count:
+>           raise self._exception_factory(f"attempt {self.calls} failed")
+E           RuntimeError: attempt 3 failed
+
+tests/unit/governor_fakes.py:67: RuntimeError
+
+The above exception was the direct cause of the following exception:
+
+    def test_stated_delay_throttle_wait_exhausts_the_budget_and_raises() -> None:
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(60, clock, sleeper, max_throttle_wait=25.0, now=clock)
+        send = FlakySender(fail_count=1_000_000)
+    
+        with pytest.raises(ProviderRateLimited):
+>           governor.execute(
+                send,
+                classify=_always_throttled,
+                stated_delay_seconds=lambda exc: 10.0,
+            )
+
+tests/unit/test_governor_retry.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10ceea360>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10ceea470>
+classify = <function _always_throttled at 0x10cc07740>
+stated_delay_seconds = <function test_stated_delay_throttle_wait_exhausts_the_budget_and_raises.<locals>.<lambda> at 0x10ce79bc0>
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    if throttle_wait_started_at is None:
+                        throttle_wait_started_at = self._monotonic()
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    self._sleep(delay)
+                    throttle_wait_used = self._monotonic() - throttle_wait_started_at
+                    if throttle_wait_used > self._settings.max_throttle_wait_seconds:
+>                       raise ProviderUnavailable(
+                            "The provider throttled every attempt until the "
+                            "throttle wait budget was exhausted."
+                        ) from exc
+E                       factorflow.ingestion.massive.errors.ProviderUnavailable: The provider throttled every attempt until the throttle wait budget was exhausted.
+
+src/factorflow/ingestion/rate_limit.py:161: ProviderUnavailable
+____ test_spent_budget_raises_provider_rate_limited_from_the_last_exception ____
+
+    def test_spent_budget_raises_provider_rate_limited_from_the_last_exception() -> None:
+        """CAP-003 TC-COMP-236 / DAC-E8-S2-2: a spent throttle budget raises a
+        `ProviderRateLimited` -- a `ProviderUnavailable` -- with the governor's
+        fixed message, no provider request ID, and the last exception `send`
+        raised as its `__cause__`."""
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(
+            60, clock, sleeper, max_throttle_wait=90.0, jitter=SequenceJitter([0.0]), now=clock
+        )
+        raised: list[RuntimeError] = []
+    
+        def send() -> str:
+            exc = RuntimeError(f"attempt {len(raised) + 1} failed")
+            raised.append(exc)
+            raise exc
+    
+        def classify(exc: BaseException) -> Outcome:
+            if len(raised) > _THROTTLE_SEND_GUARD:
+                raise AssertionError("throttling did not terminate")
+            return Outcome.THROTTLED
+    
+        with pytest.raises(ProviderUnavailable) as excinfo:
+            governor.execute(send, classify=classify)
+    
+        err = excinfo.value
+>       assert type(err) is ProviderRateLimited
+E       AssertionError: assert <class 'factorflow.ingestion.massive.errors.ProviderUnavailable'> is ProviderRateLimited
+E        +  where <class 'factorflow.ingestion.massive.errors.ProviderUnavailable'> = type(ProviderUnavailable('The provider throttled every attempt until the throttle wait budget was exhausted.'))
+
+tests/unit/test_governor_retry.py:393: AssertionError
+______ test_one_throttle_budget_spans_every_execute_until_the_next_start _______
+
+    def test_one_throttle_budget_spans_every_execute_until_the_next_start() -> None:
+        """CAP-003 TC-COMP-237 / DAC-E8-S2-3: the budget is spent across every
+        `execute` call between two `start_throttle_budget()` calls, never per
+        request. 180s spent by a first request leaves two 60s waits for a
+        second, which raises on its third (the 300s total is taken: the check
+        is `>`, not `>=`); a new start lets a third request wait again."""
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(
+            60, clock, sleeper, max_throttle_wait=300.0, jitter=SequenceJitter([0.0]), now=clock
+        )
+    
+>       governor.start_throttle_budget()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'RateLimitGovernor' object has no attribute 'start_throttle_budget'
+
+tests/unit/test_governor_retry.py:453: AttributeError
+______ test_jittered_boundary_waits_never_take_the_sleeps_past_the_budget ______
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d039e90>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10cdb5b70>
+classify = <function _guarded_throttle.<locals>.classify at 0x10d01d580>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.unit.governor_fakes.FlakySender object at 0x10cdb5b70>
+
+    def __call__(self) -> object:
+        self.calls += 1
+        if self.calls <= self.fail_count:
+>           raise self._exception_factory(f"attempt {self.calls} failed")
+E           RuntimeError: attempt 5 failed
+
+tests/unit/governor_fakes.py:67: RuntimeError
+
+The above exception was the direct cause of the following exception:
+
+    def test_jittered_boundary_waits_never_take_the_sleeps_past_the_budget() -> None:
+        """CAP-003 TC-COMP-238 / DAC-E8-S2-4: with jitter `[0.999]` each
+        boundary wait is nearly doubled, yet the sleeps total at most the 300s
+        budget, and the next delay, which the governor declined to sleep, would
+        have crossed it (review v14 FINDING-55)."""
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(
+            60, clock, sleeper, max_throttle_wait=300.0, jitter=SequenceJitter([0.999]), now=clock
+        )
+        send = FlakySender(fail_count=1_000_000)
+    
+        with pytest.raises(ProviderRateLimited):
+>           governor.execute(send, classify=_guarded_throttle(send))
+
+tests/unit/test_governor_retry.py:485: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d039e90>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10cdb5b70>
+classify = <function _guarded_throttle.<locals>.classify at 0x10d01d580>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    if throttle_wait_started_at is None:
+                        throttle_wait_started_at = self._monotonic()
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    self._sleep(delay)
+                    throttle_wait_used = self._monotonic() - throttle_wait_started_at
+                    if throttle_wait_used > self._settings.max_throttle_wait_seconds:
+>                       raise ProviderUnavailable(
+                            "The provider throttled every attempt until the "
+                            "throttle wait budget was exhausted."
+                        ) from exc
+E                       factorflow.ingestion.massive.errors.ProviderUnavailable: The provider throttled every attempt until the throttle wait budget was exhausted.
+
+src/factorflow/ingestion/rate_limit.py:161: ProviderUnavailable
+_____________ test_governor_inspects_no_exception_and_logs_nothing _____________
+
+    def test_governor_inspects_no_exception_and_logs_nothing() -> None:
+        """CAP-003 TC-COMP-242 / DAC-E8-S2-8: the governor still never inspects
+        an exception -- it imports `ProviderRateLimited` only to raise it --
+        logs nothing, carries no URL or credential in any string, and keeps its
+        settings."""
+        tree = ast.parse(Path(rate_limit_module.__file__).read_text())
+        nodes = list(ast.walk(tree))
+    
+        handlers = [node for node in nodes if isinstance(node, ast.ExceptHandler)]
+        assert len(handlers) == 1
+        assert isinstance(handlers[0].type, ast.Name)
+        assert handlers[0].type.id == "BaseException"
+    
+        called = {
+            node.func.id
+            for node in nodes
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        }
+        assert called.isdisjoint({"isinstance", "issubclass", "type"})
+    
+        error_imports = [
+            node
+            for node in nodes
+            if isinstance(node, ast.ImportFrom) and node.module == "factorflow.ingestion.massive.errors"
+        ]
+        assert len(error_imports) == 1
+>       assert {alias.name for alias in error_imports[0].names} == {
+            "ProviderRateLimited",
+            "ProviderUnavailable",
+        }
+E       AssertionError: assert {'ProviderUnavailable'} == {'ProviderRat...rUnavailable'}
+E         
+E         Extra items in the right set:
+E         'ProviderRateLimited'
+E         Use -v to get more diff
+
+tests/unit/test_governor_retry.py:525: AssertionError
+_ test_retryable_backoff_and_its_permit_wait_are_not_charged_to_the_throttle_budget _
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d03a6d0>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10d048f50>
+classify = <function _guarded_throttle.<locals>.classify at 0x10d01dee0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.unit.governor_fakes.FlakySender object at 0x10d048f50>
+
+    def __call__(self) -> object:
+        self.calls += 1
+        if self.calls <= self.fail_count:
+>           raise self._exception_factory(f"attempt {self.calls} failed")
+E           RuntimeError: attempt 2 failed
+
+tests/unit/governor_fakes.py:67: RuntimeError
+
+The above exception was the direct cause of the following exception:
+
+    def test_retryable_backoff_and_its_permit_wait_are_not_charged_to_the_throttle_budget() -> None:
+        """CAP-003 DAC-E8-5 (rate-limit-governor section 2.3): only a throttle
+        wait -- from the start of the throttle sleep to the moment the retried
+        request holds its permit -- is charged. A 60s throttle wait is charged;
+        the 1.0s backoff after a `RETRYABLE` outcome is not, so at 61s the next
+        59s boundary wait still fits the 119.5s budget (60 + 59 = 119) and only
+        the following 90s wait is declined. The half second of slack is less
+        than the backoff, so charging the backoff (60 + 1 + 59 = 120) would
+        decline the 59s wait."""
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(
+            60,
+            clock,
+            sleeper,
+            max_throttle_wait=119.5,
+            initial_backoff=2.0,
+            jitter=SequenceJitter([0.0, 0.5]),
+            now=clock,
+        )
+        first = FlakySender(fail_count=2)
+    
+        def throttled_then_retryable(exc: BaseException) -> Outcome:
+            return Outcome.THROTTLED if first.calls == 1 else Outcome.RETRYABLE
+    
+        assert governor.execute(first, classify=throttled_then_retryable) == "ok"
+    
+        always_failing = FlakySender(fail_count=1_000_000)
+        with pytest.raises(ProviderRateLimited):
+>           governor.execute(always_failing, classify=_guarded_throttle(always_failing))
+
+tests/unit/test_governor_retry.py:600: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d03a6d0>
+send = <tests.unit.governor_fakes.FlakySender object at 0x10d048f50>
+classify = <function _guarded_throttle.<locals>.classify at 0x10d01dee0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted or the
+        request is throttled beyond the throttle wait budget.
+        """
+        attempts = 0
+        throttle_wait_started_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    if throttle_wait_started_at is None:
+                        throttle_wait_started_at = self._monotonic()
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    self._sleep(delay)
+                    throttle_wait_used = self._monotonic() - throttle_wait_started_at
+                    if throttle_wait_used > self._settings.max_throttle_wait_seconds:
+>                       raise ProviderUnavailable(
+                            "The provider throttled every attempt until the "
+                            "throttle wait budget was exhausted."
+                        ) from exc
+E                       factorflow.ingestion.massive.errors.ProviderUnavailable: The provider throttled every attempt until the throttle wait budget was exhausted.
+
+src/factorflow/ingestion/rate_limit.py:161: ProviderUnavailable
+=========================== short test summary info ============================
+FAILED tests/unit/test_governor_retry.py::test_boundary_throttle_wait_exhausts_the_budget_and_raises
+FAILED tests/unit/test_governor_retry.py::test_stated_delay_throttle_wait_exhausts_the_budget_and_raises
+FAILED tests/unit/test_governor_retry.py::test_spent_budget_raises_provider_rate_limited_from_the_last_exception
+FAILED tests/unit/test_governor_retry.py::test_one_throttle_budget_spans_every_execute_until_the_next_start
+FAILED tests/unit/test_governor_retry.py::test_jittered_boundary_waits_never_take_the_sleeps_past_the_budget
+FAILED tests/unit/test_governor_retry.py::test_governor_inspects_no_exception_and_logs_nothing
+FAILED tests/unit/test_governor_retry.py::test_retryable_backoff_and_its_permit_wait_are_not_charged_to_the_throttle_budget
+7 failed, 41 passed in 0.39s
+# exit 1

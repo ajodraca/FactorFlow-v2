@@ -446,3 +446,25 @@ def test_an_unlisted_massive_error_subclass_raises_type_error() -> None:
 
     with pytest.raises(TypeError, match="_Unlisted"):
         classify_provider_error(_Unlisted("x"), data_type="fundamentals", reason="r")
+
+
+# ---------------------------------------------------------------------------
+# CAP-003 TC-COMP-241 — a spent throttle budget is a per-data-type failure
+# ---------------------------------------------------------------------------
+
+
+# Implements CAP-003 TC-COMP-241
+def test_provider_rate_limited_maps_to_failed_outcome() -> None:
+    """CAP-003 TC-COMP-241 / DAC-E8-S2-7: ``ProviderRateLimited`` reaches
+    ``failed`` through the delivered ``ProviderUnavailable`` branch, with
+    the composed reason unreworded -- the same object."""
+    from factorflow.ingestion.massive.errors import ProviderRateLimited
+    from factorflow.ingestion.outcomes import classify_provider_error
+
+    r = "[rate_limited] symbol=KO data_type=reference request_id=unavailable: x"
+
+    record = classify_provider_error(ProviderRateLimited("x"), data_type="reference", reason=r)
+
+    assert record.outcome == "failed"
+    assert record.data_type == "reference"
+    assert record.reason is r

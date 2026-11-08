@@ -445,3 +445,21 @@ def test_provider_not_entitled_is_exported_from_errors_and_the_package() -> None
     assert "ProviderNotEntitled" in errors.__all__
     assert "ProviderNotEntitled" in boundary.__all__
     assert boundary.ProviderNotEntitled is errors.ProviderNotEntitled
+
+
+# --- CAP-003 massive-client section 7 "Fatal and subclass": ProviderRateLimited
+
+
+def test_provider_rate_limited_is_a_retryable_provider_unavailable() -> None:
+    """CAP-003 DAC-E8-S2-6 (massive-client section 7, *Fatal and subclass*):
+    `ProviderRateLimited` is a `ProviderUnavailable` and so a `MassiveError`,
+    is declared in `errors.__all__`, and `is_fatal_for_governor`, unchanged,
+    would treat it as retryable (section 2.4: the classifier never sees one,
+    because the governor raises it)."""
+    from factorflow.ingestion.massive import errors
+    from factorflow.ingestion.massive.errors import ProviderRateLimited
+
+    assert issubclass(ProviderRateLimited, ProviderUnavailable)
+    assert issubclass(ProviderRateLimited, MassiveError)
+    assert "ProviderRateLimited" in errors.__all__
+    assert is_fatal_for_governor(ProviderRateLimited("x")) is False
