@@ -90,3 +90,23 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T004, T006, T011]
+    description: >
+      Review v2 rework (IR-001). One test pins the half of DAC-E1-S4-1 the v2 review found unpinned: with stable renderExpansion and getRowLabel, an open earlier row is not re-rendered when a keyset page is appended (only the three new rows render). Test only; the production comparator already behaves so. IR-002 (late), IR-003 and IR-004 (LOW, carried) are not changed: IR-002 cannot block, IR-003 is the owner's to decide as cycle-3 recorded, IR-004 deviations stay recorded in this file.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-4-open-row-memo.log
+    red_log_sha256: f76ee50cdaf57f0604c1d72fc7f9eea397f1edaaee68826a3c63cce0dc1ace74
+    red_evidence: >
+      With the review's mutant manual:v2d1 applied (the open-row clause compares a.expansion === b.expansion, a new object on every render), the new test fails: renders is S0001, S0003, S0004, S0005, expected no S0001. The 100 other tests pass.
+    green_evidence: >
+      Against the unmutated code data-table.test.tsx passes 101 tests; the full suite is 95 files and 2381 tests; npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5136f0f542d8e634d789035df8fb7749f11d0bb37440289377f53f59e63dbfbd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/cycle-4.patch
+    commit_hash: 56a446bdae81f275081de7cf7b24adc4d133b505
+    mutation:
+      not_applicable: "test-only cycle: adds no production code; the review's mutant manual:v2d1 is the RED and is killed by the new test"
