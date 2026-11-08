@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w1/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 705ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 348ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > download running 5ms
+     → expected 'good' to be 'active' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > download running
+AssertionError: expected 'good' to be 'active' // Object.is equality
+
+Expected: "active"
+Received: "good"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:11
+   Duration  1.82s (transform 35ms, setup 36ms, collect 295ms, tests 705ms, environment 178ms, prepare 147ms)
+

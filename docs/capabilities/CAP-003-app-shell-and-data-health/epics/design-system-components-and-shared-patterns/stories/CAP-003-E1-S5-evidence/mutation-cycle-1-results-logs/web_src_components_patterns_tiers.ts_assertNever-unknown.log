@@ -1,0 +1,54 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w3/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 2 failed) 509ms
+   × Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new status kind fails to type-check in both tierOf and labelOf 140ms
+     → expected false to be true // Object.is equality
+   × Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new scores state fails to type-check in both tierOf and labelOf 126ms
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new status kind fails to type-check in both tierOf and labelOf
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/patterns/tiers.test.ts:95:67
+     93|     for (const name of ["tierOf", "labelOf"]) {
+     94|       const [from, to] = functionRange(planted, name);
+     95|       expect(starts.some((start) => start >= from && start < to)).toBe…
+       |                                                                   ^
+     96|     }
+     97|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new scores state fails to type-check in both tierOf and labelOf
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/patterns/tiers.test.ts:105:67
+    103|     for (const name of ["tierOf", "labelOf"]) {
+    104|       const [from, to] = functionRange(planted, name);
+    105|       expect(starts.some((start) => start >= from && start < to)).toBe…
+       |                                                                   ^
+    106|     }
+    107|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 34 passed (36)
+   Start at  15:17:42
+   Duration  1.28s (transform 28ms, setup 30ms, collect 240ms, tests 509ms, environment 162ms, prepare 104ms)
+

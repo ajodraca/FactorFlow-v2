@@ -1,0 +1,224 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/patterns/tiers.test.ts (0 test)
+ ❯ src/components/patterns/status-badge.test.tsx (22 tests | 6 failed) 79ms
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > neutral is one hollow circle 4ms
+     → expected [] to deeply equal [ 'circle' ]
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > warning is one path from lucide-triangle 2ms
+     → expect(element).toHaveClass("lucide-triangle")
+
+Expected the element to have class:
+  lucide-triangle
+Received:
+  h-3 w-3 shrink-0
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > serious is one path from lucide-diamond 1ms
+     → expected [] to deeply equal [ 'path' ]
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > critical is one rect from lucide-square 1ms
+     → expect(element).toHaveClass("lucide-square")
+
+Expected the element to have class:
+  lucide-square
+Received:
+  h-3 w-3 shrink-0
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape 3ms
+     → expected 5 to be 6 // Object.is equality
+   × StatusBadge composition (DAC-E1-2) > imports nothing from a screen 1ms
+     → expected 'import type { JSX } from "react";\nim…' not to match /from\s+["'](\.\.\/)+screens/)+screens
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts [ src/components/patterns/tiers.test.ts ]
+Error: Failed to resolve import "./tiers" from "web/src/components/patterns/tiers.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/tiers.test.ts:7:75
+  4  |  import ts from "typescript";
+  5  |  import { describe, expect, it } from "vitest";
+  6  |  import { labelOf, tierOf } from "./tiers";
+     |                                   ^
+  7  |  const PATTERNS_DIR = path.dirname(fileURLToPath(import.meta.url));
+  8  |  const TIERS_PATH = path.join(PATTERNS_DIR, "tiers.ts");
+ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > neutral is one hollow circle
+AssertionError: expected [] to deeply equal [ 'circle' ]
+
+- Expected
++ Received
+
+- Array [
+-   "circle",
+- ]
++ Array []
+
+ ❯ src/components/patterns/status-badge.test.tsx:57:24
+     55|     const icon = iconOf("neutral");
+     56| 
+     57|     expect(tags(icon)).toEqual(["circle"]);
+       |                        ^
+     58|     expect(icon).toHaveAttribute("fill", "none");
+     59|     expect(icon.firstElementChild).not.toHaveAttribute("fill");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > warning is one path from lucide-triangle
+Error: expect(element).toHaveClass("lucide-triangle")
+
+Expected the element to have class:
+  lucide-triangle
+Received:
+  h-3 w-3 shrink-0
+ ❯ src/components/patterns/status-badge.test.tsx:86:18
+     84| 
+     85|     expect(tags(icon)).toEqual([tag]);
+     86|     expect(icon).toHaveClass(className);
+       |                  ^
+     87|   });
+     88| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > serious is one path from lucide-diamond
+AssertionError: expected [] to deeply equal [ 'path' ]
+
+- Expected
++ Received
+
+- Array [
+-   "path",
+- ]
++ Array []
+
+ ❯ src/components/patterns/status-badge.test.tsx:85:24
+     83|     const icon = iconOf(tier);
+     84| 
+     85|     expect(tags(icon)).toEqual([tag]);
+       |                        ^
+     86|     expect(icon).toHaveClass(className);
+     87|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > critical is one rect from lucide-square
+Error: expect(element).toHaveClass("lucide-square")
+
+Expected the element to have class:
+  lucide-square
+Received:
+  h-3 w-3 shrink-0
+ ❯ src/components/patterns/status-badge.test.tsx:86:18
+     84| 
+     85|     expect(tags(icon)).toEqual([tag]);
+     86|     expect(icon).toHaveClass(className);
+       |                  ^
+     87|   });
+     88| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape
+AssertionError: expected 5 to be 6 // Object.is equality
+
+- Expected
++ Received
+
+- 6
++ 5
+
+ ❯ src/components/patterns/status-badge.test.tsx:98:38
+     96|     });
+     97| 
+     98|     expect(new Set(signatures).size).toBe(6);
+       |                                      ^
+     99|   });
+    100| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge composition (DAC-E1-2) > imports nothing from a screen
+AssertionError: expected 'import type { JSX } from "react";\nim…' not to match /from\s+["'](\.\.\/)+screens/)+screens
+
+- Expected: 
+/from\s+["'](\.\.\/)+screens/
+
++ Received: 
+"import type { JSX } from \"react\";
+import { TIER_CLASSES } from \"../../screens/runs/outcome-badge\";
+
+/**
+ * The status badge the CAP-002 score-set surfaces share: the not-current
+ * banner and the as-of line (UX design 1.2; STD-UI-8). Its tier classes are
+ * the delivered map in `web/src/screens/runs/outcome-badge.tsx`, imported
+ * rather than restated (SA-DUP-001). The shapes are UX design 1.2's, which
+ * gives CAP-002 badges shapes of their own so the tiers stay distinct in
+ * greyscale: good a filled circle, warning a triangle, active a ringed dot,
+ * critical a square.
+ */
+
+export type StatusTier = \"good\" | \"warning\" | \"active\" | \"critical\";
+
+const BADGE = \"inline-flex items-center gap-1 rounded px-2 py-1 text-xs\";
+
+const TIER_SHAPES: Record<StatusTier, JSX.Element> = {
+  good: <circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"currentColor\" />,
+  warning: <path d=\"M6 1 11 11H1Z\" fill=\"currentColor\" />,
+  active: (
+    <>
+      <circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"1.5\" />
+      <circle cx=\"6\" cy=\"6\" r=\"2\" fill=\"currentColor\" />
+    </>
+  ),
+  critical: <rect x=\"1.5\" y=\"1.5\" width=\"9\" height=\"9\" fill=\"currentColor\" />,
+};
+
+export interface StatusBadgeProps {
+  tier: StatusTier;
+  /** The badge's word, from the copy catalogue. */
+  children: string;
+  /** A native tooltip, such as the building set's start time on *Updating* (UX design 1.2). */
+  title?: string;
+  /** Layout classes the host adds, as full literal strings. */
+  className?: string;
+}
+
+export function StatusBadge({ tier, children, title, className }: StatusBadgeProps): JSX.Element {
+  return (
+    <span
+      data-variant={`status-${tier}`}
+      title={title}
+      className={[BADGE, className, TIER_CLASSES[tier]].filter(Boolean).join(\" \")}
+    >
+      <svg aria-hidden=\"true\" focusable=\"false\" viewBox=\"0 0 12 12\" className=\"h-3 w-3 shrink-0\">
+        {TIER_SHAPES[tier]}
+      </svg>
+      {children}
+    </span>
+  );
+}
+"
+
+ ❯ src/components/patterns/status-badge.test.tsx:131:47
+    129| 
+    130|   it("imports nothing from a screen", () => {
+    131|     expect(readFileSync(SOURCE, "utf-8")).not.toMatch(/from\s+["'](\.\…
+       |                                               ^
+    132|   });
+    133| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 16 passed (22)
+   Start at  15:10:11
+   Duration  1.01s (transform 51ms, setup 134ms, collect 117ms, tests 79ms, environment 635ms, prepare 86ms)
+

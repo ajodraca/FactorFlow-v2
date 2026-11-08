@@ -1,0 +1,67 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4fz4h46c/w0/web
+
+ ❯ src/components/patterns/status-badge.test.tsx (31 tests | 6 failed) 105ms
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > neutral: the shape is 12 px square and comes before the label 7ms
+     → expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > active: the shape is 12 px square and comes before the label 5ms
+     → expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > good: the shape is 12 px square and comes before the label 3ms
+     → expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > warning: the shape is 12 px square and comes before the label 2ms
+     → expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > serious: the shape is 12 px square and comes before the label 2ms
+     → expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > critical: the shape is 12 px square and comes before the label 2ms
+     → expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > neutral: the shape is 12 px square and comes before the label
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > active: the shape is 12 px square and comes before the label
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > good: the shape is 12 px square and comes before the label
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > warning: the shape is 12 px square and comes before the label
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > serious: the shape is 12 px square and comes before the label
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > critical: the shape is 12 px square and comes before the label
+AssertionError: expected Text{ …(1), …(1) } to be SVGSVGElement{ …(2), …(2) } // Object.is equality
+
+- Expected
++ Received
+
+- <svg
+-   aria-hidden="true"
+-   class="lucide lucide-circle h-3 w-3 shrink-0"
+-   fill="none"
+-   focusable="false"
+-   height="24"
+-   stroke="currentColor"
+-   stroke-linecap="round"
+-   stroke-linejoin="round"
+-   stroke-width="2"
+-   viewBox="0 0 24 24"
+-   width="24"
+-   xmlns="http://www.w3.org/2000/svg"
+- >
+-   <circle
+-     cx="12"
+-     cy="12"
+-     r="10"
+-   />
+- </svg>
++ Label neutral
+
+ ❯ src/components/patterns/status-badge.test.tsx:100:38
+     98| 
+     99|     expect(icon).toHaveClass("h-3", "w-3", "shrink-0");
+    100|     expect(badgeOf(tier).firstChild).toBe(icon);
+       |                                      ^
+    101|   });
+    102| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 25 passed (31)
+   Start at  15:18:09
+   Duration  1.30s (transform 77ms, setup 34ms, collect 392ms, tests 105ms, environment 249ms, prepare 236ms)
+

@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4fz4h46c/w2/web
+
+ ❯ src/components/patterns/status-badge.test.tsx (31 tests | 2 failed) 83ms
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > good is one filled circle with no stroke 4ms
+     → expect(element).toHaveAttribute("fill", "currentColor") // element.getAttribute("fill") === "currentColor"
+
+Expected the element to have attribute:
+  fill="currentColor"
+Received:
+  null
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape 5ms
+     → expected 5 to be 6 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > good is one filled circle with no stroke
+Error: expect(element).toHaveAttribute("fill", "currentColor") // element.getAttribute("fill") === "currentColor"
+
+Expected the element to have attribute:
+  fill="currentColor"
+Received:
+  null
+ ❯ src/components/patterns/status-badge.test.tsx:73:36
+     71| 
+     72|     expect(tags(icon)).toEqual(["circle"]);
+     73|     expect(icon.firstElementChild).toHaveAttribute("fill", "currentCol…
+       |                                    ^
+     74|     expect(icon.firstElementChild).not.toHaveAttribute("stroke");
+     75|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape
+AssertionError: expected 5 to be 6 // Object.is equality
+
+- Expected
++ Received
+
+- 6
++ 5
+
+ ❯ src/components/patterns/status-badge.test.tsx:112:38
+    110|     });
+    111| 
+    112|     expect(new Set(signatures).size).toBe(6);
+       |                                      ^
+    113|   });
+    114| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 29 passed (31)
+   Start at  15:18:06
+   Duration  1.13s (transform 38ms, setup 37ms, collect 322ms, tests 83ms, environment 164ms, prepare 27ms)
+

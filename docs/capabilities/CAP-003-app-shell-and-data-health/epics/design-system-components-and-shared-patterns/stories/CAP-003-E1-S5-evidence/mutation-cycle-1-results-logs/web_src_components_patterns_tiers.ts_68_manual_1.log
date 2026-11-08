@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w0/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 727ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 317ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > result not_found 3ms
+     → expected 'serious' to be 'warning' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > result not_found
+AssertionError: expected 'serious' to be 'warning' // Object.is equality
+
+Expected: "warning"
+Received: "serious"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:15
+   Duration  2.00s (transform 31ms, setup 36ms, collect 281ms, tests 727ms, environment 196ms, prepare 181ms)
+

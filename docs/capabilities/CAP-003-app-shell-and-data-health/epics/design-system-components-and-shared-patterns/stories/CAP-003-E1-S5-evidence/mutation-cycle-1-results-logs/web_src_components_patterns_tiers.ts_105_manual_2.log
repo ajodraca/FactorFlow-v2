@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w3/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 3 failed) 717ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 346ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > item download_not_complete 3ms
+     → expected 'critical' to be 'serious' // Object.is equality
+   × Tier table (TC-COMP-021, DAC-E1-1) > item download_not_complete not failed 0ms
+     → expected 'critical' to be 'serious' // Object.is equality
+   × Tier table (TC-COMP-021, DAC-E1-1) > item download_not_complete failed 0ms
+     → expected 'serious' to be 'critical' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > item download_not_complete
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > item download_not_complete not failed
+AssertionError: expected 'critical' to be 'serious' // Object.is equality
+
+Expected: "serious"
+Received: "critical"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > item download_not_complete failed
+AssertionError: expected 'serious' to be 'critical' // Object.is equality
+
+Expected: "critical"
+Received: "serious"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 33 passed (36)
+   Start at  15:17:23
+   Duration  1.90s (transform 36ms, setup 39ms, collect 316ms, tests 717ms, environment 183ms, prepare 274ms)
+
