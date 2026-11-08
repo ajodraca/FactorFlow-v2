@@ -216,3 +216,23 @@ cycles:
     commit_hash: 12b446e470469f342f8ba1df445ee9af3df9f234
     mutation:
       not_applicable: "test-only cycle: the token-literals block adds no production code"
+
+  - id: cycle-9
+    tasks: [T021, T022]
+    description: >
+      Format-only cycle: biome format --write on input.tsx, select.tsx and select.test.tsx after npm run format flagged them (T022). Whitespace, line wrapping and three trailing commas only; no token, class or assertion changed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-9-format.log
+    red_log_sha256: a3a554b26464eb9c07f7f9089d37f52935ac5fd69c2001221aec9c589a6f293e
+    red_evidence: >
+      No red phase: a formatter run changes no token; npm run format reported three files before and none after.
+    green_evidence: >
+      components suite 372 passed; npm run format, lint and tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3990cd0d2a9aad1e2ce473ad1a02514d4df5f2f28cab2f77a59f223ec46984bb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-9.patch
+    commit_hash: ebac20f0e7cc82ef63dc5ebdf6f5c367ac29a445
+    mutation:
+      not_applicable: "format-only change: the formatter re-wraps lines and adds trailing commas, no token changed"
