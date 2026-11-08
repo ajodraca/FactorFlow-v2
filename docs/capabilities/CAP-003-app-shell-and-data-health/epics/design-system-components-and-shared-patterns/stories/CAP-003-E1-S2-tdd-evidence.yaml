@@ -80,3 +80,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T006, T013, T018]
+    description: >
+      checkbox: default variant over Radix, Space toggles and Enter does not, tri-state mixed, box border is the input token (TC-COMP-009, DEC-0300).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-4-checkbox.log
+    red_log_sha256: 5f0a9978be48d384edc8674132cb0643b80a5392ae12cc1878a6b90052f0dbf9
+    red_evidence: >
+      checkbox.test.tsx failed to resolve ./checkbox before the module existed.
+    green_evidence: >
+      checkbox 6 passed; token-literals scan and tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 93b5556289eae9eb0e3b0baae4b2003d3b08efbcc26ef5b2398752b52357017f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-4.patch
+    commit_hash: 001bbf2c1f7c784c4801c7d6704ad81bfffb8396
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: fc6f120f0e714c06f08c289dfdab91949fe472a7c370aea87aaab35c44bad3b4
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
