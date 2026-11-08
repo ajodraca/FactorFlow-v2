@@ -21,14 +21,14 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.318"
-  timestamp: 2026-11-07T23:18:50Z
+  timestamp: 2026-11-08T00:40:00Z
   source_artifacts:
     - id: CAP-003
-      version: "2, draft (2e6bfeb, 3174b50)"
+      version: "2, draft (0febf60)"
     - id: CAP-003-system-design
-      version: "2, draft (c33a8f1)"
+      version: "2, draft (c1bd393)"
     - id: CAP-003-ux-brief
-      version: "1"
+      version: "2, draft (4efc4f6)"
     - id: PRODUCT-UX
       version: "6"
     - id: PRODUCT-UX-S01
@@ -1494,7 +1494,7 @@ table so a reviewer does not raise them.
 |-------|--------|-------|
 | Consistency with product patterns | pass | The shell, the patterns and the three M1 screens are the blueprint's, built from the approved S01, S02 and S09 and the §7 labels, §8 status map and §9 action tiers; the five CAP-001 screens are restyled into them with their behaviour intact (AC-17). No destination, pattern or label is invented: Section 0.8 lists the seven departures, each with its source and reason. Compositions have one name each (Section 3) so later capabilities reuse rather than restyle them (capability §5.3) |
 | Progressive disclosure | pass | Blueprint principle 4 throughout: Home shows the topmost item and one tile; Data health shows the verdict, then three cards, then only the rows that need fixing, with the full coverage table, the followed list and the download detail one link away; setup shows one step at a time with the whole path visible; the palette reaches any page without adding navigation. Expandable rows keep 3000-stock tables readable (STD-UI-30) |
-| Error clarity | pass | Every refusal and failure names the operation, the stock or download and the reason, and offers the recovery (STD-UI-19): the step to fix in setup, Settings or Followed stocks for a refused download, **Try again** for a failed read, *Download again* or **Stop following** / **Follow a different symbol** per problem row, *Downloading again won't help* for a not-found symbol; in version 2 the fix follows the cause on *Needs fixing* and the download detail alike, a plan refusal naming the Massive plan and a rate limit a later download with the request rate to check (AC-29, AC-30). No code, `request_id`, payload key or implementation word reaches the owner (STD-UI-1); the unreachable state names the likely cause and where to look |
+| Error clarity | pass | Every refusal and failure names the operation, the stock or download and the reason, and offers the recovery (STD-UI-19): the step to fix in setup, Settings or Followed stocks for a refused download, **Try again** for a failed read, *Download again* or **Stop following** / **Follow a different symbol** per problem row, *Downloading again won't help* for a not-found symbol; in version 2 the fix follows the cause on *Needs fixing* and the download detail alike, a plan refusal naming the Massive plan and a rate limit a later download with the request rate to check (AC-29, AC-30). No code, `request_id`, payload key or implementation word reaches the owner (STD-UI-1), except that a stored failure reason is currently shown verbatim, its leading kind and `request_id` included; that display is capability OQ-5's follow-up; the unreachable state names the likely cause and where to look |
 | Accessibility | pass | WCAG 2.1 AA per STD-UI-24, specified per surface in Sections 0 and 1: landmarks and names, keyboard completion of every operation, focus management on route changes, dialogs, the palette and the stepper, polite announcement of every polled change, `blocked` instead of `disabled` wherever a precondition gates an action, 4.5:1 text and 3:1 boundaries with the chip and as-of pairs checked against `theme-validation.md`. Radix, cmdk and native-list contracts carry the dialog, radio, command, stepper and table semantics. Enforcement is human review, which the standard acknowledges |
 | States and feedback (empty, loading, error, success, partial) | pass | All five, plus the three more STD-UI-23 requires, enumerated per surface in a States table (AC-24), starting from S01 §7, S02 §7, S09 §7 and CAP-001 v5 §1.1 to §1.5. Never-populated (*No data has been downloaded yet.*) and nothing-found (*Nothing needs you right now.*, *Nothing needs fixing.*) are distinct everywhere both can occur (AC-21); stale is a marked state where it can be detected (*Not reflecting the latest download*), and the check cards state the currency they cannot judge; unavailable is `coverage-unknown` with a reason; progress shows *{done} of {total}*; a download that completes while the owner is elsewhere raises a `toast`, and a change the owner can see (a row leaving) is announced politely rather than toasted |
 
@@ -1539,7 +1539,7 @@ delivers is the blueprint's approved navigation, not a new item.
 | AC-26 | Built from the design system | Component Mapping and Token Usage of every surface; no literal outside `theme.css` except the approved-specification layout widths in `web/src/app/layout.ts` (0.7) | all, vendored per DEC-0205 |
 | AC-27 | CAP-002 keeps its routes | 0.2 Research in the static list when its routes are registered; 0.3 the five `/research` routes unchanged | shell composition |
 | AC-29 | A plan refusal is not retried; its row names the plan | 1.4 problem row: a `not_entitled` failure's fix names the Massive plan, no per-row control, no attempt count; a row of plan refusals only is not retryable, so it brings no **Download now** into *Needs fixing*; 1.8 *Fix by cause*: the same sentence on the download detail, no download offered | problem row composition; `failureRecovery` in `ui-components`; `badge` `status-critical` |
-| AC-30 | A rate limit is waited out, then named | 1.4 problem row: a `rate_limited` failure's fix is a later download with the request rate to check, no attempt count, **Download now** the action; 1.8 *Fix by cause*: the same sentence; the download's *Partial* outcome is unchanged (1.7, 1.8) | problem row composition; `failureRecovery` in `ui-components`; `badge` `status-critical` / `status-warning` |
+| AC-30 | A rate limit is waited out, then named | 1.4 problem row: a `rate_limited` failure's fix is a later download with the request rate to check, no attempt count, **Download now** the action; 1.8 *Fix by cause*: the same sentence; the download's recorded outcome, *Partial* or *Failed*, is shown unchanged (1.7, 1.8) | problem row composition; `failureRecovery` in `ui-components`; `badge` `status-critical` / `status-warning` |
 
 **Screen acceptance checks.** S01-3 and S01-4 (1.3 catalogue and
 `sortAttention`), S01-6 (1.3 as-of lines), S01-7 (1.3 layout); S01-1, S01-2
