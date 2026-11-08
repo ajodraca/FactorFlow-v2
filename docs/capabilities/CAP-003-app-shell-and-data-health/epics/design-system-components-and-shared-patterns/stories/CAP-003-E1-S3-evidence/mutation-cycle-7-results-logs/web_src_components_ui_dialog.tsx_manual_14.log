@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w0/web
+
+ ✓ src/components/token-literals.test.ts (30 tests) 259ms
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 11ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 299ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 610ms
+   ✓ input (DAC-E1-S2-2, AC-25) > makes the suffix part of the accessible name outside a form 306ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 744ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1448ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 457ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 572ms
+ ❯ src/components/ui/dialog.test.tsx (10 tests | 1 failed) 2363ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 850ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 323ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > uses the default button variant and no destructive styling (DAC-E1-15) 309ms
+   × dialog confirm resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003) > styles the content with the popover surface, the prose measure and the theme radius 61ms
+     → max-w-prose: expected [ 'fixed', 'left-[50%]', …(14) ] to include 'max-w-prose'
+ ✓ src/components/ui/badge.test.tsx (13 tests) 180ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 22ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 1124ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 836ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 331ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 758ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 304ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1028ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 357ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1383ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 814ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 1048ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 802ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1167ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 791ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > dialog confirm resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003) > styles the content with the popover surface, the prose measure and the theme radius
+AssertionError: max-w-prose: expected [ 'fixed', 'left-[50%]', …(14) ] to include 'max-w-prose'
+ ❯ src/components/ui/dialog.test.tsx:221:29
+    219|       "p-6",
+    220|     ]) {
+    221|       expect(tokens, token).toContain(token);
+       |                             ^
+    222|     }
+    223|     for (const shipped of [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:10
+   Duration  7.56s (transform 2.35s, setup 4.49s, collect 25.34s, tests 13.58s, environment 26.87s, prepare 5.97s)
+

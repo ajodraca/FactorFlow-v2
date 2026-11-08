@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w0/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 5ms
+ ✓ src/components/token-literals.test.ts (30 tests) 258ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 212ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 450ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 612ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1226ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 440ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 447ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1755ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 496ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 133ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 560ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 378ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 785ms
+   ✓ stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > is a labelled navigation holding one ordered list of four items 308ms
+ ❯ src/components/ui/command.test.tsx (10 tests | 1 failed) 891ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 599ms
+   × command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > styles the active item with the accent tokens and the item with the theme radius 104ms
+     → rounded: expected [ 'relative', 'flex', …(13) ] to include 'rounded'
+ ✓ src/components/ui/card.test.tsx (9 tests) 171ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 479ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 845ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 993ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 653ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1003ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 530ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > styles the active item with the accent tokens and the item with the theme radius
+AssertionError: rounded: expected [ 'relative', 'flex', …(13) ] to include 'rounded'
+ ❯ src/components/ui/command.test.tsx:185:27
+    183|       "data-[selected=true]:text-accent-foreground",
+    184|     ]) {
+    185|       expect(item, token).toContain(token);
+       |                           ^
+    186|     }
+    187|     for (const shipped of [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:26
+   Duration  6.76s (transform 2.34s, setup 4.01s, collect 22.92s, tests 10.38s, environment 26.94s, prepare 6.70s)
+

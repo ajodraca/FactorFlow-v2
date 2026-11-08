@@ -1,0 +1,437 @@
+diff --git a/web/src/components/ui/command.test.tsx b/web/src/components/ui/command.test.tsx
+index 22f0062..9af1377 100644
+--- a/web/src/components/ui/command.test.tsx
++++ b/web/src/components/ui/command.test.tsx
+@@ -135,3 +135,86 @@ describe("overlay family scan and packages (TC-COMP-016)", () => {
+     }
+   });
+ });
++
++function tokensOf(node: Element | null | undefined): string[] {
++  if (!node) throw new Error("node not rendered");
++  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
++}
++
++// AC-26, DAC-E1-12, AC-25: the palette's classes take design-system tokens and none of the
++// Tailwind-default literals the shadcn source ships (command spec section 6, DEC-0305), and the
++// input keeps a visible focus indicator (UX design 0.6).
++describe("command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005)", () => {
++  async function openPalette() {
++    const user = userEvent.setup();
++    render(<Harness />);
++    await user.click(screen.getByRole("button", { name: "Open the command palette" }));
++    return screen.findByRole("dialog", { name: "Search FactorFlow" });
++  }
++
++  it("styles the dialog content and scrim with the popover and foreground tokens", async () => {
++    const dialog = await openPalette();
++    const content = tokensOf(dialog);
++    expect(content).toContain("bg-popover");
++    expect(content).not.toContain("shadow-lg");
++    const scrim = tokensOf(document.querySelector("[data-state='open'].fixed.inset-0"));
++    expect(scrim).toContain("bg-foreground/40");
++    expect(scrim).not.toContain("bg-black/80");
++  });
++
++  it("caps the list by the row height token and gives the input no fixed height", async () => {
++    const dialog = await openPalette();
++    expect(tokensOf(dialog.querySelector("[cmdk-list]"))).toContain(
++      "max-h-[calc(var(--row-height)*10)]",
++    );
++    expect(tokensOf(dialog.querySelector("[cmdk-list]"))).not.toContain("max-h-80");
++    const input = tokensOf(dialog.querySelector("[cmdk-input]"));
++    expect(input).not.toContain("h-11");
++  });
++
++  it("styles the active item with the accent tokens and the item with the theme radius", async () => {
++    const dialog = await openPalette();
++    const item = tokensOf(dialog.querySelector("[cmdk-item]"));
++    for (const token of [
++      "rounded",
++      "px-2",
++      "py-2",
++      "data-[selected=true]:bg-accent",
++      "data-[selected=true]:text-accent-foreground",
++    ]) {
++      expect(item, token).toContain(token);
++    }
++    for (const shipped of [
++      "rounded-sm",
++      "py-1.5",
++      "data-[selected=true]:bg-muted",
++      "data-[selected=true]:text-foreground",
++    ]) {
++      expect(item, shipped).not.toContain(shipped);
++    }
++  });
++
++  it("sets group headings in the small muted face", async () => {
++    const dialog = await openPalette();
++    const root = tokensOf(dialog.querySelector("[cmdk-root]"));
++    for (const token of [
++      "[&_[cmdk-group-heading]]:text-xs",
++      "[&_[cmdk-group-heading]]:font-medium",
++      "[&_[cmdk-group-heading]]:text-muted-foreground",
++    ]) {
++      expect(root, token).toContain(token);
++    }
++  });
++
++  it("keeps a visible, token-backed focus indicator around the input", async () => {
++    const dialog = await openPalette();
++    const wrapper = tokensOf(dialog.querySelector("[cmdk-input-wrapper]"));
++    for (const token of [
++      "focus-within:ring",
++      "focus-within:ring-inset",
++      "focus-within:ring-ring",
++    ]) {
++      expect(wrapper, token).toContain(token);
++    }
++  });
++});
+diff --git a/web/src/components/ui/command.tsx b/web/src/components/ui/command.tsx
+index 29dd481..9e64b37 100644
+--- a/web/src/components/ui/command.tsx
++++ b/web/src/components/ui/command.tsx
+@@ -82,7 +82,10 @@ const CommandInput = forwardRef<
+   ElementRef<typeof CommandPrimitive.Input>,
+   ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
+ >(({ className, ...props }, ref) => (
+-  <div className="flex items-center gap-2 border-b border-border px-3" cmdk-input-wrapper="">
++  <div
++    className="flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"
++    cmdk-input-wrapper=""
++  >
+     <Search aria-hidden="true" className="size-4 shrink-0 opacity-50" />
+     <CommandPrimitive.Input
+       ref={ref}
+diff --git a/web/src/components/ui/dialog.test.tsx b/web/src/components/ui/dialog.test.tsx
+index 56a3b57..955b4a0 100644
+--- a/web/src/components/ui/dialog.test.tsx
++++ b/web/src/components/ui/dialog.test.tsx
+@@ -191,3 +191,50 @@ describe("ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15)", () => {
+     expect(dialog.className).not.toContain("bg-destructive");
+   });
+ });
++
++function tokensOf(node: Element | null | undefined): string[] {
++  if (!node) throw new Error("node not rendered");
++  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
++}
++
++// AC-26, DAC-E1-12: the confirm dialog's surface takes the popover tokens and none of the
++// Tailwind-default literals the shadcn source ships (dialog spec section 6, DEC-0305).
++describe("dialog confirm resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003)", () => {
++  async function openContent() {
++    const user = userEvent.setup();
++    render(<Harness onConfirm={vi.fn()} />);
++    await user.click(screen.getByRole("button", { name: TITLE }));
++    return screen.findByRole("dialog", { name: TITLE });
++  }
++
++  it("styles the content with the popover surface, the prose measure and the theme radius", async () => {
++    const tokens = tokensOf(await openContent());
++    for (const token of [
++      "max-w-prose",
++      "rounded",
++      "border",
++      "border-border",
++      "bg-popover",
++      "text-popover-foreground",
++      "p-6",
++    ]) {
++      expect(tokens, token).toContain(token);
++    }
++    for (const shipped of [
++      "max-w-lg",
++      "rounded-lg",
++      "shadow-lg",
++      "bg-background",
++      "text-foreground",
++    ]) {
++      expect(tokens, shipped).not.toContain(shipped);
++    }
++  });
++
++  it("styles the overlay with the foreground scrim, not black", async () => {
++    await openContent();
++    const tokens = tokensOf(overlay());
++    expect(tokens).toContain("bg-foreground/40");
++    expect(tokens).not.toContain("bg-black/80");
++  });
++});
+diff --git a/web/src/components/ui/progress.test.tsx b/web/src/components/ui/progress.test.tsx
+index a8413af..dc9d1e1 100644
+--- a/web/src/components/ui/progress.test.tsx
++++ b/web/src/components/ui/progress.test.tsx
+@@ -107,3 +107,35 @@ describe("progress indicator and tokens (DEC-0303)", () => {
+     expect(typeChecked).toBeTypeOf("function");
+   });
+ });
++
++function tokensOf(node: Element | null | undefined): string[] {
++  if (!node) throw new Error("node not rendered");
++  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
++}
++
++// AC-26, DAC-E1-12: the track takes the spec's 6-8 px height and the theme radius (progress spec
++// section 3), and an indeterminate bar moves when motion is allowed (progress spec section 4).
++describe("progress resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-004)", () => {
++  function renderBar(value: number | null) {
++    render(
++      <>
++        <p id="p1">label</p>
++        <Progress value={value} max={2} aria-labelledby="p1" />
++      </>,
++    );
++    return screen.getByRole("progressbar");
++  }
++
++  it("sets the track at the 8 px spacing height with the theme radius", () => {
++    const tokens = tokensOf(renderBar(1));
++    expect(tokens).toContain("h-2");
++    expect(tokens).toContain("rounded");
++    expect(tokens).not.toContain("h-4");
++    expect(tokens).not.toContain("rounded-full");
++  });
++
++  it("pulses the indeterminate indicator only when motion is allowed", () => {
++    const indicator = indicatorOf(renderBar(null));
++    expect(tokensOf(indicator)).toContain("motion-safe:animate-pulse");
++  });
++});
+diff --git a/web/src/components/ui/stepper.test.tsx b/web/src/components/ui/stepper.test.tsx
+index b9b3259..8ee0ed0 100644
+--- a/web/src/components/ui/stepper.test.tsx
++++ b/web/src/components/ui/stepper.test.tsx
+@@ -96,9 +96,14 @@ describe("stepper marks the current step and links only done steps (DAC-E1-14, A
+     );
+     const link = screen.getByRole("link", { name: "Market data, done" });
+     const clicked = vi.fn((event: MouseEvent) => event.defaultPrevented);
+-    document.addEventListener("click", clicked);
++    // Records the flag, then stops jsdom attempting the navigation it does not implement.
++    const observe = (event: MouseEvent) => {
++      clicked(event);
++      event.preventDefault();
++    };
++    document.addEventListener("click", observe);
+     await user.click(link);
+-    document.removeEventListener("click", clicked);
++    document.removeEventListener("click", observe);
+     expect(clicked).toHaveReturnedWith(false);
+   });
+ 
+@@ -113,3 +118,93 @@ describe("stepper marks the current step and links only done steps (DAC-E1-14, A
+     expect(link.className).toContain("focus-visible:ring-ring");
+   });
+ });
++
++function tokensOf(node: Element | null | undefined): string[] {
++  if (!node) throw new Error("node not rendered");
++  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
++}
++
++// AC-25, AC-26, DAC-E1-14: the stepper's focus ring, dots, labels and summary take the tokens the
++// stepper spec sections 3 and 6 name, its list is an `ol`, and activating a done step with
++// `onSelect` never follows the href (IR-001 to IR-004).
++describe("stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004)", () => {
++  function dotsAndTitles() {
++    renderStepper();
++    const items = screen.getAllByRole("listitem");
++    return items.map((item) => ({
++      dot: tokensOf(item.querySelector("[aria-hidden='true']:not(svg)")),
++      title: tokensOf(
++        item.querySelector("[aria-hidden='true']:not(svg)")?.nextElementSibling?.firstElementChild
++          ?.firstElementChild,
++      ),
++    }));
++  }
++
++  it("renders the list as an ol", () => {
++    renderStepper();
++    expect(screen.getByRole("list").tagName).toBe("OL");
++  });
++
++  it("gives the done link a ring of the focus width in the ring colour, and no ring-4 or outline", () => {
++    renderStepper();
++    const tokens = tokensOf(screen.getByRole("link", { name: "Market data, done" }));
++    expect(tokens).toContain("focus-visible:ring");
++    expect(tokens).toContain("focus-visible:ring-ring");
++    expect(tokens).toContain("focus-visible:outline-none");
++    expect(tokens).not.toContain("focus-visible:ring-4");
++  });
++
++  it("draws the done dot filled, the current dot ringed and the to-do dot outlined", () => {
++    const [done, current, todo] = dotsAndTitles().map(({ dot }) => dot);
++    expect(done).toEqual(expect.arrayContaining(["bg-foreground", "text-background"]));
++    expect(done).not.toContain("bg-status-good");
++    expect(current).toEqual(
++      expect.arrayContaining([
++        "border",
++        "border-status-active",
++        "ring",
++        "ring-status-active-muted",
++      ]),
++    );
++    expect(current).not.toContain("ring-4");
++    expect(todo).toEqual(
++      expect.arrayContaining(["border", "border-border", "text-muted-foreground"]),
++    );
++  });
++
++  it("sets every dot's number in the numeric face", () => {
++    for (const { dot } of dotsAndTitles()) {
++      expect(dot).toContain("font-numeric");
++      expect(dot).toContain("text-xs");
++    }
++  });
++
++  it("weights the current title 600 and mutes the to-do title", () => {
++    const [, current, todo] = dotsAndTitles().map(({ title }) => title);
++    expect(current).toEqual(expect.arrayContaining(["font-semibold", "text-foreground"]));
++    expect(todo).toContain("text-muted-foreground");
++    expect(todo).not.toContain("text-foreground");
++  });
++
++  it("sets the summary in the small muted face", () => {
++    renderStepper();
++    const summary = screen.getByText("Found");
++    expect(tokensOf(summary)).toEqual(expect.arrayContaining(["text-xs", "text-muted-foreground"]));
++  });
++
++  it("prevents the browser following the href when onSelect handles the click", async () => {
++    const user = userEvent.setup();
++    renderStepper();
++    const link = screen.getByRole("link", { name: "Market data, done" });
++    const defaultPrevented = vi.fn((event: MouseEvent) => event.defaultPrevented);
++    // Runs in the bubble phase after React's handler, then stops jsdom navigating.
++    const observe = (event: MouseEvent) => {
++      defaultPrevented(event);
++      event.preventDefault();
++    };
++    document.addEventListener("click", observe);
++    await user.click(link);
++    document.removeEventListener("click", observe);
++    expect(defaultPrevented).toHaveReturnedWith(true);
++  });
++});
+diff --git a/web/src/components/ui/toast.test.tsx b/web/src/components/ui/toast.test.tsx
+index c3aba61..455acf4 100644
+--- a/web/src/components/ui/toast.test.tsx
++++ b/web/src/components/ui/toast.test.tsx
+@@ -1,4 +1,4 @@
+-import { act, render, screen, waitFor } from "@testing-library/react";
++import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { toast as sonnerToast } from "sonner";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -12,7 +12,13 @@ afterEach(() => {
+   act(() => {
+     sonnerToast.dismiss();
+   });
+-  vi.runOnlyPendingTimers();
++  // Let sonner's removal timers fire inside act while the fake clock still owns them, so none
++  // survives the test environment's teardown.
++  act(() => {
++    vi.advanceTimersByTime(1000);
++    vi.runOnlyPendingTimers();
++  });
++  cleanup();
+   vi.useRealTimers();
+ });
+ 
+@@ -39,7 +45,7 @@ async function raiseAll() {
+ // Implements TC-COMP-013
+ describe("toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25)", () => {
+   it("keeps error and warning, drops success, and never moves focus", async () => {
+-    const user = setup();
++    setup();
+     const before = screen.getByRole("button", { name: "Before" });
+     before.focus();
+     await raiseAll();
+@@ -61,8 +67,6 @@ describe("toast error and warning persist, never take focus, announce politely (
+     }
+     expect(document.querySelector('[aria-live="assertive"]')).toBeNull();
+     expect(screen.queryByRole("alert")).toBeNull();
+-    // The user object is unused beyond the shared timer wiring.
+-    expect(user).toBeDefined();
+   });
+ 
+   it("reaches a close button on a persisting toast by keyboard and dismisses only that toast", async () => {
+@@ -118,3 +122,63 @@ describe("toast variants (DEC-0302, DAC-E1-S3-2)", () => {
+     expect("info" in toast).toBe(false);
+   });
+ });
++
++function tokensOf(node: Element | null | undefined): string[] {
++  if (!node) throw new Error("node not rendered");
++  return node.getAttribute("class")?.split(/\s+/).filter(Boolean) ?? [];
++}
++
++// AC-26, DAC-E1-12: the toast's surface and the outcome accents carry their tier in a token
++// (toast spec section 6; UX design 0.6), and the close control meets the 24 px target (IR-006).
++describe("toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006)", () => {
++  it("marks the region with both toaster and group, so the group-[.toaster] tokens apply", async () => {
++    setup();
++    await raiseAll();
++    const region = document.querySelector("[data-sonner-toaster]");
++    expect(tokensOf(region)).toEqual(expect.arrayContaining(["toaster", "group"]));
++  });
++
++  it("gives each toast the popover surface and the theme radius, with no shipped shadow", async () => {
++    setup();
++    await raiseAll();
++    const tokens = tokensOf(screen.getByText("Download failed").closest("[data-sonner-toast]"));
++    for (const token of [
++      "group-[.toaster]:bg-popover",
++      "group-[.toaster]:text-popover-foreground",
++      "group-[.toaster]:border-border",
++      "group-[.toaster]:rounded",
++    ]) {
++      expect(tokens, token).toContain(token);
++    }
++    for (const shipped of [
++      "group-[.toaster]:bg-background",
++      "group-[.toaster]:text-foreground",
++      "group-[.toaster]:shadow-lg",
++    ]) {
++      expect(tokens, shipped).not.toContain(shipped);
++    }
++  });
++
++  it("colours the icon by outcome: critical, warning, good", async () => {
++    setup();
++    await raiseAll();
++    const accentOf = (message: string) =>
++      tokensOf(screen.getByText(message).closest("[data-sonner-toast]")).filter((token) =>
++        token.includes("data-icon"),
++      );
++    expect(accentOf("Download failed")).toEqual(["[&_[data-icon]]:text-status-critical"]);
++    expect(accentOf("Download partial")).toEqual(["[&_[data-icon]]:text-status-warning"]);
++    expect(accentOf("Download complete")).toEqual(["[&_[data-icon]]:text-status-good"]);
++  });
++
++  it("sizes the dismiss control from the spacing token, 24 px and no smaller", async () => {
++    setup();
++    await raiseAll();
++    const close = screen
++      .getByText("Download failed")
++      .closest("[data-sonner-toast]")
++      ?.querySelector("[data-close-button]");
++    const tokens = tokensOf(close);
++    expect(tokens).toContain("!size-5");
++  });
++});
+diff --git a/web/src/components/ui/toast.tsx b/web/src/components/ui/toast.tsx
+index 09b14a3..aa43ff9 100644
+--- a/web/src/components/ui/toast.tsx
++++ b/web/src/components/ui/toast.tsx
+@@ -25,6 +25,8 @@ const Toaster = (props: ToasterProps) => (
+         toast:
+           "group toast group-[.toaster]:bg-popover group-[.toaster]:text-popover-foreground group-[.toaster]:border-border group-[.toaster]:rounded",
+         description: "group-[.toast]:text-muted-foreground",
++        // Sonner draws a 20 px close button; the toast spec asks for 24 px (section 5).
++        closeButton: "!size-5",
+         actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+         success: "[&_[data-icon]]:text-status-good",
+         warning: "[&_[data-icon]]:text-status-warning",

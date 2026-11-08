@@ -1,0 +1,42 @@
+RED for cycle-7 (review v1 rework, IR-001 to IR-006).
+Part 1: the adversarial review's own run. 31 of its 79 mutants survived the pre-rework suites plus tsc:
+  survived web/src/components/ui/dialog.tsx:manual:14
+  survived web/src/components/ui/dialog.tsx:manual:15
+  survived web/src/components/ui/dialog.tsx:manual:16
+  survived web/src/components/ui/dialog.tsx:manual:17
+  survived web/src/components/ui/command.tsx:manual:6
+  survived web/src/components/ui/command.tsx:manual:7
+  survived web/src/components/ui/command.tsx:manual:8
+  survived web/src/components/ui/command.tsx:manual:9
+  survived web/src/components/ui/command.tsx:manual:10
+  survived web/src/components/ui/command.tsx:manual:11
+  survived web/src/components/ui/command.tsx:manual:12
+  survived web/src/components/ui/toast.tsx:manual:7
+  survived web/src/components/ui/toast.tsx:manual:8
+  survived web/src/components/ui/toast.tsx:manual:9
+  survived web/src/components/ui/toast.tsx:manual:10
+  survived web/src/components/ui/toast.tsx:manual:11
+  survived web/src/components/ui/toast.tsx:manual:12
+  survived web/src/components/ui/progress.tsx:manual:6
+  survived web/src/components/ui/progress.tsx:manual:7
+  survived web/src/components/ui/progress.tsx:manual:8
+  survived web/src/components/ui/stepper.tsx:manual:3
+  survived web/src/components/ui/stepper.tsx:manual:4
+  survived web/src/components/ui/stepper.tsx:manual:5
+  survived web/src/components/ui/stepper.tsx:manual:6
+  survived web/src/components/ui/stepper.tsx:manual:7
+  survived web/src/components/ui/stepper.tsx:manual:8
+  survived web/src/components/ui/stepper.tsx:manual:9
+  survived web/src/components/ui/stepper.tsx:manual:10
+  survived web/src/components/ui/stepper.tsx:manual:13
+  survived web/src/components/ui/stepper.tsx:manual:14
+  survived web/src/components/ui/stepper.tsx:manual:15
+
+Part 2: the new tests for IR-005 and IR-006 against the pre-rework toast.tsx and command.tsx (git checkout HEAD of both files, then npx vitest run toast command):
+   × command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > keeps a visible, token-backed focus indicator around the input 17ms
+   × toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > sizes the dismiss control from the spacing token, 24 px and no smaller 47ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/ui/command.test.tsx > command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > keeps a visible, token-backed focus indicator around the input
+ FAIL  src/components/ui/toast.test.tsx > toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > sizes the dismiss control from the spacing token, 24 px and no smaller
+ Test Files  2 failed (2)
+      Tests  2 failed | 16 passed (18)

@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w0/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 12ms
+ ✓ src/components/token-literals.test.ts (30 tests) 40ms
+ ❯ src/components/ui/progress.test.tsx (10 tests | 1 failed) 311ms
+   × progress resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-004) > sets the track at the 8 px spacing height with the theme radius 31ms
+     → expected [ 'relative', 'h-2', 'w-full', …(3) ] to include 'rounded'
+ ✓ src/components/ui/button.test.tsx (11 tests) 612ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 622ms
+   ✓ input (DAC-E1-S2-2, AC-25) > renders the text variant by default 306ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1021ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 396ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 355ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1474ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 589ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 134ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 462ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 499ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 441ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 187ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 659ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 367ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 859ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 931ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 434ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1004ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 509ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-004) > sets the track at the 8 px spacing height with the theme radius
+AssertionError: expected [ 'relative', 'h-2', 'w-full', …(3) ] to include 'rounded'
+ ❯ src/components/ui/progress.test.tsx:132:20
+    130|     const tokens = tokensOf(renderBar(1));
+    131|     expect(tokens).toContain("h-2");
+    132|     expect(tokens).toContain("rounded");
+       |                    ^
+    133|     expect(tokens).not.toContain("h-4");
+    134|     expect(tokens).not.toContain("rounded-full");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:41
+   Duration  6.64s (transform 1.83s, setup 3.79s, collect 18.91s, tests 9.27s, environment 26.85s, prepare 8.20s)
+

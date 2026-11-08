@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w0/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 19ms
+ ✓ src/components/token-literals.test.ts (30 tests) 260ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 384ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 712ms
+   ✓ button blocked stays focusable, aria-disabled and inert (DAC-E1-S1-3) > takes keyboard focus, announces itself as disabled and is described by its reason 358ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 793ms
+   ✓ input (DAC-E1-S2-2, AC-25) > renders the text variant by default 325ms
+ ❯ src/components/ui/toast.test.tsx (8 tests | 1 failed) 1350ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 329ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 584ms
+   × toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > gives each toast the popover surface and the theme radius, with no shipped shadow 91ms
+     → group-[.toaster]:bg-popover: expected [ 'group', 'toast', …(5) ] to include 'group-[.toaster]:bg-popover'
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1884ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 713ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > closes on a click on the overlay and returns focus to the opener 334ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 155ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 686ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 459ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 628ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 9ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1170ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 555ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 390ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 903ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 282ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 747ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 472ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 972ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 601ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/toast.test.tsx > toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > gives each toast the popover surface and the theme radius, with no shipped shadow
+AssertionError: group-[.toaster]:bg-popover: expected [ 'group', 'toast', …(5) ] to include 'group-[.toaster]:bg-popover'
+ ❯ src/components/ui/toast.test.tsx:151:29
+    149|       "group-[.toaster]:rounded",
+    150|     ]) {
+    151|       expect(tokens, token).toContain(token);
+       |                             ^
+    152|     }
+    153|     for (const shipped of [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:34
+   Duration  6.73s (transform 2.08s, setup 4.49s, collect 21.96s, tests 11.34s, environment 24.35s, prepare 6.16s)
+

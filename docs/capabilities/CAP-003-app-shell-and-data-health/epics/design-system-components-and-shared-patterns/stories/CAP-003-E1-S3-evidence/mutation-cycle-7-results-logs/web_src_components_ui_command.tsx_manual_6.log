@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 3ms
+ ✓ src/components/token-literals.test.ts (30 tests) 309ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 250ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 368ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 564ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1218ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 567ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 2139ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 747ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 966ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 169ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 847ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1342ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 455ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 622ms
+ ❯ src/components/ui/command.test.tsx (10 tests | 1 failed) 1362ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 795ms
+   × command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > caps the list by the row height token and gives the input no fixed height 106ms
+     → expected [ 'max-h-80', 'overflow-y-auto', …(1) ] to include 'max-h-[calc(var(--row-height)*10)]'
+ ✓ src/components/ui/card.test.tsx (9 tests) 375ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1585ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 732ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1630ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 756ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > caps the list by the row height token and gives the input no fixed height
+AssertionError: expected [ 'max-h-80', 'overflow-y-auto', …(1) ] to include 'max-h-[calc(var(--row-height)*10)]'
+ ❯ src/components/ui/command.test.tsx:167:59
+    165|   it("caps the list by the row height token and gives the input no fix…
+    166|     const dialog = await openPalette();
+    167|     expect(tokensOf(dialog.querySelector("[cmdk-list]"))).toContain(
+       |                                                           ^
+    168|       "max-h-[calc(var(--row-height)*10)]",
+    169|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:18
+   Duration  6.94s (transform 1.88s, setup 5.16s, collect 25.23s, tests 13.75s, environment 21.77s, prepare 5.16s)
+

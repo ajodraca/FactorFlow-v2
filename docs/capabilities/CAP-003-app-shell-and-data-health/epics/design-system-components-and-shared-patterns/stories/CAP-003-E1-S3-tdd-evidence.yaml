@@ -168,3 +168,31 @@ cycles:
       score: 1.0
       survivors: []
 
+  - id: cycle-7
+    tasks: [T002, T003, T005, T007, T008, T009, T013, T014]
+    description: >
+      Review v1 rework (IR-001 to IR-006, IR-009). Tests now pin the done link's focus ring width and colour (IR-001); the absence of the shipped max-w-lg, bg-black/80, rounded-lg, shadow-lg, max-h-80, h-11, rounded-sm py-1.5, rounded-full and ring-4 literals (IR-002); the spec token and anatomy choices for the dialog surface, command active item and headings, toast accents, surface and group marker, progress track height, and stepper dots, labels, number face and summary (IR-003); the stepper's ol, the default-prevented click when onSelect is given, and the indeterminate pulse (IR-004). Production: CommandInput's wrapper takes a token-backed inset focus ring (IR-005) and the toast close button is sized !size-5, the 24 px spacing token (IR-006). IR-009: toast.test.tsx drops the placeholder assertion and tears down sonner's timers inside act; the stepper href test stops jsdom navigating. IR-007 deviations, recorded here: the done link names its state through aria-label, not DEC-0304's hidden span, because jsdom's name computation splits a link name around an inline span's leading space ("Market data , done"), so DEC-0304's wording should say aria-label for the link; cycle-1's RED came from a script that was not kept, and T006's package assertion was first staged with cycle-3 because T005 and T006 share command.test.tsx. IR-008 is accepted, not fixed: T016 prescribes underline-offset-4, tailwind.config.js is outside this story, and the offset is one 4 px text-decoration offset the scan cannot see; the owner can fold it in with the hairlines under DEC-0305.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-7-review-survivors.log
+    red_log_sha256: 7265bab10aab11ec87fa7597d9b455c236e560d86674723b61b7f79716e12a2f
+    red_evidence: >
+      31 of the review's 79 mutants survived the pre-rework suites plus tsc; the two new tests for IR-005 and IR-006 fail against the pre-rework toast.tsx and command.tsx.
+    green_evidence: >
+      components/ui suites pass (dialog, command, toast, progress, stepper) and tsc is clean; the 31 survivors and five mutants of the new production lines are all killed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 65107c7cc85d3fc35c015d173e6c712d830cf2718c79e71cfd9ecadce45862d4
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-7.patch
+    commit_hash: a6c56066bbb551354a8d06fab2d2ecc2558b1334
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/mutation-cycle-7-results.json
+      results_sha256: c44c50a96cb406597f1720d40bcb545a38cde61643cc235093a8e27e20bad6d4
+      generated: 36
+      killed: 36
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
