@@ -3,11 +3,11 @@ artifact_schema_version: 1
 artifact_id: CAP-003-component-design-data-health-api
 artifact_type: component-design
 artifact_version: 2
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-11-07
+updated: 2026-11-08
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
@@ -26,6 +26,12 @@ ai_provenance:
       version: "8"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-11-08T01:01:10Z
+  reviewed_revision: sha256:de44a915fc02b671425279bf769a61342a00657b5a4e72fde8205300c9d61259
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # Component: Data Health API

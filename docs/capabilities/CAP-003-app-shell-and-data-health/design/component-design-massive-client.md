@@ -3,11 +3,11 @@ artifact_schema_version: 1
 artifact_id: CAP-003-component-design-massive-client
 artifact_type: component-design
 artifact_version: 1
-status: draft
+status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-08
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
@@ -28,6 +28,12 @@ ai_provenance:
       version: "14 (b69facd), findings 55 to 64"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-11-08T01:01:11Z
+  reviewed_revision: sha256:1ee80d9e14b1e23f467a330ef0fe004680a37cf5bd6f341fc0485c8f31b35ee4
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # Component: Massive Client (CAP-003 changes)

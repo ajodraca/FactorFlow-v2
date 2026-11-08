@@ -7,10 +7,10 @@ capability: CAP-003
 title: App Shell & Data Health
 ui_facing: true
 created: 2026-10-25
-updated: 2026-11-07
+updated: 2026-11-08
 owner: Alvaro de Jodra
 owner_github: ajodraca
-status: draft
+status: approved
 ai_provenance:
   agent_id: system-design-agent
   agent_version: "1.2"
@@ -53,6 +53,12 @@ ai_provenance:
       version: "1 (docs/releases/CAP-002-release-v1.md, follow-up F1)"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
+approval:
+  approval_policy: owner-allowed
+  approved_by: "Alvaro de Jodra"
+  approved_at: 2026-11-08T01:01:13Z
+  reviewed_revision: sha256:4a8c85195d369416656eefa7933adbf88efb77c7b4c31f00dce7a723267c86d6
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # System Design: App Shell & Data Health
