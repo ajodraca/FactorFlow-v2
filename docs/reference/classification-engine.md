@@ -311,6 +311,9 @@ cursor:
 
 Only the second statement writes to the store. Every active instrument gets
 exactly three rows, even one with no bar, and a retired instrument gets none.
+A window is computed only where the stock's corporate actions were acquired
+over it (CAP-002-E2-S10; see
+[Corporate-actions coverage](#corporate-actions-coverage)).
 The stage reads no fundamental row and no line item, so an unresolved line
 item, which leaves the value and growth inputs that need it `missing`, does
 not affect it.
@@ -370,17 +373,72 @@ The return over window k is
   therefore scales the prior close but not the cash amount, and a dividend
   before a later split is scaled by that split.
 
+### Corporate-actions coverage
+
+An absent `corporate_action` row means "no split or dividend" only where the
+stock's corporate actions were acquired, so a window's return is computed only
+when one of the stock's `corporate_actions` coverage segments contains the
+whole window (CAP-002-E2-S10; DEC-0397, design 2.4). Otherwise the input is
+`missing` with cause `corporate_actions_not_covered`, and it is never scored as
+if the stock had not split or paid a dividend (AC-7, AC-12).
+
+On its window relation (`win`, one row per stock and window k), the statement
+finds the containing segment with a `LEFT JOIN LATERAL` probe of
+`coverage_segment` through `idx_coverage_instrument`, one per stock and window:
+
+- the segment's `instrument_id` is the stock's and its `data_type` is
+  `corporate_actions`;
+- `covered_from` is on or before the `S_k` bar's `session_date` plus one day
+  (`s.session_date + 1`), the first day of the window;
+- `covered_to` is on or after the `E` bar's `session_date` (`h.e_session`).
+
+Both bounds are inclusive, so a segment from exactly the day after `S_k` to
+exactly `E` covers the window, and one starting a day later or ending a day
+earlier does not. The bounds are the bars resolved, not their target dates:
+with `E` on 2026-09-15 for a target of 09-17, a segment ending on 09-15 covers
+the window. The probe takes `LIMIT 1` with no order: a stock's segments of one
+data type cannot overlap (`coverage_no_overlap`, migration 0003), so at most one
+contains a window. A window lacking a boundary bar matches no segment, and its
+boundary is named first (see [Momentum status](#momentum-status)). A segment of
+another data type, such as `prices`, never counts.
+
+A second relation, `coverage`, aggregates each active stock's
+`corporate_actions` segments, ordered by `covered_from`, for the `detail` of a
+window no segment contains.
+
+The segments are CAP-001's (DEC-0398): for every successful corporate-actions
+fetch, one that returns no action included, the acquisition runner records the
+range it requested, the history-depth start to the run date, merged with the
+stock's existing segments; a fetch that ends `failed` or `not_found` records
+none and leaves existing segments unchanged. The guard tests at the end of
+`tests/integration/test_runner_acquires.py` (TC-COMP-387) pin that contract.
+
+The engine tests' instruments are covered the same way by default:
+`tests/integration/engine_support.py`'s `add_instrument` and
+`engine_proof_support.py`'s `populate_volume` give each instrument one
+`corporate_actions` segment from 2000-01-01 to 2099-12-31, and a test passes
+`corporate_actions_covered=False` to `add_instrument` for an uncovered stock.
+The coverage cases are in `tests/integration/test_engine_inputs_momentum.py`
+(TC-COMP-381 to TC-COMP-386).
+
 ### Momentum status
 
 Every momentum input gets one status, decided in this order: `missing`, then
 `outdated`, else `present` (DEC-0116 (1)). A momentum input is never
 `not_computable` (design 2.4, DEC-0118 (4)). The causes of `missing` are also
-tested in the order listed, and the first that applies is named
-(DEC-0241 (2)).
+tested in the order listed, the owner's (DEC-0397, with DEC-0241 (2) ordering
+the last two), and the first that applies is named: a missing boundary, then a
+window no segment covers, then a non-positive close, then an unusable payload.
+A missing boundary comes first because without `E` and `S_k` there is no
+window to cover. An uncovered window is named `corporate_actions_not_covered`
+even when its `E` or `S_k` close is not positive or it holds an unusable
+payload, and an uncovered stock whose latest bar is older than `L` is
+`missing`, not `outdated`.
 
 | Status | When | Named in `detail` |
 |---|---|---|
 | `missing` | The stock has no bar on or before `E`'s target date, or none on or before `S_k`'s | `boundary`: `E`, or `S_` and k, such as `S_12` |
+| `missing` | No `corporate_actions` segment of the stock contains the window (see [Corporate-actions coverage](#corporate-actions-coverage); DEC-0397) | `cause`: `corporate_actions_not_covered` |
 | `missing` | A bar the window uses has a close of zero or less: its `E` bar, its `S_k` bar, or the prior session of any dividend in the window, usable or not (DEC-0241 (1)) | `cause`: `price_not_positive` |
 | `missing` | A split or dividend in the window is unusable (DEC-0117 (3)) | `cause`: `corporate_action_payload_unusable` |
 | `outdated` | The stock's latest bar has a `session_date` earlier than `L` (AC-13, DEC-0055 (5)). The latest bar has no upper bound, so it can be after `E` and still be outdated | `cause`: `outdated` |
@@ -402,17 +460,19 @@ other. Price currency reads no fundamental row.
   On a `present` or `outdated` input it is the latest `observed_on` of the
   window's `E` bar and `S_k` bar, of every split and dividend in the window,
   and of each dividend's prior session (DEC-0118 (1), DEC-0055 (7)). The
-  stock's latest bar counts only when it is one of those rows.
+  stock's latest bar counts only when it is one of those rows. Coverage does
+  not enter it: `coverage_segment` carries no date (design 2.4).
 - `restated_possible` is `false` on every momentum input (DEC-0118 (4)).
 
 ### Momentum `detail`
 
 | Status | Keys |
 |---|---|
-| `present` | `window_months`, `E`, `S`, `adjusted_close`, `splits`, `dividends` |
+| `present` | `window_months`, `E`, `S`, `adjusted_close`, `splits`, `dividends`, `corporate_actions_covered_by` |
 | `outdated` | The `present` keys, plus `cause` and `outdated`. `outdated.prices` holds `bar_date`, the stock's latest session, and `latest_trading_day` |
 | `missing`, no `E` | `boundary`, `on_or_before` (the target date) and `window_months` |
 | `missing`, no `S_k` | `boundary`, `on_or_before` (the target date), `window_months` and `E` |
+| `missing`, `corporate_actions_not_covered` | `cause`, `window_months`, `E`, `S` and `corporate_actions_coverage`, every `corporate_actions` segment of the stock as `{covered_from, covered_to}`, ordered by `covered_from`, and `[]` when it has none |
 | `missing`, `price_not_positive` | `cause`, `window_months`, `E`, `S` and `dividends`. `dividends` lists each dividend in the window whose prior close is zero or less, with `effective_on` and `prior_session`, and is `[]` when none is |
 | `missing`, `corporate_action_payload_unusable` | `cause`, `actions`, `window_months`, `E` and `S`. `actions` lists each unusable split or dividend in the window with `action_type`, `effective_on`, `observed_on` and its `payload` as stored |
 
@@ -428,19 +488,27 @@ and `S`. On a `present` or `outdated` input:
   `prior_adjusted_close`.
 
 Both are ordered by `effective_on`, and are `[]` when there is none.
+`corporate_actions_covered_by` is the segment that contains the window, as
+`{covered_from, covered_to}`.
 
 ### Momentum rows in `factor_input`
 
 The stage runs `insert_inputs.sql` with `factors = ['momentum']`, so it
 appends only the momentum rows of `inputs`. A `missing` row's `detail` gains
 `last_acquisition`, as in [Writing to `factor_input`](#writing-to-factor_input),
-from the instrument's `acquisition_state` row for one data type (DEC-0243,
-design 2.3 step 5):
+from the instrument's `acquisition_state` row for the data type its cause
+names (DEC-0243 as extended by DEC-0397, design 2.3 step 5):
 
-- `corporate_actions` when the cause is `corporate_action_payload_unusable`;
-- `prices` for every other cause, a missing boundary and `price_not_positive`
-  included. A window with a non-positive close and an unusable payload is
-  named `price_not_positive`, so it names `prices`.
+| Cause | Data type |
+|---|---|
+| a missing boundary | `prices` |
+| `corporate_actions_not_covered` | `corporate_actions` |
+| `price_not_positive` | `prices` |
+| `corporate_action_payload_unusable` | `corporate_actions` |
+
+Each input names the data type of the cause it is named for, so an uncovered
+window with a non-positive close names `corporate_actions`, and a covered
+window with a non-positive close and an unusable payload names `prices`.
 
 When the instrument has no such row, `detail` is written as derived. A
 `present` or `outdated` row gains no `last_acquisition`. A present return of
@@ -600,7 +668,7 @@ a `%(name)s` parameter.
 | `value_inputs.sql` | Creates the temporary table `inputs` holding the three value inputs of every active instrument. Writes no stored table |
 | `growth_inputs.sql` | Inserts the two growth inputs of every active instrument into `inputs`. Writes no stored table |
 | `insert_inputs.sql` | Appends the rows of `inputs` for the factors in `factors` to `factor_input`, adding `last_acquisition` to a `missing` row's `detail` |
-| `momentum_inputs.sql` | Inserts the three momentum inputs of every active instrument into `inputs`: the split- and dividend-adjusted total return over each window, with its status, dates and `detail`. Writes no stored table |
+| `momentum_inputs.sql` | Inserts the three momentum inputs of every active instrument into `inputs`: the split- and dividend-adjusted total return over each window its `corporate_actions` coverage contains, with its status, dates and `detail`. Writes no stored table |
 | `peer_sets.sql` | Inserts one `classification_set_factor` row per factor: how many active instruments have every input of the factor `present`, and whether that count reaches the floor |
 | `classify.sql` | Inserts one factor's `factor_classification` rows: the score and percentile of each stock in a ranked factor's peer set, and a `not_classified` row with its reason for every other active or retired instrument |
 
@@ -709,7 +777,9 @@ test payload keys (see [Line items](#line-items)).
 
 `tests/integration/test_engine_volume.py` (TC-COMP-091; AC-11, DAC-E2-5,
 DEC-0123) builds 3000 active instruments. Each has 273 daily bars, 8 quarters
-of each statement type and one dividend, and every tenth has a 2-for-1 split.
+of each statement type, one dividend and one `corporate_actions` coverage
+segment from 2000-01-01 to 2099-12-31, which contains every window, and every
+tenth has a 2-for-1 split.
 The test times the one `engine.build` call, given `timeout_seconds` 300.0, and
 fails unless the set is `complete` within `BUDGET_SECONDS`, 295: AC-11's 300
 seconds less one 5-second poll interval (DEC-0054). `statement_timeout` bounds

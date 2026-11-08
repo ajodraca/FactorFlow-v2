@@ -1,0 +1,211 @@
+diff --git a/src/factorflow/classification/sql/momentum_inputs.sql b/src/factorflow/classification/sql/momentum_inputs.sql
+index e36a258..0328e47 100644
+--- a/src/factorflow/classification/sql/momentum_inputs.sql
++++ b/src/factorflow/classification/sql/momentum_inputs.sql
+@@ -4,6 +4,11 @@
+ -- Inserts into the temporary table inputs that value_inputs.sql creates; insert_inputs.sql
+ -- writes the rows to factor_input (DEC-0115). Reads only. CAP-002-E2-S4.
+ --
++-- An absent corporate_action row means no split or dividend only where corporate actions were
++-- acquired: a window is computed only when one corporate_actions coverage segment of the stock
++-- contains it, and is missing with cause corporate_actions_not_covered otherwise (DEC-0397;
++-- the coverage contract is CAP-001's released behaviour, DEC-0398). CAP-002-E2-S10.
++--
+ -- Every bar lookup takes a session's latest observation, by observed_on and then recorded_at
+ -- (DEC-0117 (1)), so a re-acquired bar is used as currently known. That is design 2.4's
+ -- daily_bar_latest, each lookup one probe of idx_daily_bar_instrument_session.
+@@ -36,7 +41,8 @@ win AS (
+     -- S_k is the latest session on or before E minus k months (DEC-0055 (3)).
+     SELECT h.instrument_id, h.e_target, h.latest_session, h.e_session, h.e_close,
+            h.e_observed_on, w.k, (h.e_session - make_interval(months => w.k))::date AS s_target,
+-           s.session_date AS s_session, s.close_price AS s_close, s.observed_on AS s_observed_on
++           s.session_date AS s_session, s.close_price AS s_close, s.observed_on AS s_observed_on,
++           cv.covered_from AS ca_covered_from, cv.covered_to AS ca_covered_to
+       FROM held h
+      CROSS JOIN unnest(%(momentum_windows)s::integer[]) AS w (k)
+       LEFT JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on
+@@ -46,6 +52,27 @@ win AS (
+                                 <= (h.e_session - make_interval(months => w.k))::date
+                           ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC
+                           LIMIT 1) s ON true
++      -- The corporate_actions segment containing the window: it opens the day after S_k and
++      -- closes on E, both bounds inclusive (DEC-0397). Segments of a stock never overlap, so
++      -- at most one matches; one probe of idx_coverage_instrument per stock and window.
++      LEFT JOIN LATERAL (SELECT cs.covered_from, cs.covered_to
++                           FROM coverage_segment cs
++                          WHERE cs.instrument_id = h.instrument_id
++                            AND cs.data_type = 'corporate_actions'
++                            AND cs.covered_from <= s.session_date + 1
++                            AND cs.covered_to >= h.e_session
++                          LIMIT 1) cv ON true
++),
++coverage AS (
++    -- Every corporate_actions segment of each stock, for the detail of a window none contains.
++    SELECT cs.instrument_id,
++           jsonb_agg(jsonb_build_object('covered_from', cs.covered_from,
++                                        'covered_to', cs.covered_to)
++                     ORDER BY cs.covered_from) AS segments
++      FROM coverage_segment cs
++     WHERE cs.instrument_id = ANY(%(active_ids)s::bigint[])
++       AND cs.data_type = 'corporate_actions'
++     GROUP BY cs.instrument_id
+ ),
+ latest_action AS (
+     -- Each split's and dividend's latest observation (DEC-0117 (1)); ticker changes and IPOs
+@@ -145,7 +172,7 @@ judged AS (
+     -- S_k's price factor is the product over every usable split in the window, each being
+     -- after S_k; no split is after E and on or before it, so E's adjusted close is its close.
+     SELECT w.instrument_id, w.k, w.latest_session, w.e_target, w.s_target, w.e_session,
+-           w.e_close, w.s_session, w.s_close,
++           w.e_close, w.s_session, w.s_close, w.ca_covered_from, w.ca_covered_to,
+            w.s_close * coalesce(exp(sum(a.log_factor)), 1) AS s_adjusted_close,
+            coalesce(exp(sum(a.log_term)), 1) AS dividend_factor,
+            coalesce(bool_or(NOT a.usable), false) AS unusable,
+@@ -196,7 +223,8 @@ judged AS (
+                         AND a.effective_on > w.s_session
+                         AND a.effective_on <= w.e_session
+      GROUP BY w.instrument_id, w.k, w.latest_session, w.e_target, w.s_target, w.e_session,
+-              w.e_close, w.e_observed_on, w.s_session, w.s_close, w.s_observed_on
++              w.e_close, w.e_observed_on, w.s_session, w.s_close, w.s_observed_on,
++              w.ca_covered_from, w.ca_covered_to
+ ),
+ priced_window AS (
+     -- A bar the window uses whose close is not positive (DEC-0241).
+@@ -206,15 +234,17 @@ priced_window AS (
+       FROM judged j
+ ),
+ statused AS (
+-    -- Missing before outdated (DEC-0116 (1), DEC-0118 (4)), and among the missing causes a
+-    -- missing boundary, then a close that is not positive, then an unusable payload
+-    -- (DEC-0241 (2)). A momentum input is never not_computable (design 2.4).
++    -- Missing before outdated (DEC-0116 (1), DEC-0118 (4)), and among the missing causes the
++    -- owner's order (DEC-0397): a missing boundary, then a window no corporate_actions segment
++    -- contains, then a close that is not positive, then an unusable payload (DEC-0241 (2)).
++    -- A momentum input is never not_computable (design 2.4).
+     SELECT j.*,
+            CASE WHEN j.e_session IS NULL THEN 'E'
+                 WHEN j.s_session IS NULL THEN concat('S_', j.k)
+            END AS boundary,
+-           CASE WHEN j.e_session IS NULL OR j.s_session IS NULL OR j.price_not_positive
+-                  OR j.unusable THEN 'missing'
++           j.ca_covered_from IS NOT NULL AS covered,
++           CASE WHEN j.e_session IS NULL OR j.s_session IS NULL OR j.ca_covered_from IS NULL
++                  OR j.price_not_positive OR j.unusable THEN 'missing'
+                 WHEN j.latest_session < %(latest_trading_day)s::date THEN 'outdated'
+                 ELSE 'present'
+            END AS status,
+@@ -224,7 +254,10 @@ statused AS (
+                               'adjusted_close', jsonb_build_object('E', j.e_close,
+                                                                    'S', j.s_adjusted_close),
+                               'splits', j.splits,
+-                              'dividends', j.dividends) AS base
++                              'dividends', j.dividends,
++                              'corporate_actions_covered_by', jsonb_build_object(
++                                  'covered_from', j.ca_covered_from,
++                                  'covered_to', j.ca_covered_to)) AS base
+       FROM priced_window j
+ )
+ SELECT s.instrument_id,
+@@ -247,6 +280,11 @@ SELECT s.instrument_id,
+             WHEN s.boundary IS NOT NULL
+             THEN jsonb_build_object('boundary', s.boundary, 'on_or_before', s.s_target,
+                                     'window_months', s.k, 'E', s.e_bar)
++            WHEN NOT s.covered
++            THEN jsonb_build_object('cause', 'corporate_actions_not_covered',
++                                    'window_months', s.k, 'E', s.e_bar, 'S', s.s_bar,
++                                    'corporate_actions_coverage', coalesce(c.segments,
++                                                                           jsonb_build_array()))
+             WHEN s.price_not_positive
+             THEN jsonb_build_object('cause', 'price_not_positive',
+                                     'window_months', s.k, 'E', s.e_bar, 'S', s.s_bar,
+@@ -265,9 +303,14 @@ SELECT s.instrument_id,
+             ELSE s.base
+        END AS detail,
+        -- The data type whose last acquisition a missing input's detail names (design 2.3 step
+-       -- 5): corporate_actions when the cause is an unusable payload, else prices (DEC-0243).
+-       -- A window lacking a boundary joins no action, so it is never unusable.
+-       CASE WHEN s.unusable AND NOT s.price_not_positive THEN 'corporate_actions'
++       -- 5), per cause in the order above: prices for a missing boundary, corporate_actions
++       -- for a window not covered, prices for a close that is not positive, corporate_actions
++       -- for an unusable payload (DEC-0243 as extended by DEC-0397).
++       CASE WHEN s.boundary IS NOT NULL THEN 'prices'
++            WHEN NOT s.covered THEN 'corporate_actions'
++            WHEN s.price_not_positive THEN 'prices'
++            WHEN s.unusable THEN 'corporate_actions'
+             ELSE 'prices'
+        END AS missing_data_type
+   FROM statused s
++  LEFT JOIN coverage c ON c.instrument_id = s.instrument_id
+diff --git a/tests/integration/test_engine_inputs_momentum.py b/tests/integration/test_engine_inputs_momentum.py
+index fb96956..e62681e 100644
+--- a/tests/integration/test_engine_inputs_momentum.py
++++ b/tests/integration/test_engine_inputs_momentum.py
+@@ -1622,13 +1622,15 @@ def test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_mis
+ def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum(
+     env: Env, monkeypatch: pytest.MonkeyPatch
+ ) -> None:
+-    """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 1, so momentum is
+-    ranked by the covered stock alone, the uncovered stock is not classified on momentum,
+-    input_missing, naming return_3m, the first momentum input."""
+-    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 1)
++    """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 2, so momentum is
++    ranked by the two covered stocks alone (a peer set of one has no sample deviation), the
++    uncovered stock is not classified on momentum, input_missing, naming return_3m, the first
++    momentum input."""
++    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+     bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+-    add_close_series(env.conn, bare, STANDARD)
+-    add_close_series(env.conn, env.stock, STANDARD)
++    peer = add_instrument(env.conn, "PEER")
++    for stock in (bare, env.stock, peer):
++        add_close_series(env.conn, stock, STANDARD)
+ 
+     result = engine.build(env.conn, env.set_id, 60)
+ 
+@@ -1651,6 +1653,7 @@ def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentu
+         None,
+     )
+     assert rows[env.stock][0] == "classified"
++    assert rows[peer][0] == "classified"
+ 
+ 
+ # Implements TC-COMP-382
+@@ -1717,6 +1720,38 @@ def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+         assert row["detail"] == not_covered(name, listed), name
+ 
+ 
++@pytest.mark.parametrize(
++    ("covered_from", "present"),
++    [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
++    ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
++)
++# Implements TC-COMP-383
++def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
++    env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
++) -> None:
++    """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
++    on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
++    from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
++    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
++    e, s3 = date(2026, 9, 15), date(2026, 6, 12)
++    cover(env.conn, bare, covered_from, e)
++    add_close_series(
++        env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
++    )
++
++    build(env, monkeypatch)
++    row = momentum(env.conn, env.set_id, bare)["return_3m"]
++
++    if present:
++        assert row["status"] == "present"
++        assert_close(row["value"], ret(120, 100))
++        assert row["detail"]["corporate_actions_covered_by"] == segment(covered_from, e)
++    else:
++        assert row["status"] == "missing"
++        assert row["detail"]["cause"] == "corporate_actions_not_covered"
++        assert row["detail"]["corporate_actions_coverage"] == [segment(covered_from, e)]
++
++
+ # Implements TC-COMP-384
+ def test_a_covered_window_without_actions_gives_the_price_return_and_names_its_segment(
+     env: Env, monkeypatch: pytest.MonkeyPatch

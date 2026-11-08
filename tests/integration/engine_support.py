@@ -4,6 +4,10 @@ A plain module rather than ``conftest.py``: ``tests/conftest.py`` is a delivered
 Every helper takes the connection and commits, so a second connection sees the result.
 Test setup writes through the tables directly; that is setup against a throwaway
 database and never production code.
+
+``add_instrument`` gives each instrument one ``corporate_actions`` coverage segment by default,
+as a successful acquisition records one (CAP-002-E2-S10; DEC-0397, DEC-0398): momentum is
+computed only over a window that coverage contains.
 """
 
 from datetime import date
@@ -31,14 +35,31 @@ def migrate_through_classification(connection_string: str) -> psycopg.Connection
     return connection
 
 
-def add_instrument(conn: psycopg.Connection, symbol: str, lifecycle: str = "active") -> int:
+DEFAULT_CORPORATE_ACTIONS_COVERAGE = (date(2000, 1, 1), date(2099, 12, 31))
+"""The seeds' one ``corporate_actions`` segment, which contains every fixture window."""
+
+
+def add_instrument(
+    conn: psycopg.Connection,
+    symbol: str,
+    lifecycle: str = "active",
+    corporate_actions_covered: bool = True,
+) -> int:
+    """An instrument, with ``DEFAULT_CORPORATE_ACTIONS_COVERAGE`` unless
+    ``corporate_actions_covered`` is false (CAP-002-E2-S10)."""
     row = conn.execute(
         "INSERT INTO instrument (symbol, lifecycle, retired_at) "
         "VALUES (%s, %s, CASE WHEN %s = 'retired' THEN now() END) RETURNING instrument_id",
         (symbol, lifecycle, lifecycle),
     ).fetchone()
-    conn.commit()
     assert row is not None
+    if corporate_actions_covered:
+        conn.execute(
+            "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
+            "VALUES (%s, 'corporate_actions', %s, %s)",
+            (row[0], *DEFAULT_CORPORATE_ACTIONS_COVERAGE),
+        )
+    conn.commit()
     return int(row[0])
 
 

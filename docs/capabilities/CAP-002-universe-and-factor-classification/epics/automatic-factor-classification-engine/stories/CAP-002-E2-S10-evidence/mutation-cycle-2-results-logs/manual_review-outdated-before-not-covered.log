@@ -1,0 +1,42 @@
+........................................................................ [ 49%]
+.........F
+=================================== FAILURES ===================================
+___ test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51513 user=test database=test_8f248972795445f6bf0fb9b8d4edc9e...95d3020>, stock=1, set_id=UUID('aa8665ee-b1bd-42a3-a1c8-ad220671f963'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1095d3200>
+
+    def test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-13, DAC-E2-S10-1, DEC-0397, DEC-0116 (1) (review v1 IR-001): an uncovered stock
+        whose latest bar precedes the latest trading day is missing, corporate_actions_not_covered,
+        with no known_on and the corporate_actions acquisition named, never outdated; built with
+        every stage and two covered peers, it is not classified on momentum, input_missing (not
+        input_outdated), naming return_3m."""
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+        stale = add_instrument(env.conn, "STALEBARE", corporate_actions_covered=False)
+        record_outcomes(env.conn, stale)
+        peer = add_instrument(env.conn, "PEER")
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+        for stock in (env.stock, peer):
+            add_close_series(env.conn, stock, STANDARD)
+    
+        result = engine.build(env.conn, env.set_id, 60)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = momentum(env.conn, env.set_id, stale)
+        for name in MOMENTUM:
+            row = rows[name]
+>           assert row["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'outdated' == 'missing'
+E             
+E             - missing
+E             + outdated
+
+tests/integration/test_engine_inputs_momentum.py:1682: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 81 passed in 12.58s

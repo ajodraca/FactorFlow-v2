@@ -1,0 +1,57 @@
+........................................................................ [ 49%]
+...........F
+=================================== FAILURES ===================================
+__ test_coverage_must_contain_the_window_with_both_bounds_inclusive[exact-12] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=61178 user=test database=test_d1db5ffba2204447b5b306927419587...b5db920>, stock=1, set_id=UUID('61a1d341-1727-4f6d-b2d0-7507f2ce3875'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b5ddd60>
+segments = [(datetime.date(2025, 9, 18), datetime.date(2026, 9, 17))]
+present = ('return_3m', 'return_6m', 'return_12m')
+
+    @pytest.mark.parametrize(
+        ("segments", "present"),
+        [
+            ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+            ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+            ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+            ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+            ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+        ],
+        ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        segments: list[tuple[date, date]],
+        present: tuple[str, ...],
+    ) -> None:
+        """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+        from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+        it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+        segment of the stock, ordered by covered_from (the two-segment case is inserted later
+        segment first); a window the segment does contain stays present, naming that segment."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        for covered_from, covered_to in segments:
+            cover(env.conn, bare, covered_from, covered_to)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        rows = momentum(env.conn, env.set_id, bare)
+    
+        listed = [segment(*pair) for pair in sorted(segments)]
+        for name in MOMENTUM:
+            row = rows[name]
+            if name in present:
+>               assert row["status"] == "present", name
+E               AssertionError: return_3m
+E               assert 'missing' == 'present'
+E                 
+E                 - present
+E                 + missing
+
+tests/integration/test_engine_inputs_momentum.py:1753: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_must_contain_the_window_with_both_bounds_inclusive[exact-12]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 83 passed in 22.83s

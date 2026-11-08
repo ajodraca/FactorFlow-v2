@@ -28,7 +28,12 @@ from tests.integration.engine_inputs_support import (
     add_statement,
     months_before,
 )
-from tests.integration.engine_support import add_building_set, add_instrument, add_run
+from tests.integration.engine_support import (
+    DEFAULT_CORPORATE_ACTIONS_COVERAGE,
+    add_building_set,
+    add_instrument,
+    add_run,
+)
 
 SESSIONS = 273  # design section 5: 273 bars per instrument
 QUARTERS = 8  # design section 5: 8 quarters of each statement type
@@ -112,8 +117,18 @@ SELECT i.id, 'split', d.effective_on, d.effective_on,
  WHERE i.pos %% 10 = 0
 """
 
+# One corporate_actions coverage segment per instrument, as a successful acquisition records
+# (CAP-002-E2-S10; DEC-0397, DEC-0398): momentum is computed only over a covered window.
+_COVERAGE_SQL = """
+INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to)
+SELECT i.id, 'corporate_actions', %(covered_from)s::date, %(covered_to)s::date
+  FROM unnest(%(ids)s::bigint[]) AS i (id)
+"""
+
 # Planner statistics a long-lived store holds and a fresh bulk load lacks (DEC-0123).
-_ANALYZE_SQL = "ANALYZE daily_bar, fundamental_observation, corporate_action, instrument"
+_ANALYZE_SQL = (
+    "ANALYZE daily_bar, fundamental_observation, corporate_action, coverage_segment, instrument"
+)
 
 _SNAPSHOT_SQL = {
     "classification_set": "SELECT * FROM classification_set WHERE set_id = %s ORDER BY set_id",
@@ -218,8 +233,10 @@ def populate_volume(
 
     Per instrument: 273 bars (``volume_sessions``), eight quarters of each statement type
     observed and filed 30 days before ``last_session``, one cash dividend inside the momentum
-    windows, and for every tenth a 2-for-1 split, then ``ANALYZE`` (DEC-0123). Returns the
-    instrument ids, ascending, and the classification date, which is ``last_session``.
+    windows, for every tenth a 2-for-1 split, and one ``corporate_actions`` coverage segment,
+    ``DEFAULT_CORPORATE_ACTIONS_COVERAGE`` (CAP-002-E2-S10), then ``ANALYZE`` (DEC-0123).
+    Returns the instrument ids, ascending, and the classification date, which is
+    ``last_session``.
     """
     sessions = volume_sessions(last_session)
     # Ex-dates between 3 and 2 months before the last session, inside (S_3, E] of every
@@ -244,6 +261,10 @@ def populate_volume(
         )
         cur.execute(_DIVIDENDS_SQL, {"ids": ids, "days": dividend_days, "cash_amount": "0.25"})
         cur.execute(_SPLITS_SQL, {"ids": ids, "days": split_days})
+        covered_from, covered_to = DEFAULT_CORPORATE_ACTIONS_COVERAGE
+        cur.execute(
+            _COVERAGE_SQL, {"ids": ids, "covered_from": covered_from, "covered_to": covered_to}
+        )
         cur.execute(_ANALYZE_SQL)
     conn.commit()
     return ids, last_session
