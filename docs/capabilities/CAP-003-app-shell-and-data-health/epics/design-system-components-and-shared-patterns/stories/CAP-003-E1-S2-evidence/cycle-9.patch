@@ -1,0 +1,69 @@
+diff --git a/web/src/components/ui/input.tsx b/web/src/components/ui/input.tsx
+index 1717973..3c52f96 100644
+--- a/web/src/components/ui/input.tsx
++++ b/web/src/components/ui/input.tsx
+@@ -23,7 +23,10 @@ const BASE =
+   "h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive";
+ 
+ export const Input = forwardRef<HTMLInputElement, InputProps>(
+-  ({ className, variant = "text", suffix, type, "aria-labelledby": ariaLabelledby, ...props }, ref) => {
++  (
++    { className, variant = "text", suffix, type, "aria-labelledby": ariaLabelledby, ...props },
++    ref,
++  ) => {
+     const suffixId = useId();
+     const field = (
+       <input
+diff --git a/web/src/components/ui/select.test.tsx b/web/src/components/ui/select.test.tsx
+index c292656..e0ed672 100644
+--- a/web/src/components/ui/select.test.tsx
++++ b/web/src/components/ui/select.test.tsx
+@@ -133,8 +133,15 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
+     const wrapper = document.querySelector("[data-radix-popper-content-wrapper]");
+     expect(wrapper).not.toBeNull();
+     const content = wrapper?.firstElementChild;
+-    expect(content).toHaveClass("data-[side=bottom]:translate-y-1", "data-[side=top]:-translate-y-1");
+-    expect(content).toHaveClass("min-w-[var(--radix-select-trigger-width)]", "overflow-hidden", "rounded");
++    expect(content).toHaveClass(
++      "data-[side=bottom]:translate-y-1",
++      "data-[side=top]:-translate-y-1",
++    );
++    expect(content).toHaveClass(
++      "min-w-[var(--radix-select-trigger-width)]",
++      "overflow-hidden",
++      "rounded",
++    );
+     const viewport = content?.querySelector("[data-radix-select-viewport]");
+     expect(viewport).toHaveClass("p-1", "h-[var(--radix-select-trigger-height)]", "w-full");
+     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+@@ -160,7 +167,13 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
+     );
+     await user.tab();
+     await user.keyboard("{Enter}");
+-    expect(screen.getByText("Group")).toHaveClass("text-base", "font-semibold", "pl-6", "pr-2", "py-1");
++    expect(screen.getByText("Group")).toHaveClass(
++      "text-base",
++      "font-semibold",
++      "pl-6",
++      "pr-2",
++      "py-1",
++    );
+     const separator = document.querySelector(".h-px");
+     expect(separator).toHaveClass("-mx-1", "my-1", "h-px", "bg-muted");
+   });
+diff --git a/web/src/components/ui/select.tsx b/web/src/components/ui/select.tsx
+index 9f3f46d..c1a2270 100644
+--- a/web/src/components/ui/select.tsx
++++ b/web/src/components/ui/select.tsx
+@@ -138,6 +138,10 @@ export const SelectSeparator = forwardRef<
+   ElementRef<typeof SelectPrimitive.Separator>,
+   ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+ >(({ className, ...props }, ref) => (
+-  <SelectPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-muted", className)} {...props} />
++  <SelectPrimitive.Separator
++    ref={ref}
++    className={cn("-mx-1 my-1 h-px bg-muted", className)}
++    {...props}
++  />
+ ));
+ SelectSeparator.displayName = SelectPrimitive.Separator.displayName;

@@ -196,3 +196,23 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-8
+    tasks: [T003]
+    description: >
+      AC-26 literal scan over the six form family components (TC-COMP-011 scan half). Test-only cycle appended to S1's token-literals.test.ts. RED was observed by planting min-h-[80px] in textarea.tsx and reverting it, because the six files already exist by this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-8-scan.log
+    red_log_sha256: 9ced5ea058379334d5206e451dfa5822de93781ced0fafd52da69a6074f4cfa1
+    red_evidence: >
+      2 failed, 28 passed with min-h-[80px] planted in textarea.tsx (the new per-file case and S1's whole-tree scan).
+    green_evidence: >
+      token-literals 30 passed with the plant reverted.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8dd0b85d0b28aff1ed37317f6cc9451cc9b37253547046305a219dad7ca8b366
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-8.patch
+    commit_hash: 12b446e470469f342f8ba1df445ee9af3df9f234
+    mutation:
+      not_applicable: "test-only cycle: the token-literals block adds no production code"

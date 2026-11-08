@@ -23,7 +23,10 @@ const BASE =
   "h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive";
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant = "text", suffix, type, "aria-labelledby": ariaLabelledby, ...props }, ref) => {
+  (
+    { className, variant = "text", suffix, type, "aria-labelledby": ariaLabelledby, ...props },
+    ref,
+  ) => {
     const suffixId = useId();
     const field = (
       <input

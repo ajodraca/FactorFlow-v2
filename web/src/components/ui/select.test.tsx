@@ -133,8 +133,15 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
     const wrapper = document.querySelector("[data-radix-popper-content-wrapper]");
     expect(wrapper).not.toBeNull();
     const content = wrapper?.firstElementChild;
-    expect(content).toHaveClass("data-[side=bottom]:translate-y-1", "data-[side=top]:-translate-y-1");
-    expect(content).toHaveClass("min-w-[var(--radix-select-trigger-width)]", "overflow-hidden", "rounded");
+    expect(content).toHaveClass(
+      "data-[side=bottom]:translate-y-1",
+      "data-[side=top]:-translate-y-1",
+    );
+    expect(content).toHaveClass(
+      "min-w-[var(--radix-select-trigger-width)]",
+      "overflow-hidden",
+      "rounded",
+    );
     const viewport = content?.querySelector("[data-radix-select-viewport]");
     expect(viewport).toHaveClass("p-1", "h-[var(--radix-select-trigger-height)]", "w-full");
     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
@@ -160,7 +167,13 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
     );
     await user.tab();
     await user.keyboard("{Enter}");
-    expect(screen.getByText("Group")).toHaveClass("text-base", "font-semibold", "pl-6", "pr-2", "py-1");
+    expect(screen.getByText("Group")).toHaveClass(
+      "text-base",
+      "font-semibold",
+      "pl-6",
+      "pr-2",
+      "py-1",
+    );
     const separator = document.querySelector(".h-px");
     expect(separator).toHaveClass("-mx-1", "my-1", "h-px", "bg-muted");
   });
