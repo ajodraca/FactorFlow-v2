@@ -14,13 +14,19 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.318"
-  timestamp: 2026-11-08T01:34:11Z
+  timestamp: 2026-11-08T15:09:39Z
   source_artifacts:
     - id: CAP-003-E8
       version: "2"
+    - id: CAP-003-E2-S1
+      version: "2"
     - id: CAP-003-E2-S4
       version: "2"
+    - id: CAP-003-E3-S1
+      version: "2"
     - id: CAP-003-E6-S3
+      version: "2"
+    - id: CAP-003-E7-S5
       version: "2"
     - id: CAP-003
       version: "2"
@@ -122,31 +128,36 @@ AC-19 and AC-20. Every real-stack end-to-end story depends on E2-S5, which regis
 routes. E7-S8 (the `SHELL_ROUTES` edit) implements `/data` under DEC-0224 and depends on E3-S4 and
 E6-S7. E1-S10 and E7-S8 are sequenced after CAP-002's `classification-ui` merges (capability OQ-2).
 
-E8 comes last and no edge runs against EPIC order. **Provider side first** (owner decision for
-this breakdown): E8-S1 to E8-S4 edit CAP-001's delivered ingestion code, depend on no E1 to E7
+E8 comes last and no edge runs against EPIC order. **Provider side first** (owner decision,
+Alvaro de Jodra, 2026-11-07, for this breakdown; backlog review v6 FINDING-15): E8-S1 to E8-S4 edit CAP-001's delivered ingestion code, depend on no E1 to E7
 story, only on each other in order (S1, then S2, S3, S4), and can be planned and coded now.
 E8-S1 carries the runner's `ProviderNotEntitled` outcome mapping so that no landed state crashes
-a download on a plan refusal; E8-S3 and E8-S4 should be released together so the per-stock budget
-ships whole (E8-S3's landing note). The interface side, E8-S5 to E8-S10, depends on the E1 to E7
+a download on a plan refusal. **E8-S3 and E8-S4 land and release together** (owner decision, Alvaro
+de Jodra, 2026-11-08; backlog review v6 FINDING-13): one pull request or, if merged separately, one
+release, with no release built from a commit holding E8-S3 without E8-S4, because without E8-S4's
+per-stock `start_instrument()` call the throttle budget spans the ingestion process (the client is
+cached per credential across downloads) and, once spent, fails every later throttled request after
+one send. The interface side, E8-S5 to E8-S10, depends on the E1 to E7
 stories that create the files it edits: `failure-recovery.ts` on the AC-26 scan (E1-S1); the
 reader (E2-S1, with E2-S2 and E2-S3 for the counts it asserts); the API models and route tests
 (E2-S4, E2-S6); `shell-types.ts` and `shell-client.ts` (E3-S1); the *Needs fixing* row and
 header (E6-S3, with E6-S5's scan widening); the download detail (E7-S5). Every edge is in
 `dependencies.yaml`.
 
-**Who owns each change the v2 designs describe** (backlog review v5 FINDING-1). Each change is
-built once, by an E8 story editing after the earlier story lands; no earlier story builds it.
-Earlier stories are refined only where their own criteria would otherwise demand or contradict
-the change.
+**Who owns each change the v2 designs describe** (backlog review v5 FINDING-1; owner decision,
+Alvaro de Jodra, 2026-11-07). Each change is built once, by an E8 story editing after the earlier
+story lands; no earlier story builds it. Earlier stories are refined where their own criteria would
+otherwise demand or contradict the change, and E2-S1, E3-S1 and E7-S5 carry a one-line *Not in this
+story* note naming the owning E8 story (backlog review v6 FINDING-1).
 
 | Change (design v2) | Owned by | Earlier story that creates the file | Earlier story changed? |
 |--------------------|----------|-------------------------------------|------------------------|
-| `FailureCause`, the failure's `cause`, `cause_of`, `retryable` excluding `not_entitled` (data-health-reader §2.2, §2.4) | E8-S6 | E2-S1 | No. Its Description states the version 1 rule (any `failed`) and no `cause`; E8-S6 keeps DAC-E2-S1-3's fixture off `[not_entitled]` |
+| `FailureCause`, the failure's `cause`, `cause_of`, `retryable` excluding `not_entitled` (data-health-reader §2.2, §2.4) | E8-S6 | E2-S1 | **E2-S1 v2**, scope note only: its Description states the version 1 rule (any `failed`) and, in the note, no `cause`, naming E8-S6 as the owner; no criterion changes. E8-S6 keeps DAC-E2-S1-3's fixture off `[not_entitled]` |
 | `FailureResponse.cause` (data-health-api §2.4; system design §4.2) | E8-S7 | E2-S4, E2-S6 | **E2-S4 v2**: its DAC-E2-S4-1 asserted every §4.2 field present, which under §4.2 v2 demands `cause` that E2-S1's reader cannot supply; it now excludes `cause`, which E8-S7 adds |
-| `cause: FailureCause \| null` on the `ProblemPage` failure type (owner-shell §2.3) | E8-S8 | E3-S1 | No. E3-S1 depends on nothing and cannot import `FailureCause`; its DAC-E3-S1-4 forbids adding or renaming, not omitting. E8-S8 adds `cause` to the fixtures that exist when it lands |
+| `cause: FailureCause \| null` on the `ProblemPage` failure type (owner-shell §2.3) | E8-S8 | E3-S1 | **E3-S1 v2**, scope note only. E3-S1 depends on nothing (DEC-0223 answer A); it could import `FailureCause` once E8-S5 lands, but owning the field would add an edge from E3-S1 to E8-S5, against EPIC order and ahead of E1-S8, so the field is E8-S8's whichever lands first. Its DAC-E3-S1-4 forbids adding or renaming, not omitting. E8-S8 adds `cause` to the fixtures that exist when it lands |
 | `failureRecovery` and the two fix texts (ui-components §2.7a) | E8-S5 | none (new file) | No |
 | *Needs fixing* fix by cause, what-failed line without attempts for the two causes (data-health-ui §2.5) | E8-S9 | E6-S3 | **E6-S3 v2**: its DAC-E6-S3-1 and Description made *Download again* every *Failed* failure's fix, contradicting DAC-E6-8 v3; it now asserts *Download again* only for `[unavailable]` or no-prefix fixtures and leaves the two causes to E8-S9 |
-| Download detail fix line, all four kinds (owner-web-app §2.3) | E8-S10 | E7-S5 | No. E7-S5 renders no per-failure fix line; E8-S10 adds all of it, the *Download again* default included |
+| Download detail fix line, all four kinds (owner-web-app §2.3) | E8-S10 | E7-S5 | **E7-S5 v2**, scope note only: E7-S5 renders no per-failure fix line and its note names E8-S10 as the owner; E8-S10 adds all of it, the *Download again* default included |
 
 **Attempt counts** (backlog review v5 FINDING-4; specification review v5 FINDING-29): the
 delivered writer never records `attempts`, so production rows serve the column default, 1. No
@@ -155,7 +166,8 @@ E8-S9 removes the count from the two new causes' lines, and E6-S3 v2 and E8-S9 a
 value their fixtures serve.
 
 **Re-approval needed:** E8 v2, E2-S4 v2, E6-S3 v2 and this backlog v4 were materially modified
-by story generation and carry no approval until the owner approves them again.
+by story generation, and E2-S1 v2, E3-S1 v2 and E7-S5 v2 by the refinement for backlog review v6;
+none carries an approval until the owner approves it again, with E8-S1 to E8-S10.
 
 ## Full Traceability
 
