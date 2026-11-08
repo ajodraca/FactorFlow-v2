@@ -1,0 +1,30 @@
+    198| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > form family is scanned and clean (TC-COMP-011) > web/src/components/ui/textarea.tsx exists, is scanned and holds no literal
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "web/src/components/ui/textarea.tsx: 80px",
++ ]
+
+ ❯ src/components/token-literals.test.ts:271:41
+    269|     expect(isScannedSource(relPath)).toBe(true);
+    270|     expect(SCANNED_DIRECTORIES.some((directory) => relPath.startsWith(…
+    271|     expect(literalsIn(relPath, source)).toEqual([]);
+       |                                         ^
+    272|   });
+    273| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 28 passed (30)
+   Start at  09:26:12
+   Duration  550ms (transform 24ms, setup 51ms, collect 12ms, tests 14ms, environment 271ms, prepare 82ms)
+

@@ -167,3 +167,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-7
+    tasks: [T007, T008, T015]
+    description: >
+      form: shadcn form on react-hook-form with FormRoot (stacked, inline, noValidate), FormLabel id, FormControl aria-labelledby/aria-describedby/aria-invalid and role=alert FormMessage (TC-COMP-010, DEC-0299, DEC-0300). Mutation ran form, input and radio-group tests together; a first run left three survivors (item spacing, empty message, a contrived shouldUnregister mutant); two tests pinned the first two and the third was dropped as not a specified behaviour.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-7-form.log
+    red_log_sha256: ec74db1c840c85a474ba47a2305f772e36ee6509d4da3e76d79f165a4ba2043f
+    red_evidence: >
+      form.test.tsx failed to resolve ./form before the module existed.
+    green_evidence: >
+      form 9 passed; token-literals scan, tsc and biome lint clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7913b47217205da51b6b4c49b587c9b8b6d93411820e53103beb087f14fcd4c8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-7.patch
+    commit_hash: 57906d2507fab4fdc80036111e2d7c315d9ef684
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-7-results.json
+      results_sha256: 3e91923baf537f9523106aa309c1229a7eba3f815beb7985cdda02018fe16a6a
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
