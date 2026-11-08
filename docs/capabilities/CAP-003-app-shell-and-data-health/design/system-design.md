@@ -17,10 +17,10 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-07T23:17:49Z
+  timestamp: 2026-11-08T00:31:17Z
   source_artifacts:
     - id: CAP-003
-      version: "2, draft 2026-11-07"
+      version: "2, draft 2026-11-07 (0febf60)"
     - id: product-charter
       version: "2, approved"
     - id: tech-stack
@@ -719,9 +719,10 @@ sequenceDiagram
    stock the staleness derivation already reserves (`runtime-config` §2.2a,
    invariant 2: 900 > 660), so no timing value or invariant changes, and the
    sweeper never reclaims a run that is waiting out a rate limit. The run
-   continues to the remaining data types and stocks and is finalised by the
-   delivered outcome rule: `partial` when anything was stored, `failed` when
-   nothing was (Section 8 question 13).
+   continues to the remaining data types and stocks and finishes with its
+   recorded outcome, as AC-30 requires: the delivered outcome rule makes it
+   `partial` when anything was stored and `failed` when nothing was (Section 8
+   question 13, answered by the owner).
 5. **Each refusal keeps outcome `failed` and names its cause in the reason.**
    `compose_failure_reason` gains two kinds, looked up by exact class:
    `not_entitled`, whose variable segment is the fixed *the provider plan is
@@ -1071,6 +1072,9 @@ before the upgrade keep `[unavailable]` and are not rewritten (constraint 17).
     - (d) Rollback is a redeploy of the previous image with no data step: the
          new kinds are text in an existing column, and the delivered download
          detail screen shows them as the reason text it already renders.
+         That the stored reason is shown verbatim, its leading kind and
+         `request_id` included, predates this change and is a separate
+         follow-up (capability OQ-5; review v4 FINDING-30).
 
 ## 6. Architectural Assumptions
 
@@ -1148,7 +1152,7 @@ before the upgrade keep `[unavailable]` and are not rewritten (constraint 17).
 | AC-27 | CAP-002 keeps its routes | `classification-ui` `Screen registration` into `owner-shell`, routes unchanged | 4.2; DEC-0204 |
 | AC-28 | With 3,000 followed stocks, `GET /api/data-health` MUST answer within 2 seconds at the 95th percentile, measured by the volume test | `data-health-reader` coverage derivation over the active roster; `data-health-api` `GET /api/data-health`; read on demand by Data health only | 3.4 note 1, 5.7, 6.4 |
 | AC-29 | A plan refusal is not retried: sent once, recorded under its own reason; its *Needs fixing* row names the provider plan as the fix and offers no download | `massive-client` both-fields `not entitled` rule and `ProviderNotEntitled` (`FATAL` for `rate-limit-governor`, one request); `acquisition-runner` records `failed` with kind `not_entitled`; `data-health-reader` `cause` and `retryable` excluding `not_entitled`; `owner-shell` `ProblemPage` failure type carrying `cause`; `data-health-ui` and `owner-web-app` download detail fix from `failureRecovery` in `ui-components` | 1, 3.4 note 9, 3.6 notes 1, 5 to 7; 4.1, 4.2; 5.16 (a), (d) |
-| AC-30 | Throttling is waited out, then named: never a failed attempt; past the wait budget for one stock recorded under its own rate-limit reason; the download still finishes, never abandoned | `massive-client` `429` `MaxRetryError` rule (`THROTTLED`); `rate-limit-governor` per-stock budget checked before each wait, `ProviderRateLimited`; `acquisition-runner` `start_instrument()` at the heartbeat checkpoint and `failed` with kind `rate_limited`; staleness window unchanged (one budget per stock) | 1, 3.6 notes 2 to 5; 4.1, 4.2; 5.16 (b), (e); 5.17 |
+| AC-30 | Throttling is waited out, then named: never a failed attempt; past the wait budget for one stock recorded under its own rate-limit reason; the download still finishes with its recorded outcome, never abandoned | `massive-client` `429` `MaxRetryError` rule (`THROTTLED`); `rate-limit-governor` per-stock budget checked before each wait, `ProviderRateLimited`; `acquisition-runner` `start_instrument()` at the heartbeat checkpoint and `failed` with kind `rate_limited`; the run finalised by the delivered outcome rule (`partial`, or `failed` when nothing was stored); staleness window unchanged (one budget per stock) | 1, 3.6 notes 2 to 5; 4.1, 4.2; 5.16 (b), (e); 5.17 |
 
 Screen acceptance checks: S01-3, S01-4 (DEC-0203), S01-6 (box 6) and S01-7
 (5.11); S02-1 to S02-6 (Section 3.2, DEC-0202); S09-1 to S09-5 (Sections 3.4,
@@ -1256,7 +1260,12 @@ not in M1.
     standing and its honest-outcome rule says a download that stored nothing
     failed; "never abandoned" holds either way (Section 3.6 note 4). *Owner:
     capability owner, to confirm the reading. Blocks: the AC-30 test's
-    expected outcome in the all-throttled case only.*
+    expected outcome in the all-throttled case only.* **Answered 2026-11-07
+    by the owner** (capability `0febf60`, still v2; specification review v4
+    FINDING-28): AC-30 now reads "…and the download MUST still finish with
+    its recorded outcome, never abandoned." CAP-001's outcome rule stands, so
+    a download that stored nothing ends `failed`. This design already followed
+    that reading; nothing in it changes.
 14. **Persistent throttling now costs time per stock.** With one 300 s budget
     per stock, a provider that throttles every request for a whole download
     of 3,000 stocks would wait about 250 hours before finishing; the
@@ -1291,7 +1300,7 @@ not in M1.
 
 | Document | Path | Key findings used |
 |----------|------|-------------------|
-| Capability CAP-003 v2 (draft, `3174b50`) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Version 2: AC-29 and AC-30; In Scope *Provider refusals reported by cause*, changing `massive-client`, `rate-limit-governor` and `acquisition-runner` with CAP-001's designs left as they are; the Out of Scope exception; the §5.1 CAP-001 row; the plan-ownership assumption; §5.2 aligned for AC-29 and AC-30 in `3174b50` (the CAP-001 row's provider-refusal exception, the Massive row's *Any new provider read*; open question 11, answered). Version 1: 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
+| Capability CAP-003 v2 (draft, `0febf60`) | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` | Version 2: AC-29 and AC-30, AC-30 finishing "with its recorded outcome" since `0febf60` (open question 13, answered); OQ-5, showing a stored reason verbatim, a separate follow-up; In Scope *Provider refusals reported by cause*, changing `massive-client`, `rate-limit-governor` and `acquisition-runner` with CAP-001's designs left as they are; the Out of Scope exception; the §5.1 CAP-001 row; the plan-ownership assumption; §5.2 aligned for AC-29 and AC-30 in `3174b50` (the CAP-001 row's provider-refusal exception, the Massive row's *Any new provider read*; open question 11, answered). Version 1: 28 acceptance criteria (AC-28 added 2026-10-25); scope (shell, setup, Home, Data health, five screens taken over, redirects, palette, interim rail replaced); out of scope (kill switch, step 5, schedules, Live prices, scoped retry, any CAP-001 change); §5.1 runtime dependencies on CAP-001 and CAP-002's summary; §5.3 constraints; §5.4 STD-UI conformance; assumptions 1 to 4; OQ-1 to OQ-4 |
 | Product UX blueprint `PRODUCT-UX` v6 (approved) | `docs/ux/product-ux-blueprint.md` | §0 patterns in `web/src/components/patterns/`; principles 4, 5, 7, 8; §2.1 rail groups and count chips; §2.2 routes, `/` redirect and the four legacy redirects; §3.1 layout; §3.4 palette and the single keydown listener; §3.5 shell states; §4.1 Needs-you item and sort; §4.8 as-of line; §4.10 states; §6 first-run and data-problem flows; §7 vocabulary; §8 tiers; §9 action tiers and confirm wording; §10 M1 row (three palette groups, CAP-001 API as it is); §12 D-2, D-7, D-8, D-9 |
 | Home `PRODUCT-UX-S01` v4 (approved) | `docs/ux/screens/S01-home.md` | M1 regions; view model with an attention service and server sort; 60 s polling with *checked*; data item copy; states; S01-3, S01-4, S01-6, S01-7 |
 | Setup `PRODUCT-UX-S02` v4 (approved) | `docs/ux/screens/S02-setup.md` | Four M1 steps on CAP-001's API; credential variable name; parse rules and the 30-stock warning; complete when the first download is started; progress polled 10 s; reopen from Settings; S02-1 to S02-6 |
@@ -1314,18 +1323,19 @@ not in M1.
 
 ## 10. Design Readiness
 
-**Design Readiness Score: 79/100** (version 2; 80 at version 1)
+**Design Readiness Score: 80/100** (version 2; 80 at version 1)
 
 Version 2 covers AC-29 and AC-30 end to end: the three delivered ingestion
 components it changes are named with their changes and interfaces (Section
 4.1, 4.2), the per-stock throttle budget is shown to keep the staleness window
 as derived (Section 3.6 note 4), and *Needs fixing* tells a plan refusal apart
 by the stored reason's kind without a schema change. Every acceptance
-criterion, now 30, traces to a design element. The point it loses is the
-design choices this revision made on the owner's behalf for review: the
-unrecognised-refusal default (constraint 16 (c)) and the reading of AC-30's
-*partial* (open question 13). Capability §5.2, which contradicted the scope
-this revision implements, has been aligned (open question 11, answered).
+criterion, now 30, traces to a design element. What remains for the owner's
+review is the one design choice this revision made on their behalf, the
+unrecognised-refusal default (constraint 16 (c)). AC-30's outcome has been
+reworded by the owner to match the delivered outcome rule (open question 13,
+answered), and capability §5.2, which contradicted the scope this revision
+implements, has been aligned (open question 11, answered).
 
 Version 1's assessment follows.
 
