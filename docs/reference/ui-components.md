@@ -6,7 +6,7 @@ directory with `Badge`, `Button` and `Card` and the `cn` helper they share;
 CAP-003-E1-S2 added the form controls: `Form`, `Input`, `Textarea`,
 `Checkbox`, `RadioGroup` and `Select`; CAP-003-E1-S3 added the overlay and
 feedback family: `ConfirmDialog`, `Command`, `Toaster` and `toast`, `Progress`
-and `Stepper`. Every component is first-party source: it imports through relative paths, never
+and `Stepper`; CAP-003-E1-S4 added `DataTable`. Every component is first-party source: it imports through relative paths, never
 an `@/` alias, and `tsconfig.json` and `vite.config.ts` declare no path alias.
 
 ## Token-only styling
@@ -34,7 +34,8 @@ carries an approved licence (MIT, for the form packages) in `package-lock.json`.
 `@radix-ui/react-select`. All seven are `dependencies`, none a
 `devDependency`. The overlay and feedback family added five more, also
 `dependencies`: `@radix-ui/react-alert-dialog`, `@radix-ui/react-dialog`,
-`@radix-ui/react-progress`, `cmdk` and `sonner`. The stepper has no package.
+`@radix-ui/react-progress`, `cmdk` and `sonner`. The stepper has no package. `DataTable` added `@tanstack/react-table`
+(`^8.21.3`), also a `dependency`.
 
 ## `cn` (`utils.ts`)
 
@@ -222,3 +223,52 @@ by `label` holding an `ol` of `steps`. Props: `label`, `steps` and `markerSize`
 - Only a done step with an `href` is a link. When it has `onSelect`, a click is
   prevented and calls it. Current and to-do steps are never links or tab stops.
 - The stepper never moves focus; the caller moves it to the step's heading.
+
+## `DataTable` (`data-table.tsx`)
+
+`DataTable<TRow>` is the design-system table on TanStack Table v8: one
+controlled component with four variants, set by `variant`. It renders a native
+`table`, `data-variant` carrying the variant.
+
+Props: `columns` (TanStack `ColumnDef`s), `data`, `getRowId`, and optional
+`sorting`, `onSortingChange`, `rowHeader` and `busy`.
+
+- **Sorting is the caller's.** The table never sorts or reorders rows.
+  `sorting` is declared with `aria-sort` on the header; given
+  `onSortingChange`, a column with sorting enabled gets a ghost button that
+  cycles ascending, descending, unsorted (single column, ascending first).
+  Columns sort only when they opt in (`defaultColumn.enableSorting` is
+  `false`). `column.meta.numeric` right-aligns a column in the numeric face.
+- **Row header.** `history` always, other variants when `rowHeader` is set,
+  render each row's first cell as `th scope="row"`.
+- **`busy`** sets `aria-busy` and holds back `onEndReached`.
+- **`compact` and `history`** take only the common props.
+- **`expandable`** also takes `renderExpansion(row)` and `getRowLabel(row)`.
+  A leading column holds a ghost button, `aria-label` `Expand <label>`, with
+  `aria-expanded` and `aria-controls` naming the detail row; the detail row
+  spans the columns inside an `aria-live="polite"` region. Expansion state is
+  the table's own, keyed by `getRowId`, so appended data does not reset it.
+- **`virtualised`** takes `hasMore` and `onEndReached`, and optionally the
+  expansion pair. It renders inside a focusable scroller
+  (`data-slot="data-table-scroller"`, `tabIndex` 0) `VIEWPORT_ROWS + 1` = 16
+  row heights tall, with a sticky header, `aria-rowcount` (rows plus the
+  header) and each row's `aria-rowindex` (index + 2). Only a window of rows is
+  rendered, between `aria-hidden` spacer rows (`data-spacer`) that keep the
+  scroll height. Constants: `VIEWPORT_ROWS` 15, `OVERSCAN_ROWS` 10,
+  `PREFETCH_ROWS` 20 (DEC-0306, following CAP-002's `results-window.ts`).
+  `windowFor({ scrollTop, rowHeight, rowCount, extraHeights })` computes the
+  window and spacer heights; `extraHeights` maps a row index to its open
+  expansion's measured height. The row height is measured from the rendered
+  row, so with no layout (jsdom) the window is the top one.
+- **Paging.** `onEndReached` is called when the window's end is within
+  `PREFETCH_ROWS` of the loaded end, `hasMore` is true and `busy` is not. It
+  fires once per loaded set, keyed by the first row id and the row count, so
+  replacing the rows with as many as before (a sort or filter) asks again.
+- **Row heights** use the `h-row` class (`--row-height`) and cell padding the
+  `--cell-padding-x` and `--cell-padding-y` tokens.
+- **Memoisation.** Rows are memoised by the record's identity, so callers
+  keep `columns` and loaded records referentially stable. An open row also
+  follows `renderExpansion` and `getRowLabel` (DEC-0307), so detail the caller
+  loads into its own state reaches it; a collapsed row stays memoised.
+
+Tests: `data-table.test.tsx`.
