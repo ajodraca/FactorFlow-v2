@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w3/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 250ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens 30ms
+     → expect(element).toHaveClass("bg-popover")
+
+Expected the element to have class:
+  bg-popover
+Received:
+  relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded border border-border bg-background text-popover-foreground data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens
+Error: expect(element).toHaveClass("bg-popover")
+
+Expected the element to have class:
+  bg-popover
+Received:
+  relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded border border-border bg-background text-popover-foreground data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1
+ ❯ src/components/ui/select.test.tsx:117:23
+    115|     const surface = content ?? screen.getByRole("listbox");
+    116|     for (const name of ["bg-popover", "text-popover-foreground", "bord…
+    117|       expect(surface).toHaveClass(name);
+       |                       ^
+    118|     }
+    119|     expect(surface.className).not.toMatch(/(^|\s)animate-/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:28
+   Duration  1.14s (transform 35ms, setup 40ms, collect 303ms, tests 250ms, environment 153ms, prepare 109ms)
+

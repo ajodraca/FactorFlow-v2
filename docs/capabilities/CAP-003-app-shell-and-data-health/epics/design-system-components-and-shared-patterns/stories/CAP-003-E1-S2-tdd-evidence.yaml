@@ -109,3 +109,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-5
+    tasks: [T004, T011, T019]
+    description: >
+      radio-group: cards variant over Radix with RadioGroupCard (title names it, description describes it), orientation left unset so both arrow axes move the selection (TC-COMP-009, DEC-0300, Resolved Conflict 3). The test holds the arrow key down until Radix's animation-frame check checks the focused card, as a person's keypress does. A first mutation run left two survivors (title span display, indicator aria-hidden); a test pinning both killed them.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-5-radio-group.log
+    red_log_sha256: face8e6bf2fc19cb7701577d4df6679d136cfb8007a044db9505cee9072bc70e
+    red_evidence: >
+      radio-group.test.tsx failed to resolve ./radio-group before the module existed.
+    green_evidence: >
+      radio-group 7 passed; token-literals scan and tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ade639e7a60583cb7d2d5c1b4d64ed4dae46562cd86d89d16e6d107753ef8b30
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-5.patch
+    commit_hash: 7bf9bb91264e95cdc739d9c62af3b234ef8548ce
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 09e8c0dbf5e7749651ec529f5cf828e21ceaf728103e9da0417d75b99f23df37
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w0/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 231ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > positions the popper content under the trigger with a trigger-sized viewport 26ms
+     → expect(element).toHaveClass("data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1")
+
+Expected the element to have class:
+  data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1
+Received:
+  relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded border border-border bg-popover text-popover-foreground
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > positions the popper content under the trigger with a trigger-sized viewport
+Error: expect(element).toHaveClass("data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1")
+
+Expected the element to have class:
+  data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1
+Received:
+  relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded border border-border bg-popover text-popover-foreground
+ ❯ src/components/ui/select.test.tsx:136:21
+    134|     expect(wrapper).not.toBeNull();
+    135|     const content = wrapper?.firstElementChild;
+    136|     expect(content).toHaveClass("data-[side=bottom]:translate-y-1", "d…
+       |                     ^
+    137|     expect(content).toHaveClass("min-w-[var(--radix-select-trigger-wid…
+    138|     const viewport = content?.querySelector("[data-radix-select-viewpo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:27
+   Duration  1.34s (transform 39ms, setup 35ms, collect 392ms, tests 231ms, environment 158ms, prepare 108ms)
+
