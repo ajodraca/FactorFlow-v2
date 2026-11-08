@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ihenc3r9/w2/web
+
+ ❯ src/components/ui/progress.test.tsx (8 tests | 1 failed) 50ms
+   × progress indicator and tokens (DEC-0303) > translates the indicator by the share of the caller's maximum 4ms
+     → expected 'translateX(-50%)' to be 'translateX(-75%)' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress indicator and tokens (DEC-0303) > translates the indicator by the share of the caller's maximum
+AssertionError: expected 'translateX(-50%)' to be 'translateX(-75%)' // Object.is equality
+
+Expected: "translateX(-75%)"
+Received: "translateX(-50%)"
+
+ ❯ src/components/ui/progress.test.tsx:62:46
+     60|     );
+     61|     const bar = screen.getByRole("progressbar");
+     62|     expect(indicatorOf(bar).style.transform).toBe("translateX(-75%)");
+       |                                              ^
+     63|   });
+     64| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:27:40
+   Duration  689ms (transform 28ms, setup 29ms, collect 66ms, tests 50ms, environment 147ms, prepare 123ms)
+

@@ -1,0 +1,170 @@
+# TDD evidence for CAP-003-E1-S3 - Vendor the overlay and feedback family.
+# One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged each cycle's patch.
+# Decisions applied from planning: DEC-0301, DEC-0302, DEC-0303, DEC-0304, DEC-0305.
+
+cycles:
+  - id: cycle-1
+    tasks: [T011]
+    description: >
+      Overlay family packages (TC-COMP-016 packages half): five packages added with npm install; licences verified by hand against node_modules/<pkg>/LICENSE (all MIT: @radix-ui/react-dialog 1.3.1, @radix-ui/react-alert-dialog 1.2.1, @radix-ui/react-progress 1.2.1 (WorkOS), cmdk 1.1.1 (Paco Coursey), sonner 2.0.8 (Emil Kowalski)); package-lock.json carries license MIT for each (DEC-0298 record convention).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-1-packages.log
+    red_log_sha256: 123048a0b2b437541a8c27150d6e787a5a9b9e6539db6c77722eb4eccda03ed1
+    red_evidence: >
+      None of the five packages in dependencies and no lock licence (5 missing).
+    green_evidence: >
+      All five present as dependencies with lock licence MIT (checked by the same script).
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8fd0dfec2a66e88f34a8bfcd518406a26f0958b24f8972b0daf9a4606be976c5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: "dependency manifest change only; the packages test is not production code"
+
+  - id: cycle-2
+    tasks: [T002, T007, T012]
+    description: >
+      dialog: ConfirmDialog (confirm on Radix AlertDialog): role dialog with aria-modal, Cancel first and focused, trap, Esc and overlay close with opener focus restore, pending guards, children, no destructive styling (TC-COMP-012, DEC-0301, DEC-0305).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-2-dialog.log
+    red_log_sha256: 13ac606000fbfffad76fad4755ef373b5ad041530a084198f6fb1ec02952b6c2
+    red_evidence: >
+      dialog.test.tsx failed to resolve ./dialog before the module existed.
+    green_evidence: >
+      dialog 8 passed after the module existed; the pending-default survivor was killed by a test that omits the prop.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 54e2585fc72d36fa12b1812cab206eb55aa23335eb748d0afc0031ee97eb8fb9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: e898fc85b379d61611d35a2442983b336269d9feabcad9a1a5fad5a95bb82795
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T005, T006, T013]
+    description: >
+      command: cmdk inside Radix Dialog, labelled Search FactorFlow, loop, input focused, opener restore, caller wording, 560 px the one literal (TC-COMP-015, TC-COMP-016, DEC-0305). command.test.tsx also holds the TC-COMP-016 five-file scan (T006); the plan stages that describe with cycle 6, but staging is file-granular, so it is in this cycle's patch and is satisfied by the working tree once all five files exist.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-3-command.log
+    red_log_sha256: fa481833e9368eaf5842ce7bf82c7c0ba4a81aa15e9d12b6b33aa597478ab953
+    red_evidence: >
+      command.test.tsx failed to resolve ./command before the module existed.
+    green_evidence: >
+      command 5 passed (1 contract test, 4 scan tests); token-literals scan clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f22f5802e8cb8dfdcf12f7e85a756993bebf984ca1351a9ea24dd4ea7dd9c576
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 89e5d56aa9e29cc38bacebf6671219746bf713f0feb6b2401aee369bea202502
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T003, T010, T014]
+    description: >
+      toast: Toaster and toast with success, warning, error; warning and error persist, polite, never take focus, close button, no info and no important (TC-COMP-013, DEC-0302).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-4-toast.log
+    red_log_sha256: ba923ae4b3b5e564a657a19b30c03d40e42d14c4d0a26c04a1c87f8b1c385df1
+    red_evidence: >
+      toast.test.tsx failed to resolve ./toast before the module existed.
+    green_evidence: >
+      toast 4 passed; tsc checks the two ts-expect-error cases.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6b573a0789e01f8bf618d7e04120532ac7ea0da6e92857ecd6760ec68dd694bf
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: 2e984cab352bcbecd3cf7528afcf6debbd9165a08ce3afb97eaa1a459eb04cce
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T004, T009, T015]
+    description: >
+      progress: determinate and indeterminate over Radix, labelled by visible text, no aria-valuenow while indeterminate, caller maximum in the indicator offset (TC-COMP-014, DEC-0303).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-5-progress.log
+    red_log_sha256: 655da561a0582a4e8e0ff347c07382d1b35dc7ed7758bcc0aebe33d77c70b9f6
+    red_evidence: >
+      progress.test.tsx failed to resolve ./progress before the module existed.
+    green_evidence: >
+      progress 8 passed; tsc rejects Progress without aria-labelledby.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a493bffde2f00e73630cbf3531c780aab3418cd34d4c000afd166f452afa9b97
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/mutation-cycle-5-results.json
+      results_sha256: 503dcdbaa109a2075fee42d93b8f490fd0be7d716b9be86da66201e717e3d55b
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-6
+    tasks: [T008, T016, T017, T018]
+    description: >
+      stepper: bespoke vertical ol in a labelled nav, aria-current step on the current item, done step with href the only link, state in text, dot sized by the caller (DAC-E1-14 stepper half, DEC-0304, DEC-0305). T017 and T018 add no behaviour; their validation joins this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/red-cycle-6-stepper.log
+    red_log_sha256: 8c231acaeb95cf2c07f347270d0e539687928d9e4cdc2640b02fa214fa6c0880
+    red_evidence: >
+      stepper.test.tsx failed to resolve ./stepper before the module existed.
+    green_evidence: >
+      stepper 8 passed; full suite, lint, format, tsc and build green (see the completion summary).
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: af94fbab32b0339293126e97ce24d47ad22ee49e8ea706794d28fed60eebaead
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S3-evidence/mutation-cycle-6-results.json
+      results_sha256: 8ef25cbb08b4afc15fa06a81516b74041748d0b120483ae63b2e8693c2a873d2
+      generated: 8
+      killed: 8
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+

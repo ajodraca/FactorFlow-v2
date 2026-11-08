@@ -1,0 +1,187 @@
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Command as CommandPrimitive } from "cmdk";
+import { Search } from "lucide-react";
+import {
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  type ReactNode,
+  forwardRef,
+  useRef,
+} from "react";
+import { cn } from "./utils";
+
+/**
+ * Vendored shadcn/ui `command` (cmdk inside Radix Dialog; component design 2.1;
+ * command spec sections 4 and 5; DAC-E1-14; DAC-E1-S3-4; DEC-0305).
+ *
+ * The dialog is labelled *Search FactorFlow*, the selection loops (`loop` is
+ * never a caller option) and focus returns to whatever held it when the palette
+ * opened. Placeholder, group headings, empty and loading wording are the
+ * caller's. `CommandShortcut` is not vendored. The dialog's 560 px width is the
+ * one length literal the token scan allows, and only in this file (DAC-E1-S3-5).
+ *
+ * shadcn composes `CommandDialog` through its own `dialog.tsx`, which here is
+ * the AlertDialog `confirm`, so the standard Radix Dialog is used in place.
+ */
+const Command = forwardRef<
+  ElementRef<typeof CommandPrimitive>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive
+    ref={ref}
+    className={cn(
+      "flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground",
+      className,
+    )}
+    {...props}
+  />
+));
+Command.displayName = "Command";
+
+interface CommandDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: ReactNode;
+}
+
+const CommandDialog = ({ open, onOpenChange, children }: CommandDialogProps) => {
+  // Radix returns focus only to a Trigger, and the palette opens from a key
+  // chord and a button, so the opener is recorded and refocused here.
+  const opener = useRef<HTMLElement | null>(null);
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/40" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          className="fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"
+          onOpenAutoFocus={() => {
+            opener.current =
+              document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (opener.current?.isConnected) opener.current.focus();
+          }}
+        >
+          <DialogPrimitive.Title className="sr-only">Search FactorFlow</DialogPrimitive.Title>
+          <Command
+            loop
+            label="Search FactorFlow"
+            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
+          >
+            {children}
+          </Command>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+};
+
+const CommandInput = forwardRef<
+  ElementRef<typeof CommandPrimitive.Input>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
+>(({ className, ...props }, ref) => (
+  <div className="flex items-center gap-2 border-b border-border px-3" cmdk-input-wrapper="">
+    <Search aria-hidden="true" className="size-4 shrink-0 opacity-50" />
+    <CommandPrimitive.Input
+      ref={ref}
+      className={cn(
+        "flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground",
+        className,
+      )}
+      {...props}
+    />
+  </div>
+));
+CommandInput.displayName = "CommandInput";
+
+const CommandList = forwardRef<
+  ElementRef<typeof CommandPrimitive.List>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.List
+    ref={ref}
+    className={cn(
+      "max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden",
+      className,
+    )}
+    {...props}
+  />
+));
+CommandList.displayName = "CommandList";
+
+const CommandEmpty = forwardRef<
+  ElementRef<typeof CommandPrimitive.Empty>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Empty
+    ref={ref}
+    className={cn("py-5 text-center text-base", className)}
+    {...props}
+  />
+));
+CommandEmpty.displayName = "CommandEmpty";
+
+const CommandLoading = forwardRef<
+  ElementRef<typeof CommandPrimitive.Loading>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.Loading>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Loading
+    ref={ref}
+    className={cn("px-2 py-2 text-xs text-muted-foreground", className)}
+    {...props}
+  />
+));
+CommandLoading.displayName = "CommandLoading";
+
+const CommandGroup = forwardRef<
+  ElementRef<typeof CommandPrimitive.Group>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Group
+    ref={ref}
+    className={cn("overflow-hidden p-1 text-foreground", className)}
+    {...props}
+  />
+));
+CommandGroup.displayName = "CommandGroup";
+
+const CommandSeparator = forwardRef<
+  ElementRef<typeof CommandPrimitive.Separator>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 h-px bg-border", className)}
+    {...props}
+  />
+));
+CommandSeparator.displayName = "CommandSeparator";
+
+const CommandItem = forwardRef<
+  ElementRef<typeof CommandPrimitive.Item>,
+  ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center gap-2 rounded px-2 py-2 text-base outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground",
+      className,
+    )}
+    {...props}
+  />
+));
+CommandItem.displayName = "CommandItem";
+
+export {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandLoading,
+  CommandSeparator,
+};
