@@ -4,8 +4,8 @@ import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Textarea } from "./textarea";
 
-// Implements TC-COMP-010
-describe("textarea list (DAC-E1-S2-1, AC-25)", () => {
+// Implements AC-25
+describe("textarea list (AC-25)", () => {
   function renderField(props: Parameters<typeof Textarea>[0] = {}) {
     const submitSpy = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
     render(
@@ -24,6 +24,23 @@ describe("textarea list (DAC-E1-S2-1, AC-25)", () => {
     expect(field).toHaveAttribute("rows", "4");
     expect(field).toHaveClass("resize-none", "w-full", "rounded", "border", "border-input");
     expect(field).toHaveClass("aria-[invalid=true]:border-destructive");
+  });
+
+  it("shows the --ring focus ring and the spec's surface, size and placeholder tokens (AC-25, AC-26)", () => {
+    const { field } = renderField();
+    for (const name of [
+      "focus-visible:outline-none",
+      "focus-visible:ring",
+      "focus-visible:ring-ring",
+      "bg-background",
+      "text-base",
+      "text-foreground",
+      "placeholder:text-muted-foreground",
+    ]) {
+      expect(field).toHaveClass(name);
+    }
+    expect(field).not.toHaveClass("text-sm");
+    expect(field.className).not.toMatch(/(^|\s)(focus-visible:)?ring-(2|offset-)/);
   });
 
   it("pads the field with the cell padding tokens", () => {

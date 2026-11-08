@@ -83,6 +83,14 @@ describe("checkbox toggles on Space (DAC-E1-S2-1, AC-25)", () => {
       expect(box).toHaveClass(name);
     }
     expect(box).not.toHaveClass("border-primary");
+    // The shipped ring offset resolves to a Tailwind default outside the theme (DAC-E1-12).
+    expect(box.className).not.toMatch(/ring-offset-/);
+  });
+
+  it("draws no mark while unchecked", () => {
+    const { box } = renderField();
+    expect(box).toHaveAttribute("aria-checked", "false");
+    expect(box.querySelector("svg")).toBeNull();
   });
 
   it("draws a check when checked and a dash when mixed", () => {

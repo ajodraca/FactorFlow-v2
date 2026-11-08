@@ -81,6 +81,25 @@ describe("radio-group cards are one tab stop with arrows moving the selection (D
     expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
   });
 
+  it("wraps from the last card to the first and back with the arrow keys", async () => {
+    const user = userEvent.setup();
+    const { paste, later, changeSpy } = renderGroup();
+    await user.tab();
+    await user.tab();
+    await pressArrow(user, "ArrowDown", later);
+    expect(later).toHaveFocus();
+
+    await pressArrow(user, "ArrowDown", paste);
+    expect(paste).toHaveFocus();
+    expect(later).toHaveAttribute("aria-checked", "false");
+    expect(changeSpy).toHaveBeenLastCalledWith("paste");
+
+    await pressArrow(user, "ArrowUp", later);
+    expect(later).toHaveFocus();
+    expect(paste).toHaveAttribute("aria-checked", "false");
+    expect(changeSpy).toHaveBeenLastCalledWith("later");
+  });
+
   it("returns to the checked card on Shift+Tab, not to each radio in turn", async () => {
     const user = userEvent.setup();
     const { later } = renderGroup();
@@ -142,6 +161,16 @@ describe("radio-group cards are one tab stop with arrows moving the selection (D
     ]) {
       expect(later).toHaveClass(name);
     }
+  });
+
+  it("fills the checked indicator with the primary token", async () => {
+    const user = userEvent.setup();
+    const { later } = renderGroup();
+    await user.click(later);
+    const dot = later.querySelector("svg");
+    expect(dot).not.toBeNull();
+    expect(dot).toHaveClass("fill-current", "text-primary");
+    expect(dot).not.toHaveClass("text-foreground");
   });
 
   it("checks the whole card when its title text is clicked", async () => {

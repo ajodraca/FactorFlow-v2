@@ -106,6 +106,15 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
     }
   });
 
+  it("shows the --ring focus ring and the base text size on the trigger (AC-25, AC-26)", () => {
+    const { trigger } = renderSelect();
+    for (const name of ["focus:outline-none", "focus:ring", "focus:ring-ring", "text-base"]) {
+      expect(trigger).toHaveClass(name);
+    }
+    expect(trigger).not.toHaveClass("text-sm");
+    expect(trigger.className).not.toMatch(/(^|\s)(focus:)?ring-(2|offset-)/);
+  });
+
   it("styles the open content and its options with theme tokens", async () => {
     const user = userEvent.setup();
     renderSelect();
@@ -117,12 +126,26 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
       expect(surface).toHaveClass(name);
     }
     expect(surface.className).not.toMatch(/(^|\s)animate-/);
+    // Shipped shadow and maximum height resolve to Tailwind defaults (DAC-E1-12).
+    expect(surface.className).not.toMatch(/(^|\s)(shadow|max-h-\d)/);
+    expect(surface).toHaveClass("max-h-[var(--radix-select-content-available-height)]");
     const option = screen.getByRole("option", { name: "Followed" });
     expect(option).toHaveClass(
       "h-row",
+      "rounded",
+      "py-1",
+      "pl-6",
+      "pr-2",
+      "text-base",
       "data-[highlighted]:bg-accent",
       "data-[highlighted]:text-accent-foreground",
     );
+    expect(option.className).not.toMatch(/(^|\s)(rounded-sm|py-1\.5|pl-8)(\s|$)/);
+    const indicatorBox = option.querySelector("span.absolute");
+    expect(indicatorBox).toHaveClass("left-2", "h-4", "w-4");
+    expect(indicatorBox?.className).not.toMatch(/3\.5/);
+    const mark = screen.getByRole("option", { name: "All stocks" }).querySelector("svg");
+    expect(mark).toHaveClass("h-4", "w-4");
   });
 
   it("positions the popper content under the trigger with a trigger-sized viewport", async () => {
@@ -169,6 +192,7 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
     await user.keyboard("{Enter}");
     expect(screen.getByText("Group")).toHaveClass(
       "text-base",
+      "text-muted-foreground",
       "font-semibold",
       "pl-6",
       "pr-2",

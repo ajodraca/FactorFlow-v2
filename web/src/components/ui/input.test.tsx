@@ -16,6 +16,25 @@ describe("input (DAC-E1-S2-2, AC-25)", () => {
     }
   });
 
+  it("shows the --ring focus ring and the spec's text and placeholder tokens (AC-25, AC-26)", () => {
+    render(<Input aria-label="Symbol" />);
+    const field = screen.getByRole("textbox", { name: "Symbol" });
+    for (const name of [
+      "focus-visible:outline-none",
+      "focus-visible:ring",
+      "focus-visible:ring-ring",
+      "text-base",
+      "text-foreground",
+      "placeholder:text-muted-foreground",
+    ]) {
+      expect(field).toHaveClass(name);
+    }
+    // The shipped ring width, ring offset and breakpoint text size resolve to
+    // Tailwind defaults outside the theme (DAC-E1-12), so they must stay out.
+    expect(field.className).not.toMatch(/(^|\s)(focus-visible:)?ring-(2|offset-)/);
+    expect(field.className).not.toMatch(/(^|\s)md:/);
+  });
+
   it("renders the numeric variant right-aligned in tabular figures", () => {
     render(<Input variant="numeric" aria-label="Depth" />);
     const field = screen.getByRole("spinbutton", { name: "Depth" });

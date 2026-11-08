@@ -106,7 +106,7 @@ export const SelectLabel = forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn("py-1 pl-6 pr-2 text-base font-semibold", className)}
+    className={cn("py-1 pl-6 pr-2 text-base font-semibold text-muted-foreground", className)}
     {...props}
   />
 ));

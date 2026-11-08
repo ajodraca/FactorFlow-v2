@@ -14,6 +14,10 @@ import { cn } from "./utils";
  * default radius on a box this size would draw a circle.
  *
  * The tri-state is controlled: pass `checked="indeterminate"` to show the dash.
+ *
+ * The box is 16 px. The spec's 24 px target is the consumer's: put the box and
+ * its label in a row with `minHeight: "var(--control-min-target)"`, as the
+ * Research filters pane does.
  */
 export type CheckboxProps = ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
   variant?: "default";
