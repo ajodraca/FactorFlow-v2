@@ -21,7 +21,7 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: unknown
-  timestamp: 2026-11-07T21:30:00Z
+  timestamp: 2026-11-08T00:10:00Z
   source_artifacts:
     - id: PRODUCT-UX
       version: "6"
@@ -346,7 +346,7 @@ the change is owned here.
 30. **AC-30 — Throttling is waited out, then named:** A provider rate limit MUST
     NOT count as a failed attempt; when it persists past the wait budget for
     one stock, the product MUST record it under its own rate-limit reason, and
-    the download MUST still finish as partial, never abandoned.
+    the download MUST still finish with its recorded outcome, never abandoned.
 
 ## 5. Dependencies and Constraints
 
@@ -488,12 +488,19 @@ mirror of it, and the two must agree.
   `zod` and `@hookform/resolvers` (DEC-0215), beside the `@radix-ui/react-*`
   primitives. Review v1 FINDING-1 is resolved; each licence is recorded when the
   package is added (SEC-DEP-003).
+- **OQ-5 — Should the owner see a stored failure reason verbatim?** Both
+  failure screens show the reason CAP-001 stored as it is, so its leading
+  kind and the provider request ID (for example `[not_entitled] …
+  request_id=…`) reach the owner, against STD-UI-1. This predates AC-29 and
+  AC-30, which add two more kinds (specification review v4 FINDING-30).
+  **Answered 2026-11-07 by the owner: a separate follow-up**, fixing how a
+  reason is shown for every cause; AC-29 and AC-30 do not change it.
 
 ## 8. Readiness Assessment
 
 **Readiness Score: 85/100**
 
-Problem, users, outcome, scope, flows and 28 acceptance criteria are defined
+Problem, users, outcome, scope, flows and 30 acceptance criteria are defined
 against an approved blueprint and three approved screen specifications, and
 every dependency is typed and cited. The four product questions raised at
 definition — the visible download number (OQ-1), delivery order relative to
