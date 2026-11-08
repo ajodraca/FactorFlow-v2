@@ -1,0 +1,218 @@
+diff --git a/web/src/components/ui/checkbox.test.tsx b/web/src/components/ui/checkbox.test.tsx
+index e6e95f9..6310547 100644
+--- a/web/src/components/ui/checkbox.test.tsx
++++ b/web/src/components/ui/checkbox.test.tsx
+@@ -83,6 +83,14 @@ describe("checkbox toggles on Space (DAC-E1-S2-1, AC-25)", () => {
+       expect(box).toHaveClass(name);
+     }
+     expect(box).not.toHaveClass("border-primary");
++    // The shipped ring offset resolves to a Tailwind default outside the theme (DAC-E1-12).
++    expect(box.className).not.toMatch(/ring-offset-/);
++  });
++
++  it("draws no mark while unchecked", () => {
++    const { box } = renderField();
++    expect(box).toHaveAttribute("aria-checked", "false");
++    expect(box.querySelector("svg")).toBeNull();
+   });
+ 
+   it("draws a check when checked and a dash when mixed", () => {
+diff --git a/web/src/components/ui/checkbox.tsx b/web/src/components/ui/checkbox.tsx
+index edac06a..87f6526 100644
+--- a/web/src/components/ui/checkbox.tsx
++++ b/web/src/components/ui/checkbox.tsx
+@@ -14,6 +14,10 @@ import { cn } from "./utils";
+  * default radius on a box this size would draw a circle.
+  *
+  * The tri-state is controlled: pass `checked="indeterminate"` to show the dash.
++ *
++ * The box is 16 px. The spec's 24 px target is the consumer's: put the box and
++ * its label in a row with `minHeight: "var(--control-min-target)"`, as the
++ * Research filters pane does.
+  */
+ export type CheckboxProps = ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
+   variant?: "default";
+diff --git a/web/src/components/ui/input.test.tsx b/web/src/components/ui/input.test.tsx
+index 6a34203..549907f 100644
+--- a/web/src/components/ui/input.test.tsx
++++ b/web/src/components/ui/input.test.tsx
+@@ -16,6 +16,25 @@ describe("input (DAC-E1-S2-2, AC-25)", () => {
+     }
+   });
+ 
++  it("shows the --ring focus ring and the spec's text and placeholder tokens (AC-25, AC-26)", () => {
++    render(<Input aria-label="Symbol" />);
++    const field = screen.getByRole("textbox", { name: "Symbol" });
++    for (const name of [
++      "focus-visible:outline-none",
++      "focus-visible:ring",
++      "focus-visible:ring-ring",
++      "text-base",
++      "text-foreground",
++      "placeholder:text-muted-foreground",
++    ]) {
++      expect(field).toHaveClass(name);
++    }
++    // The shipped ring width, ring offset and breakpoint text size resolve to
++    // Tailwind defaults outside the theme (DAC-E1-12), so they must stay out.
++    expect(field.className).not.toMatch(/(^|\s)(focus-visible:)?ring-(2|offset-)/);
++    expect(field.className).not.toMatch(/(^|\s)md:/);
++  });
++
+   it("renders the numeric variant right-aligned in tabular figures", () => {
+     render(<Input variant="numeric" aria-label="Depth" />);
+     const field = screen.getByRole("spinbutton", { name: "Depth" });
+diff --git a/web/src/components/ui/radio-group.test.tsx b/web/src/components/ui/radio-group.test.tsx
+index 72718bc..a4166ab 100644
+--- a/web/src/components/ui/radio-group.test.tsx
++++ b/web/src/components/ui/radio-group.test.tsx
+@@ -81,6 +81,25 @@ describe("radio-group cards are one tab stop with arrows moving the selection (D
+     expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+   });
+ 
++  it("wraps from the last card to the first and back with the arrow keys", async () => {
++    const user = userEvent.setup();
++    const { paste, later, changeSpy } = renderGroup();
++    await user.tab();
++    await user.tab();
++    await pressArrow(user, "ArrowDown", later);
++    expect(later).toHaveFocus();
++
++    await pressArrow(user, "ArrowDown", paste);
++    expect(paste).toHaveFocus();
++    expect(later).toHaveAttribute("aria-checked", "false");
++    expect(changeSpy).toHaveBeenLastCalledWith("paste");
++
++    await pressArrow(user, "ArrowUp", later);
++    expect(later).toHaveFocus();
++    expect(paste).toHaveAttribute("aria-checked", "false");
++    expect(changeSpy).toHaveBeenLastCalledWith("later");
++  });
++
+   it("returns to the checked card on Shift+Tab, not to each radio in turn", async () => {
+     const user = userEvent.setup();
+     const { later } = renderGroup();
+@@ -144,6 +163,16 @@ describe("radio-group cards are one tab stop with arrows moving the selection (D
+     }
+   });
+ 
++  it("fills the checked indicator with the primary token", async () => {
++    const user = userEvent.setup();
++    const { later } = renderGroup();
++    await user.click(later);
++    const dot = later.querySelector("svg");
++    expect(dot).not.toBeNull();
++    expect(dot).toHaveClass("fill-current", "text-primary");
++    expect(dot).not.toHaveClass("text-foreground");
++  });
++
+   it("checks the whole card when its title text is clicked", async () => {
+     const user = userEvent.setup();
+     const { later, changeSpy } = renderGroup();
+diff --git a/web/src/components/ui/select.test.tsx b/web/src/components/ui/select.test.tsx
+index e0ed672..4846edc 100644
+--- a/web/src/components/ui/select.test.tsx
++++ b/web/src/components/ui/select.test.tsx
+@@ -106,6 +106,15 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
+     }
+   });
+ 
++  it("shows the --ring focus ring and the base text size on the trigger (AC-25, AC-26)", () => {
++    const { trigger } = renderSelect();
++    for (const name of ["focus:outline-none", "focus:ring", "focus:ring-ring", "text-base"]) {
++      expect(trigger).toHaveClass(name);
++    }
++    expect(trigger).not.toHaveClass("text-sm");
++    expect(trigger.className).not.toMatch(/(^|\s)(focus:)?ring-(2|offset-)/);
++  });
++
+   it("styles the open content and its options with theme tokens", async () => {
+     const user = userEvent.setup();
+     renderSelect();
+@@ -117,12 +126,26 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
+       expect(surface).toHaveClass(name);
+     }
+     expect(surface.className).not.toMatch(/(^|\s)animate-/);
++    // Shipped shadow and maximum height resolve to Tailwind defaults (DAC-E1-12).
++    expect(surface.className).not.toMatch(/(^|\s)(shadow|max-h-\d)/);
++    expect(surface).toHaveClass("max-h-[var(--radix-select-content-available-height)]");
+     const option = screen.getByRole("option", { name: "Followed" });
+     expect(option).toHaveClass(
+       "h-row",
++      "rounded",
++      "py-1",
++      "pl-6",
++      "pr-2",
++      "text-base",
+       "data-[highlighted]:bg-accent",
+       "data-[highlighted]:text-accent-foreground",
+     );
++    expect(option.className).not.toMatch(/(^|\s)(rounded-sm|py-1\.5|pl-8)(\s|$)/);
++    const indicatorBox = option.querySelector("span.absolute");
++    expect(indicatorBox).toHaveClass("left-2", "h-4", "w-4");
++    expect(indicatorBox?.className).not.toMatch(/3\.5/);
++    const mark = screen.getByRole("option", { name: "All stocks" }).querySelector("svg");
++    expect(mark).toHaveClass("h-4", "w-4");
+   });
+ 
+   it("positions the popper content under the trigger with a trigger-sized viewport", async () => {
+@@ -169,6 +192,7 @@ describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)"
+     await user.keyboard("{Enter}");
+     expect(screen.getByText("Group")).toHaveClass(
+       "text-base",
++      "text-muted-foreground",
+       "font-semibold",
+       "pl-6",
+       "pr-2",
+diff --git a/web/src/components/ui/select.tsx b/web/src/components/ui/select.tsx
+index c1a2270..8a124cb 100644
+--- a/web/src/components/ui/select.tsx
++++ b/web/src/components/ui/select.tsx
+@@ -106,7 +106,7 @@ export const SelectLabel = forwardRef<
+ >(({ className, ...props }, ref) => (
+   <SelectPrimitive.Label
+     ref={ref}
+-    className={cn("py-1 pl-6 pr-2 text-base font-semibold", className)}
++    className={cn("py-1 pl-6 pr-2 text-base font-semibold text-muted-foreground", className)}
+     {...props}
+   />
+ ));
+diff --git a/web/src/components/ui/textarea.test.tsx b/web/src/components/ui/textarea.test.tsx
+index f708372..218cb85 100644
+--- a/web/src/components/ui/textarea.test.tsx
++++ b/web/src/components/ui/textarea.test.tsx
+@@ -4,8 +4,8 @@ import { createRef } from "react";
+ import { describe, expect, it, vi } from "vitest";
+ import { Textarea } from "./textarea";
+ 
+-// Implements TC-COMP-010
+-describe("textarea list (DAC-E1-S2-1, AC-25)", () => {
++// Implements AC-25
++describe("textarea list (AC-25)", () => {
+   function renderField(props: Parameters<typeof Textarea>[0] = {}) {
+     const submitSpy = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+     render(
+@@ -26,6 +26,23 @@ describe("textarea list (DAC-E1-S2-1, AC-25)", () => {
+     expect(field).toHaveClass("aria-[invalid=true]:border-destructive");
+   });
+ 
++  it("shows the --ring focus ring and the spec's surface, size and placeholder tokens (AC-25, AC-26)", () => {
++    const { field } = renderField();
++    for (const name of [
++      "focus-visible:outline-none",
++      "focus-visible:ring",
++      "focus-visible:ring-ring",
++      "bg-background",
++      "text-base",
++      "text-foreground",
++      "placeholder:text-muted-foreground",
++    ]) {
++      expect(field).toHaveClass(name);
++    }
++    expect(field).not.toHaveClass("text-sm");
++    expect(field.className).not.toMatch(/(^|\s)(focus-visible:)?ring-(2|offset-)/);
++  });
++
+   it("pads the field with the cell padding tokens", () => {
+     const { field } = renderField();
+     expect(field).toHaveClass("px-[var(--cell-padding-x)]", "py-[var(--cell-padding-y)]");

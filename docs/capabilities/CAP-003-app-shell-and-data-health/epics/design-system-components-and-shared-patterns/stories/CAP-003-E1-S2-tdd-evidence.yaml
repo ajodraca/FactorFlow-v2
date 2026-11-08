@@ -245,3 +245,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-10
+    tasks: [T009, T010, T011, T012, T013, T004, T018, T020]
+    description: >
+      Review v1 rework (IR-001 to IR-007). Tests now pin the focus ring on input, textarea and the select trigger (IR-001); the absence of the shipped ring-2, ring-offset, md:text-sm, shadow, max-h-96, rounded-sm py-1.5 pl-8 and h-3.5 literals (IR-002); the spec section 6 tokens for placeholder, textarea surface and body size, radio indicator fill and trigger text size (IR-003); radio arrow wrap-around and no mark on an unchecked checkbox (IR-004). Optional findings: SelectLabel takes text-muted-foreground (IR-005), the checkbox doc comment states the consumer carries the 24 px target (IR-006), textarea.test.tsx drops its TC-COMP-010 and DAC-E1-S2-1 claims (IR-007). RED is the reviewer's own run: the 20 mutants survived the pre-rework tests.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-10-review-survivors.log
+    red_log_sha256: b87bf4fd0638d4691cd6d6d70f59dca094a9fc2a449ede5e85a3d074b9141f9e
+    red_evidence: >
+      20 of 41 review mutants survived the pre-rework suites plus tsc (adversarial review v1 mutation file).
+    green_evidence: >
+      components/ui and token-literals suites pass with the new tests; the same 20 mutants are all killed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d39dcbca7831c5876cd28504431cf5eb9b73a349e67602960197a7e20ec59094
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-10.patch
+    commit_hash: 18e7d13916d022d6e88016c69f8a24d0af9f9044
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-10-results.json
+      results_sha256: 771078c3f5a9238c2be4308e88fc3e45bbbbd53073c495763447889d14148a6c
+      generated: 20
+      killed: 20
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

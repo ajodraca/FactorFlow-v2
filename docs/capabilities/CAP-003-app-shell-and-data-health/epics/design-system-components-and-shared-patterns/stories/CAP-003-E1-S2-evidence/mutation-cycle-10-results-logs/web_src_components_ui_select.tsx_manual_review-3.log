@@ -1,0 +1,45 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/ee2ae1d3-f440-42d4-83b0-70a1f714a8f0/scratchpad/work/mutation-run-u2kq1wuf/w0/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 3ms
+ ✓ src/components/token-literals.test.ts (30 tests) 37ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 96ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 96ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 128ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 197ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 225ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 313ms
+ ❯ src/components/ui/select.test.tsx (7 tests | 1 failed) 763ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens 267ms
+     → expected 'relative z-50 max-h-[var(--radix-sele…' not to match /(^|\s)(shadow|max-h-\d)/
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 883ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 303ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 747ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens
+AssertionError: expected 'relative z-50 max-h-[var(--radix-sele…' not to match /(^|\s)(shadow|max-h-\d)/
+
+- Expected: 
+/(^|\s)(shadow|max-h-\d)/
+
++ Received: 
+"relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded border border-border bg-popover text-popover-foreground shadow-md data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1"
+
+ ❯ src/components/ui/select.test.tsx:130:35
+    128|     expect(surface.className).not.toMatch(/(^|\s)animate-/);
+    129|     // Shipped shadow and maximum height resolve to Tailwind defaults …
+    130|     expect(surface.className).not.toMatch(/(^|\s)(shadow|max-h-\d)/);
+       |                                   ^
+    131|     expect(surface).toHaveClass("max-h-[var(--radix-select-content-ava…
+    132|     const option = screen.getByRole("option", { name: "Followed" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 125 passed (126)
+   Start at  09:55:42
+   Duration  2.86s (transform 389ms, setup 1.03s, collect 4.03s, tests 3.49s, environment 7.13s, prepare 3.21s)
+
