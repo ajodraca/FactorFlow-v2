@@ -1,0 +1,124 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 4 failed) 3176ms
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > makes the first cell of every history row the row header 9ms
+     → expected [ <th scope="row" …(1)></th>, …(8) ] to have a length of 3 but got 9
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > keeps the history row header on when rowHeader is false 10ms
+     → expected [ <th scope="row" …(1)></th>, …(8) ] to have a length of 3 but got 9
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives compact a row header only when asked (Recent downloads) 3ms
+     → expected [ <th scope="row" …(1)></th>, …(2) ] to have a length of +0 but got 3
+   × data-table classes and structure (AC-26, DAC-E1-S4-2) > right-aligns numeric headers and cells in the numeric face, and no others 6ms
+     → expect(element).toHaveClass("text-right font-numeric")
+
+Expected the element to have class:
+  text-right font-numeric
+Received:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2207ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > makes the first cell of every history row the row header
+AssertionError: expected [ <th scope="row" …(1)></th>, …(8) ] to have a length of 3 but got 9
+
+- Expected
++ Received
+
+- 3
++ 9
+
+ ❯ src/components/ui/data-table.test.tsx:274:24
+    272|     render(<DataTable {...variantProps("history", stocks(3))} />);
+    273|     const rowHeaders = screen.getAllByRole("rowheader");
+    274|     expect(rowHeaders).toHaveLength(3);
+       |                        ^
+    275|     rowHeaders.forEach((cell, i) => {
+    276|       expect(cell).toHaveTextContent(`S000${i}`);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > keeps the history row header on when rowHeader is false
+AssertionError: expected [ <th scope="row" …(1)></th>, …(8) ] to have a length of 3 but got 9
+
+- Expected
++ Received
+
+- 3
++ 9
+
+ ❯ src/components/ui/data-table.test.tsx:283:46
+    281|   it("keeps the history row header on when rowHeader is false", () => {
+    282|     render(<DataTable {...variantProps("history", stocks(3))} rowHeade…
+    283|     expect(screen.getAllByRole("rowheader")).toHaveLength(3);
+       |                                              ^
+    284|   });
+    285| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives compact a row header only when asked (Recent downloads)
+AssertionError: expected [ <th scope="row" …(1)></th>, …(2) ] to have a length of +0 but got 3
+
+- Expected
++ Received
+
+- 0
++ 3
+
+ ❯ src/components/ui/data-table.test.tsx:288:48
+    286|   it("gives compact a row header only when asked (Recent downloads)", …
+    287|     const { rerender } = render(<DataTable {...variantProps("compact",…
+    288|     expect(screen.queryAllByRole("rowheader")).toHaveLength(0);
+       |                                                ^
+    289|     rerender(<DataTable {...variantProps("compact", stocks(3))} rowHea…
+    290|     expect(screen.getAllByRole("rowheader")).toHaveLength(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table classes and structure (AC-26, DAC-E1-S4-2) > right-aligns numeric headers and cells in the numeric face, and no others
+Error: expect(element).toHaveClass("text-right font-numeric")
+
+Expected the element to have class:
+  text-right font-numeric
+Received:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle
+ ❯ src/components/ui/data-table.test.tsx:642:22
+    640|     expect(symbol).not.toHaveClass("font-numeric");
+    641|     const cells = screen.getAllByRole("cell");
+    642|     expect(cells[2]).toHaveClass("text-right", "font-numeric");
+       |                      ^
+    643|     expect(cells[0]).not.toHaveClass("text-right");
+    644|     expect(cells[0]).not.toHaveClass("font-numeric");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 83 passed (87)
+   Start at  12:32:05
+   Duration  4.66s (transform 133ms, setup 112ms, collect 460ms, tests 3.18s, environment 451ms, prepare 194ms)
+

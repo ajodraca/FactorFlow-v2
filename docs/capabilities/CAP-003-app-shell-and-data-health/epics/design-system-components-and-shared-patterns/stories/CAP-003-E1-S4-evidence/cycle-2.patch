@@ -1,0 +1,1240 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-2-data-table.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-2-data-table.log
+new file mode 100644
+index 0000000..52a1f91
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-2-data-table.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/ui/data-table.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/ui/data-table.test.tsx [ src/components/ui/data-table.test.tsx ]
++Error: Failed to resolve import "./data-table" from "web/src/components/ui/data-table.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/ui/data-table.test.tsx:10:58
++  8  |  import { afterEach, describe, expect, it, vi } from "vitest";
++  9  |  import { SCANNED_DIRECTORIES } from "../token-literals.test";
++  10 |  import { DataTable, windowFor } from "./data-table";
++     |                                        ^
++  11 |  const UI_DIR = path.dirname(fileURLToPath(import.meta.url));
++  12 |  const REPO_ROOT = path.resolve(UI_DIR, "../../../..");
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  11:55:50
++   Duration  1.05s (transform 25ms, setup 106ms, collect 0ms, tests 0ms, environment 442ms, prepare 172ms)
++
+diff --git a/web/src/components/ui/data-table.test.tsx b/web/src/components/ui/data-table.test.tsx
+new file mode 100644
+index 0000000..80e6659
+--- /dev/null
++++ b/web/src/components/ui/data-table.test.tsx
+@@ -0,0 +1,775 @@
++import { readFileSync } from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import type { ColumnDef, SortingState } from "@tanstack/react-table";
++import { act, fireEvent, render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { type ReactElement, useState } from "react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { SCANNED_DIRECTORIES } from "../token-literals.test";
++import { DataTable, type DataTableProps, windowFor } from "./data-table";
++
++const UI_DIR = path.dirname(fileURLToPath(import.meta.url));
++// Vitest's root is `web/`, so the repo root is four levels above this file.
++const REPO_ROOT = path.resolve(UI_DIR, "../../../..");
++
++interface Stock {
++  symbol: string;
++  name: string;
++  gapCount: number;
++}
++
++// Built once per test so earlier objects keep their identity when a later
++// array is formed by spreading them.
++function stocks(n: number): Stock[] {
++  return Array.from({ length: n }, (_, i) => ({
++    symbol: `S${String(i).padStart(4, "0")}`,
++    name: `Stock ${i}`,
++    gapCount: i,
++  }));
++}
++
++// Which row ids rendered their cells, so a test sees which rows re-rendered.
++let renders: string[] = [];
++
++// Defined once at module level: the memoised row compares `columns` by identity.
++// biome-ignore lint/suspicious/noExplicitAny: TanStack's own column typing
++const columns: ColumnDef<Stock, any>[] = [
++  {
++    id: "symbol",
++    header: "Symbol",
++    accessorKey: "symbol",
++    enableSorting: true,
++    cell: (ctx) => {
++      renders.push(ctx.row.id);
++      return ctx.getValue();
++    },
++  },
++  { id: "name", header: "Name", accessorKey: "name", enableSorting: true },
++  {
++    id: "gapCount",
++    header: "Gaps",
++    accessorKey: "gapCount",
++    enableSorting: true,
++    meta: { numeric: true },
++  },
++];
++
++// The same three columns with Name's sorting left unset.
++// biome-ignore lint/suspicious/noExplicitAny: TanStack's own column typing
++const unsortableName: ColumnDef<Stock, any>[] = columns.map((column) =>
++  column.id === "name" ? { id: "name", header: "Name", accessorKey: "name" } : column,
++);
++
++const getRowId = (row: Stock) => row.symbol;
++
++// jsdom has no layout: report a height for a body row, an expansion row and nothing else.
++function stubRowHeight(rowPx: number, detailPx: number) {
++  vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
++    const height = this.matches("tr[data-row-id]")
++      ? rowPx
++      : this.matches("tr[data-expansion-for]")
++        ? detailPx
++        : 0;
++    return { height, width: 0, top: 0, left: 0, right: 0, bottom: height, x: 0, y: 0 } as DOMRect;
++  });
++}
++
++function scrollTo(row: number, rowPx: number) {
++  const scroller = document.querySelector<HTMLElement>('[data-slot="data-table-scroller"]');
++  if (!scroller) {
++    throw new Error("no scroller");
++  }
++  act(() => {
++    scroller.scrollTop = row * rowPx;
++    fireEvent.scroll(scroller);
++  });
++}
++
++function bodyRowIds(): string[] {
++  return Array.from(document.querySelectorAll("tbody tr[data-row-id]")).map(
++    (row) => row.getAttribute("data-row-id") ?? "",
++  );
++}
++
++function spacer(which: "top" | "bottom"): HTMLElement | null {
++  return document.querySelector(`tr[data-spacer="${which}"]`);
++}
++
++afterEach(() => {
++  vi.restoreAllMocks();
++  renders = [];
++});
++
++type Variant = "compact" | "history" | "expandable" | "virtualised";
++const VARIANTS: Variant[] = ["compact", "history", "expandable", "virtualised"];
++
++// Props that satisfy every variant's required set.
++function variantProps(variant: Variant, data: Stock[]): DataTableProps<Stock> {
++  const base = { columns, data, getRowId };
++  switch (variant) {
++    case "expandable":
++      return {
++        ...base,
++        variant,
++        renderExpansion: (row: Stock) => `Detail ${row.symbol}`,
++        getRowLabel: (row: Stock) => row.name,
++      };
++    case "virtualised":
++      return { ...base, variant, hasMore: false, onEndReached: vi.fn() };
++    default:
++      return { ...base, variant };
++  }
++}
++
++// Both expansion props or neither, as the virtualised variant's type requires.
++function expansionProps(on: boolean) {
++  return on
++    ? {
++        renderExpansion: (row: Stock) => `Detail ${row.symbol}`,
++        getRowLabel: (row: Stock) => row.name,
++      }
++    : {};
++}
++
++// A small stateful wrapper holding `sorting`, as a screen would.
++function Sortable(props: DataTableProps<Stock>): ReactElement {
++  const [sorting, setSorting] = useState<SortingState>([{ id: "symbol", desc: false }]);
++  return <DataTable {...props} sorting={sorting} onSortingChange={setSorting} />;
++}
++
++// Implements TC-COMP-019
++describe("TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26)", () => {
++  it("is covered by the literal scan", () => {
++    const file = "web/src/components/ui/data-table.tsx";
++    expect(SCANNED_DIRECTORIES.some((entry) => file.startsWith(entry))).toBe(true);
++  });
++
++  it.each(VARIANTS)(
++    "%s: every header row and body row has the h-row class and no h-[ class",
++    (variant) => {
++      stubRowHeight(32, 96);
++      render(<DataTable {...variantProps(variant, stocks(3))} />);
++      const rows = [
++        ...Array.from(document.querySelectorAll("thead tr")),
++        ...Array.from(document.querySelectorAll("tbody tr[data-row-id]")),
++      ];
++      expect(rows.length).toBe(4);
++      for (const row of rows) {
++        expect(row).toHaveClass("h-row");
++        expect(Array.from(row.classList).some((name) => /^h-\[/.test(name))).toBe(false);
++      }
++    },
++  );
++
++  it("resolves h-row to --row-height in the Tailwind config and the theme", async () => {
++    const config = (await import(path.join(REPO_ROOT, "tailwind.config.js"))).default;
++    expect(config.theme.extend.height.row).toBe("var(--row-height)");
++    expect(readFileSync(path.join(REPO_ROOT, "design-system/theme.css"), "utf-8")).toContain(
++      "--row-height:",
++    );
++  });
++
++  it("adds @tanstack/react-table under its MIT licence and no virtualisation library (DEC-0215)", () => {
++    const manifest = JSON.parse(readFileSync(path.join(REPO_ROOT, "package.json"), "utf-8"));
++    const lock = JSON.parse(readFileSync(path.join(REPO_ROOT, "package-lock.json"), "utf-8"));
++    expect(manifest.dependencies["@tanstack/react-table"]).toMatch(/^\^8\./);
++    expect(lock.packages["node_modules/@tanstack/react-table"].license).toBe("MIT");
++    const declared = { ...manifest.dependencies, ...manifest.devDependencies };
++    for (const name of [
++      "@tanstack/react-virtual",
++      "react-window",
++      "react-virtualized",
++      "react-virtuoso",
++    ]) {
++      expect(declared[name]).toBeUndefined();
++    }
++  });
++});
++
++// Implements TC-COMP-018
++describe("TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25)", () => {
++  it.each(VARIANTS)(
++    "%s: programmatic column headers and aria-sort on the sorted column only",
++    (variant) => {
++      stubRowHeight(32, 96);
++      render(<Sortable {...variantProps(variant, stocks(3))} />);
++      const headers = screen.getAllByRole("columnheader");
++      const expected = variant === "expandable" ? 4 : 3;
++      expect(headers).toHaveLength(expected);
++      const symbol = screen.getByRole("columnheader", { name: "Symbol" });
++      const name = screen.getByRole("columnheader", { name: "Name" });
++      const gaps = screen.getByRole("columnheader", { name: "Gaps" });
++      expect(symbol).toHaveAttribute("aria-sort", "ascending");
++      expect(name).not.toHaveAttribute("aria-sort");
++      expect(gaps).not.toHaveAttribute("aria-sort");
++    },
++  );
++
++  it("sorts from the keyboard, cycling ascending, descending, unsorted", async () => {
++    const user = userEvent.setup();
++    render(<Sortable {...variantProps("compact", stocks(3))} />);
++    const nameButton = screen.getByRole("button", { name: "Name" });
++    for (let i = 0; i < 10 && document.activeElement !== nameButton; i++) {
++      await user.tab();
++    }
++    expect(nameButton).toHaveFocus();
++    const name = screen.getByRole("columnheader", { name: "Name" });
++    const symbol = screen.getByRole("columnheader", { name: "Symbol" });
++    await user.keyboard("{Enter}");
++    expect(name).toHaveAttribute("aria-sort", "ascending");
++    expect(symbol).not.toHaveAttribute("aria-sort");
++    await user.keyboard("{Enter}");
++    expect(name).toHaveAttribute("aria-sort", "descending");
++    await user.keyboard("{Enter}");
++    for (const header of screen.getAllByRole("columnheader")) {
++      expect(header).not.toHaveAttribute("aria-sort");
++    }
++    // The numeric column cycles the same way: its first press is ascending.
++    await user.click(screen.getByRole("button", { name: "Gaps" }));
++    expect(screen.getByRole("columnheader", { name: "Gaps" })).toHaveAttribute(
++      "aria-sort",
++      "ascending",
++    );
++  });
++
++  it("shows no sort control without onSortingChange, yet still declares the given sorting", () => {
++    const { rerender } = render(
++      <DataTable
++        {...variantProps("compact", stocks(3))}
++        sorting={[{ id: "symbol", desc: false }]}
++      />,
++    );
++    expect(within(screen.getByRole("table")).queryAllByRole("button")).toHaveLength(0);
++    expect(screen.getByRole("columnheader", { name: "Symbol" })).toHaveAttribute(
++      "aria-sort",
++      "ascending",
++    );
++    rerender(<DataTable {...variantProps("compact", stocks(3))} />);
++    for (const header of screen.getAllByRole("columnheader")) {
++      expect(header).not.toHaveAttribute("aria-sort");
++    }
++  });
++
++  it("gives a header a button only when its column is marked sortable", () => {
++    render(
++      <DataTable
++        {...variantProps("compact", stocks(3))}
++        columns={unsortableName}
++        sorting={[]}
++        onSortingChange={vi.fn()}
++      />,
++    );
++    expect(
++      within(screen.getByRole("columnheader", { name: "Name" })).queryByRole("button"),
++    ).toBeNull();
++    expect(
++      within(screen.getByRole("columnheader", { name: "Symbol" })).getByRole("button"),
++    ).toBeInTheDocument();
++  });
++
++  it("makes the first cell of every history row the row header", () => {
++    render(<DataTable {...variantProps("history", stocks(3))} />);
++    const rowHeaders = screen.getAllByRole("rowheader");
++    expect(rowHeaders).toHaveLength(3);
++    rowHeaders.forEach((cell, i) => {
++      expect(cell).toHaveTextContent(`S000${i}`);
++    });
++    expect(screen.getAllByRole("cell")).toHaveLength(6);
++  });
++
++  it("keeps the history row header on when rowHeader is false", () => {
++    render(<DataTable {...variantProps("history", stocks(3))} rowHeader={false} />);
++    expect(screen.getAllByRole("rowheader")).toHaveLength(3);
++  });
++
++  it("gives compact a row header only when asked (Recent downloads)", () => {
++    const { rerender } = render(<DataTable {...variantProps("compact", stocks(3))} />);
++    expect(screen.queryAllByRole("rowheader")).toHaveLength(0);
++    rerender(<DataTable {...variantProps("compact", stocks(3))} rowHeader />);
++    expect(screen.getAllByRole("rowheader")).toHaveLength(3);
++  });
++
++  it("gives every expandable row a named expander that toggles aria-expanded and keeps focus", async () => {
++    const user = userEvent.setup();
++    render(<DataTable {...variantProps("expandable", stocks(3))} />);
++    const expander = screen.getByRole("button", { name: "Expand Stock 1" });
++    expect(expander).toHaveAttribute("aria-expanded", "false");
++    expect(document.querySelector("tr[data-expansion-for]")).toBeNull();
++    for (let i = 0; i < 10 && document.activeElement !== expander; i++) {
++      await user.tab();
++    }
++    expect(expander).toHaveFocus();
++    await user.keyboard("{Enter}");
++    expect(expander).toHaveAttribute("aria-expanded", "true");
++    expect(screen.getByRole("button", { name: "Expand Stock 1" })).toBe(expander);
++    expect(expander).toHaveFocus();
++    const detailRow = document.getElementById(expander.getAttribute("aria-controls") ?? "");
++    expect(detailRow).not.toBeNull();
++    expect(detailRow).toHaveAttribute("data-expansion-for", "S0001");
++    const live = detailRow?.querySelector('[aria-live="polite"]');
++    expect(live).toHaveTextContent("Detail S0001");
++    await user.keyboard(" ");
++    expect(expander).toHaveAttribute("aria-expanded", "false");
++    expect(document.getElementById(detailRow?.id ?? "")).toBeNull();
++    expect(expander).toHaveFocus();
++  });
++
++  it.each(VARIANTS)(
++    "%s: busy sets aria-busy on the table and its absence leaves none",
++    (variant) => {
++      stubRowHeight(32, 96);
++      const { rerender } = render(<DataTable {...variantProps(variant, stocks(3))} busy />);
++      expect(screen.getByRole("table")).toHaveAttribute("aria-busy", "true");
++      rerender(<DataTable {...variantProps(variant, stocks(3))} />);
++      expect(screen.getByRole("table")).not.toHaveAttribute("aria-busy");
++    },
++  );
++});
++
++// Implements TC-COMP-017
++describe("TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306)", () => {
++  function virtualised(data: Stock[], extra: Partial<{ hasMore: boolean; busy: boolean }> = {}) {
++    const onEndReached = vi.fn();
++    const element = (rows: Stock[], more = extra) => (
++      <DataTable
++        variant="virtualised"
++        columns={columns}
++        data={rows}
++        getRowId={getRowId}
++        hasMore={more.hasMore ?? false}
++        busy={more.busy ?? false}
++        onEndReached={onEndReached}
++      />
++    );
++    const view = render(element(data));
++    return { ...view, onEndReached, element };
++  }
++
++  it("renders the first window of 3000 rows with the spacer and row counts", () => {
++    stubRowHeight(32, 96);
++    virtualised(stocks(3000));
++    const ids = bodyRowIds();
++    expect(ids).toHaveLength(25);
++    expect(ids[0]).toBe("S0000");
++    expect(ids[24]).toBe("S0024");
++    expect(screen.getByRole("table")).toHaveAttribute("aria-rowcount", "3001");
++    expect(document.querySelector("tr[data-row-id]")).toHaveAttribute("aria-rowindex", "2");
++    expect(spacer("bottom")).toHaveAttribute("aria-hidden", "true");
++    expect(spacer("bottom")?.style.height).toBe("95200px");
++    expect(spacer("top")).toBeNull();
++  });
++
++  it("renders the next window on scroll and keeps the DOM bounded", () => {
++    stubRowHeight(32, 96);
++    virtualised(stocks(3000));
++    scrollTo(1000, 32);
++    const ids = bodyRowIds();
++    expect(ids).toHaveLength(35);
++    expect(ids[0]).toBe("S0990");
++    expect(ids[34]).toBe("S1024");
++    expect(spacer("top")?.style.height).toBe("31680px");
++    expect(spacer("bottom")?.style.height).toBe("63200px");
++  });
++
++  it("measures the row height instead of assuming one", () => {
++    stubRowHeight(40, 96);
++    virtualised(stocks(3000));
++    scrollTo(1000, 40);
++    const ids = bodyRowIds();
++    expect(ids[0]).toBe("S0990");
++    expect(ids[ids.length - 1]).toBe("S1024");
++    expect(spacer("top")?.style.height).toBe("39600px");
++  });
++
++  it("appends a keyset page without re-rendering earlier rows, asking for it once", () => {
++    stubRowHeight(32, 96);
++    const first = stocks(100);
++    const { onEndReached, rerender, element } = virtualised(first.slice(0, 50), {
++      hasMore: true,
++      busy: false,
++    });
++    scrollTo(30, 32);
++    expect(onEndReached).toHaveBeenCalledTimes(1);
++    renders = [];
++    rerender(element(first, { hasMore: true, busy: false }));
++    const ids = bodyRowIds();
++    expect(ids).toHaveLength(35);
++    expect(ids[0]).toBe("S0020");
++    expect(ids[34]).toBe("S0054");
++    for (let i = 20; i < 50; i++) {
++      expect(renders).not.toContain(`S${String(i).padStart(4, "0")}`);
++    }
++    for (let i = 50; i <= 54; i++) {
++      expect(renders).toContain(`S${String(i).padStart(4, "0")}`);
++    }
++  });
++
++  it("renders every row, with no spacer, when there are fewer than the window", () => {
++    stubRowHeight(32, 96);
++    virtualised(stocks(10));
++    expect(bodyRowIds()).toHaveLength(10);
++    expect(spacer("top")).toBeNull();
++    expect(spacer("bottom")).toBeNull();
++  });
++
++  it("never holds more than the window in the DOM across a scroll sweep", () => {
++    stubRowHeight(32, 96);
++    virtualised(stocks(3000));
++    for (const row of [0, 500, 1500, 2990]) {
++      scrollTo(row, 32);
++      expect(document.querySelectorAll("tbody tr").length).toBeLessThanOrEqual(37);
++    }
++  });
++});
++
++describe("windowFor (DAC-E1-S4-1, AC-26)", () => {
++  const none = new Map<number, number>();
++
++  it("windows the top of 3000 rows", () => {
++    expect(windowFor({ scrollTop: 0, rowHeight: 32, rowCount: 3000, extraHeights: none })).toEqual({
++      start: 0,
++      end: 25,
++      padTop: 0,
++      padBottom: 95200,
++    });
++  });
++
++  it("windows the middle with an overscan above", () => {
++    expect(
++      windowFor({ scrollTop: 32000, rowHeight: 32, rowCount: 3000, extraHeights: none }),
++    ).toEqual({ start: 990, end: 1025, padTop: 31680, padBottom: 63200 });
++  });
++
++  it("falls back to the top window when there is no layout, a negative scroll or NaN", () => {
++    for (const args of [
++      { scrollTop: 32000, rowHeight: 0 },
++      { scrollTop: -5, rowHeight: 32 },
++      { scrollTop: Number.NaN, rowHeight: 32 },
++    ]) {
++      const result = windowFor({ ...args, rowCount: 3000, extraHeights: none });
++      expect(result.start).toBe(0);
++      expect(result.end).toBe(25);
++    }
++  });
++
++  it("renders every row of a short list, and none of an empty one", () => {
++    expect(windowFor({ scrollTop: 0, rowHeight: 32, rowCount: 10, extraHeights: none })).toEqual({
++      start: 0,
++      end: 10,
++      padTop: 0,
++      padBottom: 0,
++    });
++    expect(windowFor({ scrollTop: 0, rowHeight: 32, rowCount: 0, extraHeights: none })).toEqual({
++      start: 0,
++      end: 0,
++      padTop: 0,
++      padBottom: 0,
++    });
++  });
++
++  it("counts an open expansion above the window in the row tops", () => {
++    const extra = new Map([[5, 96]]);
++    expect(
++      windowFor({ scrollTop: 3296, rowHeight: 32, rowCount: 3000, extraHeights: extra }),
++    ).toEqual({ start: 90, end: 125, padTop: 2976, padBottom: 92000 });
++    const at = windowFor({ scrollTop: 3200, rowHeight: 32, rowCount: 3000, extraHeights: extra });
++    expect(at.start).toBe(87);
++    expect(at.end).toBe(122);
++  });
++
++  it("leaves the expansion of the window's first row below its top", () => {
++    const result = windowFor({
++      scrollTop: 3296,
++      rowHeight: 32,
++      rowCount: 3000,
++      extraHeights: new Map([[90, 96]]),
++    });
++    expect(result).toMatchObject({ start: 90, end: 125, padTop: 2880 });
++  });
++
++  it("counts an open expansion below the window in the bottom spacer", () => {
++    const result = windowFor({
++      scrollTop: 0,
++      rowHeight: 32,
++      rowCount: 3000,
++      extraHeights: new Map([[2000, 96]]),
++    });
++    expect(result.padBottom).toBe(95296);
++  });
++});
++
++describe("virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25)", () => {
++  function paged(data: Stock[], props: { hasMore: boolean; busy?: boolean }, expansion = false) {
++    const onEndReached = vi.fn();
++    const element = (rows: Stock[]) => (
++      <DataTable
++        variant="virtualised"
++        columns={columns}
++        data={rows}
++        getRowId={getRowId}
++        hasMore={props.hasMore}
++        busy={props.busy ?? false}
++        onEndReached={onEndReached}
++        {...expansionProps(expansion)}
++      />
++    );
++    return { ...render(element(data)), onEndReached, element };
++  }
++
++  it("asks for the next page when the window end plus the prefetch reaches the loaded rows", () => {
++    stubRowHeight(32, 96);
++    const { onEndReached } = paged(stocks(50), { hasMore: true });
++    scrollTo(4, 32);
++    expect(onEndReached).not.toHaveBeenCalled();
++    scrollTo(5, 32);
++    expect(onEndReached).toHaveBeenCalledTimes(1);
++  });
++
++  it("asks again when the rows are replaced by as many different ones (a sort)", () => {
++    stubRowHeight(32, 96);
++    const { onEndReached, rerender, element } = paged(stocks(50), { hasMore: true });
++    scrollTo(30, 32);
++    expect(onEndReached).toHaveBeenCalledTimes(1);
++    const replaced = stocks(50).map((row) => ({ ...row, symbol: `R${row.symbol}` }));
++    rerender(element(replaced));
++    expect(onEndReached).toHaveBeenCalledTimes(2);
++    rerender(element(replaced));
++    expect(onEndReached).toHaveBeenCalledTimes(2);
++  });
++
++  it("asks again when only the first row is replaced (a sort that changes the head)", () => {
++    stubRowHeight(32, 96);
++    const { onEndReached, rerender, element } = paged(stocks(50), { hasMore: true });
++    scrollTo(30, 32);
++    const [head, ...rest] = stocks(50);
++    rerender(element([{ ...head, symbol: "HEAD" }, ...rest]));
++    expect(onEndReached).toHaveBeenCalledTimes(2);
++  });
++
++  it("never asks while busy or when there is no more", () => {
++    stubRowHeight(32, 96);
++    const busy = paged(stocks(50), { hasMore: true, busy: true });
++    scrollTo(30, 32);
++    expect(busy.onEndReached).not.toHaveBeenCalled();
++    busy.unmount();
++    const done = paged(stocks(50), { hasMore: false });
++    scrollTo(30, 32);
++    expect(done.onEndReached).not.toHaveBeenCalled();
++  });
++
++  it("makes the scroller keyboard-focusable with no role or name of its own", () => {
++    stubRowHeight(32, 96);
++    paged(stocks(10), { hasMore: false });
++    const scroller = document.querySelector('[data-slot="data-table-scroller"]');
++    expect(scroller).toHaveAttribute("tabindex", "0");
++    expect(scroller).not.toHaveAttribute("role");
++    expect(scroller).not.toHaveAttribute("aria-label");
++    expect(scroller).not.toHaveAttribute("aria-labelledby");
++  });
++
++  it("keeps an expansion open across an appended page", async () => {
++    stubRowHeight(32, 96);
++    const user = userEvent.setup();
++    const first = stocks(100);
++    const { rerender, element } = paged(first.slice(0, 50), { hasMore: true }, true);
++    await act(async () => {
++      await user.click(screen.getByRole("button", { name: "Expand Stock 3" }));
++    });
++    expect(screen.getByText("Detail S0003")).toBeInTheDocument();
++    rerender(element(first));
++    expect(screen.getByRole("button", { name: "Expand Stock 3" })).toHaveAttribute(
++      "aria-expanded",
++      "true",
++    );
++    expect(screen.getByText("Detail S0003")).toBeInTheDocument();
++  });
++
++  it("drops a collapsed row's height from the window arithmetic", async () => {
++    stubRowHeight(32, 96);
++    const user = userEvent.setup();
++    paged(stocks(100), { hasMore: false }, true);
++    await user.click(screen.getByRole("button", { name: "Expand Stock 3" }));
++    await user.click(screen.getByRole("button", { name: "Expand Stock 3" }));
++    expect(screen.queryByText("Detail S0003")).toBeNull();
++    scrollTo(50, 32);
++    const ids = bodyRowIds();
++    expect(ids[0]).toBe("S0040");
++    expect(ids[ids.length - 1]).toBe("S0074");
++  });
++});
++
++describe("windowFor edges (DAC-E1-S4-1)", () => {
++  const none = new Map<number, number>();
++
++  it("clamps a scroll past the end to the last rows", () => {
++    expect(
++      windowFor({ scrollTop: 999999, rowHeight: 32, rowCount: 3000, extraHeights: none }),
++    ).toEqual({ start: 2989, end: 3000, padTop: 95648, padBottom: 0 });
++  });
++
++  it("windows a one pixel row height", () => {
++    expect(windowFor({ scrollTop: 100, rowHeight: 1, rowCount: 3000, extraHeights: none })).toEqual(
++      {
++        start: 90,
++        end: 125,
++        padTop: 90,
++        padBottom: 2875,
++      },
++    );
++  });
++
++  it("ignores an expansion recorded for a row index past the loaded rows", () => {
++    const result = windowFor({
++      scrollTop: 0,
++      rowHeight: 32,
++      rowCount: 10,
++      extraHeights: new Map([[10, 96]]),
++    });
++    expect(result.padBottom).toBe(0);
++  });
++});
++
++describe("data-table classes and structure (AC-26, DAC-E1-S4-2)", () => {
++  it("right-aligns numeric headers and cells in the numeric face, and no others", () => {
++    render(<DataTable {...variantProps("compact", stocks(2))} />);
++    const gaps = screen.getByRole("columnheader", { name: "Gaps" });
++    const symbol = screen.getByRole("columnheader", { name: "Symbol" });
++    expect(gaps).toHaveClass("text-right", "font-numeric");
++    expect(symbol).not.toHaveClass("text-right");
++    expect(symbol).not.toHaveClass("font-numeric");
++    const cells = screen.getAllByRole("cell");
++    expect(cells[2]).toHaveClass("text-right", "font-numeric");
++    expect(cells[0]).not.toHaveClass("text-right");
++    expect(cells[0]).not.toHaveClass("font-numeric");
++  });
++
++  it("right-aligns a numeric row header", () => {
++    const numericFirst = [columns[2], columns[0], columns[1]];
++    render(<DataTable {...variantProps("history", stocks(2))} columns={numericFirst} />);
++    const [first] = screen.getAllByRole("rowheader");
++    expect(first).toHaveClass("text-right", "font-numeric");
++    const symbolFirst = render(<DataTable {...variantProps("history", stocks(2))} />);
++    const rowHeaders = within(symbolFirst.container).getAllByRole("rowheader");
++    expect(rowHeaders[0]).not.toHaveClass("text-right");
++    expect(rowHeaders[0]).not.toHaveClass("font-numeric");
++  });
++
++  it("spans the expansion row over every column and the expander", async () => {
++    const user = userEvent.setup();
++    render(<DataTable {...variantProps("expandable", stocks(2))} />);
++    await user.click(screen.getByRole("button", { name: "Expand Stock 0" }));
++    const detail = document.querySelector("tr[data-expansion-for]");
++    expect(detail?.querySelector("td")).toHaveAttribute("colspan", "4");
++  });
++
++  it("gives only the virtualised header a sticky position, and only it a scroller and spacers", () => {
++    stubRowHeight(32, 96);
++    const { unmount } = render(<DataTable {...variantProps("virtualised", stocks(3000))} />);
++    expect(document.querySelector("thead tr")).toHaveClass("sticky", "top-0");
++    expect(document.querySelector('[data-slot="data-table-scroller"]')).toHaveStyle({
++      height: "calc(var(--row-height) * 16)",
++    });
++    unmount();
++    for (const variant of ["compact", "history", "expandable"] as const) {
++      const view = render(<DataTable {...variantProps(variant, stocks(3000))} />);
++      expect(document.querySelector("thead tr")).not.toHaveClass("sticky");
++      expect(document.querySelector('[data-slot="data-table-scroller"]')).toBeNull();
++      expect(document.querySelector("tr[data-spacer]")).toBeNull();
++      expect(screen.getByRole("table")).not.toHaveAttribute("aria-rowcount");
++      expect(document.querySelector("tr[data-row-id]")).not.toHaveAttribute("aria-rowindex");
++      expect(bodyRowIds()).toHaveLength(3000);
++      view.unmount();
++    }
++  });
++
++  it("shows no expander column for a virtualised table without expansion", () => {
++    stubRowHeight(32, 96);
++    render(<DataTable {...variantProps("virtualised", stocks(5))} />);
++    expect(screen.queryByRole("button")).toBeNull();
++    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
++  });
++
++  it("sorts one column at a time, even with the shift key held", async () => {
++    const user = userEvent.setup();
++    render(<Sortable {...variantProps("compact", stocks(3))} />);
++    await user.keyboard("{Shift>}");
++    await user.click(screen.getByRole("button", { name: "Name" }));
++    await user.keyboard("{/Shift}");
++    expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute(
++      "aria-sort",
++      "ascending",
++    );
++    expect(screen.getByRole("columnheader", { name: "Symbol" })).not.toHaveAttribute("aria-sort");
++  });
++});
++
++describe("virtualised measuring (DAC-E1-S4-1, AC-26)", () => {
++  it("renders the top window with no spacer where layout reports a zero height", () => {
++    render(<DataTable {...variantProps("virtualised", stocks(3000))} />);
++    expect(bodyRowIds()).toHaveLength(25);
++    expect(spacer("top")).toBeNull();
++    expect(spacer("bottom")).toBeNull();
++  });
++
++  it("measures a row only once rows exist, not from an empty table", () => {
++    const view = render(<DataTable {...variantProps("virtualised", [])} />);
++    expect(bodyRowIds()).toHaveLength(0);
++    view.rerender(<DataTable {...variantProps("virtualised", stocks(3000))} />);
++    expect(spacer("bottom")).toBeNull();
++  });
++
++  it("keeps the last measured height when a later measurement reports zero", () => {
++    const stub = vi.spyOn(Element.prototype, "getBoundingClientRect");
++    stub.mockImplementation(function (this: Element) {
++      const height = this.matches("tr[data-row-id]") ? 32 : 0;
++      return { height } as DOMRect;
++    });
++    const data = stocks(3000);
++    const view = render(<DataTable {...variantProps("virtualised", data)} />);
++    stub.mockImplementation(() => ({ height: 0 }) as DOMRect);
++    view.rerender(<DataTable {...variantProps("virtualised", data)} />);
++    expect(spacer("bottom")?.style.height).toBe("95200px");
++  });
++
++  it("measures a one pixel row and shows a one pixel spacer", () => {
++    const stub = vi.spyOn(Element.prototype, "getBoundingClientRect");
++    stub.mockImplementation(function (this: Element) {
++      return { height: this.matches("tr[data-row-id]") ? 1 : 0 } as DOMRect;
++    });
++    render(<DataTable {...variantProps("virtualised", stocks(3000))} />);
++    expect(spacer("bottom")?.style.height).toBe("2975px");
++    scrollTo(11, 1);
++    expect(spacer("top")?.style.height).toBe("1px");
++    document.body.innerHTML = "";
++  });
++
++  it("shows a one pixel bottom spacer when one row is left unrendered", () => {
++    const stub = vi.spyOn(Element.prototype, "getBoundingClientRect");
++    stub.mockImplementation(function (this: Element) {
++      return { height: this.matches("tr[data-row-id]") ? 1 : 0 } as DOMRect;
++    });
++    render(<DataTable {...variantProps("virtualised", stocks(26))} />);
++    expect(bodyRowIds()).toHaveLength(25);
++    expect(spacer("bottom")?.style.height).toBe("1px");
++  });
++
++  it("keeps an open expansion's height in the offsets after it scrolls out of the window", async () => {
++    stubRowHeight(32, 96);
++    const user = userEvent.setup();
++    render(
++      <DataTable
++        variant="virtualised"
++        columns={columns}
++        data={stocks(100)}
++        getRowId={getRowId}
++        hasMore={false}
++        onEndReached={vi.fn()}
++        {...expansionProps(true)}
++      />,
++    );
++    await user.click(screen.getByRole("button", { name: "Expand Stock 3" }));
++    scrollTo(50, 32);
++    expect(bodyRowIds()[0]).toBe("S0037");
++  });
++});
+diff --git a/web/src/components/ui/data-table.tsx b/web/src/components/ui/data-table.tsx
+new file mode 100644
+index 0000000..26cbea3
+--- /dev/null
++++ b/web/src/components/ui/data-table.tsx
+@@ -0,0 +1,415 @@
++import {
++  type ColumnDef,
++  type ExpandedState,
++  type OnChangeFn,
++  type Row,
++  type SortingState,
++  flexRender,
++  getCoreRowModel,
++  useReactTable,
++} from "@tanstack/react-table";
++import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
++import { type ReactNode, memo, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
++import { Button } from "./button";
++import { cn } from "./utils";
++
++/**
++ * Rows the `virtualised` scroller shows at once. DEC-0306: the counts follow
++ * CAP-002's `results-window.ts` (DEC-0160), the one hand-built windowing over
++ * keyset pages in the product.
++ */
++export const VIEWPORT_ROWS = 15;
++/** Rows rendered above and below the viewport so one fast scroll step shows no blank frame (DEC-0306). */
++export const OVERSCAN_ROWS = 10;
++/** The next keyset page is requested when the window's end is this close to the loaded end (DEC-0306). */
++export const PREFETCH_ROWS = 20;
++
++export interface VisibleWindow {
++  /** Index of the first rendered row. */
++  start: number;
++  /** Index after the last rendered row. */
++  end: number;
++  /** Height of the spacer above the rendered rows, in pixels. */
++  padTop: number;
++  /** Height of the spacer below the rendered rows, in pixels. */
++  padBottom: number;
++}
++
++/**
++ * The rows to render for `scrollTop`: an overscan above the first visible
++ * row to an overscan below the viewport, clamped to the loaded rows, with the
++ * spacer heights that keep the scroll height at the full content height.
++ * `extraHeights` maps a row index to the measured height of that row's open
++ * expansion, which lies below the row's own top (DEC-0306). A row height of
++ * zero (no layout) or a negative or NaN `scrollTop` is the top window.
++ */
++export function windowFor({
++  scrollTop,
++  rowHeight,
++  rowCount,
++  extraHeights,
++}: {
++  scrollTop: number;
++  rowHeight: number;
++  rowCount: number;
++  extraHeights: ReadonlyMap<number, number>;
++}): VisibleWindow {
++  const extras = Array.from(extraHeights);
++  const topOf = (index: number): number =>
++    index * rowHeight + extras.reduce((sum, [at, height]) => (at < index ? sum + height : sum), 0);
++  const total = topOf(rowCount);
++  let first = 0;
++  if (rowHeight > 0) {
++    // The last row whose top is at or above scrollTop; tops only grow with the index.
++    // A negative or NaN scrollTop matches no row, which leaves the first.
++    let low = 0;
++    let high = rowCount - 1;
++    while (low < high) {
++      const middle = Math.ceil((low + high) / 2);
++      if (topOf(middle) <= scrollTop) {
++        low = middle;
++      } else {
++        high = middle - 1;
++      }
++    }
++    first = low;
++  }
++  const end = Math.min(rowCount, first + VIEWPORT_ROWS + OVERSCAN_ROWS);
++  const start = Math.min(end, Math.max(0, first - OVERSCAN_ROWS));
++  return { start, end, padTop: topOf(start), padBottom: total - topOf(end) };
++}
++
++declare module "@tanstack/react-table" {
++  // The type parameters must match the declaration they merge with.
++  interface ColumnMeta<TData, TValue> {
++    /** Right-aligns the column and sets it in the numeric face. */
++    numeric?: boolean;
++  }
++}
++
++interface CommonProps<TRow> {
++  // biome-ignore lint/suspicious/noExplicitAny: TanStack's own column typing
++  columns: ColumnDef<TRow, any>[];
++  data: TRow[];
++  getRowId: (row: TRow) => string;
++  /** The sorting to declare with `aria-sort`; the caller sorts server-side. */
++  sorting?: SortingState;
++  /** Given, sortable columns get a sort control; the caller turns the change into its request. */
++  onSortingChange?: OnChangeFn<SortingState>;
++  /** First cell of each row is a row header; always on for `history`. */
++  rowHeader?: boolean;
++  /** Sets `aria-busy` and holds back `onEndReached`. */
++  busy?: boolean;
++}
++
++interface ExpansionProps<TRow> {
++  renderExpansion: (row: TRow) => ReactNode;
++  getRowLabel: (row: TRow) => string;
++}
++
++export type DataTableProps<TRow> = CommonProps<TRow> &
++  (
++    | { variant: "compact" | "history" }
++    | ({ variant: "expandable" } & ExpansionProps<TRow>)
++    | ({
++        variant: "virtualised";
++        hasMore: boolean;
++        onEndReached: () => void;
++      } & (ExpansionProps<TRow> | { renderExpansion?: never; getRowLabel?: never }))
++  );
++
++interface RowProps<TRow> {
++  row: Row<TRow>;
++  index: number;
++  expanded: boolean;
++  // biome-ignore lint/suspicious/noExplicitAny: TanStack's own column typing
++  columns: ColumnDef<TRow, any>[];
++  rowHeader: boolean;
++  expansion?: ExpansionProps<TRow>;
++  windowed: boolean;
++}
++
++function RowImpl<TRow>({
++  row,
++  index,
++  expanded,
++  rowHeader,
++  expansion,
++  windowed,
++  columns,
++}: RowProps<TRow>) {
++  const detailId = useId();
++  const cellClass = "px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle";
++  const cells = row.getVisibleCells();
++  return (
++    <>
++      <tr
++        data-row-id={row.id}
++        aria-rowindex={windowed ? index + 2 : undefined}
++        className="h-row border-b border-border hover:bg-muted"
++      >
++        {expansion ? (
++          <td className={cellClass}>
++            <Button
++              variant="ghost"
++              className="h-5 w-5 p-0"
++              aria-expanded={expanded}
++              aria-controls={detailId}
++              aria-label={`Expand ${expansion.getRowLabel(row.original)}`}
++              onClick={row.getToggleExpandedHandler()}
++            >
++              {expanded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
++            </Button>
++          </td>
++        ) : null}
++        {cells.map((cell, position) => {
++          const numeric = cell.column.columnDef.meta?.numeric;
++          const content = flexRender(cell.column.columnDef.cell, cell.getContext());
++          if (position === 0 && rowHeader) {
++            return (
++              <th
++                key={cell.id}
++                scope="row"
++                className={cn(
++                  cellClass,
++                  "text-left font-medium",
++                  numeric && "text-right font-numeric",
++                )}
++              >
++                {content}
++              </th>
++            );
++          }
++          return (
++            <td key={cell.id} className={cn(cellClass, numeric && "text-right font-numeric")}>
++              {content}
++            </td>
++          );
++        })}
++      </tr>
++      {expansion && expanded ? (
++        <tr id={detailId} data-expansion-for={row.id} className="border-b border-border">
++          <td colSpan={columns.length + 1}>
++            <div aria-live="polite">{expansion.renderExpansion(row.original)}</div>
++          </td>
++        </tr>
++      ) : null}
++    </>
++  );
++}
++
++/**
++ * TanStack recreates `Row` objects on every new `data`, so the comparison is
++ * by the record's identity, which an appended keyset page leaves unchanged.
++ * Callers keep `columns` and loaded records referentially stable, or earlier
++ * rows re-render on every page; `renderExpansion` and `getRowLabel` are read
++ * when a row renders, so a row shows the closures it last rendered with.
++ */
++const DataTableRow = memo(
++  RowImpl,
++  (a, b) =>
++    a.row.original === b.row.original &&
++    a.expanded === b.expanded &&
++    a.index === b.index &&
++    a.columns === b.columns &&
++    a.rowHeader === b.rowHeader,
++) as typeof RowImpl;
++
++/**
++ * The design-system `data-table` on TanStack Table v8 (component design 2.1
++ * and 3; data-table spec sections 2 and 4-6): `compact`, `history`,
++ * `expandable` and `virtualised` variants over one controlled table. Sorting
++ * is the caller's (server-side, spec section 4): `sorting` is declared with
++ * `aria-sort` and `onSortingChange` receives the cycle ascending, descending,
++ * unsorted. Every row consumes `--row-height` through `h-row`; the window
++ * arithmetic measures the rendered height, so no literal sits outside the
++ * theme (DAC-E1-S4-2, DAC-E1-S4-3; DEC-0306, DEC-0307).
++ */
++export function DataTable<TRow>(props: DataTableProps<TRow>) {
++  const { columns, data, getRowId, sorting, onSortingChange, busy, variant } = props;
++  const rowHeader = variant === "history" || props.rowHeader === true;
++  // `renderExpansion` and `getRowLabel` come as a pair, so one is enough to test.
++  const { renderExpansion, getRowLabel } = props as Partial<ExpansionProps<TRow>>;
++  const expansion: ExpansionProps<TRow> | undefined = renderExpansion
++    ? { renderExpansion, getRowLabel: getRowLabel as ExpansionProps<TRow>["getRowLabel"] }
++    : undefined;
++  const windowed = variant === "virtualised";
++  const [expanded, setExpanded] = useState<ExpandedState>({});
++  const table = useReactTable({
++    data,
++    columns,
++    getRowId,
++    getCoreRowModel: getCoreRowModel(),
++    enableSorting: onSortingChange !== undefined,
++    defaultColumn: { enableSorting: false },
++    enableMultiSort: false,
++    sortDescFirst: false,
++    state: { sorting: sorting ?? [], expanded },
++    onSortingChange,
++    onExpandedChange: setExpanded,
++    getRowCanExpand: () => expansion !== undefined,
++  });
++  // No sorted or expanded row model is wired: rows keep the caller's order (the
++  // sort is server-side) and expansion is this component's own state, keyed by
++  // `getRowId`, so neither resets when an appended page changes `data`.
++  const rows = table.getRowModel().rows;
++  const rowCount = rows.length;
++
++  const [scrollTop, setScrollTop] = useState(0);
++  const [rowHeight, setRowHeight] = useState(0);
++  const [extraHeights, setExtraHeights] = useState<ReadonlyMap<number, number>>(new Map());
++  const tableRef = useRef<HTMLTableElement>(null);
++  const measured = useRef(new Map<string, number>());
++
++  // Measure the rendered row and each open expansion; jsdom reports zero, which is the top window.
++  useLayoutEffect(() => {
++    if (!windowed || !tableRef.current) {
++      return;
++    }
++    const firstRow = tableRef.current.querySelector("tr[data-row-id]");
++    const height = firstRow ? firstRow.getBoundingClientRect().height : 0;
++    if (height > 0) {
++      setRowHeight(height);
++    }
++    const open = new Set(rows.filter((row) => row.getIsExpanded()).map((row) => row.id));
++    for (const id of Array.from(measured.current.keys())) {
++      if (!open.has(id)) {
++        measured.current.delete(id);
++      }
++    }
++    for (const detail of Array.from(tableRef.current.querySelectorAll("tr[data-expansion-for]"))) {
++      const id = detail.getAttribute("data-expansion-for") ?? "";
++      measured.current.set(id, detail.getBoundingClientRect().height);
++    }
++    const next = new Map<number, number>();
++    rows.forEach((row, index) => {
++      const extra = measured.current.get(row.id);
++      if (extra !== undefined) {
++        next.set(index, extra);
++      }
++    });
++    const same =
++      next.size === extraHeights.size &&
++      Array.from(next).every(([index, extra]) => extraHeights.get(index) === extra);
++    if (!same) {
++      setExtraHeights(next);
++    }
++  });
++
++  const visible: VisibleWindow = windowed
++    ? windowFor({ scrollTop, rowHeight, rowCount, extraHeights })
++    : { start: 0, end: rowCount, padTop: 0, padBottom: 0 };
++
++  const paging = props.variant === "virtualised" ? props : undefined;
++  // One request per page of data: the loaded count and its first row name it, so
++  // replacing the rows (a sort or filter) with as many as before asks again.
++  const firedFor = useRef<string | null>(null);
++  const loadedKey = `${rows[0]?.id ?? ""}/${rowCount}`;
++  useEffect(() => {
++    if (paging?.hasMore && !busy && visible.end + PREFETCH_ROWS >= rowCount) {
++      if (firedFor.current !== loadedKey) {
++        firedFor.current = loadedKey;
++        paging.onEndReached();
++      }
++    }
++  });
++
++  const headerCell =
++    "px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground";
++  const body = (
++    <table
++      ref={tableRef}
++      data-variant={variant}
++      aria-busy={busy || undefined}
++      aria-rowcount={windowed ? rowCount + 1 : undefined}
++      className="w-full caption-bottom text-sm"
++    >
++      <thead>
++        {table.getHeaderGroups().map((group) => (
++          <tr
++            key={group.id}
++            className={cn("h-row border-b border-border", windowed && "sticky top-0 bg-background")}
++          >
++            {expansion ? (
++              <th scope="col" className={headerCell}>
++                <span className="sr-only">Details</span>
++              </th>
++            ) : null}
++            {group.headers.map((header) => {
++              const sorted = header.column.getIsSorted();
++              const numeric = header.column.columnDef.meta?.numeric;
++              const label = flexRender(header.column.columnDef.header, header.getContext());
++              return (
++                <th
++                  key={header.id}
++                  scope="col"
++                  aria-sort={
++                    sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : undefined
++                  }
++                  className={cn(headerCell, numeric && "text-right font-numeric")}
++                >
++                  {header.column.getCanSort() ? (
++                    <Button
++                      variant="ghost"
++                      className="h-5 gap-1 px-1 py-0"
++                      onClick={header.column.getToggleSortingHandler()}
++                    >
++                      {label}
++                      {sorted === "asc" ? (
++                        <ArrowUp aria-hidden="true" />
++                      ) : sorted === "desc" ? (
++                        <ArrowDown aria-hidden="true" />
++                      ) : (
++                        <ArrowUpDown aria-hidden="true" />
++                      )}
++                    </Button>
++                  ) : (
++                    label
++                  )}
++                </th>
++              );
++            })}
++          </tr>
++        ))}
++      </thead>
++      <tbody>
++        {visible.padTop > 0 ? (
++          // biome-ignore lint/a11y/noAriaHiddenOnFocusable: an empty spacer row holds nothing focusable
++          <tr data-spacer="top" aria-hidden="true" style={{ height: visible.padTop }} />
++        ) : null}
++        {rows.slice(visible.start, visible.end).map((row, offset) => (
++          <DataTableRow
++            key={row.id}
++            row={row}
++            index={visible.start + offset}
++            expanded={row.getIsExpanded()}
++            columns={columns}
++            rowHeader={rowHeader}
++            expansion={expansion}
++            windowed={windowed}
++          />
++        ))}
++        {visible.padBottom > 0 ? (
++          // biome-ignore lint/a11y/noAriaHiddenOnFocusable: an empty spacer row holds nothing focusable
++          <tr data-spacer="bottom" aria-hidden="true" style={{ height: visible.padBottom }} />
++        ) : null}
++      </tbody>
++    </table>
++  );
++
++  if (!windowed) {
++    return body;
++  }
++  return (
++    <div
++      data-slot="data-table-scroller"
++      // biome-ignore lint/a11y/noNoninteractiveTabindex: a keyboard user scrolls the window with the arrow and page keys (AC-25)
++      tabIndex={0}
++      className="overflow-y-auto"
++      style={{ height: `calc(var(--row-height) * ${VIEWPORT_ROWS + 1})` }}
++      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
++    >
++      {body}
++    </div>
++  );
++}

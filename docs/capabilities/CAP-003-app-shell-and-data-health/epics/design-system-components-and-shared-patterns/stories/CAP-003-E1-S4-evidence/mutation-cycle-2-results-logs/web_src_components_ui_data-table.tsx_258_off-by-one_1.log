@@ -1,0 +1,76 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 2 failed) 3040ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2091ms
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer 36ms
+     → expected '2974px' to be '2975px' // Object.is equality
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > shows a one pixel bottom spacer when one row is left unrendered 13ms
+     → expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer
+AssertionError: expected '2974px' to be '2975px' // Object.is equality
+
+Expected: "2975px"
+Received: "2974px"
+
+ ❯ src/components/ui/data-table.test.tsx:741:44
+    739|     });
+    740|     render(<DataTable {...variantProps("virtualised", stocks(3000))} /…
+    741|     expect(spacer("bottom")?.style.height).toBe("2975px");
+       |                                            ^
+    742|     scrollTo(11, 1);
+    743|     expect(spacer("top")?.style.height).toBe("1px");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > shows a one pixel bottom spacer when one row is left unrendered
+AssertionError: expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+
+- Expected
++ Received
+
+- 25
++ 26
+
+ ❯ src/components/ui/data-table.test.tsx:753:26
+    751|     });
+    752|     render(<DataTable {...variantProps("virtualised", stocks(26))} />);
+    753|     expect(bodyRowIds()).toHaveLength(25);
+       |                          ^
+    754|     expect(spacer("bottom")?.style.height).toBe("1px");
+    755|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 85 passed (87)
+   Start at  12:32:41
+   Duration  4.69s (transform 120ms, setup 61ms, collect 486ms, tests 3.04s, environment 256ms, prepare 360ms)
+

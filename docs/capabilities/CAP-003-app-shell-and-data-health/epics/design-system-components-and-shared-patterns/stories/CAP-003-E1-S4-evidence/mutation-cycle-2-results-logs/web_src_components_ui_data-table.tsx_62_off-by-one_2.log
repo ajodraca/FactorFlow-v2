@@ -1,0 +1,87 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w3/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w3/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w3/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 2 failed) 3350ms
+   × windowFor edges (DAC-E1-S4-1) > windows a one pixel row height 5ms
+     → expected { Object (start, end, ...) } to deeply equal { start: 90, end: 125, …(2) }
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2411ms
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer 27ms
+     → expected undefined to be '1px' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor edges (DAC-E1-S4-1) > windows a one pixel row height
+AssertionError: expected { Object (start, end, ...) } to deeply equal { start: 90, end: 125, …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "end": 125,
+-   "padBottom": 2875,
+-   "padTop": 90,
+-   "start": 90,
++   "end": 25,
++   "padBottom": 2975,
++   "padTop": 0,
++   "start": 0,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:612:93
+    610| 
+    611|   it("windows a one pixel row height", () => {
+    612|     expect(windowFor({ scrollTop: 100, rowHeight: 1, rowCount: 3000, e…
+       |                                                                                             ^
+    613|       {
+    614|         start: 90,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer
+AssertionError: expected undefined to be '1px' // Object.is equality
+
+- Expected: 
+"1px"
+
++ Received: 
+undefined
+
+ ❯ src/components/ui/data-table.test.tsx:743:41
+    741|     expect(spacer("bottom")?.style.height).toBe("2975px");
+    742|     scrollTo(11, 1);
+    743|     expect(spacer("top")?.style.height).toBe("1px");
+       |                                         ^
+    744|     document.body.innerHTML = "";
+    745|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 85 passed (87)
+   Start at  12:31:42
+   Duration  5.23s (transform 124ms, setup 67ms, collect 535ms, tests 3.35s, environment 335ms, prepare 145ms)
+

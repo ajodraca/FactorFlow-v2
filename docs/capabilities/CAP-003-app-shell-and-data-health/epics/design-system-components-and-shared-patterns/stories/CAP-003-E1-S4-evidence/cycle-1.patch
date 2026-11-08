@@ -1,0 +1,96 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-1-packages.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-1-packages.log
+new file mode 100644
+index 0000000..765d41a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-1-packages.log
+@@ -0,0 +1,26 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/ui/data-table.test.tsx (87 tests | 1 failed | 86 skipped) 12ms
++   × TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > adds @tanstack/react-table under its MIT licence and no virtualisation library (DEC-0215) 11ms
++     → .toMatch() expects to receive a string, but got undefined
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > adds @tanstack/react-table under its MIT licence and no virtualisation library (DEC-0215)
++TypeError: .toMatch() expects to receive a string, but got undefined
++ ❯ src/components/ui/data-table.test.tsx:176:60
++    174|     const manifest = JSON.parse(readFileSync(path.join(REPO_ROOT, "pac…
++    175|     const lock = JSON.parse(readFileSync(path.join(REPO_ROOT, "package…
++    176|     expect(manifest.dependencies["@tanstack/react-table"]).toMatch(/^\…
++       |                                                            ^
++    177|     expect(lock.packages["node_modules/@tanstack/react-table"].license…
++    178|     const declared = { ...manifest.dependencies, ...manifest.devDepend…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 86 skipped (87)
++   Start at  12:36:11
++   Duration  1.82s (transform 98ms, setup 67ms, collect 925ms, tests 12ms, environment 444ms, prepare 51ms)
++
+diff --git a/package-lock.json b/package-lock.json
+index a16f650..5d91f51 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -17,6 +17,7 @@
+         "@radix-ui/react-radio-group": "^1.5.1",
+         "@radix-ui/react-select": "^2.4.1",
+         "@radix-ui/react-slot": "^1.5.0",
++        "@tanstack/react-table": "^8.21.3",
+         "class-variance-authority": "^0.7.1",
+         "clsx": "^2.1.1",
+         "cmdk": "^1.1.1",
+@@ -2451,6 +2452,39 @@
+       "integrity": "sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==",
+       "license": "MIT"
+     },
++    "node_modules/@tanstack/react-table": {
++      "version": "8.21.3",
++      "resolved": "https://registry.npmjs.org/@tanstack/react-table/-/react-table-8.21.3.tgz",
++      "integrity": "sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==",
++      "license": "MIT",
++      "dependencies": {
++        "@tanstack/table-core": "8.21.3"
++      },
++      "engines": {
++        "node": ">=12"
++      },
++      "funding": {
++        "type": "github",
++        "url": "https://github.com/sponsors/tannerlinsley"
++      },
++      "peerDependencies": {
++        "react": ">=16.8",
++        "react-dom": ">=16.8"
++      }
++    },
++    "node_modules/@tanstack/table-core": {
++      "version": "8.21.3",
++      "resolved": "https://registry.npmjs.org/@tanstack/table-core/-/table-core-8.21.3.tgz",
++      "integrity": "sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=12"
++      },
++      "funding": {
++        "type": "github",
++        "url": "https://github.com/sponsors/tannerlinsley"
++      }
++    },
+     "node_modules/@testing-library/dom": {
+       "version": "10.4.1",
+       "resolved": "https://registry.npmjs.org/@testing-library/dom/-/dom-10.4.1.tgz",
+diff --git a/package.json b/package.json
+index 748cc04..1db4297 100644
+--- a/package.json
++++ b/package.json
+@@ -21,6 +21,7 @@
+     "@radix-ui/react-radio-group": "^1.5.1",
+     "@radix-ui/react-select": "^2.4.1",
+     "@radix-ui/react-slot": "^1.5.0",
++    "@tanstack/react-table": "^8.21.3",
+     "class-variance-authority": "^0.7.1",
+     "clsx": "^2.1.1",
+     "cmdk": "^1.1.1",
