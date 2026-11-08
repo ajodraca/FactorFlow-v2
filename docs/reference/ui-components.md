@@ -4,7 +4,9 @@
 shadcn/ui ships them and adapted to the theme. CAP-003-E1-S1 created the
 directory with `Badge`, `Button` and `Card` and the `cn` helper they share;
 CAP-003-E1-S2 added the form controls: `Form`, `Input`, `Textarea`,
-`Checkbox`, `RadioGroup` and `Select`. Every component is first-party source: it imports through relative paths, never
+`Checkbox`, `RadioGroup` and `Select`; CAP-003-E1-S3 added the overlay and
+feedback family: `ConfirmDialog`, `Command`, `Toaster` and `toast`, `Progress`
+and `Stepper`. Every component is first-party source: it imports through relative paths, never
 an `@/` alias, and `tsconfig.json` and `vite.config.ts` declare no path alias.
 
 ## Token-only styling
@@ -19,7 +21,7 @@ keys, each bound as `hsl(var(--<same name>) / <alpha-value>)`: `primary`,
 
 Two tests hold this in place: `web/src/components/token-literals.test.ts`
 checks the Tailwind keys resolve, and scans the component sources for spacing,
-size or colour literals (`literalsIn`), including the six form-control files;
+size or colour literals (`literalsIn`), including the six form-control files and the five overlay and feedback files;
 `ui/vendoring.test.ts` checks the no-alias rule and that every package below
 carries an approved licence (MIT, for the form packages) in `package-lock.json`.
 
@@ -30,7 +32,9 @@ carries an approved licence (MIT, for the form packages) in `package-lock.json`.
 `react-hook-form`, `zod`, `@hookform/resolvers`, `@radix-ui/react-label`,
 `@radix-ui/react-radio-group`, `@radix-ui/react-checkbox` and
 `@radix-ui/react-select`. All seven are `dependencies`, none a
-`devDependency`.
+`devDependency`. The overlay and feedback family added five more, also
+`dependencies`: `@radix-ui/react-alert-dialog`, `@radix-ui/react-dialog`,
+`@radix-ui/react-progress`, `cmdk` and `sonner`. The stepper has no package.
 
 ## `cn` (`utils.ts`)
 
@@ -152,3 +156,69 @@ The Radix select parts: `Select`, `SelectGroup`, `SelectValue`,
 `text-muted-foreground`), `SelectItem`, `SelectSeparator` and the two scroll
 buttons. Enter or Space opens the list with the current value highlighted,
 ArrowDown and Enter choose, Escape closes, and focus returns to the trigger.
+
+## Overlay and feedback components
+
+### `ConfirmDialog` (`dialog.tsx`)
+
+The `confirm` variant (`data-variant="confirm"`), built on Radix AlertDialog.
+The content has `role="dialog"` and `aria-modal="true"`, not Radix's
+`alertdialog`. There is no `variant` prop and no destructive styling.
+
+- Props: `open`, `onOpenChange`, `title`, `description`, `confirmLabel`,
+  `onConfirm`, optional `pending` and `children`. `children` render between the
+  description and the buttons, so a refusal can stay inside the dialog.
+- **Cancel** is the first button and takes initial focus. Clicking the overlay
+  or pressing Escape asks to close, as Cancel does.
+- The confirm action is a plain `Button`, so the dialog stays open until the
+  caller closes it. While `pending`, the dialog sets `aria-busy`, the confirm
+  action is `aria-disabled` and ignores clicks, and nothing closes the dialog.
+- Focus returns to the element that held it when the dialog opened, if it is
+  still in the document.
+
+### `Command` and `CommandDialog` (`command.tsx`)
+
+cmdk inside a Radix Dialog. `CommandDialog` (`open`, `onOpenChange`, `children`)
+is labelled *Search FactorFlow* and loops the selection; `loop` is not a caller
+option. Focus returns to the opener on close. Its 560 px width is the one
+length literal the token scan allows, in this file only.
+
+The parts are `Command`, `CommandInput` (with a search icon, ring on focus),
+`CommandList` (at most ten rows tall), `CommandEmpty`, `CommandLoading`,
+`CommandGroup`, `CommandSeparator` and `CommandItem`. The caller supplies the
+placeholder, group headings and the empty and loading wording. There is no
+`CommandShortcut`.
+
+### `Toaster` and `toast` (`toast.tsx`)
+
+`Toaster` renders sonner's region in the light theme with a close button on
+every toast; `next-themes` is not used. `toast` has `success`, `warning` and
+`error`, each `(message, { description?, action? })`. `warning` and `error`
+never time out; `success` keeps sonner's default duration. There is no `info`
+variant and no `important` option, so toasts stay in sonner's polite region and
+never take focus.
+
+### `Progress` (`progress.tsx`)
+
+A Radix progress bar. `value` and `aria-labelledby` are required; the caller
+renders the visible text and passes its id. The bar is indeterminate
+(`data-variant="indeterminate"`, no `aria-valuenow`) when `value` or `max` is
+`null`, so a download's `done` and `total` can be passed unchanged; otherwise
+it is `determinate` and the indicator is positioned from the caller's `max`
+(default 100). The indeterminate indicator is a static hatch that pulses only
+when motion is allowed.
+
+### `Stepper` (`stepper.tsx`)
+
+A bespoke vertical stepper with no shadcn/ui or Radix source: a `nav` labelled
+by `label` holding an `ol` of `steps`. Props: `label`, `steps` and `markerSize`
+(the caller's marker width).
+
+- A step has `title`, `state` (`done`, `current` or `todo`) and optional
+  `summary`, `href` and `onSelect`. The current item carries
+  `aria-current="step"`.
+- Each title carries its state in text (", done", ", current", ", to do"): a
+  visually hidden suffix, or the link's `aria-label`.
+- Only a done step with an `href` is a link. When it has `onSelect`, a click is
+  prevented and calls it. Current and to-do steps are never links or tab stops.
+- The stepper never moves focus; the caller moves it to the step's heading.
