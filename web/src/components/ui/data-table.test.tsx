@@ -896,6 +896,28 @@ describe("expanded rows follow what the caller renders (DEC-0307, IR-005)", () =
       "true",
     );
   });
+
+  it("does not re-render an open earlier row when a page is appended and the callbacks are stable (IR-001)", async () => {
+    const user = userEvent.setup();
+    const first = stocks(3);
+    const withData = (data: Stock[]) => (
+      <DataTable
+        variant="expandable"
+        columns={columns}
+        data={data}
+        getRowId={getRowId}
+        renderExpansion={symbolDetail}
+        getRowLabel={nameLabel}
+      />
+    );
+    const view = render(withData(first));
+    await user.click(screen.getByRole("button", { name: "Expand Stock 1" }));
+    renders = [];
+    view.rerender(withData([...first, ...stocks(6).slice(3)]));
+    expect(screen.getByText("Stock 4")).toBeInTheDocument();
+    expect(renders).not.toContain("S0001");
+    expect(Array.from(new Set(renders)).sort()).toEqual(["S0003", "S0004", "S0005"]);
+  });
 });
 
 describe("data-table token classes and targets (AC-25, AC-26, IR-003, IR-004)", () => {
