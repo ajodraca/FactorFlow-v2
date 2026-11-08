@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w2/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 4 failed) 83ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > returns a session date unshifted 11ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 4ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 4ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 4ms
+     → Not an ISO-8601 date: "2026-03-08"
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 89ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > returns a session date unshifted
+RangeError: Not an ISO-8601 date: "2026-03-08"
+ ❯ Module.formatSessionDate src/components/patterns/format.ts:65:11
+     63| export function formatSessionDate(value: string): string {
+     64|   if (!/^\d{5}-\d{2}-\d{2}$/.test(value)) {
+     65|     throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value…
+       |           ^
+     66|   }
+     67|   return value;
+ ❯ src/components/patterns/format.test.ts:43:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+RangeError: Not an ISO-8601 date: "2026-03-08"
+ ❯ Module.formatSessionDate src/components/patterns/format.ts:65:11
+     63| export function formatSessionDate(value: string): string {
+     64|   if (!/^\d{5}-\d{2}-\d{2}$/.test(value)) {
+     65|     throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value…
+       |           ^
+     66|   }
+     67|   return value;
+ ❯ src/components/patterns/format.test.ts:64:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 44 passed (48)
+   Start at  17:35:16
+   Duration  4.33s (transform 122ms, setup 220ms, collect 725ms, tests 171ms, environment 4.07s, prepare 1.54s)
+

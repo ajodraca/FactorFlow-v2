@@ -112,21 +112,42 @@ describe("clock and input guards", () => {
     expect(() => formatClock(new Date(Number.NaN))).toThrow(/^Not an ISO-8601 instant/);
   });
 
-  it.each(["", "2026-1-5", "20261015", "2026-10-15T00:00:00Z"])(
-    "throws RangeError on the non-date %j",
+  it.each(["", "2026-1-5", "20261015", "2026-10-15T00:00:00Z", "x2026-03-08"])(
+    "throws RangeError naming the non-date %j",
     (input) => {
       expect(() => formatSessionDate(input)).toThrow(RangeError);
+      expect(() => formatSessionDate(input)).toThrow(
+        `Not an ISO-8601 date: ${JSON.stringify(input)}`,
+      );
     },
   );
 
-  it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
-    "throws RangeError on the non-count %d",
+  it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1, 1e21])(
+    "throws RangeError naming the non-count %d",
     (n) => {
       expect(() => formatCount(n)).toThrow(RangeError);
+      expect(() => formatCount(n)).toThrow(`Not a count: ${String(n)}`);
+    },
+  );
+
+  it.each(["-002026-10-15T22:46:00Z", "+002026-10-15T22:46:00Z", "+012026-10-15T22:46:00Z"])(
+    "throws RangeError on the signed expanded-year instant %j",
+    (input) => {
+      expect(() => formatInstant(input)).toThrow(RangeError);
+      expect(() => formatInstant(input)).toThrow(
+        `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+      );
     },
   );
 
   it("throws RangeError when the download instants are not instants", () => {
     expect(() => formatDownloadName(null, "2026-10-15")).toThrow(RangeError);
+  });
+
+  it("throws on a malformed start time instead of falling back to the request time", () => {
+    expect(() => formatDownloadName("", "2026-10-15T22:46:00Z")).toThrow(RangeError);
+    expect(() => formatDownloadName("", "2026-10-15T22:46:00Z")).toThrow(
+      `Not an ISO-8601 instant: ""`,
+    );
   });
 });

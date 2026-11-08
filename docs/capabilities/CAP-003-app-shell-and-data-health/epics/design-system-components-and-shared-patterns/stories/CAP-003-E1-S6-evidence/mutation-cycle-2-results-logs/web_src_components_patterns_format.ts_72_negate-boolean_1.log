@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w2/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 6 failed) 44ms
+   × clock and input guards > throws RangeError naming the non-count -1 5ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError naming the non-count 1.5 1ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError naming the non-count NaN 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError naming the non-count Infinity 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError naming the non-count 9007199254740992 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError naming the non-count 1e+21 0ms
+     → expected function to throw an error, but it didn't
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 115ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-count -1
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-count 1.5
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-count NaN
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-count Infinity
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-count 9007199254740992
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-count 1e+21
+AssertionError: expected function to throw an error, but it didn't
+ ❯ src/components/patterns/format.test.ts:128:36
+    126|     "throws RangeError naming the non-count %d",
+    127|     (n) => {
+    128|       expect(() => formatCount(n)).toThrow(RangeError);
+       |                                    ^
+    129|       expect(() => formatCount(n)).toThrow(`Not a count: ${String(n)}`…
+    130|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  6 failed | 42 passed (48)
+   Start at  17:35:21
+   Duration  2.25s (transform 81ms, setup 193ms, collect 195ms, tests 159ms, environment 948ms, prepare 1.28s)
+

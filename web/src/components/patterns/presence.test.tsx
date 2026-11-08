@@ -21,6 +21,15 @@ describe("NotDeterminable (TC-COMP-025)", () => {
     expect(reason).not.toHaveClass("sr-only");
   });
 
+  it("sets the badge and its reason on one centred, token-spaced row in the muted small type", () => {
+    render(<NotDeterminable reason={REASON} />);
+    const reason = screen.getByText(REASON);
+    expect(reason).toHaveClass("text-xs", "text-muted-foreground");
+    const row = reason.parentElement;
+    expect(row).toHaveClass("inline-flex", "items-center", "gap-2");
+    expect(row).toContainElement(screen.getByText("Not determinable"));
+  });
+
   it("is the coverage-unknown badge, never a passed check or a dimmed absent", () => {
     const { container } = render(<NotDeterminable reason={REASON} />);
     const badge = badgeOf(container);

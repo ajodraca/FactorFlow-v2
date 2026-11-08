@@ -1,0 +1,191 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w3/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 12 failed) 209ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > reads CDT for an October instant and CST for a January one 129ms
+     → Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > shows seconds only when asked 1ms
+     → Not an ISO-8601 instant: "2026-10-15T22:52:10Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > takes a Date as well as a string (DEC-0309) 13ms
+     → Not an ISO-8601 instant: "2026-10-15T22:46:00.000Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > takes the zone as the instant falls across the autumn change 0ms
+     → Not an ISO-8601 instant: "2026-11-01T06:30:00Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > spells midnight 00, never 24 0ms
+     → Not an ISO-8601 instant: "2026-10-16T05:00:00Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > accepts an explicit offset 0ms
+     → Not an ISO-8601 instant: "2026-10-15T17:46:00-05:00"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 29ms
+     → Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 16ms
+     → Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 3ms
+     → Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from requested_at when started_at is null 1ms
+     → Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one 0ms
+     → Not an ISO-8601 instant: "2026-01-15T23:46:00Z"
+   × clock and input guards > renders a clock with seconds and the zone 0ms
+     → Not an ISO-8601 instant: "2026-10-15T22:52:10Z"
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 101ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > reads CDT for an October instant and CST for a January one
+RangeError: Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:13:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > shows seconds only when asked
+RangeError: Not an ISO-8601 instant: "2026-10-15T22:52:10Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:18:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > takes a Date as well as a string (DEC-0309)
+RangeError: Not an ISO-8601 instant: "2026-10-15T22:46:00.000Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:26:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > takes the zone as the instant falls across the autumn change
+RangeError: Not an ISO-8601 instant: "2026-11-01T06:30:00Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:30:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > spells midnight 00, never 24
+RangeError: Not an ISO-8601 instant: "2026-10-16T05:00:00Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:35:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > accepts an explicit offset
+RangeError: Not an ISO-8601 instant: "2026-10-15T17:46:00-05:00"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:39:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+RangeError: Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatInstant src/components/patterns/format.ts:49:16
+ ❯ src/components/patterns/format.test.ts:61:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from requested_at when started_at is null
+RangeError: Not an ISO-8601 instant: "2026-10-15T22:46:00Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ formatInstant src/components/patterns/format.ts:49:16
+ ❯ Module.formatDownloadName src/components/patterns/format.ts:80:22
+ ❯ src/components/patterns/format.test.ts:82:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one
+RangeError: Not an ISO-8601 instant: "2026-01-15T23:46:00Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ formatInstant src/components/patterns/format.ts:49:16
+ ❯ Module.formatDownloadName src/components/patterns/format.ts:80:22
+ ❯ src/components/patterns/format.test.ts:86:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > renders a clock with seconds and the zone
+RangeError: Not an ISO-8601 instant: "2026-10-15T22:52:10Z"
+ ❯ toDate src/components/patterns/format.ts:37:11
+     35|   const when = typeof value === "string" ? new Date(value) : value;
+     36|   if ((typeof value === "string" || !ISO_INSTANT.test(value)) || Numbe…
+     37|     throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(va…
+       |           ^
+     38|   }
+     39|   return when;
+ ❯ partsOf src/components/patterns/format.ts:43:41
+ ❯ Module.formatClock src/components/patterns/format.ts:58:16
+ ❯ src/components/patterns/format.test.ts:94:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  12 failed | 36 passed (48)
+   Start at  17:35:13
+   Duration  2.37s (transform 160ms, setup 227ms, collect 338ms, tests 310ms, environment 1.21s, prepare 793ms)
+

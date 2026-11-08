@@ -1,0 +1,103 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w0/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 5 failed) 352ms
+   × clock and input guards > throws RangeError naming the non-date "" 9ms
+     → expected [Function] to throw error including 'Not an ISO-8601 date: ""' but got 'Not an ISO-8602 date: ""'
+   × clock and input guards > throws RangeError naming the non-date "2026-1-5" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 date: "2026-1-5"' but got 'Not an ISO-8602 date: "2026-1-5"'
+   × clock and input guards > throws RangeError naming the non-date "20261015" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 date: "20261015"' but got 'Not an ISO-8602 date: "20261015"'
+   × clock and input guards > throws RangeError naming the non-date "2026-10-15T00:00:00Z" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 date: "2026-10-15T00:…' but got 'Not an ISO-8602 date: "2026-10-15T00:…'
+   × clock and input guards > throws RangeError naming the non-date "x2026-03-08" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 date: "x2026-03-08"' but got 'Not an ISO-8602 date: "x2026-03-08"'
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 140ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-date ""
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 date: ""' but got 'Not an ISO-8602 date: ""'
+
+Expected: "Not an ISO-8601 date: """
+Received: "Not an ISO-8602 date: """
+
+ ❯ src/components/patterns/format.test.ts:119:46
+    117|     (input) => {
+    118|       expect(() => formatSessionDate(input)).toThrow(RangeError);
+    119|       expect(() => formatSessionDate(input)).toThrow(
+       |                                              ^
+    120|         `Not an ISO-8601 date: ${JSON.stringify(input)}`,
+    121|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-date "2026-1-5"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 date: "2026-1-5"' but got 'Not an ISO-8602 date: "2026-1-5"'
+
+Expected: "Not an ISO-8601 date: "2026-1-5""
+Received: "Not an ISO-8602 date: "2026-1-5""
+
+ ❯ src/components/patterns/format.test.ts:119:46
+    117|     (input) => {
+    118|       expect(() => formatSessionDate(input)).toThrow(RangeError);
+    119|       expect(() => formatSessionDate(input)).toThrow(
+       |                                              ^
+    120|         `Not an ISO-8601 date: ${JSON.stringify(input)}`,
+    121|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-date "20261015"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 date: "20261015"' but got 'Not an ISO-8602 date: "20261015"'
+
+Expected: "Not an ISO-8601 date: "20261015""
+Received: "Not an ISO-8602 date: "20261015""
+
+ ❯ src/components/patterns/format.test.ts:119:46
+    117|     (input) => {
+    118|       expect(() => formatSessionDate(input)).toThrow(RangeError);
+    119|       expect(() => formatSessionDate(input)).toThrow(
+       |                                              ^
+    120|         `Not an ISO-8601 date: ${JSON.stringify(input)}`,
+    121|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-date "2026-10-15T00:00:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 date: "2026-10-15T00:…' but got 'Not an ISO-8602 date: "2026-10-15T00:…'
+
+Expected: "Not an ISO-8601 date: "2026-10-15T00:00:00Z""
+Received: "Not an ISO-8602 date: "2026-10-15T00:00:00Z""
+
+ ❯ src/components/patterns/format.test.ts:119:46
+    117|     (input) => {
+    118|       expect(() => formatSessionDate(input)).toThrow(RangeError);
+    119|       expect(() => formatSessionDate(input)).toThrow(
+       |                                              ^
+    120|         `Not an ISO-8601 date: ${JSON.stringify(input)}`,
+    121|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError naming the non-date "x2026-03-08"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 date: "x2026-03-08"' but got 'Not an ISO-8602 date: "x2026-03-08"'
+
+Expected: "Not an ISO-8601 date: "x2026-03-08""
+Received: "Not an ISO-8602 date: "x2026-03-08""
+
+ ❯ src/components/patterns/format.test.ts:119:46
+    117|     (input) => {
+    118|       expect(() => formatSessionDate(input)).toThrow(RangeError);
+    119|       expect(() => formatSessionDate(input)).toThrow(
+       |                                              ^
+    120|         `Not an ISO-8601 date: ${JSON.stringify(input)}`,
+    121|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 43 passed (48)
+   Start at  17:35:16
+   Duration  4.37s (transform 261ms, setup 272ms, collect 655ms, tests 492ms, environment 4.54s, prepare 1.10s)
+

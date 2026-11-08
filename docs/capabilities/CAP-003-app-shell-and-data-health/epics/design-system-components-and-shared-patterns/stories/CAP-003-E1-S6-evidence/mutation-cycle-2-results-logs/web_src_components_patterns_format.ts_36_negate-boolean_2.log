@@ -1,0 +1,103 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w1/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 8 failed) 78ms
+   × clock and input guards > throws RangeError on the non-instant "2026-10-15" 3ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-instant "2026-10-15T22:46:00" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-instant "2026-13-45T99:00:00Z" 2ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-13-45T…' but got 'Invalid time value'
+   × clock and input guards > throws RangeError on an invalid Date 2ms
+     → expected [Function] to throw error matching /^Not an ISO-8601 instant/ but got 'Invalid time value'
+   × clock and input guards > throws RangeError on the signed expanded-year instant "-002026-10-15T22:46:00Z" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the signed expanded-year instant "+002026-10-15T22:46:00Z" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the signed expanded-year instant "+012026-10-15T22:46:00Z" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError when the download instants are not instants 0ms
+     → expected function to throw an error, but it didn't
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 129ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-10-15"
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-10-15T22:46:00"
+AssertionError: expected function to throw an error, but it didn't
+ ❯ src/components/patterns/format.test.ts:101:42
+     99|     "throws RangeError on the non-instant %j",
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+       |                                          ^
+    102|       expect(() => formatInstant(input)).toThrow(
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-13-45T99:00:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-13-45T…' but got 'Invalid time value'
+
+Expected: "Not an ISO-8601 instant: "2026-13-45T99:00:00Z""
+Received: "Invalid time value"
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on an invalid Date
+AssertionError: expected [Function] to throw error matching /^Not an ISO-8601 instant/ but got 'Invalid time value'
+
+- Expected: 
+/^Not an ISO-8601 instant/
+
++ Received: 
+"Invalid time value"
+
+ ❯ src/components/patterns/format.test.ts:111:55
+    109| 
+    110|   it("throws RangeError on an invalid Date", () => {
+    111|     expect(() => formatInstant(new Date(Number.NaN))).toThrow(/^Not an…
+       |                                                       ^
+    112|     expect(() => formatClock(new Date(Number.NaN))).toThrow(/^Not an I…
+    113|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the signed expanded-year instant "-002026-10-15T22:46:00Z"
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the signed expanded-year instant "+002026-10-15T22:46:00Z"
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the signed expanded-year instant "+012026-10-15T22:46:00Z"
+AssertionError: expected function to throw an error, but it didn't
+ ❯ src/components/patterns/format.test.ts:136:42
+    134|     "throws RangeError on the signed expanded-year instant %j",
+    135|     (input) => {
+    136|       expect(() => formatInstant(input)).toThrow(RangeError);
+       |                                          ^
+    137|       expect(() => formatInstant(input)).toThrow(
+    138|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError when the download instants are not instants
+AssertionError: expected function to throw an error, but it didn't
+ ❯ src/components/patterns/format.test.ts:144:58
+    142| 
+    143|   it("throws RangeError when the download instants are not instants", …
+    144|     expect(() => formatDownloadName(null, "2026-10-15")).toThrow(Range…
+       |                                                          ^
+    145|   });
+    146| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 40 passed (48)
+   Start at  17:35:13
+   Duration  2.44s (transform 138ms, setup 230ms, collect 367ms, tests 207ms, environment 1.18s, prepare 656ms)
+
