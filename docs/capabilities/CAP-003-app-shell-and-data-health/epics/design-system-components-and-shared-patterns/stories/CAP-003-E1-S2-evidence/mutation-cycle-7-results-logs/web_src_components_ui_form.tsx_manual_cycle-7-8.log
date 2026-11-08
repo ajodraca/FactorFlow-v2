@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w3/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 81ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 255ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 262ms
+   × form root and field behaviour (DAC-E1-S2-2, AC-25) > renders a native form in the stacked variant by default, inline on request, without native validation 6ms
+     → expect(element).toHaveAttribute("data-variant", "stacked") // element.getAttribute("data-variant") === "stacked"
+
+Expected the element to have attribute:
+  data-variant="stacked"
+Received:
+  null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form root and field behaviour (DAC-E1-S2-2, AC-25) > renders a native form in the stacked variant by default, inline on request, without native validation
+Error: expect(element).toHaveAttribute("data-variant", "stacked") // element.getAttribute("data-variant") === "stacked"
+
+Expected the element to have attribute:
+  data-variant="stacked"
+Received:
+  null
+ ❯ src/components/ui/form.test.tsx:139:21
+    137|     const stacked = screen.getByRole("form", { name: "History depth" }…
+    138|     expect(stacked.tagName).toBe("FORM");
+    139|     expect(stacked).toHaveAttribute("data-variant", "stacked");
+       |                     ^
+    140|     expect(stacked).toHaveClass("flex", "flex-col", "gap-4");
+    141|     expect(stacked).toHaveAttribute("novalidate");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:17
+   Duration  1.10s (transform 78ms, setup 113ms, collect 757ms, tests 598ms, environment 533ms, prepare 260ms)
+

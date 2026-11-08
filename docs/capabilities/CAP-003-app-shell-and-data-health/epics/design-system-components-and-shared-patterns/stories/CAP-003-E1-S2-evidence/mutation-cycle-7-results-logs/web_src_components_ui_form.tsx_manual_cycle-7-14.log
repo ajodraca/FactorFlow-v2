@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w2/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 169ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 273ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 299ms
+   × form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 57ms
+     → expect(element).toHaveClass("space-y-2")
+
+Expected the element to have class:
+  space-y-2
+Received:
+  space-y-4
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint
+Error: expect(element).toHaveClass("space-y-2")
+
+Expected the element to have class:
+  space-y-2
+Received:
+  space-y-4
+ ❯ src/components/ui/form.test.tsx:105:49
+    103|     // With nothing to report, the message renders no element at all.
+    104|     expect(document.querySelector("[id$='-form-item-message']")).toBeN…
+    105|     expect(field.closest("div")?.parentElement).toHaveClass("space-y-2…
+       |                                                 ^
+    106|     expect(field).toHaveAccessibleDescription(YEARS_HINT);
+    107|     const describedBy = (field.getAttribute("aria-describedby") ?? "")…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:20
+   Duration  1.60s (transform 139ms, setup 130ms, collect 1.58s, tests 741ms, environment 704ms, prepare 273ms)
+

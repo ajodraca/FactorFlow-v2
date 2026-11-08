@@ -138,3 +138,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-6
+    tasks: [T005, T012, T020]
+    description: >
+      select: inline variant over Radix Select with the shadcn parts, popper content, token-backed classes and no animation classes (TC-COMP-009, DEC-0300). The test answers the :fullscreen and :modal pseudo-classes directly, because jsdom's selector engine recurses on them and opening the list otherwise takes about eight seconds. Mutation: a first run left five survivors (popper wrapper and viewport, group label, separator, redundant aria-hidden, item-aligned position); tests pinned them and the redundant aria-hidden was removed, since lucide sets it.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-6-select.log
+    red_log_sha256: 952e523f6f0b7fc844ea0e0de3670e1805d8cecca0389cb282617138bcf6f18c
+    red_evidence: >
+      select.test.tsx failed to resolve ./select before the module existed.
+    green_evidence: >
+      select 6 passed in about 0.2 s; token-literals scan, tsc and biome lint clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 79f53077a7b4d09b615a9a870cf93f00305b74ca1cf0a7a247878928ea6807b5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-6.patch
+    commit_hash: 5da802a8fd75cf077d15bbffcdd06e9d3c066ab9
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-6-results.json
+      results_sha256: cfe2f3039b160c2355b39293455cdb1bd4b065ccf6e5d5f7995a11c5546d9742
+      generated: 17
+      killed: 17
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

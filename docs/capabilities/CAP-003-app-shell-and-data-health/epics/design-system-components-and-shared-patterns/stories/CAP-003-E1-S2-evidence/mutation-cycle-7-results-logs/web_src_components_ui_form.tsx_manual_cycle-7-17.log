@@ -1,0 +1,28 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w0/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 90ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 226ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 212ms
+   × form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 41ms
+     → expected [ ':r2:-form-item-description', …(1) ] to include ''
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change
+AssertionError: expected [ ':r2:-form-item-description', …(1) ] to include ''
+ ❯ src/components/ui/form.test.tsx:123:71
+    121|     expect(alert).toHaveTextContent(YEARS_ERROR);
+    122|     expect(field).toHaveAttribute("aria-invalid", "true");
+    123|     expect((field.getAttribute("aria-describedby") ?? "").split(" ")).…
+       |                                                                       ^
+    124|     expect(field).toHaveAccessibleDescription(`${YEARS_HINT} ${YEARS_E…
+    125| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:22
+   Duration  1.31s (transform 119ms, setup 137ms, collect 1.02s, tests 529ms, environment 614ms, prepare 466ms)
+

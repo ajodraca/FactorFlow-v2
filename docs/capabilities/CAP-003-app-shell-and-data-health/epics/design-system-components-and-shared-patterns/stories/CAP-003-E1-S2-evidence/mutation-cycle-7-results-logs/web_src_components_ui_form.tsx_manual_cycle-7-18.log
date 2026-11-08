@@ -1,0 +1,62 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w2/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 107ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 239ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 2 failed) 210ms
+   × form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 60ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Whole years, 1 to 50.
+Received:
+
+   × form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 31ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Whole years, 1 to 50. History depth must be a whole number of years from 1 to 50.
+Received:
+  History depth must be a whole number of years from 1 to 50.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Whole years, 1 to 50.
+Received:
+
+ ❯ src/components/ui/form.test.tsx:106:19
+    104|     expect(document.querySelector("[id$='-form-item-message']")).toBeN…
+    105|     expect(field.closest("div")?.parentElement).toHaveClass("space-y-2…
+    106|     expect(field).toHaveAccessibleDescription(YEARS_HINT);
+       |                   ^
+    107|     const describedBy = (field.getAttribute("aria-describedby") ?? "")…
+    108|     for (const id of describedBy) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/form.test.tsx > form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Whole years, 1 to 50. History depth must be a whole number of years from 1 to 50.
+Received:
+  History depth must be a whole number of years from 1 to 50.
+ ❯ src/components/ui/form.test.tsx:124:19
+    122|     expect(field).toHaveAttribute("aria-invalid", "true");
+    123|     expect((field.getAttribute("aria-describedby") ?? "").split(" ")).…
+    124|     expect(field).toHaveAccessibleDescription(`${YEARS_HINT} ${YEARS_E…
+       |                   ^
+    125| 
+    126|     await user.clear(field);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 23 passed (25)
+   Start at  09:25:22
+   Duration  1.27s (transform 90ms, setup 110ms, collect 1.03s, tests 556ms, environment 621ms, prepare 222ms)
+

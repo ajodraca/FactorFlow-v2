@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w0/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 184ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 328ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 280ms
+   × form root and field behaviour (DAC-E1-S2-2, AC-25) > styles the hint and the error with theme tokens 32ms
+     → expect(element).toHaveClass("text-sm font-medium text-destructive")
+
+Expected the element to have class:
+  text-sm font-medium text-destructive
+Received:
+  text-sm font-medium text-foreground
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form root and field behaviour (DAC-E1-S2-2, AC-25) > styles the hint and the error with theme tokens
+Error: expect(element).toHaveClass("text-sm font-medium text-destructive")
+
+Expected the element to have class:
+  text-sm font-medium text-destructive
+Received:
+  text-sm font-medium text-foreground
+ ❯ src/components/ui/form.test.tsx:255:19
+    253|     await user.tab();
+    254|     const alert = await screen.findByRole("alert");
+    255|     expect(alert).toHaveClass("text-sm", "font-medium", "text-destruct…
+       |                   ^
+    256|   });
+    257| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:20
+   Duration  1.77s (transform 167ms, setup 197ms, collect 1.53s, tests 792ms, environment 656ms, prepare 585ms)
+
