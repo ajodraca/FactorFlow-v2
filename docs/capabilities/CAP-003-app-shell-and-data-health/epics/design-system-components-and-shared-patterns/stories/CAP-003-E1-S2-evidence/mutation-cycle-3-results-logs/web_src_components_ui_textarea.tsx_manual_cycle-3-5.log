@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5br0l38r/w1/web
+
+ ❯ src/components/ui/textarea.test.tsx (7 tests | 1 failed) 117ms
+   × textarea list (DAC-E1-S2-1, AC-25) > pads the field with the cell padding tokens 7ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)]")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)]
+Received:
+  flex w-full resize-none rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/textarea.test.tsx > textarea list (DAC-E1-S2-1, AC-25) > pads the field with the cell padding tokens
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)]")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)]
+Received:
+  flex w-full resize-none rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive
+ ❯ src/components/ui/textarea.test.tsx:31:19
+     29|   it("pads the field with the cell padding tokens", () => {
+     30|     const { field } = renderField();
+     31|     expect(field).toHaveClass("px-[var(--cell-padding-x)]", "py-[var(-…
+       |                   ^
+     32|   });
+     33| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:13:13
+   Duration  922ms (transform 24ms, setup 28ms, collect 71ms, tests 117ms, environment 178ms, prepare 167ms)
+

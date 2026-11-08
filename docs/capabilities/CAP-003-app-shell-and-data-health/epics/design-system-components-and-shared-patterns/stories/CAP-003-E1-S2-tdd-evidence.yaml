@@ -1,0 +1,53 @@
+# TDD evidence for CAP-003-E1-S2 - Vendor the form family.
+# Each cycle is its own local commit on the story branch; independent code-review and spec-drift subagents judged each cycle's patch.
+# Decisions applied from planning: DEC-0299, DEC-0300.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T014]
+    description: >
+      Form family packages (TC-COMP-011 packages half): seven packages added with npm install; licences verified by hand against node_modules/<pkg>/LICENSE (all MIT: react-hook-form 7.91.0, zod 4.6.7, @hookform/resolvers 7.0.3, @radix-ui/react-label 2.1.17, react-radio-group 1.5.1, react-checkbox 1.4.1, react-select 2.4.1); package-lock.json carries license MIT for each.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-1-packages.log
+    red_log_sha256: 55ae86ccb7689c54839a1a0e34548b0891af9a1b57f6af5c8012d2aa802d6123
+    red_evidence: >
+      2 failed, 6 passed before the packages were installed (not in dependencies; no lock licence).
+    green_evidence: >
+      vendoring 8 passed after npm install.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 15ae938276e29520009adc71c59523d571eec64111f5d3a9e4af41f3d2859feb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-1.patch
+    commit_hash: 79c2fbafd04b4b749543590e4356dc2ea02065e4
+    mutation:
+      not_applicable: "dependency manifest change only; the vendoring test is not production code"
+
+  - id: cycle-2
+    tasks: [T009, T016]
+    description: >
+      input: text and numeric variants, suffix part of the accessible name through aria-labelledby (TC-COMP-010, DEC-0299, DEC-0300).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-2-input.log
+    red_log_sha256: e8392c8668038408517f375a891d2ca7540c0aacfdb90878dbe8e0556e10192e
+    red_evidence: >
+      input.test.tsx failed to resolve ./input before the module existed.
+    green_evidence: >
+      input 9 passed; token-literals scan clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b429fbf6563187b294e9198cd6597212a7c0892a268c9d8b289f5479a6ffc155
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-2.patch
+    commit_hash: 5180212015d9c371e2485fe09e1c409c3e1c8e7e
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: c9340fe686b57a62b0a9b0048fe733b933ca9a7d6192029732aaded8c5d1415b
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
