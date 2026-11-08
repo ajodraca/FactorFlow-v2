@@ -60,3 +60,57 @@ describe("button blocked stays focusable, aria-disabled and inert (DAC-E1-S1-3)"
     expect(link).toHaveClass("border", "bg-background");
   });
 });
+
+// AC-26 and AC-25: the classes that replace shadcn/ui's Tailwind-default
+// literals, the visible focus indicator and the `blocked` presentation.
+describe("button classes (AC-25, AC-26)", () => {
+  function classesOf(variant: "default" | "blocked" | "outline"): string {
+    const { unmount } = render(<Button variant={variant}>Label</Button>);
+    const className = screen.getByRole("button", { name: "Label" }).className;
+    unmount();
+    return className;
+  }
+
+  it.each(["default", "blocked", "outline"] as const)(
+    "sizes and rounds the %s variant from theme tokens",
+    (variant) => {
+      const className = classesOf(variant);
+      expect(className.split(" ")).toEqual(
+        expect.arrayContaining(["rounded", "px-3", "py-2", "text-base"]),
+      );
+      expect(className).not.toMatch(/rounded-/);
+      expect(className).not.toMatch(/(^| )h-\d/);
+      expect(className).not.toMatch(/ring-\d|ring-offset/);
+    },
+  );
+
+  it.each(["default", "blocked", "outline"] as const)(
+    "shows a focus-visible ring on the %s variant from the ring token",
+    (variant) => {
+      const classes = classesOf(variant).split(" ");
+      expect(classes).toEqual(
+        expect.arrayContaining([
+          "focus-visible:outline-none",
+          "focus-visible:ring",
+          "focus-visible:ring-ring",
+        ]),
+      );
+    },
+  );
+
+  it("presents blocked as inert and the default as the primary action", () => {
+    const blocked = classesOf("blocked").split(" ");
+    expect(blocked).toEqual(
+      expect.arrayContaining([
+        "border",
+        "border-input",
+        "bg-background",
+        "text-muted-foreground",
+        "cursor-not-allowed",
+      ]),
+    );
+    expect(blocked.some((name) => /^(hover:)?bg-primary|^text-primary/.test(name))).toBe(false);
+    const primary = classesOf("default").split(" ");
+    expect(primary).toEqual(expect.arrayContaining(["bg-primary", "text-primary-foreground"]));
+  });
+});

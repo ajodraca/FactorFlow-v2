@@ -63,6 +63,24 @@ describe("card (AC-26)", () => {
     expect(screen.getByRole("definition")).toHaveTextContent("12");
   });
 
+  it("spaces and pads every part from the spacing tokens, never a fractional literal", () => {
+    render(
+      <Card>
+        <CardHeader data-testid="header">h</CardHeader>
+        <CardContent data-testid="content">c</CardContent>
+        <CardFooter data-testid="footer">f</CardFooter>
+        <CardSummaryList data-testid="list">
+          <dt>t</dt>
+          <dd>d</dd>
+        </CardSummaryList>
+      </Card>,
+    );
+    expect(screen.getByTestId("header")).toHaveClass("space-y-1", "p-6");
+    for (const id of ["header", "content", "footer", "list"]) {
+      expect(screen.getByTestId(id).className).not.toMatch(/\b[a-z-]+-\d+\.\d+\b/);
+    }
+  });
+
   it("composes its parts and takes no tab stop of its own", async () => {
     render(
       <Card>

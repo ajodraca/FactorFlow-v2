@@ -65,6 +65,20 @@ const ADDED_COLOR_KEYS = [
   "seq-1",
 ];
 
+// Every scale `theme.extend` holds: the delivered ones and the vendored radius,
+// ring width and background image. Written out independently of the config.
+const EXTENDED_SCALES = [
+  "colors",
+  "borderRadius",
+  "ringWidth",
+  "backgroundImage",
+  "spacing",
+  "fontSize",
+  "height",
+  "fontFamily",
+  "maxWidth",
+];
+
 // Implements TC-COMP-003
 describe("tailwind.config.js keys (DAC-E1-11)", () => {
   it("gains only the vendored colour keys, no other", async () => {
@@ -88,12 +102,25 @@ describe("tailwind.config.js keys (DAC-E1-11)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("names only tokens that theme.css declares", async () => {
+  it("binds every colour key to the token of the same name", async () => {
+    const config = await loadConfig();
+    const offenders = Object.entries(config.theme.extend.colors)
+      .filter(([key, value]) => value !== `hsl(var(--${key}) / <alpha-value>)`)
+      .map(([key, value]) => `colors.${key} = ${value}, expected --${key}`);
+    expect(offenders).toEqual([]);
+  });
+
+  it("extends only the scales this design system names", async () => {
+    const config = await loadConfig();
+    expect(Object.keys(config.theme.extend).sort()).toEqual([...EXTENDED_SCALES].sort());
+  });
+
+  it("names only tokens that theme.css declares, in every extended scale", async () => {
     const config = await loadConfig();
     const theme = readFileSync(THEME_CSS, "utf-8");
     const declared = new Set([...theme.matchAll(/(--[\w-]+)\s*:/g)].map((match) => match[1]));
     const offenders: string[] = [];
-    for (const scale of ["colors", "borderRadius", "ringWidth", "backgroundImage"]) {
+    for (const scale of Object.keys(config.theme.extend)) {
       for (const [key, value] of Object.entries(config.theme.extend[scale] ?? {})) {
         for (const reference of value.matchAll(/var\((--[\w-]+)\)/g)) {
           if (!declared.has(reference[1])) {
@@ -169,6 +196,10 @@ describe("literal scan (AC-26, DAC-E1-S1-2)", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("scans web/src/components/ as a whole (DEC-0296)", () => {
+    expect(SCANNED_DIRECTORIES).toContain("web/src/components/");
+  });
+
   it("scans only directories that exist", () => {
     for (const directory of SCANNED_DIRECTORIES) {
       expect(() => readdirSync(path.join(REPO_ROOT, directory))).not.toThrow();
@@ -181,6 +212,10 @@ describe("literal scan (AC-26, DAC-E1-S1-2)", () => {
     ["an rgb colour", 'const a = "rgb(0 0 0)";', "rgb("],
     ["an hsl colour", 'const a = "hsl(210 40% 50%)";', "hsl("],
     ["an rgba colour", 'const a = "rgba(0, 0, 0, 0.5)";', "rgba("],
+    ["a rem length", 'const a = "p-[1.5rem]";', "1.5rem"],
+    ["an em length", 'const a = "p-[2em]";', "2em"],
+    ["a vh length", 'const a = "h-[50vh]";', "50vh"],
+    ["a vw length", 'const a = "w-[30vw]";', "30vw"],
   ])("rejects %s", (_name, source, match) => {
     expect(literalsIn(PLANTED, source)).toEqual([`${PLANTED}: ${match}`]);
   });

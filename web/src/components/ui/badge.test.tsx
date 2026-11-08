@@ -86,6 +86,14 @@ describe("badge variants resolve to status and coverage tokens (DAC-E1-S1-4)", (
     expect(offenders).toEqual([]);
   });
 
+  it("sets its shape from theme tokens, not Tailwind default literals (AC-26)", () => {
+    render(<Badge variant="status-good">Label</Badge>);
+    const badge = screen.getByText("Label");
+    expect(badge).toHaveClass("rounded", "px-2", "py-1", "text-xs", "font-semibold");
+    expect(badge.className).not.toMatch(/rounded-/);
+    expect(badge.className).not.toMatch(/\b[a-z]+-\d+\.\d+\b/);
+  });
+
   it("is neither a tab stop nor a role", async () => {
     render(<Badge variant="status-good">Label</Badge>);
     const badge = screen.getByText("Label");
