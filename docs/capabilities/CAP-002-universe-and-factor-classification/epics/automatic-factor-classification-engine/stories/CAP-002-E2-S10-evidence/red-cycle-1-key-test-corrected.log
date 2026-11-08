@@ -1,0 +1,50 @@
+# RED re-check of the corrected key test against the delivered SQL (git show HEAD:src/factorflow/classification/sql/momentum_inputs.sql, HEAD 3e654dbc2f6720730886d1b0f97b148b74e830c4); production restored afterwards
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=64768 user=test database=test_fb17905041c94483b7f3d5703939178...d2feed0>, stock=1, set_id=UUID('c464dfe0-dc9e-4962-9d16-11d911a3eea6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d2ffc80>
+
+    def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 2, so momentum is
+        ranked by the two covered stocks alone (a peer set of one has no sample deviation), the
+        uncovered stock is not classified on momentum, input_missing, naming return_3m, the first
+        momentum input."""
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        peer = add_instrument(env.conn, "PEER")
+        for stock in (bare, env.stock, peer):
+            add_close_series(env.conn, stock, STANDARD)
+    
+        result = engine.build(env.conn, env.set_id, 60)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = {
+            row[0]: row[1:]
+            for row in env.conn.execute(
+                "SELECT instrument_id, status, reason_code, reason_input, reason_detail, score, "
+                "percentile FROM factor_classification WHERE set_id = %s AND factor = 'momentum'",
+                (env.set_id,),
+            ).fetchall()
+        }
+        env.conn.commit()
+>       assert rows[bare] == (
+            "not_classified",
+            "input_missing",
+            "return_3m",
+            f"{constants.INPUT_LABELS['return_3m']} missing",
+            None,
+            None,
+        )
+E       AssertionError: assert ('classified'...l('0.000000')) == ('not_classif...', None, None)
+E         
+E         At index 0 diff: 'classified' != 'not_classified'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:1647: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum
+1 failed in 2.09s

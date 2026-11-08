@@ -1,0 +1,43 @@
+........................................................................ [ 50%]
+...............F
+=================================== FAILURES ===================================
+_ test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-1] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55330 user=test database=test_d84f2f71606f4ed58b77ecbf14a79c9...b94fad0>, stock=1, set_id=UUID('516e850f-d53a-4b54-ab9f-f5ac675597ee'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b94f050>
+covered_from = datetime.date(2026, 6, 13), present = True
+
+    @pytest.mark.parametrize(
+        ("covered_from", "present"),
+        [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
+        ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
+        env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
+    ) -> None:
+        """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
+        on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
+        from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        e, s3 = date(2026, 9, 15), date(2026, 6, 12)
+        cover(env.conn, bare, covered_from, e)
+        add_close_series(
+            env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
+        )
+    
+        build(env, monkeypatch)
+        row = momentum(env.conn, env.set_id, bare)["return_3m"]
+    
+        if present:
+>           assert row["status"] == "present"
+E           AssertionError: assert 'missing' == 'present'
+E             
+E             - present
+E             + missing
+
+tests/integration/test_engine_inputs_momentum.py:1746: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-1]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 87 passed in 14.43s
