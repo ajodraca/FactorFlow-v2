@@ -1622,13 +1622,15 @@ def test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_mis
 def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum(
     env: Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 1, so momentum is
-    ranked by the covered stock alone, the uncovered stock is not classified on momentum,
-    input_missing, naming return_3m, the first momentum input."""
-    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 1)
+    """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 2, so momentum is
+    ranked by the two covered stocks alone (a peer set of one has no sample deviation), the
+    uncovered stock is not classified on momentum, input_missing, naming return_3m, the first
+    momentum input."""
+    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
     bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
-    add_close_series(env.conn, bare, STANDARD)
-    add_close_series(env.conn, env.stock, STANDARD)
+    peer = add_instrument(env.conn, "PEER")
+    for stock in (bare, env.stock, peer):
+        add_close_series(env.conn, stock, STANDARD)
 
     result = engine.build(env.conn, env.set_id, 60)
 
@@ -1651,6 +1653,7 @@ def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentu
         None,
     )
     assert rows[env.stock][0] == "classified"
+    assert rows[peer][0] == "classified"
 
 
 # Implements TC-COMP-382
@@ -1715,6 +1718,38 @@ def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
         assert row["value"] is None
         assert row["known_on"] is None
         assert row["detail"] == not_covered(name, listed), name
+
+
+@pytest.mark.parametrize(
+    ("covered_from", "present"),
+    [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
+    ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
+)
+# Implements TC-COMP-383
+def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
+    env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
+) -> None:
+    """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
+    on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
+    from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    e, s3 = date(2026, 9, 15), date(2026, 6, 12)
+    cover(env.conn, bare, covered_from, e)
+    add_close_series(
+        env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
+    )
+
+    build(env, monkeypatch)
+    row = momentum(env.conn, env.set_id, bare)["return_3m"]
+
+    if present:
+        assert row["status"] == "present"
+        assert_close(row["value"], ret(120, 100))
+        assert row["detail"]["corporate_actions_covered_by"] == segment(covered_from, e)
+    else:
+        assert row["status"] == "missing"
+        assert row["detail"]["cause"] == "corporate_actions_not_covered"
+        assert row["detail"]["corporate_actions_coverage"] == [segment(covered_from, e)]
 
 
 # Implements TC-COMP-384

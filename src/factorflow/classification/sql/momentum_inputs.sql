@@ -4,6 +4,11 @@
 -- Inserts into the temporary table inputs that value_inputs.sql creates; insert_inputs.sql
 -- writes the rows to factor_input (DEC-0115). Reads only. CAP-002-E2-S4.
 --
+-- An absent corporate_action row means no split or dividend only where corporate actions were
+-- acquired: a window is computed only when one corporate_actions coverage segment of the stock
+-- contains it, and is missing with cause corporate_actions_not_covered otherwise (DEC-0397;
+-- the coverage contract is CAP-001's released behaviour, DEC-0398). CAP-002-E2-S10.
+--
 -- Every bar lookup takes a session's latest observation, by observed_on and then recorded_at
 -- (DEC-0117 (1)), so a re-acquired bar is used as currently known. That is design 2.4's
 -- daily_bar_latest, each lookup one probe of idx_daily_bar_instrument_session.
@@ -36,7 +41,8 @@ win AS (
     -- S_k is the latest session on or before E minus k months (DEC-0055 (3)).
     SELECT h.instrument_id, h.e_target, h.latest_session, h.e_session, h.e_close,
            h.e_observed_on, w.k, (h.e_session - make_interval(months => w.k))::date AS s_target,
-           s.session_date AS s_session, s.close_price AS s_close, s.observed_on AS s_observed_on
+           s.session_date AS s_session, s.close_price AS s_close, s.observed_on AS s_observed_on,
+           cv.covered_from AS ca_covered_from, cv.covered_to AS ca_covered_to
       FROM held h
      CROSS JOIN unnest(%(momentum_windows)s::integer[]) AS w (k)
       LEFT JOIN LATERAL (SELECT d.session_date, d.close_price, d.observed_on
@@ -46,6 +52,27 @@ win AS (
                                 <= (h.e_session - make_interval(months => w.k))::date
                           ORDER BY d.session_date DESC, d.observed_on DESC, d.recorded_at DESC
                           LIMIT 1) s ON true
+      -- The corporate_actions segment containing the window: it opens the day after S_k and
+      -- closes on E, both bounds inclusive (DEC-0397). Segments of a stock never overlap, so
+      -- at most one matches; one probe of idx_coverage_instrument per stock and window.
+      LEFT JOIN LATERAL (SELECT cs.covered_from, cs.covered_to
+                           FROM coverage_segment cs
+                          WHERE cs.instrument_id = h.instrument_id
+                            AND cs.data_type = 'corporate_actions'
+                            AND cs.covered_from <= s.session_date + 1
+                            AND cs.covered_to >= h.e_session
+                          LIMIT 1) cv ON true
+),
+coverage AS (
+    -- Every corporate_actions segment of each stock, for the detail of a window none contains.
+    SELECT cs.instrument_id,
+           jsonb_agg(jsonb_build_object('covered_from', cs.covered_from,
+                                        'covered_to', cs.covered_to)
+                     ORDER BY cs.covered_from) AS segments
+      FROM coverage_segment cs
+     WHERE cs.instrument_id = ANY(%(active_ids)s::bigint[])
+       AND cs.data_type = 'corporate_actions'
+     GROUP BY cs.instrument_id
 ),
 latest_action AS (
     -- Each split's and dividend's latest observation (DEC-0117 (1)); ticker changes and IPOs
@@ -145,7 +172,7 @@ judged AS (
     -- S_k's price factor is the product over every usable split in the window, each being
     -- after S_k; no split is after E and on or before it, so E's adjusted close is its close.
     SELECT w.instrument_id, w.k, w.latest_session, w.e_target, w.s_target, w.e_session,
-           w.e_close, w.s_session, w.s_close,
+           w.e_close, w.s_session, w.s_close, w.ca_covered_from, w.ca_covered_to,
            w.s_close * coalesce(exp(sum(a.log_factor)), 1) AS s_adjusted_close,
            coalesce(exp(sum(a.log_term)), 1) AS dividend_factor,
            coalesce(bool_or(NOT a.usable), false) AS unusable,
@@ -196,7 +223,8 @@ judged AS (
                         AND a.effective_on > w.s_session
                         AND a.effective_on <= w.e_session
      GROUP BY w.instrument_id, w.k, w.latest_session, w.e_target, w.s_target, w.e_session,
-              w.e_close, w.e_observed_on, w.s_session, w.s_close, w.s_observed_on
+              w.e_close, w.e_observed_on, w.s_session, w.s_close, w.s_observed_on,
+              w.ca_covered_from, w.ca_covered_to
 ),
 priced_window AS (
     -- A bar the window uses whose close is not positive (DEC-0241).
@@ -206,15 +234,17 @@ priced_window AS (
       FROM judged j
 ),
 statused AS (
-    -- Missing before outdated (DEC-0116 (1), DEC-0118 (4)), and among the missing causes a
-    -- missing boundary, then a close that is not positive, then an unusable payload
-    -- (DEC-0241 (2)). A momentum input is never not_computable (design 2.4).
+    -- Missing before outdated (DEC-0116 (1), DEC-0118 (4)), and among the missing causes the
+    -- owner's order (DEC-0397): a missing boundary, then a window no corporate_actions segment
+    -- contains, then a close that is not positive, then an unusable payload (DEC-0241 (2)).
+    -- A momentum input is never not_computable (design 2.4).
     SELECT j.*,
            CASE WHEN j.e_session IS NULL THEN 'E'
                 WHEN j.s_session IS NULL THEN concat('S_', j.k)
            END AS boundary,
-           CASE WHEN j.e_session IS NULL OR j.s_session IS NULL OR j.price_not_positive
-                  OR j.unusable THEN 'missing'
+           j.ca_covered_from IS NOT NULL AS covered,
+           CASE WHEN j.e_session IS NULL OR j.s_session IS NULL OR j.ca_covered_from IS NULL
+                  OR j.price_not_positive OR j.unusable THEN 'missing'
                 WHEN j.latest_session < %(latest_trading_day)s::date THEN 'outdated'
                 ELSE 'present'
            END AS status,
@@ -224,7 +254,10 @@ statused AS (
                               'adjusted_close', jsonb_build_object('E', j.e_close,
                                                                    'S', j.s_adjusted_close),
                               'splits', j.splits,
-                              'dividends', j.dividends) AS base
+                              'dividends', j.dividends,
+                              'corporate_actions_covered_by', jsonb_build_object(
+                                  'covered_from', j.ca_covered_from,
+                                  'covered_to', j.ca_covered_to)) AS base
       FROM priced_window j
 )
 SELECT s.instrument_id,
@@ -247,6 +280,11 @@ SELECT s.instrument_id,
             WHEN s.boundary IS NOT NULL
             THEN jsonb_build_object('boundary', s.boundary, 'on_or_before', s.s_target,
                                     'window_months', s.k, 'E', s.e_bar)
+            WHEN NOT s.covered
+            THEN jsonb_build_object('cause', 'corporate_actions_not_covered',
+                                    'window_months', s.k, 'E', s.e_bar, 'S', s.s_bar,
+                                    'corporate_actions_coverage', coalesce(c.segments,
+                                                                           jsonb_build_array()))
             WHEN s.price_not_positive
             THEN jsonb_build_object('cause', 'price_not_positive',
                                     'window_months', s.k, 'E', s.e_bar, 'S', s.s_bar,
@@ -265,9 +303,14 @@ SELECT s.instrument_id,
             ELSE s.base
        END AS detail,
        -- The data type whose last acquisition a missing input's detail names (design 2.3 step
-       -- 5): corporate_actions when the cause is an unusable payload, else prices (DEC-0243).
-       -- A window lacking a boundary joins no action, so it is never unusable.
-       CASE WHEN s.unusable AND NOT s.price_not_positive THEN 'corporate_actions'
+       -- 5), per cause in the order above: prices for a missing boundary, corporate_actions
+       -- for a window not covered, prices for a close that is not positive, corporate_actions
+       -- for an unusable payload (DEC-0243 as extended by DEC-0397).
+       CASE WHEN s.boundary IS NOT NULL THEN 'prices'
+            WHEN NOT s.covered THEN 'corporate_actions'
+            WHEN s.price_not_positive THEN 'prices'
+            WHEN s.unusable THEN 'corporate_actions'
             ELSE 'prices'
        END AS missing_data_type
   FROM statused s
+  LEFT JOIN coverage c ON c.instrument_id = s.instrument_id
