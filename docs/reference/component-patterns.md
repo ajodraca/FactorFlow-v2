@@ -18,6 +18,10 @@ CAP-002-E4-S4 added three:
   from which download, and announces a change;
 - `status-badge.tsx`, the tiered badge the banner and the line share.
 
+CAP-003-E1-S5 added `tiers.ts`, the status-to-tier and status-to-label
+functions, and rebuilt `status-badge.tsx` on the `Badge` component and the six
+tiers.
+
 CAP-002-E4-S7 added the two selection controls:
 
 - `selection-tray.tsx`, the tray under the results that counts the checked
@@ -173,32 +177,59 @@ never renders on momentum (DAC-E4-S3-3), and every surface that shows it
 reuses this one element, so no caller can show it there by mistake
 (DEC-0150).
 
+## The status tiers (`tiers.ts`)
+
+`tiers.ts` is the one status-to-tier function of the owner interface
+(CAP-003-E1-S5; AC-20, AC-19). It imports only the `RunState` type, and
+exports `Tier`, `NeedsYouKind`, `Status`, `tierOf` and `labelOf`.
+
+`Tier` is `neutral`, `active`, `good`, `warning`, `serious` or `critical`.
+`Status` is a union tagged by `of`:
+
+| `of` | Other fields | `tierOf` / `labelOf` |
+|------|--------------|----------------------|
+| `download` | `state`: a `RunState` | `requested` neutral *Queued*; `running` active *Downloading*; `cancelling` warning *Stopping*; `succeeded` good *Complete*; `partial` warning *Partial*; `failed` critical *Failed*; `cancelled` neutral *Cancelled by you*; `abandoned` serious *Interrupted* |
+| `result` | `outcome`: `failed` or `not_found` | `not_found` warning *Not found*; `failed` critical *Failed* |
+| `scores` | `state`: `never_classified`, `building`, `not_current`, `failed` or `current` | `building` active *Updating*; `not_current` warning *Not reflecting the latest download*; `failed` critical *Score update failed*; `never_classified` neutral *No scores yet*; `current` good *Current* |
+| `check` | `check`: `daily_prices` or `company_financials`; `status`: `ok` or `exceptions` | `ok` good, *No missing prices or gaps* or *All financials present* by check; `exceptions` warning *Needs attention* |
+| `credential` | `present`: boolean | present good *Found*; absent critical *Missing* |
+| `item` | `kind`: a `NeedsYouKind`; `failed?`: boolean | `data_problems` warning *Data*; `download_not_complete` serious *Download*, critical when `failed`; `credential_missing` critical *Setup*; `first_download` active *Download*; `first_scores` active *Scores*; `score_failed` critical *Scores* |
+
+`NeedsYouKind` is `data_problems`, `download_not_complete`,
+`credential_missing`, `first_download`, `first_scores` or `score_failed`; it
+is declared here so the module imports nothing from `needs-you.ts`.
+
+`partial` is warning and never good; `cancelled` is neutral and never
+critical. Not determinable is not a tier: it renders through
+`NotDeterminable`, never through `tierOf`. Every `switch` ends in
+`default: return assertNever(...)`, which throws `Unhandled status: <JSON>`,
+so a kind or state added to `Status` without a row fails to type-check.
+`labelOf` is the one source of status labels. Tests: `tiers.test.ts`.
+
 ## The status badge (`status-badge.tsx`)
 
-`StatusBadge({ tier, children, title, className })` renders one inline
-`span` holding an `aria-hidden` shape and a word. It is the badge the banner
-and the line draw their states with (UX design 1.2; STD-UI-8); the factor
-cell and the restated mark predate it and keep their own markup.
+`StatusBadge({ tier, children, title, className })` renders one `Badge`
+(`ui/badge.tsx`, [`ui-components.md`](ui-components.md#badge-badgetsx)) with
+variant `status-{tier}`, holding an `aria-hidden` shape and a word. It is the
+badge the banner and the line draw their states with (UX design 1.2;
+STD-UI-8); the factor cell and the restated mark predate it and keep their
+own markup.
 
 | Prop | Type | Meaning |
 |------|------|---------|
-| `tier` | `StatusTier`: `good`, `warning`, `active` or `critical` | the colour tokens and the shape |
-| `children` | `string` | the word, from `copy.ts` |
+| `tier` | `Tier` | the colour tokens and the shape |
+| `children` | `string` | the word, from `labelOf` or the caller's own answer |
 | `title` | `string`, optional | a native tooltip; the *Updating* badge carries the building set's start time |
 | `className` | `string`, optional | layout classes the host adds, as full literal strings (the banner adds `w-fit`) |
 
-The `span` carries `data-variant="status-{tier}"`, the `title`, and a class
-list made of the badge size `inline-flex items-center gap-1 rounded px-2
-py-1 text-xs`, the host's `className`, and the tier's colour classes. Those
-colour classes are `TIER_CLASSES[tier]` imported from the delivered
-`web/src/screens/runs/outcome-badge.tsx` rather than restated (SA-DUP-001):
-`bg-status-{tier}-muted text-status-{tier}`. The shape is a 12 by 12 `svg`
+The colours and size come from the `Badge` variant, which sets
+`data-variant="status-{tier}"`. The shape is a 12 by 12 icon from `lucide-react`
 (`h-3 w-3 shrink-0`, `aria-hidden="true"`, `focusable="false"`) drawn in
-`currentColor`, one per tier so the tiers stay distinct in greyscale: good a
-filled circle with no stroke, warning a triangle, active a ringed dot (a
-stroked ring around a filled dot), critical a square. The badge has no test
-file of its own; the banner and line tests pin its variants, shapes and
-tokens.
+`currentColor`, one per tier so the tiers stay distinct in greyscale: neutral a
+hollow circle, active a ringed dot, good a filled circle, warning a filled
+triangle, serious a filled diamond, critical a filled square. `StatusTier` is
+kept as an alias of `Tier` for the CAP-002 callers (`as-of-line`,
+`set-history-dialog`, `history-tab`). Tests: `status-badge.test.tsx`.
 
 ## The not-current banner (`not-current-banner.tsx`)
 
