@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-06
-updated: 2026-11-06
+updated: 2026-11-08
+last_reworked_review: CAP-003-E1-S1-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
