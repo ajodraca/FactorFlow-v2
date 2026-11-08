@@ -14,12 +14,12 @@ ai_provenance:
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "2.1.318"
-  timestamp: 2026-11-07T23:05:00Z
+  timestamp: 2026-11-08T00:33:00Z
   source_artifacts:
     - id: CAP-003
-      version: "2, draft (2e6bfeb, 3174b50)"
+      version: "2, draft (0febf60)"
     - id: CAP-003-system-design
-      version: "2, draft (c33a8f1)"
+      version: "2, draft (c1bd393)"
     - id: tech-stack
       version: "7, approved"
     - id: CAP-001-component-design-acquisition-runner
@@ -194,8 +194,8 @@ derives for one throttle wait per stock (invariant 2, `660 < 900`), so the
 sweeper never reclaims the download as `abandoned`. The download is then
 finalised by the delivered rule (`src/factorflow/runs/journal.py` lines
 302-340): `partial` when anything was stored, `failed` when nothing was, which
-is the system design's reading of AC-30's "finish as partial" (open question
-13).
+is AC-30's "finish with its recorded outcome" as the owner worded it on
+2026-11-07 (system design open question 13, answered).
 
 ### 2.4 Messages
 
@@ -266,8 +266,8 @@ pytest; database-backed tests use `testcontainers[postgres]` and carry the
 | Refusals map to `failed` | `tests/unit/test_outcomes.py` | `classify_provider_error(ProviderNotEntitled("x"), data_type="fundamentals", reason=r)` and the same with `ProviderRateLimited("x")` each return outcome `failed` with `reason` exactly `r`, unchanged |
 | One budget start per stock, after the checkpoint | `tests/integration/test_runner_provider_refusals.py` | With a `MagicMock` client over a two-stock roster, `start_instrument` is called twice, each call after that stock's `heartbeat` and `cancellation_requested` and before its first `fetch_*` call (ordering read from one `Mock` the journal spies and the client are attached to); with cancellation requested before the second stock, it is called once |
 | A plan refusal is sent once and the download goes on | `tests/integration/test_runner_provider_refusals.py` | Real `MassiveClient` and governor over `tests/unit/massive_transport_fakes.py` (the `massive-client` CAP-003 §7 harness). Two followed stocks, `AAPL` and `KO`; every `/stocks/financials/v1/*` request answers `403` with `{"status": "ERROR", "request_id": "req_403_<n>", "message": "You are not entitled to this data. Please upgrade your plan"}`, the reference request `200` with the `reference_active.json` envelope, its `ticker` set to the requested symbol, and every other read `200` with an empty result set. Each stock records `fundamentals` `failed` with a reason starting `[not_entitled] symbol=<symbol> data_type=fundamentals request_id=req_403_` and ending `the provider plan is not entitled to this data`; exactly one request per stock reached `/stocks/financials/v1/balance-sheets` and none the income or cash-flow paths; the other three data types are `written` or `unchanged`; the run is finalised `partial` (AC-29) |
-| Persistent 429 under the default timing set | `tests/integration/test_runner_provider_refusals.py` | Real `MassiveClient` and governor; settings at every default with `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60` (CAP-002 manifest B2): `max_throttle_wait_seconds` 300, `stale_after_seconds` 900, `max_attempts` 3. One `FakeClock` started at a multiple of 60 is the governor's `monotonic` and `now`, a `FakeSleeper` on it is `sleep`, and `factorflow.ingestion.runner.heartbeat` and `factorflow.ingestion.runner.finalise` are wrapped to record the clock at each call before delegating. Roster `KO` then `AAPL`: every request for `KO` answers `429` with the `error_rate_limited.json` body; `AAPL` answers as in the previous row. Parametrised over jitter `[0.0]` and `[0.999]`. Asserts: (a) the sum of `FakeSleeper` calls between consecutive recorded heartbeats, and between the last heartbeat and `finalise`, is at most 300 s, and every interval is below 900 s, the reclaim predicate's window (`reclaim.py` line 44); (b) `KO` records all four data types `failed` with reasons starting `[rate_limited] symbol=KO data_type=<type> request_id=unavailable: `; (c) after `KO`'s budget is spent, its prices, fundamentals and corporate-actions reads each sent exactly one request; (d) `AAPL`'s throttle budget started fresh and its data types are `written` or `unchanged`; (e) the run is finalised `partial`, never `abandoned` (AC-30; review v14 FINDING-55) |
-| Everything throttled finishes `failed`, not abandoned | `tests/integration/test_runner_provider_refusals.py` | As the previous row with jitter `[0.0]` and a roster of `KO` alone: four `[rate_limited]` rows and the run finalised `failed` by the outcome rule, never `abandoned`. The expected `failed` rests on system design open question 13 and changes only if the owner reads AC-30's *partial* otherwise |
+| Persistent 429 under the default timing set | `tests/integration/test_runner_provider_refusals.py` | Real `MassiveClient` and governor; settings at every default with `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60` (CAP-002 manifest B2): `max_throttle_wait_seconds` 300, `stale_after_seconds` 900, `max_attempts` 3. One `FakeClock` started at a multiple of 60 is the governor's `monotonic` and `now`, a `FakeSleeper` on it is `sleep`, and `factorflow.ingestion.runner.heartbeat` and `factorflow.ingestion.runner.finalise` are wrapped to record the clock at each call before delegating. Roster `KO` then `AAPL`: every request for `KO` answers `429` with the `error_rate_limited.json` body; `AAPL` answers as in the previous row. Parametrised over jitter `[0.0]` and `[0.999]`. Asserts: (a) the sum of `FakeSleeper` calls between consecutive recorded heartbeats, and between the last heartbeat and `finalise`, is at most 300 s, and every interval is below 900 s, the reclaim predicate's window (`reclaim.py` line 44); (b) `KO` records all four data types `failed` with reasons starting `[rate_limited] symbol=KO data_type=<type> request_id=unavailable: `; (c) after `KO`'s budget is spent, its prices, fundamentals and corporate-actions reads each sent exactly one request; (d) `AAPL`'s throttle budget started fresh, its reference, prices and corporate actions are `written` or `unchanged`, and its fundamentals `failed` with a reason starting `[not_entitled] symbol=AAPL data_type=fundamentals ` (the previous row's fixture); (e) the run is finalised `partial`, never `abandoned` (AC-30; review v14 FINDING-55) |
+| Everything throttled finishes `failed`, not abandoned | `tests/integration/test_runner_provider_refusals.py` | As the previous row with jitter `[0.0]` and a roster of `KO` alone: four `[rate_limited]` rows and the run finalised `failed` by the outcome rule, never `abandoned`. The expected `failed` is AC-30's recorded outcome when nothing was stored (system design open question 13, answered 2026-11-07) |
 | Delivered isolation still holds | `tests/integration/test_runner_isolation.py`, `test_runner_outcomes.py`, `test_runner_cancel.py`, `test_runner_reclaim.py` (delivered, unchanged) | The `MagicMock` clients accept `start_instrument()`; every delivered outcome, cancellation and reclaim assertion holds |
 
 ## 8. Acceptance Criteria
@@ -338,10 +338,10 @@ No HTTP surface. Interfaces consumed, as CAP-003 changes them:
 
 ## 14. Open Questions
 
-1. **AC-30's "finish as partial" when nothing was stored** (system design open
-   question 13): this design follows the system design's reading, `failed` by
-   the delivered outcome rule, and one test's expectation rests on it. *Owner:
-   capability owner. Blocks: that one expectation only.*
+1. **AC-30's outcome when nothing was stored** (system design open question
+   13): **answered 2026-11-07 by the owner** (capability `0febf60`): the
+   download finishes with its recorded outcome, `failed` by the delivered
+   outcome rule; the test expectation stands.
 2. **The staleness derivation's attempt term** (system design open question
    15): a stock whose requests all time out is the delivered worst case and is
    not touched here. *Owner: capability owner. Blocks: nothing here.*
