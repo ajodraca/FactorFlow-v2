@@ -1,0 +1,41 @@
+F
+=================================== FAILURES ===================================
+_________ test_a_missing_12_month_price_makes_only_return_12m_missing __________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=49284 user=test database=test_7dc84f994da24402aa82e33ee9b1137...c57a960>, stock=1, set_id=UUID('53f527af-aca7-4ef7-8770-0d6996ca6873'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb1e8a0>
+
+    def test_a_missing_12_month_price_makes_only_return_12m_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        add_close_series(env.conn, env.stock, {S6: 80, S3: 100, E: 120, L: 130})
+    
+        rows = build(env, monkeypatch)
+    
+        assert rows["return_12m"]["status"] == "missing"
+        assert rows["return_12m"]["value"] is None
+        assert rows["return_12m"]["as_of"] == E
+        # DEC-0242: a missing input has no known_on, although its E bar was read.
+        assert rows["return_12m"]["known_on"] is None
+>       assert rows["return_12m"]["detail"] == {
+            "boundary": "S_12",
+            "on_or_before": str(S12),
+            "window_months": 12,
+            "E": bar(E, 120),
+        }
+E       AssertionError: assert {'cause': 'co..._not_covered'} == {'boundary': ...'2026-09-17'}}
+E         
+E         Left contains 1 more item:
+E         {'cause': 'corporate_actions_not_covered'}
+E         Right contains 4 more items:
+E         {'E': {'close': 120, 'observed_on': '2026-09-17', 'session_date': '2026-09-17'},
+E          'boundary': 'S_12',
+E          'on_or_before': '2025-09-17',
+E          'window_months': 12}
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:154: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_12_month_price_makes_only_return_12m_missing
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.29s

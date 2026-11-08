@@ -1,0 +1,57 @@
+........................................................................ [ 49%]
+.........F
+=================================== FAILURES ===================================
+___ test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated ____
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51476 user=test database=test_f2c1132a74a041cc8360ffb8a627ea2...d52bec0>, stock=1, set_id=UUID('33f3e931-4170-41ae-8027-f3cd9a1439a6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d52bc80>
+
+    def test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-13, DAC-E2-S10-1, DEC-0397, DEC-0116 (1) (review v1 IR-001): an uncovered stock
+        whose latest bar precedes the latest trading day is missing, corporate_actions_not_covered,
+        with no known_on and the corporate_actions acquisition named, never outdated; built with
+        every stage and two covered peers, it is not classified on momentum, input_missing (not
+        input_outdated), naming return_3m."""
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+        stale = add_instrument(env.conn, "STALEBARE", corporate_actions_covered=False)
+        record_outcomes(env.conn, stale)
+        peer = add_instrument(env.conn, "PEER")
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+        for stock in (env.stock, peer):
+            add_close_series(env.conn, stock, STANDARD)
+    
+        result = engine.build(env.conn, env.set_id, 60)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = momentum(env.conn, env.set_id, stale)
+        for name in MOMENTUM:
+            row = rows[name]
+            assert row["status"] == "missing", name
+            assert row["value"] is None
+            assert row["known_on"] is None
+            assert row["as_of"] == E
+            detail = dict(row["detail"])
+            detail.pop("last_acquisition")
+            assert detail == not_covered(name, []), name
+>           assert_last_acquisition(row, "corporate_actions")
+
+tests/integration/test_engine_inputs_momentum.py:1689: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = {'factor': 'momentum', 'status': 'missing', 'value': None, 'as_of': datetime.date(2026, 9, 17), ...}
+data_type = 'corporate_actions'
+
+    def assert_last_acquisition(row: dict, data_type: str) -> None:
+        last = row["detail"]["last_acquisition"]
+        outcome = {"prices": "not_found", "corporate_actions": "failed"}[data_type]
+>       assert (last["data_type"], last["outcome"]) == (data_type, outcome), row["input_name"]
+                                                                             ^^^^^^^^^^^^^^^^^
+E       KeyError: 'input_name'
+
+tests/integration/test_engine_inputs_momentum.py:1590: KeyError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 81 passed in 13.12s

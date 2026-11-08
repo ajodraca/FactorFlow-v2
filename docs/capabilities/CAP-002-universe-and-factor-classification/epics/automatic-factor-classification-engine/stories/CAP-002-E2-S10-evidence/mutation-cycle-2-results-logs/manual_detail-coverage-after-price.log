@@ -1,0 +1,53 @@
+........................................................................ [ 49%]
+...................F
+=================================== FAILURES ===================================
+_ test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=65212 user=test database=test_cb1cfb9a78504b0dbbe10cc0a6cb222...b4df4a0>, stock=1, set_id=UUID('a6bb44f4-17fe-4c88-902e-8e4bcbb1eaad'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b4df980>
+
+    def test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-5, DEC-0397 (the owner's order), DEC-0243: among uncovered stocks, a window
+        without its S_k bar names the boundary and the prices acquisition; a window with an
+        unusable payload, or a non-positive E close, is corporate_actions_not_covered and names
+        the corporate_actions acquisition."""
+        no_s12 = add_instrument(env.conn, "NOS12", corporate_actions_covered=False)
+        unusable = add_instrument(env.conn, "UNUSABLE", corporate_actions_covered=False)
+        e_zero = add_instrument(env.conn, "EZERO", corporate_actions_covered=False)
+        for stock in (no_s12, unusable, e_zero):
+            record_outcomes(env.conn, stock)
+        add_close_series(env.conn, no_s12, {S6: 80, S3: 100, E: 120, L: 130})
+        add_close_series(env.conn, unusable, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(
+            env.conn, unusable, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+        )
+        add_close_series(env.conn, e_zero, STANDARD | {E: 0})
+    
+        build(env, monkeypatch)
+        no_s12_rows = momentum(env.conn, env.set_id, no_s12)
+        unusable_rows = momentum(env.conn, env.set_id, unusable)
+        e_zero_rows = momentum(env.conn, env.set_id, e_zero)
+    
+        assert no_s12_rows["return_12m"]["detail"]["boundary"] == "S_12"
+        assert "cause" not in no_s12_rows["return_12m"]["detail"]
+        assert_last_acquisition(no_s12_rows["return_12m"], "prices")
+        for name in ("return_3m", "return_6m"):
+            assert no_s12_rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+            assert_last_acquisition(no_s12_rows[name], "corporate_actions")
+        for name in MOMENTUM:
+            for rows in (unusable_rows, e_zero_rows):
+                assert rows[name]["status"] == "missing", name
+>               assert rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+E               AssertionError: return_3m
+E               assert 'price_not_positive' == 'corporate_ac...s_not_covered'
+E                 
+E                 - corporate_actions_not_covered
+E                 + price_not_positive
+
+tests/integration/test_engine_inputs_momentum.py:1859: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 91 passed in 14.01s

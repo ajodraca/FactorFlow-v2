@@ -2,26 +2,26 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-coverage-matrix
 artifact_type: coverage-matrix
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-17
-updated: 2026-10-17
+updated: 2026-11-07
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
   model: claude-sonnet-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-10-17T18:38:08Z
+  timestamp: 2026-11-07T22:55:59Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "3"
+      version: "5"
     - id: CAP-002-backlog
-      version: "4"
+      version: "5"
   invoking_user: ajodraca
   correlation_id: 46789099-86c6-4691-b89c-83f573bd73af
 ---
@@ -38,12 +38,12 @@ ai_provenance:
 | AC-4 | Capability | Universe maintenance | TC-COMP-019, TC-COMP-023, TC-COMP-024, TC-COMP-025, TC-COMP-026, TC-COMP-027, TC-COMP-028, TC-COMP-029, TC-COMP-030, TC-COMP-031, TC-COMP-032 | TC-INT-003, TC-INT-004, TC-INT-010, TC-INT-011, TC-INT-012, TC-INT-013, TC-INT-014, TC-INT-015, TC-INT-016 | TC-E2E-011 | Covered |
 | AC-5 | Capability | No empty universe | TC-COMP-008, TC-COMP-009, TC-COMP-033, TC-COMP-034, TC-COMP-035, TC-COMP-036, TC-COMP-037, TC-COMP-038, TC-COMP-039, TC-COMP-040, TC-COMP-041, TC-COMP-042, TC-COMP-043, TC-COMP-044 | TC-INT-008, TC-INT-017, TC-INT-018 | TC-E2E-004, TC-E2E-006, TC-E2E-012 | Covered |
 | AC-6 | Capability | Membership history | TC-COMP-034, TC-COMP-036, TC-COMP-037, TC-COMP-038, TC-COMP-041, TC-COMP-043, TC-COMP-044, TC-COMP-045, TC-COMP-046, TC-COMP-047, TC-COMP-048, TC-COMP-049, TC-COMP-050, TC-COMP-051, TC-COMP-052, TC-COMP-053, TC-COMP-054, TC-COMP-055, TC-COMP-056, TC-COMP-057, TC-COMP-058 | TC-INT-014, TC-INT-016, TC-INT-019, TC-INT-020, TC-INT-021, TC-INT-022, TC-INT-023, TC-INT-024 | TC-E2E-011, TC-E2E-012 | Covered |
-| AC-7 | Capability | Factor definitions | TC-COMP-059, TC-COMP-060, TC-COMP-061, TC-COMP-062, TC-COMP-063, TC-COMP-064, TC-COMP-065, TC-COMP-066 | TC-INT-025 | — | Covered |
+| AC-7 | Capability | Factor definitions | TC-COMP-059, TC-COMP-060, TC-COMP-061, TC-COMP-062, TC-COMP-063, TC-COMP-064, TC-COMP-065, TC-COMP-066, TC-COMP-381, TC-COMP-384, TC-COMP-386 | TC-INT-025 | — | Covered |
 | AC-8 | Capability | One peer set | TC-COMP-067, TC-COMP-068 | TC-INT-026 | — | Covered |
 | AC-9 | Capability | Score and percentile | TC-COMP-069, TC-COMP-070, TC-COMP-071, TC-COMP-072, TC-COMP-073, TC-COMP-074 | TC-INT-027 | TC-E2E-001, TC-E2E-007 | Covered |
 | AC-10 | Capability | Automatic refresh | TC-COMP-075, TC-COMP-076, TC-COMP-077, TC-COMP-078, TC-COMP-079, TC-COMP-080, TC-COMP-081, TC-COMP-082, TC-COMP-083, TC-COMP-084, TC-COMP-085, TC-COMP-086, TC-COMP-087, TC-COMP-088, TC-COMP-089 | TC-INT-028, TC-INT-029, TC-INT-030 | TC-E2E-001 | Covered |
 | AC-11 | Capability | Timeliness | TC-COMP-090, TC-COMP-091, TC-COMP-092, TC-COMP-093 | TC-INT-031 | — | Covered |
-| AC-12 | Capability | Like-for-like only | TC-COMP-072, TC-COMP-073, TC-COMP-094, TC-COMP-095, TC-COMP-096, TC-COMP-097, TC-COMP-098, TC-COMP-099 | TC-INT-032, TC-INT-033 | TC-E2E-001, TC-E2E-008, TC-E2E-009, TC-E2E-010 | Covered |
+| AC-12 | Capability | Like-for-like only | TC-COMP-072, TC-COMP-073, TC-COMP-094, TC-COMP-095, TC-COMP-096, TC-COMP-097, TC-COMP-098, TC-COMP-099, TC-COMP-381, TC-COMP-382, TC-COMP-385 | TC-INT-032, TC-INT-033 | TC-E2E-001, TC-E2E-008, TC-E2E-009, TC-E2E-010 | Covered |
 | AC-13 | Capability | Outdated inputs | TC-COMP-100, TC-COMP-101, TC-COMP-102, TC-COMP-103, TC-COMP-104, TC-COMP-105, TC-COMP-106 | TC-INT-034, TC-INT-035 | TC-E2E-001, TC-E2E-009, TC-E2E-010 | Covered |
 | AC-14 | Capability | Enough stocks to rank | TC-COMP-072, TC-COMP-073, TC-COMP-107, TC-COMP-108, TC-COMP-109, TC-COMP-110 | TC-INT-036 | TC-E2E-002, TC-E2E-008 | Covered |
 | AC-15 | Capability | Retired stocks | TC-COMP-108, TC-COMP-111, TC-COMP-112, TC-COMP-113, TC-COMP-114, TC-COMP-115, TC-COMP-116, TC-COMP-117, TC-COMP-118, TC-COMP-119 | TC-INT-037, TC-INT-038 | TC-E2E-001, TC-E2E-003, TC-E2E-008, TC-E2E-012 | Covered |
@@ -67,6 +67,7 @@ ai_provenance:
 | DAC-E2-10 | Derived (E2) | A classification_set MUST transition to complete in the same transaction as its last clas… | TC-COMP-163, TC-COMP-164, TC-COMP-166, TC-COMP-167 | TC-INT-051, TC-INT-054 | — | Covered |
 | DAC-E2-11 | Derived (E2) | A value or growth classification built on any statement whose provider_filing_date preced… | TC-COMP-186, TC-COMP-187 | — | — | Covered |
 | DAC-E2-12 | Derived (E2) | A classification_set left building by an interrupted application process MUST be recorded… | TC-COMP-168, TC-COMP-169 | TC-INT-053 | — | Covered |
+| DAC-E2-13 | Derived (E2) | A momentum input MUST be missing, with cause corporate_actions_not_covered, unless one co… | TC-COMP-381, TC-COMP-383, TC-COMP-384, TC-COMP-385, TC-COMP-386, TC-COMP-387 | — | — | Covered |
 | DAC-E3-1 | Derived (E3) | current_set MUST resolve to the latest set in state complete, and later MUST carry the mo… | TC-COMP-170 | — | — | Covered |
 | DAC-E3-2 | Derived (E3) | evaluate_filter MUST be the one predicate used by the list read, by compare, and by unive… | TC-COMP-122 | — | — | Covered |
 | DAC-E3-3 | Derived (E3) | A threshold on a factor MUST exclude only a stock classified on that factor that fails th… | TC-COMP-096 | TC-INT-033 | — | Covered |
@@ -150,6 +151,13 @@ ai_provenance:
 | DAC-E2-S9-3 | Derived (E2-S9) | Reclaim runs once before the first claim | TC-COMP-169 | — | — | Covered |
 | DAC-E2-S9-4 | Derived (E2-S9) | Short build timeout reaches the engine and fails the set | TC-COMP-092 | — | — | Covered |
 | DAC-E2-S9-5 | Derived (E2-S9) | ingestion_main imports nothing from classification | TC-COMP-085 | — | — | Covered |
+| DAC-E2-S10-1 | Derived (E2-S10) | Uncovered momentum is missing, not classified | TC-COMP-381 | — | — | Covered |
+| DAC-E2-S10-2 | Derived (E2-S10) | Missing momentum names the corporate_actions acquisition | TC-COMP-382 | — | — | Covered |
+| DAC-E2-S10-3 | Derived (E2-S10) | Coverage contains the window, bounds inclusive | TC-COMP-383 | — | — | Covered |
+| DAC-E2-S10-4 | Derived (E2-S10) | Covered window with no actions gives the price return | TC-COMP-384 | — | — | Covered |
+| DAC-E2-S10-5 | Derived (E2-S10) | Boundary, then not covered, then the payload and price causes | TC-COMP-385 | — | — | Covered |
+| DAC-E2-S10-6 | Derived (E2-S10) | Covered stocks keep every delivered momentum result | TC-COMP-386 | — | — | Covered |
+| DAC-E2-S10-7 | Derived (E2-S10) | Successful empty fetch covers the range requested | TC-COMP-387 | — | — | Covered |
 | DAC-E3-S1-1 | Derived (E3-S1) | current_set returns complete set with newer building set as later | TC-COMP-170 | — | — | Covered |
 | DAC-E3-S1-2 | Derived (E3-S1) | First set building or failed gives never_classified with later | TC-COMP-171 | — | — | Covered |
 | DAC-E3-S1-3 | Derived (E3-S1) | No set at all gives never_classified in the same shape | TC-COMP-181 | — | — | Covered |
@@ -301,17 +309,17 @@ ai_provenance:
 
 ## Coverage Summary
 
-- **Total ACs:** 266 (capability: 23, derived: 243)
-- **Covered:** 266
+- **Total ACs:** 274 (capability: 23, derived: 251)
+- **Covered:** 274
 - **Gaps:** 0
-- **Component test cases:** 197
+- **Component test cases:** 204
 - **Integration test cases:** 58
 - **E2E test cases:** 12
 
 ### Coverage Notes
 
 1. **DAC-E4-6 and its story DACs DAC-E4-S10-1 to DAC-E4-S10-5 trace to no capability AC.** DAC-E4-6 states it traces "to the composition constraint, AGT-SCOPE-002; not a capability AC". They are covered by component tests TC-COMP-193, TC-COMP-194, TC-COMP-195, TC-COMP-196, TC-COMP-197 only. This is by design of the source, not a gap.
-2. **Epic-level DACs are covered transitively.** Each epic-level DAC has no test of its own; it is covered by the component tests of its child story DACs, which list the epic DAC in their Traces to field. Every one of the 46 epic-level DACs has at least one such child test.
+2. **Epic-level DACs are covered transitively.** Each epic-level DAC has no test of its own; it is covered by the component tests of its child story DACs, which list the epic DAC in their Traces to field. Every one of the 47 epic-level DACs has at least one such child test.
 3. **Capability ACs and the story-level DACs.** Every story-level DAC has exactly one component test. AC-8 has no story-level DAC that traces to it directly; its component coverage is through DAC-E2-2 (child DAC-E2-S5-2 and DAC-E2-S5-5) and its integration coverage is the integration test comparing unscoped and universe-scoped classifications.
 4. **Scope of the integration tier.** Contracts reachable only through Python call, Python coroutine or in-process entries (universe-service, classification-reader, factor-engine build, scheduler loop) are not integration boundaries and are tested at component scope. The integration boundaries used are the HTTP endpoints of classification-api and the SQL contracts in the research-store API table, plus the CAP-001 acquisition_run read (classification recorded as a decision record).
 5. **Terminology.** The specs use "stock" for owner-facing text and "instrument" for stored data; "followed" and "acquisition list" both appear for CAP-001 coverage; "not classified" (capability) and "Incomplete" / "Not enough to rank" / "Not followed" (UX copy) name the same states. E2E steps use the UX copy; integration and component tests use the API reason codes.

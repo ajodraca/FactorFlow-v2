@@ -3,6 +3,8 @@
 Exercises CAP-001-E4-S5 runner.run_once against the full schema:
 - TC-COMP-003: all four data types acquired per active instrument
 - TC-COMP-146: roster read once at claim time (DAC-E4-12)
+- CAP-002 TC-COMP-387: the corporate-actions coverage contract CAP-002 momentum relies on
+  (CAP-002-E2-S10, DAC-E2-S10-7, DEC-0398), a guard on the released runner and writer
 
 Uses `migrated_runner_connection` (all four migrations) and stubs the
 provider boundary at its typed MassiveClient interface.
@@ -19,6 +21,11 @@ from unittest.mock import MagicMock
 import psycopg
 import pytest
 
+from factorflow.ingestion.massive.errors import (
+    InstrumentNotFound,
+    MassiveError,
+    ProviderUnavailable,
+)
 from factorflow.ingestion.massive.models import (
     CorporateAction,
     DailyBar,
@@ -208,3 +215,106 @@ def test_roster_read_once_at_claim(
         goog_row = cur.fetchone()
     assert goog_row is not None
     assert goog_row[0] not in instrument_ids_in_results
+
+
+# ---------------------------------------------------------------------------
+# CAP-002-E2-S10: the coverage contract momentum relies on (DEC-0398)
+# ---------------------------------------------------------------------------
+
+_TODAY = date(2025, 9, 22)
+_DEPTH_START = date(2020, 9, 22)  # depth 5 years before _TODAY: the range requested
+
+
+def _corporate_actions_segments(
+    conn: psycopg.Connection, instrument_id: int
+) -> list[tuple[date, date]]:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT covered_from, covered_to FROM coverage_segment "
+            "WHERE instrument_id = %s AND data_type = 'corporate_actions' ORDER BY covered_from",
+            (instrument_id,),
+        )
+        rows = [(row[0], row[1]) for row in cur.fetchall()]
+    conn.commit()
+    return rows
+
+
+def _acquire(conn: psycopg.Connection, instrument_id: int, client: MagicMock) -> uuid.UUID:
+    """Run one claimed run over the instrument with every other data type succeeding."""
+    from factorflow.ingestion.runner import AcquisitionRunner
+
+    client.fetch_reference.return_value = _make_reference()
+    client.fetch_daily_bars.return_value = [_make_daily_bar()]
+    client.fetch_financials.return_value = [_make_financial()]
+    run_id = _insert_claimed_run(conn, depth=5)
+    runner = AcquisitionRunner(connection=conn, client=client, today=_TODAY)
+    runner.execute_claimed(run_id=run_id, depth_years=5, instrument_ids=[instrument_id])
+    return run_id
+
+
+@pytest.mark.postgres
+# Implements CAP-002 TC-COMP-387
+def test_a_successful_empty_corporate_actions_fetch_covers_the_range_requested(
+    migrated_runner_connection: psycopg.Connection,
+) -> None:
+    """DAC-E2-S10-7, DEC-0398: a corporate-actions fetch that succeeds with no action records
+    one corporate_actions segment over the range the runner requested, history-depth start
+    to the run date, which is what lets CAP-002 momentum score a stock that never split or
+    paid a dividend."""
+    conn = migrated_runner_connection
+    instrument_id = _insert_instrument(conn, "AAPL")
+    client = MagicMock()
+    client.fetch_corporate_actions.return_value = []
+
+    run_id = _acquire(conn, instrument_id, client)
+
+    client.fetch_corporate_actions.assert_called_once_with("AAPL", _DEPTH_START, _TODAY)
+    # No action was returned, so no corporate_action row is written: the outcome is unchanged.
+    assert (instrument_id, "corporate_actions", "unchanged") in _fetch_result_rows(conn, run_id)
+    assert _corporate_actions_segments(conn, instrument_id) == [(_DEPTH_START, _TODAY)]
+
+
+@pytest.mark.postgres
+@pytest.mark.parametrize(
+    ("error", "outcome"),
+    [
+        (ProviderUnavailable("The provider is unavailable."), "failed"),
+        (InstrumentNotFound("The provider does not recognise this instrument."), "not_found"),
+    ],
+    ids=["failed", "not_found"],
+)
+@pytest.mark.parametrize(
+    "prior",
+    [[], [(_DEPTH_START, date(2025, 8, 31))]],
+    ids=["no-prior-segment", "prior-segment"],
+)
+# Implements CAP-002 TC-COMP-387
+def test_a_failed_or_not_found_corporate_actions_fetch_records_no_coverage(
+    migrated_runner_connection: psycopg.Connection,
+    error: MassiveError,
+    outcome: str,
+    prior: list[tuple[date, date]],
+) -> None:
+    """DAC-E2-S10-7, DEC-0398: a corporate-actions fetch that fails, or ends not_found,
+    records no segment, and a segment written by an earlier fetch is left unchanged; the
+    instrument's other data types are still written."""
+    conn = migrated_runner_connection
+    instrument_id = _insert_instrument(conn, "AAPL")
+    with conn.cursor() as cur:
+        for covered_from, covered_to in prior:
+            cur.execute(
+                "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
+                "VALUES (%s, 'corporate_actions', %s, %s)",
+                (instrument_id, covered_from, covered_to),
+            )
+    conn.commit()
+    client = MagicMock()
+    client.fetch_corporate_actions.side_effect = error
+
+    run_id = _acquire(conn, instrument_id, client)
+
+    client.fetch_corporate_actions.assert_called_once()
+    results = _fetch_result_rows(conn, run_id)
+    assert (instrument_id, "corporate_actions", outcome) in results
+    assert (instrument_id, "prices", "written") in results
+    assert _corporate_actions_segments(conn, instrument_id) == prior

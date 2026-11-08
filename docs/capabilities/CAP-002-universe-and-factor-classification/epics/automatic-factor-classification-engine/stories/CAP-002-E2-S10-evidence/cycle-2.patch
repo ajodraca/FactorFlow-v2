@@ -1,0 +1,51 @@
+diff --git a/tests/integration/test_engine_inputs_momentum.py b/tests/integration/test_engine_inputs_momentum.py
+index e62681e..3e7f4ea 100644
+--- a/tests/integration/test_engine_inputs_momentum.py
++++ b/tests/integration/test_engine_inputs_momentum.py
+@@ -1656,6 +1656,46 @@ def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentu
+     assert rows[peer][0] == "classified"
+ 
+ 
++# Implements TC-COMP-381
++def test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated(
++    env: Env, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    """DAC-E2-13, DAC-E2-S10-1, DEC-0397, DEC-0116 (1) (review v1 IR-001): an uncovered stock
++    whose latest bar precedes the latest trading day is missing, corporate_actions_not_covered,
++    with no known_on and the corporate_actions acquisition named, never outdated; built with
++    every stage and two covered peers, it is not classified on momentum, input_missing (not
++    input_outdated), naming return_3m."""
++    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
++    stale = add_instrument(env.conn, "STALEBARE", corporate_actions_covered=False)
++    record_outcomes(env.conn, stale)
++    peer = add_instrument(env.conn, "PEER")
++    add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
++    for stock in (env.stock, peer):
++        add_close_series(env.conn, stock, STANDARD)
++
++    result = engine.build(env.conn, env.set_id, 60)
++
++    assert result.state == "complete", result.failure_reason
++    rows = momentum(env.conn, env.set_id, stale)
++    for name in MOMENTUM:
++        row = rows[name]
++        assert row["status"] == "missing", name
++        assert row["value"] is None
++        assert row["known_on"] is None
++        assert row["as_of"] == E
++        detail = dict(row["detail"])
++        detail.pop("last_acquisition")
++        assert detail == not_covered(name, []), name
++        assert_last_acquisition(row, "corporate_actions")
++    classification = env.conn.execute(
++        "SELECT status, reason_code, reason_input FROM factor_classification "
++        "WHERE set_id = %s AND instrument_id = %s AND factor = 'momentum'",
++        (env.set_id, stale),
++    ).fetchone()
++    env.conn.commit()
++    assert classification == ("not_classified", "input_missing", "return_3m")
++
++
+ # Implements TC-COMP-382
+ def test_a_momentum_input_missing_coverage_names_the_corporate_actions_acquisition(
+     env: Env, monkeypatch: pytest.MonkeyPatch

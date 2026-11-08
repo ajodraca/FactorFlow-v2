@@ -1,0 +1,45 @@
+.F
+=================================== FAILURES ===================================
+___________ test_every_window_is_present_with_bars_on_every_boundary ___________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=55252 user=test database=test_fcba71f5ea724636a007995966e8b54...cbe7b00>, stock=1, set_id=UUID('4278c64f-7196-4473-a6b0-259d37d67362'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cbe7bf0>
+
+    def test_every_window_is_present_with_bars_on_every_boundary(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-7, DEC-0055 (3), (4): three returns over (S_k, E], with E, S_k and both closes in
+        detail and no adjustment when the window holds no corporate action."""
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+        rows = build(env, monkeypatch)
+    
+        expected = {"return_3m": ret(120, 100), "return_6m": ret(120, 80), "return_12m": ret(120, 50)}
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            assert_close(rows[name]["value"], expected[name])
+            start = START[name]
+>           assert rows[name]["detail"] == {
+                "window_months": WINDOW[name],
+                "E": bar(E, 120),
+                "S": bar(start, STANDARD[start]),
+                "adjusted_close": {"E": 120, "S": STANDARD[start]},
+                "splits": [],
+                "dividends": [],
+                # Implements TC-COMP-386: the default segment contains the window (DAC-E2-S10-6).
+                "corporate_actions_covered_by": DEFAULT_COVERED_BY,
+            }, name
+E           AssertionError: return_3m
+E           assert {'E': {'close...nds': [], ...} == {'window_mont...S': 100}, ...}
+E             
+E             Omitting 6 identical items, use -vv to show
+E             Right contains 1 more item:
+E             {'corporate_actions_covered_by': {'covered_from': '2000-01-01',
+E                                               'covered_to': '2099-12-31'}}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:182: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_every_window_is_present_with_bars_on_every_boundary
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 2.48s

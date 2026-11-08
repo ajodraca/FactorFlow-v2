@@ -1,0 +1,647 @@
+# RED re-check of the final cycle-1 tests (staged) against the delivered production code: git archive HEAD src (HEAD 3e654dbc2f6720730886d1b0f97b148b74e830c4, the red_commit, src unchanged since 600f0c0a44c35b5164933036c977c86f99023b81) imported first through PYTHONPATH; the working tree untouched
+# factorflow imported from: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-confident-shtern-083e4b/32dcd9ff-fb53-4005-8409-e856d3707e6f/scratchpad/s10/delivered-src/src/factorflow/classification/engine.py
+.F.....................................F................................ [ 72%]
+.......FFFFFFFFFFFFF.......                                              [100%]
+=================================== FAILURES ===================================
+___________ test_every_window_is_present_with_bars_on_every_boundary ___________
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_86c799799e8f412289f269b0ec9ce92...84343e0>, stock=1, set_id=UUID('305453a4-aa08-4488-a77f-397296b80ca6'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108437aa0>
+
+    def test_every_window_is_present_with_bars_on_every_boundary(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """AC-7, DEC-0055 (3), (4): three returns over (S_k, E], with E, S_k and both closes in
+        detail and no adjustment when the window holds no corporate action."""
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+        rows = build(env, monkeypatch)
+    
+        expected = {"return_3m": ret(120, 100), "return_6m": ret(120, 80), "return_12m": ret(120, 50)}
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            assert_close(rows[name]["value"], expected[name])
+            start = START[name]
+>           assert rows[name]["detail"] == {
+                "window_months": WINDOW[name],
+                "E": bar(E, 120),
+                "S": bar(start, STANDARD[start]),
+                "adjusted_close": {"E": 120, "S": STANDARD[start]},
+                "splits": [],
+                "dividends": [],
+                # Implements TC-COMP-386: the default segment contains the window (DAC-E2-S10-6).
+                "corporate_actions_covered_by": DEFAULT_COVERED_BY,
+            }, name
+E           AssertionError: return_3m
+E           assert {'E': {'close...nds': [], ...} == {'window_mont...S': 100}, ...}
+E             
+E             Omitting 6 identical items, use -vv to show
+E             Right contains 1 more item:
+E             {'corporate_actions_covered_by': {'covered_from': '2000-01-01',
+E                                               'covered_to': '2099-12-31'}}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:182: AssertionError
+_______ test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated _______
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_4ec54f2a072748c5a8220ed6ada58d1...831b8f0>, stock=1, set_id=UUID('c2c66323-1b51-4739-ad0f-d49134e5aec1'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10831a5a0>
+
+    def test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stale = add_instrument(env.conn, "STALE")
+        stale_day = date(2026, 10, 15)
+        add_close_series(env.conn, env.stock, STANDARD)
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, stale_day: 130})
+    
+        rows = build(env, monkeypatch)
+        stale_rows = momentum(env.conn, env.set_id, stale)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            row = stale_rows[name]
+            assert row["status"] == "outdated", name
+            assert row["value"] is None
+            assert row["as_of"] == E
+            assert row["known_on"] == E
+            start = START[name]
+>           assert row["detail"] == {
+                "cause": "outdated",
+                "outdated": {"prices": {"bar_date": str(stale_day), "latest_trading_day": str(L)}},
+                "window_months": WINDOW[name],
+                "E": bar(E, 120),
+                "S": bar(start, STANDARD[start]),
+                "adjusted_close": {"E": 120, "S": STANDARD[start]},
+                "splits": [],
+                "dividends": [],
+                # Implements TC-COMP-386: the default segment contains the window (DAC-E2-S10-6).
+                "corporate_actions_covered_by": DEFAULT_COVERED_BY,
+            }, name
+E           AssertionError: return_3m
+E           assert {'E': {'close...its': [], ...} == {'cause': 'ou...-09-17'}, ...}
+E             
+E             Omitting 8 identical items, use -vv to show
+E             Right contains 1 more item:
+E             {'corporate_actions_covered_by': {'covered_from': '2000-01-01',
+E                                               'covered_to': '2099-12-31'}}
+E             Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:957: AssertionError
+_ test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_bb59ba1370374aeeb0d435a5ef07d6f...8437da0>, stock=1, set_id=UUID('949527c0-9b57-40bf-b0a6-f13f88b34953'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108924fb0>
+
+    def test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-1, DAC-E2-13, AC-12, DEC-0397: with every boundary bar and no
+        corporate_actions segment (a prices segment does not count), all three inputs are
+        missing, naming the cause, with no value and no known_on (DEC-0242); the same bars with
+        the default segment are present."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        cover(env.conn, bare, *DEFAULT_CORPORATE_ACTIONS_COVERAGE, data_type="prices")
+        add_close_series(env.conn, bare, STANDARD)
+        add_close_series(env.conn, env.stock, STANDARD)
+    
+        rows = build(env, monkeypatch)
+        bare_rows = momentum(env.conn, env.set_id, bare)
+    
+        for name in MOMENTUM:
+            assert rows[name]["status"] == "present", name
+            row = bare_rows[name]
+>           assert row["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1613: AssertionError
+_ test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_08245dc8bdfb4316b30cb3476947f3f...8385e80>, stock=1, set_id=UUID('da03685f-3709-48bc-8593-e1ae1ce0eaad'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108384680>
+
+    def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 2, so momentum is
+        ranked by the two covered stocks alone (a peer set of one has no sample deviation), the
+        uncovered stock is not classified on momentum, input_missing, naming return_3m, the first
+        momentum input."""
+        monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        peer = add_instrument(env.conn, "PEER")
+        for stock in (bare, env.stock, peer):
+            add_close_series(env.conn, stock, STANDARD)
+    
+        result = engine.build(env.conn, env.set_id, 60)
+    
+        assert result.state == "complete", result.failure_reason
+        rows = {
+            row[0]: row[1:]
+            for row in env.conn.execute(
+                "SELECT instrument_id, status, reason_code, reason_input, reason_detail, score, "
+                "percentile FROM factor_classification WHERE set_id = %s AND factor = 'momentum'",
+                (env.set_id,),
+            ).fetchall()
+        }
+        env.conn.commit()
+>       assert rows[bare] == (
+            "not_classified",
+            "input_missing",
+            "return_3m",
+            f"{constants.INPUT_LABELS['return_3m']} missing",
+            None,
+            None,
+        )
+E       AssertionError: assert ('classified'...l('0.000000')) == ('not_classif...', None, None)
+E         
+E         At index 0 diff: 'classified' != 'not_classified'
+E         Use -v to get more diff
+
+tests/integration/test_engine_inputs_momentum.py:1647: AssertionError
+_ test_a_momentum_input_missing_coverage_names_the_corporate_actions_acquisition _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_ff1669b03d0b4a7dbb52dacda488103...8443f50>, stock=1, set_id=UUID('c0275ab6-1913-4e46-8970-9748ff432ea5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10831a090>
+
+    def test_a_momentum_input_missing_coverage_names_the_corporate_actions_acquisition(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-2, AC-12, design 2.3 step 5 and 2.4 (DEC-0243 as extended by DEC-0397): an
+        input missing for want of coverage names the last corporate_actions outcome, not the
+        prices one."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        record_outcomes(env.conn, bare)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        bare_rows = momentum(env.conn, env.set_id, bare)
+    
+        for name in MOMENTUM:
+>           assert bare_rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'cause'
+
+tests/integration/test_engine_inputs_momentum.py:1674: KeyError
+__ test_coverage_must_contain_the_window_with_both_bounds_inclusive[exact-12] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_4e02ade694e0480f8a8f3e1a9ac56e3...8927bf0>, stock=1, set_id=UUID('440ec457-eed1-4128-9d1a-42f2126e23c2'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108925010>
+segments = [(datetime.date(2025, 9, 18), datetime.date(2026, 9, 17))]
+present = ('return_3m', 'return_6m', 'return_12m')
+
+    @pytest.mark.parametrize(
+        ("segments", "present"),
+        [
+            ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+            ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+            ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+            ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+            ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+        ],
+        ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        segments: list[tuple[date, date]],
+        present: tuple[str, ...],
+    ) -> None:
+        """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+        from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+        it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+        segment of the stock, ordered by covered_from (the two-segment case is inserted later
+        segment first); a window the segment does contain stays present, naming that segment."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        for covered_from, covered_to in segments:
+            cover(env.conn, bare, covered_from, covered_to)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        rows = momentum(env.conn, env.set_id, bare)
+    
+        listed = [segment(*pair) for pair in sorted(segments)]
+        for name in MOMENTUM:
+            row = rows[name]
+            if name in present:
+                assert row["status"] == "present", name
+                assert_close(row["value"], ret(120, STANDARD[START[name]]))
+>               assert row["detail"]["corporate_actions_covered_by"] == segment(*segments[0]), name
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'corporate_actions_covered_by'
+
+tests/integration/test_engine_inputs_momentum.py:1715: KeyError
+__ test_coverage_must_contain_the_window_with_both_bounds_inclusive[exact-6] ___
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_67ab7eedba63444c9f9019d42a13d4f...8384890>, stock=1, set_id=UUID('c6716489-4d4e-4af7-89a8-f880cfa81fd3'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1083844d0>
+segments = [(datetime.date(2026, 3, 18), datetime.date(2026, 9, 17))]
+present = ('return_3m', 'return_6m')
+
+    @pytest.mark.parametrize(
+        ("segments", "present"),
+        [
+            ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+            ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+            ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+            ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+            ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+        ],
+        ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        segments: list[tuple[date, date]],
+        present: tuple[str, ...],
+    ) -> None:
+        """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+        from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+        it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+        segment of the stock, ordered by covered_from (the two-segment case is inserted later
+        segment first); a window the segment does contain stays present, naming that segment."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        for covered_from, covered_to in segments:
+            cover(env.conn, bare, covered_from, covered_to)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        rows = momentum(env.conn, env.set_id, bare)
+    
+        listed = [segment(*pair) for pair in sorted(segments)]
+        for name in MOMENTUM:
+            row = rows[name]
+            if name in present:
+                assert row["status"] == "present", name
+                assert_close(row["value"], ret(120, STANDARD[START[name]]))
+>               assert row["detail"]["corporate_actions_covered_by"] == segment(*segments[0]), name
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'corporate_actions_covered_by'
+
+tests/integration/test_engine_inputs_momentum.py:1715: KeyError
+_ test_coverage_must_contain_the_window_with_both_bounds_inclusive[late-start-6] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_351edd9ece204afc9a80de03142fc6a...8927c20>, stock=1, set_id=UUID('0c2215c6-1668-4053-8972-1a382f5b91be'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108318ec0>
+segments = [(datetime.date(2026, 3, 19), datetime.date(2026, 9, 17))]
+present = ('return_3m',)
+
+    @pytest.mark.parametrize(
+        ("segments", "present"),
+        [
+            ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+            ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+            ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+            ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+            ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+        ],
+        ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        segments: list[tuple[date, date]],
+        present: tuple[str, ...],
+    ) -> None:
+        """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+        from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+        it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+        segment of the stock, ordered by covered_from (the two-segment case is inserted later
+        segment first); a window the segment does contain stays present, naming that segment."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        for covered_from, covered_to in segments:
+            cover(env.conn, bare, covered_from, covered_to)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        rows = momentum(env.conn, env.set_id, bare)
+    
+        listed = [segment(*pair) for pair in sorted(segments)]
+        for name in MOMENTUM:
+            row = rows[name]
+            if name in present:
+                assert row["status"] == "present", name
+                assert_close(row["value"], ret(120, STANDARD[START[name]]))
+>               assert row["detail"]["corporate_actions_covered_by"] == segment(*segments[0]), name
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'corporate_actions_covered_by'
+
+tests/integration/test_engine_inputs_momentum.py:1715: KeyError
+_ test_coverage_must_contain_the_window_with_both_bounds_inclusive[early-end] __
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_fa57dd540c984b84b2071517416d981...8319be0>, stock=1, set_id=UUID('e5f2c766-7440-4b29-b41d-a4a90033e7eb'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10831a630>
+segments = [(datetime.date(2025, 9, 18), datetime.date(2026, 9, 16))]
+present = ()
+
+    @pytest.mark.parametrize(
+        ("segments", "present"),
+        [
+            ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+            ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+            ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+            ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+            ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+        ],
+        ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        segments: list[tuple[date, date]],
+        present: tuple[str, ...],
+    ) -> None:
+        """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+        from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+        it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+        segment of the stock, ordered by covered_from (the two-segment case is inserted later
+        segment first); a window the segment does contain stays present, naming that segment."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        for covered_from, covered_to in segments:
+            cover(env.conn, bare, covered_from, covered_to)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        rows = momentum(env.conn, env.set_id, bare)
+    
+        listed = [segment(*pair) for pair in sorted(segments)]
+        for name in MOMENTUM:
+            row = rows[name]
+            if name in present:
+                assert row["status"] == "present", name
+                assert_close(row["value"], ret(120, STANDARD[START[name]]))
+                assert row["detail"]["corporate_actions_covered_by"] == segment(*segments[0]), name
+                continue
+>           assert row["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1717: AssertionError
+_ test_coverage_must_contain_the_window_with_both_bounds_inclusive[two-segments] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_f18d7a0da36a42a6ac09559db6694b8...83871d0>, stock=1, set_id=UUID('1085497b-05d3-480c-9839-6b23255840f7'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108386150>
+segments = [(datetime.date(2026, 3, 19), datetime.date(2026, 9, 17)), (datetime.date(2025, 9, 18), datetime.date(2026, 3, 17))]
+present = ('return_3m',)
+
+    @pytest.mark.parametrize(
+        ("segments", "present"),
+        [
+            ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+            ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+            ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+            ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+            ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+        ],
+        ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+        env: Env,
+        monkeypatch: pytest.MonkeyPatch,
+        segments: list[tuple[date, date]],
+        present: tuple[str, ...],
+    ) -> None:
+        """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+        from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+        it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+        segment of the stock, ordered by covered_from (the two-segment case is inserted later
+        segment first); a window the segment does contain stays present, naming that segment."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        for covered_from, covered_to in segments:
+            cover(env.conn, bare, covered_from, covered_to)
+        add_close_series(env.conn, bare, STANDARD)
+    
+        build(env, monkeypatch)
+        rows = momentum(env.conn, env.set_id, bare)
+    
+        listed = [segment(*pair) for pair in sorted(segments)]
+        for name in MOMENTUM:
+            row = rows[name]
+            if name in present:
+                assert row["status"] == "present", name
+                assert_close(row["value"], ret(120, STANDARD[START[name]]))
+>               assert row["detail"]["corporate_actions_covered_by"] == segment(*segments[0]), name
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'corporate_actions_covered_by'
+
+tests/integration/test_engine_inputs_momentum.py:1715: KeyError
+_ test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-1] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_cd20d69ace9a4ed18f53df89425f15d...892e030>, stock=1, set_id=UUID('b67f14a8-b9ff-4353-903e-c64c0c602ce5'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10892ef60>
+covered_from = datetime.date(2026, 6, 13), present = True
+
+    @pytest.mark.parametrize(
+        ("covered_from", "present"),
+        [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
+        ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
+        env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
+    ) -> None:
+        """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
+        on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
+        from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        e, s3 = date(2026, 9, 15), date(2026, 6, 12)
+        cover(env.conn, bare, covered_from, e)
+        add_close_series(
+            env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
+        )
+    
+        build(env, monkeypatch)
+        row = momentum(env.conn, env.set_id, bare)["return_3m"]
+    
+        if present:
+            assert row["status"] == "present"
+            assert_close(row["value"], ret(120, 100))
+>           assert row["detail"]["corporate_actions_covered_by"] == segment(covered_from, e)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'corporate_actions_covered_by'
+
+tests/integration/test_engine_inputs_momentum.py:1748: KeyError
+_ test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-2] _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_876bc27200d442c4ba77b110a40dc1b...892d700>, stock=1, set_id=UUID('0ae41e71-3466-4291-859a-aed0e5f89658'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10892c470>
+covered_from = datetime.date(2026, 6, 14), present = False
+
+    @pytest.mark.parametrize(
+        ("covered_from", "present"),
+        [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
+        ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
+    )
+    # Implements TC-COMP-383
+    def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
+        env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
+    ) -> None:
+        """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
+        on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
+        from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        e, s3 = date(2026, 9, 15), date(2026, 6, 12)
+        cover(env.conn, bare, covered_from, e)
+        add_close_series(
+            env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
+        )
+    
+        build(env, monkeypatch)
+        row = momentum(env.conn, env.set_id, bare)["return_3m"]
+    
+        if present:
+            assert row["status"] == "present"
+            assert_close(row["value"], ret(120, 100))
+            assert row["detail"]["corporate_actions_covered_by"] == segment(covered_from, e)
+        else:
+>           assert row["status"] == "missing"
+E           AssertionError: assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1750: AssertionError
+_ test_a_covered_window_without_actions_gives_the_price_return_and_names_its_segment _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_e95d28a4c098432ebfa82bb362896ef...892fd70>, stock=1, set_id=UUID('22804b55-54fd-4185-bb19-d6d6673fb558'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10892ec00>
+
+    def test_a_covered_window_without_actions_gives_the_price_return_and_names_its_segment(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-4, DAC-E2-13, AC-7: with a segment containing every window and no
+        corporate-action row, each input is present, its value the price return
+        close(E) / close(S_k) - 1, and records its stock's own segment; a stock whose latest bar
+        precedes the latest trading day is outdated and records its own segment the same way."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        stale = add_instrument(env.conn, "STALE", corporate_actions_covered=False)
+        bare_segment = (date(2020, 1, 2), date(2026, 10, 1))
+        stale_segment = (date(2021, 3, 4), date(2026, 10, 15))
+        cover(env.conn, bare, *bare_segment)
+        cover(env.conn, stale, *stale_segment)
+        add_close_series(env.conn, bare, STANDARD)
+        add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+    
+        build(env, monkeypatch)
+        bare_rows = momentum(env.conn, env.set_id, bare)
+        stale_rows = momentum(env.conn, env.set_id, stale)
+    
+        for name in MOMENTUM:
+            assert bare_rows[name]["status"] == "present", name
+            assert_close(bare_rows[name]["value"], ret(120, STANDARD[START[name]]))
+>           assert bare_rows[name]["detail"]["corporate_actions_covered_by"] == segment(*bare_segment)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'corporate_actions_covered_by'
+
+tests/integration/test_engine_inputs_momentum.py:1779: KeyError
+_ test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload _
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_de843b9c5c6f4b82a7aed0f9cd6516e...892d850>, stock=1, set_id=UUID('fc0ac9ae-c485-423f-b972-bceaef454d67'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10892d670>
+
+    def test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-5, DEC-0397 (the owner's order), DEC-0243: among uncovered stocks, a window
+        without its S_k bar names the boundary and the prices acquisition; a window with an
+        unusable payload, or a non-positive E close, is corporate_actions_not_covered and names
+        the corporate_actions acquisition."""
+        no_s12 = add_instrument(env.conn, "NOS12", corporate_actions_covered=False)
+        unusable = add_instrument(env.conn, "UNUSABLE", corporate_actions_covered=False)
+        e_zero = add_instrument(env.conn, "EZERO", corporate_actions_covered=False)
+        for stock in (no_s12, unusable, e_zero):
+            record_outcomes(env.conn, stock)
+        add_close_series(env.conn, no_s12, {S6: 80, S3: 100, E: 120, L: 130})
+        add_close_series(env.conn, unusable, STANDARD | {date(2026, 4, 30): 90})
+        add_corporate_action(
+            env.conn, unusable, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+        )
+        add_close_series(env.conn, e_zero, STANDARD | {E: 0})
+    
+        build(env, monkeypatch)
+        no_s12_rows = momentum(env.conn, env.set_id, no_s12)
+        unusable_rows = momentum(env.conn, env.set_id, unusable)
+        e_zero_rows = momentum(env.conn, env.set_id, e_zero)
+    
+        assert no_s12_rows["return_12m"]["detail"]["boundary"] == "S_12"
+        assert "cause" not in no_s12_rows["return_12m"]["detail"]
+        assert_last_acquisition(no_s12_rows["return_12m"], "prices")
+        for name in ("return_3m", "return_6m"):
+>           assert no_s12_rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'cause'
+
+tests/integration/test_engine_inputs_momentum.py:1814: KeyError
+___ test_value_and_growth_inputs_do_not_depend_on_corporate_actions_coverage ___
+
+env = Env(conn=<psycopg.Connection [IDLE] (host=localhost port=51541 user=test database=test_4c4cf446e88b48c0b06f2fe9327f545...8935760>, stock=1, set_id=UUID('75936c41-db09-428b-b9ac-31157721e062'), latest_trading_day=datetime.date(2026, 10, 16))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108934e30>
+
+    def test_value_and_growth_inputs_do_not_depend_on_corporate_actions_coverage(
+        env: Env, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """DAC-E2-S10-6, design 2.4 ("Value and growth read no corporate action"): a covered and
+        an uncovered stock with the same bars and statements have the same value and growth
+        inputs, all present; only the uncovered stock's momentum is missing."""
+        bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+        quarter = {
+            "book_equity": Decimal(500),
+            "shares_outstanding": Decimal(100),
+            "net_income": Decimal(10),
+            "diluted_eps": Decimal(1),
+            "revenue": Decimal(100),
+            "operating_cash_flow": Decimal(30),
+            "capital_expenditure": Decimal(-5),
+        }
+        for stock in (env.stock, bare):
+            add_close_series(env.conn, stock, STANDARD)
+            add_quarters(env.conn, stock, date(2026, 9, 30), 8, [dict(quarter)] * 8)
+        install_test_line_items(monkeypatch)
+    
+        build(env, monkeypatch)
+        covered_rows = inputs_for(env.conn, env.set_id, env.stock)
+        bare_rows = inputs_for(env.conn, env.set_id, bare)
+    
+        for name in (*constants.INPUT_NAMES["value"], *constants.INPUT_NAMES["growth"]):
+            assert covered_rows[name]["status"] == "present", name
+            for key in ("status", "value", "as_of", "known_on", "restated_possible", "detail"):
+                assert bare_rows[name][key] == covered_rows[name][key], (name, key)
+        for name in MOMENTUM:
+            assert covered_rows[name]["status"] == "present", name
+>           assert bare_rows[name]["status"] == "missing", name
+E           AssertionError: return_3m
+E           assert 'present' == 'missing'
+E             
+E             - missing
+E             + present
+
+tests/integration/test_engine_inputs_momentum.py:1859: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_engine_inputs_momentum.py::test_every_window_is_present_with_bars_on_every_boundary
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_momentum_input_missing_coverage_names_the_corporate_actions_acquisition
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_must_contain_the_window_with_both_bounds_inclusive[exact-12]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_must_contain_the_window_with_both_bounds_inclusive[exact-6]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_must_contain_the_window_with_both_bounds_inclusive[late-start-6]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_must_contain_the_window_with_both_bounds_inclusive[early-end]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_must_contain_the_window_with_both_bounds_inclusive[two-segments]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-1]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_coverage_bounds_are_the_resolved_bars_not_their_targets[from-s3-session-plus-2]
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_covered_window_without_actions_gives_the_price_return_and_names_its_segment
+FAILED tests/integration/test_engine_inputs_momentum.py::test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload
+FAILED tests/integration/test_engine_inputs_momentum.py::test_value_and_growth_inputs_do_not_depend_on_corporate_actions_coverage
+15 failed, 84 passed in 22.31s

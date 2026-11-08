@@ -37,6 +37,7 @@ from tests.integration.engine_momentum_support import (
     momentum_fixture_dates,
     run_momentum_stages,
 )
+from tests.integration.engine_support import DEFAULT_CORPORATE_ACTIONS_COVERAGE
 
 pytestmark = pytest.mark.postgres
 
@@ -49,6 +50,12 @@ WINDOW = {"return_3m": 3, "return_6m": 6, "return_12m": 12}
 START = {"return_3m": S3, "return_6m": S6, "return_12m": S12}
 STANDARD: dict[date, Decimal | int] = {S12: 50, S6: 80, S3: 100, E: 120, L: 130}
 """Bars on every boundary target and the latest trading day: returns 1.4, 0.5 and 0.2."""
+
+DEFAULT_COVERED_BY = {
+    "covered_from": str(DEFAULT_CORPORATE_ACTIONS_COVERAGE[0]),
+    "covered_to": str(DEFAULT_CORPORATE_ACTIONS_COVERAGE[1]),
+}
+"""``detail.corporate_actions_covered_by`` of a stock seeded with the default segment."""
 
 SPLIT_2_FOR_1 = {"split_from": "1", "split_to": "2"}
 TOLERANCE = Decimal("1e-8")
@@ -179,6 +186,8 @@ def test_every_window_is_present_with_bars_on_every_boundary(
             "adjusted_close": {"E": 120, "S": STANDARD[start]},
             "splits": [],
             "dividends": [],
+            # Implements TC-COMP-386: the default segment contains the window (DAC-E2-S10-6).
+            "corporate_actions_covered_by": DEFAULT_COVERED_BY,
         }, name
 
 
@@ -954,6 +963,8 @@ def test_a_stale_latest_bar_makes_all_three_momentum_inputs_outdated(
             "adjusted_close": {"E": 120, "S": STANDARD[start]},
             "splits": [],
             "dividends": [],
+            # Implements TC-COMP-386: the default segment contains the window (DAC-E2-S10-6).
+            "corporate_actions_covered_by": DEFAULT_COVERED_BY,
         }, name
 
 
@@ -1521,3 +1532,368 @@ def test_the_momentum_stage_is_registered_once_between_fundamentals_and_classifi
     momentum_at = stages.index(engine._momentum_inputs_stage)
     assert stages.index(engine._fundamental_inputs_stage) < momentum_at
     assert momentum_at < stages.index(engine._classification_stage)
+
+
+# --- CAP-002-E2-S10: corporate-actions coverage of each window (DEC-0397, DEC-0398) -------------
+
+ONE_DAY = timedelta(days=1)
+
+
+def cover(
+    conn: psycopg.Connection,
+    instrument_id: int,
+    covered_from: date,
+    covered_to: date,
+    data_type: str = "corporate_actions",
+) -> None:
+    """One ``coverage_segment`` row, as the writer records a successful fetch (DEC-0398)."""
+    conn.execute(
+        "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
+        "VALUES (%s, %s, %s, %s)",
+        (instrument_id, data_type, covered_from, covered_to),
+    )
+    conn.commit()
+
+
+def segment(covered_from: date, covered_to: date) -> dict[str, str]:
+    """A segment as ``detail`` records it."""
+    return {"covered_from": str(covered_from), "covered_to": str(covered_to)}
+
+
+def not_covered(name: str, segments: list[dict[str, str]], e_close: int = 120) -> dict:
+    """The whole ``detail`` of a window no segment contains, for the ``STANDARD`` bars."""
+    start = START[name]
+    return {
+        "cause": "corporate_actions_not_covered",
+        "window_months": WINDOW[name],
+        "E": bar(E, e_close),
+        "S": bar(start, STANDARD[start]),
+        "corporate_actions_coverage": segments,
+    }
+
+
+def record_outcomes(conn: psycopg.Connection, instrument_id: int) -> None:
+    """Distinct last outcomes for prices and corporate_actions, so the data type a missing
+    input names is observable."""
+    for data_type, outcome in (("prices", "not_found"), ("corporate_actions", "failed")):
+        conn.execute(
+            "INSERT INTO acquisition_state (instrument_id, data_type, last_acquired_at, "
+            "last_run_id, last_outcome) VALUES (%s, %s, %s, gen_random_uuid(), %s)",
+            (instrument_id, data_type, ACQUIRED_AT, outcome),
+        )
+    conn.commit()
+
+
+def assert_last_acquisition(row: dict, data_type: str) -> None:
+    last = row["detail"]["last_acquisition"]
+    outcome = {"prices": "not_found", "corporate_actions": "failed"}[data_type]
+    assert (last["data_type"], last["outcome"]) == (data_type, outcome), row["input_name"]
+    assert datetime.fromisoformat(last["acquired_at"]) == ACQUIRED_AT
+
+
+# Implements TC-COMP-381
+def test_a_stock_without_corporate_actions_coverage_has_every_momentum_input_missing(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-S10-1, DAC-E2-13, AC-12, DEC-0397: with every boundary bar and no
+    corporate_actions segment (a prices segment does not count), all three inputs are
+    missing, naming the cause, with no value and no known_on (DEC-0242); the same bars with
+    the default segment are present."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    cover(env.conn, bare, *DEFAULT_CORPORATE_ACTIONS_COVERAGE, data_type="prices")
+    add_close_series(env.conn, bare, STANDARD)
+    add_close_series(env.conn, env.stock, STANDARD)
+
+    rows = build(env, monkeypatch)
+    bare_rows = momentum(env.conn, env.set_id, bare)
+
+    for name in MOMENTUM:
+        assert rows[name]["status"] == "present", name
+        row = bare_rows[name]
+        assert row["status"] == "missing", name
+        assert row["value"] is None
+        assert row["known_on"] is None
+        assert row["as_of"] == E
+        assert row["detail"] == not_covered(name, []), name
+    assert_momentum_invariants(env.conn, env.set_id)
+
+
+# Implements TC-COMP-381
+def test_a_stock_without_corporate_actions_coverage_is_not_classified_on_momentum(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-S10-1, AC-12: built with every stage and the peer-set floor at 2, so momentum is
+    ranked by the two covered stocks alone (a peer set of one has no sample deviation), the
+    uncovered stock is not classified on momentum, input_missing, naming return_3m, the first
+    momentum input."""
+    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    peer = add_instrument(env.conn, "PEER")
+    for stock in (bare, env.stock, peer):
+        add_close_series(env.conn, stock, STANDARD)
+
+    result = engine.build(env.conn, env.set_id, 60)
+
+    assert result.state == "complete", result.failure_reason
+    rows = {
+        row[0]: row[1:]
+        for row in env.conn.execute(
+            "SELECT instrument_id, status, reason_code, reason_input, reason_detail, score, "
+            "percentile FROM factor_classification WHERE set_id = %s AND factor = 'momentum'",
+            (env.set_id,),
+        ).fetchall()
+    }
+    env.conn.commit()
+    assert rows[bare] == (
+        "not_classified",
+        "input_missing",
+        "return_3m",
+        f"{constants.INPUT_LABELS['return_3m']} missing",
+        None,
+        None,
+    )
+    assert rows[env.stock][0] == "classified"
+    assert rows[peer][0] == "classified"
+
+
+# Implements TC-COMP-381
+def test_an_uncovered_stock_with_a_stale_latest_bar_is_missing_not_outdated(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-13, DAC-E2-S10-1, DEC-0397, DEC-0116 (1) (review v1 IR-001): an uncovered stock
+    whose latest bar precedes the latest trading day is missing, corporate_actions_not_covered,
+    with no known_on and the corporate_actions acquisition named, never outdated; built with
+    every stage and two covered peers, it is not classified on momentum, input_missing (not
+    input_outdated), naming return_3m."""
+    monkeypatch.setattr(constants, "MIN_PEER_SET_SIZE", 2)
+    stale = add_instrument(env.conn, "STALEBARE", corporate_actions_covered=False)
+    record_outcomes(env.conn, stale)
+    peer = add_instrument(env.conn, "PEER")
+    add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+    for stock in (env.stock, peer):
+        add_close_series(env.conn, stock, STANDARD)
+
+    result = engine.build(env.conn, env.set_id, 60)
+
+    assert result.state == "complete", result.failure_reason
+    rows = momentum(env.conn, env.set_id, stale)
+    for name in MOMENTUM:
+        row = rows[name]
+        assert row["status"] == "missing", name
+        assert row["value"] is None
+        assert row["known_on"] is None
+        assert row["as_of"] == E
+        detail = dict(row["detail"])
+        detail.pop("last_acquisition")
+        assert detail == not_covered(name, []), name
+        assert_last_acquisition(row, "corporate_actions")
+    classification = env.conn.execute(
+        "SELECT status, reason_code, reason_input FROM factor_classification "
+        "WHERE set_id = %s AND instrument_id = %s AND factor = 'momentum'",
+        (env.set_id, stale),
+    ).fetchone()
+    env.conn.commit()
+    assert classification == ("not_classified", "input_missing", "return_3m")
+
+
+# Implements TC-COMP-382
+def test_a_momentum_input_missing_coverage_names_the_corporate_actions_acquisition(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-S10-2, AC-12, design 2.3 step 5 and 2.4 (DEC-0243 as extended by DEC-0397): an
+    input missing for want of coverage names the last corporate_actions outcome, not the
+    prices one."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    record_outcomes(env.conn, bare)
+    add_close_series(env.conn, bare, STANDARD)
+
+    build(env, monkeypatch)
+    bare_rows = momentum(env.conn, env.set_id, bare)
+
+    for name in MOMENTUM:
+        assert bare_rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+        assert_last_acquisition(bare_rows[name], "corporate_actions")
+
+
+@pytest.mark.parametrize(
+    ("segments", "present"),
+    [
+        ([(S12 + ONE_DAY, E)], ("return_3m", "return_6m", "return_12m")),
+        ([(S6 + ONE_DAY, E)], ("return_3m", "return_6m")),
+        ([(S6 + 2 * ONE_DAY, E)], ("return_3m",)),
+        ([(S12 + ONE_DAY, E - ONE_DAY)], ()),
+        ([(S6 + 2 * ONE_DAY, E), (S12 + ONE_DAY, S6)], ("return_3m",)),
+    ],
+    ids=["exact-12", "exact-6", "late-start-6", "early-end", "two-segments"],
+)
+# Implements TC-COMP-383
+def test_coverage_must_contain_the_window_with_both_bounds_inclusive(
+    env: Env,
+    monkeypatch: pytest.MonkeyPatch,
+    segments: list[tuple[date, date]],
+    present: tuple[str, ...],
+) -> None:
+    """DAC-E2-S10-3, DAC-E2-13, design 2.4: a window (S_k, E] is covered when one segment runs
+    from S_k + 1 or earlier to E or later. A segment from exactly S_k + 1 to exactly E covers
+    it; one starting on S_k + 2 or ending on E - 1 does not, and the missing input lists every
+    segment of the stock, ordered by covered_from (the two-segment case is inserted later
+    segment first); a window the segment does contain stays present, naming that segment."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    for covered_from, covered_to in segments:
+        cover(env.conn, bare, covered_from, covered_to)
+    add_close_series(env.conn, bare, STANDARD)
+
+    build(env, monkeypatch)
+    rows = momentum(env.conn, env.set_id, bare)
+
+    listed = [segment(*pair) for pair in sorted(segments)]
+    for name in MOMENTUM:
+        row = rows[name]
+        if name in present:
+            assert row["status"] == "present", name
+            assert_close(row["value"], ret(120, STANDARD[START[name]]))
+            assert row["detail"]["corporate_actions_covered_by"] == segment(*segments[0]), name
+            continue
+        assert row["status"] == "missing", name
+        assert row["value"] is None
+        assert row["known_on"] is None
+        assert row["detail"] == not_covered(name, listed), name
+
+
+@pytest.mark.parametrize(
+    ("covered_from", "present"),
+    [(date(2026, 6, 13), True), (date(2026, 6, 14), False)],
+    ids=["from-s3-session-plus-1", "from-s3-session-plus-2"],
+)
+# Implements TC-COMP-383
+def test_coverage_bounds_are_the_resolved_bars_not_their_targets(
+    env: Env, monkeypatch: pytest.MonkeyPatch, covered_from: date, present: bool
+) -> None:
+    """DAC-E2-S10-3, design 2.4: the window is (S_k, E] between the bars resolved, so with E
+    on 2026-09-15 (its target is 09-17) and S_3 on 06-12 (its target is 06-15) a segment
+    from 06-13 to 09-15 covers return_3m and one from 06-14 does not."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    e, s3 = date(2026, 9, 15), date(2026, 6, 12)
+    cover(env.conn, bare, covered_from, e)
+    add_close_series(
+        env.conn, bare, {date(2025, 9, 12): 50, date(2026, 3, 13): 80, s3: 100, e: 120, L: 130}
+    )
+
+    build(env, monkeypatch)
+    row = momentum(env.conn, env.set_id, bare)["return_3m"]
+
+    if present:
+        assert row["status"] == "present"
+        assert_close(row["value"], ret(120, 100))
+        assert row["detail"]["corporate_actions_covered_by"] == segment(covered_from, e)
+    else:
+        assert row["status"] == "missing"
+        assert row["detail"]["cause"] == "corporate_actions_not_covered"
+        assert row["detail"]["corporate_actions_coverage"] == [segment(covered_from, e)]
+
+
+# Implements TC-COMP-384
+def test_a_covered_window_without_actions_gives_the_price_return_and_names_its_segment(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-S10-4, DAC-E2-13, AC-7: with a segment containing every window and no
+    corporate-action row, each input is present, its value the price return
+    close(E) / close(S_k) - 1, and records its stock's own segment; a stock whose latest bar
+    precedes the latest trading day is outdated and records its own segment the same way."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    stale = add_instrument(env.conn, "STALE", corporate_actions_covered=False)
+    bare_segment = (date(2020, 1, 2), date(2026, 10, 1))
+    stale_segment = (date(2021, 3, 4), date(2026, 10, 15))
+    cover(env.conn, bare, *bare_segment)
+    cover(env.conn, stale, *stale_segment)
+    add_close_series(env.conn, bare, STANDARD)
+    add_close_series(env.conn, stale, {S12: 50, S6: 80, S3: 100, E: 120, date(2026, 10, 15): 130})
+
+    build(env, monkeypatch)
+    bare_rows = momentum(env.conn, env.set_id, bare)
+    stale_rows = momentum(env.conn, env.set_id, stale)
+
+    for name in MOMENTUM:
+        assert bare_rows[name]["status"] == "present", name
+        assert_close(bare_rows[name]["value"], ret(120, STANDARD[START[name]]))
+        assert bare_rows[name]["detail"]["corporate_actions_covered_by"] == segment(*bare_segment)
+        assert stale_rows[name]["status"] == "outdated", name
+        assert stale_rows[name]["value"] is None
+        assert stale_rows[name]["detail"]["corporate_actions_covered_by"] == segment(*stale_segment)
+
+
+# Implements TC-COMP-385
+def test_a_missing_boundary_ranks_before_coverage_and_coverage_before_price_and_payload(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-S10-5, DEC-0397 (the owner's order), DEC-0243: among uncovered stocks, a window
+    without its S_k bar names the boundary and the prices acquisition; a window with an
+    unusable payload, or a non-positive E close, is corporate_actions_not_covered and names
+    the corporate_actions acquisition."""
+    no_s12 = add_instrument(env.conn, "NOS12", corporate_actions_covered=False)
+    unusable = add_instrument(env.conn, "UNUSABLE", corporate_actions_covered=False)
+    e_zero = add_instrument(env.conn, "EZERO", corporate_actions_covered=False)
+    for stock in (no_s12, unusable, e_zero):
+        record_outcomes(env.conn, stock)
+    add_close_series(env.conn, no_s12, {S6: 80, S3: 100, E: 120, L: 130})
+    add_close_series(env.conn, unusable, STANDARD | {date(2026, 4, 30): 90})
+    add_corporate_action(
+        env.conn, unusable, "split", date(2026, 5, 1), {"split_from": "1", "split_to": "0"}
+    )
+    add_close_series(env.conn, e_zero, STANDARD | {E: 0})
+
+    build(env, monkeypatch)
+    no_s12_rows = momentum(env.conn, env.set_id, no_s12)
+    unusable_rows = momentum(env.conn, env.set_id, unusable)
+    e_zero_rows = momentum(env.conn, env.set_id, e_zero)
+
+    assert no_s12_rows["return_12m"]["detail"]["boundary"] == "S_12"
+    assert "cause" not in no_s12_rows["return_12m"]["detail"]
+    assert_last_acquisition(no_s12_rows["return_12m"], "prices")
+    for name in ("return_3m", "return_6m"):
+        assert no_s12_rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+        assert_last_acquisition(no_s12_rows[name], "corporate_actions")
+    for name in MOMENTUM:
+        for rows in (unusable_rows, e_zero_rows):
+            assert rows[name]["status"] == "missing", name
+            assert rows[name]["detail"]["cause"] == "corporate_actions_not_covered", name
+            assert_last_acquisition(rows[name], "corporate_actions")
+        assert e_zero_rows[name]["detail"] == {
+            **not_covered(name, [], e_close=0),
+            "last_acquisition": e_zero_rows[name]["detail"]["last_acquisition"],
+        }, name
+
+
+# Implements TC-COMP-386
+def test_value_and_growth_inputs_do_not_depend_on_corporate_actions_coverage(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """DAC-E2-S10-6, design 2.4 ("Value and growth read no corporate action"): a covered and
+    an uncovered stock with the same bars and statements have the same value and growth
+    inputs, all present; only the uncovered stock's momentum is missing."""
+    bare = add_instrument(env.conn, "BARE", corporate_actions_covered=False)
+    quarter = {
+        "book_equity": Decimal(500),
+        "shares_outstanding": Decimal(100),
+        "net_income": Decimal(10),
+        "diluted_eps": Decimal(1),
+        "revenue": Decimal(100),
+        "operating_cash_flow": Decimal(30),
+        "capital_expenditure": Decimal(-5),
+    }
+    for stock in (env.stock, bare):
+        add_close_series(env.conn, stock, STANDARD)
+        add_quarters(env.conn, stock, date(2026, 9, 30), 8, [dict(quarter)] * 8)
+    install_test_line_items(monkeypatch)
+
+    build(env, monkeypatch)
+    covered_rows = inputs_for(env.conn, env.set_id, env.stock)
+    bare_rows = inputs_for(env.conn, env.set_id, bare)
+
+    for name in (*constants.INPUT_NAMES["value"], *constants.INPUT_NAMES["growth"]):
+        assert covered_rows[name]["status"] == "present", name
+        for key in ("status", "value", "as_of", "known_on", "restated_possible", "detail"):
+            assert bare_rows[name][key] == covered_rows[name][key], (name, key)
+    for name in MOMENTUM:
+        assert covered_rows[name]["status"] == "present", name
+        assert bare_rows[name]["status"] == "missing", name

@@ -2,30 +2,30 @@
 artifact_schema_version: 1
 artifact_id: CAP-002-component-design-factor-engine
 artifact_type: component-design
-artifact_version: 3
+artifact_version: 4
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-16
-updated: 2026-11-06
+updated: 2026-11-07
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.0"
   model: claude-opus-5-5
   tool: Claude Code
   tool_version: "unknown"
-  timestamp: 2026-11-06T12:00:00Z
+  timestamp: 2026-11-07T23:20:00Z
   source_artifacts:
     - id: CAP-002
       version: "1"
     - id: CAP-002-system-design
-      version: "4"
+      version: "5"
     - id: CAP-002-specification-review
-      version: "2"
+      version: "7"
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "5"
+      version: "7"
     - id: CAP-001-component-design-market-data-store
       version: "9"
     - id: CAP-001-component-design-massive-client
@@ -35,9 +35,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-11-07T02:40:00Z
-  reviewed_revision: sha256:40f4719fcedb7d73d0495e8d554d7bc2f947279588fd33f71e072d511362e582
-  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v5.md"
+  approved_at: 2026-11-07T22:54:55Z
+  reviewed_revision: sha256:8a4746d431a8e0abc2ca780d2b11f6e7efa43c5a7a718cf5834bb0704cb11e77
+  review_artifact: "docs/capabilities/CAP-002-universe-and-factor-classification/specifications-review-report-v8.md"
 ---
 
 # Component: Factor Engine
@@ -45,7 +45,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-002
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-11-06
+**Last Updated:** 2026-11-07
 
 This design was produced in an unattended `$design-run`. Choices no artifact
 fixes are recorded as decisions under `projects/factorflow-v2/decisions/`
@@ -108,6 +108,30 @@ FINDING-5), states DEC-0221's consecutive-quarter windows and DEC-0242's null
 `known_on` (FINDING-2), and carries the shares source into the statements
 rule, the input table, the constraints and the test plan (FINDING-6).
 
+**Version 4 (2026-11-07)** closes CAP-002 release blocker B3 (DEC-0397,
+owner). Version 3 joined `corporate_action` with an outer join, so a stock
+whose corporate actions were never acquired was scored as if it had never paid
+a dividend or split: on 2026-11-07, 31 of the 42 momentum-classified stocks had
+no corporate-action rows because the provider rate-limited that data type, and
+all 31 were scored. That breaks AC-7 (exactly the defined inputs) and AC-12
+(no score unless every input is present). A momentum input now requires the
+instrument's `corporate_actions` coverage to contain its window, and is
+`missing` with `detail.cause = "corporate_actions_not_covered"` otherwise
+(Section 2.4). The coverage it relies on is CAP-001's released behaviour, which
+DEC-0398 (owner) adopts as the contract. On specification review v6 the
+revision also states the momentum causes' data types (FINDING-44), the cause
+order as the owner's (FINDING-41), why coverage does not enter `known_on`
+(FINDING-43), the upgrade from version 3 (FINDING-40), the boundary and order
+tests (FINDING-42), and DEC-0295's JSON-null `preferred_stock` (FINDING-3). On
+review v7 it identifies a pre-version-4 set by its rows rather than its date
+(FINDING-47), drops the first-release Upgrade bullets (FINDING-48 and
+FINDING-49), lists the new `detail` key with the others (FINDING-50), adds a
+test pinning the coverage contract (FINDING-51) and cites DEC-0295 for the
+shares source (FINDING-4). The
+change touches Sections 1, 2.2, 2.3, 2.4, 3, 6, 7, 8, 11, 12 and 13. System
+design v5 carries the same rule into constraint 8, Section 3.1 step 8a, the
+`Observation read` interface and Section 6 assumption 2.
+
 ## 1. Overview
 
 The factor engine builds one classification set for one qualifying acquisition
@@ -147,7 +171,7 @@ a time, against PostgreSQL 16 on the host-local channel.
 
 Dependencies: `research-store` migration `0006`; `market-data-store` tables
 `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action`,
-`acquisition_state` (migrations `0001` to `0003`); `psycopg` 3; the
+`coverage_segment`, `acquisition_state` (migrations `0001` to `0003`); `psycopg` 3; the
 `classification-scheduler` settings model for the build timeout; the owner's
 answer to the payload-key question for the value and growth inputs (section
 14).
@@ -223,6 +247,7 @@ flowchart TB
         DB[("daily_bar")]
         FO[("fundamental_observation")]
         CA[("corporate_action")]
+        CV[("coverage_segment")]
         AS[("acquisition_state")]
     end
     subgraph RS["research-store"]
@@ -236,6 +261,7 @@ flowchart TB
     C1 --> FO
     M --> DB
     M --> CA
+    M --> CV
     I -.->|missing detail| AS
     I --> FI
     P --> CSF
@@ -291,7 +317,8 @@ def build(conn: psycopg.Connection, set_id: UUID, timeout_seconds: float) -> Bui
    as_of, known_on, restated_possible, detail)`, section 2.4.
 5. `insert_inputs.sql`: `INSERT INTO factor_input SELECT ... FROM inputs`,
    enriching a `missing` input's `detail` with the instrument's latest
-   `acquisition_state` outcome for the data type concerned, so the evidence
+   `acquisition_state` outcome for the data type concerned (for a momentum
+   input, the data type section 2.4 names for each cause), so the evidence
    screen can say *the last acquisition of fundamentals for AAPL ended
    not_found* (AC-12, flow 5 step 5).
 6. `peer_sets.sql`: per factor, `qualified_count` = instruments with every
@@ -358,7 +385,7 @@ class LineItem:
     payload_key: str      # the Massive statement field, owner input
     sign: int             # +1, or -1 when the provider reports an outflow negative
     magnitude: bool = False       # read |value|: the field's sign carries no meaning
-    less_key: str | None = None   # a field of the same statement subtracted, absent read as 0
+    less_key: str | None = None   # a field of the same statement subtracted, absent or JSON null read as 0
 
 LINE_ITEMS: dict[str, LineItem] = {
     "book_equity":        LineItem("book equity", "balance_sheet", "total_equity_attributable_to_parent", 1,
@@ -395,15 +422,17 @@ magnitude:** Massive reports purchases of property, plant and equipment as
 cash flow minus that magnitude whatever sign a record carries. **Book equity is
 common equity:** `total_equity_attributable_to_parent` excludes noncontrolling
 interests but includes preferred stock, so `preferred_stock` from the same
-balance sheet is subtracted, and an absent `preferred_stock` reads as zero
-because most issuers have none. A present `preferred_stock` that is not a plain
-number makes book equity absent, as any unreadable field does.
+balance sheet is subtracted, and a `preferred_stock` that is absent or JSON
+null reads as zero because most issuers have none; any other value that is not
+a plain number makes book equity absent, as any unreadable field does
+(DEC-0295).
 
 **The eight inputs.** `MC` is market capitalisation, `close(L) ×
 shares_outstanding(P1)`, where P1 is the most recent quarterly **income
 statement** and `shares_outstanding` is its diluted weighted average, read from
 that one statement and never summed (DEC-0055 (6) as revised by the owner on
-2026-11-06: Massive's balance sheet carries no shares count).
+2026-11-06 and recorded in DEC-0295: Massive's balance sheet carries no shares
+count).
 
 | Input | Factor | Formula | Statements | Price | `not_computable` when |
 |-------|--------|---------|------------|-------|-----------------------|
@@ -430,13 +459,72 @@ its own `price_not_positive` cause (DEC-0241) is open with the owner;
 (DEC-0056). `detail` records, for a fundamental input, each period end used
 with its `observed_on`, `provider_filing_date` and `backfilled` flag plus the
 market-capitalisation components; for a momentum input, `E`, `S_k`, the two
-closes, and every split and dividend applied.
+closes, every split and dividend applied, and the `corporate_actions` coverage
+segment that contains the window (`corporate_actions_covered_by`).
 
 **Momentum** (DEC-0055 (3), (4)). Per stock, `E` is the latest
 `session_date <= D - MOMENTUM_LAG_MONTHS months` among its bars, and `S_k` is
 the latest `session_date <= E - k months` for k in 3, 6, 12. A stock with no
 bar on or before a boundary has that input `missing` with `detail.boundary`
-naming it. The total return over `(S_k, E]`:
+naming it.
+
+**Corporate-actions coverage** (DEC-0397, DEC-0398, owner 2026-11-07). An
+absent `corporate_action` row means "no split or dividend" only where corporate
+actions were acquired. The contract is CAP-001's released behaviour, which
+DEC-0398 adopts in place of CAP-001's design prose (DEC-0049): for every
+successful corporate-actions fetch, one that returned no action included, the
+acquisition runner passes the range it requested, the history-depth start to
+the run date, as the covered range (`src/factorflow/ingestion/runner.py`, the
+`ParsedObservations` it builds), and the writer records it as a
+`coverage_segment` with `data_type = 'corporate_actions'`; a fetch that ends
+`failed` or `not_found` records none. Segments of one instrument and data type
+never overlap and abutting ones are merged, so a window is covered when one
+segment contains it. On the momentum statement's window relation (`win` in
+`momentum_inputs.sql`, one row per stock and window k, whose `s_session` is
+S_k and `e_session` is E; the sketch below calls them `window_start` and
+`window_end`), a momentum input `return_k` uses its window's actions only when
+
+```sql
+EXISTS (SELECT 1 FROM coverage_segment cs
+         WHERE cs.instrument_id = win.instrument_id
+           AND cs.data_type = 'corporate_actions'
+           AND cs.covered_from <= win.s_session + 1   -- the window opens the day after S_k
+           AND cs.covered_to   >= win.e_session)      -- and closes on E
+```
+
+Both bounds are inclusive: a segment from S_k + 1 to E exactly covers the
+window. Otherwise the input is `missing` with `detail.cause =
+"corporate_actions_not_covered"`, `detail.window_months`, `detail.E` and
+`detail.S` (the two bars, as for the other causes) and
+`detail.corporate_actions_coverage`, the instrument's `corporate_actions`
+segments as `{covered_from, covered_to}` ordered by `covered_from`, `[]` when
+there is none. Its value and `known_on` are null (DEC-0242). A `present` or
+`outdated` momentum input records the segment that contains its window as
+`detail.corporate_actions_covered_by`, `{covered_from, covered_to}`.
+
+The data type a missing momentum input's `last_acquisition` names (design 2.3
+step 5) is, per cause (DEC-0243 as extended by DEC-0397): `prices` for a
+missing boundary and for `price_not_positive`; `corporate_actions` for
+`corporate_actions_not_covered` and for `corporate_action_payload_unusable`.
+So the evidence can say the last download of corporate actions ended `failed`.
+
+The order among a momentum input's `missing` causes is the owner's
+(DEC-0397): a missing boundary, then `corporate_actions_not_covered`, then
+`price_not_positive`, then `corporate_action_payload_unusable` (DEC-0241 (2)
+orders the last two). A missing boundary comes first because without `E` and
+`S_k` there is no window to cover. A window without coverage is named
+`corporate_actions_not_covered` even when its `E` or `S_k` close is not
+positive. Value and growth read no corporate action and are unaffected.
+
+Coverage does not enter `known_on`. `coverage_segment` carries no date, so a
+momentum input's `known_on` stays the latest `observed_on` of the bars and
+actions it used (DEC-0055 (7)). Where a window's bars were acquired before its
+corporate actions, that date can precede the download that made the window
+computable; the containing segment in `detail` shows the basis, and the set is
+dated by its `classification_date` (AC-19). A dated basis would need a record
+CAP-001 does not keep.
+
+The total return over `(S_k, E]`:
 
 ```sql
 -- src/factorflow/classification/sql/momentum_inputs.sql (one window; k is a parameter)
@@ -603,7 +691,7 @@ reports through the set row and its return value.
   dispersion contributes zero; nothing else.
 - **Inputs are DEC-0055's**, exactly: quarterly TTM sums, prior-year
   comparison, most recent balance sheet, shares from the most recent
-  income statement (owner 2026-11-06), read-time split and dividend
+  income statement (owner 2026-11-06, DEC-0295), read-time split and dividend
   adjustment of unadjusted bars (DEC-0001), per-stock window boundaries,
   latest-trading-day price currency, latest `observed_on` as `known_on`.
 - **The backfill rule is DEC-0056's**: `provider_filing_date` earlier than the
@@ -633,6 +721,15 @@ reports through the set row and its return value.
 - **Assumption (system design 6.4):** dividend payloads carry `cash_amount`
   and split payloads `split_from` and `split_to`, as the `CorporateAction`
   model records.
+- **Contract (CAP-001's released coverage, DEC-0398):** a `corporate_actions`
+  coverage segment is written only for a successful fetch, an empty result
+  included, and its range is the range the acquisition runner requested
+  (`src/factorflow/ingestion/runner.py`; the writer records the range it is
+  given). Coverage is therefore the record that a window's corporate actions
+  are known, and an absent `corporate_action` row inside covered dates means
+  none occurred (DEC-0397). CAP-001's design prose reads coverage as the range
+  written (DEC-0049); DEC-0398 adopts the released behaviour instead, and a
+  change to it in CAP-001 would be a change to this contract.
 - **Assumption:** `fiscal_period = 'FY'` marks an annual statement and every
   other value a quarter, as `observation-writer` derives it (owner decision
   2026-09-20).
@@ -696,20 +793,38 @@ reports through the set row and its return value.
 
 ## 6. Upgrade
 
-- **No previous release** of this component.
+- **Previous release:** version 3, in production as `factorflow` 0.2.0.
+  Version 4 (CAP-002-E2-S10) changes only what `momentum_inputs.sql` computes.
 - **Data migration: none.** It reads delivered tables and writes `0006`'s.
-- **Behaviour change after upgrade.** Classification sets appear after the
-  first qualifying run following deployment. A set built before the owner
-  supplies the payload keys shows value and growth as not classified with the
-  cause named; sets built afterwards classify them. Earlier sets are not
-  rebuilt, by C5; the next qualifying run produces the first classified set.
-- **Manual actions required.** The owner's answer to section 14 question 1,
-  recorded in `line_items.py` by the implementing story.
-- **Rollback (OPS-MIG-003).** Reverting the image stops builds; the store
-  rollback is `runtime-config` section 2.8.4's. A set built by a newer engine
-  and left in the store after an image rollback is still readable by the
-  older reader, because the row shapes are `0006`'s and do not change within
-  this capability.
+- **Behaviour change in version 4 (DEC-0397).** From the first set built after
+  the upgrade, every momentum window without corporate-actions coverage is
+  `missing`, `corporate_actions_not_covered`, and its stock is not classified
+  on momentum with the input named. At DEC-0397's figures (31 of 42
+  momentum-classified stocks without corporate actions on 2026-11-07) at most
+  11 stocks stay qualified, fewer than 30, so momentum is unranked for every
+  stock (AC-14), and the summary's current-stock count falls, until a download
+  acquires corporate actions for enough stocks. That is the intended fail-safe
+  of AC-12.
+- **Sets built before version 4** stay as recorded and are not marked (C5,
+  AC-18): their momentum ignored whether corporate actions were acquired. They
+  are told apart by their rows, not their dates: every `present` or `outdated`
+  momentum `factor_input` row version 4 writes carries
+  `detail.corporate_actions_covered_by`, and no version 3 row does. A set with
+  such a momentum row and without that key was built by version 3, including a
+  set built after a rollback to 0.2.0. A set none of whose momentum rows is
+  `present` or `outdated` scored nobody on momentum, so the distinction does
+  not matter for it. The M4 backtest can apply this test without any row
+  changing.
+- **Manual actions required.** None for the upgrade itself. Momentum
+  classifies a stock again once a download acquires its corporate actions,
+  which needs the provider to accept corporate-actions requests at the
+  configured rate; the next qualifying run then builds a set that classifies
+  the covered stocks.
+- **Rollback (OPS-MIG-003).** Reverting the image to 0.2.0 restores version
+  3's momentum, which ignores coverage. Sets built by version 4 stay readable
+  by the older reader, because the row shapes are `0006`'s and do not change
+  within this capability; the store rollback is `runtime-config` section
+  2.8.4's.
 - **Forward compatibility (AGT-SCOPE-005).** Backtesting at M4 replays sets by
   `classification_date`; every row this engine writes carries the set it
   belongs to and the dates it was computed from, so a later capability reads
@@ -736,11 +851,15 @@ them to the engine, so the tests do not wait on the owner's answer.
 | Market capitalisation | `tests/integration/test_engine_inputs_fundamentals.py` | `close(L) × shares_outstanding(P1)` in `detail`, P1 the latest quarterly income statement; non-positive shares: value inputs `not_computable` |
 | Shares are never summed | `tests/integration/test_engine_inputs_fundamentals.py` | With four income statements of 100 shares each, MC uses 100, not 400, for all three value inputs; a stock with balance sheets and cash-flow statements but no income statement has `book_to_price` and `fcf_yield` `missing` |
 | Capital expenditure by magnitude | `tests/integration/test_engine_inputs_fundamentals.py` | A purchase reported as −X and one reported as +X give the same `fcf_yield`, OCF − X |
-| Book equity less preferred | `tests/integration/test_engine_inputs_fundamentals.py` | Parent equity 1000 with `preferred_stock` 200 gives book equity 800; `preferred_stock` absent gives 1000 |
+| Book equity less preferred | `tests/integration/test_engine_inputs_fundamentals.py` | Parent equity 1000 with `preferred_stock` 200 gives book equity 800; `preferred_stock` absent or JSON null gives 1000; a non-numeric string makes `book_to_price` `missing` (DEC-0295) |
 | Consecutive windows | `tests/integration/test_engine_inputs_fundamentals.py` | A gap of more than 4 months between adjacent quarter ends makes the dependent input `missing`; 52-week quarter ends are consecutive (DEC-0221) |
 | Momentum boundaries per stock | `tests/integration/test_engine_inputs_momentum.py` | E is the latest bar on or before D minus one month; S_k the latest on or before E minus k months; a stock lacking a bar before S_12 has `return_12m` missing and the others present |
 | Split adjustment | `tests/integration/test_engine_inputs_momentum.py` | A 2-for-1 split inside the window halves pre-split prices; the return equals the unsplit series' return (DEC-0001, DEC-0055 (4)) |
 | Dividend compounding | `tests/integration/test_engine_inputs_momentum.py` | One dividend of 1 against a prior close of 100 multiplies the return factor by 1.01 |
+| Corporate actions not covered | `tests/integration/test_engine_inputs_momentum.py` | A stock with every bar but no `corporate_actions` coverage has all three momentum inputs `missing`, `detail.cause = corporate_actions_not_covered`, `detail.corporate_actions_coverage = []`, `known_on` null and `last_acquisition.data_type = corporate_actions`, and is `not_classified` on momentum naming the input; coverage that starts after `S_k + 1` or ends before `E` makes only the windows it does not contain `missing`, and `detail.corporate_actions_coverage` lists that segment; coverage from exactly `S_k + 1` to exactly `E` leaves the input `present`; coverage containing the window with no action rows leaves the input `present`, its return the price return, with `detail.corporate_actions_covered_by` naming the segment (AC-7, AC-12, DEC-0397) |
+| Covered by on an outdated input | `tests/integration/test_engine_inputs_momentum.py` | A covered stock whose latest bar precedes the latest trading day has all three momentum inputs `outdated`, each with `detail.corporate_actions_covered_by` naming the segment (DEC-0397) |
+| Coverage contract pinned | `tests/integration/test_runner_acquires.py` | A successful corporate-actions fetch returning no action records one `corporate_actions` segment over the range requested; a failed fetch records none and leaves an existing segment unchanged (DEC-0398) |
+| Order of momentum causes | `tests/integration/test_engine_inputs_momentum.py` | No `S_k` bar and no coverage: the boundary is named, `last_acquisition.data_type = prices`; no coverage and an unusable payload in the window: `corporate_actions_not_covered`; no coverage and a non-positive `E` close: `corporate_actions_not_covered` (DEC-0397, DEC-0243) |
 | Known-on is the latest observation | `tests/integration/test_engine_inputs_momentum.py` | `known_on` equals the max `observed_on` over bars and actions used (AC-17); null on a `missing` input (DEC-0242) |
 | Composite arithmetic | `tests/unit/test_composite_arithmetic.py` | On a hand-built peer set, z-scores, equal-weight mean, re-standardisation to mean 0 and sd 1, `percent_rank × 100` in 0 to 100; zero-dispersion input contributes 0 (AC-9, DEC-0053); `hypothesis` over random peer sets |
 | One peer set | `tests/integration/test_engine_peer_set.py` | Scores for a stock are identical whether or not it belongs to any universe; universes are never read (AC-8) |
@@ -787,6 +906,11 @@ them to the engine, so the tests do not wait on the owner's answer.
 13. Failure scenario: a payload key is unresolved; the dependent inputs are
     `missing` with the cause named, the set completes, and momentum is
     classified.
+14. Failure scenario: a stock's corporate actions were not acquired over a
+    momentum window; that input is `missing` with cause
+    `corporate_actions_not_covered`, the stock is not classified on momentum
+    with the input named, and no score or percentile is written for it
+    (DEC-0397).
 
 ## 9. Workflows
 
@@ -822,7 +946,7 @@ of system design section 4.2 and consumes the SQL interfaces of
 | Endpoint | Method/Operation | Auth/Privilege | Request | Response | Notes |
 |----------|-----------------|----------------|---------|----------|-------|
 | `build` | Python call, synchronous | in-process | `conn`, `set_id`, `timeout_seconds` | `BuildResult` with terminal state | consumer `classification-scheduler`; never raises for a build failure |
-| Observation read | SQL `SELECT` | database credential | set context | rows of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action`, `acquisition_state` | read-only, never UPDATE or DELETE |
+| Observation read | SQL `SELECT` | database credential | set context | rows of `instrument`, `daily_bar`, `fundamental_observation`, `corporate_action`, `coverage_segment`, `acquisition_state` | read-only, never UPDATE or DELETE |
 | Classification append | SQL `INSERT ... SELECT` | database credential | temp tables | rows in `classification_set_factor`, `factor_input`, `factor_classification` | **critical, C5** |
 | Set state transition | SQL `UPDATE classification_set ... WHERE state = 'building'` | database credential | terminal state and sizing | rowcount 1 | the only UPDATE |
 
@@ -831,24 +955,25 @@ of system design section 4.2 and consumes the SQL interfaces of
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
 | Capability | CAP-002 v1 | Section 2 factor definitions; AC-7 to AC-15, AC-17, AC-19, AC-23; section 6 assumptions | `docs/capabilities/CAP-002-universe-and-factor-classification/Capability-CAP-002.md` |
-| System design | CAP-002 system design v4 | Section 3.1 steps 8 to 14b, 22 to 31; constraints 2, 4 to 10; section 6; section 8 questions 1, 6, 7, 9 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
+| System design | CAP-002 system design v5 | Section 3.1 steps 8 to 14b, 22 to 31; constraints 2, 4 to 10; section 6; section 8 questions 1, 6, 7, 9 | `docs/capabilities/CAP-002-universe-and-factor-classification/design/system-design.md` |
 | Component design | CAP-001 market data store v9 | Table shapes, sizing basis, append-only enforcement | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-market-data-store.md` |
 | Component design | CAP-001 massive client | Section 2.5 statement and corporate-action fields; line items not enumerated | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-massive-client.md` |
 | Component design | CAP-002 research store v2 | Migration `0006` | `docs/capabilities/CAP-002-universe-and-factor-classification/design/component-design-research-store.md` |
-| Implemented code | `src/factorflow/ingestion/writer.py`, `src/factorflow/ingestion/massive/models.py` | `fiscal_period` derivation; payload shapes for statements and actions | `src/factorflow/ingestion/` |
+| Implemented code | `src/factorflow/ingestion/writer.py`, `src/factorflow/ingestion/massive/models.py` | `fiscal_period` derivation; payload shapes for statements and actions |
+| Implemented code | `src/factorflow/ingestion/runner.py` | The covered range of a successful fetch is the range requested, an empty result included; a failed or `not_found` fetch records no coverage (DEC-0398) | `src/factorflow/ingestion/` |
 | Implemented schema | Migrations `0001` to `0003` | Columns read | `src/factorflow/db/migrations/` |
-| Decision records | DEC-0001, DEC-0052, DEC-0053, DEC-0055, DEC-0056, DEC-0066, DEC-0067, DEC-0116, DEC-0221, DEC-0241, DEC-0242 | Unadjusted bars; SQL arithmetic; composite; inputs; backfill; engine mechanics; timeout; input status and `as_of`; consecutive windows; non-positive price (open); `known_on` of a missing input | `projects/factorflow-v2/decisions/` (harness repository) |
+| Decision records | DEC-0001, DEC-0052, DEC-0053, DEC-0055, DEC-0056, DEC-0066, DEC-0067, DEC-0116, DEC-0221, DEC-0241, DEC-0242, DEC-0243, DEC-0295, DEC-0397, DEC-0398 | Unadjusted bars; SQL arithmetic; composite; inputs; backfill; engine mechanics; timeout; input status and `as_of`; consecutive windows; non-positive price (open); `known_on` of a missing input; data type of a missing momentum input; payload keys and null preferred stock; corporate-actions coverage of a momentum window; CAP-001's released coverage as the contract | `projects/factorflow-v2/decisions/` (harness repository) |
 
 ## 13. Traceability
 
 | Capability AC | System Design Element | Component Design Element | Section |
 |--------------|----------------------|--------------------------|---------|
-| AC-7 | Constraints 7, 8; `factor_input` per named input | The eight inputs table; `value_inputs.sql`, `growth_inputs.sql`, `momentum_inputs.sql`; `classify.sql` | 2.4, 2.5 |
+| AC-7 | Constraints 7, 8; `factor_input` per named input | The eight inputs table; `value_inputs.sql`, `growth_inputs.sql`, `momentum_inputs.sql` with corporate-actions coverage of each window; `classify.sql` | 2.4, 2.5 |
 | AC-8 | Constraint 5, peer set is the active roster | `peer` CTE over `active_roster`; universes never read | 2.5 |
 | AC-9 | Constraint 7, `percent_rank() × 100` | `scored` CTE and the classified `INSERT` | 2.5 |
 | AC-10 | Scheduler qualifying-run read | `build` runs only for a set the scheduler created | 2.3 |
 | AC-11 | Steps 28 to 31; volume test | Sizing, `statement_timeout`, `test_engine_volume.py` | 5, 7 |
-| AC-12 | Constraint 6; `not_classified` with reason and input | Peer set requires every input `present`; reason from the first non-present input | 2.5 |
+| AC-12 | Constraint 6, 8; `not_classified` with reason and input | Peer set requires every input `present`; reason from the first non-present input; a momentum window without corporate-actions coverage is `missing`, `corporate_actions_not_covered` | 2.4, 2.5 |
 | AC-13 | Constraint 6; 6-month and latest-trading-day rules | Currency rules; `FUNDAMENTALS_STALE_AFTER_MONTHS`; `latest_trading_day` | 2.4 |
 | AC-14 | `qualified_count`, `ranked`; `not_enough_stocks` | `peer_sets.sql`; `MIN_PEER_SET_SIZE`; unranked rows with the count | 2.3, 2.5 |
 | AC-15 | Constraint 5, retired excluded | Retired roster gets `retired` rows and no inputs | 2.5 |
