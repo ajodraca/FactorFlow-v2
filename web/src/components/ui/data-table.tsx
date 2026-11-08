@@ -202,8 +202,9 @@ function RowImpl<TRow>({
  * TanStack recreates `Row` objects on every new `data`, so the comparison is
  * by the record's identity, which an appended keyset page leaves unchanged.
  * Callers keep `columns` and loaded records referentially stable, or earlier
- * rows re-render on every page; `renderExpansion` and `getRowLabel` are read
- * when a row renders, so a row shows the closures it last rendered with.
+ * rows re-render on every page. An open row also follows `renderExpansion` and
+ * `getRowLabel`, so detail the caller loads into its own state reaches it
+ * (DEC-0307); a collapsed row reads them when it opens and stays memoised.
  */
 const DataTableRow = memo(
   RowImpl,
@@ -212,7 +213,10 @@ const DataTableRow = memo(
     a.expanded === b.expanded &&
     a.index === b.index &&
     a.columns === b.columns &&
-    a.rowHeader === b.rowHeader,
+    a.rowHeader === b.rowHeader &&
+    (!a.expanded ||
+      (a.expansion?.renderExpansion === b.expansion?.renderExpansion &&
+        a.expansion?.getRowLabel === b.expansion?.getRowLabel)),
 ) as typeof RowImpl;
 
 /**
