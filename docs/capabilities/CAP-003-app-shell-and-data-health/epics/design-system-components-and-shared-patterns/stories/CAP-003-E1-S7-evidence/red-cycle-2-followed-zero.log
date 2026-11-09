@@ -1,0 +1,42 @@
+RED for cycle-2 (review v1 IR-001): the production code already behaves so, so the observed failure is the non-equivalent survivor re-applied to worst-data-tier.ts; each fails the new followedCount 0 rows.
+=== baseline-w0.log
+      Tests  124 passed | 1 skipped (125)
+=== baseline-w1.log
+      Tests  124 passed | 1 skipped (125)
+=== baseline-w2.log
+      Tests  124 passed | 1 skipped (125)
+=== web_src_components_patterns_worst-data-tier.ts_manual_critical-to-gt.log
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 13ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 9ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 1ms
+     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
+AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+     43|       ).toEqual(expected);
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
+=== web_src_components_patterns_worst-data-tier.ts_manual_followed-zero-to-warning.log
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 4ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
+AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+     43|       ).toEqual(expected);
+      Tests  2 failed | 122 passed | 1 skipped (125)
+=== web_src_components_patterns_worst-data-tier.ts_manual_reviewer-followed-gt-zero.log
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 5ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
+AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+     43|       ).toEqual(expected);
+      Tests  2 failed | 122 passed | 1 skipped (125)

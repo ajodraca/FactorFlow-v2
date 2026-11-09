@@ -31,6 +31,9 @@ describe("worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4)", () => {
     [1, 1, { tier: "critical", word: "No", downloadClause: null }],
     [11, 10, { tier: "critical", word: "No", downloadClause: null }],
     [0, 0, { tier: "good", word: "Yes", downloadClause: null }],
+    // DEC-0312: an inconsistent read (affected with nobody followed) is critical, never better than the data.
+    [1, 0, { tier: "critical", word: "No", downloadClause: null }],
+    [5, 0, { tier: "critical", word: "No", downloadClause: null }],
   ];
   it.each(problemRows)(
     "succeeded download, affected %i of %i",

@@ -1,6 +1,7 @@
 # TDD evidence for CAP-003-E1-S7 - worstDataTier and dataTileBadge: the One Data Verdict.
 # One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged the cycle's patch.
 # Deviation from the plan: one cycle, not three. The tier order, the verdict and the tile badge are one 90-line module and one test file, written and staged together, so one patch, one pair of reviews and one mutation run cover all three planned cycles.
+# Cycle-2 is the review v1 rework (IR-001..IR-003); the one-cycle merge above is a deviation from T009's three cycles, accepted by review v1.
 # Mutation (cycle-1): 13 generated mutants plus 14 hand-written ones (the plan's five and one per guard, branch and field). 23 killed; 4 survivors, all equivalent (below).
 
 cycles:
@@ -48,3 +49,31 @@ cycles:
           disposition: equivalent
           reason: >
             the same tie as the line 65 mutant: the replaced tier equals the original, so the answer is identical
+  - id: cycle-2
+    tasks: [T002, T009]
+    description: >
+      Review v1 rework (IR-001, IR-002, IR-003). Test only; the production code already behaves so. IR-001: worst-data-tier.test.ts adds two TC-COMP-026 rows, affectedCount 1 and 5 with followedCount 0 and a succeeded download, which DEC-0312 fixes as critical No; the reviewer's non-equivalent survivor (affectedCount >= followedCount && followedCount > 0) now fails them. IR-002: this commit carries Decision-Id trailers for DEC-0311 and DEC-0312. IR-003: the baseline at the review base is measured as 99 files and 2509 tests (this story's file adds 52 tests, 54 with the two new rows; the suite is now 100 files, 2563 tests, 1 skipped), the cycle-1 one-cycle merge of the plan's three cycles is a deviation recorded against T009 here and in the header, and the planted second TIER_ORDER check is kept as planted-order-check.log (planted-order.ts, exit 1, 2 failed, then deleted).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-2-followed-zero.log
+    red_log_sha256: dcbe772ba137923fbe10fc40cd711da3da3b908f07145158baba2a4a0ace7e25
+    red_evidence: >
+      The production code already returns critical No for followedCount 0, so no test can fail against it. The review's non-equivalent survivor, re-applied to worst-data-tier.ts, fails both new rows (affected 1 of 0 and 5 of 0), as do followed-zero-to-warning (followedCount !== 0) and critical-to-gt (>); the log lists each mutant and its failing tests.
+    green_evidence: >
+      Against the unmutated code worst-data-tier.test.ts passes (53 tests, 1 skipped); npm run test (100 files, 2562 passed, 1 skipped, with --testTimeout=60000: two unrelated volume tests, coverage-table and run-detail, time out at the default under a load average above 900), npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d49c6eca51c6e35c595603bcea9bba8340419ee3b65a5aaf45cd9f7d175e3077
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results.json
+      results_sha256: 5e8ba0f526ca12db53aa0460da4ea042642dd6c0a28154730f634212d59a288b
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
