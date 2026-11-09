@@ -67,8 +67,12 @@ permit waits once the bucket is drawn down, so it cannot retry forever.
 composer writes for it is described in
 [Massive provider failure reasons](../../README.md#massive-provider-failure-reasons).
 
-Nothing in this release calls `start_throttle_budget()` yet, so a governor's
-budget starts at its construction and is spent across its whole life.
+`MassiveClient.start_instrument()` (CAP-003-E8-S3) is the only production
+caller of `start_throttle_budget()`, and no production code calls `start_instrument()`
+yet, so a governor's budget starts at its construction and is spent across its
+whole life. A Massive `429` reaches this path as `THROTTLED` through the
+client's classifier, described in
+[Massive historical client](massive-client.md#classifying-a-failed-request).
 
 ## Throttle wait timing
 

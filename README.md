@@ -140,7 +140,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `RunNotActive` (raised when the run's `acquisition_run` row is not in an active state at the start of a write — prevents a post-reclaim runner from appending data), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction after locking and verifying the run is active), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
 | `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
 | `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. See [`docs/reference/ingestion-outcomes.md`](docs/reference/ingestion-outcomes.md) |
-| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, `ProviderContractViolation`, and `ProviderNotEntitled` from the Massive SDK's single, status-code-discarding exception, defines `ProviderRateLimited`, the `ProviderUnavailable` the rate-limit governor raises when a throttle wait budget is spent, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, `ProviderContractViolation`, and `ProviderNotEntitled` from the Massive SDK's single, status-code-discarding exception, defines `ProviderRateLimited`, the `ProviderUnavailable` the rate-limit governor raises when a throttle wait budget is spent, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client and `start_instrument()`, which starts the governor's per-stock throttle wait budget, with every request routed through `RateLimitGovernor` and classified by `classify_for_governor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [`docs/reference/massive-client.md`](docs/reference/massive-client.md), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. `main()` takes two keyword-only parameters, `settings_factory` (default `Settings`) and `credential_reader` (default `read_provider_credential`, called at every claim). They exist only for the test-only entry point `tests/e2e/support/ingestion_e2e_main.py` and are not configuration; the release launch passes neither. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
@@ -174,7 +174,7 @@ variable** — never its value.
 | `FACTORFLOW_API_HOST` | no | `127.0.0.1` | Loopback only; a non-loopback address is rejected at start |
 | `FACTORFLOW_API_PORT` | no | `8000` | 1–65535. Also fixes the `Host` and `Origin` values the API accepts, read once when the application is built. See [Host and Origin checks](#host-and-origin-checks) |
 | `FACTORFLOW_MASSIVE_API_KEY` | yes | — | Held as a secret. Supplied to both processes; the application reads only whether it is set |
-| `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | `https` only, with a host and nothing else: a query, fragment, userinfo, path, whitespace or control character, or a port outside 1–65535 is rejected at start, and so is `http`, loopback included. One trailing `/` is removed. The error names the variable and the broken rule, never the value. See [Massive historical client](#massive-historical-client) |
+| `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | `https` only, with a host and nothing else: a query, fragment, userinfo, path, whitespace or control character, or a port outside 1–65535 is rejected at start, and so is `http`, loopback included. One trailing `/` is removed. The error names the variable and the broken rule, never the value. See [`docs/reference/massive-client.md`](docs/reference/massive-client.md) |
 | `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` | yes | — | No default: the budget is the owner's provider plan and cannot be guessed |
 | `FACTORFLOW_MASSIVE_MAX_ATTEMPTS` | no | `3` | Minimum 1 |
 | `FACTORFLOW_MASSIVE_TIMEOUT_SECONDS` | no | `30` | Minimum 1 second |
@@ -501,86 +501,8 @@ current model behavior or blocks an acceptance criterion:
 
 ## Massive historical client
 
-`src/factorflow/ingestion/massive/client.py` provides the project-owned
-historical boundary over Massive's official REST SDK. `MassiveClient` exposes
-four product-named reads: `fetch_reference(symbol)`,
-`fetch_daily_bars(symbol, start, end)`, `fetch_financials(symbol, start, end)`,
-and `fetch_corporate_actions(symbol, start, end)`. Each returns the parsed
-models above rather than provider wire shapes.
-
-The client creates one reusable SDK client from `MassiveSettings`, explicitly
-disabling SDK retries, pagination, and request tracing. It passes the runtime
-credential to the SDK for header authentication; it does not put the credential
-in request URLs. It also passes the validated `FACTORFLOW_MASSIVE_BASE_URL` as
-the SDK's `base`, so every request of the four reads, followed `next_url` pages
-and the `vx` sub-client's IPO reads included, goes to that host
-(CAP-001-E3-S6). Every initial and followed page request passes through
-`RateLimitGovernor`, while `paging.follow_pages()` follows a present
-`next_url` one page at a time and raises if a later page fails rather than
-returning a partial range.
-
-Reference reads use Massive's single-ticker endpoint. Daily-bar requests use
-multiplier `1`, timespan `day`, inclusive ISO date bounds, and unadjusted bars.
-Financial statements are read from the three statement endpoints (balance
-sheets, income statements and cash-flow statements), each bounded by
-`period_end`. Massive's ratios endpoint is not called: CAP-001's fundamentals
-are the three statements, and ratios can be derived later from stored
-statements and bars (component design v13 section 2.5). Corporate actions
-combine splits, dividends, IPOs, and ticker-change events. Ticker events have
-no provider date-range parameter, so the client validates their rows and
-applies the requested inclusive range locally. The client never calls
-Massive's forward-looking market-status endpoint or ticker-list endpoint.
-
-An empty successful response is not an unknown instrument. `fetch_daily_bars`,
-`fetch_financials` and `fetch_corporate_actions` return an empty list when a
-recognised instrument has nothing in range, such as no corporate action, no
-filings or a range outside its trading life. Only `fetch_reference` raises
-`InstrumentNotFound` for an empty result, and any provider 404 still raises it
-on every read (decision record DEC-0047 in the ai-agents SDD harness).
-
-**Known limitation, carried forward as an accepted warning from
-implementation review v6** (`CAP-001-E3-S1-implementation-review-v6.md`,
-IR-001, low). The empty-result tests serve `results: []` only. An envelope
-with no `results` key is also handled as empty today (`paging.follow_pages`
-reads `envelope.get("results") or []`), but no test pins that form, so a
-refactor that indexed `envelope["results"]` directly would still pass.
-
-The credential never leaves for another host. With SDK retries at `0`, a
-redirect is refused rather than followed: the governor retries the request to
-the same host up to `max_attempts`, then raises `ProviderUnavailable`. Neither
-SDK connection pool uses a proxy, whatever the `HTTP_PROXY`, `HTTPS_PROXY` or
-`ALL_PROXY` environment says, and no construction path relaxes TLS
-verification (`cert_reqs="CERT_REQUIRED"` on both pools). The release build
-carries none of the test tree: the `Dockerfile` copies nothing under `tests/`,
-the wheel contains nothing under it, and nothing in `src/factorflow` imports
-from it. `tests/unit/test_massive_redirects.py`, `test_massive_tls.py` and
-`test_release_excludes_test_paths.py` prove each of these without opening a
-socket.
-
-**Known limitations, carried forward as accepted warnings from
-implementation review v1**
-(`CAP-001-E3-S6-implementation-review-v1.md`). All four are about how strong
-the tests are. None leaves an acceptance criterion unmet:
-
-- `test_trailing_slash_base_never_produces_a_double_slash` uses the default
-  host, so it would still pass if `base=` were removed. Other tests catch that
-  removal (IR-001).
-- `test_no_construction_path_passes_a_tls_override` does not install the
-  `forbid_sockets` guard. It patches `RESTClient` for the whole test, so no
-  pool exists today (IR-002).
-- The source scan for `http` acceptance flags string constants, comparisons
-  and collection literals. It would miss a `startswith("http")` or a `match`
-  case (IR-003).
-
-  It has exactly one exemption (CAP-001-E1-S7, DAC-E1-S7-6). The constants
-  `http://127.0.0.1:`, `http://localhost:` and `http://[::1]:` are accepted
-  only in `src/factorflow/api/app.py`, where they build the
-  [Origin allow-list](#host-and-origin-checks). That module is matched by its
-  path under `src/factorflow`, not by its file name. Any other `http://`
-  constant there, those three anywhere else, and every comparison with or
-  listing of `"http"` still fail the scan.
-- The `Dockerfile` check reads `COPY`/`ADD` line by line. It would miss a
-  continued line or the JSON array form (IR-004).
+`src/factorflow/ingestion/massive/client.py` is described in
+[`docs/reference/massive-client.md`](docs/reference/massive-client.md).
 
 ## Massive provider failure reasons
 
