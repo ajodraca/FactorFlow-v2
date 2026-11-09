@@ -22,6 +22,10 @@ CAP-003-E1-S5 added `tiers.ts`, the status-to-tier and status-to-label
 functions, and rebuilt `status-badge.tsx` on the `Badge` component and the six
 tiers.
 
+CAP-003-E1-S6 added `format.ts`, the America/Chicago formatters, and
+`presence.tsx`, the *absent* and *not determinable* renderings. No screen
+imports either yet; their only importers are their tests.
+
 CAP-002-E4-S7 added the two selection controls:
 
 - `selection-tray.tsx`, the tray under the results that counts the checked
@@ -230,6 +234,60 @@ hollow circle, active a ringed dot, good a filled circle, warning a filled
 triangle, serious a filled diamond, critical a filled square. `StatusTier` is
 kept as an alias of `Tier` for the CAP-002 callers (`as-of-line`,
 `set-history-dialog`, `history-tab`). Tests: `status-badge.test.tsx`.
+
+## The formatters (`format.ts`)
+
+`format.ts` is the one place the owner interface formats an instant, a
+session date or a count (CAP-003-E1-S6; AC-24; STD-UI-5; DEC-0309,
+provisional). It has no import. Every instant renders in `America/Chicago`
+with the zone as that instant falls (`CDT` or `CST`), built from
+`Intl.DateTimeFormat` parts in `en-US`; the viewer's machine zone is never read
+and no `toLocale*` call is made. The shell's `formatTimestamp` is unchanged.
+
+`Instant` is `Date | string`. A string must be an ISO-8601 instant that carries
+its zone, `Z` or an offset (`+hh:mm`, `-hh:mm`), with optional seconds and
+fraction; a bare local time is refused.
+
+| Function | Returns |
+|----------|---------|
+| `formatInstant(value, { seconds? })` | `2026-10-15 17:46 CDT`; with `{ seconds: true }`, `2026-10-15 17:52:10 CDT` |
+| `formatClock(value)` | `17:52:10 CDT`, for a *checked {time}* clause |
+| `formatSessionDate(value: string)` | the string as received, after a `^\d{4}-\d{2}-\d{2}$` check; it never passes through `Date`, so no zone can shift it |
+| `formatCount(n: number)` | a whole, non-negative safe integer with `,` thousands separators; `0` is a measured zero |
+| `formatDownloadName(startedAt, requestedAt)` | `Download {formatInstant(startedAt ?? requestedAt)}`: the start time, else the request time (capability OQ-1) |
+
+The formatter is built on each call, so the zone is always the one the module
+names. It uses `hourCycle: "h23"`, so midnight reads `00`, never `24`. The
+guards throw `RangeError`: `Not an ISO-8601 instant: <JSON>` for a string that
+is not an instant, or a `Date` that is invalid; `Not an ISO-8601 date: <JSON>`
+for `formatSessionDate`; `Not a count: <n>` for a negative, fractional,
+non-finite or unsafe number. Tests: `format.test.ts` (TC-COMP-023,
+TC-COMP-024, and the clock and guard cases), run under a non-Chicago `TZ` to
+show the machine zone is ignored.
+
+## The presence renderings (`presence.tsx`)
+
+`presence.tsx` draws the two states of a value that is not there (CAP-003-E1-S6;
+AC-24; STD-UI-4, STD-UI-14; DEC-0310, provisional). Present is the value
+itself. A blank means only "does not apply" and is not this module's.
+
+- `Absent({ label })` renders a value that does not exist: a `span` with
+  `text-value-missing` holding an `aria-hidden` em dash and an `sr-only` span
+  with `label`, the full phrase naming what is absent. It is never zero and
+  never blank.
+- `NotDeterminable({ reason, label = "Not determinable" })` renders a value
+  that cannot be known: an `inline-flex items-center gap-2` `span` holding a
+  `Badge` with variant `coverage-unknown` and the label, then the reason in a
+  `text-xs text-muted-foreground` `span`. The badge's `aria-describedby` is
+  that span's `useId()` id, so the reason is both visible beside the badge and
+  its accessible description. It is never a dimmed absent and never a passed
+  check.
+
+Neither takes a tab stop or a role. Tests: `presence.test.tsx` (TC-COMP-025).
+
+Open warnings from the story's implementation review v2: no test passes a
+fractional-second or minute-precision instant (IR-001); nothing pins that the
+visible reason stays in the accessibility tree and follows the badge (IR-002).
 
 ## The not-current banner (`not-current-banner.tsx`)
 
