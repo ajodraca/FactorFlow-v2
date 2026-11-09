@@ -112,9 +112,10 @@ no permit and sends no request (CAP-003-E8-S3; CAP-003
 spends the same throttle wait budget until the next call. One governor belongs
 to one client, built together in `ingestion_main._build_client_for_key`.
 
-No production code calls `start_instrument()` yet, so a client's throttle
-wait budget starts when its governor is constructed and is spent across the
-governor's whole life.
+The acquisition runner calls `start_instrument()` once per stock, after the
+stock's heartbeat and cancellation checks and before its symbol lookup
+(CAP-003-E8-S4), so each stock's reads spend a throttle wait budget of their
+own. See [Acquisition runner](acquisition-runner.md#stock-boundary).
 
 ## Known limitations
 

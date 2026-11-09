@@ -138,7 +138,7 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, throttle handling bounded by a throttle wait budget that `start_throttle_budget()` starts, and bounded retry backoff. See [`docs/reference/rate-limit-governor.md`](docs/reference/rate-limit-governor.md) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
 | `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `RunNotActive` (raised when the run's `acquisition_run` row is not in an active state at the start of a write — prevents a post-reclaim runner from appending data), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction after locking and verifying the run is active), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
-| `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
+| `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument and then starting that instrument's throttle wait budget through the client's `start_instrument()`; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [`docs/reference/acquisition-runner.md`](docs/reference/acquisition-runner.md) |
 | `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. See [`docs/reference/ingestion-outcomes.md`](docs/reference/ingestion-outcomes.md) |
 | `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, `ProviderContractViolation`, and `ProviderNotEntitled` from the Massive SDK's single, status-code-discarding exception, defines `ProviderRateLimited`, the `ProviderUnavailable` the rate-limit governor raises when a throttle wait budget is spent, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client and `start_instrument()`, which starts the governor's per-stock throttle wait budget, with every request routed through `RateLimitGovernor` and classified by `classify_for_governor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [`docs/reference/massive-client.md`](docs/reference/massive-client.md), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
@@ -1019,75 +1019,8 @@ current acceptance criterion:
 
 ## Acquisition runner
 
-`src/factorflow/ingestion/runner.py` turns a claimed run into observations,
-one instrument at a time. It is the process that finally calls the
-[observation writer](#observation-writer). It writes nothing directly — every
-insert or update belongs to `writer.py` on the success path and `outcomes.py`
-on the failure path — while reading an instrument's symbol and coverage
-segments through two parameterised queries of its own.
-
-`AcquisitionRunner.execute_claimed(run_id, depth_years, instrument_ids)`
-walks the roster it was handed — snapshotted once at claim time, so an
-instrument added mid-run belongs to the next one. Before anything else it
-records the roster's size on the run through the journal's
-`record_instruments_named`, because that is the count `finalise` compares
-written results against. A run whose claimed depth
-is `None` is finalised without a single provider call: no stated depth means
-there is no window to fetch.
-
-Before every instrument, in this order, it refreshes the heartbeat and then
-asks whether cancellation was requested. A lost claim stops the run
-immediately and writes nothing further — another runner now owns it. An
-observed cancellation finalises and stops. Both checks sit at the top of the
-loop rather than around the work, so the longest a cancelled run continues
-is one instrument.
-
-For each instrument it fetches the four data types individually through
-[`plan_fetches`](#range-planner), which is what keeps a re-run from
-re-fetching covered ground. Each data type is fetched in a separate
-try/except block. `CredentialRejected` is the one run-level error: every
-remaining instrument would fail the same way, so the runner records the whole
-run `failed` through the journal's `fail_run`, with the composed
-credential-safe reason as `failure_reason`, writes nothing for the instrument
-it was reading, and returns, so the ingestion process keeps polling
-(EXP-20261011-3). The reason is served as `failure_reason` by
-`GET /api/acquisition-runs` and `GET /api/acquisition-runs/{id}`; no screen
-shows it yet. `InstrumentNotFound`, `ProviderUnavailable`, and any other `MassiveError`
-are classified by `classify_provider_error` into a per-data-type
-`InstrumentOutcomeRecord` (`not_found` or `failed`). The reason is composed
-by `compose_failure_reason` and passed through the entrypoint's redaction
-callable before classification, so a credential in a provider message never
-reaches the database. After all four data types are attempted, the runner
-calls `write_instrument_with_outcomes()` in one transaction, passing the
-successfully fetched observations alongside the error outcomes for any
-data types that failed. This allows one instrument to record distinct
-outcomes per data type — for example `written` for prices and `not_found`
-for fundamentals. Provider failures affect the instrument, not the run;
-the next instrument starts immediately after.
-
-When the roster is exhausted the run is finalised from what was written.
-
-`CredentialAwareClientFactory` keeps one provider client and rebuilds it only
-when the credential's value changes, and the entrypoint re-reads the
-credential at each claim — so rotating the key takes effect on the next run
-without restarting the process.
-
-**Known limitations, carried forward as accepted warnings from implementation
-review v1** (`CAP-001-E4-S6-implementation-review-v1.md`) — none blocks a
-current acceptance criterion:
-
-- `test_rate_limit_does_not_produce_outcome_row` (TC-COMP-145) provides a
-  normal full-success stub client and asserts outcome strings are in the
-  allowed set; it does not inject a 429-equivalent at the fetch boundary to
-  prove the governor absorbs it before classification. A future change
-  introducing a rate-limit error type that bypasses the governor would not be
-  caught by this test (IR-001, medium).
-- `test_appended_rows_persist_written_outcome` (TC-COMP-183 integration) does
-  not assert `corporate_actions`; `test_unchanged_rows_persist_unchanged_outcome`
-  (TC-COMP-184 integration) asserts only `prices` and `fundamentals`. An
-  integration regression silently dropping one data type from
-  `run_instrument_result` insertion would not be caught by these integration
-  tests (IR-002, medium).
+`src/factorflow/ingestion/runner.py` is described in
+[`docs/reference/acquisition-runner.md`](docs/reference/acquisition-runner.md).
 
 ## Deploying and operating FactorFlow
 

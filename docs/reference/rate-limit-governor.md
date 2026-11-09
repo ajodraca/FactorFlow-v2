@@ -68,9 +68,11 @@ composer writes for it is described in
 [Massive provider failure reasons](../../README.md#massive-provider-failure-reasons).
 
 `MassiveClient.start_instrument()` (CAP-003-E8-S3) is the only production
-caller of `start_throttle_budget()`, and no production code calls `start_instrument()`
-yet, so a governor's budget starts at its construction and is spent across its
-whole life. A Massive `429` reaches this path as `THROTTLED` through the
+caller of `start_throttle_budget()`. The acquisition runner calls it once per
+stock, at the checkpoint where it refreshes that stock's heartbeat
+(CAP-003-E8-S4), so each stock's throttle waits are charged to a budget of
+their own (see
+[Acquisition runner](acquisition-runner.md#stock-boundary)). A Massive `429` reaches this path as `THROTTLED` through the
 client's classifier, described in
 [Massive historical client](massive-client.md#classifying-a-failed-request).
 
