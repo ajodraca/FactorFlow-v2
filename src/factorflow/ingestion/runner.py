@@ -213,6 +213,10 @@ class AcquisitionRunner:
                 finalise(self._connection, run_id)
                 return
 
+            # Start this stock's throttle wait budget at the same checkpoint the
+            # heartbeat was refreshed (CAP-003 system design §3.6 note 4).
+            self._client.start_instrument()
+
             # --- Fetch symbol ---
             try:
                 symbol = _symbol_for_id(self._connection, instrument_id)

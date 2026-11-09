@@ -1,0 +1,44 @@
+# Independent spec-drift subagent (general-purpose, agentId abbd6b57a01288c91), cycle-1, judged cycle-1.patch
+# (diff_sha256 7640e7c89e79e28d50a7063b77e85f838bb4b83aaab3f41ed2928f91a8a2d267, index tree 617b1ccc9f97def855d15c4737b1f74252bb4cea).
+DRIFT_DETECTED: false
+
+What I checked
+- Patch identity: HEAD is eb912cb and `git write-tree` gives 617b1ccc9f97def855d15c4737b1f74252bb4cea. The SHA-256 of `git diff --cached` is 7640e7c89e79e28d50a7063b77e85f838bb4b83aaab3f41ed2928f91a8a2d267, the same as the reviewed `cycle-1.patch`. Only two paths are staged: `src/factorflow/ingestion/runner.py` and `tests/integration/test_runner_provider_refusals.py`. The only unstaged change is the story document, which is outside the cycle.
+- Production change against acquisition-runner §2.2 and T010: the three added lines (the two comment lines and `self._client.start_instrument()`) match the design snippet character for character. They sit at loop-body indentation, after the `cancellation_requested` block's `return` and before `# --- Fetch symbol ---`. No other production line changed. There is no new outcome value, column, timing value or migration, and `journal.py`, `reclaim.py`, `writer.py`, `plan.py`, `ingestion_main.py`, `outcomes.py` and `config/` are untouched. `MassiveClient.start_instrument()` delegates to `self._governor.start_throttle_budget()`, so the per-instance `budget` mark in the tests sees the real call.
+- Harness against T002 and DAC-E8-20:
+  - Settings: production `MassiveSettings(_env_file=None)` and `RunSettings(_env_file=None)`, built from env `FACTORFLOW_MASSIVE_API_KEY=generated_test_key()` and `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE=60`. Every other timing variable is deleted so its default applies, and the harness asserts `max_attempts == 3`, `max_throttle_wait_seconds == 300.0` and `stale_after_seconds == 900.0`.
+  - Clock and governor: one `FakeClock(1_762_560_000.0)` (a multiple of 60) is passed as both `monotonic` and `now`, with a `FakeSleeper` on it and `SequenceJitter([jitter])`.
+  - Client and transport: the real `MassiveClient`, with `forbid_sockets` and then `RecordingMakeRequest(...).install`.
+  - Marks: the `heartbeat`, `finalise` and budget wrappers each record a mark before delegating.
+  - Scenario call: `today=date(2025, 9, 22)` and `depth_years=5`.
+  - The harness is built after the database fixture.
+  - Responders: they follow the plan, including checking `/events` first. The reference fixture is wrapped in `{"request_id", "results"}`, which is the same precedent as `_four_reads_answer`, because `reference_active.json` is the bare results object.
+- Each test against its TC and DAC:
+  - TC-COMP-252, both tests: the literal 7-name sequence × 2. With cancellation, the 7 names plus `heartbeat` and `cancellation_requested`, `start_instrument.call_count == 1`, and the run is `cancelled`.
+  - TC-COMP-253: roster `AAPL` then `KO`. Checks the `[not_entitled]` prefix and suffix, one balance-sheets request per symbol, no income-statement or cash-flow request, the other three data types `written`/`unchanged`, `KO` fully recorded, no sleeps, and the run `partial`.
+  - TC-COMP-254: roster `KO` then `AAPL`, parametrised over jitter 0.0 and 0.999. Assertions (a) to (e) are as the plan writes them, including `[60.0] * 5` at jitter 0.0, the literal mark sequence `heartbeat, budget, heartbeat, budget, finalise`, the check that each budget mark's request index equals the preceding heartbeat's, and a reference count of 6.
+  - TC-COMP-255: `KO` alone gives four `[rate_limited]` rows, marks `heartbeat, budget, finalise`, sleeps `[[60.0] * 5]`, and a `failed` run.
+  - TC-COMP-258: parametrised over the `plan_refusal` and `throttled` (jitter 0.0, `KO`/`AAPL`) scenarios.
+    - The earlier run is seeded `failed` with `ended_at` set and `claimed_by` and `heartbeat_at` NULL.
+    - The snapshot query is exactly the plan's: `xmin` plus every column except `attempts`, as Resolved Conflict 1 directs.
+    - The before and after snapshots are equal, the reasons are compared against literals, and the earlier run is still `failed`.
+  - TC-COMP-256 edge case: parametrised over `ProviderNotEntitled` and `ProviderRateLimited`. Checks a `failed` run, a `failure_reason` starting `[credential_rejected] symbol=AAPL data_type=prices `, no result rows, `fetch_reference.call_count == 1` and `start_instrument.call_count == 1`.
+  - T009: roster `KO` then `PEP`, both throttled. Checks two intervals of `[60.0] * 5`, 6 reference requests per symbol, 8 `[rate_limited]` rows, and a `failed` run.
+- TC-COMP-259 and TC-COMP-258 step 3 (the T015 greps):
+  - `grep -nw attempts ... | grep -v 'consecutive attempts'` prints nothing, and the result-row reader selects only `instrument_id, data_type, outcome, reason`. Every request count comes from `harness.transport.requests`.
+  - The diff of `runner.py` adds no `UPDATE`.
+- Test run: I ran the focused command with the sandbox disabled. 11 passed in 7.51 s, and `factorflow` resolved to this clone's `src`.
+- RED log: 8 tests failed, and every failure traces to the missing call. 3 passed on arrival: T004 and both T007 scenarios.
+
+Findings (state for each whether it is drift)
+1. Test markers read `# Implements CAP-003 TC-COMP-NNN`, where the plan's wording is `# Implements TC-COMP-…`. Not drift. CAP-001 already uses bare TC-COMP-253 to 259. The CAP-003 prefix removes that ambiguity and follows CAP-003 precedent (for example `tests/unit/test_governor_retry.py`).
+2. `_plan_refusal_answer()` is a factory that returns a fresh responder, where the plan calls it a responder. Not drift. Each download's `req_403_<n>` counter starts at 1, which keeps the plan's "n counts the 403s answered" true within a download. The assertions only check the `req_403_` prefix.
+3. The scenario helpers take an extra `prepare` hook, and `_run_throttled_download` takes `throttled`. Not drift. These are the minimal hooks T007 (seeding between the instrument inserts and the download) and T009 (throttling `KO` and `PEP`) need. They add no behaviour of their own. `_run_plan_refusal_download` passes jitter 0.0 to the harness, which has no effect because nothing is throttled.
+4. The RED evidence differs from the plan's Phase 2 checkpoint. The plan predicted T006 and T008 would pass on arrival, but they fail RED: T006 on its planned `budget` mark and T008 on its planned `start_instrument.call_count == 1`. Not drift in the code or tests. Both assertions are written exactly as the plan specifies them, and they can only pass with T010. The checkpoint's prediction is inaccurate, not the tests. The evidence should record 8 RED and 3 GREEN-on-arrival rather than the plan's 4 and 4, which the RED log already does.
+5. T008 drives the refusals as exceptions from a `MagicMock` client, not through the real SDK and urllib3 path. Not drift. DAC-E8-20 covers tests of a `429` or `403` response, while T008 tests the credential-rejection edge of TC-COMP-256 (acquisition-runner §8 criterion 6). The plan specifies a `MagicMock` client for it, following the `_rejecting_client` precedent. Every test that exercises an actual `403` or `429` (T004, T005, T006, T007, T009) uses the real path.
+6. `test_each_throttled_stock_waits_its_own_full_budget` (T009) has no `# Implements` marker. Not drift. T009 sits under "Additional Unit Tests" with no TC id, and its docstring names DAC-E8-7, DAC-E8-10 and DAC-E8-S4-3.
+7. Minor tightenings beyond the plan's wording. Not drift. These are:
+   - TC-COMP-252 test 1 also asserts the run is `succeeded`, which follows from the stub client.
+   - Request-path checks use equality on the path without its query (`== _BALANCE_SHEETS`, exact corporate-actions routes) where the plan says "starts with". This is stricter, and it fails rather than passes falsely if a path ever differs.
+8. TC-COMP-258 "byte for byte". Not drift. It is handled as Resolved Conflict 1 directs: every column except `attempts` is compared, `xmin` is added so even a no-op `UPDATE` (M6) would show, and DAC-E8-S4-8 still holds.
+9. README tasks T013 and T014 and TC-COMP-257 are absent from this cycle. Not drift. The plan makes them a separate documentation step outside cycle-1.

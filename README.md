@@ -1236,6 +1236,33 @@ the owner runs it only after confirming the dump to restore (OPS-DEST-001):
    version.
 6. `FACTORFLOW_IMAGE_TAG=<old> docker compose --profile ingestion up -d`
 
+### Upgrading from 0.2.0: provider refusals reported by cause
+
+This upgrade from release 0.2.0 (`factorflow:0.2.0-829c9e1`, deployed
+2026-11-07) changes how ingestion handles a provider rate limit and a plan
+refusal (CAP-003-E8-S1 to S4). It uses the *Upgrade, backup and rollback*
+procedure above unchanged. No migration, new variable or manual action is
+needed.
+
+- **A throttled stock waits instead of failing.** A rate-limited request now
+  waits to the next minute boundary, for up to the 300 s budget per stock
+  (`FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS`), instead of failing within
+  seconds, and a rate limit is not counted as a failed attempt. A download on a
+  plan whose request limit is below `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE`
+  therefore takes longer: under throttling that persists, by up to one budget
+  per followed stock. Cancelling still takes effect after the current stock,
+  which may now include that stock's wait.
+- **A plan refusal costs one request instead of three.** A data type the
+  provider plan is not entitled to is requested once, and recorded as refused.
+- **Stored reasons gain two kinds.** Reasons are now recorded under the kinds
+  `not_entitled` and `rate_limited` as well, six kinds where 0.2.0 had four
+  (see *Massive provider failure reasons*). Results recorded before the upgrade
+  keep `[unavailable]` and are not rewritten, so they read as ordinary failures
+  until the next download re-records that data type.
+- **Rollback has no data step.** The new kinds are text in an existing column,
+  so rolling back is a redeploy of the previous image, the rollback above for a
+  release that applied no migration.
+
 ### Pre-release backup and restore drill
 
 Before the first deployment of `0.1.0`, the backup and restore procedure is

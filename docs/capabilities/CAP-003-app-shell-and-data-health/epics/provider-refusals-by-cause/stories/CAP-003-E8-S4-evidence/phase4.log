@@ -1,0 +1,19 @@
+# Phase 4 (T011, T012) on cycle-1's bytes (index tree 617b1ccc9f97def855d15c4737b1f74252bb4cea), base eb912cb
+# T011 $ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/integration/test_runner_provider_refusals.py tests/integration/test_runner_acquires.py tests/integration/test_runner_cancel.py tests/integration/test_runner_credential.py tests/integration/test_runner_depth.py tests/integration/test_runner_isolation.py tests/integration/test_runner_outcomes.py tests/integration/test_runner_reclaim.py tests/integration/test_runner_resume.py tests/integration/test_runner_transactions.py tests/integration/test_runner_volume.py tests/unit/test_runner_reason.py tests/unit/test_runner_volume_support.py tests/unit/test_outcomes.py tests/unit/test_ingestion_main.py tests/unit/test_ingestion_e2e_main.py   (sandbox disabled, testcontainers postgres:16)
+........................................................................ [ 50%]
+.......................................................................  [100%]
+143 passed in 336.96s (0:05:36)
+
+[exited with code 0]
+# T011 untouched: $ git diff --stat eb912cb -- tests/integration/test_runner_{acquires,cancel,credential,depth,isolation,outcomes,reclaim,resume,transactions,volume}.py tests/unit/
+# (no output: untouched)
+# DAC-E8-8: $ git diff --stat eb912cb -- src/factorflow/db/migrations/ src/factorflow/config/ src/factorflow/runs/journal.py src/factorflow/runs/reclaim.py src/factorflow/ingestion/writer.py src/factorflow/ingestion/plan.py src/factorflow/ingestion_main.py src/factorflow/ingestion/outcomes.py
+# (no output: untouched; reclaim.py lives at src/factorflow/runs/reclaim.py)
+# T012 $ ruff check src/factorflow/ingestion/runner.py tests/integration/test_runner_provider_refusals.py ; ruff format --check <same> ; mypy src
+All checks passed!
+2 files already formatted
+Success: no issues found in 61 source files
+# T012 code diff: $ git diff --stat eb912cb -- src tests
+ src/factorflow/ingestion/runner.py                 |   4 +
+ tests/integration/test_runner_provider_refusals.py | 901 +++++++++++++++++++++
+ 2 files changed, 905 insertions(+)
