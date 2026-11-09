@@ -1,0 +1,219 @@
+# TDD evidence for CAP-003-E1-S1 - Vendoring Foundation: cn, Tailwind token keys, badge, button, card and the AC-26 literal scan.
+# Each cycle is its own local commit on the story branch (commit_hash names it); the driver's stage commit adds this file, the ticked task plan and the story status.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+# Decisions applied from planning: DEC-0296, DEC-0297, DEC-0298.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T010]
+    description: >
+      Tailwind colour, radius and ring-width keys (TC-COMP-003, DAC-E1-11): twelve colour keys plus borderRadius.DEFAULT and ringWidth.DEFAULT, each bound to an existing theme.css token.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-1-tailwind-keys.log
+    red_log_sha256: c5b1a4e0a2dcd50bfb3e0dadd86312e4fd04f0989987dae7c01469f81c7d9bf4
+    red_evidence: >
+      2 failed, 2 passed before tailwind.config.js gained the keys (key-set and radius/ring assertions).
+    green_evidence: >
+      token-literals 4 passed after T010; full suite in the final validation.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e8304c0b4544ab459a5cfe7a3b28e7e0a25d003784337d6992d1ab64a862e617
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-1.patch
+    commit_hash: e36f7b8524c08185b153a3a7af90b1a785fcf280
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: a0fd667bd8098e46b844d450c9f8808716eab2702c9080425bd5ec66339082f3
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003]
+    description: >
+      AC-26 literal scan (TC-COMP-005, DEC-0296): SCANNED_DIRECTORIES, isScannedSource, literalsIn and the cases over planted sources. Test-only cycle; the scan and its helpers live in the test file.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-2-literal-scan.log
+    red_log_sha256: b092a8bd8fb7498ba7f5fe9359a77059218d301467f943784bc98b34645dc1c4
+    red_evidence: >
+      7 failed, 9 passed with literalsIn stubbed to return [] (the file restored afterwards).
+    green_evidence: >
+      token-literals 16 passed, including the scan over the delivered web/src/components/ patterns.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8d3f6b5d4303fad83584ad7a369fe714673775a3859f48d1fec83b335bae8a77
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-2.patch
+    commit_hash: 5757ae48bb6c25ce99e34ec6bd8da3db9c7b9feb
+    mutation:
+      not_applicable: "test-only cycle: token-literals.test.ts adds no production code"
+
+  - id: cycle-3
+    tasks: [T004, T009]
+    description: >
+      vendoring.test.ts (TC-COMP-004, TC-COMP-008, DEC-0298) and the five packages added with npm install (tailwind-merge pinned to ^2). Licences verified by hand against node_modules/<pkg>/LICENSE: clsx MIT (license), tailwind-merge MIT, class-variance-authority Apache-2.0, lucide-react ISC, @radix-ui/react-slot MIT; package-lock.json carries the same license value for each.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-3-packages.log
+    red_log_sha256: 2ad995b63cee7e323984ee19cbe429854934199295447e1dab15b9a5cf98f5dc
+    red_evidence: >
+      2 failed, 3 passed before the packages were installed (missing packages; no non-test file under ui/ yet).
+    green_evidence: >
+      vendoring 4 passed, 1 failed after T009: the at-least-one-file scan case stays red until utils.ts exists in cycle 4, as planned. All 5 pass from cycle 4.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c22dda7601cd27eb31dc98911540c71e3ecfadbe67d1485da870c72b313ea60c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-3.patch
+    commit_hash: ccfdd8d358232d552654ec83a8bad819755243b8
+    mutation:
+      not_applicable: "dependency manifest change only; the vendoring test is not production code"
+
+  - id: cycle-4
+    tasks: [T008, T011]
+    description: >
+      cn() in ui/utils.ts: clsx plus tailwind-merge with pattern-indeterminate registered in the bg-image class group. An object/array case was added to kill a surviving mutant.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-4-cn.log
+    red_log_sha256: d75f1e61c92e686c6edaac7473551cf8e30cce3f3a422426fd0b7a645628be6f
+    red_evidence: >
+      utils.test.ts failed to resolve ./utils before the module existed.
+    green_evidence: >
+      utils 5 passed; token-literals and vendoring pass over the new file.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 260d949e01120da4f82478a39aafeff1722dea89beb44bda35132dc8b9e6627f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-4.patch
+    commit_hash: 784dcfcb9ce3daae46c72bfc95e55476eb19ceee
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/mutation-cycle-4-results.json
+      results_sha256: 79fd485f8466339acaec9909dab47b32cf38c81e6014db5c67ee3be2ac90a1f5
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T006, T012]
+    description: >
+      badge variants and token classes (TC-COMP-007).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-5-badge.log
+    red_log_sha256: fbb53a88d39515c7c60c8a764d2bddae1c6c9295d9b8024432f1887a1f850217
+    red_evidence: >
+      badge.test.tsx failed to resolve ./badge before the module existed.
+    green_evidence: >
+      badge.test 45 passed (pattern match includes siblings); tsc and biome clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 1b6deb09e2a78ba0e31cda7c91a55b93a868da9b0d28e97c526d08eb942a3866
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-5.patch
+    commit_hash: eaaa2308b90e3c74ae84d50b5eca3ec883c80260
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/mutation-cycle-5-results.json
+      results_sha256: de278d2891d45fe53f6f195e4477fc49bd1e1bba69ee52ae5d538880562a1ec9
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-6
+    tasks: [T005, T013]
+    description: >
+      button variants and the blocked contract (TC-COMP-006, DAC-E1-14, DAC-E1-15). A small asChild test was added beyond T005.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-6-button.log
+    red_log_sha256: af8dfe8ec8a280f30c095ec0bb3ffe9e320978d7b56cfe66163c959b8c523195
+    red_evidence: >
+      button.test.tsx failed to resolve ./button before the module existed.
+    green_evidence: >
+      button.test and token-literals 20 passed; tsc and biome clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 0c33ba488409cd5e13d7eb0c655cc537deb37a85b64d95c921ecebcb2f1d2023
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-6.patch
+    commit_hash: b221b2546a212a911b0dd4e6898f68799e149673
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/mutation-cycle-6-results.json
+      results_sha256: e082af3454d97c8fb9ceb675356a386ce713bf7388bf41658f4dda1ee6043bf5
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-7
+    tasks: [T007, T014]
+    description: >
+      card variants and parts (DEC-0297). defaultVariants is omitted: the component's variant parameter defaults to default and every variant class string is empty. The cycle's mutation command also runs tsc --noEmit so the variant type contract is scored.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-7-card.log
+    red_log_sha256: f07be9bc324365560dea794e42325b363ee23a151615d35e9c68beb8fd1c84ef
+    red_evidence: >
+      card.test.tsx failed to resolve ./card before the module existed.
+    green_evidence: >
+      card.test 67 passed (pattern match includes siblings); tsc and biome clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2e3a63189d4f629c0c36669eb856033c44d495706c953f8176625171aa9e7b07
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-7.patch
+    commit_hash: 822077deca0b50070ca6c7a5f13d6d7542668cd4
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/mutation-cycle-7-results.json
+      results_sha256: 2325c0c8255230ec32d5f380c31dc7a0e54fb5dc7b9b09eb982da4314993f284
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-8
+    tasks: [T002, T003, T005, T006, T007]
+    description: >
+      Review v1 rework (IR-001 to IR-004), tests only: every colour key is pinned to its same-named token; the set of extended scales and every var() in them are pinned; the literal scan is planted for rem, em, vh and vw and its directory is pinned; badge, button and card part classes are pinned against the shipped Tailwind literals; button's focus ring and blocked presentation are pinned. No production file changes.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/red-cycle-8-mutants.log
+    red_log_sha256: 4362744ed43612997d8e6565d1b53dd696cf9eacdc75cd8c75b7b9b34624d267
+    red_evidence: >
+      The 11 mutants that survived review v1 were rerun against the new tests; each now fails a named assertion (red-cycle-8-mutants.log).
+    green_evidence: >
+      components, render and shell.tokens suites 321 passed; tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f6bc90f3f8fb73a581b2e862fca8cac504893f666e4f26f581c0af4db9557583
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/cycle-8.patch
+    commit_hash: 176888705e3b431025e40b0678af8bf24d771a0b
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S1-evidence/mutation-cycle-8-results.json
+      results_sha256: 859e6b7b54ea1f5fbc149fcf267dd6ebe78a37407ce3c2def1e0d7c5d16e2e4d
+      generated: 11
+      killed: 11
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

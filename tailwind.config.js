@@ -31,6 +31,26 @@ export default {
         "value-missing-muted": "hsl(var(--value-missing-muted) / <alpha-value>)",
         "value-indeterminate": "hsl(var(--value-indeterminate) / <alpha-value>)",
         "value-indeterminate-muted": "hsl(var(--value-indeterminate-muted) / <alpha-value>)",
+        // Vendored design-system components (component design 2.2, DAC-E1-11):
+        // each key binds to a token theme.css already defines.
+        primary: "hsl(var(--primary) / <alpha-value>)",
+        "primary-foreground": "hsl(var(--primary-foreground) / <alpha-value>)",
+        accent: "hsl(var(--accent) / <alpha-value>)",
+        "accent-foreground": "hsl(var(--accent-foreground) / <alpha-value>)",
+        popover: "hsl(var(--popover) / <alpha-value>)",
+        "popover-foreground": "hsl(var(--popover-foreground) / <alpha-value>)",
+        muted: "hsl(var(--muted) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
+        destructive: "hsl(var(--destructive) / <alpha-value>)",
+        "destructive-foreground": "hsl(var(--destructive-foreground) / <alpha-value>)",
+        "status-foreground": "hsl(var(--status-foreground) / <alpha-value>)",
+        "seq-1": "hsl(var(--seq-1) / <alpha-value>)",
+      },
+      borderRadius: {
+        DEFAULT: "var(--radius)",
+      },
+      ringWidth: {
+        DEFAULT: "var(--focus-ring-width)",
       },
       backgroundImage: {
         "pattern-indeterminate": "var(--pattern-indeterminate)",
