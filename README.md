@@ -135,12 +135,12 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, the Host and Origin middleware it wraps (see [Host and Origin checks](#host-and-origin-checks)), exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `routes/universes.py`, `routes/classifications.py`, `classification_models.py` and `classification_bounds.py` are the classification API's `/api/universes` and `/api/classifications` routes, models and bounds, described in [`docs/reference/classification-api.md`](docs/reference/classification-api.md). `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
-| `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
+| `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, throttle handling bounded by a throttle wait budget that `start_throttle_budget()` starts, and bounded retry backoff. See [`docs/reference/rate-limit-governor.md`](docs/reference/rate-limit-governor.md) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
 | `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `RunNotActive` (raised when the run's `acquisition_run` row is not in an active state at the start of a write — prevents a post-reclaim runner from appending data), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction after locking and verifying the run is active), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
 | `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
 | `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. See [`docs/reference/ingestion-outcomes.md`](docs/reference/ingestion-outcomes.md) |
-| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, `ProviderContractViolation`, and `ProviderNotEntitled` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, `ProviderContractViolation`, and `ProviderNotEntitled` from the Massive SDK's single, status-code-discarding exception, defines `ProviderRateLimited`, the `ProviderUnavailable` the rate-limit governor raises when a throttle wait budget is spent, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. `main()` takes two keyword-only parameters, `settings_factory` (default `Settings`) and `credential_reader` (default `read_provider_credential`, called at every claim). They exist only for the test-only entry point `tests/e2e/support/ingestion_e2e_main.py` and are not configuration; the release launch passes neither. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
@@ -585,7 +585,7 @@ the tests are. None leaves an acceptance criterion unmet:
 ## Massive provider failure reasons
 
 `src/factorflow/ingestion/massive/errors.py` also defines
-`compose_failure_reason`, which turns one of the five typed `MassiveError`
+`compose_failure_reason`, which turns one of the six typed `MassiveError`
 subclasses into the safe, owner-visible text stored as
 `run_instrument_result.reason`. The acquisition runner calls it in the
 per-data-type fetch error handlers, passing the entrypoint's `redact`
@@ -613,99 +613,18 @@ provider-echoed text. `ProviderNotEntitled`, a plan refusal (CAP-003-E8-S1),
 likewise always carries a fixed description ("the provider plan is not
 entitled to this data"), never the provider's text and never passed through
 `redact`, under the kind `not_entitled` with the provider's `request_id`.
+`ProviderRateLimited` (CAP-003-E8-S2) is never built from a response: the
+rate-limit governor raises it with its own fixed text ("The provider kept
+rate-limiting requests until this stock's throttle wait budget was spent."),
+so its reason is the kind `rate_limited` with `request_id=unavailable`, and
+that text is redacted and bounded like any other variable segment.
 `compose_failure_reason` raises `TypeError` for any error whose exact class is
-not in the five-type taxonomy.
+not in the six-type taxonomy.
 
 ## Rate limit governor
 
-`src/factorflow/ingestion/rate_limit.py` implements `RateLimitGovernor`, the
-synchronous, provider-agnostic governor that `CAP-001-E3-S1`'s
-`massive/client.py` submits every SDK request through, including followed
-pages. It imports no Massive SDK, response type,
-or wire shape — `send` and `classify` are opaque callables the caller
-supplies, and the governor inspects only the `Outcome` `classify` returns,
-never the raised exception's type or fields.
-
-`execute(send, classify, stated_delay_seconds=None)` calls `send()` under a
-token bucket sized to `GovernorSettings.requests_per_minute`. The bucket starts
-full, never refills above that capacity, refills continuously, and consumes one
-permit per send. A one-minute window overlapping the initial full bucket may
-issue up to capacity plus one window's refill; after drawdown, each subsequent
-one-minute window is capped at the configured budget. The classified outcome
-then follows a distinct, bounded path:
-
-| Outcome | Attempt counter | Wait | Then |
-|---|---|---|---|
-| `THROTTLED`, provider stated a delay | unchanged | the stated delay, no jitter | retry |
-| `THROTTLED`, no stated delay (the Massive case) | unchanged | to the next minute boundary, plus jitter | retry |
-| `RETRYABLE` (timeout or 5xx) | plus one | `initial_backoff_seconds × 2^(attempts−1)`, full jitter | retry while attempts remain |
-| `OK` | unchanged | none | return |
-| `FATAL` (404, 401, not retryable) | unchanged | none | re-raise |
-
-Two limits terminate the loop, both configured through
-`GovernorSettings.from_massive_settings()` (built from `MassiveSettings`
-without either settings class importing the other, `MassiveSettings`
-imported only under `TYPE_CHECKING`). `max_attempts` (default 3) bounds the
-`RETRYABLE` path. Once the first `THROTTLED` outcome occurs,
-`max_throttle_wait_seconds` bounds monotonic elapsed time until a later
-throttle check, including permit-acquisition waits, sender time, retry
-backoff, and throttle sleeps. This elapsed-time accounting means a
-provider-stated zero-second delay cannot retry forever. A `429` still never
-consumes an attempt; persistent throttling raises `ProviderUnavailable` once
-the elapsed throttle budget is exceeded. Because the check follows the wait
-that crosses the limit, the budget is soft and may be exceeded by that final
-wait.
-
-The no-delay throttle wait is anchored to a wall-clock `now` collaborator
-(default `time.time`), not to `monotonic()` or any instant fixed at
-governor construction, so the wait tracks the provider's actual per-minute
-window regardless of how long the governor instance has been alive. Its
-jitter is applied additively on top of the boundary wait
-(`boundary + jitter() × boundary`, range `[boundary, 2 × boundary]`) rather
-than the literal "full jitter over the computed delay" that
-`component-design-rate-limit-governor.md` §2.5 states for every jittered
-delay — a deliberate, recorded deviation: true full jitter here
-(`[0, boundary)`) would often fire before the provider's per-minute quota
-refills, defeating the reason the boundary wait exists. The backoff path
-(retryable failures) does use full jitter as written. See
-`_boundary_wait_with_jitter`'s docstring and the task plan's Notes.
-
-**Known limitations, carried forward as accepted warnings from
-implementation review v5**
-(`CAP-001-E3-S4-implementation-review-v5.md`) — none blocks a current
-acceptance criterion:
-
-- The `except BaseException` classification boundary (`execute`, per the
-  design-mandated `Callable[[BaseException], Outcome]` signature) hands
-  `KeyboardInterrupt` and `SystemExit` to the caller's `classify` along with
-  every other exception. No test covers either type, and a classifier that
-  defaults an unrecognised exception to `RETRYABLE` or `THROTTLED` would
-  make the governor sleep through a cancellation signal — for the no-delay
-  throttle path, now a genuine up-to-120-second wall-clock wait (v5 IR-003).
-- `GovernorSettings` is a plain frozen dataclass with no construction-time
-  validation, so a direct literal construction with `requests_per_minute=0`
-  succeeds and only fails later, obscurely, with `ZeroDivisionError` inside
-  permit acquisition. Every production caller goes through
-  `from_massive_settings()`, where `MassiveSettings`'s `Field(ge=1)` already
-  enforces positivity, so this affects only direct construction, which
-  today only the tests do (v5 IR-007).
-- The backoff cap on the first retry is `initial_backoff_seconds × 2**0`,
-  i.e. `initial_backoff_seconds` itself — one doubling below component
-  design section 2.5 row 3's literal wording ("initial delay times two to
-  the power of attempts"). The implementation is the conventional reading
-  and the bound holds; the wording gap is flagged for the next design
-  revision (v5 IR-005).
-- `ProviderUnavailable` is raised with only a message string on exhaustion;
-  the attempt count is interpolated into prose rather than carried as a
-  structured field, and the module emits no log records naming the attempt
-  index, delay, or status code (component design section 4's expectation).
-  Whether governor logging and a structured exhaustion failure belong to
-  CAP-001-E5 or a later story is an open owner decision (v2 IR-009).
-- The test double clock used for the throttle-boundary tests never
-  advances the injected wall-clock `now` source during a sleep, so no test
-  exercises a multi-wait throttle sequence in which each wait lands on a
-  genuinely fresh wall-clock phase, the shape production actually takes
-  (v5 IR-006).
+`src/factorflow/ingestion/rate_limit.py` is described in
+[`docs/reference/rate-limit-governor.md`](docs/reference/rate-limit-governor.md).
 
 ## Coverage range arithmetic
 

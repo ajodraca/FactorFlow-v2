@@ -23,7 +23,10 @@ failing data type. `InstrumentNotFound` → `"not_found"`;
 `ProviderUnavailable`/`ProviderContractViolation`/`ProviderNotEntitled` →
 `"failed"`. `ProviderNotEntitled` is a plan refusal: it is recorded against the
 one data type the plan does not cover, so the instrument's other data types and
-the run go on (CAP-003-E8-S1, AC-29). `CredentialRejected` raises `ValueError` — it is a run-level failure that must
+the run go on (CAP-003-E8-S1, AC-29). `ProviderRateLimited`, which the
+rate-limit governor raises when a stock's throttle wait budget is spent, is a
+`ProviderUnavailable` and is recorded `"failed"` through the same branch
+(CAP-003-E8-S2). `CredentialRejected` raises `ValueError` — it is a run-level failure that must
 not become a per-data-type outcome row. Any unrecognised type raises `TypeError`.
 The `reason` argument is the already-composed, credential-safe reason string
 from the Massive-client boundary; this module does not re-compose or re-redact it.
@@ -45,5 +48,6 @@ fetches data types individually, `classify_provider_error` +
 | Instrument unknown to the provider (`InstrumentNotFound`) | `not_found` | run continues, outcome becomes `partial` |
 | Transport or server error, attempts exhausted (`ProviderUnavailable`, `ProviderContractViolation`) | `failed` | run continues, outcome becomes `partial` |
 | Plan not entitled to the data type (`ProviderNotEntitled`, a `403` sent once and never retried) | `failed` | run continues, outcome becomes `partial` |
-| Rate-limit pacing (`429`) | no outcome — absorbed by the governor before classification | no row written |
+| Rate-limit pacing (`429`) within the throttle wait budget | no outcome — absorbed by the governor before classification | no row written |
+| Rate limiting that outlasts the throttle wait budget (`ProviderRateLimited`, a `ProviderUnavailable`) | `failed` | run continues, outcome becomes `partial` |
 | Not reached because the run was cancelled | no row written | no coverage, no failure |
