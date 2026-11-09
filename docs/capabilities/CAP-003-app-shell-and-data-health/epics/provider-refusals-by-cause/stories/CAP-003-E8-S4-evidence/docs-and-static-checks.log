@@ -1,0 +1,61 @@
+# T013 (DAC-E8-S4-6) position and content check, from the clone root
+$ python3 -c "<the Validation Plan's DAC-E8-S4-6 one-liner>"
+# exit 0
+$ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/unit/test_readme_deployment.py   (unchanged)
+3 passed in 0.14s
+$ git diff --stat eb912cb -- tests/unit/test_readme_deployment.py
+# (no output: unchanged)
+$ git diff eb912cb -- README.md
+diff --git a/README.md b/README.md
+index 7884adf..3e93aea 100644
+--- a/README.md
++++ b/README.md
+@@ -1236,6 +1236,33 @@ the owner runs it only after confirming the dump to restore (OPS-DEST-001):
+    version.
+ 6. `FACTORFLOW_IMAGE_TAG=<old> docker compose --profile ingestion up -d`
+ 
++### Upgrading from 0.2.0: provider refusals reported by cause
++
++This upgrade from release 0.2.0 (`factorflow:0.2.0-829c9e1`, deployed
++2026-11-07) changes how ingestion handles a provider rate limit and a plan
++refusal (CAP-003-E8-S1 to S4). It uses the *Upgrade, backup and rollback*
++procedure above unchanged. No migration, new variable or manual action is
++needed.
++
++- **A throttled stock waits instead of failing.** A rate-limited request now
++  waits to the next minute boundary, for up to the 300 s budget per stock
++  (`FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS`), instead of failing within
++  seconds, and a rate limit is not counted as a failed attempt. A download on a
++  plan whose request limit is below `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE`
++  therefore takes longer: under throttling that persists, by up to one budget
++  per followed stock. Cancelling still takes effect after the current stock,
++  which may now include that stock's wait.
++- **A plan refusal costs one request instead of three.** A data type the
++  provider plan is not entitled to is requested once, and recorded as refused.
++- **Stored reasons gain two kinds.** Reasons are now recorded under the kinds
++  `not_entitled` and `rate_limited` as well, six kinds where 0.2.0 had four
++  (see *Massive provider failure reasons*). Results recorded before the upgrade
++  keep `[unavailable]` and are not rewritten, so they read as ordinary failures
++  until the next download re-records that data type.
++- **Rollback has no data step.** The new kinds are text in an existing column,
++  so rolling back is a redeploy of the previous image, the rollback above for a
++  release that applied no migration.
++
+ ### Pre-release backup and restore drill
+ 
+ Before the first deployment of `0.1.0`, the backup and restore procedure is
+
+# T014 satisfied by earlier doc syncs; README.md 'Massive provider failure reasons' already current at the base:
+$ grep -n 'six typed\|six-type\|four typed\|four-type\|not entitled to this data\|kind `rate_limited`' README.md
+510:`compose_failure_reason`, which turns one of the six typed `MassiveError`
+541:so its reason is the kind `rate_limited` with `request_id=unavailable`, and
+544:not in the six-type taxonomy.
+$ git log --oneline -S'six-type taxonomy' -- README.md ; git log --oneline -S'the provider plan is not' -- README.md
+52ecfbd docs(CAP-003-E8-S2): doc sync against implementation review v2
+201442b docs(CAP-003-E8-S1): doc sync against implementation review v2
+
+# T015 static review checks
+$ git diff eb912cb -- src/factorflow/ingestion/runner.py | grep -nE '^\+.*UPDATE'
+# grep exit 1 (1: nothing printed)
+$ grep -nw attempts tests/integration/test_runner_provider_refusals.py | grep -v 'consecutive attempts'
+# grep exit 1 (1: nothing printed)

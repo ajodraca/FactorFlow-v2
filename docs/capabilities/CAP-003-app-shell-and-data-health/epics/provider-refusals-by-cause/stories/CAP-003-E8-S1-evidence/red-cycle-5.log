@@ -1,0 +1,88 @@
+# RED cycle-5 (review rework, IR-001): the new TC-COMP-228 negative rows run against each surviving review mutant.
+# Tree: git archive of HEAD 64b68c9afbae649de92c26607dda2c810cc971bd (errors.py unchanged since 3888727) plus the working-tree tests/unit/test_massive_error_classification.py; one copy per mutant.
+
+# --- mutant errors.py:manual:reviewer-status-also-searched: 'for name in ("error", "message")' -> 'for name in ("status", "error", "message")'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_error_classification.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s1-rework/tree-status
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collected 34 items
+
+tests/unit/test_massive_error_classification.py ........................ [ 70%]
+...F......                                                               [100%]
+
+=================================== FAILURES ===================================
+_ test_a_marker_outside_error_and_message_stays_provider_unavailable[in-status] _
+
+body = {'status': 'NOT ENTITLED', 'request_id': 'r7'}
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            pytest.param({"status": "NOT ENTITLED", "request_id": "r7"}, id="in-status"),
+            pytest.param({"status": "ERROR", "request_id": "not entitled"}, id="in-request-id"),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-228
+    def test_a_marker_outside_error_and_message_stays_provider_unavailable(
+        body: dict[str, str],
+    ) -> None:
+        """CAP-003 TC-COMP-228 / DAC-E8-1, DAC-E8-3: the entitlement rule reads
+        only `error` and `message` (massive-client section 2.4 rule 3); the
+        marker in `status` or in `request_id` alone leaves the safe default."""
+        result = classify_error_body(json.dumps(body))
+    
+>       assert type(result) is ProviderUnavailable
+E       AssertionError: assert <class 'factorflow.ingestion.massive.errors.ProviderNotEntitled'> is ProviderUnavailable
+E        +  where <class 'factorflow.ingestion.massive.errors.ProviderNotEntitled'> = type(ProviderNotEntitled('The provider plan is not entitled to this data.'))
+
+tests/unit/test_massive_error_classification.py:360: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_error_classification.py::test_a_marker_outside_error_and_message_stays_provider_unavailable[in-status]
+========================= 1 failed, 33 passed in 0.34s =========================
+# exit code: 1
+
+# --- mutant errors.py:manual:reviewer-request-id-also-searched: 'for name in ("error", "message")' -> 'for name in ("error", "message", "request_id")'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_error_classification.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s1-rework/tree-request_id
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collected 34 items
+
+tests/unit/test_massive_error_classification.py ........................ [ 70%]
+....F.....                                                               [100%]
+
+=================================== FAILURES ===================================
+_ test_a_marker_outside_error_and_message_stays_provider_unavailable[in-request-id] _
+
+body = {'status': 'ERROR', 'request_id': 'not entitled'}
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            pytest.param({"status": "NOT ENTITLED", "request_id": "r7"}, id="in-status"),
+            pytest.param({"status": "ERROR", "request_id": "not entitled"}, id="in-request-id"),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-228
+    def test_a_marker_outside_error_and_message_stays_provider_unavailable(
+        body: dict[str, str],
+    ) -> None:
+        """CAP-003 TC-COMP-228 / DAC-E8-1, DAC-E8-3: the entitlement rule reads
+        only `error` and `message` (massive-client section 2.4 rule 3); the
+        marker in `status` or in `request_id` alone leaves the safe default."""
+        result = classify_error_body(json.dumps(body))
+    
+>       assert type(result) is ProviderUnavailable
+E       AssertionError: assert <class 'factorflow.ingestion.massive.errors.ProviderNotEntitled'> is ProviderUnavailable
+E        +  where <class 'factorflow.ingestion.massive.errors.ProviderNotEntitled'> = type(ProviderNotEntitled('The provider plan is not entitled to this data.'))
+
+tests/unit/test_massive_error_classification.py:360: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_error_classification.py::test_a_marker_outside_error_and_message_stays_provider_unavailable[in-request-id]
+========================= 1 failed, 33 passed in 0.20s =========================
+# exit code: 1

@@ -1,0 +1,184 @@
+# RED cycle-2, T016: rate_limit.py as T015 leaves it (blob ce67d90793dcd57e1b7998a7d4dc02d12eeb21d7) and tests/unit/test_massive_retry.py's _governor() helper still at the delivered max_throttle_wait_seconds=1.0
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -q -rf
+F........                                                                [100%]
+=================================== FAILURES ===================================
+_______ test_rate_limited_responses_are_paced_without_consuming_attempts _______
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10b529160>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10b1d2ca0>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10b513740>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:77: in <lambda>
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py:1169: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py:1173: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <MagicMock name='RESTClient().get_ticker_details' id='4484926832'>
+args = ('AAPL',), kwargs = {'raw': True}
+
+    def _execute_mock_call(self, /, *args, **kwargs):
+        # separate from _increment_mock_call so that awaited functions are
+        # executed separately from their call, also AsyncMock overrides this method
+    
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+                raise effect
+            elif not _callable(effect):
+                result = next(effect)
+                if _is_exception(result):
+>                   raise result
+E                   massive.exceptions.BadResponse: {
+E                     "status": "ERROR",
+E                     "request_id": "req_ratelimit_001",
+E                     "error": "You've exceeded the maximum requests per minute, please try again later."
+E                   }
+
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py:1232: BadResponse
+
+The above exception was the direct cause of the following exception:
+
+    def test_rate_limited_responses_are_paced_without_consuming_attempts() -> None:
+        """429 is not an attempt (section 7, 5.13): four throttled responses
+        are paced and the fifth send succeeds, although `max_attempts` is 3."""
+        rate_limited = (FIXTURES / "error_rate_limited.json").read_text()
+        with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
+            instance = rest_client_cls.return_value
+            instance.get_ticker_details.side_effect = [
+                BadResponse(rate_limited),
+                BadResponse(rate_limited),
+                BadResponse(rate_limited),
+                BadResponse(rate_limited),
+                _FakeResponse(_envelope(_load("reference_active.json"))),
+            ]
+            client = MassiveClient(settings=_settings(), governor=_governor())
+    
+>           reference = client.fetch_reference("AAPL")
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_massive_retry.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:77: in fetch_reference
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:285: in _get_one
+    response = self._through_governor(send)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:298: in _through_governor
+    return self._governor.execute(send, classify)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10b529160>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10b1d2ca0>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10b513740>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    if self._throttle_spent + delay > self._settings.max_throttle_wait_seconds:
+>                       raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc
+E                       factorflow.ingestion.massive.errors.ProviderRateLimited: The provider kept rate-limiting requests until this stock's throttle wait budget was spent.
+
+src/factorflow/ingestion/rate_limit.py:179: ProviderRateLimited
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_rate_limited_responses_are_paced_without_consuming_attempts
+1 failed, 8 passed in 2.93s
+# exit 1

@@ -1,0 +1,23 @@
+# Independent spec-drift subagent (general-purpose, agentId ac4cd73497419c9fa), cycle-4, judged cycle-4.patch
+# (diff_sha256 dca6c502c3db5e0fea835feeac73af0bd7aeac542cb3ad5856a79b966e3c9e8a).
+DRIFT_DETECTED: false
+
+All listed items match the story, the task plan, design section 7 and the test specification; nothing goes beyond them.
+T013: ProviderNotEntitled in the errors import (line 41) and __all__ (line 65), between ProviderContractViolation and
+ProviderUnavailable, alphabetical order kept; docstring "the `MassiveError` types"; client.py, rate_limit.py and
+runner.py absent from the diff.
+T009 (test_massive_error_classification.py:419-428): package imported inside the test; exactly the three assertions.
+T004 harness: _CLOCK_START = 1_800_000_000.0 asserted a multiple of 60; _production_settings deletes the five variables,
+sets the key from generated_test_key() and 60 requests per minute, returns MassiveSettings(_env_file=None);
+_real_transport_client builds the governor from GovernorSettings.from_massive_settings with one FakeClock as monotonic
+and now, a FakeSleeper on it and SequenceJitter([0.0]); module docstring extended with both CAP-003 rows.
+T004 (TC-COMP-230): three bodies; fetch_financials("KO", date(2021, 1, 1), date(2025, 12, 31)); type is
+ProviderNotEntitled imported from the package; req_403_001; exactly one balance-sheets request; sleeper.calls == [];
+guard.fired == []; exact reason; "Please upgrade your plan" absent.
+T005 (TC-COMP-231): Forbidden envelope and non-JSON body; three balance-sheets requests; type is ProviderUnavailable and
+not ProviderNotEntitled; the unavailable prefix; no stored attempts value read.
+Markers present; the CAP-001 TC-INT-026 test unchanged.
+Minor observations (not drift): T005 calls forbid_sockets but does not check guard.fired (not asked by the plan);
+design section 7 also says the TC-COMP-231 error is not a ProviderRateLimited, a CAP-003-E8-S2 type; the strict
+`type(err) is ProviderUnavailable` already rules out any subclass; MassiveError and compose_failure_reason are imported
+from the package and pytest.raises uses the base type, fitting the plan's unspecified "under pytest.raises".

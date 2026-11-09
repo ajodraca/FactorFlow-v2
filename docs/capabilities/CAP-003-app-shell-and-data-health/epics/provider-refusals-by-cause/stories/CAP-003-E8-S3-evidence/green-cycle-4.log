@@ -1,0 +1,31 @@
+# GREEN cycle-4 (review rework of implementation review v1), on HEAD 4d907238c9dd7078d3946540c584ee36c8bb75c6 with the staged tests/unit/test_massive_retry.py.
+# Interpreter: <main checkout>/.venv/bin/python (no venv in this clone), from the clone root.
+
+$ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/unit/test_massive_retry.py
+.....................................                                    [100%]
+37 passed in 1.28s
+# exit code: 0
+
+$ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/unit/test_massive_retry.py tests/unit/test_massive_client_governor_integration.py tests/unit/test_massive_redirects.py tests/unit/test_massive_error_classification.py tests/unit/test_massive_client_interface.py
+........................................................................ [ 79%]
+...................                                                      [100%]
+91 passed in 0.98s
+# exit code: 0
+
+$ python -m ruff check .
+All checks passed!
+# exit code: 0
+
+$ python -m ruff format --check .
+285 files already formatted
+# exit code: 0
+
+$ python -m mypy src
+Success: no issues found in 61 source files
+# exit code: 0
+
+$ git diff --cached --stat
+ tests/unit/test_massive_retry.py | 129 +++++++++++++++++++++++++++++----------
+ 1 file changed, 96 insertions(+), 33 deletions(-)
+$ git diff --exit-code HEAD -- src uv.lock pyproject.toml tests/unit/test_massive_redirects.py
+# exit code: 0

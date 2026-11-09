@@ -1,0 +1,59 @@
+# Independent code-review subagent (general-purpose, agentId a42f78c6f171aa4bf), cycle-4 round 2, judged cycle-4.patch
+# (diff_sha256 b83175950a90383d16e155457fe17b304c153a60c67ebfe8a4da6790711c4e1d), red-cycle-4.log, green-cycle-4.log and
+# mutation-cycle-4-results.json, with code-review-cycle-4-round1.txt as the previous round.
+VERDICT: APPROVED
+
+Checked: The patch matches the staged change. `cycle-4.patch` and `git diff --cached` both hash to sha256 b83175950a90383d16e155457fe17b304c153a60c67ebfe8a4da6790711c4e1d. The index holds one file, `tests/unit/test_massive_retry.py` (+96/−33). In a `git archive HEAD` scratch copy the patch applies cleanly, and the result is byte-identical to the index blob (`git show :tests/unit/test_massive_retry.py`).
+Checked: No production file changes. `git diff HEAD --stat -- src uv.lock pyproject.toml` is empty (exit 0). `classify_for_governor` (`client.py:67-81`) still compares with `str(exc.reason) == _THROTTLED_RETRY_REASON`, as design §2.3 rule 1 specifies. The only other working-tree change is an unstaged edit to the story file, `status: in-review` → `in-progress`. That is workflow state and is not in the patch.
+Checked: IR-001 is resolved. Four new TC-COMP-248 rows each expect `RETRYABLE`, and each builds its text from `ResponseError.SPECIFIC_ERROR.format(status_code=429)`, never from `client._THROTTLED_RETRY_REASON`:
+- `"proxy: "` + the text (prefix)
+- `" "` + the text (leading whitespace)
+- the text + `"\n"` (trailing whitespace)
+- `.upper()` (different case)
+Each row has a comment citing DAC-E8-2, design §2.3 rule 1 and IR-001.
+Checked: I reproduced the survivor kills myself on scratch copies (HEAD tree with the HEAD test file, and HEAD tree with the patch). I applied each mutant to `client.py` and ran the five focused files (retry, governor_integration, redirects, error_classification, client_interface). Every mutant passes the HEAD test file (87 passed) and is killed by the new one:
+- `review-rule1-endswith`: killed by the prefix and leading-whitespace rows.
+- `review-rule1-strip`: killed by the leading- and trailing-whitespace rows.
+- `review-rule1-casefold`: killed by the case row.
+- `coder-rule1-lstrip`: killed by the leading-whitespace row.
+- `coder-rule1-rstrip`: killed by the trailing-whitespace row.
+- My extra mutants (`.lower()==`, `.upper()==.upper()`, `" ".join(split())==` and a suffix-slice compare) are all killed too.
+Without a mutant: 91 passed.
+Checked: The mutation evidence holds up. The cycle-4 mutants file (sha a660add4…) is exactly the review's 33 mutants (sha 3320dcab…) relabelled `cycle-4`, plus `coder-rule1-lstrip` and `coder-rule1-rstrip`. `mutation-cycle-4-results.json` reports 35/35 killed with all 4 baselines at exit 0. The review's own run reports 30 killed and 3 survivors, which agrees with my reruns.
+Checked: Round-1 finding 1 (exemption too broad) is addressed. The function-level `information_schema` text exemption is gone. It is replaced by `_SCHEMA_DEFAULT_READS`, an exact pair: `tests/integration/test_run_constraints.py` with the read `result_columns['attempts']`. On the current tree that pair matches exactly one read, line 50, which is the column default from the `information_schema.columns` query. The comment's "CAP-001 migration 0004" matches `src/factorflow/db/migrations/0004_runs.sql`. `ast.unparse` gives `result_columns['attempts']` under both 3.12.14 and 3.13.7, so the key does not depend on the Python version.
+Checked: Round-1 finding 2 (lstrip and rstrip survive) is addressed. The single whitespace row is split into a leading-only row and a trailing-only row, and my reruns show each kills its mutant.
+Checked: Round-1 finding 3 (keyword forms missed) is addressed. Keywords `target`, `attribute` and `name` are now read, so `patch.object(m, attribute="RESTClient")` and `monkeypatch.setattr(m, name="RESTClient", value=…)` are both caught.
+Checked: Round-1 finding 4 (strict mypy) is addressed. `_reads_attempts` is a `TypeGuard[ast.Attribute | ast.Subscript]`, and the `"AST" has no attribute "lineno"` error is gone. Strict mypy on the test file goes from 12 to 16 errors, all four new ones the existing `MaxRetryError(None, …)` arg-type kind from the new rows. This is outside the plan's `mypy src` scope.
+Checked: IR-003 clause (c) reproduced. I planted one file at a time and ran TC-COMP-251 with the HEAD test file and with the new one:
+
+| Planted offender | HEAD guard | New guard |
+|---|---|---|
+| `monkeypatch.setattr("<…>.RESTClient", …)` with 429 | passes | fails |
+| `patch.object(module, "RESTClient")` with `error_rate_limited.json` | passes | fails |
+| `patch.object(module, attribute="RESTClient")` with 429 | passes | fails |
+| `monkeypatch.setattr(module, name="RESTClient", value=429)` | passes | fails |
+| `@patch("<…>.RESTClient")` decorator | fails | fails |
+
+Each failure names the planted `path::function`.
+Checked: IR-003 clause (d) reproduced. An `.attempts` read in `tests/integration/test_planted_*.py` and a `["attempts"]` read in a new `tests/unit` file both pass the HEAD guard and fail the new one, which reports `path:line`. The scan covers `sorted((REPO_ROOT / "tests").rglob("*.py"))`: 222 files on disk, the same 222 that git tracks.
+Checked: The guard gives no false positives on the current tree. Clause (c) detects 40 `RESTClient`-replacing functions across 11 files, the `monkeypatch.setattr` uses in `test_ingestion_main.py` and `test_ingestion_e2e_main.py` among them. None of them names a 429 or `error_rate_limited`. In every file except `test_massive_retry.py`, no function names a 429 at all. Clause (d) finds only the one exempted read. The `"attempts"` strings in `test_api_models.py` are not subscripts and are correctly ignored.
+Checked: The guard is deterministic. It sorts the `rglob` output, works on the AST alone, and builds paths with repo-relative `as_posix()`. It passed 3 times in a row.
+Checked: File conventions hold. The `# Implements CAP-003 TC-COMP-248/251` markers are unchanged, and the docstring is updated for (c) and (d). Nothing outside the evidence and review docs refers to the old helper `_calls_patch_on_rest_client`. `typing.TypeGuard` needs Python 3.10 or later, which both interpreters meet.
+Checked: Validation on the patched scratch tree passes:
+- `ruff check .`: All checks passed.
+- `ruff format --check .`: 285 files already formatted.
+- `mypy src`: no issues in 61 source files.
+- Focused suite: 91 passed, against 87 at HEAD.
+Checked: The RED and GREEN logs match what I reproduced.
+- `red-cycle-4.log`: each of the 5 mutants fails the expected rows, every planted form fails on its own, the HEAD guard passes the combined plant, and a control run gives 37 passed.
+- `green-cycle-4.log`: 37 passed and 91 passed, plus ruff, format, mypy and `git diff --exit-code HEAD -- src uv.lock pyproject.toml tests/unit/test_massive_redirects.py` all exiting 0.
+
+Findings:
+- non-blocking: Clause (c) still misses some ways of faking a 429 through `RESTClient`. I planted each of these with a 429 and both guards passed:
+  - patching a method of `RESTClient`: `patch.object(RESTClient, "list_aggs", side_effect=…429…)` (the target is a Name, not a string) and `patch("massive.RESTClient.list_aggs", …)`. This is the gap closest to TC-COMP-251 step 2's wording.
+  - `patch.multiple(module, RESTClient=…)`.
+  - a patch in a fixture when the 429 is named in a different test function.
+  - a class-level `@patch` decorator.
+
+  Every form TC-COMP-251 and IR-003 name is covered, and the current tree has none of these. Record the narrowing at doc sync, alongside IR-002.
+- non-blocking: Clause (d)'s exemption is keyed on file and source text, not on the read's context. A later `result_columns["attempts"]` in `test_run_constraints.py` that reads a recorded value would pass; I appended one and the guard passed. `getattr(row, "attempts")`, `row.get("attempts")` and positional tuple read-backs are also invisible, as they were before this patch. Against the current tree the exemption matches exactly one read, so this is a residual risk only.

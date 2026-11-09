@@ -1,0 +1,22 @@
+# Independent code-review subagent (general-purpose, agentId a87b7f4163bb399ea), cycle-3, judged cycle-3.patch
+# (diff_sha256 8bc13db8397d068f90df544dab64fcdec6a8b13583c963acab33ebbb22497d2c) and mutation-cycle-3-results.json.
+# A first-round review (agentId a8166c9c00346987b) approved an earlier staging (sha256 7e127694...75bb2) with two
+# non-blocking wording findings (the IR-002 docstring's claim about the other rows, and 1.76e9 for time.time in late
+# 2026); both were fixed, the cycle re-staged, re-run (RED, GREEN, mutation) and reviewed again here.
+VERDICT: APPROVED
+Checked:
+- Patch integrity: cycle-3.patch has sha256 8bc13db8…7d068f90; `git diff --cached` without docs/ hashes to the same value. 2 files, +76/-3. rate_limit.py is not in the diff.
+- Survivor kills, on my own scratch copies (HEAD 2c44be5 archive, patch applied, one copy per mutant): 22 tests pass on the unmutated copy. `review-reset-spent-on-raise` fails only test_a_spent_budget_stays_spent…, on `assert after_raise.calls == 1` (6 == 1). `review-throttled-at-from-wall-clock` fails only test_throttle_waits_are_charged_on_the_monotonic_clock…, where the 20-send guard trips ("throttling did not terminate"). Both fail for the reason the findings describe.
+- IR-001 arithmetic: rpm 60, jitter 0, budget 300 s. The first execute sleeps 5×60 s and raises on send 6, because 300 + 60 > 300. The second execute raises after 1 send with no new sleep. Total 300 s.
+- IR-002 arithmetic: monotonic starts at 1000; adding 1_793_999_000 gives a wall clock of 1_794_000_000, which is 29_900_000×60, so every boundary wait is exactly 60 s. Permit waits are 0 (capacity 60). Result: 6 sends and [60.0]×5. Under the mutant each wait is charged about −1.794e9 s, so the budget is never spent. Float precision at 1.8e9 is about 2e-7, so the arithmetic is exact enough.
+- Determinism: fake clock, sleeper and jitter, no real time or network. Focused 10-file suite run twice: 136 passed both times.
+- Mutation results: mutation-cycle-3-results.json has 41 of 41 killed, 4 baselines exit 0. Its mutant set (id, file, line, operator) is identical to the 41 in review-v1-mutation.json (39 killed + 2 survived there).
+- Logs: red-cycle-3.log shows 1 failed, 21 passed per mutant, with the failures above. green-cycle-3.log shows 22 passed, 136 passed, ruff, format and mypy clean.
+- Validation I ran myself: ruff check passes; ruff format --check reports 285 files already formatted; mypy reports no issues in 61 source files; `git diff --cached --check` is clean.
+- IR-003 docstring (errors.py:18-23) is accurate:
+  - DAC-E3-S3-6 says a 429 "is not raised as a failure… handed to the governor as flow control".
+  - Massive-client 2.4 says ProviderRateLimited is raised by the governor, never from a response, and 2.5 gives it its own kind.
+- Comment and docstring facts hold: Unix time in Nov 2026 is about 1.79e9, and the -1.79e9 s per-wait charge is correct. Both rows follow file conventions (`_guarded_throttle`, `pytest.approx`, FlakySender with fail_count 1_000_000, IR references). The direct RateLimitGovernor construction is needed because `_governor`'s `now` parameter is typed FakeClock.
+Findings:
+1. NON-BLOCKING — tests/unit/test_governor_retry.py:648-650. The docstring's "Unlike the rows DAC-E8-S2-1 governs" reads as if this row were outside DAC-E8-S2-1. But that criterion's Given covers "every row" of the file, apart from the delivered fixed-phase rows. This row is therefore a deviation from DAC-E8-S2-1, not an exemption. CAP-003-E8-S2-tdd-evidence.yaml has no cycle-3 entry yet. The cycle should record it there, with the cycle-3 mutation block, as the review's IR-002 remediation requires.
+2. NON-BLOCKING — tests/unit/test_governor_retry.py:469 and 493. The test name says "every execute", but the row exercises only one further execute. Also, `sum(sleeper.calls) == 300` is redundant after the exact `[60.0]*5` assertion. Neither weakens the kill.

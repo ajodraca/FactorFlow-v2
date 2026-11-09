@@ -1,0 +1,180 @@
+# TDD evidence for CAP-003-E8-S4 - The runner starts each stock's budget at its heartbeat, proven end to end at the
+# default timing set.
+# Base commit (T001): eb912cb020f511a990ec681671d90a105b286112 (CAP-003-E8-S3 doc sync; E8-S1, S2 and S3 coded,
+# adversarially reviewed and doc-synced on this branch's ancestry; nothing pushed or merged, by the owner's
+# instruction, so "landed" means present in this branch's history; S3 and S4 land and release together). T001 records:
+# errors.py defines ProviderRateLimited (line 109) and ProviderNotEntitled (line 124) and maps them to rate_limited and
+# not_entitled (lines 292-293); rate_limit.py has RateLimitGovernor.start_throttle_budget() (line 124); client.py has
+# classify_for_governor (line 67) and MassiveClient.start_instrument() (line 100); outcomes.py classify_provider_error
+# accepts both types (line 151); PYTHONPATH=src imports this clone's factorflow; docker info succeeds (28.3.2) with the
+# sandbox disabled.
+# One behaviour-changing cycle, the plan's cycle-1 (T002-T009 tests, then T010 the runner call). T013 (README upgrade
+# subsection) changes documentation only and is no cycle; T014 was already satisfied by the E8-S1 and E8-S2 doc syncs
+# (201442b, 52ecfbd), so README.md's Massive provider failure reasons section was not edited (docs-and-static-checks.log).
+# T001, T011, T012, T015 and T016 change no code.
+# Story coding makes one commit for the story, so the cycle records commit_hash: stage and cites its reviewed_patch,
+# the staged diff against HEAD (fingerprint --staged, index tree 617b1ccc).
+# Mutation: scripts/mutation-run.py generates no mutant for the added comment and call line (as the plan expected), so
+# the run is the plan's hand-written M1-M4 and M6 plus the coder's own on every other placement of the call
+# (operator "manual"). As first scored (mutation-cycle-1-results.json, 11/13), M5 and the coder's m12 survived and were
+# disposed of as equivalent, as the plan records M5. Implementation review v1 (IR-001) rejected that disposition: the
+# story and acquisition-runner section 2.2 place the call before the symbol lookup, so a stock skipped for a missing
+# symbol still gets its one call, and the client seam observes it. Cycle-2 (the review rework) adds the TC-COMP-252
+# rows that pin it, and cycle-1's 13 mutants were rescored at cycle-2's test bytes (runner.py unchanged):
+# mutation-cycle-1-rescored-results.json, 13/13 killed. Cycle-1's mutation block cites the rescored run; no survivor
+# of either cycle is recorded equivalent.
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+# Interpreter: no venv in this clone; every focused command ran as <main checkout>/.venv/bin/python -m <tool> from the
+# clone root with pytest given -o pythonpath=src; postgres rows in a testcontainers postgres:16 on a random port with
+# the Bash sandbox disabled; the production compose project factorflow untouched; the live provider never contacted.
+# No exception and no decision record: no TDD or review step was skipped.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T010]
+    description: >
+      tests/integration/test_runner_provider_refusals.py (new, every test @pytest.mark.postgres on
+      migrated_runner_connection). T002: copied store helpers (_fetch_result_rows reads instrument_id, data_type,
+      outcome, reason only), _symbol_of, the responders (_plan_refusal_answer: 403 with req_403_<n> on
+      /stocks/financials/v1/*, reference_active.json with the requested ticker, empty events and results;
+      _throttling: a real 429 with error_rate_limited.json's bytes for the throttled symbols), and _real_harness:
+      production MassiveSettings and RunSettings from env (RPM 60, every other value at its default, asserted 3 /
+      300.0 / 900.0), one FakeClock(1_762_560_000.0) as monotonic and now, FakeSleeper, SequenceJitter([jitter]), the
+      real MassiveClient, forbid_sockets then RecordingMakeRequest, and heartbeat / finalise / budget marks recorded
+      before delegating. T003 (TC-COMP-252) two MagicMock-client tests on one parent Mock: the literal seven-name
+      sequence x 2, and, cancelled during the first stock, the seven names plus heartbeat, cancellation_requested,
+      start_instrument called once, run cancelled. T004 (TC-COMP-253) AAPL then KO refused on financials. T005
+      (TC-COMP-254) KO always 429 then AAPL, jitter 0.0 and 0.999, (a) to (e). T006 (TC-COMP-255) KO alone, run
+      failed. T007 (TC-COMP-258) both scenarios, an earlier failed run's [unavailable] rows unchanged by xmin and
+      every column except the retry count. T008 (TC-COMP-256 edge) a refusal then CredentialRejected fails the run
+      at once. T009 two throttled stocks each wait a full budget. Then T010: runner.py execute_claimed, after the
+      cancellation_requested block and before "# --- Fetch symbol ---", the design's two-line comment and
+      self._client.start_instrument().
+    deviations: >
+      (1) Markers read "# Implements CAP-003 TC-COMP-NNN", not "# Implements TC-COMP-NNN": CAP-001 already uses bare
+      TC-COMP-253 to 259 (tests/unit/test_run_states.py, tests/integration/test_run_constraints.py); E8-S1 to S3 set
+      the prefix precedent. Both reviewers accepted it. (2) _plan_refusal_answer() is a factory returning a fresh
+      responder per download, so each download's 403 request ids count from 1; the scenario helpers share one
+      _run_download and take a prepare hook (T007's seed between the instrument inserts and the download), and
+      _run_throttled_download takes throttled (T009's KO and PEP). (3) Small tightenings beyond the plan: TC-COMP-252
+      test 1 also asserts the run succeeded; path checks compare the route without its query for equality. (4) The
+      plan's Phase 2 checkpoint predicted 4 RED and T004, T006, T007, T008 passing on arrival; the observed split is 8
+      RED (T003 x2, T005 x2 at (d), T006, T008 x2, T009) and 3 passing on arrival (T004, T007 x2). T006 and T008 fail
+      on assertions the plan itself specifies (the budget mark; start_instrument.call_count == 1), which need T010;
+      both reviewers judged the tests right and the checkpoint's prediction a planning inconsistency.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/red-cycle-1.log
+    red_log_sha256: 291ba75064c20a6e2b39e5042880aa6f789adad99299c7b10a5a618dda931359
+    red_evidence: >
+      With the staged test module and runner.py at the base: 8 failed, 3 passed. Every failure is the missing
+      start_instrument() call: T003's sequences differ at index 2, T005 at (d) for both jitters with (a) to (c)
+      already holding, T006 at its marks, T008 at start_instrument.call_count 0 for both refusals, T009 at the second
+      stock's sleeps []. T004 and both T007 scenarios pass on arrival, characterization rows of E8-S1 to S3 and the
+      delivered outcome rule through the runner.
+    green_evidence: >
+      The focused module 11 passed; ruff check, ruff format --check and mypy src clean (green-cycle-1.log). Phase 4
+      (T011): the module plus every delivered runner, outcome and entrypoint suite, 143 passed, delivered tests
+      unchanged, and src limited to runner.py (phase4.log). Full suite on the final bytes 2701 passed, postgres tests included; uv build, ruff and mypy clean (full-suite.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/green-cycle-1.log
+        sha256: 8083748d93818992ed263dd50a0ed72e109ce17877f9752035243d3b55d565bd
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/code-review-cycle-1.txt
+        sha256: 438c26cf15c7aa6454a130b07b439543d0b34b7cff618e1340a7a9bf91f43b3a
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/spec-drift-cycle-1.txt
+        sha256: 4679c06a3520f65e2399e7c3b751d82a8bcae2d394d21cfa43667e394cc21cff
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/phase4.log
+        sha256: 1037f1980c5c08839476142f1041a97588095a5b6b2e3b19b7b7658215176752
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/docs-and-static-checks.log
+        sha256: 19ed4a44064811f723342d19a75033d2e1ebce32ed98103fd15154d2a874c05f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/full-suite.log
+        sha256: 46f74af9609e9dd0290d76da58bfe6afe651a74c5c44a8c3bc225bff669f458c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7640e7c89e79e28d50a7063b77e85f838bb4b83aaab3f41ed2928f91a8a2d267
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/cycle-1.patch
+    index_tree: 617b1ccc9f97def855d15c4737b1f74252bb4cea
+    commit_hash: stage
+    # Rescored for review v1 IR-001: the same 13 cycle-1 mutants at cycle-2's test bytes, runner.py unchanged. As
+    # first scored (mutation-cycle-1-results.json, sha256 54980a32562d1155631ec4ff46a83455237ed1123635f769856d868327bd171c)
+    # m5 and m12 survived and were recorded equivalent; the review rejected that, and cycle-2's rows kill both.
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/mutation-cycle-1-rescored-results.json
+      results_sha256: 5eeea1b5771fff9019291c9b1b3d6e047223aca16c53e5c90016d625487370cd
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    tasks: [T003]
+    description: >
+      Review rework for implementation review v1, test-only (tests/integration/test_runner_provider_refusals.py; no
+      production file changes). IR-001 (HIGH): TC-COMP-252 drove only the normal path and the cancellation exit, so the
+      review's mutants review-r08-extra-call-on-claim-loss, review-r05-call-after-symbol-lookup and
+      review-r12-call-inside-reference-helper survived. Two TC-COMP-252 rows on the same parent-Mock technique: (1) the
+      claim lost during the first stock (an _abandon_run helper copied from tests/integration/test_runner_reclaim.py,
+      called from the first stock's fetch_corporate_actions side effect, as the cancellation row calls
+      _set_cancelling): the names are the seven-name first stock followed by heartbeat only, start_instrument is called
+      once, and the run stays abandoned; (2) a roster [AAPL, an instrument_id with no instrument row, KO] with
+      runner._symbol_for_id wrapped in a Mock spy attached to the same parent as symbol_lookup: every stock records
+      heartbeat, cancellation_requested, client.start_instrument, symbol_lookup in that order, the skipped stock with no
+      fetch_*, so start_instrument is called 3 times, once per stock and before each lookup (story Description,
+      acquisition-runner CAP-003 section 2.2, DAC-E8-7), and the lookups are made for the roster's ids in order. The
+      cycle's commit is the rework commit after the review commit d809d75, so commit_hash: stage resolves to it and the
+      patch is the staged diff over d809d75.
+    deviations: >
+      (1) The missing-symbol row also spies the symbol lookup, beyond IR-001's minimum (a call count on the skipped
+      stock), so the order "start_instrument before the lookup" is pinned on the fetched stocks too; the code review
+      showed a mutant that keeps three calls but moves the fetched stocks' call below the lookup is killed only by the
+      spy. (2) Cycle-1's mutation block now cites mutation-cycle-1-rescored-results.json, the same 13 cycle-1 mutants
+      rerun at this cycle's test bytes (13/13 killed), in place of the first scoring whose m5 and m12 equivalence the
+      review rejected; the original results file is kept beside it and named in cycle-1's comment. (3) The task plan's
+      Other Notes still describe M5 as equivalent; the plan's content is not this skill's to edit (story-coding
+      constraint 9), so it is a follow-up for the plan's next revision. (4) Code-review NIT left as is: the
+      _abandon_run docstring reads "as ... does" twice.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/red-cycle-2.log
+    red_log_sha256: d0c0117ad6520b448c894a016a600bdb10d6744ee0972abf6f7b0b0132b34570
+    red_evidence: >
+      The two rows pin behaviour runner.py already delivers, so they pass on HEAD (control: the four TC-COMP-252 rows,
+      4 passed); their RED is the review's surviving mutants. In a git archive of HEAD d809d75 per mutant, runner.py
+      changed by the review's own old/new pair: with HEAD's test file each survivor passes TC-COMP-252 (2 passed);
+      with the reworked file review-r08 fails the claim-lost row (one more client.start_instrument after the second
+      heartbeat), and review-r05 and review-r12 each fail the missing-symbol row (at index 2, symbol_lookup where
+      client.start_instrument is expected); every other row passes.
+    green_evidence: >
+      tests/integration/test_runner_provider_refusals.py 13 passed (11 + 2); the reclaim and cancel precedents 4 passed;
+      ruff check, ruff format --check and mypy src clean; the staged diff is the test module only, and src, uv.lock and
+      pyproject.toml are unchanged (green-cycle-2.log). Mutation: the review's 16 mutants and cycle-1's 9 not duplicated
+      by them, 25/25 killed. Full suite on the final bytes 2703 passed (2701 + 2), postgres tests included, the 2
+      pre-existing deprecation warnings; uv build ok (full-suite-cycle-2.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/green-cycle-2.log
+        sha256: 9158710c30181c2da59e695ebb3282d778e427842f4780efcace6f41916ab21b
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/code-review-cycle-2.txt
+        sha256: 19b4d21a42ff5759e495233100004a0100bbc558ddfe163b8f7aba0f4a7c6fcc
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/spec-drift-cycle-2.txt
+        sha256: 60606c65adbdf8454a324fd2fdc1f1cd46320c041441d6947ec3c6350428358d
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/full-suite-cycle-2.log
+        sha256: 88fc2a5640dc664ac26e832b0a1666213666d415568e2566d1621f532cff1a69
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f727c36739527e34296ee7eea7faf908d99afe7296186abfde9c2f18878bd8ac
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: fd116741289dd98ccc220bcb012c0e5251fa42ff23192c1767daf2a68883842e
+      generated: 25
+      killed: 25
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

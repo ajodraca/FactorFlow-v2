@@ -1,0 +1,81 @@
+# RED cycle-1 (T002-T009) on base eb912cb020f511a990ec681671d90a105b286112: tests/integration/test_runner_provider_refusals.py as staged (blob ab6d51ece8b5246482aa39ae4a970f063ac20bc7), src/factorflow/ingestion/runner.py at the base (blob 2633faf5dbf1660d2d0b2819d8b7c56b76b84a2c)
+# postgres tests in a testcontainers postgres:16 on a random port (sandbox disabled); the production compose project factorflow untouched
+# $ <main checkout>/.venv/bin/python -m pytest -o pythonpath=src -p no:cacheprovider -q -rfE --tb=short tests/integration/test_runner_provider_refusals.py   (from the clone root)
+FF.FFF..FFF                                                              [100%]
+=================================== FAILURES ===================================
+_ test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check _
+tests/integration/test_runner_provider_refusals.py:541: in test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check
+    assert [c[0] for c in parent.mock_calls] == [
+E   AssertionError: assert ['heartbeat',...actions', ...] == ['heartbeat',...ancials', ...]
+E     
+E     At index 2 diff: 'client.fetch_reference' != 'client.start_instrument'
+E     Right contains 2 more items, first extra item: 'client.fetch_financials'
+E     Use -v to get more diff
+_________ test_a_stock_cancelled_before_it_is_fetched_starts_no_budget _________
+tests/integration/test_runner_provider_refusals.py:579: in test_a_stock_cancelled_before_it_is_fetched_starts_no_budget
+    assert [c[0] for c in parent.mock_calls] == _ONE_STOCK + [
+E   AssertionError: assert ['heartbeat',...actions', ...] == ['heartbeat',...ancials', ...]
+E     
+E     At index 2 diff: 'client.fetch_reference' != 'client.start_instrument'
+E     Right contains one more item: 'cancellation_requested'
+E     Use -v to get more diff
+_ test_a_persistent_429_stays_inside_the_staleness_window_and_finishes_partial[0.0] _
+tests/integration/test_runner_provider_refusals.py:695: in test_a_persistent_429_stays_inside_the_staleness_window_and_finishes_partial
+    assert [m.kind for m in harness.marks] == [
+E   AssertionError: assert ['heartbeat',...', 'finalise'] == ['heartbeat',...', 'finalise']
+E     
+E     At index 1 diff: 'heartbeat' != 'budget'
+E     Right contains 2 more items, first extra item: 'budget'
+E     Use -v to get more diff
+_ test_a_persistent_429_stays_inside_the_staleness_window_and_finishes_partial[0.999] _
+tests/integration/test_runner_provider_refusals.py:695: in test_a_persistent_429_stays_inside_the_staleness_window_and_finishes_partial
+    assert [m.kind for m in harness.marks] == [
+E   AssertionError: assert ['heartbeat',...', 'finalise'] == ['heartbeat',...', 'finalise']
+E     
+E     At index 1 diff: 'heartbeat' != 'budget'
+E     Right contains 2 more items, first extra item: 'budget'
+E     Use -v to get more diff
+__________ test_everything_throttled_finishes_failed_never_abandoned ___________
+tests/integration/test_runner_provider_refusals.py:745: in test_everything_throttled_finishes_failed_never_abandoned
+    assert [m.kind for m in harness.marks] == ["heartbeat", "budget", "finalise"]
+E   AssertionError: assert ['heartbeat', 'finalise'] == ['heartbeat',...', 'finalise']
+E     
+E     At index 1 diff: 'finalise' != 'budget'
+E     Right contains one more item: 'finalise'
+E     Use -v to get more diff
+_ test_a_rejected_credential_after_a_refusal_still_fails_the_download_at_once[not-entitled] _
+tests/integration/test_runner_provider_refusals.py:868: in test_a_rejected_credential_after_a_refusal_still_fails_the_download_at_once
+    assert client.start_instrument.call_count == 1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = <MagicMock name='mock.start_instrument' id='4446620032'>.call_count
+E    +    where <MagicMock name='mock.start_instrument' id='4446620032'> = <MagicMock id='4446623056'>.start_instrument
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.ingestion.runner:runner.py:355 run=adabe47d-753f-4bbb-89af-bfbf4a4fa93c credential rejected; failing the run: [credential_rejected] symbol=AAPL data_type=prices request_id=req-cr-001: the provider rejected the configured credential
+_ test_a_rejected_credential_after_a_refusal_still_fails_the_download_at_once[rate-limited] _
+tests/integration/test_runner_provider_refusals.py:868: in test_a_rejected_credential_after_a_refusal_still_fails_the_download_at_once
+    assert client.start_instrument.call_count == 1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = <MagicMock name='mock.start_instrument' id='4443422208'>.call_count
+E    +    where <MagicMock name='mock.start_instrument' id='4443422208'> = <MagicMock id='4443421200'>.start_instrument
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.ingestion.runner:runner.py:355 run=0d344b5d-94e6-4372-8942-2f7369f3c876 credential rejected; failing the run: [credential_rejected] symbol=AAPL data_type=prices request_id=req-cr-001: the provider rejected the configured credential
+_____________ test_each_throttled_stock_waits_its_own_full_budget ______________
+tests/integration/test_runner_provider_refusals.py:895: in test_each_throttled_stock_waits_its_own_full_budget
+    assert harness.interval_sleeps() == [[60.0] * 5, [60.0] * 5]
+E   assert [[60.0, 60.0,....0, 60.0], []] == [[60.0, 60.0,..., 60.0, 60.0]]
+E     
+E     At index 1 diff: [] != [60.0, 60.0, 60.0, 60.0, 60.0]
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_persistent_429_stays_inside_the_staleness_window_and_finishes_partial[0.0]
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_persistent_429_stays_inside_the_staleness_window_and_finishes_partial[0.999]
+FAILED tests/integration/test_runner_provider_refusals.py::test_everything_throttled_finishes_failed_never_abandoned
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_rejected_credential_after_a_refusal_still_fails_the_download_at_once[not-entitled]
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_rejected_credential_after_a_refusal_still_fails_the_download_at_once[rate-limited]
+FAILED tests/integration/test_runner_provider_refusals.py::test_each_throttled_stock_waits_its_own_full_budget
+8 failed, 3 passed in 9.62s
+# exit 1
+# 8 failed, every failure the missing start_instrument() call: T003 both rows (call sequence index 2), T005 both jitters at (d) (marks lack 'budget'; (a) to (c) already hold), T006 at its marks, T008 both refusals at start_instrument.call_count 0, T009 at the second stock's sleeps [].
+# 3 passed on arrival: T004 (TC-COMP-253) and T007 both scenarios (TC-COMP-258), characterization rows of E8-S1 to S3 through the runner.

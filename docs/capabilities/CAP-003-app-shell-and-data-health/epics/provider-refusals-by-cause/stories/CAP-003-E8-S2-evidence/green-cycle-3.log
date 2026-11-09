@@ -1,0 +1,28 @@
+# GREEN cycle-3 (review rework, IR-001, IR-002, IR-003) on HEAD 2c44be5 plus the staged test rows and errors.py docstring; rate_limit.py unchanged.
+
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_governor_retry.py
+============================= test session starts ==============================
+collected 22 items
+
+tests/unit/test_governor_retry.py ......................                 [100%]
+
+============================== 22 passed in 1.06s ==============================
+# exit code: 0
+
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q <cycle-1 list> <cycle-2 list>  (whole-story focused suite)
+........................................................................ [ 52%]
+................................................................         [100%]
+136 passed in 2.94s
+# exit code: 0
+
+# $ python -m ruff check .
+All checks passed!
+# exit code: 0
+
+# $ python -m ruff format --check .
+285 files already formatted
+# exit code: 0
+
+# $ python -m mypy src
+Success: no issues found in 61 source files
+# exit code: 0

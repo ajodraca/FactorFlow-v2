@@ -47,3 +47,12 @@ def test_public_surface_contains_no_raw_dictionary_or_massive_sdk_value() -> Non
         value = getattr(massive_boundary, name)
         assert not isinstance(value, dict), name
         assert not _export_origin(value).startswith("massive"), name
+
+
+def test_provider_rate_limited_is_identity_reexported_from_package() -> None:
+    """CAP-003 DAC-E8-S2-6: `ProviderRateLimited` crosses the package
+    boundary as its definition, so callers import it from the package."""
+    from factorflow.ingestion.massive import errors
+
+    assert "ProviderRateLimited" in massive_boundary.__all__
+    assert massive_boundary.ProviderRateLimited is errors.ProviderRateLimited

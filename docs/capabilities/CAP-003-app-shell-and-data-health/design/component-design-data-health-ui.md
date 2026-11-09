@@ -2,42 +2,44 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-component-design-data-health-ui
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-08
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-26T02:20:00Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:23:46Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c5add7f)"
+    - id: CAP-003-component-design-owner-shell
+      version: "2, draft (ca2eb41)"
     - id: CAP-003-ux-brief
       version: "1"
     - id: CAP-003-ux-design
-      version: "1"
+      version: "2, draft (d0af566)"
     - id: PRODUCT-UX-S09
       version: "4"
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "6"
+      version: "7, approved"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:26Z
-  reviewed_revision: sha256:ca070dd2fca538012fdf6a4875f6efc1844f3f1d3edbfe57c21121f4648e43cd
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
+  approved_at: 2026-11-08T01:01:20Z
+  reviewed_revision: sha256:8bc4a8e6142ba3b2768faa0df513a5a15b492d94925f12aa8b03d063024be89d
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # Component: Data Health UI
@@ -45,7 +47,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-003
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-11-07
 
 This design was produced in an unattended `$design-run`. It applies DEC-0200,
 DEC-0201, DEC-0210, DEC-0213, DEC-0217 and DEC-0220 without re-deciding them,
@@ -53,6 +55,14 @@ DEC-0210 and DEC-0217 as the owner amended them on 2026-10-25;
 decisions live under `projects/factorflow-v2/decisions/` in the harness
 repository. Positions resting on a decision are marked **PROVISIONAL**. It
 records no decision of its own.
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29, AC-30). Each *Needs fixing* failure now states
+the fix its cause calls for, through `ui-components`' `failureRecovery`: a
+plan refusal names the provider plan and is never offered a download, and a
+rate limit is offered a later download with what to check when it recurs
+(system design §3.4 note 9, §3.6 note 7). Sections 1, 2.5, 3, 7, 8, 10, 12, 13
+and 14 carry the change.
 
 ## 1. Overview
 
@@ -69,7 +79,11 @@ It offers two recoveries, both through the delivered API: **Download now**, a
 full download over the followed list that CAP-001 makes safe to repeat (AC-15;
 D-9), and, for a symbol the provider does not recognise, **Stop following**
 (confirmed, history kept) and **Follow a different symbol** (a link to
-Followed stocks), never a download (AC-14).
+Followed stocks), never a download (AC-14). In version 2 a failure the
+owner's plan is not entitled to names the provider plan as its fix, which is
+changed outside the product, and is never offered a download (AC-29); a
+failure the provider rate-limited past the wait budget is fixed by a later
+download (AC-30).
 
 Use cases addressed: AC-11, AC-12, AC-13, AC-14, AC-15, AC-21, AC-24, AC-25,
 and the Data health half of AC-16 (the chip is the shell's, from the same
@@ -216,12 +230,37 @@ row is `retryable`. One `li` per `problems.rows` entry, ordered by symbol:
   `prices`, `fundamentals`, `corporate_actions`, `reference`;
 - the consequence at `--text-xs`, *Its scores show as Incomplete until this
   is fixed, and so does every universe holding it.* (DEC-0201);
-- the fix: a *Failed* failure reads *Download again to retry; data already
-  stored is never duplicated or overwritten.* with no per-row control (the
-  header's **Download now** is the action, D-9); a *Not found* failure gives
-  the row **Stop following** (`button` `ghost`) and **Follow a different
-  symbol** (`button` `outline`, a link) with *Probably a typo or a delisted
-  ticker. Downloading again won't help.*
+- the fix, chosen by `failureRecovery(failure.outcome, failure.cause)` from
+  `ui-components` (version 2; system design §3.6 note 7), never by a mapping
+  of this screen's own:
+  - `download_again`: *Download again to retry; data already stored is never
+    duplicated or overwritten.* with no per-row control (the header's
+    **Download now** is the action, D-9), as delivered;
+  - `provider_plan` (cause `not_entitled`, AC-29): the fix's `text`, which
+    names the provider plan, with no per-row control and no download offered;
+  - `download_later` (cause `rate_limited`, AC-30): the fix's `text`, a later
+    download with the plan's request limit and the configured request rate
+    named as what to check, the header's **Download now** being the action;
+  - `stop_following` (outcome `not_found`): the row's **Stop following**
+    (`button` `ghost`) and **Follow a different symbol** (`button` `outline`,
+    a link) with *Probably a typo or a delisted ticker. Downloading again
+    won't help.*, as delivered.
+
+  For `provider_plan` and `download_later` the what-failed line omits
+  *, {attempts} attempts*: a plan refusal is one request and a rate limit is
+  not an attempt (AC-30), and the delivered writer never records the attempt
+  count, so the column would read 1 (`src/factorflow/db/migrations/0004_runs.sql`
+  line 41, `DEFAULT 1`; `src/factorflow/ingestion/outcomes.py` writes no
+  `attempts`). The words of both new fixes and of this line are UX design
+  v2's, 1.4 (`d0af566`; section 14, question 4).
+
+The header's **Download now** appears only when a loaded row is `retryable`,
+which the server computes excluding `not_entitled` failures, so a stock whose
+only failures are plan refusals never shows **Download now** on its account
+(system design §3.4 note 9). `failure.cause` reaches this screen through the
+`ProblemPage` failure type in `web/src/app/shell-types.ts`, which
+`owner-shell` §2.3 gives `cause: FailureCause | null` (section 14,
+question 5).
 
 **Show more** (`button` `outline`) after the loaded rows when `next_cursor` is
 set appends `fetchProblems(cursor, 50)`; focus stays on the control and the
@@ -296,6 +335,15 @@ N/A, not applicable for this component.
 - **Not found is never retried** (AC-14): no download control on a row whose
   failures are all *Not found*; the header's **Download now** in *Needs
   fixing* appears only when a row is retryable.
+- **A plan refusal is never offered a download** (AC-29; version 2): its fix
+  names the provider plan; a row whose failures are all plan refusals, or
+  plan refusals and *Not found*, is not retryable and carries no download
+  control. It still counts as a problem in the header, the verdict and the
+  chip; only its fix differs (system design §3.6 note 6).
+- **One mapping from cause to fix** (version 2): this screen holds no
+  cause-to-fix logic and no copy for the two new fixes; both come from
+  `ui-components` so the download detail says the same (review v14
+  FINDING-64).
 - **No strategy wording in M1** (UX design 0.8; DEC-0210): the consequence
   speaks of scores and universes.
 - **S09 §7's Stale state is not rendered on the check cards.** Under
@@ -345,6 +393,9 @@ N/A, not applicable for this component.
 | Partial is never complete | `web/src/screens/data-health/recent-downloads.test.tsx` | *Partial* is warning and *Interrupted* serious with their result sentences (AC-12; S09-1) |
 | Recent downloads time | `web/src/screens/data-health/recent-downloads.test.tsx` | *checked {time}* shows while a download runs and otherwise, and advances on each 10 s re-read (AC-25) |
 | Rows | `web/src/screens/data-health/problem-row.test.tsx` | Symbol, what failed, reason, attempts and consequence; *Not found* rows offer **Stop following** and **Follow a different symbol** and no download (AC-13, AC-14; S09-2, S09-3) |
+| Plan refusal row | `web/src/screens/data-health/problem-row.test.tsx` | A failure `{outcome: "failed", cause: "not_entitled", data_type: "fundamentals"}` renders *Failed*, the what-failed line for company financials without an attempt count, and `PLAN_FIX_TEXT`; the row has no button and no link whose name contains *Download* (AC-29) |
+| Rate-limited row | `web/src/screens/data-health/problem-row.test.tsx` | A failure with cause `rate_limited` renders `RATE_LIMIT_FIX_TEXT` and no attempt count; a failure with cause `unavailable` or `null` renders *Download again to retry; …* with its attempt count, as delivered (AC-30) |
+| No download for plan refusals only | `web/src/screens/data-health/needs-fixing.test.tsx` | With every loaded row `retryable` false because its failures are `not_entitled`, *Needs fixing* shows no **Download now**; adding one row with a `rate_limited` failure and `retryable` true shows it (AC-29, AC-30) |
 | Header action | `web/src/screens/data-health/needs-fixing.test.tsx` | **Download now** appears in *Needs fixing* only with a retryable row; **Show more** appends and keeps focus |
 | Download now | `web/src/screens/data-health/download-now.test.tsx` | `202` refreshes attention; `queued_behind` shows the queued line; each `409` names its fix (AC-15) |
 | Stop following | `web/src/screens/data-health/stop-following-dialog.test.tsx` | `confirm`, cancel first and focused, blueprint wording; success re-reads and announces; refusal stays in the dialog (STD-UI-2) |
@@ -369,6 +420,14 @@ N/A, not applicable for this component.
 7. Failure scenario: a failed read keeps each card's header and replaces its
    body with *Couldn't read {the data health checks / recent downloads / what
    you follow}: {reason}.* and **Try again**; no `request_id` is shown.
+8. A failure whose cause is `not_entitled` names the provider plan as its fix
+   and offers no download, and a row whose failures are all plan refusals
+   never brings **Download now** into *Needs fixing* (version 2; AC-29).
+9. A failure whose cause is `rate_limited` is fixed by a later download and
+   names the plan's request limit and the configured request rate as what to
+   check when it recurs (version 2; AC-30).
+10. Every failure's fix comes from `failureRecovery`; a failure with an
+    unknown cause keeps *Download again* (version 2).
 
 ## 9. Workflows
 
@@ -390,6 +449,12 @@ with its name as `h2` at `--text-lg`, the tier `badge` beside it, a bold
 result line at `--text-base` and one `--text-xs` as-of and exceptions line;
 (3) *Needs fixing · {n}* (`card` `default`); (4) two columns `--space-5`
 apart, Recent downloads and What you follow.
+
+**Version 2 copy.** The two new fixes render as one `--text-xs` line under the
+failure, like the delivered fix line, with no control; their words are
+`ui-components`' `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT`, which hold UX
+design v2 1.4's words (section 14, question 4). No component, variant or
+token is added.
 
 **Component mapping.**
 
@@ -479,9 +544,11 @@ Consumed; none exposed.
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| UX design | CAP-003 v1 | §1.4 Data health, §0.8 departures | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
+| UX design | CAP-003 v2 (draft, `d0af566`) | §1.4 Data health, its fix by cause and what-failed line; §0.8 departures | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
 | Screen spec | PRODUCT-UX-S09 v4 | Regions, copy, states, S09-1 to S09-5 | `docs/ux/screens/S09-data-health.md` |
-| System design | CAP-003 v1 | §3.4 and notes | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| System design | CAP-003 v2 (draft, `c5add7f`) | §3.4 and notes (note 9), §3.6 notes 6, 7; §4.1 `owner-shell` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| Component design | CAP-003 UI components | `failureRecovery`, `PLAN_FIX_TEXT`, `RATE_LIMIT_FIX_TEXT` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-ui-components.md` |
+| Component design | CAP-003 owner shell v2 (draft, `ca2eb41`) | §2.3 `ProblemPage` failure type with `cause`; §7 `shell-types.test.ts`; acceptance criterion 9 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-owner-shell.md` |
 | Blueprint | PRODUCT-UX v6 | §9 confirm wording; D-9 | `docs/ux/product-ux-blueprint.md` |
 | Decisions | DEC-0200, DEC-0201, DEC-0210, DEC-0213, DEC-0217, DEC-0220 | Reads, definitions, verdict (as amended 2026-10-25), counts, the full tier order (as amended 2026-10-25), exception count | `projects/factorflow-v2/decisions/` (harness repository) |
 
@@ -499,6 +566,8 @@ Consumed; none exposed.
 | AC-25 | Keyboard; *checked {time}* | As-of lines; Recent downloads' *checked {time}*; dialog focus | 2.3, 2.6, 10 |
 | AC-26 | `ui-components` | Component mapping | 10 |
 | AC-16 | `problems.stock_count` | Same set as the header count | 2.5 |
+| AC-29 | §3.4 note 9, §3.6 note 7; `retryable` excluding `not_entitled` | `provider_plan` fix, no download control; header **Download now** absent for plan refusals only | 2.5, 3 |
+| AC-30 | §3.6 note 7 | `download_later` fix with what to check; no attempt count | 2.5 |
 
 ## 14. Open Questions
 
@@ -512,3 +581,11 @@ Consumed; none exposed.
 3. **Latency target for the aggregate: answered.** The owner set AC-28 on
    2026-10-25 (p95 ≤ 2 s at 3,000 followed stocks; system design open
    question 7).
+4. ~~**The words of the two new fixes, and of their what-failed line, await UX
+   design v2.**~~ **Answered 2026-11-07 by UX design v2** (draft, `d0af566`)
+   §1.4: the plan-refusal and rate-limit fixes are the words
+   `ui-components`' `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT` hold
+   (`ui-components` section 14, question 3), and for those two causes the
+   what-failed line ends at *{reason}*, without *, {attempts} attempts*, as
+   2.5 renders it. *Blocks: nothing.*
+5. ~~**`cause` must be added to the shell's wire types.**~~ **Answered 2026-11-07 by the owner:** system design v2 §4.1 (`c5add7f`) assigns the change to `owner-shell`, and `component-design-owner-shell.md` v2 §2.3 (`ca2eb41`) adds `cause: FailureCause | null` to the `ProblemPage` failure type in `web/src/app/shell-types.ts` (shared by `DataHealth.problems.rows`), with `FailureCause` imported from `ui-components`, tested type-level in `web/src/app/shell-types.test.ts` (owner-shell section 7, acceptance criterion 9). *Blocks: nothing.*

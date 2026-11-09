@@ -1,0 +1,13 @@
+# GREEN cycle-2 on the staged bytes (test blob fd239bd7952310bc4556df52b542db4c390c2cbf, runner.py unchanged at HEAD d809d75c02a2318442aa3acb9de8b906eccff33d, blob 52155c5f4a44c7c9ae02624d8c0241359f0ca414)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/integration/test_runner_provider_refusals.py   (sandbox disabled, testcontainers postgres:16)
+13 passed in 9.16s
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/integration/test_runner_reclaim.py tests/integration/test_runner_cancel.py   (the precedents the new rows copy)
+4 passed in 4.61s
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+286 files already formatted
+Success: no issues found in 61 source files
+# $ git diff --cached --stat
+ tests/integration/test_runner_provider_refusals.py | 89 ++++++++++++++++++++++
+ 1 file changed, 89 insertions(+)
+# $ git diff --stat HEAD -- src uv.lock pyproject.toml   (empty: no production change)

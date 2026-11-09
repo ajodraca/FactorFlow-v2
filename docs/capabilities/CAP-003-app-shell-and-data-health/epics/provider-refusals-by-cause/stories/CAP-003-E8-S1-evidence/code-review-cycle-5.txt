@@ -1,0 +1,15 @@
+# Independent code-review subagent (general-purpose, agentId ac7b4fb2cacece6da), cycle-5, judged cycle-5.patch
+# (diff_sha256 82a5523c27ce8398beb7f10f10ffc6809646036a8ce49ea0637faa5e0b850c1f) and mutation-cycle-5-results.json.
+VERDICT: APPROVED
+Checked: The patch hash is 82a5523c…0c1f, and it matches `git diff --cached` byte for byte. It only touches `tests/unit/test_massive_error_classification.py` (+19 lines) and changes no production code. HEAD is 64b68c9.
+Checked: The focused suite passes (34 passed). `ruff check`, `ruff format --check` (285 files) and `mypy src` (61 files) are all clean.
+Checked: I built my own copies of both IR-001 mutants under $TMPDIR. `status-also-searched` fails only `[in-status]` and `request-id-also-searched` fails only `[in-request-id]`, each with 33 passed. Each row kills its own mutant and only that one, and in both cases the failure is `ProviderNotEntitled` being returned instead of `ProviderUnavailable`, which is the right reason. This matches red-cycle-5.log.
+Checked: The test is not vacuous. Both bodies have no `error` or `message`, so `reason` is "". That rules out the not-found message marker and the credential markers (`api key`, `authorization header`). The statuses "NOT ENTITLED" and "ERROR" are not equal to `_NOT_FOUND_STATUS` ("NOT_FOUND"), and the JSON is valid. So both bodies reach rule 3, and only its field selection decides the result.
+Checked: The test is deterministic: fixed literal dicts, `json.dumps`, no clock and no I/O. The assertion is `type(result) is ProviderUnavailable` against the imported class, not something derived from the code under test. An exact-type check is the right one, since `ProviderNotEntitled` does not subclass `ProviderUnavailable`.
+Checked: The test follows the file's conventions. The `# Implements CAP-003 TC-COMP-228` marker sits between the parametrize decorator and the `def`, as in the neighbouring tests. The `pytest.param(..., id=...)` ids are kebab-case like `in-message` and `in-error`. The docstring opens with "CAP-003 TC-COMP-228 / DAC-…", and the test sits inside the TC-COMP-228 section.
+Checked: mutation-cycle-5-results.json has 33 mutants tagged cycle-5, all for HEAD 64b68c9: 31 killed and 2 survived. Both IR-001 mutants are now `killed`.
+Checked: Both survivors are equivalent.
+- `coder-exact-class-to-isinstance`: `compose_failure_reason` looks up `_ERROR_KIND_BY_TYPE` by `type(error)` and raises `TypeError` before the branch for any class not in the table. No table class subclasses `ProviderNotEntitled`; the test's `_NotEntitledSubclass` is rejected before the branch. So `type(...) is` and `isinstance` agree on every input that reaches the branch.
+- `reviewer-compose-type-error-text-reverted`: this only rewords a `TypeError` message. DAC-E8-4 specifies the exception type, not its text, and the review already judged it equivalent on that basis.
+Findings: none
+Out of scope: the working tree also has an unstaged change to `CAP-003-E8-S1.md` (status `in-review` changed to `in-progress`). It is not part of the patch, so I did not judge it.

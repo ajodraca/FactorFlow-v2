@@ -1,0 +1,16 @@
+# Independent spec-drift subagent (general-purpose, agentId a2d34efe7293bab12), cycle-2 ROUND 1 (superseded by
+# spec-drift-cycle-2.txt): judged the cycle-2 patch at index tree 1c5ff94e5d0dcd43fd1d129a20eb2db790590e15
+# (diff_sha256 7b6e3a0d022a7cc4e3ddebd78c59a7a27881c1e173dc792a8ae52593c822d635). Kept as a log.
+DRIFT_DETECTED: false
+
+What I checked (summary of the report)
+- Patch integrity (sha256 7b6e3a0d... equals git diff 72aaf81..1c5ff94; write-tree 1c5ff94e).
+- Files touched: client.py and test_massive_retry.py; test_massive_redirects.py, uv.lock, pyproject.toml unchanged from 52ecfbd (DEC-0042, SEC-DEP-001); SDK construction untouched.
+- classify_for_governor and _THROTTLED_RETRY_REASON match massive-client section 2.3 and story rules 1-4 in order; _through_governor passes it positionally and keeps the except BadResponse re-raise; T016 docstring paragraph present.
+- TC-COMP-243..248, 251 each against the test spec and DAC-E8-S3-1..9; TC-COMP-249 rows differ only by the added marker line (DAC-E8-S3-7); DAC-E8-20: only TC-INT-026 still patches RESTClient (no 429).
+- Tests: 76 passed.
+- Coder choices: marker prefix, kept test name and removed _FakeResponse, strengthening rows, __all__ entry: none is drift.
+
+Minor findings (not drift)
+- tests/unit/test_massive_retry.py:615: the 404 test marked TC-COMP-249 stretches that case. -> ADDRESSED (relabelled implementation-level).
+- The 413 row sat above the T012 comment, mislabelled. -> ADDRESSED (rows regrouped under their own comment).

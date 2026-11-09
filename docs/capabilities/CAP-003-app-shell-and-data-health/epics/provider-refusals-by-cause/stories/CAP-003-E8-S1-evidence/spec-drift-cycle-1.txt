@@ -1,0 +1,21 @@
+# Independent spec-drift subagent (general-purpose, agentId a5768bbdfbe057894), cycle-1, judged cycle-1.patch
+# (diff_sha256 f93d3487bb24cda6c5c821e4165e6713adf3faeb95a4afd969aee1fc0497f989).
+DRIFT_DETECTED: false
+
+Checked against T002, T003, T010, massive-client section 2.4, TC-COMP-228/229 and DAC-E8-S1-1/2. Every item matches.
+errors.py: __all__ entry after ProviderContractViolation; marker constant and comment exactly as section 2.4;
+CredentialRejected docstring loses only "(401/403)"; ProviderNotEntitled(MassiveError) after ProviderContractViolation
+with the section 2.4 docstring word for word; _mentions_not_entitled matches section 2.4; the rule sits after not-found
+and credential and before the default, message "The provider plan is not entitled to this data." with
+provider_request_id=request_id; one classify_error_body docstring sentence added as T010 asks; _safe_fields,
+is_rate_limited_body, is_fatal_for_governor, wrap_validation_error have no hunks; rules 1 and 2 still read
+`error or message`.
+Tests: T002 one parametrised test over the five bodies (r1, r1, r2, r3, r5; NOT_AUTHORIZED kept as row 5), each
+asserting type is ProviderNotEntitled, the literal id and the exact str; separate no-marker Forbidden body gives
+ProviderUnavailable. T003 credential and NOT_FOUND bodies with `type(...) is`, is_fatal_for_governor True, issubclass
+MassiveError and not ProviderUnavailable. Every new test carries `# Implements CAP-003 TC-COMP-228/229`;
+ProviderNotEntitled imported at module level; nothing from C2-C4 present.
+Minor observations (not drift): the Implements comment on the parametrised test sits between decorator and def (valid,
+as test_massive_retry.py's TC-INT-026 precedent); the pre-existing classify_error_body sentence "recorded in this
+story's task plan" refers to CAP-001 and was not touched; the reviewer's sandbox blocked `diff`, so it compared the
+patch file with the staged errors.py content on disk; unstaged story and plan edits are outside the patch.

@@ -1,0 +1,189 @@
+diff --git a/src/factorflow/ingestion/massive/errors.py b/src/factorflow/ingestion/massive/errors.py
+index 4b6d9a2..93bee0f 100644
+--- a/src/factorflow/ingestion/massive/errors.py
++++ b/src/factorflow/ingestion/massive/errors.py
+@@ -48,6 +48,7 @@ __all__ = [
+     "CredentialRejected",
+     "ProviderUnavailable",
+     "ProviderContractViolation",
++    "ProviderNotEntitled",
+     "classify_error_body",
+     "is_rate_limited_body",
+     "is_fatal_for_governor",
+@@ -63,6 +64,7 @@ _NOT_FOUND_MESSAGE_MARKER = "ticker not found"
+ _API_KEY_ERROR_MARKERS = ("api key", "authorization header")
+ # Section 2.6a: the observed 429 body's `error` text.
+ _RATE_LIMIT_MARKER = "exceeded the maximum requests"
++_NOT_ENTITLED_MARKER = "not entitled"  # production 403 text, 2026-11-07 (CAP-002 manifest B1)
+ 
+ 
+ class MassiveError(Exception):
+@@ -89,7 +91,7 @@ class InstrumentNotFound(MassiveError):
+ 
+ class CredentialRejected(MassiveError):
+     """The API key was missing, unknown, or the `Authorization` header was
+-    malformed (401/403). Not retried -- every remaining instrument in the
++    malformed. Not retried -- every remaining instrument in the
+     run would fail identically."""
+ 
+ 
+@@ -107,6 +109,15 @@ class ProviderContractViolation(MassiveError):
+     retrying will not help (DAC-E3-S3-4)."""
+ 
+ 
++class ProviderNotEntitled(MassiveError):
++    """The owner's plan is not entitled to this endpoint (the observed 403
++    body, marker "not entitled" in `error` or `message`). Fatal for the
++    governor: sent once, never retried. Per data type, not per run: prices may
++    succeed while financials are refused, so the data type is recorded failed
++    and the run continues. Carries the provider request_id when the body has
++    one (AC-29)."""
++
++
+ def _safe_fields(raw_body: bytes | str) -> dict[str, str | None] | None:
+     """Parse `raw_body` as JSON and return only the four documented,
+     safe fields (`status`, `message`, `error`, `request_id`); every other
+@@ -135,6 +146,12 @@ def _safe_fields(raw_body: bytes | str) -> dict[str, str | None] | None:
+     }
+ 
+ 
++def _mentions_not_entitled(fields: dict[str, str | None]) -> bool:
++    return any(
++        _NOT_ENTITLED_MARKER in (fields[name] or "").lower() for name in ("error", "message")
++    )
++
++
+ def is_rate_limited_body(raw_body: bytes | str) -> bool:
+     """True when `raw_body` is Massive's 429 envelope (DAC-E3-S3-6).
+ 
+@@ -162,6 +179,11 @@ def classify_error_body(raw_body: bytes | str) -> MassiveError:
+     reserved for a *successful* response failing model validation
+     (`wrap_validation_error`), per the owner's precedence resolution
+     recorded in this story's task plan.
++
++    A plan refusal -- `not entitled` in `error` or in `message`, each field
++    searched on its own, case-insensitively -- classifies as
++    `ProviderNotEntitled`, after the not-found and credential rules and
++    before the default (CAP-003 massive-client section 2.4, AC-29).
+     """
+     fields = _safe_fields(raw_body)
+     if fields is None:
+@@ -183,6 +205,12 @@ def classify_error_body(raw_body: bytes | str) -> MassiveError:
+             provider_request_id=request_id,
+         )
+ 
++    if _mentions_not_entitled(fields):
++        return ProviderNotEntitled(
++            "The provider plan is not entitled to this data.",
++            provider_request_id=request_id,
++        )
++
+     return ProviderUnavailable(
+         "The provider returned an error this component does not recognise.",
+         provider_request_id=request_id,
+diff --git a/tests/unit/test_massive_error_classification.py b/tests/unit/test_massive_error_classification.py
+index 9382305..c8a4aa4 100644
+--- a/tests/unit/test_massive_error_classification.py
++++ b/tests/unit/test_massive_error_classification.py
+@@ -22,6 +22,7 @@ from factorflow.ingestion.massive.errors import (
+     InstrumentNotFound,
+     MassiveError,
+     ProviderContractViolation,
++    ProviderNotEntitled,
+     ProviderUnavailable,
+     classify_error_body,
+     is_fatal_for_governor,
+@@ -274,3 +275,93 @@ def test_classification_never_touches_a_provider_url_or_credential() -> None:
+     assert "SECRET_TEST_TOKEN_ABC123" not in str(result)
+     assert "SECRET_TEST_TOKEN_ABC123" not in repr(result)
+     assert "massive.com" not in str(result)
++
++
++# --- CAP-003 TC-COMP-228 / DAC-E8-S1-1: the plan-refusal rule ----------
++
++_PLAN_REFUSAL_TEXT = "You are not entitled to this data. Please upgrade your plan"
++
++
++@pytest.mark.parametrize(
++    ("body", "request_id"),
++    [
++        pytest.param(
++            {"status": "ERROR", "request_id": "r1", "message": _PLAN_REFUSAL_TEXT},
++            "r1",
++            id="in-message",
++        ),
++        pytest.param(
++            {"status": "ERROR", "request_id": "r1", "error": _PLAN_REFUSAL_TEXT},
++            "r1",
++            id="in-error",
++        ),
++        pytest.param({"error": "NOT ENTITLED", "request_id": "r2"}, "r2", id="upper-case"),
++        pytest.param(
++            {
++                "error": "Forbidden",
++                "message": "You are not entitled to this data",
++                "request_id": "r3",
++            },
++            "r3",
++            id="beside-an-unrelated-error",
++        ),
++        pytest.param(
++            {"status": "NOT_AUTHORIZED", "request_id": "r5", "message": _PLAN_REFUSAL_TEXT},
++            "r5",
++            id="not-authorized-status",
++        ),
++    ],
++)
++# Implements CAP-003 TC-COMP-228
++def test_a_not_entitled_body_in_either_field_any_case_classifies_provider_not_entitled(
++    body: dict[str, str], request_id: str
++) -> None:
++    """CAP-003 TC-COMP-228 / DAC-E8-S1-1: the marker `not entitled` in
++    `message`, in `error`, in upper case, or in `message` beside an
++    unrelated `error` classifies `ProviderNotEntitled` with the body's
++    `request_id`. The `NOT_AUTHORIZED` status row is the specification's
++    provisional edge row, kept on the owner's confirmation of 2026-11-08:
++    `status` takes no part in the rule."""
++    result = classify_error_body(json.dumps(body))
++
++    assert type(result) is ProviderNotEntitled
++    assert result.provider_request_id == request_id
++    assert str(result) == "The provider plan is not entitled to this data."
++
++
++# Implements CAP-003 TC-COMP-228
++def test_a_forbidden_body_without_the_marker_stays_provider_unavailable() -> None:
++    """CAP-003 TC-COMP-228 / DAC-E8-S1-1: a body without the marker stays
++    the safe default."""
++    body = {"status": "ERROR", "request_id": "r4", "error": "Forbidden"}
++
++    result = classify_error_body(json.dumps(body))
++
++    assert type(result) is ProviderUnavailable
++
++
++# --- CAP-003 TC-COMP-229 / DAC-E8-S1-2: rule order; fatal ---------------
++
++
++# Implements CAP-003 TC-COMP-229
++def test_not_found_and_credential_rules_win_over_the_plan_refusal_rule() -> None:
++    """CAP-003 TC-COMP-229 / DAC-E8-S1-2: the delivered credential and
++    not-found rules come before the entitlement rule, so a body naming the
++    API key still stops the run."""
++    credential = classify_error_body(
++        json.dumps({"error": "Unknown API Key", "message": "not entitled"})
++    )
++    not_found = classify_error_body(json.dumps({"status": "NOT_FOUND", "message": "not entitled"}))
++
++    assert type(credential) is CredentialRejected
++    assert type(not_found) is InstrumentNotFound
++
++
++# Implements CAP-003 TC-COMP-229
++def test_provider_not_entitled_is_fatal_and_a_massive_error() -> None:
++    """CAP-003 TC-COMP-229 / DAC-E8-S1-2: a plan refusal is sent once --
++    fatal for the governor -- and is a `MassiveError` that is not a
++    `ProviderUnavailable`."""
++    assert is_fatal_for_governor(ProviderNotEntitled("x")) is True
++    assert issubclass(ProviderNotEntitled, MassiveError)
++    assert not issubclass(ProviderNotEntitled, ProviderUnavailable)

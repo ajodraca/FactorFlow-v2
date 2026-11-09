@@ -2,24 +2,24 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-component-design-owner-web-app
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-08
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-25T19:45:46Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:05:00Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c33a8f1)"
     - id: CAP-003-ux-brief
       version: "1"
     - id: CAP-003-ux-design
@@ -31,15 +31,15 @@ ai_provenance:
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "6"
+      version: "7, approved"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:27Z
-  reviewed_revision: sha256:600efed70d936386a6704d4e3b490ebc36aa782db1ad74577a3197b11cd5a396
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
+  approved_at: 2026-11-08T01:01:21Z
+  reviewed_revision: sha256:716c1f1105de912de5dd74d37648c9256337eccac3c3a793f1bd74ee29b90544
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # Component: Owner Web App (CAP-003 changes)
@@ -47,7 +47,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-003
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-11-07
 
 This design records only what CAP-003 changes in `owner-web-app`, the
 component CAP-001 delivered. Its approved design,
@@ -58,6 +58,14 @@ produced in an unattended `$design-run`; it applies DEC-0204 and DEC-0205 and
 records DEC-0211 (which delivered files this component owns) and DEC-0214
 (the download detail supplies its top-bar crumb), all **PROVISIONAL**, under
 `projects/factorflow-v2/decisions/` in the harness repository.
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29, AC-30). The download detail screen states each
+failed data type's fix through `ui-components`' `failureRecovery`, reading the
+cause from the delivered response's `reason` with `failureCause`, so a plan
+refusal names the provider plan instead of a re-run (system design §3.6 note
+7, §4.1; review v14 FINDING-64). No request, response or other screen changes.
+Sections 1, 2.1, 2.3, 2.6, 7, 8, 12, 13 and 14 carry the change.
 
 ## 1. Overview
 
@@ -89,6 +97,9 @@ design 1.5 to 1.9; AC-17). Concretely:
    `web/src/screens/research/copy.ts` that CAP-002's approved design assigns
    to the shell capability, migrating its three targets to the new paths
    (2.1; DEC-0211; review v1 FINDING-13).
+9. **A failure's fix by its cause** (version 2): on the download detail, each
+   failed data type states the fix `failureRecovery` chooses for its outcome
+   and the cause its `reason` begins with (AC-29, AC-30).
 
 Every action, confirmation and refusal CAP-001 accepted is kept with the same
 outcome: following and stopping following stocks, starting, queueing and
@@ -109,7 +120,9 @@ web/src/screens/instruments/*         labels; Stop following dialog via dialog c
                                       (parse-bulk-symbols.ts unchanged; setup-ui imports it)
 web/src/screens/runs/*                labels; Started column; StatusBadge in place of outcome-badge.tsx and
                                       detail/result-outcome-badge.tsx; links and navigate() to /data/downloads/*
-web/src/screens/runs/detail/*         labels; progress determinate; confirm wording; Not found sentence; setTitleDetail
+web/src/screens/runs/detail/*         labels; progress determinate; confirm wording; Not found sentence; setTitleDetail;
+                                      per failed data type, the fix from failureRecovery(outcome, failureCause(reason))
+                                      in instrument-roster.tsx (version 2)
 web/src/screens/settings/*            labels; Open setup link; Market data key region; coverage-unknown while unreachable
 web/src/screens/research/copy.ts      SHELL_ROUTES only: /runs/:runId, /runs, /instruments to the new paths (CAP-002 §2.2)
 web/src/screens/**/*.test.ts(x)       the delivered screen tests: label, path and component assertions follow (2.6)
@@ -240,7 +253,41 @@ the download was picked up as interrupted. Coverage written before it stopped
 is kept. Download again to continue.* (serious). Not found: `status-warning`
 *Not found* with *The provider doesn't recognise this symbol. Downloading
 again won't help; stop following it or follow a different symbol.* and
-**Open Data health** to `/data`. The completion toast for a download that ends
+**Open Data health** to `/data`. **A failure's fix (version 2; AC-29, AC-30;
+system design §3.6 note 7).** Each expanded data type whose outcome is
+`failed` or `not_found` follows its reason sentence with the fix
+`failureRecovery(row.outcome, failureCause(row.reason))` returns, both from
+`ui-components`: `download_again` keeps the delivered *Download again; data
+already stored is never duplicated or overwritten.*; `provider_plan` (the
+reason begins `[not_entitled] `) shows `PLAN_FIX_TEXT`, which names the
+provider plan and offers no download; `download_later` (`[rate_limited] `)
+shows `RATE_LIMIT_FIX_TEXT`; `stop_following` keeps the delivered *Not
+found* sentence and **Open Data health**. The cause is read from the
+delivered `GET /api/acquisition-runs/{id}` row's `reason` text, so the
+response model is unchanged (system design §4.2, the delivered run-detail
+interface reused unchanged). The reason sentence itself and the summary card
+are unchanged.
+
+```typescript
+// web/src/screens/runs/detail/instrument-roster.tsx (version 2)
+import { failureCause, failureRecovery } from "../../../components/patterns/failure-recovery";
+
+function fixText(row: RunResult): string | null {
+  if (row.outcome !== "failed" && row.outcome !== "not_found") return null;
+  const fix = failureRecovery(row.outcome, failureCause(row.reason));
+  switch (fix.kind) {
+    case "provider_plan":
+    case "download_later":
+      return fix.text;
+    case "download_again":
+      return DOWNLOAD_AGAIN_FIX;        // this screen's constant: UX design 1.8's Download again words
+    case "stop_following":
+      return null;                      // the delivered Not found sentence and link render instead
+  }
+}
+```
+
+The completion toast for a download that ends
 while the owner is elsewhere is `owner-shell`'s watcher, not this screen's,
 and is suppressed on this route.
 
@@ -282,7 +329,7 @@ and renders it through `ui-components`' `StateRegion` over the delivered
 |------------|--------|
 | `web/src/screens/coverage/*.test.tsx` | Label assertions (*stock*, **Download now**, *Last downloaded*, *Stopped following*); start routes to `/data/downloads/{id}`; table assertions against the `virtualised` variant; the blocked and queued sentences |
 | `web/src/screens/instruments/*.test.tsx` | Labels (**Follow a stock**, **Follow many**, **Stop following**, *Stopped following*); `retire-dialog.test.tsx` asserts the `confirm` variant, the blueprint wording, cancel first and focused; the row action's name *Stop following AAPL* |
-| `web/src/screens/runs/*.test.tsx`, `runs/detail/*.test.tsx` | *Started* link to `/data/downloads/{id}`; the eight labels and tiers through `StatusBadge`; `outcome-badge.test.tsx` and `result-outcome-badge.test.tsx` deleted with their components; cancel wording; progress as `progressbar` |
+| `web/src/screens/runs/*.test.tsx`, `runs/detail/*.test.tsx` | *Started* link to `/data/downloads/{id}`; the eight labels and tiers through `StatusBadge`; `outcome-badge.test.tsx` and `result-outcome-badge.test.tsx` deleted with their components; cancel wording; progress as `progressbar`; in version 2, the per-failure fix rows of section 7 |
 | `web/src/screens/settings/*.test.tsx` | *Market data key* region, **Open setup** link, `coverage-unknown` while unreachable |
 | `web/src/api/client.*.test.ts`, `web/src/api/render.test.tsx` | Unchanged |
 | The eleven e2e specs and `tests/e2e/support/acquisition.ts` | `page.goto("/coverage" / "/instruments" / "/runs")` become the new paths; locators by the old labels become the new labels; the behaviour each spec proves is unchanged (AC-17) |
@@ -340,6 +387,7 @@ unchanged.
 | Followed hint | `web/src/screens/instruments/entry-hint.test.tsx` | `focusAdd` focuses the add field; without it focus is unchanged |
 | Behaviour preserved | the delivered screen tests, relabelled | Every CAP-001 confirmation and refusal still renders with the same outcome (AC-17) |
 | Tiers | `web/src/screens/runs/runs-screen.test.tsx` | Each of the eight states renders its label and shape through `StatusBadge`; *Partial* warning, *Cancelled by you* neutral (AC-12, AC-20) |
+| Fix by cause on the detail | `web/src/screens/runs/run-detail.test.tsx` | Expanding a stock whose `fundamentals` row is `failed` with reason `[not_entitled] symbol=KO data_type=fundamentals request_id=r1: the provider plan is not entitled to this data` shows the reason sentence and `PLAN_FIX_TEXT`, and no text *Download again*; a `failed` row whose reason begins `[rate_limited] ` shows `RATE_LIMIT_FIX_TEXT`; a `failed` row whose reason begins `[unavailable] `, or has no prefix, shows *Download again; data already stored is never duplicated or overwritten.*; a `not_found` row keeps the delivered sentence and **Open Data health** (AC-29, AC-30; review v14 FINDING-64) |
 | Detail crumb | `web/src/screens/runs/run-detail.test.tsx` | After the run is read the shell's crumb reads *Download {start time}*; cleared on unmount (DEC-0214) |
 | Settings | `web/src/screens/settings/credential-status.test.tsx` | *Market data key* with *Found*, *Missing* and *Not determinable*; **Open setup** links to `/setup`; no value anywhere (AC-4) |
 | Journeys | the eleven delivered e2e specs at the new paths | First run, diagnose, cancel, coverage, followed-stock changes and the unrecognised-symbol flow behave as CAP-001 accepted (AC-17) |
@@ -358,6 +406,15 @@ unchanged.
 7. Failure scenario: a refused start still names the operation and the reason
    (*Couldn't start the download: ...*), with the same two non-interchangeable
    reasons CAP-001 defined.
+8. On the download detail, a failed data type whose reason begins
+   `[not_entitled] ` states a fix naming the provider plan and offers no
+   download as its fix; one whose reason begins `[rate_limited] ` states a
+   later download and what to check; every other failed data type keeps
+   *Download again*, and a *Not found* one is unchanged (version 2; AC-29,
+   AC-30).
+9. The fix is chosen by `ui-components`' `failureRecovery`; the screen holds
+   no cause-to-fix mapping of its own, and the delivered run-detail request and
+   response are unchanged.
 
 ## 9. Workflows
 
@@ -451,7 +508,9 @@ with the screen that now calls each.
 | Component design | CAP-001 owner web app v4 (approved, not edited) | The five screens as delivered | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-owner-web-app.md` |
 | UX design | CAP-001 v5 | §1.1 to §1.5, the screens' source | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/ux-design.md` |
 | UX design | CAP-003 v1 | §1.5 to §1.9 deltas; §0.7 conventions | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
-| System design | CAP-003 v1 | §3.5 note 3, §4.1, §4.2 *Screen registration* | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| System design | CAP-003 v2 | §3.5 note 3, §3.6 note 7, §4.1, §4.2 *Screen registration* and the reused run-detail interface | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| Component design | CAP-003 UI components | `failureCause`, `failureRecovery`, the two fix texts | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-ui-components.md` |
+| Review | CAP-001 specification review v14 | FINDING-64: Run detail named a re-run as every failure's recovery | `git show b69facd:docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v14.md` |
 | Standard | STD-UI v6 | STD-UI-1 display labels, STD-UI-2, STD-UI-12 | `docs/constitution/standards/ui-conventions.md` |
 | Decisions | DEC-0083 (CAP-002), DEC-0204, DEC-0205, DEC-0211, DEC-0214, DEC-0215 | Download name, shell, packages, ownership, crumb, windowing | `projects/factorflow-v2/decisions/` (harness repository) |
 | Constitution | Agent governance | AGT-SCOPE-002 | `docs/constitutions/agent-governance.constitution.md` (harness repository) |
@@ -471,6 +530,8 @@ with the screen that now calls each.
 | AC-24 | Every region's states | v5 tables through `StateRegion` | 2.5 |
 | AC-26 | Built from `ui-components` | Component mapping | 10 |
 | AC-5 | Shared parser | **Follow many** keeps `parse-bulk-symbols` | 3 |
+| AC-29 | §3.6 note 7; `failureRecovery` in `ui-components` | Detail's plan-refusal fix, no download | 2.3 |
+| AC-30 | §3.6 note 7 | Detail's rate-limit fix, a later download | 2.3 |
 
 ## 14. Open Questions
 
@@ -480,3 +541,15 @@ with the screen that now calls each.
    owner. Blocks: the stories that edit these files.*
 2. **The download's name** (capability OQ-1): the detail's `h1`, the crumb and
    the *Started* column. *Owner: capability owner. Blocks: copy only.*
+3. **The summary card's download recovery stays** (version 2). The delivered
+   summary offers a new download for a `failed` or `partial` download as a
+   whole (CAP-001 owner-web-app v4; DAC-E7-S4-2). It still does when every
+   failure in the download is a plan refusal, because the run-detail response
+   carries counts, not causes, and changing it would change a delivered
+   response (system design constraint 2). Each failed data type's own fix
+   names the plan, which is what AC-29 asks of a failure. Whether the summary
+   should also drop its download in that case is the owner's. *Owner:
+   capability owner. Blocks: nothing in AC-29.*
+4. **The words of the two new fixes await UX design v2** (`ui-components`
+   section 14, question 3). *Owner: capability owner, through `$ux-design`.
+   Blocks: final copy only.*

@@ -2,34 +2,34 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-component-design-ui-components
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-08
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-26T02:13:49Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:23:46Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c33a8f1)"
     - id: CAP-003-ux-brief
       version: "1"
     - id: CAP-003-ux-design
-      version: "1"
+      version: "2, draft (d0af566)"
     - id: PRODUCT-UX
       version: "6"
     - id: STD-UI
       version: "6"
     - id: tech-stack
-      version: "6"
+      version: "7, approved"
     - id: factorflow-design-system
       version: "18 components as of 2026-10-15"
   invoking_user: ajodraca
@@ -37,9 +37,9 @@ ai_provenance:
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:28Z
-  reviewed_revision: sha256:f192035972886f4d75abf789fba598cf064f5f7aa69ee7f6d72bb2f5d288a558
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
+  approved_at: 2026-11-08T01:01:22Z
+  reviewed_revision: sha256:02f64bfe7dac0b117b7d71bf2a881e1f5b3290470506cdf1fec6dabc3256bc89
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # Component: UI Components (design-system components and shared patterns)
@@ -47,7 +47,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-003
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-11-07
 
 This design was produced in an unattended `$design-run`. It applies DEC-0203,
 DEC-0205 and DEC-0210 without re-deciding them, and records DEC-0211 (it owns
@@ -59,6 +59,16 @@ in the harness repository and all **PROVISIONAL**. DEC-0210 and DEC-0217 are
 applied as the owner amended them on 2026-10-25 (specification review v1
 FINDING-8, FINDING-9), including DEC-0210's clause that never-acquired
 replaces both with the empty state (specification review v2 FINDING-2).
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29, AC-30). It adds one pattern,
+`web/src/components/patterns/failure-recovery.ts`, holding `failureCause` and
+`failureRecovery`, the one mapping from a failure's outcome and cause to its
+fix, used by *Needs fixing* and by the download detail screen (system design
+§3.6 note 7; review v14 FINDING-64). Nothing else here changes. Sections 1,
+2.1, 2.2, 2.7a, 7, 8, 12, 13 and 14 carry the change. The two new fixes'
+constants hold UX design v2's words (`d0af566`), closing section 14,
+question 3.
 
 ## 1. Overview
 
@@ -74,9 +84,10 @@ It holds the functions whose single definition is what makes the interface
 consistent: the one status-to-tier function (AC-20; system design constraint
 4), `worstDataTier` shared by the verdict and the data tile (DEC-0210), the
 *Needs you* derivation and `sortAttention` shared by Home and the shell's
-count (DEC-0203; AC-9, AC-16), the date and time formatters (STD-UI-5), and
-the presence renderings that keep present, absent and not determinable apart
-(STD-UI-4, STD-UI-14).
+count (DEC-0203; AC-9, AC-16), the date and time formatters (STD-UI-5), the
+presence renderings that keep present, absent and not determinable apart
+(STD-UI-4, STD-UI-14), and, in version 2, `failureRecovery`, the one mapping
+from a failure's outcome and cause to its fix (AC-29, AC-30).
 
 Use cases addressed: every rendered status, count, as-of line, empty and
 error state on the eight CAP-003 screens, the palette and the shell.
@@ -124,6 +135,7 @@ web/src/components/patterns/worst-data-tier.ts        worstDataTier (DEC-0210)
 web/src/components/patterns/needs-you.ts              NeedsYouItem, deriveNeedsYou(), sortAttention() (DEC-0203, DEC-0216)
 web/src/components/patterns/needs-you-item.tsx        the blueprint §4.1 row
 web/src/components/patterns/state-region.tsx          StateRegion: STD-UI-23's eight states around a body
+web/src/components/patterns/failure-recovery.ts       FailureCause, failureCause(), failureRecovery(), offersDownload() (version 2)
 web/src/components/patterns/*.test.ts(x)              one test file per pattern
 web/src/components/ui/*.test.tsx                      contract tests per vendored component
 package.json                                          delivered; dependencies above (DEC-0211, after confirmation)
@@ -168,7 +180,7 @@ surface at once and no surface carries a literal of its own (AC-26).
 flowchart TB
     T["design-system/theme.css<br/>tokens"] --> TW["tailwind.config.js<br/>token -> utility class"]
     TW --> UI["web/src/components/ui/*<br/>vendored shadcn/ui on Radix"]
-    UI --> PAT["web/src/components/patterns/*<br/>tiers, StatusBadge, presence, format,<br/>AsOfLine, worstDataTier, needs-you, StateRegion"]
+    UI --> PAT["web/src/components/patterns/*<br/>tiers, StatusBadge, presence, format,<br/>AsOfLine, worstDataTier, needs-you, StateRegion,<br/>failureRecovery"]
     UI --> SCR["screens: owner-shell, command-palette, setup-ui,<br/>home-ui, data-health-ui, owner-web-app"]
     PAT --> SCR
 ```
@@ -392,6 +404,112 @@ copy, the error with its three parts and **Try again**, and leaves the
 unreachable kind to the shell, which replaces the main region (AC-23). It
 never renders `empty-never-populated` as `empty-no-match` (AC-24).
 
+### 2.7a `failureCause` and `failureRecovery` (version 2; AC-29, AC-30)
+
+A failure's fix follows its cause, not only its outcome (system design §3.4
+note 9, §3.6 note 7). Two screens show failures: *Needs fixing*
+(`data-health-ui`), whose rows carry `cause` from `GET /api/data-health`, and
+the download detail (`owner-web-app`), whose rows carry only the delivered
+`reason` from `GET /api/acquisition-runs/{id}`. Both decide the fix through
+this one module, so the two screens cannot drift apart (review v14
+FINDING-64).
+
+The flowchart shows the decision `failureRecovery` makes. Its inputs are the
+failure's outcome and its cause, the latter either from the API or read from
+the reason by `failureCause`. The decision points are the outcome, then the
+cause of a `failed` failure. The outcome is one of four fixes: a plan refusal
+names the provider plan and never offers a download, a rate limit offers a
+later download with what to check if it recurs, a stock the provider does not
+recognise keeps its delivered fix, and every other failure, an unknown cause
+included, keeps *Download again*.
+
+```mermaid
+flowchart TD
+    A["[1] failure: outcome, cause (or failureCause(reason))"] --> B{"[2] outcome"}
+    B -- not_found --> NF["[3] stop_following: the screen's delivered not-found fix, never a download"]
+    B -- failed --> C{"[4] cause"}
+    C -- not_entitled --> P["[5] provider_plan: PLAN_FIX_TEXT, no download"]
+    C -- rate_limited --> RL["[6] download_later: RATE_LIMIT_FIX_TEXT"]
+    C -- "unavailable, contract_violation, credential_rejected, not_found, null" --> DA["[7] download_again: the screen's delivered Download again fix"]
+```
+
+```typescript
+// web/src/components/patterns/failure-recovery.ts
+export const FAILURE_CAUSES = [
+  "not_found", "credential_rejected", "unavailable",
+  "contract_violation", "not_entitled", "rate_limited",
+] as const;
+export type FailureCause = (typeof FAILURE_CAUSES)[number];
+
+const CAUSE_PREFIX = new RegExp(`^\\[(${FAILURE_CAUSES.join("|")})\\] `);
+
+/** The kind a stored reason begins with, or null (system design §3.6 note 6).
+ *  The same anchored rule data-health-reader applies on the server. */
+export function failureCause(reason: string | null): FailureCause | null {
+  const match = reason === null ? null : CAUSE_PREFIX.exec(reason);
+  return match ? (match[1] as FailureCause) : null;
+}
+
+/** UX design v2 §1.4 and §1.8 (d0af566), word for word (section 14, question 3). */
+export const PLAN_FIX_TEXT =
+  "Your Massive plan doesn't include this data, so downloading again won't help. " +
+  "Add it to your plan with Massive; the next download after that gets it.";
+export const RATE_LIMIT_FIX_TEXT =
+  "Download again later; data already stored is never duplicated or overwritten. " +
+  "If this keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no " +
+  "higher than your Massive plan's request limit; restart FactorFlow after changing it.";
+
+export type FailureFix =
+  | { kind: "download_again" }                    // copy: each screen's delivered Download again line
+  | { kind: "stop_following" }                    // copy: each screen's delivered not-found line and actions
+  | { kind: "provider_plan"; text: string }       // AC-29: names the plan, never a download
+  | { kind: "download_later"; text: string };     // AC-30: a later download, and what to check
+
+export function failureRecovery(
+  outcome: "failed" | "not_found",
+  cause: FailureCause | null,
+): FailureFix {
+  if (outcome === "not_found") return { kind: "stop_following" };
+  if (cause === "not_entitled") return { kind: "provider_plan", text: PLAN_FIX_TEXT };
+  if (cause === "rate_limited") return { kind: "download_later", text: RATE_LIMIT_FIX_TEXT };
+  return { kind: "download_again" };
+}
+
+/** Whether a download is this fix's action: the server's `retryable` rule, per failure. */
+export function offersDownload(fix: FailureFix): boolean {
+  return fix.kind === "download_again" || fix.kind === "download_later";
+}
+```
+
+Three rules hold the mapping to the system design:
+
+1. **Outcome first.** A `not_found` failure keeps its delivered fix whatever
+   its cause (system design §3.6 note 7, "`not_found` is unchanged"; AC-14).
+2. **Unknown is ordinary.** A null cause, and the three causes this change
+   does not concern, keep *Download again*, so a result recorded before the
+   upgrade with `[unavailable]` reads as it did (system design constraint 17
+   (c)). `credential_rejected` never reaches a per-data-type row, because it
+   fails the whole download, and is mapped to the default only for
+   totality.
+3. **The download decision agrees with the server.** For every failure,
+   `offersDownload(failureRecovery(outcome, cause))` is true exactly when
+   `data-health-reader` would count the failure toward `retryable`, so a row's
+   fixes and the API's `retryable` cannot disagree. A test asserts it over the
+   whole outcome and cause product (section 7).
+
+The words of the two new fixes are the UX design's to fix (system design §3.6
+note 7), and the two constants hold UX design v2's words exactly (1.4 and
+1.8, `d0af566`; section 14, question 3), so the screens import them from here
+rather than holding their own copy. UX design v2 sets
+`FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` in code formatting; this design
+reads that as marking the literal name, as the UX design does for
+`FACTORFLOW_MASSIVE_API_KEY`, which the delivered Settings line renders as
+plain text (`web/src/screens/settings/credential-status.tsx`). The constant
+is therefore the plain text of the line, the name included, and
+`owner-web-app`'s `fixText` returns it as a `string`. The two existing fixes keep each
+screen's delivered words (UX design 1.4 and 1.8), which this change does not
+touch.
+
 ### 2.8 Messages
 
 N/A, not applicable for this component. No network access: every function
@@ -467,6 +585,11 @@ Vitest with React Testing Library, as the tech stack approves.
 | One count | `web/src/components/patterns/needs-you.test.ts` | The length of `deriveNeedsYou` is what both callers use (AC-16) |
 | Presence | `web/src/components/patterns/presence.test.tsx` | Absent is an em dash with hidden words, never `0`; not determinable is the `coverage-unknown` badge with its reason (STD-UI-4, STD-UI-14) |
 | Formatting | `web/src/components/patterns/format.test.ts` | `formatInstant` gives *CDT* in October and *CST* in January; session dates are not shifted; counts carry separators (STD-UI-3, STD-UI-5) |
+| Fix by cause | `web/src/components/patterns/failure-recovery.test.ts` | `failureRecovery("failed", "not_entitled")` is `provider_plan` with `PLAN_FIX_TEXT`; `("failed", "rate_limited")` is `download_later` with `RATE_LIMIT_FIX_TEXT`; `("failed", c)` is `download_again` for `unavailable`, `contract_violation`, `credential_rejected`, `not_found` and `null`; `("not_found", c)` is `stop_following` for every cause and `null` (AC-29, AC-30) |
+| Agrees with `retryable` | `web/src/components/patterns/failure-recovery.test.ts` | Over every outcome and every cause including `null`, `offersDownload(failureRecovery(o, c))` equals `o === "failed" && c !== "not_entitled"`, the server's rule (system design §4.2) |
+| Cause from the reason | `web/src/components/patterns/failure-recovery.test.ts` | `failureCause` returns each of the six kinds for `"[<kind>] symbol=KO data_type=prices request_id=r1: …"`; `null` for `null`, `""`, `"[foo] …"`, `"[not_entitled]x"` and `"x [not_entitled] …"` (system design §3.6 note 6) |
+| Plan fix offers no download | `web/src/components/patterns/failure-recovery.test.ts` | `PLAN_FIX_TEXT` contains *plan* and contains neither *Download again* nor *Download now* (AC-29) |
+| Fix words | `web/src/components/patterns/failure-recovery.test.ts` | `PLAN_FIX_TEXT` equals *Your Massive plan doesn't include this data, so downloading again won't help. Add it to your plan with Massive; the next download after that gets it.* and `RATE_LIMIT_FIX_TEXT` equals *Download again later; data already stored is never duplicated or overwritten. If this keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no higher than your Massive plan's request limit; restart FactorFlow after changing it.*, UX design v2 1.4 and 1.8 word for word (AC-29, AC-30) |
 | Eight states | `web/src/components/patterns/state-region.test.tsx` | Each `ScreenState` kind renders its renderer; omitting one without a reason fails to type-check (AC-24) |
 | Component contracts | `web/src/components/ui/*.test.tsx` | `button` `blocked` stays focusable with its reason described; `dialog` `confirm` puts cancel first and focuses it; `stepper` sets `aria-current="step"`; `progress` exposes `progressbar` with its label; `command` loops and restores focus |
 | Token discipline | `web/src/app/shell.tokens.test.tsx` (delivered, unchanged) | The extended Tailwind keys resolve only to custom properties (STD-UI-29) |
@@ -488,6 +611,14 @@ Vitest with React Testing Library, as the tech stack approves.
    recorded confirmation and its licence.
 7. Failure scenario: a region whose fetch fails renders its three-part error
    and **Try again**, header kept.
+8. `failureRecovery` is the only mapping from a failure's outcome and cause to
+   its fix: a `not_entitled` failure's fix names the provider plan and never
+   offers a download, a `rate_limited` failure's fix is a later download with
+   the plan's request limit and the configured request rate named as what to
+   check, every other `failed` failure's fix is *Download again*, and a
+   `not_found` failure's fix is unchanged (version 2; AC-29, AC-30).
+9. For every outcome and cause, whether the fix offers a download agrees with
+   the server's `retryable` rule (AC-14, AC-29).
 
 ## 9. Workflows
 
@@ -556,7 +687,9 @@ N/A, not applicable for this component. It makes no request; the
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| UX design | CAP-003 v1 | §0.6, §0.7, §3, §5; every screen's Component Mapping | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
+| UX design | CAP-003 v2 (draft, `d0af566`) | §0.6, §0.7, §3, §5; every screen's Component Mapping; 1.4 and 1.8 fix lines, the words of `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT` | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-design.md` |
+| System design | CAP-003 v2 | §3.4 note 9, §3.6 notes 6, 7, §4.1 (`ui-components`), constraint 17 (c) | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| Review | CAP-001 specification review v14 | FINDING-64: the run detail named a re-run as the recovery for every failure | `git show b69facd:docs/capabilities/CAP-001-market-data-acquisition-foundation/specifications-review-report-v14.md` |
 | UX brief | CAP-003 v1 | §12.2 status tier table | `docs/capabilities/CAP-003-app-shell-and-data-health/design/ux-brief.md` |
 | Blueprint | PRODUCT-UX v6 | §0 patterns location, §4 patterns, §8 status map | `docs/ux/product-ux-blueprint.md` |
 | Standard | STD-UI v6 | STD-UI-3, 4, 5, 8, 12, 14, 23, 24, 29, 30 | `docs/constitution/standards/ui-conventions.md` |
@@ -578,6 +711,9 @@ N/A, not applicable for this component. It makes no request; the
 | AC-25 | Constraint 13, keyboard | Radix and native contracts; component contract tests | 3, 7 |
 | AC-26 | Constraint 12, tokens only | Vendored components over `theme.css`; Tailwind keys for existing tokens | 2.1, 2.2 |
 | AC-7 | First download until scores exist | First-download variant under a `404` summary (DEC-0216) | 2.6 |
+| AC-29 | §3.6 note 7; `failureRecovery(outcome, cause)` in `ui-components` | `provider_plan` fix, no download; `failureCause` for the download detail | 2.7a |
+| AC-30 | §3.6 note 7 | `download_later` fix naming the request limit and the configured rate | 2.7a |
+| AC-13 | Every problem names its fix | One fix per cause on both screens | 2.7a |
 
 ## 14. Open Questions
 
@@ -590,3 +726,15 @@ N/A, not applicable for this component. It makes no request; the
    OQ-2) with its Research-specialised file (DEC-0073); this component takes
    the file over and generalises it to `AsOfLine`, and CAP-002's Research line
    composes it (2.1).
+3. ~~**The words of the two new fixes await UX design v2.**~~ **Answered
+   2026-11-07 by UX design v2** (draft, `d0af566`), 1.4 and 1.8:
+   `PLAN_FIX_TEXT` is *Your Massive plan doesn't include this data, so
+   downloading again won't help. Add it to your plan with Massive; the next
+   download after that gets it.*, as proposed, and `RATE_LIMIT_FIX_TEXT` is
+   *Download again later; data already stored is never duplicated or
+   overwritten. If this keeps happening, check that
+   `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` is no higher than your Massive
+   plan's request limit; restart FactorFlow after changing it.*, the proposal
+   with the restart added. Section 2.7a holds both word for word, the name as
+   plain text, and section 7's *Fix words* test asserts them.
+   *Blocks: nothing.*

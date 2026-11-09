@@ -1,0 +1,18 @@
+# Independent code-review subagent (general-purpose, agentId ada3a3de6705a2162), cycle-2 ROUND 2 (superseded by
+# code-review-cycle-2.txt, the same agent's report on the final tree): judged the cycle-2 patch at index tree
+# faf4c600cfa6a1357c1fc12864011729b74d0265 (diff_sha256 48301208ba6803f92752d4f29a9eff88e04438d4856a72f808487b494eb693c4)
+# and mutation-cycle-2-round3-results.json (35/35 killed). Kept as a log.
+VERDICT: APPROVED
+
+What I checked (summary of the report)
+- Patch genuine (48301208... equals git diff 72aaf81..faf4c60; write-tree faf4c600); the mutation evidence's tree_patch_sha256 equals the current git diff HEAD.
+- Focused 4-file suite 80 passed; ruff check, ruff format --check, mypy src clean.
+- client.py matches massive-client section 2.3 exactly (code block, four rules in order, kept except BadResponse re-raise and comment); T016 paragraph present; SDK construction unchanged.
+- Plan constraints hold: marker-only lines in TC-COMP-230/231 and TC-INT-026; redirects test, uv.lock, pyproject.toml unchanged; only TC-INT-026 still patches RESTClient; no attempts read; 429 string from ResponseError.SPECIFIC_ERROR; T007 computes the declined delay from the clock.
+- Budget arithmetic against rate_limit.py for TC-COMP-243..246 holds.
+- Own mutants: killed - rule 1 on str(exc); constant set to GENERIC_ERROR; rule 4 FATAL narrowed to ProviderNotEntitled; `in repr(exc)`; re-added patched-RESTClient 429 test (TC-COMP-251 (c)); an attempts read (TC-COMP-251 (d)). SURVIVED - rule 3 moved above rule 2 (finding 1).
+
+Findings
+1. NON-BLOCKING, client.py:76-79. No test pins rule 2 before rule 3 (nearly equivalent in production). -> ADDRESSED: row ProtocolError(<error_rate_limited.json text>) -> RETRYABLE; mutant rule-3-before-rule-2 killed.
+2. NON-BLOCKING, test_massive_retry.py:614-615. The __all__ test over-claims TC-COMP-248. -> ADDRESSED: labelled implementation-level (T014).
+3. NON-BLOCKING, test_massive_retry.py:651-671. TC-COMP-251 (c) recognises only patch("...RESTClient"), not monkeypatch.setattr or patch.object; follows T011's wording, no current violation. -> Left as planned; reported as a follow-up.

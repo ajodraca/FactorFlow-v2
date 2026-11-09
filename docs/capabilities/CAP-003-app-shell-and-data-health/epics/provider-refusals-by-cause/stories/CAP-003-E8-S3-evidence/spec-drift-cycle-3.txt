@@ -1,0 +1,13 @@
+# Independent spec-drift subagent (general-purpose, agentId a407c5effb23f525c), cycle-3, judged cycle-3.patch
+# (diff_sha256 fb4a1c8235a387ae91f6e382edea43de31b0e3d137a614e2a4aea293854d2b20).
+DRIFT_DETECTED: false
+
+What I checked
+- Patch: sha256 matches fb4a1c82...2b20 and is byte-identical to git diff e27f9bb e8f4031. One file, tests/unit/test_massive_client_interface.py, 4 inserted lines (3 comment, 1 set entry), nothing under src/. HEAD 52ecfbd; write-tree e8f4031.
+- start_instrument() exists in the index: src/factorflow/ingestion/massive/client.py:100-105 only calls self._governor.start_throttle_budget().
+
+Findings
+1. CAP-003 requires this method: design section 2.6 (component-design-massive-client.md:360-375) defines start_instrument() as a public method on MassiveClient; section 11 (:551) lists it as a new in-process interface; the story requires it in DAC-E8-7 (CAP-003-E8-S3.md:77), DAC-E8-S3-8 (:90) and the API Contract (:96). Once it lands, CAP-001's exact-set test (test_massive_client_interface.py:19-38) can only pass if the set includes it.
+2. CAP-001's intent still holds: DAC-E3-1 (CAP-001-E3.md:82) / TC-COMP-195 ask for one operation per data type; the four fetch_* reads are still the only read operations with unchanged signatures (tests at :41-77 unchanged). The new method reads no data type and takes no provider path, so it is not the generic get(path) CAP-001 section 2.3 forbids. DAC-E3-14 (CAP-001-E3.md:95): TC-COMP-208's forbidden set (get, request, call, stream, subscribe) is unchanged. The test still checks exact equality.
+3. Gap in the plan and design, not the code: CAP-003 design section 2.1's file list (:114-126) and the task plan's Scope line (CAP-003-E8-S3-tasks.md:192) omit this test file. Editing it is the minimal change consistent with both capabilities; the Scope line is technically exceeded. Record a deviation, or amend section 2.1 and the Scope line. The code has not drifted.
+4. Advisory: a doc-sync note that CAP-003 added start_instrument would keep the CAP-001 test's docstring and coverage rationale accurate.

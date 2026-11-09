@@ -1,0 +1,19 @@
+# Independent code-review subagent (general-purpose, agentId ab8c7f6ab393ed1e7), cycle-3, judged cycle-3.patch
+# (diff_sha256 fb4a1c8235a387ae91f6e382edea43de31b0e3d137a614e2a4aea293854d2b20, git diff e27f9bb1d801761d883af73c78361800273e0b3d
+# e8f403186d7628fec7ec79b6b8fd0f7564ea6f11) and red-cycle-3.log.
+VERDICT: APPROVED
+
+What I checked
+- The patch matches its hash: git diff e27f9bb..e8f4031 hashes to fb4a1c82...2b20, the saved cycle-3.patch; git write-tree gives e8f40318. The only unstaged changes are the S3 story file and its tasks.md checkboxes.
+- The diff is 4 added lines in tests/unit/test_massive_client_interface.py: a 3-line comment and "start_instrument" added to the expected set. No production change.
+- The RED log shows this test was the only failure in the full run (1 failed, 2685 passed), caused by exactly one extra public member, start_instrument.
+- The interface tests pass (6 passed); the import resolves to this worktree's src. ruff check passes; ruff format --check reports the file formatted.
+- The approved design: massive-client section 2.6 and section 11 define MassiveClient.start_instrument() as a public in-process call the runner makes; acquisition-runner sections 2.2 and 7 call it; CAP-003-E8-S4-tasks.md (lines 52, 60, 66, 107; T001(c)) calls self._client.start_instrument() and asserts on it.
+- CAP-001 TC-COMP-195 / DAC-E3-1 ("one operation per data type") and the test's own docstring.
+
+Findings
+1. NON-BLOCKING, test_massive_client_interface.py:29-38. The fix is minimal and keeps the test's intent: the four fetch_* reads are still listed and must exist; the set is still compared exactly, so a generic get(path) or any other new public member still fails; the four signature tests are unchanged; start_instrument() takes no arguments, makes no request and is not a provider-path operation, so DAC-E3-1 holds. TC-COMP-208 (lines 82-94) is untouched.
+2. NON-BLOCKING, the alternative. Making the method private would contradict massive-client sections 2.6 and 11 and acquisition-runner section 2.2, make E8-S4's runner call a private member of another component, and break E8-S4's TC-COMP-252 assertions. Keeping it public and updating this test is the only option consistent with the approved design.
+3. NON-BLOCKING, design section 2.1 file list (component-design-massive-client.md lines 116-126) and the S3 task plan (CAP-003-E8-S3-tasks.md:192) do not list tests/unit/test_massive_client_interface.py; the gap goes back to the design, not the coder. Fine as a recorded deviation rather than an owner decision: no behaviour, interface or acceptance criterion changes. Record it in the TDD evidence, naming TC-COMP-195 and why it was out of scope; note the section 2.1 omission for doc sync.
+4. NON-BLOCKING, the test name still fits, because the comment says the read operations are still exactly these four; renaming would break CAP-001's traceability.
+Not done: I did not re-run the full suite on cycle-3.

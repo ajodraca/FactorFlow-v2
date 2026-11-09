@@ -1,0 +1,107 @@
+diff --git a/tests/integration/test_runner_provider_refusals.py b/tests/integration/test_runner_provider_refusals.py
+index ab6d51e..fd239bd 100644
+--- a/tests/integration/test_runner_provider_refusals.py
++++ b/tests/integration/test_runner_provider_refusals.py
+@@ -121,6 +121,18 @@ def _set_cancelling(conn: psycopg.Connection, run_id: uuid.UUID) -> None:
+     conn.commit()
+ 
+ 
++def _abandon_run(conn: psycopg.Connection, run_id: uuid.UUID) -> None:
++    """Abandon the run as the reclaim sweeper does, as `_abandon_run` in
++    `tests/integration/test_runner_reclaim.py` does."""
++    with conn.cursor() as cur:
++        cur.execute(
++            "UPDATE acquisition_run SET state = 'abandoned', ended_at = now(), "
++            "claimed_by = NULL, heartbeat_at = NULL WHERE run_id = %s",
++            (run_id,),
++        )
++    conn.commit()
++
++
+ def _fetch_run_state(conn: psycopg.Connection, run_id: uuid.UUID) -> str:
+     with conn.cursor() as cur:
+         cur.execute("SELECT state FROM acquisition_run WHERE run_id = %s", (run_id,))
+@@ -584,6 +596,83 @@ def test_a_stock_cancelled_before_it_is_fetched_starts_no_budget(
+     assert _fetch_run_state(conn, run_id) == "cancelled"
+ 
+ 
++@pytest.mark.postgres
++# Implements CAP-003 TC-COMP-252
++def test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget(
++    migrated_runner_connection: psycopg.Connection,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """DAC-E8-7: with the claim lost during the first stock, the second
++    stock's `heartbeat` fails, so it is never fetched and starts no budget."""
++    conn = migrated_runner_connection
++    first = _insert_instrument(conn, "AAPL")
++    second = _insert_instrument(conn, "KO")
++    run_id = _insert_claimed_run(conn)
++    client = _stub_client()
++    actions = client.fetch_corporate_actions.return_value
++
++    def abandon_then_answer(*_args: object) -> list[CorporateAction]:
++        _abandon_run(conn, run_id)
++        return actions
++
++    client.fetch_corporate_actions.side_effect = abandon_then_answer
++    parent = _spied_parent(monkeypatch, client)
++
++    AcquisitionRunner(connection=conn, client=client, today=_TODAY).execute_claimed(
++        run_id=run_id, depth_years=5, instrument_ids=[first, second]
++    )
++
++    assert [c[0] for c in parent.mock_calls] == _ONE_STOCK + ["heartbeat"]
++    assert client.start_instrument.call_count == 1
++    assert _fetch_run_state(conn, run_id) == "abandoned"
++
++
++@pytest.mark.postgres
++# Implements CAP-003 TC-COMP-252
++def test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup(
++    migrated_runner_connection: psycopg.Connection,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """DAC-E8-7, acquisition-runner CAP-003 section 2.2: a roster stock with
++    no `instrument` row gets its one `start_instrument()` after its
++    `heartbeat` and `cancellation_requested` and before the symbol lookup
++    that skips it, as every other stock does."""
++    conn = migrated_runner_connection
++    first = _insert_instrument(conn, "AAPL")
++    second = _insert_instrument(conn, "KO")
++    missing = second + 1000
++    run_id = _insert_claimed_run(conn)
++    client = _stub_client()
++    parent = _spied_parent(monkeypatch, client)
++    lookup = Mock(wraps=runner_module._symbol_for_id)
++    parent.attach_mock(lookup, "symbol_lookup")
++    monkeypatch.setattr(runner_module, "_symbol_for_id", lookup)
++
++    AcquisitionRunner(connection=conn, client=client, today=_TODAY).execute_claimed(
++        run_id=run_id, depth_years=5, instrument_ids=[first, missing, second]
++    )
++
++    fetched = [
++        "heartbeat",
++        "cancellation_requested",
++        "client.start_instrument",
++        "symbol_lookup",
++        "client.fetch_reference",
++        "client.fetch_daily_bars",
++        "client.fetch_financials",
++        "client.fetch_corporate_actions",
++    ]
++    skipped = [
++        "heartbeat",
++        "cancellation_requested",
++        "client.start_instrument",
++        "symbol_lookup",
++    ]
++    assert [c[0] for c in parent.mock_calls] == fetched + skipped + fetched
++    assert client.start_instrument.call_count == 3
++    assert [c.args[1] for c in lookup.call_args_list] == [first, missing, second]
++
++
+ # ---------------------------------------------------------------------------
+ # TC-COMP-253: a real 403 plan refusal
+ # ---------------------------------------------------------------------------

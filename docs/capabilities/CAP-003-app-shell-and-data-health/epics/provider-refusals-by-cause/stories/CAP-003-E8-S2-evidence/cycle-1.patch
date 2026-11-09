@@ -1,0 +1,262 @@
+diff --git a/src/factorflow/ingestion/massive/__init__.py b/src/factorflow/ingestion/massive/__init__.py
+index 1108661..ff55f02 100644
+--- a/src/factorflow/ingestion/massive/__init__.py
++++ b/src/factorflow/ingestion/massive/__init__.py
+@@ -39,6 +39,7 @@ from factorflow.ingestion.massive.errors import (
+     MassiveError,
+     ProviderContractViolation,
+     ProviderNotEntitled,
++    ProviderRateLimited,
+     ProviderUnavailable,
+     classify_error_body,
+     compose_failure_reason,
+@@ -63,6 +64,7 @@ __all__ = [
+     "MassiveError",
+     "ProviderContractViolation",
+     "ProviderNotEntitled",
++    "ProviderRateLimited",
+     "ProviderUnavailable",
+     "TickerReference",
+     "classify_error_body",
+diff --git a/src/factorflow/ingestion/massive/errors.py b/src/factorflow/ingestion/massive/errors.py
+index 274c8d0..dce3cd3 100644
+--- a/src/factorflow/ingestion/massive/errors.py
++++ b/src/factorflow/ingestion/massive/errors.py
+@@ -47,6 +47,7 @@ __all__ = [
+     "InstrumentNotFound",
+     "CredentialRejected",
+     "ProviderUnavailable",
++    "ProviderRateLimited",
+     "ProviderContractViolation",
+     "ProviderNotEntitled",
+     "classify_error_body",
+@@ -102,6 +103,14 @@ class ProviderUnavailable(MassiveError):
+     retryable."""
+ 
+ 
++class ProviderRateLimited(ProviderUnavailable):
++    """Raised by the rate-limit governor when the provider keeps throttling
++    past the stock's throttle wait budget (AC-30). A ProviderUnavailable, so
++    every delivered `except ProviderUnavailable` still catches it. Never built
++    from a response: under retries=0 urllib3 drains the 429 body, so it never
++    carries a provider request_id."""
++
++
+ class ProviderContractViolation(MassiveError):
+     """A `200` response that fails model validation (DAC-E3-5), reserved
+     exclusively for that case. Distinct from unavailability because it
+@@ -278,6 +287,7 @@ _ERROR_KIND_BY_TYPE: dict[type[MassiveError], str] = {
+     ProviderUnavailable: "unavailable",
+     ProviderContractViolation: "contract_violation",
+     ProviderNotEntitled: "not_entitled",
++    ProviderRateLimited: "rate_limited",
+ }
+ 
+ _CREDENTIAL_REJECTED_DESCRIPTION = "the provider rejected the configured credential"
+diff --git a/tests/unit/test_massive_error_classification.py b/tests/unit/test_massive_error_classification.py
+index 72f46c0..ceb3581 100644
+--- a/tests/unit/test_massive_error_classification.py
++++ b/tests/unit/test_massive_error_classification.py
+@@ -445,3 +445,21 @@ def test_provider_not_entitled_is_exported_from_errors_and_the_package() -> None
+     assert "ProviderNotEntitled" in errors.__all__
+     assert "ProviderNotEntitled" in boundary.__all__
+     assert boundary.ProviderNotEntitled is errors.ProviderNotEntitled
++
++
++# --- CAP-003 massive-client section 7 "Fatal and subclass": ProviderRateLimited
++
++
++def test_provider_rate_limited_is_a_retryable_provider_unavailable() -> None:
++    """CAP-003 DAC-E8-S2-6 (massive-client section 7, *Fatal and subclass*):
++    `ProviderRateLimited` is a `ProviderUnavailable` and so a `MassiveError`,
++    is declared in `errors.__all__`, and `is_fatal_for_governor`, unchanged,
++    would treat it as retryable (section 2.4: the classifier never sees one,
++    because the governor raises it)."""
++    from factorflow.ingestion.massive import errors
++    from factorflow.ingestion.massive.errors import ProviderRateLimited
++
++    assert issubclass(ProviderRateLimited, ProviderUnavailable)
++    assert issubclass(ProviderRateLimited, MassiveError)
++    assert "ProviderRateLimited" in errors.__all__
++    assert is_fatal_for_governor(ProviderRateLimited("x")) is False
+diff --git a/tests/unit/test_massive_failure_reasons.py b/tests/unit/test_massive_failure_reasons.py
+index 648d9ab..fcec6db 100644
+--- a/tests/unit/test_massive_failure_reasons.py
++++ b/tests/unit/test_massive_failure_reasons.py
+@@ -384,3 +384,129 @@ def test_an_unlisted_massive_error_subclass_raises_type_error(
+             data_type="prices",
+             redact=_identity_redact,
+         )
++
++
++# --- CAP-003 TC-COMP-240 / DAC-E8-S2-6: the rate_limited reason ----------
++
++_RATE_LIMITED_MESSAGE = (
++    "The provider kept rate-limiting requests until this stock's throttle wait budget was spent."
++)
++
++
++@pytest.mark.parametrize(
++    ("kind", "expected"),
++    [
++        pytest.param(
++            "not_found",
++            "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
++            id="not_found",
++        ),
++        pytest.param(
++            "credential_rejected",
++            "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
++            "the provider rejected the configured credential",
++            id="credential_rejected",
++        ),
++        pytest.param(
++            "unavailable",
++            "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
++            id="unavailable",
++        ),
++        pytest.param(
++            "contract_violation",
++            "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
++            id="contract_violation",
++        ),
++        pytest.param(
++            "not_entitled",
++            "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
++            "the provider plan is not entitled to this data",
++            id="not_entitled",
++        ),
++        pytest.param(
++            "rate_limited",
++            "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
++            "The provider kept rate-limiting requests until this stock's throttle wait "
++            "budget was spent.",
++            id="rate_limited",
++        ),
++    ],
++)
++# Implements CAP-003 TC-COMP-240
++def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
++    """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
++    its own kind, chosen by exact class, and every reason begins
++    `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
++    `request_id=unavailable`, never its parent's `unavailable`."""
++    from factorflow.ingestion.massive.errors import ProviderRateLimited
++
++    errors: dict[str, MassiveError] = {
++        "not_found": InstrumentNotFound("x", provider_request_id="r1"),
++        "credential_rejected": CredentialRejected("x", provider_request_id="r2"),
++        "unavailable": ProviderUnavailable("x", provider_request_id="r3"),
++        "contract_violation": ProviderContractViolation("x", provider_request_id="r4"),
++        "not_entitled": ProviderNotEntitled("other text", provider_request_id="r5"),
++        "rate_limited": ProviderRateLimited(_RATE_LIMITED_MESSAGE),
++    }
++
++    reason = compose_failure_reason(
++        errors[kind], symbol="AAPL", data_type="reference", redact=_identity_redact
++    )
++
++    assert reason == expected
++    assert reason.startswith(f"[{kind}] ")
++    if kind == "rate_limited":
++        assert not reason.startswith("[unavailable]")
++
++
++# Implements CAP-003 TC-COMP-240
++def test_rate_limited_reason_never_carries_the_credential() -> None:
++    """CAP-003 TC-COMP-240 / DAC-E8-S2-6 (CAP-001 AC-13): the `rate_limited`
++    variable segment is redacted then bounded, as delivered, so the
++    credential fixture inside a `ProviderRateLimited` message never reaches
++    the reason."""
++    from factorflow.ingestion.massive.errors import ProviderRateLimited
++
++    reason = compose_failure_reason(
++        ProviderRateLimited(f"throttled near {_CREDENTIAL_FIXTURE}"),
++        symbol="AAPL",
++        data_type="reference",
++        redact=_redact_fixture,
++    )
++
++    assert _CREDENTIAL_FIXTURE not in reason
++    assert "[redacted]" in reason
++    assert reason == (
++        "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
++        "throttled near [redacted]"
++    )
++
++
++# Implements CAP-003 TC-COMP-240
++def test_an_unlisted_subclass_of_a_listed_class_raises_type_error() -> None:
++    """CAP-003 TC-COMP-240 / DAC-E8-S2-6: the lookup is by exact class, so a
++    subclass of `ProviderUnavailable` the table does not list -- as
++    `ProviderRateLimited` would be without its own row -- raises
++    `TypeError` rather than falling back to its parent's kind."""
++
++    class _UnlistedUnavailable(ProviderUnavailable):
++        pass
++
++    class _UnlistedMassiveError(MassiveError):
++        pass
++
++    for error_type in (_UnlistedUnavailable, _UnlistedMassiveError):
++        with pytest.raises(TypeError):
++            compose_failure_reason(
++                error_type("x"), symbol="AAPL", data_type="reference", redact=_identity_redact
++            )
++
++
++# Implements CAP-003 TC-COMP-240
++def test_provider_rate_limited_subclasses_provider_unavailable() -> None:
++    """CAP-003 TC-COMP-240 / DAC-E8-S2-6: a spent throttle budget is a
++    `ProviderUnavailable`, so every delivered `except ProviderUnavailable`
++    still catches it."""
++    from factorflow.ingestion.massive.errors import ProviderRateLimited
++
++    assert issubclass(ProviderRateLimited, ProviderUnavailable)
+diff --git a/tests/unit/test_massive_package_boundary.py b/tests/unit/test_massive_package_boundary.py
+index 9f50834..aaf4ad6 100644
+--- a/tests/unit/test_massive_package_boundary.py
++++ b/tests/unit/test_massive_package_boundary.py
+@@ -47,3 +47,12 @@ def test_public_surface_contains_no_raw_dictionary_or_massive_sdk_value() -> Non
+         value = getattr(massive_boundary, name)
+         assert not isinstance(value, dict), name
+         assert not _export_origin(value).startswith("massive"), name
++
++
++def test_provider_rate_limited_is_identity_reexported_from_package() -> None:
++    """CAP-003 DAC-E8-S2-6: `ProviderRateLimited` crosses the package
++    boundary as its definition, so callers import it from the package."""
++    from factorflow.ingestion.massive import errors
++
++    assert "ProviderRateLimited" in massive_boundary.__all__
++    assert massive_boundary.ProviderRateLimited is errors.ProviderRateLimited
+diff --git a/tests/unit/test_outcomes.py b/tests/unit/test_outcomes.py
+index 39b5df0..f74adcf 100644
+--- a/tests/unit/test_outcomes.py
++++ b/tests/unit/test_outcomes.py
+@@ -446,3 +446,25 @@ def test_an_unlisted_massive_error_subclass_raises_type_error() -> None:
+ 
+     with pytest.raises(TypeError, match="_Unlisted"):
+         classify_provider_error(_Unlisted("x"), data_type="fundamentals", reason="r")
++
++
++# ---------------------------------------------------------------------------
++# CAP-003 TC-COMP-241 — a spent throttle budget is a per-data-type failure
++# ---------------------------------------------------------------------------
++
++
++# Implements CAP-003 TC-COMP-241
++def test_provider_rate_limited_maps_to_failed_outcome() -> None:
++    """CAP-003 TC-COMP-241 / DAC-E8-S2-7: ``ProviderRateLimited`` reaches
++    ``failed`` through the delivered ``ProviderUnavailable`` branch, with
++    the composed reason unreworded -- the same object."""
++    from factorflow.ingestion.massive.errors import ProviderRateLimited
++    from factorflow.ingestion.outcomes import classify_provider_error
++
++    r = "[rate_limited] symbol=KO data_type=reference request_id=unavailable: x"
++
++    record = classify_provider_error(ProviderRateLimited("x"), data_type="reference", reason=r)
++
++    assert record.outcome == "failed"
++    assert record.data_type == "reference"
++    assert record.reason is r

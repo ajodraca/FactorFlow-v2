@@ -1,0 +1,11 @@
+# GREEN cycle-1 on the staged bytes (runner.py blob 52155c5f4a44c7c9ae02624d8c0241359f0ca414, test blob ab6d51ece8b5246482aa39ae4a970f063ac20bc7), base eb912cb
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/integration/test_runner_provider_refusals.py   (sandbox disabled, testcontainers postgres:16)
+11 passed in 8.50s
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+286 files already formatted
+Success: no issues found in 61 source files
+# $ git diff --cached --stat
+ src/factorflow/ingestion/runner.py                 |   4 +
+ tests/integration/test_runner_provider_refusals.py | 901 +++++++++++++++++++++
+ 2 files changed, 905 insertions(+)

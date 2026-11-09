@@ -1,0 +1,25 @@
+# Independent spec-drift subagent (general-purpose, agentId a7c67a593d6d0c870), cycle-2, judged cycle-2.patch
+# (diff_sha256 2a464b6236aeedd5a19182d67c88622d5aba35cd8e4b095fd0f2fb4b0ef46cf1).
+DRIFT_DETECTED: false
+
+Matches T011, T006, T008, design section 2.5 and TC-COMP-232/234.
+errors.py: ProviderNotEntitled: "not_entitled" is the fifth row; _NOT_ENTITLED_DESCRIPTION straight after
+_CREDENTIAL_REJECTED_DESCRIPTION, text exactly as section 2.5, docstring says never built from provider text and never
+passed to redact, citing AGT-PROHIB-003; `elif type(error) is ProviderNotEntitled:` between the CredentialRejected
+branch and the else with the section 2.5 inline comment word for word; the fixed-description docstring paragraph is
+present; TypeError text exactly "only the typed MassiveError subclasses in its kind table are accepted."; "exact
+class" in the docstring is consistent with DAC-E8-4.
+test_massive_failure_reasons.py: T006 (a) spy, body, req_ne_001, KO/fundamentals, full literal, seen == [] and both
+not-in checks; (b) five rows with ("diag text", provider_request_id="r1") and AAPL/prices against full literals;
+(c) test-local _Unlisted(MassiveError) and _NotEntitledSubclass(ProviderNotEntitled) each raise TypeError; module-level
+imports; `# Implements CAP-003 TC-COMP-232` on each (decorator-then-comment placement has precedent).
+test_massive_error_classification.py: T008 body, req_leak_403, str/repr checks, identity redact and three-string reason
+check as T008; compose_failure_reason imported at module level; marked TC-COMP-234.
+Extra negative row: not drift. DAC-E8-1 classifies a refusal only when error or message "contains `not entitled`";
+TC-COMP-228 already checks that a body without the marker stays ProviderUnavailable; the row pins existing behaviour
+and kills the widened-marker mutant without changing any expected result.
+Minor observations (not drift):
+1. The extra row belongs to T002/C1 in substance but was added in C2; it passes with or without C2's code, so it has no
+   RED. The evidence should mark it as a guard row passing at RED and say it came from the cycle-1 code review.
+2. The section 2.5 snippet has three spaces before its inline comment; the code has two (ruff/PEP 8). Whitespace only.
+3. The _NOT_ENTITLED_DESCRIPTION docstring also cites "massive-client section 2.5, AC-29": extra traceability only.

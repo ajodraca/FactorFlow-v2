@@ -1,0 +1,399 @@
+# RED cycle-1 (T002-T005) on base 201442b: the four test files with the cycle's tests written, errors.py and __init__.py unchanged (errors.py blob 274c8d021cd373d3790ffbc3984eedf58a5671d6, __init__.py blob 1108661ce6a57e34dc1b3aa3f6876b5ab8254246)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_failure_reasons.py tests/unit/test_massive_error_classification.py tests/unit/test_massive_package_boundary.py tests/unit/test_outcomes.py -q -rf
+.....................FFFFFFF.F..................................F...F... [ 83%]
+.............F                                                           [100%]
+=================================== FAILURES ===================================
+_________ test_each_of_the_six_kinds_composes_its_own_kind[not_found] __________
+
+kind = 'not_found'
+expected = '[not_found] symbol=AAPL data_type=reference request_id=r1: x'
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            pytest.param(
+                "not_found",
+                "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+                id="not_found",
+            ),
+            pytest.param(
+                "credential_rejected",
+                "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                "unavailable",
+                "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+                id="unavailable",
+            ),
+            pytest.param(
+                "contract_violation",
+                "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+                id="contract_violation",
+            ),
+            pytest.param(
+                "not_entitled",
+                "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+            pytest.param(
+                "rate_limited",
+                "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+                "The provider kept rate-limiting requests until this stock's throttle wait "
+                "budget was spent.",
+                id="rate_limited",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-240
+    def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+        its own kind, chosen by exact class, and every reason begins
+        `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+        `request_id=unavailable`, never its parent's `unavailable`."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:441: ImportError
+____ test_each_of_the_six_kinds_composes_its_own_kind[credential_rejected] _____
+
+kind = 'credential_rejected'
+expected = '[credential_rejected] symbol=AAPL data_type=reference request_id=r2: the provider rejected the configured credential'
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            pytest.param(
+                "not_found",
+                "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+                id="not_found",
+            ),
+            pytest.param(
+                "credential_rejected",
+                "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                "unavailable",
+                "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+                id="unavailable",
+            ),
+            pytest.param(
+                "contract_violation",
+                "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+                id="contract_violation",
+            ),
+            pytest.param(
+                "not_entitled",
+                "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+            pytest.param(
+                "rate_limited",
+                "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+                "The provider kept rate-limiting requests until this stock's throttle wait "
+                "budget was spent.",
+                id="rate_limited",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-240
+    def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+        its own kind, chosen by exact class, and every reason begins
+        `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+        `request_id=unavailable`, never its parent's `unavailable`."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:441: ImportError
+________ test_each_of_the_six_kinds_composes_its_own_kind[unavailable] _________
+
+kind = 'unavailable'
+expected = '[unavailable] symbol=AAPL data_type=reference request_id=r3: x'
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            pytest.param(
+                "not_found",
+                "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+                id="not_found",
+            ),
+            pytest.param(
+                "credential_rejected",
+                "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                "unavailable",
+                "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+                id="unavailable",
+            ),
+            pytest.param(
+                "contract_violation",
+                "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+                id="contract_violation",
+            ),
+            pytest.param(
+                "not_entitled",
+                "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+            pytest.param(
+                "rate_limited",
+                "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+                "The provider kept rate-limiting requests until this stock's throttle wait "
+                "budget was spent.",
+                id="rate_limited",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-240
+    def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+        its own kind, chosen by exact class, and every reason begins
+        `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+        `request_id=unavailable`, never its parent's `unavailable`."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:441: ImportError
+_____ test_each_of_the_six_kinds_composes_its_own_kind[contract_violation] _____
+
+kind = 'contract_violation'
+expected = '[contract_violation] symbol=AAPL data_type=reference request_id=r4: x'
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            pytest.param(
+                "not_found",
+                "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+                id="not_found",
+            ),
+            pytest.param(
+                "credential_rejected",
+                "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                "unavailable",
+                "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+                id="unavailable",
+            ),
+            pytest.param(
+                "contract_violation",
+                "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+                id="contract_violation",
+            ),
+            pytest.param(
+                "not_entitled",
+                "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+            pytest.param(
+                "rate_limited",
+                "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+                "The provider kept rate-limiting requests until this stock's throttle wait "
+                "budget was spent.",
+                id="rate_limited",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-240
+    def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+        its own kind, chosen by exact class, and every reason begins
+        `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+        `request_id=unavailable`, never its parent's `unavailable`."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:441: ImportError
+________ test_each_of_the_six_kinds_composes_its_own_kind[not_entitled] ________
+
+kind = 'not_entitled'
+expected = '[not_entitled] symbol=AAPL data_type=reference request_id=r5: the provider plan is not entitled to this data'
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            pytest.param(
+                "not_found",
+                "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+                id="not_found",
+            ),
+            pytest.param(
+                "credential_rejected",
+                "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                "unavailable",
+                "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+                id="unavailable",
+            ),
+            pytest.param(
+                "contract_violation",
+                "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+                id="contract_violation",
+            ),
+            pytest.param(
+                "not_entitled",
+                "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+            pytest.param(
+                "rate_limited",
+                "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+                "The provider kept rate-limiting requests until this stock's throttle wait "
+                "budget was spent.",
+                id="rate_limited",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-240
+    def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+        its own kind, chosen by exact class, and every reason begins
+        `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+        `request_id=unavailable`, never its parent's `unavailable`."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:441: ImportError
+________ test_each_of_the_six_kinds_composes_its_own_kind[rate_limited] ________
+
+kind = 'rate_limited'
+expected = "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: The provider kept rate-limiting requests until this stock's throttle wait budget was spent."
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            pytest.param(
+                "not_found",
+                "[not_found] symbol=AAPL data_type=reference request_id=r1: x",
+                id="not_found",
+            ),
+            pytest.param(
+                "credential_rejected",
+                "[credential_rejected] symbol=AAPL data_type=reference request_id=r2: "
+                "the provider rejected the configured credential",
+                id="credential_rejected",
+            ),
+            pytest.param(
+                "unavailable",
+                "[unavailable] symbol=AAPL data_type=reference request_id=r3: x",
+                id="unavailable",
+            ),
+            pytest.param(
+                "contract_violation",
+                "[contract_violation] symbol=AAPL data_type=reference request_id=r4: x",
+                id="contract_violation",
+            ),
+            pytest.param(
+                "not_entitled",
+                "[not_entitled] symbol=AAPL data_type=reference request_id=r5: "
+                "the provider plan is not entitled to this data",
+                id="not_entitled",
+            ),
+            pytest.param(
+                "rate_limited",
+                "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+                "The provider kept rate-limiting requests until this stock's throttle wait "
+                "budget was spent.",
+                id="rate_limited",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-240
+    def test_each_of_the_six_kinds_composes_its_own_kind(kind: str, expected: str) -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: each of the six classes composes
+        its own kind, chosen by exact class, and every reason begins
+        `[<kind>] `. `ProviderRateLimited` composes `rate_limited` with
+        `request_id=unavailable`, never its parent's `unavailable`."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:441: ImportError
+____________ test_rate_limited_reason_never_carries_the_credential _____________
+
+    def test_rate_limited_reason_never_carries_the_credential() -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6 (CAP-001 AC-13): the `rate_limited`
+        variable segment is redacted then bounded, as delivered, so the
+        credential fixture inside a `ProviderRateLimited` message never reaches
+        the reason."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:468: ImportError
+__________ test_provider_rate_limited_subclasses_provider_unavailable __________
+
+    def test_provider_rate_limited_subclasses_provider_unavailable() -> None:
+        """CAP-003 TC-COMP-240 / DAC-E8-S2-6: a spent throttle budget is a
+        `ProviderUnavailable`, so every delivered `except ProviderUnavailable`
+        still catches it."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_failure_reasons.py:510: ImportError
+________ test_provider_rate_limited_is_a_retryable_provider_unavailable ________
+
+    def test_provider_rate_limited_is_a_retryable_provider_unavailable() -> None:
+        """CAP-003 DAC-E8-S2-6 (massive-client section 7, *Fatal and subclass*):
+        `ProviderRateLimited` is a `ProviderUnavailable` and so a `MassiveError`,
+        is declared in `errors.__all__`, and `is_fatal_for_governor`, unchanged,
+        would treat it as retryable (section 2.4: the classifier never sees one,
+        because the governor raises it)."""
+        from factorflow.ingestion.massive import errors
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_massive_error_classification.py:460: ImportError
+________ test_provider_rate_limited_is_identity_reexported_from_package ________
+
+    def test_provider_rate_limited_is_identity_reexported_from_package() -> None:
+        """CAP-003 DAC-E8-S2-6: `ProviderRateLimited` crosses the package
+        boundary as its definition, so callers import it from the package."""
+        from factorflow.ingestion.massive import errors
+    
+>       assert "ProviderRateLimited" in massive_boundary.__all__
+E       AssertionError: assert 'ProviderRateLimited' in ['MAX_FAILURE_REASON_VARIABLE_TEXT', 'CorporateAction', 'CredentialRejected', 'DailyBar', 'FinancialStatement', 'InstrumentNotFound', ...]
+E        +  where ['MAX_FAILURE_REASON_VARIABLE_TEXT', 'CorporateAction', 'CredentialRejected', 'DailyBar', 'FinancialStatement', 'InstrumentNotFound', ...] = massive_boundary.__all__
+
+tests/unit/test_massive_package_boundary.py:57: AssertionError
+______________ test_provider_rate_limited_maps_to_failed_outcome _______________
+
+    def test_provider_rate_limited_maps_to_failed_outcome() -> None:
+        """CAP-003 TC-COMP-241 / DAC-E8-S2-7: ``ProviderRateLimited`` reaches
+        ``failed`` through the delivered ``ProviderUnavailable`` branch, with
+        the composed reason unreworded -- the same object."""
+>       from factorflow.ingestion.massive.errors import ProviderRateLimited
+E       ImportError: cannot import name 'ProviderRateLimited' from 'factorflow.ingestion.massive.errors' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2/src/factorflow/ingestion/massive/errors.py)
+
+tests/unit/test_outcomes.py:461: ImportError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_of_the_six_kinds_composes_its_own_kind[not_found]
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_of_the_six_kinds_composes_its_own_kind[credential_rejected]
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_of_the_six_kinds_composes_its_own_kind[unavailable]
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_of_the_six_kinds_composes_its_own_kind[contract_violation]
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_of_the_six_kinds_composes_its_own_kind[not_entitled]
+FAILED tests/unit/test_massive_failure_reasons.py::test_each_of_the_six_kinds_composes_its_own_kind[rate_limited]
+FAILED tests/unit/test_massive_failure_reasons.py::test_rate_limited_reason_never_carries_the_credential
+FAILED tests/unit/test_massive_failure_reasons.py::test_provider_rate_limited_subclasses_provider_unavailable
+FAILED tests/unit/test_massive_error_classification.py::test_provider_rate_limited_is_a_retryable_provider_unavailable
+FAILED tests/unit/test_massive_package_boundary.py::test_provider_rate_limited_is_identity_reexported_from_package
+FAILED tests/unit/test_outcomes.py::test_provider_rate_limited_maps_to_failed_outcome
+11 failed, 75 passed in 0.43s
+# exit 1

@@ -135,12 +135,12 @@ files, since `index.html` references only the current ones.
 | `src/factorflow/api/` | The FastAPI application. `app.py` is the application factory: lifespan-managed `psycopg_pool.ConnectionPool`, a periodic reclaim loop task (dispatches `reclaim_stale_runs` via `asyncio.to_thread` every 5 seconds), request-id middleware, the Host and Origin middleware it wraps (see [Host and Origin checks](#host-and-origin-checks)), exception handlers (`errors.py`'s envelope for uncaught exceptions, `app.py`'s for request-validation `422`s and framework HTTP errors such as `405`), and the static-bundle mount with its SPA fallback. `bounds.py` holds the canonical request-bound constants (`MAX_HISTORY_DEPTH_YEARS`, `MAX_PAGE_SIZE`, etc.) shared across route modules. `routes/health.py` implements `GET /api/health`; `routes/instruments.py` implements `GET`/`POST /api/instruments` and `DELETE /api/instruments/{symbol}`; `routes/settings.py` implements `GET`/`PUT /api/settings/history-depth` — both thin HTTP surfaces over `src/factorflow/instruments/`, delegating all domain logic. `routes/runs.py` implements `POST /api/acquisition-runs`, `GET /api/acquisition-runs`, `GET /api/acquisition-runs/{id}`, and `POST /api/acquisition-runs/{id}/cancel` — a thin HTTP surface over `src/factorflow/runs/journal.py` (mutations) and `src/factorflow/runs/queries.py` (reads). `routes/coverage.py` implements `GET /api/coverage`, a thin HTTP surface over `src/factorflow/coverage/service.py`. `routes/universes.py`, `routes/classifications.py`, `classification_models.py` and `classification_bounds.py` are the classification API's `/api/universes` and `/api/classifications` routes, models and bounds, described in [`docs/reference/classification-api.md`](docs/reference/classification-api.md). `models.py` and `errors.py` hold the response models and the `{"error": {...}}` envelope; `errors.py` carries an optional `state` field on `ErrorDetail`, excluded from the body unless the error is `run_already_terminal`. `static/` is the Vite build output directory, populated by `npm run build`; only its `.gitkeep` is tracked. See [Running the API](#running-the-api), [Acquisition run API](#acquisition-run-api) and [Coverage API](#coverage-api) |
 | `src/factorflow/ingestion/hashing.py` | Pure deterministic observation-value canonicalization and hashing. `canonical_json()` emits sorted, compact UTF-8 JSON with exact `Decimal` strings and rejects unsupported values; `value_hash()` returns its raw 32-byte SHA-256 digest. See [Deterministic observation-value hashing](#deterministic-observation-value-hashing) |
 | `src/factorflow/ingestion/plan.py` | Pure range planner for one acquisition run. `depth_start_for_run(run, today)` derives the window start from the claimed run's snapshotted `history_depth_years`, never from the current owner setting. `plan_fetches(data_type, covered, depth_start, today)` returns the sub-ranges of `[depth_start, today]` not already covered, with the trailing covered day deliberately re-fetched. See [Range planner](#range-planner) |
-| `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, bounded throttle handling, and bounded retry backoff. See [Rate limit governor](#rate-limit-governor) |
+| `src/factorflow/ingestion/rate_limit.py` | The synchronous, provider-agnostic `RateLimitGovernor`: full-start token-bucket pacing, throttle handling bounded by a throttle wait budget that `start_throttle_budget()` starts, and bounded retry backoff. See [`docs/reference/rate-limit-governor.md`](docs/reference/rate-limit-governor.md) |
 | `src/factorflow/ingestion/coverage.py` | Pure date-range arithmetic. `merge_ranges(existing, written)` merges a newly written range into existing coverage segments, coalescing overlap and one-calendar-day adjacency in either direction. Returns the minimal ordered set of non-overlapping segments. No database dependency. See [Coverage range arithmetic](#coverage-range-arithmetic) |
 | `src/factorflow/ingestion/writer.py` | Observation writer: one atomic transaction per instrument. Defines `ParsedObservations` (writer-local typed grouping of the four provider-model collections with per-data-type coverage ranges), `WriteResult` (immutable per-type appended/unchanged counts and covered ranges), `RunNotActive` (raised when the run's `acquisition_run` row is not in an active state at the start of a write — prevents a post-reclaim runner from appending data), `write_instrument()` (commits observations, coverage, acquisition state, and run results in the caller's transaction after locking and verifying the run is active), and `write_instrument_with_outcomes()` (extends `write_instrument` to accept pre-classified error outcomes for data types that failed at the provider layer — the function the runner now calls). See [Observation writer](#observation-writer) |
-| `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [Acquisition runner](#acquisition-runner) |
-| `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. |
-| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, and `ProviderContractViolation` from the Massive SDK's single, status-code-discarding exception, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client, every request routed through `RateLimitGovernor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [Massive historical client](#massive-historical-client), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
+| `src/factorflow/ingestion/runner.py` | The acquisition runner. `AcquisitionRunner.execute_claimed()` drives one claimed run sequentially over the roster snapshot, checking the claim and cancellation before every instrument and then starting that instrument's throttle wait budget through the client's `start_instrument()`; `CredentialAwareClientFactory.get_or_rebuild()` returns the cached provider client and builds a new one only when the credential value changed; `run_polling_loop()` claims, executes, or waits. Every write it causes belongs to `writer.py` or `outcomes.py`; it issues two parameterised reads of its own, for an instrument's symbol and its coverage segments. See [`docs/reference/acquisition-runner.md`](docs/reference/acquisition-runner.md) |
+| `src/factorflow/ingestion/outcomes.py` | Per-instrument outcome classification (CAP-001-E4-S6). `InstrumentOutcomeRecord` is the typed per-data-type result record the writer persists. `classify_write_result` maps a `WriteResult` to per-data-type outcome strings (`written`/`unchanged`). `classify_provider_error` maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the failing data type (`not_found` or `failed`). `write_error_results` is preserved from E4-S5 for the all-at-once fetch phase. The module owns the classification boundary only — no SQL, no retry logic, no credential access, no reason composition. See [`docs/reference/ingestion-outcomes.md`](docs/reference/ingestion-outcomes.md) |
+| `src/factorflow/ingestion/massive/` | Pydantic v2 response models for Massive's four historical data shapes, named in the product's own vocabulary rather than the provider's, the provider's typed error taxonomy, a safe failure-reason composer, and the historical client over Massive's REST SDK. `models.py` defines `TickerReference`, `DailyBar`, `FinancialStatement`, and `CorporateAction`; wire field names (`t`, `o`, `h`, `l`, `c`, `filing_date`, and the rest) appear only as `Field(alias=...)`, never as a public attribute. `errors.py` reconstructs `InstrumentNotFound`, `CredentialRejected`, `ProviderUnavailable`, `ProviderContractViolation`, and `ProviderNotEntitled` from the Massive SDK's single, status-code-discarding exception, defines `ProviderRateLimited`, the `ProviderUnavailable` the rate-limit governor raises when a throttle wait budget is spent, and composes owner-visible failure reasons from them via `compose_failure_reason` and `MAX_FAILURE_REASON_VARIABLE_TEXT`. `client.py` defines `MassiveClient`, the four product-named reads over one reusable SDK client and `start_instrument()`, which starts the governor's per-stock throttle wait budget, with every request routed through `RateLimitGovernor` and classified by `classify_for_governor`; `paging.py` follows a paged read's `next_url` one page at a time under governor permits. `__init__.py` re-exports exactly these model, error-taxonomy and reason-composer names — no Massive SDK type or raw wire dict crosses the package boundary. See [Massive provider response models](#massive-provider-response-models), [`docs/reference/massive-client.md`](docs/reference/massive-client.md), and [Massive provider failure reasons](#massive-provider-failure-reasons) |
 | `src/factorflow/app_main.py` | The uvicorn entrypoint (`python -m factorflow.app_main`). Binds the host and port from `ApiSettings` (loopback only by default) |
 | `src/factorflow/ingestion_main.py` | The ingestion entrypoint (`python -m factorflow.ingestion_main`), the acquisition process's own `main()`. Loads `Settings`, configures redacted logging, derives a runner id from the hostname, and runs the polling loop. It shares only the database with the API and never imports `factorflow.api` — a test asserts the import never happens. `main()` takes two keyword-only parameters, `settings_factory` (default `Settings`) and `credential_reader` (default `read_provider_credential`, called at every claim). They exist only for the test-only entry point `tests/e2e/support/ingestion_e2e_main.py` and are not configuration; the release launch passes neither. See [Running the acquisition runner](#running-the-acquisition-runner) |
 | `web/` | The owner interface's Vite root. `index.html` is the bundle entry; `src/main.tsx` mounts the React root inside a `BrowserRouter` |
@@ -175,7 +175,7 @@ variable** — never its value.
 | `FACTORFLOW_API_HOST` | no | `127.0.0.1` | Loopback only; a non-loopback address is rejected at start |
 | `FACTORFLOW_API_PORT` | no | `8000` | 1–65535. Also fixes the `Host` and `Origin` values the API accepts, read once when the application is built. See [Host and Origin checks](#host-and-origin-checks) |
 | `FACTORFLOW_MASSIVE_API_KEY` | yes | — | Held as a secret. Supplied to both processes; the application reads only whether it is set |
-| `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | `https` only, with a host and nothing else: a query, fragment, userinfo, path, whitespace or control character, or a port outside 1–65535 is rejected at start, and so is `http`, loopback included. One trailing `/` is removed. The error names the variable and the broken rule, never the value. See [Massive historical client](#massive-historical-client) |
+| `FACTORFLOW_MASSIVE_BASE_URL` | no | `https://api.massive.com` | `https` only, with a host and nothing else: a query, fragment, userinfo, path, whitespace or control character, or a port outside 1–65535 is rejected at start, and so is `http`, loopback included. One trailing `/` is removed. The error names the variable and the broken rule, never the value. See [`docs/reference/massive-client.md`](docs/reference/massive-client.md) |
 | `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE` | yes | — | No default: the budget is the owner's provider plan and cannot be guessed |
 | `FACTORFLOW_MASSIVE_MAX_ATTEMPTS` | no | `3` | Minimum 1 |
 | `FACTORFLOW_MASSIVE_TIMEOUT_SECONDS` | no | `30` | Minimum 1 second |
@@ -502,91 +502,13 @@ current model behavior or blocks an acceptance criterion:
 
 ## Massive historical client
 
-`src/factorflow/ingestion/massive/client.py` provides the project-owned
-historical boundary over Massive's official REST SDK. `MassiveClient` exposes
-four product-named reads: `fetch_reference(symbol)`,
-`fetch_daily_bars(symbol, start, end)`, `fetch_financials(symbol, start, end)`,
-and `fetch_corporate_actions(symbol, start, end)`. Each returns the parsed
-models above rather than provider wire shapes.
-
-The client creates one reusable SDK client from `MassiveSettings`, explicitly
-disabling SDK retries, pagination, and request tracing. It passes the runtime
-credential to the SDK for header authentication; it does not put the credential
-in request URLs. It also passes the validated `FACTORFLOW_MASSIVE_BASE_URL` as
-the SDK's `base`, so every request of the four reads, followed `next_url` pages
-and the `vx` sub-client's IPO reads included, goes to that host
-(CAP-001-E3-S6). Every initial and followed page request passes through
-`RateLimitGovernor`, while `paging.follow_pages()` follows a present
-`next_url` one page at a time and raises if a later page fails rather than
-returning a partial range.
-
-Reference reads use Massive's single-ticker endpoint. Daily-bar requests use
-multiplier `1`, timespan `day`, inclusive ISO date bounds, and unadjusted bars.
-Financial statements are read from the three statement endpoints (balance
-sheets, income statements and cash-flow statements), each bounded by
-`period_end`. Massive's ratios endpoint is not called: CAP-001's fundamentals
-are the three statements, and ratios can be derived later from stored
-statements and bars (component design v13 section 2.5). Corporate actions
-combine splits, dividends, IPOs, and ticker-change events. Ticker events have
-no provider date-range parameter, so the client validates their rows and
-applies the requested inclusive range locally. The client never calls
-Massive's forward-looking market-status endpoint or ticker-list endpoint.
-
-An empty successful response is not an unknown instrument. `fetch_daily_bars`,
-`fetch_financials` and `fetch_corporate_actions` return an empty list when a
-recognised instrument has nothing in range, such as no corporate action, no
-filings or a range outside its trading life. Only `fetch_reference` raises
-`InstrumentNotFound` for an empty result, and any provider 404 still raises it
-on every read (decision record DEC-0047 in the ai-agents SDD harness).
-
-**Known limitation, carried forward as an accepted warning from
-implementation review v6** (`CAP-001-E3-S1-implementation-review-v6.md`,
-IR-001, low). The empty-result tests serve `results: []` only. An envelope
-with no `results` key is also handled as empty today (`paging.follow_pages`
-reads `envelope.get("results") or []`), but no test pins that form, so a
-refactor that indexed `envelope["results"]` directly would still pass.
-
-The credential never leaves for another host. With SDK retries at `0`, a
-redirect is refused rather than followed: the governor retries the request to
-the same host up to `max_attempts`, then raises `ProviderUnavailable`. Neither
-SDK connection pool uses a proxy, whatever the `HTTP_PROXY`, `HTTPS_PROXY` or
-`ALL_PROXY` environment says, and no construction path relaxes TLS
-verification (`cert_reqs="CERT_REQUIRED"` on both pools). The release build
-carries none of the test tree: the `Dockerfile` copies nothing under `tests/`,
-the wheel contains nothing under it, and nothing in `src/factorflow` imports
-from it. `tests/unit/test_massive_redirects.py`, `test_massive_tls.py` and
-`test_release_excludes_test_paths.py` prove each of these without opening a
-socket.
-
-**Known limitations, carried forward as accepted warnings from
-implementation review v1**
-(`CAP-001-E3-S6-implementation-review-v1.md`). All four are about how strong
-the tests are. None leaves an acceptance criterion unmet:
-
-- `test_trailing_slash_base_never_produces_a_double_slash` uses the default
-  host, so it would still pass if `base=` were removed. Other tests catch that
-  removal (IR-001).
-- `test_no_construction_path_passes_a_tls_override` does not install the
-  `forbid_sockets` guard. It patches `RESTClient` for the whole test, so no
-  pool exists today (IR-002).
-- The source scan for `http` acceptance flags string constants, comparisons
-  and collection literals. It would miss a `startswith("http")` or a `match`
-  case (IR-003).
-
-  It has exactly one exemption (CAP-001-E1-S7, DAC-E1-S7-6). The constants
-  `http://127.0.0.1:`, `http://localhost:` and `http://[::1]:` are accepted
-  only in `src/factorflow/api/app.py`, where they build the
-  [Origin allow-list](#host-and-origin-checks). That module is matched by its
-  path under `src/factorflow`, not by its file name. Any other `http://`
-  constant there, those three anywhere else, and every comparison with or
-  listing of `"http"` still fail the scan.
-- The `Dockerfile` check reads `COPY`/`ADD` line by line. It would miss a
-  continued line or the JSON array form (IR-004).
+`src/factorflow/ingestion/massive/client.py` is described in
+[`docs/reference/massive-client.md`](docs/reference/massive-client.md).
 
 ## Massive provider failure reasons
 
 `src/factorflow/ingestion/massive/errors.py` also defines
-`compose_failure_reason`, which turns one of the four typed `MassiveError`
+`compose_failure_reason`, which turns one of the six typed `MassiveError`
 subclasses into the safe, owner-visible text stored as
 `run_instrument_result.reason`. The acquisition runner calls it in the
 per-data-type fetch error handlers, passing the entrypoint's `redact`
@@ -610,99 +532,22 @@ the cut is made rather than after; a truncated segment ends with the
 fixed description ("the provider rejected the configured credential"),
 never the error's own message even redacted, because the reason must not
 depend on redaction catching every way a credential could appear in
-provider-echoed text. `compose_failure_reason` raises `TypeError` for any
-error not in the four-type taxonomy.
+provider-echoed text. `ProviderNotEntitled`, a plan refusal (CAP-003-E8-S1),
+likewise always carries a fixed description ("the provider plan is not
+entitled to this data"), never the provider's text and never passed through
+`redact`, under the kind `not_entitled` with the provider's `request_id`.
+`ProviderRateLimited` (CAP-003-E8-S2) is never built from a response: the
+rate-limit governor raises it with its own fixed text ("The provider kept
+rate-limiting requests until this stock's throttle wait budget was spent."),
+so its reason is the kind `rate_limited` with `request_id=unavailable`, and
+that text is redacted and bounded like any other variable segment.
+`compose_failure_reason` raises `TypeError` for any error whose exact class is
+not in the six-type taxonomy.
 
 ## Rate limit governor
 
-`src/factorflow/ingestion/rate_limit.py` implements `RateLimitGovernor`, the
-synchronous, provider-agnostic governor that `CAP-001-E3-S1`'s
-`massive/client.py` submits every SDK request through, including followed
-pages. It imports no Massive SDK, response type,
-or wire shape — `send` and `classify` are opaque callables the caller
-supplies, and the governor inspects only the `Outcome` `classify` returns,
-never the raised exception's type or fields.
-
-`execute(send, classify, stated_delay_seconds=None)` calls `send()` under a
-token bucket sized to `GovernorSettings.requests_per_minute`. The bucket starts
-full, never refills above that capacity, refills continuously, and consumes one
-permit per send. A one-minute window overlapping the initial full bucket may
-issue up to capacity plus one window's refill; after drawdown, each subsequent
-one-minute window is capped at the configured budget. The classified outcome
-then follows a distinct, bounded path:
-
-| Outcome | Attempt counter | Wait | Then |
-|---|---|---|---|
-| `THROTTLED`, provider stated a delay | unchanged | the stated delay, no jitter | retry |
-| `THROTTLED`, no stated delay (the Massive case) | unchanged | to the next minute boundary, plus jitter | retry |
-| `RETRYABLE` (timeout or 5xx) | plus one | `initial_backoff_seconds × 2^(attempts−1)`, full jitter | retry while attempts remain |
-| `OK` | unchanged | none | return |
-| `FATAL` (404, 401, not retryable) | unchanged | none | re-raise |
-
-Two limits terminate the loop, both configured through
-`GovernorSettings.from_massive_settings()` (built from `MassiveSettings`
-without either settings class importing the other, `MassiveSettings`
-imported only under `TYPE_CHECKING`). `max_attempts` (default 3) bounds the
-`RETRYABLE` path. Once the first `THROTTLED` outcome occurs,
-`max_throttle_wait_seconds` bounds monotonic elapsed time until a later
-throttle check, including permit-acquisition waits, sender time, retry
-backoff, and throttle sleeps. This elapsed-time accounting means a
-provider-stated zero-second delay cannot retry forever. A `429` still never
-consumes an attempt; persistent throttling raises `ProviderUnavailable` once
-the elapsed throttle budget is exceeded. Because the check follows the wait
-that crosses the limit, the budget is soft and may be exceeded by that final
-wait.
-
-The no-delay throttle wait is anchored to a wall-clock `now` collaborator
-(default `time.time`), not to `monotonic()` or any instant fixed at
-governor construction, so the wait tracks the provider's actual per-minute
-window regardless of how long the governor instance has been alive. Its
-jitter is applied additively on top of the boundary wait
-(`boundary + jitter() × boundary`, range `[boundary, 2 × boundary]`) rather
-than the literal "full jitter over the computed delay" that
-`component-design-rate-limit-governor.md` §2.5 states for every jittered
-delay — a deliberate, recorded deviation: true full jitter here
-(`[0, boundary)`) would often fire before the provider's per-minute quota
-refills, defeating the reason the boundary wait exists. The backoff path
-(retryable failures) does use full jitter as written. See
-`_boundary_wait_with_jitter`'s docstring and the task plan's Notes.
-
-**Known limitations, carried forward as accepted warnings from
-implementation review v5**
-(`CAP-001-E3-S4-implementation-review-v5.md`) — none blocks a current
-acceptance criterion:
-
-- The `except BaseException` classification boundary (`execute`, per the
-  design-mandated `Callable[[BaseException], Outcome]` signature) hands
-  `KeyboardInterrupt` and `SystemExit` to the caller's `classify` along with
-  every other exception. No test covers either type, and a classifier that
-  defaults an unrecognised exception to `RETRYABLE` or `THROTTLED` would
-  make the governor sleep through a cancellation signal — for the no-delay
-  throttle path, now a genuine up-to-120-second wall-clock wait (v5 IR-003).
-- `GovernorSettings` is a plain frozen dataclass with no construction-time
-  validation, so a direct literal construction with `requests_per_minute=0`
-  succeeds and only fails later, obscurely, with `ZeroDivisionError` inside
-  permit acquisition. Every production caller goes through
-  `from_massive_settings()`, where `MassiveSettings`'s `Field(ge=1)` already
-  enforces positivity, so this affects only direct construction, which
-  today only the tests do (v5 IR-007).
-- The backoff cap on the first retry is `initial_backoff_seconds × 2**0`,
-  i.e. `initial_backoff_seconds` itself — one doubling below component
-  design section 2.5 row 3's literal wording ("initial delay times two to
-  the power of attempts"). The implementation is the conventional reading
-  and the bound holds; the wording gap is flagged for the next design
-  revision (v5 IR-005).
-- `ProviderUnavailable` is raised with only a message string on exhaustion;
-  the attempt count is interpolated into prose rather than carried as a
-  structured field, and the module emits no log records naming the attempt
-  index, delay, or status code (component design section 4's expectation).
-  Whether governor logging and a structured exhaustion failure belong to
-  CAP-001-E5 or a later story is an open owner decision (v2 IR-009).
-- The test double clock used for the throttle-boundary tests never
-  advances the injected wall-clock `now` source during a sleep, so no test
-  exercises a multi-wait throttle sequence in which each wait lands on a
-  genuinely fresh wall-clock phase, the shape production actually takes
-  (v5 IR-006).
+`src/factorflow/ingestion/rate_limit.py` is described in
+[`docs/reference/rate-limit-governor.md`](docs/reference/rate-limit-governor.md).
 
 ## Coverage range arithmetic
 
@@ -1028,49 +873,8 @@ criterion:
 
 ## Per-instrument outcome classification
 
-`src/factorflow/ingestion/outcomes.py` owns the classification boundary between
-a provider result and a persisted outcome string. It contains no SQL, no retry
-logic, no credential access, and no reason-composition logic.
-
-**`InstrumentOutcomeRecord`** — A frozen dataclass carrying `data_type`,
-`outcome` (one of `"written"`, `"unchanged"`, `"not_found"`, `"failed"`), and
-an optional `reason` string. The reason is the pre-composed, credential-safe
-failure reason from the Massive-client boundary (`compose_failure_reason`); it
-is `None` on success paths.
-
-**`classify_write_result(result: WriteResult) -> dict[str, str]`** — Maps a
-`WriteResult` to a dict with exactly four keys (the four schema data-type
-names). Each data type maps to `"written"` when any rows were appended, or
-`"unchanged"` when every returned row already existed (or none came back). This
-is a pure function: no database access, no side effects.
-
-**`classify_provider_error(error, *, data_type, reason) -> InstrumentOutcomeRecord`** —
-Maps a typed `MassiveError` to a single `InstrumentOutcomeRecord` for the
-failing data type. `InstrumentNotFound` → `"not_found"`;
-`ProviderUnavailable`/`ProviderContractViolation` → `"failed"`.
-`CredentialRejected` raises `ValueError` — it is a run-level failure that must
-not become a per-data-type outcome row. Any unrecognised type raises `TypeError`.
-The `reason` argument is the already-composed, credential-safe reason string
-from the Massive-client boundary; this module does not re-compose or re-redact it.
-
-**`write_error_results(connection, run_id, instrument_id, outcome, reason)`** —
-Preserved from E4-S5 for the all-at-once fetch phase. Inserts
-`run_instrument_result` rows for all four data types when the provider failed
-before any per-data-type result was classified. This path is used by callers
-that have not yet migrated to the per-data-type fetch seam. Once the runner
-fetches data types individually, `classify_provider_error` +
-`write_instrument_with_outcomes` replace this path for individual failures.
-
-**Classification table:**
-
-| Provider result | `classify_write_result` / `classify_provider_error` output | Run effect |
-|---|---|---|
-| Data returned, rows appended | `written` | counts toward `succeeded` |
-| Data returned, every value already held | `unchanged` | counts toward `succeeded` |
-| Instrument unknown to the provider (`InstrumentNotFound`) | `not_found` | run continues, outcome becomes `partial` |
-| Transport or server error, attempts exhausted (`ProviderUnavailable`, `ProviderContractViolation`) | `failed` | run continues, outcome becomes `partial` |
-| Rate-limit pacing (`429`) | no outcome — absorbed by the governor before classification | no row written |
-| Not reached because the run was cancelled | no row written | no coverage, no failure |
+`src/factorflow/ingestion/outcomes.py` is described in
+[`docs/reference/ingestion-outcomes.md`](docs/reference/ingestion-outcomes.md).
 
 ## Run request and claim
 
@@ -1216,75 +1020,8 @@ current acceptance criterion:
 
 ## Acquisition runner
 
-`src/factorflow/ingestion/runner.py` turns a claimed run into observations,
-one instrument at a time. It is the process that finally calls the
-[observation writer](#observation-writer). It writes nothing directly — every
-insert or update belongs to `writer.py` on the success path and `outcomes.py`
-on the failure path — while reading an instrument's symbol and coverage
-segments through two parameterised queries of its own.
-
-`AcquisitionRunner.execute_claimed(run_id, depth_years, instrument_ids)`
-walks the roster it was handed — snapshotted once at claim time, so an
-instrument added mid-run belongs to the next one. Before anything else it
-records the roster's size on the run through the journal's
-`record_instruments_named`, because that is the count `finalise` compares
-written results against. A run whose claimed depth
-is `None` is finalised without a single provider call: no stated depth means
-there is no window to fetch.
-
-Before every instrument, in this order, it refreshes the heartbeat and then
-asks whether cancellation was requested. A lost claim stops the run
-immediately and writes nothing further — another runner now owns it. An
-observed cancellation finalises and stops. Both checks sit at the top of the
-loop rather than around the work, so the longest a cancelled run continues
-is one instrument.
-
-For each instrument it fetches the four data types individually through
-[`plan_fetches`](#range-planner), which is what keeps a re-run from
-re-fetching covered ground. Each data type is fetched in a separate
-try/except block. `CredentialRejected` is the one run-level error: every
-remaining instrument would fail the same way, so the runner records the whole
-run `failed` through the journal's `fail_run`, with the composed
-credential-safe reason as `failure_reason`, writes nothing for the instrument
-it was reading, and returns, so the ingestion process keeps polling
-(EXP-20261011-3). The reason is served as `failure_reason` by
-`GET /api/acquisition-runs` and `GET /api/acquisition-runs/{id}`; no screen
-shows it yet. `InstrumentNotFound`, `ProviderUnavailable`, and any other `MassiveError`
-are classified by `classify_provider_error` into a per-data-type
-`InstrumentOutcomeRecord` (`not_found` or `failed`). The reason is composed
-by `compose_failure_reason` and passed through the entrypoint's redaction
-callable before classification, so a credential in a provider message never
-reaches the database. After all four data types are attempted, the runner
-calls `write_instrument_with_outcomes()` in one transaction, passing the
-successfully fetched observations alongside the error outcomes for any
-data types that failed. This allows one instrument to record distinct
-outcomes per data type — for example `written` for prices and `not_found`
-for fundamentals. Provider failures affect the instrument, not the run;
-the next instrument starts immediately after.
-
-When the roster is exhausted the run is finalised from what was written.
-
-`CredentialAwareClientFactory` keeps one provider client and rebuilds it only
-when the credential's value changes, and the entrypoint re-reads the
-credential at each claim — so rotating the key takes effect on the next run
-without restarting the process.
-
-**Known limitations, carried forward as accepted warnings from implementation
-review v1** (`CAP-001-E4-S6-implementation-review-v1.md`) — none blocks a
-current acceptance criterion:
-
-- `test_rate_limit_does_not_produce_outcome_row` (TC-COMP-145) provides a
-  normal full-success stub client and asserts outcome strings are in the
-  allowed set; it does not inject a 429-equivalent at the fetch boundary to
-  prove the governor absorbs it before classification. A future change
-  introducing a rate-limit error type that bypasses the governor would not be
-  caught by this test (IR-001, medium).
-- `test_appended_rows_persist_written_outcome` (TC-COMP-183 integration) does
-  not assert `corporate_actions`; `test_unchanged_rows_persist_unchanged_outcome`
-  (TC-COMP-184 integration) asserts only `prices` and `fundamentals`. An
-  integration regression silently dropping one data type from
-  `run_instrument_result` insertion would not be caught by these integration
-  tests (IR-002, medium).
+`src/factorflow/ingestion/runner.py` is described in
+[`docs/reference/acquisition-runner.md`](docs/reference/acquisition-runner.md).
 
 ## Deploying and operating FactorFlow
 
@@ -1432,6 +1169,33 @@ the owner runs it only after confirming the dump to restore (OPS-DEST-001):
 5. Run `scripts/deploy-smoke.sh`. Check 2 must report `<old>`'s highest schema
    version.
 6. `FACTORFLOW_IMAGE_TAG=<old> docker compose --profile ingestion up -d`
+
+### Upgrading from 0.2.0: provider refusals reported by cause
+
+This upgrade from release 0.2.0 (`factorflow:0.2.0-829c9e1`, deployed
+2026-11-07) changes how ingestion handles a provider rate limit and a plan
+refusal (CAP-003-E8-S1 to S4). It uses the *Upgrade, backup and rollback*
+procedure above unchanged. No migration, new variable or manual action is
+needed.
+
+- **A throttled stock waits instead of failing.** A rate-limited request now
+  waits to the next minute boundary, for up to the 300 s budget per stock
+  (`FACTORFLOW_MASSIVE_MAX_THROTTLE_WAIT_SECONDS`), instead of failing within
+  seconds, and a rate limit is not counted as a failed attempt. A download on a
+  plan whose request limit is below `FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE`
+  therefore takes longer: under throttling that persists, by up to one budget
+  per followed stock. Cancelling still takes effect after the current stock,
+  which may now include that stock's wait.
+- **A plan refusal costs one request instead of three.** A data type the
+  provider plan is not entitled to is requested once, and recorded as refused.
+- **Stored reasons gain two kinds.** Reasons are now recorded under the kinds
+  `not_entitled` and `rate_limited` as well, six kinds where 0.2.0 had four
+  (see *Massive provider failure reasons*). Results recorded before the upgrade
+  keep `[unavailable]` and are not rewritten, so they read as ordinary failures
+  until the next download re-records that data type.
+- **Rollback has no data step.** The new kinds are text in an existing column,
+  so rolling back is a redeploy of the previous image, the rollback above for a
+  release that applied no migration.
 
 ### Pre-release backup and restore drill
 

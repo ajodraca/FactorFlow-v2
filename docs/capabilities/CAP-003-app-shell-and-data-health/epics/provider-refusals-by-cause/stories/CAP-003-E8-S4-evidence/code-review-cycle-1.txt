@@ -1,0 +1,38 @@
+# Independent code-review subagent (general-purpose, agentId a89be09c0c60946c3), cycle-1, judged cycle-1.patch
+# (diff_sha256 7640e7c89e79e28d50a7063b77e85f838bb4b83aaab3f41ed2928f91a8a2d267, index tree 617b1ccc9f97def855d15c4737b1f74252bb4cea)
+# and mutation-cycle-1-results.json (the round1 run, 13 hand-written mutants).
+VERDICT: APPROVED
+
+What I checked
+- Patch identity. HEAD is eb912cb. `git diff --cached` is byte-identical to cycle-1.patch (`cmp` reports no difference), the patch's sha256 is 7640e7c8…2a8d267, and `git write-tree` gives 617b1ccc…cea. The staged set is only `src/factorflow/ingestion/runner.py` (+4) and the new `tests/integration/test_runner_provider_refusals.py` (+901). The working-tree copies of both files match the index; the only other change is the unstaged story doc, which I left out of scope.
+- T010. The runner change is exactly the plan's two comment lines, the `self._client.start_instrument()` call and one blank line. It sits after the `cancellation_requested` block's `return` and before `# --- Fetch symbol ---`, at loop-body indentation. No other line, docstring, import, except clause or timing value changed. No `UPDATE` was added (T015's first grep prints nothing).
+- T002 harness:
+  - Production `MassiveSettings` and `RunSettings` with `_env_file=None`, and the env overrides cleared first.
+  - Asserts for 3 / 300.0 / 900.0.
+  - One `FakeClock(1_762_560_000.0)` serves as both `monotonic` and `now`, with a `FakeSleeper` on it and `SequenceJitter([jitter])`.
+  - The real `MassiveClient`. `forbid_sockets` is installed before `RecordingMakeRequest`.
+  - Marks are recorded for heartbeat, finalise and budget before each delegates.
+  - The harness is built in `_run_download` after the instruments, the run and any `prepare` seed are written. No `psycopg.connect` happens after `forbid_sockets`; every read uses the fixture connection.
+  - `_fetch_result_rows` never selects `attempts`.
+- T003 matches its task: one parent `Mock`, the journal spies wrapped with `Mock(wraps=...)` and also monkeypatched onto the runner, and a literal seven-name list ×2. The cancel case uses the literal list plus `["heartbeat", "cancellation_requested"]`, `start_instrument.call_count == 1`, and checks the run is `cancelled`.
+- T004 to T009 each match their task wording, with independent literal expected values: reason prefixes and suffix, `[60.0] * 5`, a reference count of 6, a balance-sheets count of 1, exact mark sequences, the `budget.requests == heartbeat.requests` check, and the run states `partial` and `failed`. T007 compares `xmin` snapshots taken before and after, checks the reasons against the literal 0.2.0 text rather than the earlier snapshot, and checks the earlier run is still `failed`.
+- T015's second grep, `grep -nw attempts … | grep -v 'consecutive attempts'`, prints nothing.
+- Markers. Each test carries `# Implements CAP-003 TC-COMP-NNN`, which is right: CAP-001's bare TC-COMP-253 to 259 already appear in `tests/unit/test_run_states.py` and `tests/integration/test_run_constraints.py`, and `test_governor_retry.py` already uses the `CAP-003` prefix. Every test has `@pytest.mark.postgres`.
+- My own runs:
+  - The focused suite passed 11 of 11 (Docker, sandbox disabled).
+  - `ruff check` reports all checks passed.
+  - `ruff format --check` reports both files already formatted.
+  - `mypy` on `runner.py` found no issues; the green log shows `mypy src` clean across 61 files.
+- Mutation. The 13 hand-written mutants cover deletion (M1), before the heartbeat (M2), between the heartbeat and the claim check (m8), after `fetch_reference` (M3), hoisted to once per run (M4), only when cancelling (m9), twice per stock (m10), at the end of the stock (m11), the attribute without the call (m13), first stock only (m14) and the no-op `UPDATE` (M6). All are killed except m5 and m12. Calling it before each `fetch_*` or inside `_fetch_prices`, which I considered too, would also fail: T003's literal sequence catches the first, and T005 (d) (no request before a budget mark) and T009 catch the second.
+- Disposition of m5 and m12: I accept both as equivalent.
+  - `start_instrument()` only calls `governor.start_throttle_budget()`, which sets `self._throttle_spent = 0.0`. It sends no request and cannot raise.
+  - `_symbol_for_id` sends no provider request, and `_fetch_reference`'s first statement is `self._client.fetch_reference(symbol)`. So under both mutants the budget is still reset before the stock's first provider request, and the governor is in the same state at every request.
+  - The only difference is for a stock skipped because its symbol is missing. That stock sends no request, the next stock resets the budget anyway, and the roster is snapshotted from the instrument table, so the case is practically unreachable.
+  - For m12, the reference `try` catches only provider errors, which `start_instrument()` cannot raise.
+  - Both mutants still satisfy DAC-E8-7: once per stock, after `heartbeat` and `cancellation_requested`, before the first `fetch_*`. The design's reason for placing the call before the lookup ("every provider request of the stock … charged to one budget") holds either way.
+- RED evidence. 8 failed and 3 passed at base, and every failure comes from the missing call: index 2 of the call sequence, the missing `budget` marks, `call_count` 0, and the second stock's sleeps `[]`. T006 and T008 failing on arrival is acceptable. Their own task text requires the `budget` mark (T006) and `start_instrument.call_count == 1` (T008), and neither can hold without T010. The plan's Phase 2 checkpoint prediction (four failing tests) contradicts its own T006 and T008 wording; the tests follow the tasks, which is correct. The RED log's comment records the actual split. T004 and T007 (both scenarios) pass on arrival as characterization rows, as planned.
+
+Findings
+1. NON-BLOCKING, CAP-003-E8-S4-tasks.md:110 (with T017 at line 165). The Phase 2 checkpoint says T006 and T008 pass on arrival, and T017 asks the RED log to name "the four failing tests and the four characterization tests". In fact 8 tests fail at RED (T003 ×2, T005 ×2, T006, T008 ×2, T009) and 3 characterization tests pass (T004, T007 ×2). The tests are right, so this is a planning inconsistency only. The TDD evidence entry should state the actual split and why T006 and T008 fail, as the RED log comment already does, rather than the plan's prediction.
+2. NON-BLOCKING, src/factorflow/ingestion/runner.py:216 (mutants m5 and m12). These survive as equivalent mutants. Record the disposition in the evidence: the symbol lookup sends no provider request, `start_throttle_budget()` is a side-effect-free reset of one float, and the two placements differ only for a stock skipped for a missing symbol, which sends nothing. A mock-spy test with a dangling `instrument_id` could tell the placements apart. I don't recommend adding one: DAC-E8-7 asks for both "exactly once per stock" and "a stock that is never fetched starts no budget", and for that skipped stock the two rules call for opposite placements, so such a test would have to pick one reading of an ambiguous criterion.
+3. NON-BLOCKING, tests/integration/test_runner_provider_refusals.py:262. `_Harness.governor` is stored but no test reads it. This is harmless and useful when debugging; no action needed.

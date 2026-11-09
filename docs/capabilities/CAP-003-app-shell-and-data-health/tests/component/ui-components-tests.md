@@ -2,33 +2,33 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-ui-components-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
 
 # ui-components Component Test Specification
 
-Component tests for `ui-components` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 34 cases (TC-COMP-001 to TC-COMP-034, not necessarily contiguous).
+Component tests for `ui-components` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 41 cases (TC-COMP-001 to TC-COMP-266, not necessarily contiguous).
 
 ### TC-COMP-001: dataTileBadge takes the worse of verdict and score tier, tie to verdict
 
@@ -803,6 +803,160 @@ Component tests for `ui-components` (CAP-003). Each case verifies one story-leve
 
 #### Expected Result
 - Every case passes; the Research line composes `AsOfLine`
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-260: failureRecovery maps each outcome and cause to its fix
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-29, AC-30, AC-14, DAC-E8-S5-1, DAC-E8-15
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `web/src/components/patterns/failure-recovery.test.ts`
+
+#### Steps
+1. Call `failureRecovery("failed", "not_entitled")` and `failureRecovery("failed", "rate_limited")`
+2. Call `failureRecovery("failed", c)` for `c` in `unavailable`, `contract_violation`, `credential_rejected`, `not_found` and `null`
+3. Call `failureRecovery("not_found", c)` for each of the six causes and `null`
+
+#### Expected Result
+- Step 1: `{ kind: "provider_plan", text: PLAN_FIX_TEXT }` and `{ kind: "download_later", text: RATE_LIMIT_FIX_TEXT }`
+- Step 2: `{ kind: "download_again" }` for each
+- Step 3: `{ kind: "stop_following" }` for every cause and `null`
+
+#### Error / Edge Cases
+- A `not_found` failure whose reason carries `not_entitled` or `rate_limited` still gets `stop_following` (AC-14: outcome first)
+
+### TC-COMP-261: offersDownload agrees with the server's retryable rule over all fourteen pairs
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-14, AC-29, DAC-E8-S5-2, DAC-E8-15
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- Every pair of outcome in `["failed", "not_found"]` and cause in `[...FAILURE_CAUSES, null]`
+
+#### Steps
+1. Evaluate `offersDownload(failureRecovery(o, c))` for each pair
+
+#### Expected Result
+- For all fourteen pairs it equals `o === "failed" && c !== "not_entitled"`
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-262: failureCause reads only a known kind with its space at position 0
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-29, AC-30, DAC-E8-S5-3, DAC-E8-15
+**Priority:** P1
+**Type:** security
+
+#### Preconditions
+- `failureCause` from `failure-recovery.ts`
+
+#### Steps
+1. Call it with `"[<kind>] symbol=KO data_type=prices request_id=r1: …"` for each of the six kinds
+2. Call it with `null`, `""`, `"[foo] …"`, `"[not_entitled]x"` and `"x [not_entitled] …"`
+
+#### Expected Result
+- Step 1 returns that kind each time
+- Step 2 returns `null` each time
+
+#### Error / Edge Cases
+- The rule is the one `data-health-reader`'s `cause_of` applies on the server (TC-COMP-267)
+
+### TC-COMP-263: The two fix texts equal the UX design's words exactly
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-29, AC-30, DAC-E8-S5-4, DAC-E8-16
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `PLAN_FIX_TEXT` and `RATE_LIMIT_FIX_TEXT`
+
+#### Steps
+1. Compare each constant with DAC-E8-16's words
+2. Search `PLAN_FIX_TEXT` for *plan*, *Download again* and *Download now*
+3. Search both for a backtick or markup
+
+#### Expected Result
+- `PLAN_FIX_TEXT` equals *Your Massive plan doesn't include this data, so downloading again won't help. Add it to your plan with Massive; the next download after that gets it.*
+- `RATE_LIMIT_FIX_TEXT` equals *Download again later; data already stored is never duplicated or overwritten. If this keeps happening, check that FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE is no higher than your Massive plan's request limit; restart FactorFlow after changing it.*, the variable name as plain text
+- `PLAN_FIX_TEXT` contains *plan* and neither *Download again* nor *Download now*; neither constant holds a backtick or markup
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-264: The fix texts use none of the domain terms the vocabulary sweep forbids
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-19, DAC-E8-S5-5
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- The two constants
+
+#### Steps
+1. Scan both for *instrument*, *acquisition*, *acquire*, *run*, *runs*, *Retire*, *Retired*, *Provider credential* as whole words in any case
+
+#### Expected Result
+- None appears
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-265: The literal scan passes with failure-recovery.ts present
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-26, DAC-E8-S5-6
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- `web/src/components/token-literals.test.ts` (CAP-003-E1-S1), which reads every non-test source under `web/src/components/`
+
+#### Steps
+1. Run it with `failure-recovery.ts` present
+
+#### Expected Result
+- It passes: the module carries no spacing, size or colour literal
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-266: failureRecovery's types restrict the outcome and discriminate the fix
+
+**Scope:** component
+**Component(s):** ui-components
+**Traces to:** AC-29, AC-30, DAC-E8-S5-7, DAC-E8-15
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- `failure-recovery.ts` under `npx tsc --noEmit`
+
+#### Steps
+1. Compile a call passing an outcome other than `"failed"` or `"not_found"` (expected error)
+2. Narrow a `FailureFix` on `kind` and read `text` on each branch
+3. Read the module's imports
+
+#### Expected Result
+- The `outcome` parameter accepts only `"failed" | "not_found"`; the step 1 call fails to compile
+- `FailureFix` is a discriminated union on `kind`: `text` exists only on `provider_plan` and `download_later`
+- No runtime import from `web/src/app/`
 
 #### Error / Edge Cases
 - None beyond the scenario

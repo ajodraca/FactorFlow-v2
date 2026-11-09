@@ -3,6 +3,9 @@
 # Cross-EPIC edges that run against epic order are deliberate and named in each story's Dependencies section:
 # CAP-003-E1-S8 depends on CAP-003-E3-S1 (the Attention and ScoreState types). E3 never depends on E4.
 # Every real-stack end-to-end story depends on CAP-003-E2-S5, which registers the data-health routes.
+# E8 (capability v2, AC-29 and AC-30), owner-directed: the provider-side stories E8-S1 to E8-S4 depend on
+# no E1 to E7 story and can start now; the interface stories E8-S5 to E8-S10 depend on the E1 to E7
+# stories that create the files they edit. No E1 to E7 story depends on E8, so no edge runs against epic order.
 dependency_contract: 2
 capability: CAP-003
 stories:
@@ -57,3 +60,13 @@ stories:
   CAP-003-E7-S6: [CAP-003-E7-S1, CAP-003-E7-S2, CAP-003-E7-S3, CAP-003-E7-S4, CAP-003-E7-S5, CAP-003-E3-S1, CAP-003-E3-S3]
   CAP-003-E7-S7: [CAP-003-E7-S1, CAP-003-E7-S2, CAP-003-E7-S3, CAP-003-E7-S4, CAP-003-E7-S5, CAP-003-E3-S4, CAP-003-E3-S6, CAP-003-E2-S5]
   CAP-003-E7-S8: [CAP-003-E3-S4, CAP-003-E6-S7]
+  CAP-003-E8-S1: []
+  CAP-003-E8-S2: [CAP-003-E8-S1]
+  CAP-003-E8-S3: [CAP-003-E8-S1, CAP-003-E8-S2]
+  CAP-003-E8-S4: [CAP-003-E8-S1, CAP-003-E8-S2, CAP-003-E8-S3]
+  CAP-003-E8-S5: [CAP-003-E1-S1]
+  CAP-003-E8-S6: [CAP-003-E2-S1, CAP-003-E2-S2, CAP-003-E2-S3]
+  CAP-003-E8-S7: [CAP-003-E8-S6, CAP-003-E2-S4, CAP-003-E2-S6]
+  CAP-003-E8-S8: [CAP-003-E3-S1, CAP-003-E8-S5]
+  CAP-003-E8-S9: [CAP-003-E6-S3, CAP-003-E6-S5, CAP-003-E8-S5, CAP-003-E8-S8]
+  CAP-003-E8-S10: [CAP-003-E7-S5, CAP-003-E8-S5]

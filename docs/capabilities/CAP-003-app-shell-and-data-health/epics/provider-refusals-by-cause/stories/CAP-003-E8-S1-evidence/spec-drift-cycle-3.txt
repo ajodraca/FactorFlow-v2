@@ -1,0 +1,26 @@
+# Independent spec-drift subagents, cycle-3. Three rounds, one per revision of the cycle's patch. The recorded verdict
+# is round 3's, on the final cycle-3.patch (diff_sha256 45a13cbf5fb91095ddc728febfb9e9c0450a88877631b9dfbbadd5b21cf97c02).
+
+== Round 3 (agentId a0841fad1c39f5fd4), final patch
+DRIFT_DETECTED: false
+Matches T007, T012, design section 2.3, TC-COMP-233, DAC-E8-8 and DAC-E8-S1-6: the import at outcomes.py:33; the tuple
+and the section 2.3 comment line exactly as the design gives them (150-151); the T012 docstring sentence word for word
+with a closing period (125); the TypeError text exactly T012's sentence (160-161); CredentialRejected's ValueError
+unchanged; no outcome value, column, timing value or migration. All four tests carry `# Implements CAP-003
+TC-COMP-233`; the reason is a hand-written literal and the record is compared whole.
+The two strengthenings are in scope: (1) test_an_unlisted_massive_error_subclass_raises_type_error checks that the
+accepted list is closed, as TC-COMP-233 step 3 and DAC-E8-S1-6 require; it adds no production behaviour and passes on
+the unchanged code too, so the cycle's RED comes from the other tests; (2) matching the full "only ... are accepted"
+sentence is a stricter check of T012's exact text, not drift.
+Minor: the outcomes.py:150 comment names ProviderRateLimited, which CAP-003-E8-S2 adds; outcomes.py:151 is about 96
+characters, inside the 100-character limit.
+
+== Round 2 (agentId a030617cbfe7b0ba0), patch 351c30097291c6f75daa1be1a218c56eb810c6bd149bb31ef3d161788fabfb4e
+DRIFT_DETECTED: false
+The unlisted-subclass test is in scope (DAC-E8-S1-6, "an unrecognised type still raises TypeError"); suggested noting
+it in the cycle's evidence.
+
+== Round 1 (agentId a97e4a1166f24bfdf), patch fcef9885ce23a3af7b889edf5287b897282f7a47526a24003ad1bb09ac52383e
+DRIFT_DETECTED: false
+Minor: the reason is held in a module constant rather than a local r (same literal); T007's three checks are split into
+three tests; the ProviderRateLimited comment is instructed by T012.

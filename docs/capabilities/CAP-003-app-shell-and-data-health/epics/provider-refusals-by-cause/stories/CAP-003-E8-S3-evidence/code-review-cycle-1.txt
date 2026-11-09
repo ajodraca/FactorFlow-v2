@@ -1,0 +1,21 @@
+# Independent code-review subagent (general-purpose, agentId a35dc6fd47d56d807), cycle-1, judged cycle-1.patch
+# (diff_sha256 313788b8b0dfe41537d76245021c947869e4d9a2f9a852eb4b4750f2c9e0ebeb, index tree 72aaf8116ebb8e43579db8a7d4d87811df3a5388)
+# and mutation-cycle-1-results.json.
+VERDICT: APPROVED
+
+What I checked
+- Patch identity: the evidence patch and `git diff --cached` both hash to 313788b8...0ebeb, and the index tree is 72aaf811...5388 on HEAD 52ecfbd. Only src/factorflow/ingestion/massive/client.py and tests/unit/test_massive_client_governor_integration.py are staged. The unstaged changes are the two story docs, which I ignored. The mutation run's tree_patch_sha256 (2db02ed...) is `git diff HEAD` with those doc edits included; its src/tests part hashes to the staged 313788b..., so the mutants ran against the reviewed code.
+- T013 against design section 2.6 and the plan: start_instrument(self) -> None sits right after __init__. Its docstring matches the section 2.6 snippet word for word, and its body is the single call self._governor.start_throttle_budget(). It adds no import, constant, __all__ entry or other change, so nothing from cycle 2 leaked in.
+- T002 against the plan, TC-COMP-250 and section 7 last row: the test's name, arrange, act and assertions match the plan. Settings are built from env exactly as test_massive_redirects.py:_settings does (BASE_URL and MAX_ATTEMPTS unset, generated_test_key(), RPM 60, _env_file=None). It installs forbid_sockets and RecordingMakeRequest().install, uses MagicMock(spec=RateLimitGovernor) and builds a real MassiveClient. It makes all four planned assertions, plus governor.method_calls == [call.start_throttle_budget()], which catches any other governor call. The expected values are written into the test, not derived from the code under test.
+- Marker `# Implements CAP-003 TC-COMP-250`: accepted. CAP-001 already uses TC-COMP-250 in tests/unit/test_api_errors.py:75 and tests/integration/test_api_runs.py:159; CAP-003-E8-S1 and E8-S2 set the CAP-003 prefix precedent.
+- Validation: the focused 4-file command passed (57 tests). ruff check ., ruff format --check . and mypy src are all clean.
+- Mutation evidence: the generator found 0 mutable lines. All 5 hand-written mutants were killed: body replaced by pass, the call made twice, an execute permit, an SDK send, and a call to _acquire_permit.
+- My own mutants, run in a $TMPDIR copy that I then deleted: attribute access without the call (killed by assert_called_once_with); a raw socket.create_connection with the exception swallowed (killed by guard.fired); an SDK get_ticker_details with the exception swallowed (killed by transport.requests == []); method removed (RED with AttributeError, as the plan's checkpoint expects); an equivalent variant, start_throttle_budget(*()), survived, as an equivalent mutant should.
+- Repository state: no edits, staging, checkout or stash. I ran `git write-tree`, which rewrote the existing tree object 72aaf81 and changed no ref or the index.
+
+Findings
+1. NON-BLOCKING, tests/unit/test_massive_client_governor_integration.py:18 and :178. The new module-level import of `call` from unittest.mock shares its name with the existing parametrize argument `call` in test_a_first_page_provider_failure_surfaces_as_the_typed_error; inside that test the argument hides the import. Behaviour and lint are unaffected. No action is needed for this cycle.
+2. NON-BLOCKING, tests/unit/test_massive_client_governor_integration.py:224-228. The env-based settings are written inline rather than through a helper; reasonable, because the file already has an unrelated _settings() built with model_validate.
+3. NON-BLOCKING, tests/unit/test_massive_client_governor_integration.py:237. governor.execute.call_count == 0 is implied by the method_calls equality; the plan requires it, so keeping it is correct.
+
+No blocking findings. The code matches design section 2.6 and plan T013 exactly. The test does what TC-COMP-250 specifies, fails RED for the right reason, and kills a no-op body, a double call, any send or permit, and any other governor call.

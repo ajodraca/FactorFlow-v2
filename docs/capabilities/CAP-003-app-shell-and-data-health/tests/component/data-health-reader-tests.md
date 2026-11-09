@@ -2,33 +2,33 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-data-health-reader-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
 
 # data-health-reader Component Test Specification
 
-Component tests for `data-health-reader` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 14 cases (TC-COMP-035 to TC-COMP-049, not necessarily contiguous).
+Component tests for `data-health-reader` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 21 cases (TC-COMP-035 to TC-COMP-273, not necessarily contiguous).
 
 ### TC-COMP-035: Daily prices status: exceptions, not_determinable, ok; gap count null
 
@@ -166,6 +166,7 @@ Component tests for `data-health-reader` (CAP-003). Each case verifies one story
 
 #### Error / Edge Cases
 - A `written` outcome for a different data type: the row stays
+- E2-S1 v2 builds the version 1 shape (no `cause`, `retryable` true when any failure is `failed`); the `failed` fixture's reason begins `[unavailable] ` (or is null), a cause that stays retryable once CAP-003-E8-S6 excludes plan refusals (TC-COMP-268), so this case passes before and after that story
 
 ### TC-COMP-042: cursor and limit are bound parameters; no transaction left open
 
@@ -334,6 +335,158 @@ Component tests for `data-health-reader` (CAP-003). Each case verifies one story
 #### Expected Result
 - The retired stock is in no count and no row
 - Six pages requested; at most five symbols kept per check
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-267: cause_of reads the six kinds anchored at the start of the reason
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-29, AC-30, DAC-E8-S6-1, DAC-E8-11
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `tests/unit/test_data_health_cause.py` (new)
+
+#### Steps
+1. Call `cause_of` with a reason beginning `[<kind>] symbol=…` for each of the six kinds
+2. Call it with `None`, a reason without a prefix, `[foo] …`, `[not_entitled]` without its following space, and `x [not_entitled] …`
+
+#### Expected Result
+- Step 1 returns each kind
+- Step 2 returns `None` each time
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-268: retryable excludes plan refusals and not-found, and counts every other failed cause
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-14, AC-29, AC-30, DAC-E8-S6-2, DAC-E8-11
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `tests/unit/test_data_health_cause.py`; failure lists built in memory
+
+#### Steps
+1. Evaluate `_retryable` for failures all `failed` with cause `not_entitled`, all `not_found`, and a mix of the two
+2. Evaluate it for one `failed` `unavailable`, one `failed` `rate_limited`, and one `failed` with cause `None` beside a `not_entitled`
+
+#### Expected Result
+- Step 1: false each time
+- Step 2: true each time
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-269: A plan refusal stays in every count and row; only its fix changes
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-16, AC-29, DAC-E8-S6-3, DAC-E8-12, DAC-E8-11
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `tests/integration/test_data_health_problems.py` (CAP-003-E2-S1's file), PostgreSQL; an active stock whose only latest outcome is `fundamentals` `failed` with reason `[not_entitled] symbol=KO data_type=fundamentals request_id=r1: the provider plan is not entitled to this data`
+
+#### Steps
+1. Call `read_data_health`, `read_attention` and `read_problems`
+
+#### Expected Result
+- The stock counts in `read_data_health`'s `affected_count` and the Company financials check's `problem_count`, and appears in the problem rows
+- It counts in `read_attention`'s `problems.stock_count`
+- Its failure carries `cause` `not_entitled`; its row `retryable` is false
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-270: A rate limit, an older unavailable and a null reason keep their rows retryable
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-30, DAC-E8-S6-4, DAC-E8-11, DAC-E8-19
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- PostgreSQL; three active stocks, each with one `failed` failure: reason beginning `[rate_limited] `, reason beginning `[unavailable] ` (as recorded before the upgrade), and a null reason
+
+#### Steps
+1. Call `read_problems`
+
+#### Expected Result
+- The rate-limited failure has `cause` `rate_limited`, its row `retryable` true
+- The `[unavailable]` failure has `cause` `unavailable` and the null-reason failure `cause` `None`; both rows `retryable` true
+
+#### Error / Edge Cases
+- A result recorded before the upgrade reads as an ordinary failure (DAC-E8-19)
+
+### TC-COMP-271: The cause change leaves the SQL read-only and the paging tests passing
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-16, AC-17, DAC-E8-S6-5, DAC-E8-12
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- CAP-003-E2-S1's `test_data_health_sql_is_read_only.py`, keyset-paging and `retryable` tests after this story
+
+#### Steps
+1. Run them
+2. Compare `queries.py` with its state before the story
+
+#### Expected Result
+- Each passes; `queries.py` is unchanged and contains only `SELECT`; the reader writes nothing
+
+#### Error / Edge Cases
+- E2-S1's `retryable` test keeps passing because its `failed` fixture carries a cause that stays retryable (TC-COMP-041)
+
+### TC-COMP-272: No provider text can choose a cause; reason and attempts pass through unchanged
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-29, DAC-E8-S6-6, DAC-E8-11
+**Priority:** P2
+**Type:** security
+
+#### Preconditions
+- `reader.py` and `models.py` after the story
+
+#### Steps
+1. Read how `cause` is chosen
+2. Compare each served `reason` with the stored one
+3. Search for any read or reinterpretation of the stored `attempts`
+
+#### Expected Result
+- `cause` is chosen only by the closed six-kind table at position 0
+- The reason is returned unchanged
+- Nothing reads or reinterprets `attempts`
+
+#### Error / Edge Cases
+- A reason whose provider text contains `[not_entitled] ` after position 0 gives `cause` `None`
+
+### TC-COMP-273: Every construction of the failure dataclass carries cause; earlier assertions unchanged
+
+**Scope:** component
+**Component(s):** data-health-reader
+**Traces to:** AC-29, DAC-E8-S6-7, DAC-E8-11
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- Every test constructing the reader's failure dataclass when the story lands, including CAP-003-E2-S4's `tests/unit/test_api_data_health_models.py` and `tests/unit/test_api_data_health_routes.py` and CAP-003-E2-S5's `stub_reader_functions` in `tests/unit/test_api_no_secrets.py` where those stories have landed
+
+#### Steps
+1. Run `uv run pytest`
+
+#### Expected Result
+- Each construction carries `cause`; every pre-existing assertion passes unchanged
 
 #### Error / Edge Cases
 - None beyond the scenario

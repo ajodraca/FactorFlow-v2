@@ -2,38 +2,40 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-component-design-data-health-reader
 artifact_type: component-design
-artifact_version: 1
+artifact_version: 2
 status: approved
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-25
-updated: 2026-10-26
+updated: 2026-11-08
 ai_provenance:
   agent_id: design-decomposition-agent
   agent_version: "1.1"
   model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-25T19:45:46Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-07T23:05:00Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
+      version: "2, draft (2e6bfeb, 3174b50)"
     - id: CAP-003-system-design
-      version: "1"
+      version: "2, draft (c33a8f1)"
     - id: CAP-003-ux-design
       version: "1"
     - id: tech-stack
-      version: "6"
+      version: "7, approved"
     - id: CAP-001-component-design-coverage-service
       version: "6"
+    - id: CAP-003-component-design-massive-client
+      version: "1, draft (the stored reason's leading kind)"
   invoking_user: ajodraca
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 approval:
   approval_policy: owner-allowed
   approved_by: "Alvaro de Jodra"
-  approved_at: 2026-10-26T02:36:26Z
-  reviewed_revision: sha256:c8ce9ff3632d077456ade077fe30937bda1c06f0b120a60f5f3401e77db9d7ab
-  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v3.md"
+  approved_at: 2026-11-08T01:01:20Z
+  reviewed_revision: sha256:3ea280a900eaacb56f019a18292cdbf078f0a1a49fc80c3dd1f433097b2116b8
+  review_artifact: "docs/capabilities/CAP-003-app-shell-and-data-health/specifications-review-report-v5.md"
 ---
 
 # Component: Data Health Reader
@@ -41,7 +43,7 @@ approval:
 **Status:** draft
 **Capability:** CAP-003
 **Owner:** Alvaro de Jodra
-**Last Updated:** 2026-10-25
+**Last Updated:** 2026-11-07
 
 This design was produced in an unattended `$design-run`. It applies the system
 design's decisions DEC-0200 and DEC-0201 without re-deciding them, and records
@@ -49,6 +51,14 @@ two of its own, DEC-0213 (how each count treats absence, currency, gaps and
 download progress) and DEC-0220 (each check carries its distinct exception
 count), under `projects/factorflow-v2/decisions/` in the harness
 repository. Positions resting on a decision are marked **PROVISIONAL**.
+
+**Version 2 (2026-11-07)** is an owner-directed refinement for capability v2
+and system design v2 (AC-29). Each failure now carries its `cause`, the kind
+its stored reason leads with, and `retryable` excludes a plan refusal as it
+excludes a stock the provider does not recognise (system design §3.4 note 9,
+§3.6 note 6, §4.2 `GET /api/data-health`). The problem set, every count and
+the verdict's inputs are unchanged. Sections 1, 2.1, 2.2, 2.4, 3, 4, 6, 7, 8,
+12, 13 and 14 carry the change.
 
 ## 1. Overview
 
@@ -73,6 +83,8 @@ Use cases addressed:
   shell's attention cadence (AC-9, AC-16; capability flow 3).
 - Data health's verdict counts, check cards and *Needs fixing* rows, read on
   demand (AC-11, AC-13, AC-14; capability flow 2).
+- Each failure's cause, so a plan refusal can name the provider plan as its
+  fix and is never offered a download (AC-29; version 2).
 - Setup's and Home's download progress (AC-7).
 - The honest empty state before any download (AC-21): Data health's
   never-downloaded empty state is triggered by the attention read's
@@ -107,7 +119,10 @@ tests/integration/test_data_health_checks.py
 tests/integration/test_data_health_volume.py
 ```
 
-Every file is new. No delivered file is edited (DEC-0211).
+Every file is new. No delivered file is edited (DEC-0211). Version 2 adds the
+cause to `models.py` and `reader.py` (`cause_of`, the `retryable` rule) and
+rows to `tests/unit/test_data_health_cause.py` (new) and
+`tests/integration/test_data_health_problems.py`.
 
 ### 2.2 Interface
 
@@ -166,10 +181,16 @@ class Attention:
     latest_terminal_download: LatestTerminalDownload | None
     items: tuple[AttentionItem, ...]
 
+FailureCause = Literal[       # the stored reason's leading kind (version 2; system design §3.6 note 6)
+    "not_found", "credential_rejected", "unavailable",
+    "contract_violation", "not_entitled", "rate_limited",
+]
+
 @dataclass(frozen=True)
 class Failure:
     data_type: str               # reference | prices | fundamentals | corporate_actions
     outcome: Literal["failed", "not_found"]
+    cause: FailureCause | None   # None when the reason does not begin with a known kind (version 2)
     reason: str | None
     attempts: int
     completed_at: datetime
@@ -179,7 +200,7 @@ class Failure:
 class ProblemRow:
     symbol: str
     failures: tuple[Failure, ...]
-    retryable: bool              # any failure with outcome failed (DEC-0201; AC-14)
+    retryable: bool              # any failure failed with a cause other than not_entitled (AC-14, AC-29)
 
 @dataclass(frozen=True)
 class ProblemPage:
@@ -297,10 +318,47 @@ SELECT i.symbol,
 `read_problems` groups the rows by symbol, keeps `limit` stocks and returns
 the last kept symbol as `next_cursor` only when a `limit + 1`th stock exists,
 the lookahead `read_coverage` already uses, so a full final page carries no
-cursor. `retryable` is true when any of the row's failures is `failed`; a row
-whose failures are all `not_found` is never retryable (AC-14). The count query
-`PROBLEM_COUNT_SQL` is the same predicate with `count(DISTINCT
-i.instrument_id)`, the first three symbols and `max(r.completed_at)`.
+cursor. The count query `PROBLEM_COUNT_SQL` is the same predicate with
+`count(DISTINCT i.instrument_id)`, the first three symbols and
+`max(r.completed_at)`.
+
+**Cause and retryable (version 2; AC-29; system design §3.4 note 9, §3.6 note
+6).** `compose_failure_reason` begins every stored reason with `[<kind>] ` from
+a closed table, ahead of any variable text, so provider text can never occupy
+that position (`component-design-massive-client.md` CAP-003 §2.5; system design
+assumption 8). `read_problems` reads each failure's `cause` from that prefix in
+Python, with an anchored match against the six kinds; no SQL changes. A reason
+that is null, or does not begin with one of the six, has cause `None`: rows
+recorded before the reason format existed, and the `[unavailable]` rows
+recorded before this upgrade, keep the ordinary fix.
+
+```python
+# src/factorflow/data_health/reader.py
+_CAUSE_PREFIX = re.compile(
+    r"\[(not_found|credential_rejected|unavailable|contract_violation|not_entitled|rate_limited)\] "
+)
+
+
+def cause_of(reason: str | None) -> FailureCause | None:
+    """The failure's cause: the kind its stored reason leads with, or None."""
+    if reason is None:
+        return None
+    match = _CAUSE_PREFIX.match(reason)          # anchored at position 0
+    return cast(FailureCause, match.group(1)) if match else None
+
+
+def _retryable(failures: tuple[Failure, ...]) -> bool:
+    """A download can fix the row: some failure is `failed` for a cause other
+    than a plan refusal (AC-14, AC-29). A `not_found` failure never counts."""
+    return any(f.outcome == "failed" and f.cause != "not_entitled" for f in failures)
+```
+
+A row whose failures are all `not_found`, all `not_entitled`, or a mix of the
+two is never retryable; a `rate_limited` failure is retryable, because a later
+download is its fix (system design §3.6 note 7). A plan refusal is still a
+problem: it stays in the problem set, `affected_count`, the attention
+`problems` block and the Company financials check's `problem_count`; only its
+fix changes (§3.6 note 6).
 
 ### 2.5 The checks (DEC-0201, DEC-0213, PROVISIONAL)
 
@@ -441,6 +499,13 @@ callers poll.
 - **Volume** (constraint 7): at most 3000 active instruments times four data
   types for the attention read, and six coverage pages for the on-demand
   aggregate.
+- **The cause is read, never inferred** (version 2). Only the six kinds of the
+  closed table are recognised, only at the start of the reason; the stored
+  outcome, not the cause, decides membership of the problem set (system design
+  §3.6 note 6; constraint 16 (d)).
+- **Assumption: a stored reason leads with its kind** (system design
+  assumption 8). That prefix is now a read contract between `massive-client`
+  and this module (system design open question 16).
 
 ## 4. Security
 
@@ -451,7 +516,9 @@ callers poll.
 - **No secret is read or returned.** `credential_present()` returns a
   boolean; the key's value never enters this module (AC-4; AGT-PROHIB-001).
 - **Provider text is data.** `reason` and `failure_reason` are returned as
-  stored; the interface renders them as text (AGT-PROHIB-003).
+  stored; the interface renders them as text (AGT-PROHIB-003). `cause` is one
+  of six fixed values or null, matched only against the closed table, so no
+  provider text can choose it.
 - **Data classification:** Internal (SEC-DAT-001), as all CAP-001 data. No
   PII. System design §4.2 now carries the same classification for the new
   response elements it introduces.
@@ -483,6 +550,10 @@ callers poll.
 - **No migration and no data step.** Rollback is redeploying the previous
   image (system design §4.4; OPS-MIG-003).
 - **Behaviour change after upgrade:** none in stored data; the module is new.
+  Version 2 returns `cause` for every failure. Results recorded before the
+  ingestion change of AC-29 and AC-30 keep `[unavailable]` and read as
+  ordinary failures until the next download records that data type under its
+  cause (system design constraint 17 (c)).
 - **Manual actions:** none.
 
 ## 7. Testing
@@ -506,6 +577,10 @@ tech stack.
 | Latest terminal | `tests/integration/test_data_health_attention.py` | A running download does not displace the latest terminal one; an `abandoned` latest terminal yields the item with its `run_id` |
 | Never acquired | `tests/integration/test_data_health_checks.py` | An empty store returns `never_acquired` true and both checks `None`, so no check reports `ok` (AC-21); a store where a download ended and every request failed returns `never_acquired` true with `affected_count` and the problem rows populated, and a non-null `latest_terminal_download` (FINDING-10) |
 | Retired stocks excluded | `tests/integration/test_data_health_checks.py` | A retired stock with a failure is in no count and no row |
+| Cause from the prefix | `tests/unit/test_data_health_cause.py` | `cause_of` returns each of the six kinds for a reason beginning `[<kind>] symbol=…`; `None` for `None`, for a reason without a prefix, for `[foo] …`, for `[not_entitled]` without the following space, and for `x [not_entitled] …` where the kind is not at the start (version 2; AC-29) |
+| Retryable by cause | `tests/unit/test_data_health_cause.py` | `_retryable` is false for failures all `not_entitled`, all `not_found`, and a mix of the two; true for one `unavailable`, one `rate_limited`, and one `failed` with cause `None` beside a `not_entitled` (AC-14, AC-29) |
+| Plan refusal stays a problem | `tests/integration/test_data_health_problems.py` | A stock whose only latest outcome is `fundamentals` `failed` with reason `[not_entitled] symbol=KO data_type=fundamentals request_id=r1: the provider plan is not entitled to this data` is in `affected_count`, `problems.stock_count` and the rows, with `cause` `not_entitled` and `retryable` false; its Company financials `problem_count` counts it (AC-29) |
+| Rate limit is retryable | `tests/integration/test_data_health_problems.py` | A stock whose failure reason begins `[rate_limited] ` has `cause` `rate_limited` and `retryable` true (AC-30) |
 | Volume | `tests/integration/test_data_health_volume.py` | 3000 active instruments with failures on 300: correct counts, keyset pages, memory bounded; after one warm-up request, 20 timed `GET /api/data-health` requests through the in-process application against that store have a 95th percentile of at most 2 seconds (AC-28) |
 
 ## 8. Acceptance Criteria
@@ -528,6 +603,13 @@ tech stack.
    answers the error envelope; no partial aggregate is returned as complete.
 9. With 3,000 followed stocks, `GET /api/data-health` answers within 2
    seconds at the 95th percentile in the volume test (AC-28).
+10. Every failure carries `cause`, the kind its stored reason begins with when
+    that kind is one of the six, and null otherwise (version 2; AC-29).
+11. A row is `retryable` only when some failure is `failed` with a cause other
+    than `not_entitled`; a row whose failures are all plan refusals or
+    `not_found` never is (AC-14, AC-29).
+12. A plan refusal stays in the problem set and every count; the cause
+    changes only the fix (AC-29).
 
 ## 9. Workflows
 
@@ -559,8 +641,9 @@ This component exposes no HTTP endpoint. Its Python interface is consumed by
 
 | Type | Document Name | Description | Link |
 |------|---------------|-------------|------|
-| Capability | CAP-003 v1 | AC-7, AC-9, AC-11, AC-13, AC-14, AC-16, AC-21, AC-28 | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` |
-| System design | CAP-003 v1 | §3.3, §3.4, §4.1, §4.2, constraints 1, 3, 5, 7 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| Capability | CAP-003 v2 | AC-7, AC-9, AC-11, AC-13, AC-14, AC-16, AC-21, AC-28, AC-29 | `docs/capabilities/CAP-003-app-shell-and-data-health/Capability-CAP-003.md` |
+| System design | CAP-003 v2 | §3.3, §3.4 (note 9), §3.6 note 6, §4.1, §4.2, constraints 1, 3, 5, 7, 16 (d), 17 (c), assumption 8 | `docs/capabilities/CAP-003-app-shell-and-data-health/design/system-design.md` |
+| Component design | CAP-003 massive client | The reason format and its six kinds | `docs/capabilities/CAP-003-app-shell-and-data-health/design/component-design-massive-client.md` |
 | Component design | CAP-001 coverage service | `read_coverage` contract, presence and gap semantics | `docs/capabilities/CAP-001-market-data-acquisition-foundation/design/component-design-coverage-service.md` |
 | Schema | Migrations 0001, 0003, 0004 | The tables read | `src/factorflow/db/migrations/` |
 | Decisions | DEC-0200, DEC-0201, DEC-0203, DEC-0208, DEC-0210, DEC-0213, DEC-0217, DEC-0220 | Server-side aggregates, problem and check definitions, item kinds, loopback, the verdict's inputs (as amended), count rules, exception count | `projects/factorflow-v2/decisions/` (harness repository) |
@@ -576,6 +659,8 @@ This component exposes no HTTP endpoint. Its Python interface is consumed by
 | AC-12 | Recorded states only | Run state returned as recorded; checks carry exceptions | 2.5, 2.6 |
 | AC-13 | One problem set with reasons | Problem rows from `acquisition_state` and `run_instrument_result` | 2.4 |
 | AC-14 | `retryable` false for `not_found` | `retryable` rule | 2.4 |
+| AC-29 | §3.4 note 9, §3.6 note 6; `cause`, `retryable` excluding `not_entitled` | `cause_of` over the leading kind; `_retryable` | 2.2, 2.4 |
+| AC-30 | §3.6 note 7 (a rate limit's fix is a later download) | `rate_limited` cause, retryable | 2.4 |
 | AC-16 | `problems.stock_count` | Same set as the rows | 2.4 |
 | AC-21 | `never_acquired`; `latest_terminal_download` | `never_acquired` passed through from `coverage-service` for the check cards' null state; an absent `latest_terminal_download` is the screen's empty-state trigger | 2.5, 2.6 |
 | AC-24 | Not determinable is a value | `null` counts and `not_determinable` status | 2.5 |
@@ -591,3 +676,7 @@ This component exposes no HTTP endpoint. Its Python interface is consumed by
    attempted stock shown apart from one the provider returned nothing for,
    the Daily prices card gains a fourth count and the response a field.
    *Owner: capability owner. Blocks: nothing now.*
+3. **The reason prefix is now a read contract** (system design open question
+   16): this module depends on `massive-client` keeping the kind first. The
+   owner decides whether that rule warrants a decision record. *Owner:
+   capability owner. Blocks: nothing in this design.*

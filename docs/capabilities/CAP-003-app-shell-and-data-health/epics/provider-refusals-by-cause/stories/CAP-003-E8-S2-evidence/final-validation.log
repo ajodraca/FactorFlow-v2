@@ -1,0 +1,31 @@
+# T017 final validation on the final bytes (code tree 337511a8aa06165833a76c4d501894bfe3b6f90b, base 201442b)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q -W ignore::DeprecationWarning   (full suite, postgres tests in a testcontainers postgres:16, outside the sandbox)
+2659 passed, 1 warning in 1328.97s (0:22:08)   [exit 0; the warning is the pre-existing StarletteDeprecationWarning from fastapi/testclient.py]
+# $ uv build --out-dir <scratch>
+Successfully built <scratch>/factorflow-0.2.0.tar.gz
+Successfully built <scratch>/factorflow-0.2.0-py3-none-any.whl
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+285 files already formatted
+Success: no issues found in 61 source files
+# DAC-E8-S2-8 / T017 review against the base
+# $ grep -rn start_throttle_budget src
+src/factorflow/ingestion/rate_limit.py:124:    def start_throttle_budget(self) -> None:
+# $ git diff --cached 201442b --name-only (code)
+src/factorflow/ingestion/massive/__init__.py
+src/factorflow/ingestion/massive/errors.py
+src/factorflow/ingestion/rate_limit.py
+tests/unit/test_governor_retry.py
+tests/unit/test_massive_error_classification.py
+tests/unit/test_massive_failure_reasons.py
+tests/unit/test_massive_package_boundary.py
+tests/unit/test_massive_retry.py
+tests/unit/test_outcomes.py
+# rate_limit.py hunks: none inside GovernorSettings or from_massive_settings (base lines 54-78); no logging import; the only new message is _THROTTLE_BUDGET_SPENT_MESSAGE
+@@ -1,7 +1,8 @@
+@@ -17,9 +18,11 @@ exception's type or fields, only the `Outcome` `classify` returns. The
+@@ -31,7 +34,7 @@ from dataclasses import dataclass
+@@ -40,6 +43,10 @@ T = TypeVar("T")
+@@ -112,6 +119,14 @@ class RateLimitGovernor:
+@@ -134,14 +149,21 @@ class RateLimitGovernor:
+@@ -152,16 +174,11 @@ class RateLimitGovernor:

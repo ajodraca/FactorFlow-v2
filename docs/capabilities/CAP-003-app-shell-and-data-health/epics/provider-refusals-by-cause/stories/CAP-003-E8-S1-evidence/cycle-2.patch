@@ -1,0 +1,244 @@
+diff --git a/src/factorflow/ingestion/massive/errors.py b/src/factorflow/ingestion/massive/errors.py
+index 93bee0f..274c8d0 100644
+--- a/src/factorflow/ingestion/massive/errors.py
++++ b/src/factorflow/ingestion/massive/errors.py
+@@ -277,6 +277,7 @@ _ERROR_KIND_BY_TYPE: dict[type[MassiveError], str] = {
+     CredentialRejected: "credential_rejected",
+     ProviderUnavailable: "unavailable",
+     ProviderContractViolation: "contract_violation",
++    ProviderNotEntitled: "not_entitled",
+ }
+ 
+ _CREDENTIAL_REJECTED_DESCRIPTION = "the provider rejected the configured credential"
+@@ -285,6 +286,12 @@ from the error's own message, which may itself embed provider-supplied
+ diagnostic text -- only the fixed kind and the typed fields (symbol, data
+ type, request ID) are safe to compose unconditionally."""
+ 
++_NOT_ENTITLED_DESCRIPTION = "the provider plan is not entitled to this data"
++"""A fixed description for `ProviderNotEntitled` (CAP-003 massive-client
++section 2.5, AC-29). Never built from the provider's text, which is free
++text the stored reason must not carry (AGT-PROHIB-003), and never passed to
++`redact`."""
++
+ 
+ def compose_failure_reason(
+     error: MassiveError,
+@@ -315,15 +322,20 @@ def compose_failure_reason(
+     on trusting redaction to catch every way a credential could appear in
+     provider-echoed text.
+ 
+-    Raises `TypeError` if `error` is not one of the four typed
+-    `MassiveError` subclasses this module defines -- this composer never
+-    emits an untyped reason for an unrecognised error class.
++    `ProviderNotEntitled` likewise composes a fixed description, never its
++    own message and never through `redact`: the provider's text tells the
++    owner nothing the kind and the data type do not, and is provider free
++    text the stored reason must not carry (AGT-PROHIB-003).
++
++    Raises `TypeError` if `error`'s exact class is not one of the typed
++    `MassiveError` subclasses in this module's kind table -- this composer
++    never emits an untyped reason for an unrecognised error class.
+     """
+     kind = _ERROR_KIND_BY_TYPE.get(type(error))
+     if kind is None:
+         raise TypeError(
+             f"compose_failure_reason does not support {type(error).__name__}; "
+-            "only the four typed MassiveError subclasses are accepted."
++            "only the typed MassiveError subclasses in its kind table are accepted."
+         )
+ 
+     if error.provider_request_id is None:
+@@ -333,6 +345,8 @@ def compose_failure_reason(
+ 
+     if isinstance(error, CredentialRejected):
+         variable_segment = _CREDENTIAL_REJECTED_DESCRIPTION
++    elif type(error) is ProviderNotEntitled:
++        variable_segment = _NOT_ENTITLED_DESCRIPTION  # never the provider's text; redact not called
+     else:
+         variable_segment = _bound_variable_text(redact(str(error)))
+ 
+diff --git a/tests/unit/test_massive_error_classification.py b/tests/unit/test_massive_error_classification.py
+index c8a4aa4..da5a91c 100644
+--- a/tests/unit/test_massive_error_classification.py
++++ b/tests/unit/test_massive_error_classification.py
+@@ -25,6 +25,7 @@ from factorflow.ingestion.massive.errors import (
+     ProviderNotEntitled,
+     ProviderUnavailable,
+     classify_error_body,
++    compose_failure_reason,
+     is_fatal_for_governor,
+     is_rate_limited_body,
+     wrap_validation_error,
+@@ -365,3 +366,48 @@ def test_provider_not_entitled_is_fatal_and_a_massive_error() -> None:
+     assert is_fatal_for_governor(ProviderNotEntitled("x")) is True
+     assert issubclass(ProviderNotEntitled, MassiveError)
+     assert not issubclass(ProviderNotEntitled, ProviderUnavailable)
++
++
++# Implements CAP-003 TC-COMP-228
++def test_a_body_that_says_entitled_without_not_entitled_stays_provider_unavailable() -> None:
++    """CAP-003 TC-COMP-228 / DAC-E8-1: the marker is the phrase `not
++    entitled`, not the word `entitled`; a body that grants an entitlement
++    is not a refusal."""
++    body = {"status": "ERROR", "request_id": "r6", "message": "Your plan is entitled to this data"}
++
++    result = classify_error_body(json.dumps(body))
++
++    assert type(result) is ProviderUnavailable
++
++
++# --- CAP-003 TC-COMP-234 / DAC-E8-S1-7: no provider free text -----------
++
++
++# Implements CAP-003 TC-COMP-234
++def test_a_plan_refusal_carries_no_provider_free_text_or_spurious_field() -> None:
++    """CAP-003 TC-COMP-234 / DAC-E8-S1-7 (AGT-PROHIB-003, SEC-INP-001): a
++    plan refusal carrying a spurious credential-bearing field classifies
++    with its request id, and neither the error nor its composed reason --
++    under an identity `redact`, so nothing is hidden by redaction -- holds
++    the provider's text, the field or the credential."""
++    body = {
++        "status": "ERROR",
++        "request_id": "req_leak_403",
++        "message": "You are not entitled to this data. Please upgrade your plan",
++        "debug_request_url": "https://api.massive.com/v3/reference/tickers/KO?apiKey=SECRET_TEST_TOKEN_ABC123",
++    }
++
++    result = classify_error_body(json.dumps(body))
++
++    assert type(result) is ProviderNotEntitled
++    assert result.provider_request_id == "req_leak_403"
++    for leaked in ("SECRET_TEST_TOKEN_ABC123", "massive.com", "Please upgrade"):
++        assert leaked not in str(result)
++        assert leaked not in repr(result)
++
++    reason = compose_failure_reason(
++        result, symbol="KO", data_type="fundamentals", redact=lambda text: text
++    )
++
++    for leaked in ("SECRET_TEST_TOKEN_ABC123", "You are not entitled", "Please upgrade"):
++        assert leaked not in reason
+diff --git a/tests/unit/test_massive_failure_reasons.py b/tests/unit/test_massive_failure_reasons.py
+index e04c251..648d9ab 100644
+--- a/tests/unit/test_massive_failure_reasons.py
++++ b/tests/unit/test_massive_failure_reasons.py
+@@ -17,7 +17,9 @@ from factorflow.ingestion.massive.errors import (
+     MAX_FAILURE_REASON_VARIABLE_TEXT,
+     CredentialRejected,
+     InstrumentNotFound,
++    MassiveError,
+     ProviderContractViolation,
++    ProviderNotEntitled,
+     ProviderUnavailable,
+     compose_failure_reason,
+ )
+@@ -276,3 +278,109 @@ def test_composer_rejects_a_raw_exception_not_in_the_taxonomy() -> None:
+             data_type="daily_bars",
+             redact=_identity_redact,
+         )
++
++
++# --- CAP-003 TC-COMP-232 / DAC-E8-S1-5: the not_entitled reason ----------
++
++
++# Implements CAP-003 TC-COMP-232
++def test_not_entitled_reason_carries_the_fixed_description_never_the_provider_text() -> None:
++    """CAP-003 TC-COMP-232 / DAC-E8-S1-5: a plan refusal composes the fixed
++    description whatever its message holds; `redact` is never called with
++    that message, and the credential fixture appears nowhere. The spy
++    returns its argument unchanged, so a branch that composed the message
++    would leak the fixture into the reason."""
++    seen: list[str] = []
++
++    def _spy_redact(text: str) -> str:
++        seen.append(text)
++        return text
++
++    error = ProviderNotEntitled(
++        f"Please upgrade your plan {_CREDENTIAL_FIXTURE}", provider_request_id="req_ne_001"
++    )
++
++    reason = compose_failure_reason(
++        error, symbol="KO", data_type="fundamentals", redact=_spy_redact
++    )
++
++    assert reason == (
++        "[not_entitled] symbol=KO data_type=fundamentals request_id=req_ne_001: "
++        "the provider plan is not entitled to this data"
++    )
++    assert seen == []
++    assert _CREDENTIAL_FIXTURE not in reason
++    assert "Please upgrade" not in reason
++
++
++@pytest.mark.parametrize(
++    ("error_type", "expected"),
++    [
++        pytest.param(
++            InstrumentNotFound,
++            "[not_found] symbol=AAPL data_type=prices request_id=r1: diag text",
++            id="not_found",
++        ),
++        pytest.param(
++            CredentialRejected,
++            "[credential_rejected] symbol=AAPL data_type=prices request_id=r1: "
++            "the provider rejected the configured credential",
++            id="credential_rejected",
++        ),
++        pytest.param(
++            ProviderUnavailable,
++            "[unavailable] symbol=AAPL data_type=prices request_id=r1: diag text",
++            id="unavailable",
++        ),
++        pytest.param(
++            ProviderContractViolation,
++            "[contract_violation] symbol=AAPL data_type=prices request_id=r1: diag text",
++            id="contract_violation",
++        ),
++        pytest.param(
++            ProviderNotEntitled,
++            "[not_entitled] symbol=AAPL data_type=prices request_id=r1: "
++            "the provider plan is not entitled to this data",
++            id="not_entitled",
++        ),
++    ],
++)
++# Implements CAP-003 TC-COMP-232
++def test_each_kind_composes_its_own_reason_by_exact_class(
++    error_type: type[MassiveError], expected: str
++) -> None:
++    """CAP-003 TC-COMP-232 / DAC-E8-S1-5: every delivered kind still
++    composes its own reason, and the new `not_entitled` row its fixed
++    description, each beginning `[<kind>] `."""
++    error = error_type("diag text", provider_request_id="r1")
++
++    reason = compose_failure_reason(
++        error, symbol="AAPL", data_type="prices", redact=_identity_redact
++    )
++
++    assert reason == expected
++
++
++class _Unlisted(MassiveError):
++    """A `MassiveError` subclass the kind table does not list."""
++
++
++class _NotEntitledSubclass(ProviderNotEntitled):
++    """A subclass of a listed class: the lookup is by exact class."""
++
++
++@pytest.mark.parametrize("error_type", [_Unlisted, _NotEntitledSubclass])
++# Implements CAP-003 TC-COMP-232
++def test_an_unlisted_massive_error_subclass_raises_type_error(
++    error_type: type[MassiveError],
++) -> None:
++    """CAP-003 TC-COMP-232 / DAC-E8-S1-5: a class absent from the closed
++    kind table -- including a subclass of `ProviderNotEntitled` -- raises
++    `TypeError` rather than composing an untyped reason."""
++    with pytest.raises(TypeError):
++        compose_failure_reason(
++            error_type("diag text", provider_request_id="r1"),
++            symbol="AAPL",
++            data_type="prices",
++            redact=_identity_redact,
++        )

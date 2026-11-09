@@ -1,0 +1,34 @@
+# Independent code-review subagent (general-purpose, agentId aee7f253e187ab0d9), cycle-1, judged cycle-1.patch
+# (diff_sha256 2e6937646a29d44aeb5985d1042f1ac8cd68351152b37ad9f77a5632d2c27c47) and mutation-cycle-1-results.json.
+VERDICT: APPROVED
+
+What I checked
+- Patch identity. HEAD is 201442b. The SHA-256 of `git diff --cached` (2e693764...7c45e) matches cycle-1.patch. The staged change touches only six files: 2 src and 4 tests. The one unstaged change, the story's `status: in-progress`, is not part of the patch.
+- T013 (`errors.py`). `ProviderRateLimited(ProviderUnavailable)` sits right after `ProviderUnavailable`, and its docstring matches design 2.4 word for word. The `"rate_limited"` row comes after `not_entitled`, so the table has exactly six rows (the plan's story-specific check). The `__all__` entry is beside `ProviderUnavailable`. The `compose_failure_reason` body, its docstring and its `TypeError` text are unchanged; they don't state a count, as T001 found. `is_fatal_for_governor` is unchanged too, so `ProviderRateLimited` counts as retryable, as 2.4 says.
+- T014 (`__init__.py`). The import and the `__all__` entry are in sorted order, and the docstring doesn't state a count. `outcomes.py` is not in the diff, as DAC-E8-S2-7 requires. HEAD's `outcomes.py`:150 already has the comment saying `ProviderUnavailable` includes its subclass `ProviderRateLimited`.
+- T002-T005 tests.
+  - Every expected value is a hand-written literal, and the rate_limited line matches the design 2.5 example (`request_id=unavailable`).
+  - The credential test asserts the full redacted reason, which proves the "redacted then bounded" path ran.
+  - The unlisted-subclass test covers both a `ProviderUnavailable` subclass and a `MassiveError` subclass, which pins the exact-class lookup.
+  - `ProviderRateLimited` is imported inside each new function, as the plan says.
+  - Each `# Implements CAP-003 TC-COMP-240/241` marker is present.
+- Mutants. Each of the 7 hand-written mutants is killed for the reason the plan gives:
+  - Deleting the row gives a `TypeError`.
+  - Changing the kind to `"unavailable"` breaks the literal.
+  - Changing the base class to `MassiveError` breaks `issubclass`, and `is_fatal_for_governor` returns True.
+  - Deleting either `__all__` entry or the re-export breaks the membership and identity checks.
+  - Dropping `ProviderUnavailable` from the `outcomes` tuple gives a `TypeError`.
+- Further mutants I reasoned through (not run). All would be caught:
+  - Looking up the kind through the parent class instead of the exact class: caught by the `_UnlistedUnavailable` `TypeError` case.
+  - Routing `ProviderRateLimited` to a fixed description: caught by the literal.
+  - Skipping `redact`: caught by the credential test.
+  - `is_fatal_for_governor` switched to an exact-class check: caught by T004's last assert.
+  I found no plausible surviving mutant.
+- Security and scope. Tests use only the existing `_CREDENTIAL_FIXTURE`, and there is no new logging or URL. Nothing outside cycle 1 changed: `rate_limit.py` is untouched.
+- Commands. The focused pytest run passed 86 tests. `ruff check` passed, `ruff format --check` reported 285 files already formatted, and `mypy src` found no issues in 61 files.
+
+Findings
+1. NON-BLOCKING, `src/factorflow/ingestion/massive/errors.py`:13-20. The module docstring still says a 429 "must never become a `MassiveError` at all". That is still true for a single throttled response, but it now reads against `ProviderRateLimited`, which is raised for a persistent 429. T013 doesn't ask for this edit, so leave it for doc-sync or a design revision.
+2. NON-BLOCKING, `tests/unit/test_massive_failure_reasons.py`:506. `test_provider_rate_limited_subclasses_provider_unavailable` repeats T004's `issubclass` assertion. The plan asks for it (T002 (d)), so this is acceptable redundancy.
+3. NON-BLOCKING, `tests/unit/test_massive_failure_reasons.py`:459. `assert not reason.startswith("[unavailable]")` is already implied by the exact-equality check just before it. The plan asks for it and it does no harm.
+4. NON-BLOCKING, `docs/.../stories/CAP-003-E8-S2.md` (unstaged). The `status: planning` to `in-progress` change is outside the reviewed patch. Make sure it lands in the story commit on purpose.

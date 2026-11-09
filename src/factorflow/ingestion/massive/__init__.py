@@ -12,7 +12,7 @@ Package contents land across CAP-001-E3's stories:
 Only the four product model types and the error-taxonomy primitives are
 re-exported here (DAC-E3-12): a caller of `massive-client` --
 `CAP-001-E3-S1`'s historical reads -- imports `TickerReference`,
-`DailyBar`, `FinancialStatement`, `CorporateAction`, the five
+`DailyBar`, `FinancialStatement`, `CorporateAction`, the
 `MassiveError` types, `classify_error_body`, `is_rate_limited_body`,
 `is_fatal_for_governor`, `wrap_validation_error`, `compose_failure_reason`
 and `MAX_FAILURE_REASON_VARIABLE_TEXT` from this package, never the
@@ -38,6 +38,8 @@ from factorflow.ingestion.massive.errors import (
     InstrumentNotFound,
     MassiveError,
     ProviderContractViolation,
+    ProviderNotEntitled,
+    ProviderRateLimited,
     ProviderUnavailable,
     classify_error_body,
     compose_failure_reason,
@@ -61,6 +63,8 @@ __all__ = [
     "InstrumentNotFound",
     "MassiveError",
     "ProviderContractViolation",
+    "ProviderNotEntitled",
+    "ProviderRateLimited",
     "ProviderUnavailable",
     "TickerReference",
     "classify_error_body",

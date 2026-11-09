@@ -2,33 +2,33 @@
 artifact_schema_version: 1
 artifact_id: CAP-003-owner-shell-tests
 artifact_type: test-specification
-artifact_version: 1
+artifact_version: 2
 status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-08
 ai_provenance:
   agent_id: test-design-agent
   agent_version: "1.0"
-  model: claude-fable-5-1
+  model: claude-opus-5-5
   tool: Claude Code
-  tool_version: "unknown"
-  timestamp: 2026-10-30T02:26:09Z
+  tool_version: "2.1.318"
+  timestamp: 2026-11-08T19:19:17Z
   source_artifacts:
     - id: CAP-003
-      version: "1"
-    - id: CAP-003-system-design
-      version: "1"
-    - id: CAP-003-backlog
       version: "2"
+    - id: CAP-003-system-design
+      version: "2"
+    - id: CAP-003-backlog
+      version: "4"
   invoking_user: Alvaro de Jodra
   correlation_id: 8e98ad1c-3c34-4529-991c-a0af1920daf5
 ---
 
 # owner-shell Component Test Specification
 
-Component tests for `owner-shell` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 37 cases (TC-COMP-056 to TC-COMP-182, not necessarily contiguous).
+Component tests for `owner-shell` (CAP-003). Each case verifies one story-level or epic-level derived acceptance criterion within a unit test harness for the FactorFlow-v2 repository; IDs are assigned in AC-ID order across every component file, so this file holds 41 cases (TC-COMP-056 to TC-COMP-281, not necessarily contiguous).
 
 ### TC-COMP-056: Root renders a skeleton then redirects by most_recent_run
 
@@ -841,6 +841,92 @@ Component tests for `owner-shell` (CAP-003). Each case verifies one story-level 
 
 #### Expected Result
 - `/data` renders with its `h1` focused, both ways
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-278: The problem failure type requires cause as FailureCause or null
+
+**Scope:** component
+**Component(s):** owner-shell
+**Traces to:** AC-29, DAC-E8-S8-1, DAC-E8-14
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `web/src/app/shell-types.test.ts` (new), with Vitest's `expectTypeOf` as `web/src/api/classification-client.test.ts` uses it
+
+#### Steps
+1. Run `npx tsc --noEmit` and `npm run test`
+2. Make the field optional in a scratch copy and re-run `npx tsc --noEmit`
+
+#### Expected Result
+- `ProblemPage["rows"][number]["failures"][number]["cause"]` and `DataHealth["problems"]["rows"][number]["failures"][number]["cause"]` each `toEqualTypeOf<FailureCause | null>()`
+- With the field optional, type-checking fails
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-279: shell-client passes the served cause through, null included
+
+**Scope:** component
+**Component(s):** owner-shell
+**Traces to:** AC-29, DAC-E8-S8-2, DAC-E8-14
+**Priority:** P1
+**Type:** functional
+
+#### Preconditions
+- `web/src/app/shell-client.test.ts` with a doubled `fetch`
+
+#### Steps
+1. Resolve `fetchProblems(cursor, limit)` with a body whose failures carry `"cause": "not_entitled"` and `"cause": null`
+2. Resolve `fetchDataHealth()` with the same failures
+
+#### Expected Result
+- The returned rows carry `cause` `"not_entitled"` and `null` respectively, unchanged, from both functions
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-280: shell-types imports FailureCause as a type and changes nothing else
+
+**Scope:** component
+**Component(s):** owner-shell
+**Traces to:** AC-29, DAC-E8-S8-3, DAC-E8-14
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- `shell-types.ts` after the story and its diff
+
+#### Steps
+1. Search for a second definition of the six kinds
+2. Read the import of `FailureCause`
+3. Compare the failure type, `ProblemPage`, `DataHealth` and `Attention` with their previous fields
+
+#### Expected Result
+- `FailureCause` is not redefined; the import is `import type` from `web/src/components/patterns/failure-recovery.ts`
+- Only `cause` is added to the failure type; nothing else changes
+
+#### Error / Edge Cases
+- None beyond the scenario
+
+### TC-COMP-281: Every typed ProblemPage or DataHealth failure fixture carries cause
+
+**Scope:** component
+**Component(s):** owner-shell
+**Traces to:** AC-29, DAC-E8-S8-4, DAC-E8-14
+**Priority:** P2
+**Type:** functional
+
+#### Preconditions
+- Every test fixture typed as a `ProblemPage` or `DataHealth` failure when the story lands
+
+#### Steps
+1. Run `npx tsc --noEmit` and `npm run test`
+
+#### Expected Result
+- Each fixture carries `cause`; every pre-existing assertion passes unchanged
 
 #### Error / Edge Cases
 - None beyond the scenario

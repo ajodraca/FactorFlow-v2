@@ -1,0 +1,32 @@
+# Independent spec-drift subagent (general-purpose, agentId ae878f466fa4ce8fc), cycle-2, judged cycle-2.patch
+# (diff_sha256 3a28bfe48d1753b559d864a9d1ba69db89f698b2103fea8faa17c9ab8b9eb0c6).
+DRIFT_DETECTED: false
+
+What I checked (the patch's sha256 matches `git diff b401360..337511a`; three files changed):
+- `src/factorflow/ingestion/rate_limit.py` against design section 2.2/2.3 and T015:
+  - The import, `_THROTTLE_BUDGET_SPENT_MESSAGE` (same text as the design), and `self._throttle_spent = 0.0` with the design's comment are all present.
+  - `start_throttle_budget()` and its docstring match the design.
+  - In `execute`, `throttled_at` is charged after the permit and then reset. The budget check is `spent + delay > max`, made before the sleep, and raises `ProviderRateLimited(...) from exc`.
+  - The `RETRYABLE` branch, its comment, its message and its backoff are unchanged byte for byte. So are FATAL, pacing, `_throttle_delay`, `GovernorSettings` and `from_massive_settings`.
+  - Nothing is logged and no setting is added.
+  - The docstrings (module and `execute`) say what T015(f) asks for.
+- T006 / TC-COMP-235 / DAC-E8-S2-1: both delivered exhaustion tests now pass `now=clock`, expect `ProviderRateLimited`, and assert `[60.0]` and `[10.0, 10.0]`. The zero-stated-delay test is untouched. The `# Implements CAP-003 TC-COMP-235` comment sits above the section header.
+- T007 / TC-COMP-236 / DAC-E8-S2-2: the test checks the exact type, the subclass, `provider_request_id is None`, the literal message, `__cause__ is raised[-1]` and two sends. The RETRYABLE case checks a plain `ProviderUnavailable` with the delivered message after 3 sends.
+- T008 / TC-COMP-237 / DAC-E8-S2-3: three 60 s waits, then two more and a raise, 300 s in total; after a restart there is one 60 s wait. This matches the plan.
+- T009 / TC-COMP-238 / DAC-E8-S2-4: jitter `[0.999]`; the declined delay comes from the literal formula; the test asserts the sleeps total <= 300 and that adding the declined delay would exceed 300.
+- T010 / TC-COMP-239 / DAC-E8-S2-5: only the comment line was added. No delivered test body changed, and the backoff, pacing and settings test files are not in the diff.
+- T011 / TC-COMP-242 / DAC-E8-S2-8:
+  - The AST test asserts one `except BaseException` handler and no `isinstance`, `issubclass` or `type` calls.
+  - It asserts the import names exactly two errors and that every `ProviderRateLimited` name sits inside a `raise`.
+  - It asserts no logging or `getLogger`, no URL or credential strings, and the literal list of `GovernorSettings` fields.
+- T016: only `max_throttle_wait_seconds` changed from 1.0 to 300.0, with a one-line comment. The owner confirmed this on 2026-11-08 (Open Gaps 1).
+
+The four coder choices:
+1. T012's budget of 119.5 instead of the plan's 120.0: not drift. Scenario, sleeps and assertions match the plan. The plan's own kill claim for the "charge the backoff" mutant is false at 120.0, because 120 > 120 is false. At 119.5 the delivered code still takes the 59 s wait (60 + 59 = 119) and declines the 90 s wait. The backoff mutant reaches 120 and declines the 59 s wait. The `throttled_at = None` deletion mutant still produces `[60, 1]`. The design section 2.3 and DAC-E8-5 rule being tested is unchanged, and the docstring records why.
+2. The joined message literal: the string is identical to the design and DAC-E8-S2-2, so no drift.
+3. `_THROTTLE_SEND_GUARD = 20` and `_guarded_throttle`: these are the plan's 20-send guard ("more than 20 sends" fails), used in T007, T008, T009 and T012. No drift.
+4. Two changed tests, not three: this agrees with the story (DAC-E8-S2-1), design section 7 and TC-COMP-235. The "three" in design section 2.1 is the stale text the plan's Resolved Conflicts 1 already settled. No drift.
+
+Minor, not drift: `execute`'s docstring has one more sentence than the plan lists, saying what is charged (from the start of the sleep until the retried request holds its permit). It repeats design section 2.3 and DAC-E8-5 and does not contradict them.
+
+I edited no file and ran no tests.

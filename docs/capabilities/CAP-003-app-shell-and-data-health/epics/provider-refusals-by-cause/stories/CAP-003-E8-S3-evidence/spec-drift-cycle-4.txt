@@ -1,0 +1,49 @@
+# Independent spec-drift subagent (general-purpose, agentId a71429b2d5192b62d), cycle-4 round 2, judged cycle-4.patch
+# (diff_sha256 b83175950a90383d16e155457fe17b304c153a60c67ebfe8a4da6790711c4e1d).
+DRIFT_DETECTED: false
+
+- **Patch identity:** `cycle-4.patch` has sha256 `b83175950a90383d16e155457fe17b304c153a60c67ebfe8a4da6790711c4e1d`, as stated. It is byte-identical to `git diff --cached` at HEAD `4d90723`. It changes only `tests/unit/test_massive_retry.py` (+96/−33), so `src/factorflow/ingestion/massive/client.py` is unchanged, as IR-001 says it should be ("No production change is needed"). The worktree has two other changes, and neither is in the patch:
+  - The unstaged story edit changes only `status: in-review` to `in-progress`. It changes no DAC wording.
+  - The cycle-4 evidence files are untracked.
+- **New TC-COMP-248 rows, checked against story rule 1 (`str(reason) == ResponseError.SPECIFIC_ERROR.format(status_code=429)`), DAC-E8-2 ("equal to"), design §2.3 rules 1 and 2, and DAC-E8-S3-6:**
+  - There are four new rows: a prefix (`"proxy: " + text`), a leading space (`" " + text`), a trailing newline (`text + "\n"`) and upper case (`text.upper()`).
+  - I checked each row with the locked urllib3 2.7.0 (`'too many 429 error responses'`). The `ResponseError` text is not `==` the constant, so rule 1 does not match. Each exception is a `MaxRetryError`, not a `BadResponse`, so rule 2 ("any other exception that is not a `BadResponse` is `RETRYABLE`", "every other `MaxRetryError`") gives `RETRYABLE`.
+  - Each expected `Outcome.RETRYABLE` therefore follows from the specified `==` comparison and rule 2. No row asserts anything the contract leaves open.
+  - The rows add to DAC-E8-S3-6's five rows and change none of them. They are implementation-level rows beyond TC-COMP-248's steps, which is the same footing as T012 and review v1 deviation 4.
+- **Source of the 429 text (TC-COMP-248 edge case "taken from urllib3's constant, never hand-typed"; T009; IR-001 "never from `client._THROTTLED_RETRY_REASON`"):** all four rows build the text from `ResponseError.SPECIFIC_ERROR.format(status_code=429)` with a literal `429`. None uses the module constant or a hand-typed string, so the comparison stays asymmetric.
+- **IR-001 remediation (prefix, surrounding whitespace, other letter case):** all three variants are present. The whitespace variant is split into a leading row and a trailing row, which together cover "surrounding". I checked each row against IR-001's three survivors:
+  - The prefix row and the leading-space row both make `endswith` true.
+  - The leading-space row and the trailing-newline row both make `.strip() ==` true.
+  - The upper-case row makes `casefold` true.
+  - In every case the mutant gives `THROTTLED` where the test expects `RETRYABLE`, so each survivor is killed by at least one row.
+  - Whether the mutation run killed them is a matter of evidence (`mutation-cycle-4-results.json`). I did not re-run it.
+- **TC-COMP-251 clause (c), checked against step 2 ("Search every test for `RESTClient` patched to raise `BadResponse` with a `429`"), DAC-E8-S3-9, DAC-E8-20 and IR-003:**
+  - The clause still scans every `tests/**/*.py`.
+  - It now recognises these patch forms:
+    - `patch("<...>.RESTClient")`
+    - `patch.object(<module>, "RESTClient")`
+    - `monkeypatch.setattr`, with either a dotted string or a module plus `"RESTClient"`
+    - the keywords `target=`, `attribute=` and `name=`
+  - This covers both forms IR-003 named.
+  - The clause flags any function that replaces `RESTClient` and names a `429` or `error_rate_limited`, whether or not it raises a `BadResponse`. That is broader than step 2's literal wording, but DAC-E8-20 requires it ("Every test of a `429` … MUST run through the real SDK and `urllib3` path"). The broader trigger was also already in the approved T011 shape, so it is not drift.
+- **TC-COMP-251 clause (d), checked against step 3 ("Search every test for a read of `attempts`") and the expected result ("No assertion reads the recorded `attempts` value"), as DAC-E8-S3-9 cites them (spec review v5 FINDING-29; backlog review v5 FINDING-4):**
+  - **Scope:** it now scans every `tests/**/*.py`, not just the story's two files. That matches "every test" and IR-003's remedy.
+  - **What counts as a read:** any `.attempts` attribute or `["attempts"]` subscript.
+    - In production, the only `attempts` attributes are the recorded column: `ResultRow.attempts` in `api/models.py` and the row dataclass in `runs/queries.py`. The governor's `attempts` is a local variable. So "any `.attempts` read" means the same in practice as "a read of the recorded value".
+    - Flagging any read, not only reads inside assertions, follows step 3's own wording.
+  - **The one exemption:** `("tests/integration/test_run_constraints.py", "result_columns['attempts']")`. It is keyed to the exact expression, not to the whole function. That read asserts the column's `information_schema` default (`"1"`, CAP-001 migration 0004), which is schema metadata, not a recorded value.
+    - FINDING-29's concern is that no test should assert an attempt count the writer never records.
+    - The exemption is the "excluding the DB-column check by context" option IR-003 offers. It is neither narrower nor broader than "the recorded `attempts` value".
+  - **Other specs:** nothing contradicts the clause. TC-COMP-259 ("No assertion reads `attempts`") and TC-COMP-272 ("Nothing reads or reinterprets `attempts`") say the same thing. The specs that do read `attempts` (TC-COMP-226 and TC-COMP-284) are `.tsx` tests, outside `tests/**/*.py`. No CAP-001 test specification requires a Python test to read `attempts`.
+  - **Current state:** a grep of `tests/` finds no other attribute or subscript read. The green log shows the test passing (37 passed).
+- **Unchanged:** clauses (a) and (b), and the lock-file clause, which stays with the validation commands.
+
+Minor observations (not drift):
+- **SQL-text reads are invisible to the guard.** `tests/integration/test_run_constraints.py:114-118` reads `attempts` back through a SQL `SELECT` and asserts the `2` it inserted itself. That is a delivered CAP-001 schema round-trip, not the writer's recorded count, so the meaning of FINDING-29 is not violated. But it makes the comment "The one `attempts` read under tests/ that is not a recorded value" inaccurate: there are two such reads, and the guard can see only one. A future integration test that reads `run_instrument_result.attempts` through SQL text after a run would also go unflagged.
+- **The exemption key is file plus expression text, not line.** A second `result_columns['attempts']` added to that file would also be exempt. It has no effect today.
+- **Gaps from scanning one function at a time remain in clause (c)** (these were there before this cycle):
+  - A `RESTClient` patch set up in a fixture or helper while a separate test names the `429`.
+  - Patching one of `RESTClient`'s methods, e.g. `patch.object(RESTClient, "get_ticker_details", side_effect=BadResponse(...))` or `patch("...RESTClient.<method>")`.
+  - `getattr(x, "attempts")` in clause (d).
+  - None of these exists in the current tree.
+- **The plan and the test spec now describe a narrower guard than the code.** T011's wording still describes the cycle-2 guard (`patch` only; (d) over two files). TC-COMP-251's preconditions name only "the story's change set … and its tests". The guard now follows steps 2 and 3, which say every test. These are records to update at doc sync, alongside IR-002, and they are not behaviour drift.

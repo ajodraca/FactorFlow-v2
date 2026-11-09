@@ -1,0 +1,121 @@
+{
+  "command": "PYTHONPATH=src /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python -m pytest tests/unit/test_outcomes.py -q -p no:cacheprovider",
+  "repo_head": "0c0c7ad6ada5b161b567787e3277bc888e8a4811",
+  "tree_patch_sha256": "28ef1f6081d5799a384a04479a1dbe55a2c201e0dd198d15aac3cf30a5391a6a",
+  "mutants_sha256": "e0c7660d1a1d0c5da793bce4d37fb6d7b5b316d045ef3b10ccd5eb66277b3e69",
+  "schema": 1,
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutants-cycle-3.json",
+  "jobs": 5,
+  "planned": 5,
+  "started": "2026-11-08T21:22:27Z",
+  "baselines": [
+    {
+      "worker": 4,
+      "exit_code": 0,
+      "seconds": 1.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/baseline-w4.log",
+      "log_sha256": "bb42f0eec486f8f1d3c88a38cc85346fa3377db51f893913af6a7ebca181c011"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 1.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/baseline-w1.log",
+      "log_sha256": "e11a8d55d61f616a2031f58a19cb409785bc4c867f1dff819a85e06d3405e050"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 1.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/baseline-w2.log",
+      "log_sha256": "055ec9ad5ed6c669d4523fdd0dd3f40f50f12200e9becc9ec3d0ee5ccc7e6327"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 1.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/baseline-w0.log",
+      "log_sha256": "21326f9afa0de598f626c77f483f8c4cc4132aaf3a74ec11b1d929e98e85bbc3"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 1.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/baseline-w3.log",
+      "log_sha256": "055ec9ad5ed6c669d4523fdd0dd3f40f50f12200e9becc9ec3d0ee5ccc7e6327"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/ingestion/outcomes.py:manual:not-entitled-dropped-from-failed",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/outcomes.py",
+      "old": "(ProviderUnavailable, ProviderContractViolation, ProviderNotEntitled)",
+      "new": "(ProviderUnavailable, ProviderContractViolation)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.6,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/src_factorflow_ingestion_outcomes.py_manual_not-entitled-dropped-from-failed.log",
+      "log_sha256": "898cee7f8c8f0ffb7ab3fe12bc0816185734498aaa0c0a374a97b59c43584ea8"
+    },
+    {
+      "id": "src/factorflow/ingestion/outcomes.py:manual:failed-outcome-to-not-found",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/outcomes.py",
+      "old": "    if isinstance(error, (ProviderUnavailable, ProviderContractViolation, ProviderNotEntitled)):\n        return InstrumentOutcomeRecord(\n            data_type=data_type,\n            outcome=\"failed\",",
+      "new": "    if isinstance(error, (ProviderUnavailable, ProviderContractViolation, ProviderNotEntitled)):\n        return InstrumentOutcomeRecord(\n            data_type=data_type,\n            outcome=\"not_found\",",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/src_factorflow_ingestion_outcomes.py_manual_failed-outcome-to-not-found.log",
+      "log_sha256": "c1e236204bbc2603da0f37f55df9156355d05b9a8a66919f155d7915fdd257cd"
+    },
+    {
+      "id": "src/factorflow/ingestion/outcomes.py:manual:type-error-text-omits-not-entitled",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/outcomes.py",
+      "old": "        \"ProviderNotEntitled are accepted as per-data-type outcomes.\"",
+      "new": "        \"are accepted as per-data-type outcomes.\"",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/src_factorflow_ingestion_outcomes.py_manual_type-error-text-omits-not-entitled.log",
+      "log_sha256": "49534a3cef6b83e68c2c191c9f54313efaa7fba1170eb51b5fa17c61c910e65d"
+    },
+    {
+      "id": "src/factorflow/ingestion/outcomes.py:manual:failed-widened-to-massive-error",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/outcomes.py",
+      "old": "isinstance(error, (ProviderUnavailable, ProviderContractViolation, ProviderNotEntitled))",
+      "new": "isinstance(error, (MassiveError,))",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/src_factorflow_ingestion_outcomes.py_manual_failed-widened-to-massive-error.log",
+      "log_sha256": "06aafb818ffd267074ba14b260d000eb619e92fdf6b91031b7eeea1e96eb9e0b"
+    },
+    {
+      "id": "src/factorflow/ingestion/outcomes.py:manual:type-error-text-omits-delivered-types",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/outcomes.py",
+      "old": "\"only InstrumentNotFound, ProviderUnavailable, ProviderContractViolation and \"",
+      "new": "\"only \"",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/ev/mutation-cycle-3-results-logs/src_factorflow_ingestion_outcomes.py_manual_type-error-text-omits-delivered-types.log",
+      "log_sha256": "905f5fce6e2e2d29b1eab58893234cad4b4406a6a06b8733b7f1c9da078004d5"
+    }
+  ],
+  "finished": "2026-11-08T21:22:31Z"
+}

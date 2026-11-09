@@ -1,0 +1,64 @@
+# GREEN cycle-4 (T009, T004, T005 -> T013)
+# $ PYTHONPATH=src python -m pytest tests/unit/test_massive_retry.py tests/unit/test_massive_error_classification.py tests/unit/test_massive_package_boundary.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/cool-blackburn-2ab918/repos/factorflow-v2/FactorFlow-v2
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 44 items
+
+tests/unit/test_massive_retry.py::test_rate_limited_responses_are_paced_without_consuming_attempts PASSED [  2%]
+tests/unit/test_massive_retry.py::test_timeouts_and_server_errors_retry_to_the_attempt_limit[timeout] PASSED [  4%]
+tests/unit/test_massive_retry.py::test_timeouts_and_server_errors_retry_to_the_attempt_limit[server-error] PASSED [  6%]
+tests/unit/test_massive_retry.py::test_the_real_transport_clock_starts_on_a_minute_boundary PASSED [  9%]
+tests/unit/test_massive_retry.py::test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing[in-message] PASSED [ 11%]
+tests/unit/test_massive_retry.py::test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing[in-error] PASSED [ 13%]
+tests/unit/test_massive_retry.py::test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing[beside-forbidden] PASSED [ 15%]
+tests/unit/test_massive_retry.py::test_an_unrecognised_403_is_still_retried_to_the_limit_as_unavailable[forbidden-envelope] PASSED [ 18%]
+tests/unit/test_massive_retry.py::test_an_unrecognised_403_is_still_retried_to_the_limit_as_unavailable[non-json-body] PASSED [ 20%]
+tests/unit/test_massive_error_classification.py::test_all_four_taxonomy_types_exist_and_derive_from_massive_error PASSED [ 22%]
+tests/unit/test_massive_error_classification.py::test_status_not_found_classifies_as_instrument_not_found PASSED [ 25%]
+tests/unit/test_massive_error_classification.py::test_status_not_found_alone_classifies_even_with_an_unrelated_message PASSED [ 27%]
+tests/unit/test_massive_error_classification.py::test_message_field_is_accepted_for_not_found PASSED [ 29%]
+tests/unit/test_massive_error_classification.py::test_error_field_is_accepted_for_credential_rejection PASSED [ 31%]
+tests/unit/test_massive_error_classification.py::test_neither_message_nor_error_is_required PASSED [ 34%]
+tests/unit/test_massive_error_classification.py::test_malformed_json_classifies_as_provider_unavailable_never_not_found PASSED [ 36%]
+tests/unit/test_massive_error_classification.py::test_valid_json_of_unknown_shape_classifies_as_provider_unavailable PASSED [ 38%]
+tests/unit/test_massive_error_classification.py::test_non_object_json_classifies_as_provider_unavailable_not_a_crash[[1, 2]] PASSED [ 40%]
+tests/unit/test_massive_error_classification.py::test_non_object_json_classifies_as_provider_unavailable_not_a_crash[null] PASSED [ 43%]
+tests/unit/test_massive_error_classification.py::test_non_object_json_classifies_as_provider_unavailable_not_a_crash["text"] PASSED [ 45%]
+tests/unit/test_massive_error_classification.py::test_non_object_json_classifies_as_provider_unavailable_not_a_crash[42] PASSED [ 47%]
+tests/unit/test_massive_error_classification.py::test_validation_error_from_a_successful_response_wraps_to_contract_violation PASSED [ 50%]
+tests/unit/test_massive_error_classification.py::test_classify_error_body_never_returns_contract_violation PASSED [ 52%]
+tests/unit/test_massive_error_classification.py::test_contract_violation_is_fatal_for_the_governor_classifier PASSED [ 54%]
+tests/unit/test_massive_error_classification.py::test_provider_unavailable_is_the_only_retryable_type PASSED [ 56%]
+tests/unit/test_massive_error_classification.py::test_rate_limited_body_is_identified_without_constructing_any_massive_error PASSED [ 59%]
+tests/unit/test_massive_error_classification.py::test_non_rate_limited_bodies_are_not_flagged_as_rate_limited PASSED [ 61%]
+tests/unit/test_massive_error_classification.py::test_not_found_message_recognised_when_status_is_absent PASSED [ 63%]
+tests/unit/test_massive_error_classification.py::test_absent_message_and_error_still_produces_provider_unavailable PASSED [ 65%]
+tests/unit/test_massive_error_classification.py::test_classification_never_touches_a_provider_url_or_credential PASSED [ 68%]
+tests/unit/test_massive_error_classification.py::test_a_not_entitled_body_in_either_field_any_case_classifies_provider_not_entitled[in-message] PASSED [ 70%]
+tests/unit/test_massive_error_classification.py::test_a_not_entitled_body_in_either_field_any_case_classifies_provider_not_entitled[in-error] PASSED [ 72%]
+tests/unit/test_massive_error_classification.py::test_a_not_entitled_body_in_either_field_any_case_classifies_provider_not_entitled[upper-case] PASSED [ 75%]
+tests/unit/test_massive_error_classification.py::test_a_not_entitled_body_in_either_field_any_case_classifies_provider_not_entitled[beside-an-unrelated-error] PASSED [ 77%]
+tests/unit/test_massive_error_classification.py::test_a_not_entitled_body_in_either_field_any_case_classifies_provider_not_entitled[not-authorized-status] PASSED [ 79%]
+tests/unit/test_massive_error_classification.py::test_a_forbidden_body_without_the_marker_stays_provider_unavailable PASSED [ 81%]
+tests/unit/test_massive_error_classification.py::test_not_found_and_credential_rules_win_over_the_plan_refusal_rule PASSED [ 84%]
+tests/unit/test_massive_error_classification.py::test_provider_not_entitled_is_fatal_and_a_massive_error PASSED [ 86%]
+tests/unit/test_massive_error_classification.py::test_a_body_that_says_entitled_without_not_entitled_stays_provider_unavailable PASSED [ 88%]
+tests/unit/test_massive_error_classification.py::test_a_plan_refusal_carries_no_provider_free_text_or_spurious_field PASSED [ 90%]
+tests/unit/test_massive_error_classification.py::test_provider_not_entitled_is_exported_from_errors_and_the_package PASSED [ 93%]
+tests/unit/test_massive_package_boundary.py::test_s2_product_models_are_identity_reexported_from_package PASSED [ 95%]
+tests/unit/test_massive_package_boundary.py::test_every_public_export_is_product_owned PASSED [ 97%]
+tests/unit/test_massive_package_boundary.py::test_public_surface_contains_no_raw_dictionary_or_massive_sdk_value PASSED [100%]
+
+============================== 44 passed in 0.50s ==============================
+# exit 0
+# $ PYTHONPATH=src python -m pytest <focused suite: the four files of the Validation Plan>
+78 passed in 0.71s
+# $ git diff --stat <base> -- src/factorflow/ingestion/massive/client.py src/factorflow/ingestion/rate_limit.py src/factorflow/ingestion/runner.py (expect empty)
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+285 files already formatted
+Success: no issues found in 61 source files

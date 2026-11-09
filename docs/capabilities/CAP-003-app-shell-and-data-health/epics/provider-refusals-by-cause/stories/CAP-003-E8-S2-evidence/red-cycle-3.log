@@ -1,0 +1,176 @@
+# RED cycle-3 (review rework, IR-001 and IR-002): the two new test_governor_retry.py rows run against each surviving review mutant.
+# Tree: git archive of HEAD 2c44be5bd1835eaaedad38795bb9f29e5969cc23 (rate_limit.py unchanged since 72c8a0e) plus the staged tests/unit/test_governor_retry.py; one copy per mutant.
+# The new rows pass on HEAD (22 passed); the behaviour is delivered, so the RED is the review's two survivors.
+
+# --- mutant rate_limit.py:manual:review-reset-spent-on-raise: inserts 'self._throttle_spent = 0.0' before 'raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_governor_retry.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s2-rework/tree-reset
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collected 22 items
+
+tests/unit/test_governor_retry.py .................F....                 [100%]
+
+=================================== FAILURES ===================================
+____ test_a_spent_budget_stays_spent_for_every_execute_until_the_next_start ____
+
+    def test_a_spent_budget_stays_spent_for_every_execute_until_the_next_start() -> None:
+        """CAP-003 TC-COMP-237 / DAC-E8-5 (rate-limit-governor section 2.4):
+        raising `ProviderRateLimited` does not release the stock's budget. Once
+        the 300s budget is spent, a further always-throttled `execute` before the
+        next `start_throttle_budget()` raises after exactly one send and sleeps
+        nothing more, so the sleeps between two starts stay at 300s
+        (implementation review v1 IR-001)."""
+        clock = FakeClock()
+        sleeper = FakeSleeper(clock)
+        governor = _governor(
+            60, clock, sleeper, max_throttle_wait=300.0, jitter=SequenceJitter([0.0]), now=clock
+        )
+    
+        governor.start_throttle_budget()
+        first = FlakySender(fail_count=1_000_000)
+        with pytest.raises(ProviderRateLimited):
+            governor.execute(first, classify=_guarded_throttle(first))
+        assert sleeper.calls == [pytest.approx(60.0)] * 5
+    
+        after_raise = FlakySender(fail_count=1_000_000)
+        with pytest.raises(ProviderRateLimited):
+            governor.execute(after_raise, classify=_guarded_throttle(after_raise))
+>       assert after_raise.calls == 1
+E       assert 6 == 1
+E        +  where 6 = <tests.unit.governor_fakes.FlakySender object at 0x10b4cc9f0>.calls
+
+tests/unit/test_governor_retry.py:491: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_governor_retry.py::test_a_spent_budget_stays_spent_for_every_execute_until_the_next_start
+========================= 1 failed, 21 passed in 0.92s =========================
+# exit code: 1
+
+# --- mutant rate_limit.py:manual:review-throttled-at-from-wall-clock: 'throttled_at = self._monotonic()' -> 'throttled_at = self._now()'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_governor_retry.py
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s2-rework/tree-wall
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collected 22 items
+
+tests/unit/test_governor_retry.py .....................F                 [100%]
+
+=================================== FAILURES ===================================
+__ test_throttle_waits_are_charged_on_the_monotonic_clock_not_the_wall_clock ___
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x1094f2df0>
+send = <tests.unit.governor_fakes.FlakySender object at 0x108eb3c80>
+classify = <function _guarded_throttle.<locals>.classify at 0x1094f2ca0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.unit.governor_fakes.FlakySender object at 0x108eb3c80>
+
+    def __call__(self) -> object:
+        self.calls += 1
+        if self.calls <= self.fail_count:
+>           raise self._exception_factory(f"attempt {self.calls} failed")
+E           RuntimeError: attempt 21 failed
+
+tests/unit/governor_fakes.py:67: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_throttle_waits_are_charged_on_the_monotonic_clock_not_the_wall_clock() -> None:
+        """CAP-003 DAC-E8-5 (rate-limit-governor section 2.3): a throttle wait is
+        charged as the monotonic time from the start of its sleep to the retried
+        request's permit; the wall clock `now` only places the minute boundary.
+        With production-shaped clocks -- `now` about 1.79e9 s ahead of
+        `monotonic`, both advancing together -- the 300s budget is still spent
+        after five 60s waits. Measuring the sleep's start on `now` would charge
+        about -1.79e9 s per wait, and the budget would never be spent
+        (implementation review v1 IR-002). Unlike the rows DAC-E8-S2-1 governs,
+        which pass one `FakeClock` as both clocks and so cannot tell the two
+        apart, this row derives `now` from that clock plus a fixed offset."""
+        clock = FakeClock(start=1_000.0)
+        sleeper = FakeSleeper(clock)
+        governor = RateLimitGovernor(
+            GovernorSettings(
+                requests_per_minute=60,
+                max_attempts=3,
+                initial_backoff_seconds=2.0,
+                max_throttle_wait_seconds=300.0,
+            ),
+            monotonic=clock,
+            sleep=sleeper,
+            jitter=SequenceJitter([0.0]),
+            now=lambda: clock() + _WALL_CLOCK_OFFSET,
+        )
+        send = FlakySender(fail_count=1_000_000)
+    
+        governor.start_throttle_budget()
+        with pytest.raises(ProviderRateLimited):
+>           governor.execute(send, classify=_guarded_throttle(send))
+
+tests/unit/test_governor_retry.py:669: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/rate_limit.py:171: in execute
+    outcome = classify(exc)
+              ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exc = RuntimeError('attempt 21 failed')
+
+    def classify(exc: BaseException) -> Outcome:
+        if send.calls > _THROTTLE_SEND_GUARD:
+>           raise AssertionError("throttling did not terminate")
+E           AssertionError: throttling did not terminate
+
+tests/unit/test_governor_retry.py:434: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_governor_retry.py::test_throttle_waits_are_charged_on_the_monotonic_clock_not_the_wall_clock
+========================= 1 failed, 21 passed in 1.43s =========================
+# exit code: 1

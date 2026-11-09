@@ -1,0 +1,24 @@
+# Independent code-review subagent (general-purpose, agentId a27fe45952dd7a262), cycle-4, judged cycle-4.patch
+# (diff_sha256 dca6c502c3db5e0fea835feeac73af0bd7aeac542cb3ad5856a79b966e3c9e8a) and mutation-cycle-4-results.json.
+VERDICT: APPROVED
+
+Checked: the focused command passes (44); ruff check, ruff format --check and mypy src clean; every src/tests change
+staged; client.py, rate_limit.py and runner.py have no staged or unstaged changes; the only removed line in
+__init__.py and test_massive_retry.py is the docstring's "the five", so the TC-INT-026 test is byte-identical.
+Real path (DAC-E8-20): the new tests do not patch RESTClient; the harness replaces only
+HTTPConnectionPool._make_request, so RESTClient(retries=0) and urllib3 run unpatched. _production_settings clears the
+right variables and sets 60 requests per minute; timing values stay at their defaults; one FakeClock is passed as both
+monotonic and now with the FakeSleeper bound to it.
+Request counts come only from transport.requests; no attempts value is read. `sleeper.calls == []` is the right check
+(the RED spike recorded [0.0, 0.0]). The exact not_entitled reason literal is asserted and is the only test killing
+kind-not-entitled-to-unavailable. T005 asserts three balance-sheets requests and the unavailable prefix for both
+bodies. Other paths get an empty success, so a read that carried on would show in the recorded paths. T009 checks
+errors.__all__, the package __all__ and identity; each declaration's removal is killed. All 8 mutants killed.
+Findings
+1. NON-BLOCKING tests/unit/test_massive_retry.py:221. The plan attributes the negate-entitlement-match kill to T004; T004
+   passes under it (with `not in`, the absent field reads "" so any() stays true). T005's forbidden-envelope row and four
+   classification tests kill it, so coverage is adequate; only the plan's attribution is wrong.
+2. NON-BLOCKING tests/unit/test_massive_retry.py:283. T005 discards its SocketGuard and never asserts guard.fired == [];
+   the plan does not ask for it.
+3. NON-BLOCKING (style) :236, :285. _real_transport_client returns a clock neither test uses; acceptable as the shared
+   harness the plan's Notes intend for later E8 stories.

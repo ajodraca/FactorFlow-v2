@@ -1,0 +1,9 @@
+# T014 final validation on the final bytes (code tree 66e35d08dd0d5b45645df52a77ff5f4b069e737e, base 0c0c7ad)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q -W ignore::DeprecationWarning   (full suite, postgres tests in a testcontainers postgres:16, outside the sandbox)
+2639 passed, 1 warning in 1387.59s (0:23:07)   [exit 0; the warning is the pre-existing StarletteDeprecationWarning from fastapi/testclient.py]
+# $ uv build --out-dir <scratch>
+Successfully built factorflow-0.2.0.tar.gz and factorflow-0.2.0-py3-none-any.whl
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+285 files already formatted
+Success: no issues found in 61 source files
