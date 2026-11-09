@@ -1,0 +1,236 @@
+{
+ "schema": 1,
+ "repo_head": "6e570b27d3a2593143ac50b1664a89d203db9591",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:20:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 20,
+   "original": "  critical: 0,",
+   "mutated": "  critical: 1,"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:21:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 21,
+   "original": "  serious: 1,",
+   "mutated": "  serious: 2,"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:22:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 22,
+   "original": "  warning: 2,",
+   "mutated": "  warning: 3,"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:23:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 23,
+   "original": "  good: 3,",
+   "mutated": "  good: 4,"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:24:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 24,
+   "original": "  active: 3,",
+   "mutated": "  active: 4,"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:25:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 25,
+   "original": "  neutral: 4,",
+   "mutated": "  neutral: 5,"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:53:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 53,
+   "original": "    affectedCount === 0 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
+   "mutated": "    affectedCount === 0 ? \"good\" : affectedCount > followedCount ? \"critical\" : \"warning\";"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:53:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 53,
+   "original": "    affectedCount === 0 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
+   "mutated": "    affectedCount === 1 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:65:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 65,
+   "original": "  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
+   "mutated": "  if (downloadTier !== null || TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:65:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 65,
+   "original": "  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
+   "mutated": "  if (downloadTier !== null && TIER_ORDER[downloadTier] <= TIER_ORDER[tier]) {"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:78:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 78,
+   "original": "  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
+   "mutated": "  if (scores !== null || TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:78:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 78,
+   "original": "  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
+   "mutated": "  if (scores !== null && TIER_ORDER[tierOf(scores)] <= TIER_ORDER[verdict.tier]) {"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:81:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "line": 81,
+   "original": "  return { tier: verdict.tier, label: verdict.word, from: \"verdict\" };",
+   "mutated": "  return { tier: nil, label: verdict.word, from: \"verdict\" };"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:active-rank",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "active: 3",
+   "new": "active: 2"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:tie-to-scores",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]",
+   "new": "TIER_ORDER[tierOf(scores)] <= TIER_ORDER[verdict.tier]"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:clause-only-if-wins",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "  return { tier, word: WORD[tier], downloadClause };",
+   "new": "  return { tier, word: WORD[tier], downloadClause: tier === downloadTier ? downloadClause : null };"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:ge-to-gt",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "affectedCount >= followedCount",
+   "new": "affectedCount > followedCount"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:serious-word",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "serious: \"Mostly yes\"",
+   "new": "serious: \"No\""
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:drop-freeze",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "Object.freeze({",
+   "new": "({"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:zero-to-ge",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "affectedCount === 0 ?",
+   "new": "affectedCount <= 0 ?"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:download-lt-to-le",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "TIER_ORDER[downloadTier] < TIER_ORDER[tier]",
+   "new": "TIER_ORDER[downloadTier] <= TIER_ORDER[tier]"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:abandoned-warning",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "downloadTier = \"serious\"",
+   "new": "downloadTier = \"warning\""
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:failed-clause",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "downloadClause = \"failed\"",
+   "new": "downloadClause = \"interrupted\""
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:null-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "latestTerminalDownload === null",
+   "new": "latestTerminalDownload !== null"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:verdict-null-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "verdict === null",
+   "new": "verdict !== null"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:label-verdict",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "label: labelOf(scores)",
+   "new": "label: verdict.word"
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:from-swap",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "from: \"scores\"",
+   "new": "from: \"verdict\""
+  }
+ ]
+}

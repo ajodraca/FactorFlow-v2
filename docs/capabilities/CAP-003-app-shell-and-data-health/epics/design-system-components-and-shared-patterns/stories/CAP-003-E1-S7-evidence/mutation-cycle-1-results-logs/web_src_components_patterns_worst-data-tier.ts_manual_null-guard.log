@@ -1,0 +1,276 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 22 failed | 1 skipped) 36ms
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 0 of 10 (DAC-E1-3) 8ms
+     → expected { tier: 'good', word: 'Yes', …(1) } to be null
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 3 of 10 (DAC-E1-3) 2ms
+     → expected { tier: 'warning', …(2) } to be null
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 10 of 10 (DAC-E1-3) 1ms
+     → expected { tier: 'critical', word: 'No', …(1) } to be null
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 10 1ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 3 of 10 1ms
+     → expected null to deeply equal { tier: 'warning', …(2) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 9 of 10 1ms
+     → expected null to deeply equal { tier: 'warning', …(2) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 0ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 0ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 11 of 10 1ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 0 1ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 0 of 10 1ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 3 of 10 0ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 10 of 10 0ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10 0ms
+     → expected null to deeply equal { tier: 'serious', …(2) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10 0ms
+     → expected null to deeply equal { tier: 'serious', …(2) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 0ms
+     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > requested download contributes no tier 1ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > running download contributes no tier 0ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelling download contributes no tier 0ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download contributes no tier 1ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > partial download contributes no tier 0ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelled download contributes no tier 0ms
+     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 22 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 0 of 10 (DAC-E1-3)
+AssertionError: expected { tier: 'good', word: 'Yes', …(1) } to be null
+
+- Expected: 
+null
+
++ Received: 
+Object {
+  "downloadClause": null,
+  "tier": "good",
+  "word": "Yes",
+}
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:22:9
+     20|       expect(
+     21|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     22|       ).toBeNull();
+       |         ^
+     23|     },
+     24|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 3 of 10 (DAC-E1-3)
+AssertionError: expected { tier: 'warning', …(2) } to be null
+
+- Expected: 
+null
+
++ Received: 
+Object {
+  "downloadClause": null,
+  "tier": "warning",
+  "word": "Mostly yes",
+}
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:22:9
+     20|       expect(
+     21|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     22|       ).toBeNull();
+       |         ^
+     23|     },
+     24|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 10 of 10 (DAC-E1-3)
+AssertionError: expected { tier: 'critical', word: 'No', …(1) } to be null
+
+- Expected: 
+null
+
++ Received: 
+Object {
+  "downloadClause": null,
+  "tier": "critical",
+  "word": "No",
+}
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:22:9
+     20|       expect(
+     21|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     22|       ).toBeNull();
+       |         ^
+     23|     },
+     24|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 0
+AssertionError: expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+
+- Expected: 
+Object {
+  "downloadClause": null,
+  "tier": "good",
+  "word": "Yes",
+}
+
++ Received: 
+null
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
+     38|       expect(
+     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     40|       ).toEqual(expected);
+       |         ^
+     41|     },
+     42|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 3 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 9 of 10
+AssertionError: expected null to deeply equal { tier: 'warning', …(2) }
+
+- Expected: 
+Object {
+  "downloadClause": null,
+  "tier": "warning",
+  "word": "Mostly yes",
+}
+
++ Received: 
+null
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
+     38|       expect(
+     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     40|       ).toEqual(expected);
+       |         ^
+     41|     },
+     42|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 11 of 10
+AssertionError: expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+
+- Expected: 
+Object {
+  "downloadClause": null,
+  "tier": "critical",
+  "word": "No",
+}
+
++ Received: 
+null
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
+     38|       expect(
+     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     40|       ).toEqual(expected);
+       |         ^
+     41|     },
+     42|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 0 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 3 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 10 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
+AssertionError: expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
+
+- Expected: 
+Object {
+  "downloadClause": "failed",
+  "tier": "critical",
+  "word": "No",
+}
+
++ Received: 
+null
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
+     55|       expect(
+     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     57|       ).toEqual(expected);
+       |         ^
+     58|     },
+     59|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10
+AssertionError: expected null to deeply equal { tier: 'serious', …(2) }
+
+- Expected: 
+Object {
+  "downloadClause": "interrupted",
+  "tier": "serious",
+  "word": "Mostly yes",
+}
+
++ Received: 
+null
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
+     55|       expect(
+     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     57|       ).toEqual(expected);
+       |         ^
+     58|     },
+     59|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/22]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > requested download contributes no tier
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > running download contributes no tier
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelling download contributes no tier
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download contributes no tier
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > partial download contributes no tier
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelled download contributes no tier
+AssertionError: expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
+
+- Expected: 
+Object {
+  "downloadClause": null,
+  "tier": "good",
+  "word": "Yes",
+}
+
++ Received: 
+null
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:75:9
+     73|       expect(
+     74|         worstDataTier({ affectedCount: 0, followedCount: 10, latestTer…
+     75|       ).toEqual({ tier: "good", word: "Yes", downloadClause: null });
+       |         ^
+     76|       expect(
+     77|         worstDataTier({ affectedCount: 3, followedCount: 10, latestTer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/22]⎯
+
+ Test Files  1 failed (1)
+      Tests  22 failed | 29 passed | 1 skipped (52)
+   Start at  18:23:14
+   Duration  1.96s (transform 69ms, setup 85ms, collect 97ms, tests 36ms, environment 565ms, prepare 476ms)
+

@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 failed | 1 skipped) 110ms
+   × TIER_ORDER semantics (DEC-0217, DEC-0311) > is frozen 70ms
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > is frozen
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:293:41
+    291| 
+    292|   it("is frozen", () => {
+    293|     expect(Object.isFrozen(TIER_ORDER)).toBe(true);
+       |                                         ^
+    294|   });
+    295| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 50 passed | 1 skipped (52)
+   Start at  18:23:07
+   Duration  4.85s (transform 144ms, setup 243ms, collect 256ms, tests 110ms, environment 1.32s, prepare 1.13s)
+
