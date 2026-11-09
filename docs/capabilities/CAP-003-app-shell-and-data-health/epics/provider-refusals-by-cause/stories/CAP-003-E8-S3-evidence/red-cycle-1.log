@@ -1,0 +1,35 @@
+# RED cycle-1 (T002) on base 52ecfbd: tests/unit/test_massive_client_governor_integration.py with TC-COMP-250 written, src/factorflow/ingestion/massive/client.py unchanged (blob dab6084b2909a94fbc1fa1b91c7a6f06815fb713)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py tests/unit/test_massive_client_governor_integration.py tests/unit/test_massive_redirects.py tests/unit/test_massive_error_classification.py -q -rf
+.................F.......................................                [100%]
+=================================== FAILURES ===================================
+___ test_start_instrument_starts_the_governor_budget_once_and_sends_nothing ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d496850>
+
+    def test_start_instrument_starts_the_governor_budget_once_and_sends_nothing(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """CAP-003 TC-COMP-250 / DAC-E8-S3-8: `start_instrument()` is the stock
+        boundary (massive-client CAP-003 section 2.6). On a real `MassiveClient`
+        built from production settings with a spy governor, it starts the
+        governor's throttle budget exactly once, asks the governor for no permit
+        and sends no request through the socket-free transport."""
+        monkeypatch.delenv("FACTORFLOW_MASSIVE_BASE_URL", raising=False)
+        monkeypatch.delenv("FACTORFLOW_MASSIVE_MAX_ATTEMPTS", raising=False)
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", generated_test_key())
+        monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
+        settings = MassiveSettings(_env_file=None)  # type: ignore[call-arg]
+        guard = forbid_sockets(monkeypatch)
+        transport = RecordingMakeRequest().install(monkeypatch)
+        governor = MagicMock(spec=RateLimitGovernor)
+        client = MassiveClient(settings=settings, governor=governor)
+    
+>       client.start_instrument()
+        ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'MassiveClient' object has no attribute 'start_instrument'
+
+tests/unit/test_massive_client_governor_integration.py:234: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_client_governor_integration.py::test_start_instrument_starts_the_governor_budget_once_and_sends_nothing
+1 failed, 56 passed in 1.53s
+# exit 1

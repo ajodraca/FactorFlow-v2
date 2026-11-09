@@ -1,0 +1,218 @@
+# TDD evidence for CAP-003-E8-S3 - A real 429 is throttling, not an attempt, and each stock starts its own budget.
+# Base commit (T001): 52ecfbd0f4cc51cbfaac0899158811a11dce7d41 (CAP-003-E8-S2 doc sync; E8-S1 PASS v2 and E8-S2
+# PASS-WITH-WARNINGS v2 coded, reviewed and doc-synced on this branch's ancestry; nothing pushed or merged, by the
+# owner's instruction, so "landed" means present in this branch's history). T001 records: errors.py defines
+# ProviderNotEntitled (line 124) and ProviderRateLimited (line 109) and _ERROR_KIND_BY_TYPE holds not_entitled and
+# rate_limited; rate_limit.py defines RateLimitGovernor.start_throttle_budget() (line 124) and the check-before-wait
+# THROTTLED branch (line 176); tests/unit/test_massive_retry.py holds S1's TC-COMP-230/231 rows and real-transport harness
+# (_CLOCK_START, _production_settings, _real_transport_client) and S2's _governor() budget 300.0. Focused suite at the
+# base: 56 passed (the plan's 36 predates S1 and S2's rows).
+# Three cycles: the plan's cycle-1 (T002 -> T013) and cycle-2 (T003-T012 -> T014, T015, with T016's module-docstring
+# paragraph), and cycle-3, a test-only correction of a delivered CAP-001 test the full suite (T016) showed failing.
+# Story coding makes one commit for the story, so every cycle records commit_hash: stage and cites its reviewed_patch. cycle-1's patch is the staged diff against HEAD (fingerprint --staged, index tree
+# 72aaf81); cycle-2's and cycle-3's are each the diff from the previous cycle's index tree to the index tree after
+# staging their own bytes (fingerprint --range <tree>..<tree>), so the patches apply in order onto the base and rebuild the story's code.
+# Mutation: scripts/mutation-run.py generates no mutant for cycle-1's lines and three for cycle-2's; both also
+# runs the plan's hand-written mutants (operator "manual") plus the coder's own on every branch added. cycle-2's
+# command is two-stage (see cycle-2 deviations). cycle-3 changes no production line (not_applicable).
+# Reviews: per cycle, an independent code-review subagent and an independent spec-drift subagent judged the patch;
+# cycle-2 was reviewed three times as it was strengthened (round files kept beside the final ones).
+# Interpreter: no venv in this clone; every command ran as <main checkout>/.venv/bin/python -m <tool> from the clone
+# root, with pytest given -o pythonpath=src.
+# No exception and no decision record: no TDD or review step was skipped.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T013]
+    description: >
+      T002 (TC-COMP-250) in tests/unit/test_massive_client_governor_integration.py,
+      test_start_instrument_starts_the_governor_budget_once_and_sends_nothing: production MassiveSettings from env as
+      test_massive_redirects.py's _settings builds them, forbid_sockets and RecordingMakeRequest installed, a real
+      MassiveClient on MagicMock(spec=RateLimitGovernor); start_instrument() once; start_throttle_budget called once
+      with no arguments, execute never, governor.method_calls == [call.start_throttle_budget()], no request recorded,
+      no socket touched. Then T013: MassiveClient.start_instrument() after __init__, the design's docstring (section
+      2.6), body the single call self._governor.start_throttle_budget().
+    deviations: >
+      (1) The marker reads "# Implements CAP-003 TC-COMP-250", not the plan's "# Implements TC-COMP-250": CAP-001
+      already uses bare TC-COMP-250 for another case (tests/unit/test_api_errors.py:75,
+      tests/integration/test_api_runs.py:159), and CAP-003-E8-S1/S2 set the prefix precedent. Both reviewers accepted
+      it. (2) One assertion beyond the plan, governor.method_calls == [call.start_throttle_budget()], which kills a
+      body that calls any other governor method. (3) The settings are built inline: the file's existing _settings()
+      is an unrelated model_validate helper.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/red-cycle-1.log
+    red_log_sha256: c7fa6fb9d4c4a6289223c8b1d9065be1e7414cd347d9bef2e15f544fa5614916
+    red_evidence: >
+      With T002 written and client.py at the base: the focused suite 1 failed, 56 passed; the new test fails with
+      AttributeError "'MassiveClient' object has no attribute 'start_instrument'".
+    green_evidence: >
+      The focused suite 57 passed; ruff check, ruff format --check and mypy src clean (green-cycle-1.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/green-cycle-1.log
+        sha256: 53a90b0d12eb393f1beac87408e984ff26a9bd789a9d687d2f4589f4e95f11ce
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-1.txt
+        sha256: 7d8ce300bb3687cc3db22991697359bd80f935ee167d51af2144d0d43c481620
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/spec-drift-cycle-1.txt
+        sha256: fdcdfd501ecf4a0f240bc61a419a2c4d917702262b4bc1bf9b45cd5ea6caa729
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 313788b8b0dfe41537d76245021c947869e4d9a2f9a852eb4b4750f2c9e0ebeb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/cycle-1.patch
+    index_tree: 72aaf8116ebb8e43579db8a7d4d87811df3a5388
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 32fae5be945c5897a2ed54212c5926e59212ac35ecd57d217e68805a20f308ab
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T014, T015, T016]
+    description: >
+      tests/unit/test_massive_retry.py: T003 module docstring rewritten (the 429 rows run the real SDK and urllib3
+      path; only TC-INT-026 still patches RESTClient), _real_transport_client gains jitter: Sequence[float] = (0.0,),
+      and a path-prefix responder _answer_429(path_prefix="/", *, then_after=None, then=None) answering a real 429
+      with error_rate_limited.json's body. T004 (TC-COMP-243, keeping "# Implements TC-INT-025") replaces the
+      patched-RESTClient test: five real 429s then 200, the reference returned, six requests, sleeps [60.0] * 5.
+      T005 (TC-COMP-244): persistent 429 after start_instrument(), ProviderRateLimited (a ProviderUnavailable, no
+      request_id, __cause__ MaxRetryError), six requests, five 60.0 s waits = 300 s, the [rate_limited] prefix. T006
+      (TC-COMP-245): the next read fails after one request and no sleep; after start_instrument() it waits 5 x 60 s
+      again. T007 (TC-COMP-246): jitter 0.999, sleeps <= 300 and sleeps + independently computed next delay > 300.
+      T008 (TC-COMP-247): refused 302 and forcelisted 503 stay RETRYABLE, three requests to api.massive.com, sleeps
+      [0.0, 0.0], not ProviderRateLimited. T009/T012 (TC-COMP-248): classify_for_governor called directly, the
+      planned rows. T010 (TC-COMP-249): marker lines only above TC-COMP-230/231 and TC-INT-026. T011 (TC-COMP-251):
+      ast checks (a)-(d). Then client.py: T014 the urllib3.exceptions import, _THROTTLED_RETRY_REASON from
+      ResponseError.SPECIFIC_ERROR, classify_for_governor with the design's four rules, in __all__; T015
+      _through_governor passes classify_for_governor positionally, the closure deleted, the except BadResponse
+      re-raise kept with the design's comment; T016's module-docstring paragraph. SDK construction unchanged.
+    deviations: >
+      (1) Markers "# Implements CAP-003 TC-COMP-NNN" (CAP-001 owns bare TC-COMP-243..251 here: test_run_cancel.py,
+      test_api_errors.py), as in cycle-1; TC-INT-025 and TC-INT-026 stay bare, as planned. (2) The TC-COMP-243
+      replacement keeps the delivered name test_rate_limited_responses_are_paced_without_consuming_attempts and sits
+      below the real-transport harness it uses; the patched test's now-dead _FakeResponse helper was removed with it.
+      (3) Strengthening beyond the plan, each added after a mutation or review round left a non-equivalent survivor
+      and labelled implementation-level in the test file. Round 1 (mutation-cycle-2-round1-results.json: 23 killed,
+      6 survived): TC-COMP-248 rows for status 413, for a ResponseError whose text only contains the 429 text, and for
+      a non-MaxRetryError carrying a 429 reason (all RETRYABLE); test_classify_for_governor_is_part_of_the_client_modules_interface
+      (T014's __all__ entry); test_a_fatal_bad_response_is_raised_typed_from_the_one_response (a real-transport 404:
+      InstrumentNotFound with request_id req_notfound_001 and __cause__ BadResponse, one request, no sleep; pins
+      T015's kept re-raise, killing the "raise without from exc" mutant). Round 2 (review finding: rule 1 matching
+      {429, 499}/{429, 500}/{429, 504} survived): rows for 499, 500, 502, 504. Round 3 (review finding: rule 3 moved
+      above rule 2 survived): row ProtocolError(<error_rate_limited.json text>) -> RETRYABLE. Labels: the 404 and
+      __all__ tests no longer claim TC-COMP-249/248 (review findings). Each round was re-staged, re-fingerprinted,
+      re-mutated and re-reviewed; the final RED is red-cycle-2-final.log. (4) The mutation command is two-stage: the
+      two story test files with -x, excluding the delivered TC-INT-026 row, then the full four-file focused suite.
+      The delivered TC-INT-026 row and the delivered test_massive_redirects.py rows run real clocks with a no-op sleep
+      and no send guard, so a mutant classifying every error THROTTLED loops in them instead of failing (the first
+      single-stage run was stopped for that reason and rerun); the first stage fails fast on the story's guarded
+      rows, and the second still runs every focused test for each surviving mutant. (5) TC-COMP-251 (c) recognises
+      only patch("...RESTClient") calls, as T011 words it; monkeypatch.setattr and patch.object are not recognised
+      (code review non-blocking finding, a follow-up).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/red-cycle-2.log
+    red_log_sha256: 5c58f6293d057ddaac07b10c33730cd733378ea86526da047c5c81a52ee9e970
+    red_evidence: >
+      First observation, with the plan's tests written and client.py at cycle-1 (no classify_for_governor): 13 failed,
+      58 passed. T004-T007 fail with the production F1 symptom, ProviderUnavailable "The provider failed 3
+      consecutive attempts." after three requests, its cause MaxRetryError(ResponseError('too many 429 error
+      responses')); the eight T009/T012 rows fail with AttributeError (no classify_for_governor); T011 fails on (a).
+      T008 and the T010 rows pass, as the plan's regression guards. Final tests (red-cycle-2-final.log, a scratch copy
+      with the staged tests and client.py at cycle-1): 22 failed, 59 passed; the added rows fail the same way, and
+      the 404 re-raise test passes there (delivered behaviour; its RED is the reraise-without-cause mutant, killed in
+      the final run).
+    green_evidence: >
+      The focused suite 81 passed; ruff check, ruff format --check and mypy src clean; tests/unit/test_massive_redirects.py
+      unchanged from the base (green-cycle-2.log). The full suite on these bytes failed one delivered test (cycle-3).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/red-cycle-2-final.log
+        sha256: ecff6fab8ac9235feafa34178826d0e91da198cf60a63c9efc3e7718eed42513
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/green-cycle-2.log
+        sha256: 71c3ab337805de28096566536cfdee8e83687f8944cce416674ee05cfe18698c
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/mutation-cycle-2-round1-results.json
+        sha256: 9947f280e0e67c662877f124bd262b7c5142153538e9f4fd40ce17b6b89c4acd
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/mutation-cycle-2-round2-results.json
+        sha256: dff9790296e765a8789faa1e1a9d0a1ee2c7098e7c4efd9c8bc331dbe1230449
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/mutation-cycle-2-round3-results.json
+        sha256: 48f610448a77043bd94c9b7a14c8d416fb530750820984b3f2e9208fe5ada33a
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-2-round1.txt
+        sha256: 38e1bdc67cad48ff2f378b772bc09a8981d246b57e488c49ce53ea2a282cebbe
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/spec-drift-cycle-2-round1.txt
+        sha256: b7911d3ec918f0589cdf91288eb5df76a1dbaff1f464e061aa5850e808aa173e
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-2-round2.txt
+        sha256: e61ec2dd9e250581d5158181fe23a37b7d741cdf32da1a6eb19447c022b15ec5
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-2.txt
+        sha256: 493e7d9d695def0065b0acaeb1202c36d20bc25a14fac00d09e460ecd2b37627
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/spec-drift-cycle-2.txt
+        sha256: fe51e118de9d6a039c58cf2990aa7a3271ba4b5bf17d462bc1388aa2d4389b22
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 64a011995c213dbf4db173455ca3d1becaedd4abc3fb63959889b90bfcaf2a30
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/cycle-2.patch
+    diff_from_tree: 72aaf8116ebb8e43579db8a7d4d87811df3a5388
+    index_tree: e27f9bb1d801761d883af73c78361800273e0b3d
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: afbb66830489af5b90ff140bcb99cd50618ff82f1a0e2f38538ab7103a6f7446
+      generated: 36
+      killed: 36
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T016]
+    description: >
+      T016's full suite on cycle-2's bytes failed one delivered CAP-001 test,
+      tests/unit/test_massive_client_interface.py::test_exposes_exactly_the_four_named_read_operations (CAP-001
+      TC-COMP-195, DAC-E3-1), which asserts MassiveClient's public functions are exactly the four fetch_* reads;
+      cycle-1's start_instrument() (CAP-003 massive-client sections 2.6 and 11, a public in-process method the runner
+      calls, CAP-003-E8-S4) makes five. The expected set now includes "start_instrument", with a comment that the
+      read operations are still exactly these four; the test's name, its exact-set comparison, the signature tests
+      and TC-COMP-208's no-streaming test are unchanged. No production change.
+    deviations: >
+      Beyond the task plan's Story-Specific Validation "Scope" line, which lists only client.py,
+      test_massive_retry.py and test_massive_client_governor_integration.py; massive-client CAP-003 section 2.1's file
+      list omits this test too. The only alternative, a private start_instrument, contradicts design sections 2.6 and
+      11 and CAP-003-E8-S4's runner call, so the edit is fully determined by the approved design; both cycle reviewers
+      judged it a recorded deviation, not an owner decision. Follow-up for doc sync: add the file to section 2.1's
+      list and note start_instrument beside CAP-001 TC-COMP-195.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/red-cycle-3.log
+    red_log_sha256: 5d47125e22195d04c536cc81a3360023a7035697457942165fdfd7c7090c3128
+    red_evidence: >
+      The full suite on cycle-2's bytes (index tree e27f9bb1), postgres tests included: 1 failed, 2685 passed; the one
+      failure is this test, its set holding one extra member, start_instrument.
+    green_evidence: >
+      tests/unit/test_massive_client_interface.py 6 passed; ruff check and ruff format --check clean. Full suite on the
+      final bytes, uv build, ruff, mypy and the story-specific checks in final-validation.log.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-3.txt
+        sha256: 85ab87472bc3092b1c1a3f6db12829dd66f81baf6f583c40764eba3bdb4c6c86
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/spec-drift-cycle-3.txt
+        sha256: 2654f98e0598e586fc1da0269a815f7c70fce3f6856f26face1a5e662bef3c69
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/final-validation.log
+        sha256: 70f12ed5941be5db8bcc995fce4898f48f4352933127442c1ffde7db4ea6c79f
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: fb4a1c8235a387ae91f6e382edea43de31b0e3d137a614e2a4aea293854d2b20
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/cycle-3.patch
+    diff_from_tree: e27f9bb1d801761d883af73c78361800273e0b3d
+    index_tree: e8f403186d7628fec7ec79b6b8fd0f7564ea6f11
+    commit_hash: stage
+    mutation:
+      not_applicable: >
+        Test-only cycle: it changes the expected set of one delivered test and no production line, so there is no
+        changed production line to mutate.

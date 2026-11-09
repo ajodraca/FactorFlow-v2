@@ -1,0 +1,3106 @@
+# RED cycle-2, final tests (index tree e27f9bb1d801761d883af73c78361800273e0b3d, after the strengthening rows of three mutation rounds): a scratch copy of the tree with tests/unit/test_massive_retry.py as staged for review and src/factorflow/ingestion/massive/client.py at cycle-1 (index tree 72aaf8116ebb8e43579db8a7d4d87811df3a5388, no classify_for_governor)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py tests/unit/test_massive_client_governor_integration.py tests/unit/test_massive_redirects.py tests/unit/test_massive_error_classification.py -q -rf
+........FFFF..FFFFFFFFFFFFFFFFF.F....................................... [ 88%]
+.........                                                                [100%]
+=================================== FAILURES ===================================
+_______ test_rate_limited_responses_are_paced_without_consuming_attempts _______
+urllib3.exceptions.ResponseError: too many 429 error responses
+
+The above exception was the direct cause of the following exception:
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d66dae0>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d308a40>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d3089a0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in <lambda>
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/reference.py:157: in get_ticker_details
+    return self._get(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/base.py:121: in _get
+    resp = self.client.request(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:135: in request
+    return self.request_encode_url(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:182: in request_encode_url
+    return self.urlopen(method, url, **extra_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/poolmanager.py:457: in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:945: in urlopen
+    retries = retries.increment(method, url, response=response, _pool=self)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Retry(total=0, connect=None, read=None, redirect=None, status=None)
+method = 'GET', url = '/v3/reference/tickers/AAPL?ticker=AAPL'
+response = <urllib3.response.HTTPResponse object at 0x10d38a980>, error = None
+_pool = <urllib3.connectionpool.HTTPSConnectionPool object at 0x10d682060>
+_stacktrace = None
+
+    def increment(
+        self,
+        method: str | None = None,
+        url: str | None = None,
+        response: BaseHTTPResponse | None = None,
+        error: Exception | None = None,
+        _pool: ConnectionPool | None = None,
+        _stacktrace: TracebackType | None = None,
+    ) -> Self:
+        """Return a new Retry object with incremented retry counters.
+    
+        :param response: A response object, or None, if the server did not
+            return a response.
+        :type response: :class:`~urllib3.response.BaseHTTPResponse`
+        :param Exception error: An error encountered during the request, or
+            None if the response was received successfully.
+    
+        :return: A new ``Retry`` object.
+        """
+        if self.total is False and error:
+            # Disabled, indicate to re-raise the error.
+            raise reraise(type(error), error, _stacktrace)
+    
+        total = self.total
+        if total is not None:
+            total -= 1
+    
+        connect = self.connect
+        read = self.read
+        redirect = self.redirect
+        status_count = self.status
+        other = self.other
+        cause = "unknown"
+        status = None
+        redirect_location = None
+    
+        if error and self._is_connection_error(error):
+            # Connect retry?
+            if connect is False:
+                raise reraise(type(error), error, _stacktrace)
+            elif connect is not None:
+                connect -= 1
+    
+        elif error and self._is_read_error(error):
+            # Read retry?
+            if read is False or method is None or not self._is_method_retryable(method):
+                raise reraise(type(error), error, _stacktrace)
+            elif read is not None:
+                read -= 1
+    
+        elif error:
+            # Other retry?
+            if other is not None:
+                other -= 1
+    
+        elif response and response.get_redirect_location():
+            # Redirect retry?
+            if redirect is not None:
+                redirect -= 1
+            cause = "too many redirects"
+            response_redirect_location = response.get_redirect_location()
+            if response_redirect_location:
+                redirect_location = response_redirect_location
+            status = response.status
+    
+        else:
+            # Incrementing because of a server error like a 500 in
+            # status_forcelist and the given method is in the allowed_methods
+            cause = ResponseError.GENERIC_ERROR
+            if response and response.status:
+                if status_count is not None:
+                    status_count -= 1
+                cause = ResponseError.SPECIFIC_ERROR.format(status_code=response.status)
+                status = response.status
+    
+        history = self.history + (
+            RequestHistory(method, url, error, status, redirect_location),
+        )
+    
+        new_retry = self.new(
+            total=total,
+            connect=connect,
+            read=read,
+            redirect=redirect,
+            status=status_count,
+            other=other,
+            history=history,
+        )
+    
+        if new_retry.is_exhausted():
+            reason = error or ResponseError(cause)
+>           raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.massive.com', port=443): Max retries exceeded with url: /v3/reference/tickers/AAPL?ticker=AAPL (Caused by ResponseError('too many 429 error responses'))
+
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/util/retry.py:543: MaxRetryError
+
+The above exception was the direct cause of the following exception:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d112950>
+
+    def test_rate_limited_responses_are_paced_without_consuming_attempts(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """CAP-003 TC-COMP-243 / DAC-E8-S3-1, replacing CAP-001's patched
+        TC-INT-025 row: through the real SDK and urllib3 path, five real `429`s
+        and then a `200` are waited out at the minute boundary and the reference
+        is returned, although five exceeds `max_attempts` (3). Five waits of
+        exactly 60.0 s: at jitter 0.0 a backoff delay would be 0.0, so the
+        literal list also proves none of them was a backoff."""
+        settings = _production_settings(monkeypatch)
+        guard = forbid_sockets(monkeypatch)
+        transport = RecordingMakeRequest(
+            _answer_429(
+                _REFERENCE_AAPL,
+                then_after=5,
+                then=json_answer(_envelope(_load("reference_active.json"))),
+            )
+        ).install(monkeypatch)
+        client, _clock, sleeper = _real_transport_client(settings)
+    
+>       reference = client.fetch_reference("AAPL")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_massive_retry.py:351: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in fetch_reference
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:292: in _get_one
+    response = self._through_governor(send)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:305: in _through_governor
+    return self._governor.execute(send, classify)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d66dae0>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d308a40>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d3089a0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    if self._throttle_spent + delay > self._settings.max_throttle_wait_seconds:
+                        raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc
+                    throttled_at = self._monotonic()
+                    self._sleep(delay)
+                    continue
+    
+                # Outcome.RETRYABLE (or Outcome.OK, which classify should
+                # never return for a raised exception -- treated the same
+                # as RETRYABLE would be nonsensical, so it is not special
+                # cased; only THROTTLED and FATAL are).
+                attempts += 1
+                if attempts >= self._settings.max_attempts:
+>                   raise ProviderUnavailable(
+                        f"The provider failed {attempts} consecutive attempts."
+                    ) from exc
+E                   factorflow.ingestion.massive.errors.ProviderUnavailable: The provider failed 3 consecutive attempts.
+
+src/factorflow/ingestion/rate_limit.py:190: ProviderUnavailable
+_ test_a_persistent_real_429_spends_exactly_the_300_s_budget_and_raises_rate_limited _
+urllib3.exceptions.ResponseError: too many 429 error responses
+
+The above exception was the direct cause of the following exception:
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d148a50>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d30aca0>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d3094e0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in <lambda>
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/reference.py:157: in get_ticker_details
+    return self._get(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/base.py:121: in _get
+    resp = self.client.request(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:135: in request
+    return self.request_encode_url(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:182: in request_encode_url
+    return self.urlopen(method, url, **extra_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/poolmanager.py:457: in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:945: in urlopen
+    retries = retries.increment(method, url, response=response, _pool=self)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Retry(total=0, connect=None, read=None, redirect=None, status=None)
+method = 'GET', url = '/v3/reference/tickers/AAPL?ticker=AAPL'
+response = <urllib3.response.HTTPResponse object at 0x10d389210>, error = None
+_pool = <urllib3.connectionpool.HTTPSConnectionPool object at 0x10d393bb0>
+_stacktrace = None
+
+    def increment(
+        self,
+        method: str | None = None,
+        url: str | None = None,
+        response: BaseHTTPResponse | None = None,
+        error: Exception | None = None,
+        _pool: ConnectionPool | None = None,
+        _stacktrace: TracebackType | None = None,
+    ) -> Self:
+        """Return a new Retry object with incremented retry counters.
+    
+        :param response: A response object, or None, if the server did not
+            return a response.
+        :type response: :class:`~urllib3.response.BaseHTTPResponse`
+        :param Exception error: An error encountered during the request, or
+            None if the response was received successfully.
+    
+        :return: A new ``Retry`` object.
+        """
+        if self.total is False and error:
+            # Disabled, indicate to re-raise the error.
+            raise reraise(type(error), error, _stacktrace)
+    
+        total = self.total
+        if total is not None:
+            total -= 1
+    
+        connect = self.connect
+        read = self.read
+        redirect = self.redirect
+        status_count = self.status
+        other = self.other
+        cause = "unknown"
+        status = None
+        redirect_location = None
+    
+        if error and self._is_connection_error(error):
+            # Connect retry?
+            if connect is False:
+                raise reraise(type(error), error, _stacktrace)
+            elif connect is not None:
+                connect -= 1
+    
+        elif error and self._is_read_error(error):
+            # Read retry?
+            if read is False or method is None or not self._is_method_retryable(method):
+                raise reraise(type(error), error, _stacktrace)
+            elif read is not None:
+                read -= 1
+    
+        elif error:
+            # Other retry?
+            if other is not None:
+                other -= 1
+    
+        elif response and response.get_redirect_location():
+            # Redirect retry?
+            if redirect is not None:
+                redirect -= 1
+            cause = "too many redirects"
+            response_redirect_location = response.get_redirect_location()
+            if response_redirect_location:
+                redirect_location = response_redirect_location
+            status = response.status
+    
+        else:
+            # Incrementing because of a server error like a 500 in
+            # status_forcelist and the given method is in the allowed_methods
+            cause = ResponseError.GENERIC_ERROR
+            if response and response.status:
+                if status_count is not None:
+                    status_count -= 1
+                cause = ResponseError.SPECIFIC_ERROR.format(status_code=response.status)
+                status = response.status
+    
+        history = self.history + (
+            RequestHistory(method, url, error, status, redirect_location),
+        )
+    
+        new_retry = self.new(
+            total=total,
+            connect=connect,
+            read=read,
+            redirect=redirect,
+            status=status_count,
+            other=other,
+            history=history,
+        )
+    
+        if new_retry.is_exhausted():
+            reason = error or ResponseError(cause)
+>           raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.massive.com', port=443): Max retries exceeded with url: /v3/reference/tickers/AAPL?ticker=AAPL (Caused by ResponseError('too many 429 error responses'))
+
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/util/retry.py:543: MaxRetryError
+
+The above exception was the direct cause of the following exception:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d148e50>
+
+    def test_a_persistent_real_429_spends_exactly_the_300_s_budget_and_raises_rate_limited(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """CAP-003 TC-COMP-244 / DAC-E8-S3-2: every request answered `429`, jitter
+        0.0. After `start_instrument()`, five 60.0 s boundary waits fit the 300 s
+        budget; the sixth `429` would take it to 360 s, so the read raises
+        `ProviderRateLimited` after six requests and never sleeps past 300 s."""
+        settings = _production_settings(monkeypatch)
+        guard = forbid_sockets(monkeypatch)
+        transport = RecordingMakeRequest(_answer_429()).install(monkeypatch)
+        client, _clock, sleeper = _real_transport_client(settings)
+    
+        client.start_instrument()
+        with pytest.raises(ProviderRateLimited) as raised:
+>           client.fetch_reference("AAPL")
+
+tests/unit/test_massive_retry.py:376: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in fetch_reference
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:292: in _get_one
+    response = self._through_governor(send)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:305: in _through_governor
+    return self._governor.execute(send, classify)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d148a50>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d30aca0>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d3094e0>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    if self._throttle_spent + delay > self._settings.max_throttle_wait_seconds:
+                        raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc
+                    throttled_at = self._monotonic()
+                    self._sleep(delay)
+                    continue
+    
+                # Outcome.RETRYABLE (or Outcome.OK, which classify should
+                # never return for a raised exception -- treated the same
+                # as RETRYABLE would be nonsensical, so it is not special
+                # cased; only THROTTLED and FATAL are).
+                attempts += 1
+                if attempts >= self._settings.max_attempts:
+>                   raise ProviderUnavailable(
+                        f"The provider failed {attempts} consecutive attempts."
+                    ) from exc
+E                   factorflow.ingestion.massive.errors.ProviderUnavailable: The provider failed 3 consecutive attempts.
+
+src/factorflow/ingestion/rate_limit.py:190: ProviderUnavailable
+_ test_a_spent_budget_fails_the_stocks_next_read_after_one_request_until_the_next_stock _
+urllib3.exceptions.ResponseError: too many 429 error responses
+
+The above exception was the direct cause of the following exception:
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d148d50>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d308d60>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d309f80>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in <lambda>
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/reference.py:157: in get_ticker_details
+    return self._get(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/base.py:121: in _get
+    resp = self.client.request(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:135: in request
+    return self.request_encode_url(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:182: in request_encode_url
+    return self.urlopen(method, url, **extra_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/poolmanager.py:457: in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:945: in urlopen
+    retries = retries.increment(method, url, response=response, _pool=self)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Retry(total=0, connect=None, read=None, redirect=None, status=None)
+method = 'GET', url = '/v3/reference/tickers/AAPL?ticker=AAPL'
+response = <urllib3.response.HTTPResponse object at 0x10d32b0a0>, error = None
+_pool = <urllib3.connectionpool.HTTPSConnectionPool object at 0x10d393950>
+_stacktrace = None
+
+    def increment(
+        self,
+        method: str | None = None,
+        url: str | None = None,
+        response: BaseHTTPResponse | None = None,
+        error: Exception | None = None,
+        _pool: ConnectionPool | None = None,
+        _stacktrace: TracebackType | None = None,
+    ) -> Self:
+        """Return a new Retry object with incremented retry counters.
+    
+        :param response: A response object, or None, if the server did not
+            return a response.
+        :type response: :class:`~urllib3.response.BaseHTTPResponse`
+        :param Exception error: An error encountered during the request, or
+            None if the response was received successfully.
+    
+        :return: A new ``Retry`` object.
+        """
+        if self.total is False and error:
+            # Disabled, indicate to re-raise the error.
+            raise reraise(type(error), error, _stacktrace)
+    
+        total = self.total
+        if total is not None:
+            total -= 1
+    
+        connect = self.connect
+        read = self.read
+        redirect = self.redirect
+        status_count = self.status
+        other = self.other
+        cause = "unknown"
+        status = None
+        redirect_location = None
+    
+        if error and self._is_connection_error(error):
+            # Connect retry?
+            if connect is False:
+                raise reraise(type(error), error, _stacktrace)
+            elif connect is not None:
+                connect -= 1
+    
+        elif error and self._is_read_error(error):
+            # Read retry?
+            if read is False or method is None or not self._is_method_retryable(method):
+                raise reraise(type(error), error, _stacktrace)
+            elif read is not None:
+                read -= 1
+    
+        elif error:
+            # Other retry?
+            if other is not None:
+                other -= 1
+    
+        elif response and response.get_redirect_location():
+            # Redirect retry?
+            if redirect is not None:
+                redirect -= 1
+            cause = "too many redirects"
+            response_redirect_location = response.get_redirect_location()
+            if response_redirect_location:
+                redirect_location = response_redirect_location
+            status = response.status
+    
+        else:
+            # Incrementing because of a server error like a 500 in
+            # status_forcelist and the given method is in the allowed_methods
+            cause = ResponseError.GENERIC_ERROR
+            if response and response.status:
+                if status_count is not None:
+                    status_count -= 1
+                cause = ResponseError.SPECIFIC_ERROR.format(status_code=response.status)
+                status = response.status
+    
+        history = self.history + (
+            RequestHistory(method, url, error, status, redirect_location),
+        )
+    
+        new_retry = self.new(
+            total=total,
+            connect=connect,
+            read=read,
+            redirect=redirect,
+            status=status_count,
+            other=other,
+            history=history,
+        )
+    
+        if new_retry.is_exhausted():
+            reason = error or ResponseError(cause)
+>           raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.massive.com', port=443): Max retries exceeded with url: /v3/reference/tickers/AAPL?ticker=AAPL (Caused by ResponseError('too many 429 error responses'))
+
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/util/retry.py:543: MaxRetryError
+
+The above exception was the direct cause of the following exception:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d342c60>
+
+    def test_a_spent_budget_fails_the_stocks_next_read_after_one_request_until_the_next_stock(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """CAP-003 TC-COMP-245 / DAC-E8-S3-3: the budget is the stock's, across its
+        requests. TC-COMP-244's scenario is repeated on one client, governor and
+        clock (no state is shared between tests). Without `start_instrument()`,
+        the next read fails after exactly one request and no sleep; after it, a
+        read waits again. The clock then sits at `_CLOCK_START + 300.0`, a
+        multiple of 60, so each new wait is exactly 60.0 s."""
+        settings = _production_settings(monkeypatch)
+        guard = forbid_sockets(monkeypatch)
+        transport = RecordingMakeRequest(_answer_429()).install(monkeypatch)
+        client, clock, sleeper = _real_transport_client(settings)
+        client.start_instrument()
+        with pytest.raises(ProviderRateLimited):
+>           client.fetch_reference("AAPL")
+
+tests/unit/test_massive_retry.py:410: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in fetch_reference
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:292: in _get_one
+    response = self._through_governor(send)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:305: in _through_governor
+    return self._governor.execute(send, classify)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d148d50>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d308d60>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d309f80>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    if self._throttle_spent + delay > self._settings.max_throttle_wait_seconds:
+                        raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc
+                    throttled_at = self._monotonic()
+                    self._sleep(delay)
+                    continue
+    
+                # Outcome.RETRYABLE (or Outcome.OK, which classify should
+                # never return for a raised exception -- treated the same
+                # as RETRYABLE would be nonsensical, so it is not special
+                # cased; only THROTTLED and FATAL are).
+                attempts += 1
+                if attempts >= self._settings.max_attempts:
+>                   raise ProviderUnavailable(
+                        f"The provider failed {attempts} consecutive attempts."
+                    ) from exc
+E                   factorflow.ingestion.massive.errors.ProviderUnavailable: The provider failed 3 consecutive attempts.
+
+src/factorflow/ingestion/rate_limit.py:190: ProviderUnavailable
+_________ test_jitter_never_takes_the_real_transport_budget_past_300_s _________
+urllib3.exceptions.ResponseError: too many 429 error responses
+
+The above exception was the direct cause of the following exception:
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d343890>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d3094e0>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d30a660>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+>               result = send()
+                         ^^^^^^
+
+src/factorflow/ingestion/rate_limit.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in <lambda>
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/reference.py:157: in get_ticker_details
+    return self._get(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/massive/rest/base.py:121: in _get
+    resp = self.client.request(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:135: in request
+    return self.request_encode_url(
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/_request_methods.py:182: in request_encode_url
+    return self.urlopen(method, url, **extra_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/poolmanager.py:457: in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:945: in urlopen
+    retries = retries.increment(method, url, response=response, _pool=self)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Retry(total=0, connect=None, read=None, redirect=None, status=None)
+method = 'GET', url = '/v3/reference/tickers/AAPL?ticker=AAPL'
+response = <urllib3.response.HTTPResponse object at 0x10d38ab00>, error = None
+_pool = <urllib3.connectionpool.HTTPSConnectionPool object at 0x10d393bb0>
+_stacktrace = None
+
+    def increment(
+        self,
+        method: str | None = None,
+        url: str | None = None,
+        response: BaseHTTPResponse | None = None,
+        error: Exception | None = None,
+        _pool: ConnectionPool | None = None,
+        _stacktrace: TracebackType | None = None,
+    ) -> Self:
+        """Return a new Retry object with incremented retry counters.
+    
+        :param response: A response object, or None, if the server did not
+            return a response.
+        :type response: :class:`~urllib3.response.BaseHTTPResponse`
+        :param Exception error: An error encountered during the request, or
+            None if the response was received successfully.
+    
+        :return: A new ``Retry`` object.
+        """
+        if self.total is False and error:
+            # Disabled, indicate to re-raise the error.
+            raise reraise(type(error), error, _stacktrace)
+    
+        total = self.total
+        if total is not None:
+            total -= 1
+    
+        connect = self.connect
+        read = self.read
+        redirect = self.redirect
+        status_count = self.status
+        other = self.other
+        cause = "unknown"
+        status = None
+        redirect_location = None
+    
+        if error and self._is_connection_error(error):
+            # Connect retry?
+            if connect is False:
+                raise reraise(type(error), error, _stacktrace)
+            elif connect is not None:
+                connect -= 1
+    
+        elif error and self._is_read_error(error):
+            # Read retry?
+            if read is False or method is None or not self._is_method_retryable(method):
+                raise reraise(type(error), error, _stacktrace)
+            elif read is not None:
+                read -= 1
+    
+        elif error:
+            # Other retry?
+            if other is not None:
+                other -= 1
+    
+        elif response and response.get_redirect_location():
+            # Redirect retry?
+            if redirect is not None:
+                redirect -= 1
+            cause = "too many redirects"
+            response_redirect_location = response.get_redirect_location()
+            if response_redirect_location:
+                redirect_location = response_redirect_location
+            status = response.status
+    
+        else:
+            # Incrementing because of a server error like a 500 in
+            # status_forcelist and the given method is in the allowed_methods
+            cause = ResponseError.GENERIC_ERROR
+            if response and response.status:
+                if status_count is not None:
+                    status_count -= 1
+                cause = ResponseError.SPECIFIC_ERROR.format(status_code=response.status)
+                status = response.status
+    
+        history = self.history + (
+            RequestHistory(method, url, error, status, redirect_location),
+        )
+    
+        new_retry = self.new(
+            total=total,
+            connect=connect,
+            read=read,
+            redirect=redirect,
+            status=status_count,
+            other=other,
+            history=history,
+        )
+    
+        if new_retry.is_exhausted():
+            reason = error or ResponseError(cause)
+>           raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.massive.com', port=443): Max retries exceeded with url: /v3/reference/tickers/AAPL?ticker=AAPL (Caused by ResponseError('too many 429 error responses'))
+
+/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/urllib3/util/retry.py:543: MaxRetryError
+
+The above exception was the direct cause of the following exception:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d3433e0>
+
+    def test_jitter_never_takes_the_real_transport_budget_past_300_s(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """CAP-003 TC-COMP-246 / DAC-E8-S3-4: every request `429`, jitter 0.999, so
+        each boundary wait is nearly doubled. The recorded sleeps total at most
+        300 s, and that total plus the next delay, which the governor declined to
+        sleep, exceeds 300 s. The declined delay is computed here from the clock
+        with the boundary-wait formula, never through the governor."""
+        settings = _production_settings(monkeypatch)
+        guard = forbid_sockets(monkeypatch)
+        transport = RecordingMakeRequest(_answer_429()).install(monkeypatch)
+        client, clock, sleeper = _real_transport_client(settings, jitter=[0.999])
+    
+        client.start_instrument()
+        with pytest.raises(ProviderRateLimited):
+>           client.fetch_reference("AAPL")
+
+tests/unit/test_massive_retry.py:448: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/ingestion/massive/client.py:84: in fetch_reference
+    envelope = self._get_one(lambda: self._rest_client.get_ticker_details(symbol, raw=True))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:292: in _get_one
+    response = self._through_governor(send)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/factorflow/ingestion/massive/client.py:305: in _through_governor
+    return self._governor.execute(send, classify)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <factorflow.ingestion.rate_limit.RateLimitGovernor object at 0x10d343890>
+send = <function MassiveClient.fetch_reference.<locals>.<lambda> at 0x10d3094e0>
+classify = <function MassiveClient._through_governor.<locals>.classify at 0x10d30a660>
+stated_delay_seconds = None
+
+    def execute(
+        self,
+        send: Callable[[], T],
+        classify: Callable[[BaseException], Outcome],
+        stated_delay_seconds: Callable[[BaseException], float | None] | None = None,
+    ) -> T:
+        """Run one request under the budget, retrying per section 2.2.
+    
+        `send` performs one attempt. `classify` maps an exception raised
+        by it onto an `Outcome`; the governor decides what to do with
+        that `Outcome` and never examines the exception itself, beyond
+        passing it to `classify` and, optionally, `stated_delay_seconds`.
+    
+        `stated_delay_seconds`, given the raised exception, returns the
+        provider's stated throttle delay in seconds, or `None` when the
+        provider stated none. It is honoured without jitter
+        (DAC-E3-S4-1, TC-COMP-226; component design section 2.5 row 1).
+        Massive sends no `Retry-After` (component design section 2.5), so
+        CAP-001-E3-S1 passes no callback and this path is dead code
+        against the only provider this capability has; it is retained
+        because the governor is provider-agnostic.
+    
+        Raises `ProviderUnavailable` when attempts are exhausted, and
+        `ProviderRateLimited`, a `ProviderUnavailable`, when a throttle wait
+        would take the stock's spent throttle wait past the budget. A
+        throttle wait is charged from the start of its sleep to the moment
+        the retried request holds its permit (CAP-003 rate-limit-governor
+        section 2.3).
+        """
+        attempts = 0
+        throttled_at: float | None = None
+    
+        while True:
+            self._acquire_permit()
+            if throttled_at is not None:
+                self._throttle_spent += self._monotonic() - throttled_at
+                throttled_at = None
+    
+            try:
+                result = send()
+            except BaseException as exc:  # noqa: BLE001 - classify decides, not this module
+                outcome = classify(exc)
+    
+                if outcome is Outcome.FATAL:
+                    raise
+    
+                if outcome is Outcome.THROTTLED:
+                    delay = self._throttle_delay(exc, stated_delay_seconds)
+                    if self._throttle_spent + delay > self._settings.max_throttle_wait_seconds:
+                        raise ProviderRateLimited(_THROTTLE_BUDGET_SPENT_MESSAGE) from exc
+                    throttled_at = self._monotonic()
+                    self._sleep(delay)
+                    continue
+    
+                # Outcome.RETRYABLE (or Outcome.OK, which classify should
+                # never return for a raised exception -- treated the same
+                # as RETRYABLE would be nonsensical, so it is not special
+                # cased; only THROTTLED and FATAL are).
+                attempts += 1
+                if attempts >= self._settings.max_attempts:
+>                   raise ProviderUnavailable(
+                        f"The provider failed {attempts} consecutive attempts."
+                    ) from exc
+E                   factorflow.ingestion.massive.errors.ProviderUnavailable: The provider failed 3 consecutive attempts.
+
+src/factorflow/ingestion/rate_limit.py:190: ProviderUnavailable
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses'))")
+expected = <Outcome.THROTTLED: 'throttled'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 503 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many redirects'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by NewConnectionError('None: Failed to establish a new connection'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] _
+
+exc = BadResponse('{\n  "status": "ERROR",\n  "request_id": "req_ratelimit_001",\n  "error": "You\'ve exceeded the maximum requests per minute, please try again later."\n}\n')
+expected = <Outcome.THROTTLED: 'throttled'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ProtocolError('too many 429 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] _
+
+exc = BadResponse('{\n  "status": "NOT_FOUND",\n  "request_id": "req_notfound_001",\n  "message": "Ticker not found."\n}\n')
+expected = <Outcome.FATAL: 'fatal'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] _
+
+exc = BadResponse('{\n  "foo": "bar",\n  "baz": 42\n}\n')
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 413 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 499 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 500 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 502 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 504 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses via a proxy'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] _
+
+exc = ProtocolError('Connection aborted.')
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] _
+
+exc = ProtocolError('{\n  "status": "ERROR",\n  "request_id": "req_ratelimit_001",\n  "error": "You\'ve exceeded the maximum requests per minute, please try again later."\n}\n')
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'factorflow.ingestion.massive.client' has no attribute 'classify_for_governor'
+
+tests/unit/test_massive_retry.py:617: AttributeError
+______ test_classify_for_governor_is_part_of_the_client_modules_interface ______
+
+    def test_classify_for_governor_is_part_of_the_client_modules_interface() -> None:
+        """massive-client CAP-003 section 11 lists `classify_for_governor(exc)` as
+        an in-process interface; T014 declares it in the module's `__all__`."""
+>       assert "classify_for_governor" in massive_client.__all__
+E       AssertionError: assert 'classify_for_governor' in ['MassiveClient']
+E        +  where ['MassiveClient'] = massive_client.__all__
+
+tests/unit/test_massive_retry.py:625: AssertionError
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that patches
+        `RESTClient` names a `429` or the rate-limited fixture; (d) neither of
+        this story's test files reads a recorded `attempts` value. The lock-file
+        clause is checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+>       assert {"MaxRetryError", "ResponseError"} <= imported
+E       AssertionError: assert {'MaxRetryErr...esponseError'} <= set()
+E         
+E         Extra items in the left set:
+E         'MaxRetryError'
+E         'ResponseError'
+
+tests/unit/test_massive_retry.py:714: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_rate_limited_responses_are_paced_without_consuming_attempts
+FAILED tests/unit/test_massive_retry.py::test_a_persistent_real_429_spends_exactly_the_300_s_budget_and_raises_rate_limited
+FAILED tests/unit/test_massive_retry.py::test_a_spent_budget_fails_the_stocks_next_read_after_one_request_until_the_next_stock
+FAILED tests/unit/test_massive_retry.py::test_jitter_never_takes_the_real_transport_budget_past_300_s
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable]
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_is_part_of_the_client_modules_interface
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts
+22 failed, 59 passed in 0.50s
+# exit 1

@@ -1,0 +1,16 @@
+# Independent spec-drift subagent (general-purpose, agentId a4a46d42588cec00e), cycle-1, judged cycle-1.patch
+# (diff_sha256 313788b8b0dfe41537d76245021c947869e4d9a2f9a852eb4b4750f2c9e0ebeb, index tree 72aaf8116ebb8e43579db8a7d4d87811df3a5388).
+DRIFT_DETECTED: false
+
+What I checked
+- The patch matches the staged change: the SHA-256 of `git diff --cached` equals 313788b8...ebeb and `git write-tree` gives 72aaf811...8a5388. HEAD is 52ecfbd. The only unstaged edits are the two story docs (task checkboxes, story status).
+- Production change (src/factorflow/ingestion/massive/client.py:69-74): start_instrument(self) -> None sits right after __init__. Its body is the single call self._governor.start_throttle_budget(), and its docstring matches massive-client design section 2.6 word for word. It sends nothing. That agrees with T013; DAC-E8-7 in the story (line 77) and the epic (line 111); design section 1 item 5, section 7 row "Stock boundary delegates", section 8 criterion 6 and the section 11 row (start_instrument() -> None, in process); system design section 3.6 note 3 and the section 4.2 "Stock boundary" row; rate-limit-governor section 2 item 1 and the start_throttle_budget() sketch.
+- __all__ is unchanged, which is correct for this cycle: MassiveClient was already exported, and adding classify_for_governor belongs to cycle 2 (T014).
+- No other production lines changed: no import, constant, classifier or _through_governor edit.
+- Test (tests/unit/test_massive_client_governor_integration.py:215-240): covers TC-COMP-250 (massive-client-tests.md:381) and DAC-E8-S3-8. It builds production MassiveSettings from env as T002 prescribes, installs forbid_sockets and RecordingMakeRequest, passes MagicMock(spec=RateLimitGovernor) to a real MassiveClient and calls start_instrument() once. It makes all four planned assertions. The test name matches T002 exactly.
+- Ran tests/unit/test_massive_client_governor_integration.py: 9 passed.
+
+Findings (none is drift)
+1. Minor, not drift: the marker reads `# Implements CAP-003 TC-COMP-250` instead of the plan's `# Implements TC-COMP-250`. Justified: the bare ID already means a different CAP-001 case (tests/unit/test_api_errors.py:75, tests/integration/test_api_runs.py:159), and other CAP-003 tests already use the prefixed form. The plan text could be updated to say this; no behaviour changes.
+2. Not drift: the extra assertion governor.method_calls == [call.start_throttle_budget()] is stricter than the plan; the spec says start_instrument() makes exactly one governor call and sends nothing, and this checks that directly.
+3. Not drift: the module-level `call` import is shadowed by an existing parametrize argument named `call` inside one earlier test; readability note only.

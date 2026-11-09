@@ -1,0 +1,21 @@
+# Independent code-review subagent (general-purpose, agentId ada3a3de6705a2162), cycle-2 FINAL round: judged cycle-2.patch
+# (diff_sha256 64a011995c213dbf4db173455ca3d1becaedd4abc3fb63959889b90bfcaf2a30, git diff 72aaf8116ebb8e43579db8a7d4d87811df3a5388
+# e27f9bb1d801761d883af73c78361800273e0b3d) and mutation-cycle-2-results.json. Earlier rounds: code-review-cycle-2-round1.txt
+# (agent ad905856596c8e723) and code-review-cycle-2-round2.txt (this agent, tree faf4c600).
+VERDICT: APPROVED
+
+What I checked
+- The hashes match. The saved cycle-2.patch is 64a01199..., the same as `git diff 72aaf81... e27f9bb...`. git write-tree gives e27f9bb..., HEAD is 52ecfbd, and the working tree equals the index for src/ and tests/.
+- The delta faf4c60..e27f9bb touches tests/unit/test_massive_retry.py only:
+  - New row ProtocolError(<error_rate_limited.json text>) -> RETRYABLE. str() of that error is exactly the fixture text and is_rate_limited_body returns True on it, so the row really tests that rule 2 wins over rule 3.
+  - The __all__ test is now labelled implementation-level (T014) and no longer claims TC-COMP-248.
+  - The grouping comment is updated to match. client.py is unchanged from what I reviewed last round.
+- Validation is green: the focused 4-file suite (81 passed), ruff check, ruff format --check (285 files) and mypy src (61 files).
+- Last round's checks still hold for the cycle as now staged: client.py matches massive-client design section 2.3 exactly; the budget arithmetic in T004-T007 holds (6 requests and 5 x 60 s waits, then 1 request after the budget is spent, then 13 requests in total for TC-COMP-245; TC-COMP-246's declined-delay formula reproduces the governor's own); plan constraints hold (TC-COMP-230/231 and TC-INT-026 bodies gain only marker lines; test_massive_redirects.py, uv.lock, pyproject.toml and the SDK construction are unchanged; no test reads attempts; the 429 string comes from urllib3's constant).
+- Coder's mutation evidence: mutation-cycle-2-results.json has 36/36 killed, using mutants-cycle-2-round4.json and including rule-3-before-rule-2. All 4 baselines exited 0, and its tree_patch_sha256 (dd80df29...) is the same as the current `git diff HEAD`.
+- My 7 mutants, re-run on a fresh copy, are all killed: rule 1 comparing str(exc) instead of str(exc.reason); the constant set to GENERIC_ERROR; rule 3 moved above rule 2 (survived last round, now killed by the new row); rule 4's FATAL narrowed to ProviderNotEntitled only; rule 1 as `_THROTTLED_RETRY_REASON in repr(exc)`; test side: re-adding a patched-RESTClient 429 test (caught by TC-COMP-251 (c)); test side: adding an attempts read (caught by TC-COMP-251 (d)).
+
+Findings
+1. RESOLVED (was NON-BLOCKING 1), tests/unit/test_massive_retry.py:600-604. The rule 2 before rule 3 ordering is now pinned.
+2. RESOLVED (was NON-BLOCKING 2), tests/unit/test_massive_retry.py:620-622. The __all__ test is labelled implementation-level.
+3. NON-BLOCKING, still open, tests/unit/test_massive_retry.py:657-677 (_calls_patch_on_rest_client). TC-COMP-251 (c) only recognises patch("<...>.RESTClient"). It would miss monkeypatch.setattr("...RESTClient", ...), which test_ingestion_main.py and test_ingestion_e2e_main.py already use, and patch.object. It follows T011's wording and no current test violates the rule. Reporting it as a follow-up is fine.

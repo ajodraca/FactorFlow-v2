@@ -1,0 +1,19 @@
+# Independent spec-drift subagent (general-purpose, agentId a8847c38a587ac194), cycle-2 FINAL round: judged cycle-2.patch
+# (diff_sha256 64a011995c213dbf4db173455ca3d1becaedd4abc3fb63959889b90bfcaf2a30, git diff 72aaf8116ebb8e43579db8a7d4d87811df3a5388
+# e27f9bb1d801761d883af73c78361800273e0b3d). The same agent judged tree faf4c600 first (DRIFT_DETECTED: false, Minor 1: the
+# __all__ test over-claimed TC-COMP-248; Minor 2: TC-COMP-251 (d) scans only the story's two files, per T011); round 1:
+# spec-drift-cycle-2-round1.txt (agent a2d34efe7293bab12).
+DRIFT_DETECTED: false
+
+What I checked
+- Hash: the patch file and a fresh `git diff 72aaf81... e27f9bb1...` both give sha256 64a01199...af2a30. git write-tree gives e27f9bb1. The only unstaged edits are the story and tasks markdown, which I ignored.
+- Delta from faf4c600 (the tree I judged before): only tests/unit/test_massive_retry.py, +11/-4 lines. client.py is unchanged, so my earlier production-code findings stand: classify_for_governor keeps section 2.3's four rules in order, the urllib3 constant, the kept except BadResponse re-raise, the unchanged SDK construction and the T016 docstring paragraph.
+  - New row ProtocolError(<error_rate_limited.json text>) gives RETRYABLE (test_massive_retry.py:600-604). This matches section 2.3 and story Description rule 2 ("any other non-BadResponse exception is RETRYABLE"), and first-match-wins puts rule 2 before rule 3. Rule 3 stays reserved for a BadResponse (DAC-E8-2). It builds no BadResponse for a 429, so DAC-E8-S3-6's "only row that builds a BadResponse for a 429" still holds. Its grouping comment (:568-571) marks it implementation-level, beyond the plan.
+  - The __all__ test (:620-621) is now labelled implementation-level, pinning T014, not TC-COMP-248. This resolves my Minor 1.
+- Whole cycle against the base 52ecfbd: the story touches only client.py, test_massive_retry.py and test_massive_client_governor_integration.py. test_massive_redirects.py, uv.lock and pyproject.toml have no diff (DEC-0042; no package added, SEC-DEP-001).
+- TC-COMP-243 to 249 and 251: 243-247 run on real transport with production settings, from_massive_settings and one FakeClock as both monotonic and now (DAC-E8-20); 248 has all five specified rows, with the 429 text built from urllib3's constant; 249 adds only marker lines, the three function bodies unchanged (DAC-E8-S3-7); 251 checks with ast. TC-INT-025 and TC-INT-026 markers stay bare. The CAP-003 TC-COMP-NNN prefix is justified, because CAP-001 uses bare TC-COMP-243/244/249/250 in tests/integration/test_run_cancel.py and tests/unit/test_api_errors.py, and S1 already used the prefix in this file.
+- Ran pytest on test_massive_retry.py, test_massive_redirects.py and test_massive_client_governor_integration.py: 46 passed, the module imported from this worktree's src.
+
+Findings: no drift.
+- Minor 1: resolved.
+- Minor 2, test_massive_retry.py (TC-COMP-251 clause (d)): it scans only the story's two test files, where TC-COMP-251 step 3 says "every test". The narrowing comes from plan T011, not this cycle, so it is not drift. Carried forward, non-blocking; worth widening in the next revision of the test spec or the plan.

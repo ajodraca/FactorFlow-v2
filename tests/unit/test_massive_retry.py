@@ -1,39 +1,55 @@
 """`MassiveClient` retry behaviour through the real `RateLimitGovernor`.
 
-Component design: `component-design-massive-client.md` section 7, test
-table rows "429 is not an attempt", "Timeout retries to the limit" and
-"A 429 without Retry-After is still throttling". `RESTClient` is patched
-and constructed with `retries=0`, so the governor alone owns retry and the
-SDK call count equals the provider requests sent.
+Component design: CAP-001 `component-design-massive-client.md` section 7,
+row "Timeout retries to the limit", and CAP-003 massive-client section 7.
 
-CAP-003 adds rows that run through the real SDK and urllib3 path instead
-(CAP-003 massive-client section 7, DAC-E8-20): a real `MassiveClient` with
-production `MassiveSettings` at 60 requests per minute and every timing value
-at its default, the governor built from those settings with one `FakeClock`
-passed as both `monotonic` and `now` and a `FakeSleeper` on it, and the
-socket-free harness of `massive_transport_fakes`, which replaces only
-`HTTPConnectionPool._make_request`. Request counts come from
-`RecordingMakeRequest`, never from a stored `attempts` value: "A real 403
-plan refusal is sent once" (CAP-003 TC-COMP-230) and "An unrecognised 4xx
-refusal is retried to the limit" (CAP-003 TC-COMP-231).
+The `429` rows run the real SDK and urllib3 path (CAP-003 massive-client
+section 7, DAC-E8-20): a real `MassiveClient` with production
+`MassiveSettings` at 60 requests per minute and every timing value at its
+default, the governor built from those settings with one `FakeClock` passed
+as both `monotonic` and `now` and a `FakeSleeper` on it, and the socket-free
+harness of `tests/unit/massive_transport_fakes.py`, which replaces only
+`HTTPConnectionPool._make_request`. Under the locked SDK built with
+`retries=0`, a real `429` reaches the governor as urllib3's `MaxRetryError`,
+never as a `BadResponse`, so no row patches `RESTClient` to raise one for a
+`429`. The `403`, refused-redirect and `503` rows use the same harness.
+Request counts come from `RecordingMakeRequest`, never from a stored
+`attempts` value.
+
+Only the delivered TC-INT-026 row still patches `RESTClient`, constructed
+with `retries=0`, so the governor alone owns retry and the SDK call count
+equals the provider requests sent.
 """
 
+import ast
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from massive.exceptions import BadResponse
-from urllib3.exceptions import ReadTimeoutError
+from urllib3.exceptions import (
+    MaxRetryError,
+    NewConnectionError,
+    ProtocolError,
+    ReadTimeoutError,
+    ResponseError,
+)
 
 from factorflow.config.settings import MassiveSettings
-from factorflow.ingestion.massive import MassiveError, ProviderNotEntitled, compose_failure_reason
+from factorflow.ingestion.massive import (
+    MassiveError,
+    ProviderNotEntitled,
+    ProviderRateLimited,
+    compose_failure_reason,
+)
+from factorflow.ingestion.massive import client as massive_client
 from factorflow.ingestion.massive.client import MassiveClient
-from factorflow.ingestion.massive.errors import ProviderUnavailable
+from factorflow.ingestion.massive.errors import InstrumentNotFound, ProviderUnavailable
 from factorflow.ingestion.massive.models import TickerReference
-from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
+from factorflow.ingestion.rate_limit import GovernorSettings, Outcome, RateLimitGovernor
 from tests.unit.governor_fakes import FakeClock, FakeSleeper, SequenceJitter
 from tests.unit.massive_transport_fakes import (
     FakeAnswer,
@@ -42,8 +58,10 @@ from tests.unit.massive_transport_fakes import (
     forbid_sockets,
     generated_test_key,
     json_answer,
+    redirect_answer,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
 
@@ -75,37 +93,8 @@ def _governor() -> RateLimitGovernor:
     )
 
 
-class _FakeResponse:
-    def __init__(self, payload: dict, status: int = 200) -> None:
-        self.status = status
-        self.data = json.dumps(payload).encode()
-
-
 def _envelope(results: object) -> dict:
     return {"request_id": "req_ok_001", "results": results}
-
-
-# Implements TC-INT-025
-def test_rate_limited_responses_are_paced_without_consuming_attempts() -> None:
-    """429 is not an attempt (section 7, 5.13): four throttled responses
-    are paced and the fifth send succeeds, although `max_attempts` is 3."""
-    rate_limited = (FIXTURES / "error_rate_limited.json").read_text()
-    with patch("factorflow.ingestion.massive.client.RESTClient") as rest_client_cls:
-        instance = rest_client_cls.return_value
-        instance.get_ticker_details.side_effect = [
-            BadResponse(rate_limited),
-            BadResponse(rate_limited),
-            BadResponse(rate_limited),
-            BadResponse(rate_limited),
-            _FakeResponse(_envelope(_load("reference_active.json"))),
-        ]
-        client = MassiveClient(settings=_settings(), governor=_governor())
-
-        reference = client.fetch_reference("AAPL")
-
-    assert isinstance(reference, TickerReference)
-    assert reference.cik == "0000320193"
-    assert instance.get_ticker_details.call_count == 5
 
 
 @pytest.mark.parametrize(
@@ -122,6 +111,7 @@ def test_rate_limited_responses_are_paced_without_consuming_attempts() -> None:
     ],
 )
 # Implements TC-INT-026
+# Implements CAP-003 TC-COMP-249
 def test_timeouts_and_server_errors_retry_to_the_attempt_limit(failure: Exception) -> None:
     """Timeout retries to the limit (section 7, 5.13): a timeout or an
     unrecognised server error is retried up to `max_attempts`, then
@@ -142,6 +132,10 @@ def test_timeouts_and_server_errors_retry_to_the_attempt_limit(failure: Exceptio
 _CLOCK_START = 1_800_000_000.0
 _BALANCE_SHEETS = "/stocks/financials/v1/balance-sheets"
 _PLAN_REFUSAL_TEXT = "You are not entitled to this data. Please upgrade your plan"
+_REFERENCE_AAPL = "/v3/reference/tickers/AAPL"
+_DAILY_BARS_AAPL = "/v2/aggs/ticker/AAPL"
+_CONFIGURED_HOST = "api.massive.com"
+_REDIRECT_HOST = "198.51.100.7"
 
 
 def _production_settings(monkeypatch: pytest.MonkeyPatch) -> MassiveSettings:
@@ -162,17 +156,20 @@ def _production_settings(monkeypatch: pytest.MonkeyPatch) -> MassiveSettings:
 
 def _real_transport_client(
     settings: MassiveSettings,
+    jitter: Sequence[float] = (0.0,),
 ) -> tuple[MassiveClient, FakeClock, FakeSleeper]:
     """A `MassiveClient` built as CAP-001 section 2.2b builds it, with the
     governor from production settings and one `FakeClock` as both
-    `monotonic` and `now`, so every sleep advances both clocks together."""
+    `monotonic` and `now`, so every sleep advances both clocks together.
+    `jitter` feeds `SequenceJitter`; every row but the jitter row keeps
+    `[0.0]`."""
     clock = FakeClock(_CLOCK_START)
     sleeper = FakeSleeper(clock)
     governor = RateLimitGovernor(
         GovernorSettings.from_massive_settings(settings),
         monotonic=clock,
         sleep=sleeper,
-        jitter=SequenceJitter([0.0]),
+        jitter=SequenceJitter(jitter),
         now=clock,
     )
     return MassiveClient(settings=settings, governor=governor), clock, sleeper
@@ -188,6 +185,30 @@ def _answer_balance_sheets_with(
         if request.path.split("?", 1)[0] == _BALANCE_SHEETS:
             return answer
         return json_answer({"status": "OK", "request_id": "unexpected", "results": []})
+
+    return responder
+
+
+def _answer_429(
+    path_prefix: str = "/", *, then_after: int | None = None, then: FakeAnswer | None = None
+) -> Callable[[RecordedRequest], FakeAnswer]:
+    """Answer every request whose path starts with `path_prefix` with a real
+    `429` carrying the body of `error_rate_limited.json`; once `then_after`
+    such requests have been answered, answer `then` instead. The recorded
+    path carries the query string (`/v3/reference/tickers/AAPL?ticker=AAPL`),
+    hence the prefix match. Any other path gets an empty success, so a read
+    that went elsewhere would show in the recorded paths."""
+    throttled = json_answer(_load("error_rate_limited.json"), status=429)
+    matched = 0
+
+    def responder(request: RecordedRequest) -> FakeAnswer:
+        nonlocal matched
+        if not request.path.startswith(path_prefix):
+            return json_answer({"status": "OK", "request_id": "unexpected", "results": []})
+        matched += 1
+        if then is not None and then_after is not None and matched > then_after:
+            return then
+        return throttled
 
     return responder
 
@@ -219,6 +240,7 @@ def test_the_real_transport_clock_starts_on_a_minute_boundary() -> None:
     ],
 )
 # Implements CAP-003 TC-COMP-230
+# Implements CAP-003 TC-COMP-249
 def test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing(
     monkeypatch: pytest.MonkeyPatch, body: dict[str, str]
 ) -> None:
@@ -272,6 +294,7 @@ def test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing(
     ],
 )
 # Implements CAP-003 TC-COMP-231
+# Implements CAP-003 TC-COMP-249
 def test_an_unrecognised_403_is_still_retried_to_the_limit_as_unavailable(
     monkeypatch: pytest.MonkeyPatch, answer: FakeAnswer
 ) -> None:
@@ -301,3 +324,439 @@ def test_an_unrecognised_403_is_still_retried_to_the_limit_as_unavailable(
     assert reason.startswith(
         "[unavailable] symbol=KO data_type=fundamentals request_id=unavailable: "
     )
+
+
+# Implements TC-INT-025
+# Implements CAP-003 TC-COMP-243
+def test_rate_limited_responses_are_paced_without_consuming_attempts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CAP-003 TC-COMP-243 / DAC-E8-S3-1, replacing CAP-001's patched
+    TC-INT-025 row: through the real SDK and urllib3 path, five real `429`s
+    and then a `200` are waited out at the minute boundary and the reference
+    is returned, although five exceeds `max_attempts` (3). Five waits of
+    exactly 60.0 s: at jitter 0.0 a backoff delay would be 0.0, so the
+    literal list also proves none of them was a backoff."""
+    settings = _production_settings(monkeypatch)
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(
+        _answer_429(
+            _REFERENCE_AAPL,
+            then_after=5,
+            then=json_answer(_envelope(_load("reference_active.json"))),
+        )
+    ).install(monkeypatch)
+    client, _clock, sleeper = _real_transport_client(settings)
+
+    reference = client.fetch_reference("AAPL")
+
+    assert isinstance(reference, TickerReference)
+    assert reference.cik == "0000320193"
+    assert len(transport.requests) == 6
+    assert all(r.path.startswith(_REFERENCE_AAPL) for r in transport.requests)
+    assert sleeper.calls == [60.0, 60.0, 60.0, 60.0, 60.0]
+    assert guard.fired == []
+
+
+# Implements CAP-003 TC-COMP-244
+def test_a_persistent_real_429_spends_exactly_the_300_s_budget_and_raises_rate_limited(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CAP-003 TC-COMP-244 / DAC-E8-S3-2: every request answered `429`, jitter
+    0.0. After `start_instrument()`, five 60.0 s boundary waits fit the 300 s
+    budget; the sixth `429` would take it to 360 s, so the read raises
+    `ProviderRateLimited` after six requests and never sleeps past 300 s."""
+    settings = _production_settings(monkeypatch)
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(_answer_429()).install(monkeypatch)
+    client, _clock, sleeper = _real_transport_client(settings)
+
+    client.start_instrument()
+    with pytest.raises(ProviderRateLimited) as raised:
+        client.fetch_reference("AAPL")
+
+    err = raised.value
+    assert isinstance(err, ProviderUnavailable)
+    assert err.provider_request_id is None
+    assert isinstance(err.__cause__, MaxRetryError)
+    assert len(transport.requests) == 6
+    assert sleeper.calls == [60.0] * 5
+    assert sum(sleeper.calls) == 300.0
+    reason = compose_failure_reason(
+        err, symbol="AAPL", data_type="reference", redact=lambda text: text
+    )
+    assert reason.startswith(
+        "[rate_limited] symbol=AAPL data_type=reference request_id=unavailable: "
+    )
+    assert guard.fired == []
+
+
+# Implements CAP-003 TC-COMP-245
+def test_a_spent_budget_fails_the_stocks_next_read_after_one_request_until_the_next_stock(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CAP-003 TC-COMP-245 / DAC-E8-S3-3: the budget is the stock's, across its
+    requests. TC-COMP-244's scenario is repeated on one client, governor and
+    clock (no state is shared between tests). Without `start_instrument()`,
+    the next read fails after exactly one request and no sleep; after it, a
+    read waits again. The clock then sits at `_CLOCK_START + 300.0`, a
+    multiple of 60, so each new wait is exactly 60.0 s."""
+    settings = _production_settings(monkeypatch)
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(_answer_429()).install(monkeypatch)
+    client, clock, sleeper = _real_transport_client(settings)
+    client.start_instrument()
+    with pytest.raises(ProviderRateLimited):
+        client.fetch_reference("AAPL")
+    assert len(transport.requests) == 6
+    assert sleeper.calls == [60.0] * 5
+    assert clock() == _CLOCK_START + 300.0
+
+    with pytest.raises(ProviderRateLimited):
+        client.fetch_daily_bars("AAPL", date(2024, 1, 1), date(2024, 1, 31))
+
+    assert len(transport.requests) == 7
+    assert transport.requests[6].path.startswith(_DAILY_BARS_AAPL)
+    assert len(sleeper.calls) == 5
+
+    client.start_instrument()
+    with pytest.raises(ProviderRateLimited):
+        client.fetch_reference("AAPL")
+
+    assert sleeper.calls[5:] == [60.0] * 5
+    assert len(transport.requests) == 13
+    assert all(r.path.startswith(_REFERENCE_AAPL) for r in transport.requests[7:])
+    assert guard.fired == []
+
+
+# Implements CAP-003 TC-COMP-246
+def test_jitter_never_takes_the_real_transport_budget_past_300_s(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CAP-003 TC-COMP-246 / DAC-E8-S3-4: every request `429`, jitter 0.999, so
+    each boundary wait is nearly doubled. The recorded sleeps total at most
+    300 s, and that total plus the next delay, which the governor declined to
+    sleep, exceeds 300 s. The declined delay is computed here from the clock
+    with the boundary-wait formula, never through the governor."""
+    settings = _production_settings(monkeypatch)
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(_answer_429()).install(monkeypatch)
+    client, clock, sleeper = _real_transport_client(settings, jitter=[0.999])
+
+    client.start_instrument()
+    with pytest.raises(ProviderRateLimited):
+        client.fetch_reference("AAPL")
+
+    boundary = 60.0 - (clock() % 60.0)
+    next_delay = boundary + 0.999 * boundary
+    assert sum(sleeper.calls) <= 300.0
+    assert sum(sleeper.calls) + next_delay > 300.0
+    assert len(transport.requests) == len(sleeper.calls) + 1
+    assert guard.fired == []
+
+
+@pytest.mark.parametrize(
+    "responder",
+    [
+        pytest.param(redirect_answer, id="refused-redirect"),
+        pytest.param(
+            lambda _request: json_answer(
+                {"status": "ERROR", "request_id": "r503", "error": "Service Unavailable"},
+                status=503,
+            ),
+            id="forcelisted-503",
+        ),
+    ],
+)
+# Implements CAP-003 TC-COMP-247
+def test_a_refused_redirect_and_a_forcelisted_503_stay_retryable_and_reach_no_other_host(
+    monkeypatch: pytest.MonkeyPatch, responder: Callable[[RecordedRequest], FakeAnswer]
+) -> None:
+    """CAP-003 TC-COMP-247 / DAC-E8-S3-5: the `429` rule did not widen. A `302`
+    to another host (refused, DEC-0042) and a forcelisted `503` each reach
+    the governor as a `MaxRetryError` that stays `RETRYABLE`: three requests,
+    all to the configured host, two backoff delays of 0.0 at jitter 0.0 and
+    never a 60.0 s boundary wait, then a `ProviderUnavailable` that is not a
+    `ProviderRateLimited`. The delivered rows in `test_massive_redirects.py`
+    stay the security proof."""
+    settings = _production_settings(monkeypatch)
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(responder).install(monkeypatch)
+    client, _clock, sleeper = _real_transport_client(settings)
+
+    with pytest.raises(ProviderUnavailable) as raised:
+        client.fetch_reference("AAPL")
+
+    err = raised.value
+    assert not isinstance(err, ProviderRateLimited)
+    assert isinstance(err.__cause__, MaxRetryError)
+    assert len(transport.requests) == 3
+    assert [r.host for r in transport.requests] == [_CONFIGURED_HOST] * 3
+    assert all(r.host != _REDIRECT_HOST for r in transport.requests)
+    assert sleeper.calls == [0.0, 0.0]
+    assert guard.fired == []
+
+
+def _not_a_max_retry_error_with_a_429_reason() -> ProtocolError:
+    """An error that is not a `MaxRetryError` but carries a `reason` equal to
+    the `429` `ResponseError`: rule 1 is for a `MaxRetryError` only."""
+    error = ProtocolError("Connection aborted.")
+    error.reason = ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429))  # type: ignore[attr-defined]
+    return error
+
+
+@pytest.mark.parametrize(
+    ("exc", "expected"),
+    [
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+            ),
+            Outcome.THROTTLED,
+            id="429-max-retry-is-throttled",
+        ),
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+            ),
+            Outcome.RETRYABLE,
+            id="503-max-retry-is-retryable",
+        ),
+        pytest.param(
+            MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+            Outcome.RETRYABLE,
+            id="refused-redirect-is-retryable",
+        ),
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                NewConnectionError(None, "Failed to establish a new connection"),
+            ),
+            Outcome.RETRYABLE,
+            id="connection-error-is-retryable",
+        ),
+        pytest.param(
+            BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+            Outcome.THROTTLED,
+            id="rate-limited-body-is-throttled",
+        ),
+        # Implementation-level rows (T012), beyond the case's steps.
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+            ),
+            Outcome.RETRYABLE,
+            id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+        ),
+        pytest.param(
+            BadResponse((FIXTURES / "error_not_found.json").read_text()),
+            Outcome.FATAL,
+            id="not-found-body-is-fatal",
+        ),
+        pytest.param(
+            BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+            Outcome.RETRYABLE,
+            id="unknown-shape-body-is-retryable",
+        ),
+        # Implementation-level rows added after the cycle's mutation runs, beyond
+        # the plan: every other forcelisted status design section 2.3 rule 2
+        # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+        # winning over rule 3 for an error that is not a `BadResponse`.
+        *[
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                ),
+                Outcome.RETRYABLE,
+                id=f"{status}-max-retry-is-retryable",
+            )
+            for status in (413, 499, 500, 502, 504)
+        ],
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError(
+                    ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                ),
+            ),
+            Outcome.RETRYABLE,
+            id="a-reason-only-containing-the-429-text-is-retryable",
+        ),
+        pytest.param(
+            _not_a_max_retry_error_with_a_429_reason(),
+            Outcome.RETRYABLE,
+            id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+        ),
+        pytest.param(
+            ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+            Outcome.RETRYABLE,
+            id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+        ),
+    ],
+)
+# Implements CAP-003 TC-COMP-248
+def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+    exc: BaseException, expected: Outcome
+) -> None:
+    """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+    nothing patched. The `429` text is built here from urllib3's own
+    `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+    module's constant. The `BadResponse` rate-limited row is the only one
+    building a `BadResponse` for a `429`: it stands for an SDK without `429`
+    in its forcelist, not for production."""
+    assert massive_client.classify_for_governor(exc) is expected
+
+
+# Implementation-level row beyond TC-COMP-248's steps (added after the cycle's
+# first mutation run): pins T014's `__all__` entry.
+def test_classify_for_governor_is_part_of_the_client_modules_interface() -> None:
+    """massive-client CAP-003 section 11 lists `classify_for_governor(exc)` as
+    an in-process interface; T014 declares it in the module's `__all__`."""
+    assert "classify_for_governor" in massive_client.__all__
+
+
+# Implementation-level row beyond TC-COMP-249's steps (added after the cycle's
+# first mutation run): pins T015's kept FATAL re-raise.
+def test_a_fatal_bad_response_is_raised_typed_from_the_one_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The `except BadResponse` re-raise `_through_governor` keeps (massive-client
+    CAP-003 section 2.3): through the real path, a `404` (not forcelisted)
+    reaches the governor as the SDK's `BadResponse`, `classify_for_governor`
+    makes it `FATAL`, and the client raises `InstrumentNotFound` built from
+    that one response, with its `request_id`, from the SDK's error, after one
+    request and no wait."""
+    settings = _production_settings(monkeypatch)
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest(
+        lambda _request: json_answer(_load("error_not_found.json"), status=404)
+    ).install(monkeypatch)
+    client, _clock, sleeper = _real_transport_client(settings)
+
+    with pytest.raises(MassiveError) as raised:
+        client.fetch_reference("AAPL")
+
+    err = raised.value
+    assert type(err) is InstrumentNotFound
+    assert err.provider_request_id == "req_notfound_001"
+    assert isinstance(err.__cause__, BadResponse)
+    assert len(transport.requests) == 1
+    assert sleeper.calls == []
+    assert guard.fired == []
+
+
+def _calls_patch_on_rest_client(function: ast.AST) -> bool:
+    for node in ast.walk(function):
+        if not isinstance(node, ast.Call) or not node.args:
+            continue
+        func = node.func
+        name = (
+            func.id
+            if isinstance(func, ast.Name)
+            else func.attr
+            if isinstance(func, ast.Attribute)
+            else None
+        )
+        target = node.args[0]
+        if (
+            name == "patch"
+            and isinstance(target, ast.Constant)
+            and isinstance(target.value, str)
+            and target.value.endswith(".RESTClient")
+        ):
+            return True
+    return False
+
+
+def _names_a_429(function: ast.AST) -> bool:
+    for node in ast.walk(function):
+        if not isinstance(node, ast.Constant):
+            continue
+        if isinstance(node.value, str) and (
+            "error_rate_limited" in node.value or "429" in node.value
+        ):
+            return True
+        if isinstance(node.value, int) and node.value == 429:
+            return True
+    return False
+
+
+# Implements CAP-003 TC-COMP-251
+def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+    """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+    over test files (so this test's own constants cannot match its rules):
+    (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+    `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+    urllib3's constant, never a hand-typed copy, which no behavioural test can
+    tell apart at urllib3 2.7.0; (c) no test function that patches
+    `RESTClient` names a `429` or the rate-limited fixture; (d) neither of
+    this story's test files reads a recorded `attempts` value. The lock-file
+    clause is checked by the story's validation, not here."""
+    client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+    client_tree = ast.parse(client_source.read_text())
+
+    imported = {
+        alias.name
+        for node in ast.walk(client_tree)
+        if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+        for alias in node.names
+    }
+    assert {"MaxRetryError", "ResponseError"} <= imported
+
+    assignments = [
+        node
+        for node in client_tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+            for target in node.targets
+        )
+    ]
+    assert len(assignments) == 1
+    value = assignments[0].value
+    assert isinstance(value, ast.Call)
+    assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+    assert value.args == []
+    assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+    string_constants = {
+        node.value
+        for node in ast.walk(client_tree)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    }
+    assert "too many 429 error responses" not in string_constants
+
+    offenders = []
+    for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+        tree = ast.parse(path.read_text(), filename=str(path))
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and _calls_patch_on_rest_client(node)
+                and _names_a_429(node)
+            ):
+                offenders.append(f"{path.relative_to(REPO_ROOT)}::{node.name}")
+    assert offenders == []
+
+    for name in ("test_massive_retry.py", "test_massive_client_governor_integration.py"):
+        tree = ast.parse((REPO_ROOT / "tests" / "unit" / name).read_text())
+        reads = [
+            node.lineno
+            for node in ast.walk(tree)
+            if (isinstance(node, ast.Attribute) and node.attr == "attempts")
+            or (
+                isinstance(node, ast.Subscript)
+                and isinstance(node.slice, ast.Constant)
+                and node.slice.value == "attempts"
+            )
+        ]
+        assert reads == [], name

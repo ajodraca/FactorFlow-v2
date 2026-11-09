@@ -1,0 +1,114 @@
+{
+  "command": "/Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python -m pytest -o pythonpath=src -p no:cacheprovider -q tests/unit/test_massive_retry.py tests/unit/test_massive_client_governor_integration.py tests/unit/test_massive_redirects.py tests/unit/test_massive_error_classification.py",
+  "repo_head": "52ecfbd0f4cc51cbfaac0899158811a11dce7d41",
+  "tree_patch_sha256": "2db02ed7e4d861ec7e36b521f81536aab3f5e02c319564994964dc2474b01a4e",
+  "mutants_sha256": "843a78fb8c5cad46a41539a054c31cafa8eaeb3b5ea925f1f6771b40750ab5c4",
+  "schema": 1,
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutants-cycle-1.json",
+  "jobs": 4,
+  "planned": 5,
+  "started": "2026-11-09T01:44:41Z",
+  "baselines": [
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 1.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/baseline-w2.log",
+      "log_sha256": "63fb1901716844ad096711d8b245b0be5bd2cbead474f44debc62921fd8d44d3"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 1.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/baseline-w1.log",
+      "log_sha256": "63fb1901716844ad096711d8b245b0be5bd2cbead474f44debc62921fd8d44d3"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 1.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/baseline-w0.log",
+      "log_sha256": "3a7c9d8101a3253826bcb838a6cb1218c6b7d1dda8162956d4887d236da72928"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 1.6,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/baseline-w3.log",
+      "log_sha256": "63fb1901716844ad096711d8b245b0be5bd2cbead474f44debc62921fd8d44d3"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/ingestion/massive/client.py:manual:start-instrument-body-pass",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/client.py",
+      "old": "        self._governor.start_throttle_budget()\n",
+      "new": "        pass\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.1,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_client.py_manual_start-instrument-body-pass.log",
+      "log_sha256": "a81363f056c17eee65eba6c0d7a6b7786a81ba6764a7be3955fea97e8819025c"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/client.py:manual:start-instrument-starts-twice",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/client.py",
+      "old": "        self._governor.start_throttle_budget()\n",
+      "new": "        self._governor.start_throttle_budget()\n        self._governor.start_throttle_budget()\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.2,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_client.py_manual_start-instrument-starts-twice.log",
+      "log_sha256": "43424a9bd5746636023665143777bdffd2d5df8397844abf0ff32e99dc8e78b1"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/client.py:manual:start-instrument-asks-for-a-permit",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/client.py",
+      "old": "        self._governor.start_throttle_budget()\n",
+      "new": "        self._governor.start_throttle_budget()\n        self._governor.execute(lambda: None, lambda exc: Outcome.RETRYABLE)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.1,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_client.py_manual_start-instrument-asks-for-a-permit.log",
+      "log_sha256": "392e9a4df1f0a153aca9969c2d4fe8c2d8264d1a1dfd49bb8e75ca73d45bb370"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/client.py:manual:start-instrument-sends-a-request",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/client.py",
+      "old": "        self._governor.start_throttle_budget()\n",
+      "new": "        self._governor.start_throttle_budget()\n        self._rest_client.get_ticker_details(\"AAPL\", raw=True)\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.2,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_client.py_manual_start-instrument-sends-a-request.log",
+      "log_sha256": "8ccc6ed616ddeb80687dab175a4256cbec28eade4028607e3943139f3af84f83"
+    },
+    {
+      "id": "src/factorflow/ingestion/massive/client.py:manual:start-instrument-calls-another-governor-method",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "src/factorflow/ingestion/massive/client.py",
+      "old": "        self._governor.start_throttle_budget()\n",
+      "new": "        self._governor.start_throttle_budget()\n        self._governor._acquire_permit()\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.0,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s3/mutation-cycle-1-results-logs/src_factorflow_ingestion_massive_client.py_manual_start-instrument-calls-another-governor-method.log",
+      "log_sha256": "5e00bd4f23fe7c758fd4d8e14a6906980ef5a2a8113048543169d6466cba6a64"
+    }
+  ],
+  "finished": "2026-11-09T01:44:44Z"
+}

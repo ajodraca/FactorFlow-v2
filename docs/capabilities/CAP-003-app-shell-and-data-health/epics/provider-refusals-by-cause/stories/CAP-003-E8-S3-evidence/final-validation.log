@@ -1,0 +1,49 @@
+# T016 final validation on the final bytes (code tree e8f403186d7628fec7ec79b6b8fd0f7564ea6f11, base 52ecfbd)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests   (full suite, postgres tests in testcontainers, outside the sandbox)
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2686 passed, 2 warnings in 457.70s (0:07:37)
+
+# (both warnings pre-existing: StarletteDeprecationWarning from fastapi/testclient.py and the anyio BlockingPortal alias)
+# $ uv build --out-dir <scratch> --offline   (src unchanged since; cycle-3 is test-only)
+Successfully built <scratch>/dist/factorflow-0.2.0.tar.gz
+Successfully built <scratch>/dist/factorflow-0.2.0-py3-none-any.whl
+# $ ruff check . ; ruff format --check . ; mypy src
+All checks passed!
+285 files already formatted
+Success: no issues found in 61 source files
+# focused suite
+87 passed in 1.84s
+# Story-specific validation
+# $ git diff --cached --exit-code -- uv.lock pyproject.toml   (DAC-E8-S3-9, no package added)
+# exit 0
+# $ grep -n urllib3.exceptions src/factorflow/ingestion/massive/client.py
+43:from urllib3.exceptions import MaxRetryError, ResponseError
+# client.py hunks against the base (none inside MassiveClient.__init__'s RESTClient(...) block):
+@@ -19,6 +19,14 @@ classified by the typed error taxonomy (CAP-001-E3-S3). This module owns
+@@ -32,6 +40,7 @@ from massive import RESTClient
+@@ -45,10 +54,32 @@ from factorflow.ingestion.massive.errors import (
+@@ -66,6 +97,13 @@ class MassiveClient:
+@@ -286,17 +324,9 @@ class MassiveClient:
+25:the SDK's `retries=0`, a provider `429` arrives as urllib3's `MaxRetryError`
+92:            base=settings.base_url,
+93:            retries=0,  # the governor owns retry alone (section 2.2b)
+96:            pagination=False,  # pages are followed under governor permits
+97:            trace=False,  # request headers carry the credential
+# $ git diff --exit-code 52ecfbd -- tests/unit/test_massive_redirects.py   (DAC-E8-S3-5)
+# exit 0
+# DAC-E8-S3-7: the only added lines at TC-COMP-230/231 and TC-INT-026 are the markers
+@@ -124,0 +114 @@ def test_rate_limited_responses_are_paced_without_consuming_attempts() -> None:
++# Implements CAP-003 TC-COMP-249
+--
+@@ -221,0 +243 @@ def test_the_real_transport_clock_starts_on_a_minute_boundary() -> None:
++# Implements CAP-003 TC-COMP-249
+@@ -274,0 +297 @@ def test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing(
++# Implements CAP-003 TC-COMP-249
+# Scope: $ git diff --cached --name-only 52ecfbd
+src/factorflow/ingestion/massive/client.py
+tests/unit/test_massive_client_governor_integration.py
+tests/unit/test_massive_client_interface.py
+tests/unit/test_massive_retry.py
+# (test_massive_client_interface.py is cycle-3's recorded deviation)

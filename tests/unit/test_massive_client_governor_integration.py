@@ -15,7 +15,7 @@ originally were) fails here even though the SDK-level tests stay green.
 import json
 from datetime import date
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -23,6 +23,11 @@ from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive.client import MassiveClient
 from factorflow.ingestion.massive.errors import InstrumentNotFound
 from factorflow.ingestion.rate_limit import GovernorSettings, RateLimitGovernor
+from tests.unit.massive_transport_fakes import (
+    RecordingMakeRequest,
+    forbid_sockets,
+    generated_test_key,
+)
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "massive"
 
@@ -205,3 +210,31 @@ def test_a_first_page_provider_failure_surfaces_as_the_typed_error(call, sdk_met
 
         with pytest.raises(InstrumentNotFound):
             call(client)
+
+
+# Implements CAP-003 TC-COMP-250
+def test_start_instrument_starts_the_governor_budget_once_and_sends_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CAP-003 TC-COMP-250 / DAC-E8-S3-8: `start_instrument()` is the stock
+    boundary (massive-client CAP-003 section 2.6). On a real `MassiveClient`
+    built from production settings with a spy governor, it starts the
+    governor's throttle budget exactly once, asks the governor for no permit
+    and sends no request through the socket-free transport."""
+    monkeypatch.delenv("FACTORFLOW_MASSIVE_BASE_URL", raising=False)
+    monkeypatch.delenv("FACTORFLOW_MASSIVE_MAX_ATTEMPTS", raising=False)
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_API_KEY", generated_test_key())
+    monkeypatch.setenv("FACTORFLOW_MASSIVE_REQUESTS_PER_MINUTE", "60")
+    settings = MassiveSettings(_env_file=None)  # type: ignore[call-arg]
+    guard = forbid_sockets(monkeypatch)
+    transport = RecordingMakeRequest().install(monkeypatch)
+    governor = MagicMock(spec=RateLimitGovernor)
+    client = MassiveClient(settings=settings, governor=governor)
+
+    client.start_instrument()
+
+    governor.start_throttle_budget.assert_called_once_with()
+    assert governor.execute.call_count == 0
+    assert governor.method_calls == [call.start_throttle_budget()]
+    assert transport.requests == []
+    assert guard.fired == []

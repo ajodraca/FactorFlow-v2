@@ -19,6 +19,14 @@ classified by the typed error taxonomy (CAP-001-E3-S3). This module owns
 neither pacing nor retry policy; it only adapts the taxonomy's types onto
 the governor's `Outcome` enum, the seam `component-design-rate-limit-governor.md`
 section 2.3 assigns to this story.
+
+CAP-003-E8-S3 (CAP-003 `component-design-massive-client.md` sections 2.3 and
+2.6) lifts that adaptation to the module-level `classify_for_governor`. Under
+the SDK's `retries=0`, a provider `429` arrives as urllib3's `MaxRetryError`
+whose reason is the `429` `ResponseError`, never as a `BadResponse`; it is
+throttling, not a failed attempt. `MassiveClient.start_instrument()` is the
+stock boundary: it starts the governor's per-stock throttle wait budget and
+sends nothing.
 """
 
 from __future__ import annotations
@@ -32,6 +40,7 @@ from massive import RESTClient
 from massive.exceptions import BadResponse
 from pydantic import ValidationError
 from urllib3 import HTTPResponse
+from urllib3.exceptions import MaxRetryError, ResponseError
 
 from factorflow.config.settings import MassiveSettings
 from factorflow.ingestion.massive import models
@@ -45,9 +54,31 @@ from factorflow.ingestion.massive.errors import (
 from factorflow.ingestion.massive.paging import follow_pages
 from factorflow.ingestion.rate_limit import Outcome, RateLimitGovernor
 
-__all__ = ["MassiveClient"]
+__all__ = ["MassiveClient", "classify_for_governor"]
 
 T = TypeVar("T")
+
+# urllib3 2.7.0's own constant (`ResponseError.SPECIFIC_ERROR`), never a
+# hand-typed copy: a urllib3 release that rewords it changes both sides of
+# the comparison together (CAP-003 system design assumption 10).
+_THROTTLED_RETRY_REASON = ResponseError.SPECIFIC_ERROR.format(status_code=429)
+
+
+def classify_for_governor(exc: BaseException) -> Outcome:
+    """The `classify` callable every governed request passes to
+    `RateLimitGovernor.execute` (CAP-003 system design §3.6 note 2)."""
+    if (
+        isinstance(exc, MaxRetryError)
+        and isinstance(exc.reason, ResponseError)
+        and str(exc.reason) == _THROTTLED_RETRY_REASON
+    ):
+        return Outcome.THROTTLED
+    if not isinstance(exc, BadResponse):
+        return Outcome.RETRYABLE
+    if is_rate_limited_body(str(exc)):
+        return Outcome.THROTTLED
+    error = classify_error_body(str(exc))
+    return Outcome.FATAL if is_fatal_for_governor(error) else Outcome.RETRYABLE
 
 
 class MassiveClient:
@@ -65,6 +96,13 @@ class MassiveClient:
             pagination=False,  # pages are followed under governor permits
             trace=False,  # request headers carry the credential
         )
+
+    def start_instrument(self) -> None:
+        """Begin a new stock: the governor's throttle wait budget is spent per
+        stock, across all of that stock's requests (CAP-003 system design §3.6
+        note 3). `acquisition-runner` calls this once per stock, at the
+        top-of-stock checkpoint."""
+        self._governor.start_throttle_budget()
 
     # -- fetch_reference (DAC-E3-S1-4) ------------------------------------
 
@@ -286,17 +324,9 @@ class MassiveClient:
         return self._decode(response)
 
     def _through_governor(self, send: Callable[[], HTTPResponse]) -> HTTPResponse:
-        def classify(exc: BaseException) -> Outcome:
-            if not isinstance(exc, BadResponse):
-                return Outcome.RETRYABLE
-            if is_rate_limited_body(str(exc)):
-                return Outcome.THROTTLED
-            error = classify_error_body(str(exc))
-            return Outcome.FATAL if is_fatal_for_governor(error) else Outcome.RETRYABLE
-
         try:
-            return self._governor.execute(send, classify)
-        except BadResponse as exc:
+            return self._governor.execute(send, classify_for_governor)
+        except BadResponse as exc:  # a FATAL re-raise: typed from the one response
             raise classify_error_body(str(exc)) from exc
 
     def _decode(self, response: HTTPResponse) -> dict[str, Any]:

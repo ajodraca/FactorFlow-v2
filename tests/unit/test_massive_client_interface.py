@@ -26,11 +26,15 @@ def test_exposes_exactly_the_four_named_read_operations() -> None:
         if not name.startswith("_")
     }
 
+    # CAP-003-E8-S3 adds the stock boundary `start_instrument()` (CAP-003
+    # massive-client sections 2.6 and 11), which reads nothing and sends
+    # nothing; the read operations are still exactly these four.
     assert public_methods == {
         "fetch_reference",
         "fetch_daily_bars",
         "fetch_financials",
         "fetch_corporate_actions",
+        "start_instrument",
     }
 
 

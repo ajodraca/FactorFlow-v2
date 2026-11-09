@@ -1,0 +1,21 @@
+# Independent code-review subagent (general-purpose, agentId ad905856596c8e723), cycle-2 ROUND 1 (superseded by
+# code-review-cycle-2.txt): judged the cycle-2 patch at index tree 1c5ff94e5d0dcd43fd1d129a20eb2db790590e15
+# (diff_sha256 7b6e3a0d022a7cc4e3ddebd78c59a7a27881c1e173dc792a8ae52593c822d635) and mutation-cycle-2-round1-results.json /
+# mutation-cycle-2-round2-results.json. Kept as a log; its non-blocking findings 1 and 2 were addressed before the final round.
+VERDICT: APPROVED
+
+What I checked (summary of the report)
+- Patch identity: git diff 72aaf81..1c5ff94 hashes to 7b6e3a0d..., the saved cycle-2.patch; only client.py and test_massive_retry.py change.
+- classify_for_governor, _THROTTLED_RETRY_REASON and _through_governor match massive-client section 2.3 line for line; rules in order; except BadResponse re-raise kept with the design's comment; classify_for_governor passed positionally; T016 docstring paragraph present, CAP-001 text unchanged.
+- Budget arithmetic against rate_limit.py: five 60.0 s waits fit 300 s, the sixth 429 raises after 6 requests; a spent budget fails the next read after 1 request; after start_instrument() each wait is exactly 60.0; T007 computes next_delay independently.
+- Plan constraints: only marker lines inside TC-COMP-230/231 and TC-INT-026; test_massive_redirects.py, uv.lock, pyproject.toml unchanged; SDK construction untouched; no test reads attempts; the 429 text built from ResponseError.SPECIFIC_ERROR.
+- Four failure modes avoided (symmetric comparison, wrong property, inferred declaration, self-contradiction).
+- Deviations accepted: CAP-003 marker prefix, kept test name, removed _FakeResponse, extra rows, _answer_429.
+- Focused suite 76 passed; ruff check, ruff format --check, mypy src clean. Round 1 23 killed / 6 survived; round 2 29/29 killed.
+- Own 12 mutants: 5 killed, 4 equivalent, 3 survived (finding 1).
+
+Findings
+1. NON-BLOCKING, tests/unit/test_massive_retry.py:527 (rule 1 at client.py:67). Rule 1 matching {429, 499}, {429, 500} or {429, 504} instead of equality survives; the direct rows sample only 503 and 413. Suggested: parametrise over every non-429 forcelisted status. -> ADDRESSED: rows for 413, 499, 500, 502, 504 added; rule-1-also-matches-<status> mutants killed.
+2. NON-BLOCKING, tests/unit/test_massive_retry.py:615. The 404 FATAL re-raise test's TC-COMP-249 marker overstates that case. -> ADDRESSED: relabelled implementation-level.
+3. NON-BLOCKING, evidence binding: tree_patch_sha256 included unstaged doc edits that changed since the run; src/tests bytes identical. -> The final round's results were rerun on the final bytes.
+4. NON-BLOCKING, tests/unit/test_massive_retry.py:500. `error.reason = ...  # type: ignore[attr-defined]`; cosmetic (setattr with a constant name trips ruff B010). Kept.

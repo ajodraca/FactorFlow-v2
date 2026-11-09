@@ -1,0 +1,44 @@
+# RED cycle-3: the full suite on the cycle-2 bytes (index tree e27f9bb1d801761d883af73c78361800273e0b3d), postgres tests included (testcontainers, outside the sandbox). CAP-001's delivered TC-COMP-195 interface test still expects exactly four public methods and fails on cycle-1's start_instrument().
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -q tests
+...................................................................F.... [ 67%]
+=================================== FAILURES ===================================
+_____________ test_exposes_exactly_the_four_named_read_operations ______________
+
+    def test_exposes_exactly_the_four_named_read_operations() -> None:
+        """DAC-E3-1: the client exposes one operation per data type, not a
+        generic `get(path)` that would push Massive's URL shapes onto the
+        runner (component design section 2.3)."""
+        public_methods = {
+            name
+            for name, _ in inspect.getmembers(MassiveClient, predicate=inspect.isfunction)
+            if not name.startswith("_")
+        }
+    
+>       assert public_methods == {
+            "fetch_reference",
+            "fetch_daily_bars",
+            "fetch_financials",
+            "fetch_corporate_actions",
+        }
+E       AssertionError: assert {'fetch_corpo...t_instrument'} == {'fetch_corpo...ch_reference'}
+E         
+E         Extra items in the left set:
+E         'start_instrument'
+E         Use -v to get more diff
+
+tests/unit/test_massive_client_interface.py:29: AssertionError
+=============================== warnings summary ===============================
+../../../../../../repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../../../../repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/starlette/testclient.py:53
+  /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/lib/python3.13/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_client_interface.py::test_exposes_exactly_the_four_named_read_operations
+1 failed, 2685 passed, 2 warnings in 439.21s (0:07:19)
+
+[exited with code 1]
