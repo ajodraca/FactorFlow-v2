@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/ee2ae1d3-f440-42d4-83b0-70a1f714a8f0/scratchpad/work/mutation-run-u2kq1wuf/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 4ms
+ ✓ src/components/token-literals.test.ts (30 tests) 91ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 283ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 340ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 352ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 335ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 425ms
+ ❯ src/components/ui/checkbox.test.tsx (7 tests | 1 failed) 204ms
+   × checkbox toggles on Space (DAC-E1-S2-1, AC-25) > draws no mark while unchecked 9ms
+     → expected SVGSVGElement{ …(2), [Symbol(impl)]: SVGSVGElementImpl{ …(33), …(2) } } to be null
+ ✓ src/components/ui/form.test.tsx (9 tests) 270ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 342ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 391ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/checkbox.test.tsx > checkbox toggles on Space (DAC-E1-S2-1, AC-25) > draws no mark while unchecked
+AssertionError: expected SVGSVGElement{ …(2), [Symbol(impl)]: SVGSVGElementImpl{ …(33), …(2) } } to be null
+
+- Expected: 
+null
+
++ Received: 
+<svg
+  aria-hidden="true"
+  class="lucide lucide-check h-4 w-4"
+  fill="none"
+  height="24"
+  stroke="currentColor"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2"
+  viewBox="0 0 24 24"
+  width="24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M20 6 9 17l-5-5"
+  />
+</svg>
+
+ ❯ src/components/ui/checkbox.test.tsx:93:38
+     91|     const { box } = renderField();
+     92|     expect(box).toHaveAttribute("aria-checked", "false");
+     93|     expect(box.querySelector("svg")).toBeNull();
+       |                                      ^
+     94|   });
+     95| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 125 passed (126)
+   Start at  09:55:35
+   Duration  4.16s (transform 684ms, setup 2.36s, collect 8.17s, tests 3.04s, environment 15.40s, prepare 1.80s)
+

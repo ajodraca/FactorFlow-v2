@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w2/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 83ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 242ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 230ms
+   × form root and field behaviour (DAC-E1-S2-2, AC-25) > renders a native form in the stacked variant by default, inline on request, without native validation 7ms
+     → expect(element).toHaveClass("flex flex-col gap-4")
+
+Expected the element to have class:
+  flex flex-col gap-4
+Received:
+  flex flex-row flex-wrap items-end gap-3
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form root and field behaviour (DAC-E1-S2-2, AC-25) > renders a native form in the stacked variant by default, inline on request, without native validation
+Error: expect(element).toHaveClass("flex flex-col gap-4")
+
+Expected the element to have class:
+  flex flex-col gap-4
+Received:
+  flex flex-row flex-wrap items-end gap-3
+ ❯ src/components/ui/form.test.tsx:140:21
+    138|     expect(stacked.tagName).toBe("FORM");
+    139|     expect(stacked).toHaveAttribute("data-variant", "stacked");
+    140|     expect(stacked).toHaveClass("flex", "flex-col", "gap-4");
+       |                     ^
+    141|     expect(stacked).toHaveAttribute("novalidate");
+    142| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:16
+   Duration  1.22s (transform 77ms, setup 110ms, collect 1.03s, tests 554ms, environment 582ms, prepare 102ms)
+

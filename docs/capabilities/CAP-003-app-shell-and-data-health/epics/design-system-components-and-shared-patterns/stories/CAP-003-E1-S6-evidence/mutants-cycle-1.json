@@ -1,0 +1,215 @@
+{
+ "schema": 1,
+ "repo_head": "",
+ "range": "manual",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/format.ts:manual:drop-timezone",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "  timeZone: TIME_ZONE,\n",
+   "new": ""
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:swap-fallback",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "startedAt ?? requestedAt",
+   "new": "requestedAt ?? startedAt"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:drop-hourcycle",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "  hourCycle: \"h23\",\n",
+   "new": ""
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:long-zone",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "timeZoneName: \"short\"",
+   "new": "timeZoneName: \"long\""
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:negate-seconds",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "options?.seconds",
+   "new": "!options?.seconds"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:session-via-date",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "  return value;",
+   "new": "  return formatInstant(new Date(value)).slice(0, 10);"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:count-zero-throws",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "n < 0",
+   "new": "n <= 0"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:group-width",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "(\\d{3})+$",
+   "new": "(\\d{4})+$"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:negate-iso-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "!ISO_INSTANT.test(value)",
+   "new": "ISO_INSTANT.test(value)"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:negate-integer-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "!Number.isSafeInteger(n) ||",
+   "new": "Number.isSafeInteger(n) ||"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:drop-download-prefix",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "`Download ${",
+   "new": "`${"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:negate-date-shape",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "if (!/^\\d{4}",
+   "new": "if (/^\\d{4}"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:drop-nan-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "|| Number.isNaN(when.getTime())",
+   "new": "|| false"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:clock-no-seconds",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "${part(\"hour\")}:${part(\"minute\")}:${part(\"second\")} ${part(\"timeZoneName\")}",
+   "new": "${part(\"hour\")}:${part(\"minute\")} ${part(\"timeZoneName\")}"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:swap-day-month",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "${part(\"month\")}-${part(\"day\")} ${clock}",
+   "new": "${part(\"day\")}-${part(\"month\")} ${clock}"
+  },
+  {
+   "id": "web/src/components/patterns/format.ts:manual:year-as-month",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/format.ts",
+   "old": "${part(\"year\")}-",
+   "new": "${part(\"month\")}-"
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:drop-describedby",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "aria-describedby={id}",
+   "new": ""
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:variant-absent",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "variant=\"coverage-unknown\"",
+   "new": "variant=\"coverage-absent\""
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:variant-good",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "variant=\"coverage-unknown\"",
+   "new": "variant=\"status-good\""
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:dash-as-zero",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "aria-hidden=\"true\">\u2014",
+   "new": "aria-hidden=\"true\">0"
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:drop-aria-hidden",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "aria-hidden=\"true\"",
+   "new": ""
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:visible-label",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "<span className=\"sr-only\">{label}</span>",
+   "new": "<span>{label}</span>"
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:drop-missing-colour",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "<span className=\"text-value-missing\">",
+   "new": "<span>"
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:default-label",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "label = \"Not determinable\"",
+   "new": "label = \"Undetermined\""
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:hidden-reason",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "className=\"text-xs text-muted-foreground\"",
+   "new": "className=\"sr-only\""
+  },
+  {
+   "id": "web/src/components/patterns/presence.tsx:manual:fixed-id",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/components/patterns/presence.tsx",
+   "old": "const id = useId();",
+   "new": "const id = \"reason\";"
+  }
+ ]
+}

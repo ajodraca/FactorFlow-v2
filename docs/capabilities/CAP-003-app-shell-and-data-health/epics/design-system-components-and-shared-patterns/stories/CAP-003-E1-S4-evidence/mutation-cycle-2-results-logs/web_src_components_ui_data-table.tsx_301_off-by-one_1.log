@@ -1,0 +1,551 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 8 failed) 2149ms
+   × TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > compact: every header row and body row has the h-row class and no h-[ class 29ms
+     → expected 3 to be 4 // Object.is equality
+   × TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > history: every header row and body row has the h-row class and no h-[ class 9ms
+     → expected 3 to be 4 // Object.is equality
+   × TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > expandable: every header row and body row has the h-row class and no h-[ class 9ms
+     → expected 3 to be 4 // Object.is equality
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > makes the first cell of every history row the row header 7ms
+     → expected [ <th scope="row" …(1)></th>, …(1) ] to have a length of 3 but got 2
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > keeps the history row header on when rowHeader is false 4ms
+     → expected [ <th scope="row" …(1)></th>, …(1) ] to have a length of 3 but got 2
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives compact a row header only when asked (Recent downloads) 7ms
+     → expected [ <th scope="row" …(1)></th>, …(1) ] to have a length of 3 but got 2
+   × data-table classes and structure (AC-26, DAC-E1-S4-2) > spans the expansion row over every column and the expander 19ms
+     → Unable to find an accessible element with the role "button" and name "Expand Stock 0"
+
+Here are the accessible roles:
+
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+    [33mdata-variant[39m=[32m"expandable"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead />[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Details Symbol Name Gaps":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border"[39m
+  [36m/>[39m
+
+  Name "S0001 Stock 1 1":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0001"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "Details":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Symbol":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Name":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Gaps":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  cell:
+
+  Name "":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "S0001":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Expand Stock 1":
+  [36m<button[39m
+    [33maria-controls[39m=[32m":rmk:"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Expand Stock 1"[39m
+    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-5 w-5 p-0"[39m
+    [33mdata-variant[39m=[32m"ghost"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<table[39m
+      [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+      [33mdata-variant[39m=[32m"expandable"[39m
+    [36m>[39m
+      [36m<thead>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border"[39m
+        [36m>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sr-only"[39m
+            [36m>[39m
+              [0mDetails[0m
+            [36m</span>[39m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mSymbol[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mName[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mGaps[0m
+          [36m</th>[39m
+        [36m</tr>[39m
+      [36m</thead>[39m
+      [36m<tbody>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0001"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-controls[39m=[32m":rmk:"[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33maria-label[39m=[32m"Expand Stock 1"[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-5 w-5 p-0"[39m
+              [33mdata-variant[39m=[32m"ghost"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-chevron-right"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0001[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 1[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m1[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+      [36m</tbody>[39m
+    [36m</table>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 642ms
+     → expected [ 'S0001', 'S0002', 'S0003', …(2996) ] to have a length of 3000 but got 2999
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > compact: every header row and body row has the h-row class and no h-[ class
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > history: every header row and body row has the h-row class and no h-[ class
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-019 data-table passes the scan, takes its row height from the token and adds one package (DAC-E1-S4-3, DAC-E1-12, AC-26) > expandable: every header row and body row has the h-row class and no h-[ class
+AssertionError: expected 3 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 3
+
+ ❯ src/components/ui/data-table.test.tsx:157:27
+    155|         ...Array.from(document.querySelectorAll("tbody tr[data-row-id]…
+    156|       ];
+    157|       expect(rows.length).toBe(4);
+       |                           ^
+    158|       for (const row of rows) {
+    159|         expect(row).toHaveClass("h-row");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > makes the first cell of every history row the row header
+AssertionError: expected [ <th scope="row" …(1)></th>, …(1) ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ src/components/ui/data-table.test.tsx:274:24
+    272|     render(<DataTable {...variantProps("history", stocks(3))} />);
+    273|     const rowHeaders = screen.getAllByRole("rowheader");
+    274|     expect(rowHeaders).toHaveLength(3);
+       |                        ^
+    275|     rowHeaders.forEach((cell, i) => {
+    276|       expect(cell).toHaveTextContent(`S000${i}`);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > keeps the history row header on when rowHeader is false
+AssertionError: expected [ <th scope="row" …(1)></th>, …(1) ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ src/components/ui/data-table.test.tsx:283:46
+    281|   it("keeps the history row header on when rowHeader is false", () => {
+    282|     render(<DataTable {...variantProps("history", stocks(3))} rowHeade…
+    283|     expect(screen.getAllByRole("rowheader")).toHaveLength(3);
+       |                                              ^
+    284|   });
+    285| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives compact a row header only when asked (Recent downloads)
+AssertionError: expected [ <th scope="row" …(1)></th>, …(1) ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ src/components/ui/data-table.test.tsx:290:46
+    288|     expect(screen.queryAllByRole("rowheader")).toHaveLength(0);
+    289|     rerender(<DataTable {...variantProps("compact", stocks(3))} rowHea…
+    290|     expect(screen.getAllByRole("rowheader")).toHaveLength(3);
+       |                                              ^
+    291|   });
+    292| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table classes and structure (AC-26, DAC-E1-S4-2) > spans the expansion row over every column and the expander
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Expand Stock 0"
+
+Here are the accessible roles:
+
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+    [33mdata-variant[39m=[32m"expandable"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead />[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Details Symbol Name Gaps":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border"[39m
+  [36m/>[39m
+
+  Name "S0001 Stock 1 1":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0001"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "Details":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Symbol":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Name":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Gaps":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  cell:
+
+  Name "":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "S0001":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Expand Stock 1":
+  [36m<button[39m
+    [33maria-controls[39m=[32m":rmk:"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Expand Stock 1"[39m
+    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-5 w-5 p-0"[39m
+    [33mdata-variant[39m=[32m"ghost"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<table[39m
+      [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+      [33mdata-variant[39m=[32m"expandable"[39m
+    [36m>[39m
+      [36m<thead>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border"[39m
+        [36m>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sr-only"[39m
+            [36m>[39m
+              [0mDetails[0m
+            [36m</span>[39m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mSymbol[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mName[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mGaps[0m
+          [36m</th>[39m
+        [36m</tr>[39m
+      [36m</thead>[39m
+      [36m<tbody>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0001"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-controls[39m=[32m":rmk:"[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33maria-label[39m=[32m"Expand Stock 1"[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-5 w-5 p-0"[39m
+              [33mdata-variant[39m=[32m"ghost"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-chevron-right"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0001[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 1[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m1[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+      [36m</tbody>[39m
+    [36m</table>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/ui/data-table.test.tsx:661:29
+    659|     const user = userEvent.setup();
+    660|     render(<DataTable {...variantProps("expandable", stocks(2))} />);
+    661|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+       |                             ^
+    662|     const detail = document.querySelector("tr[data-expansion-for]");
+    663|     expect(detail?.querySelector("td")).toHaveAttribute("colspan", "4"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers
+AssertionError: expected [ 'S0001', 'S0002', 'S0003', …(2996) ] to have a length of 3000 but got 2999
+
+- Expected
++ Received
+
+- 3000
++ 2999
+
+ ❯ src/components/ui/data-table.test.tsx:681:28
+    679|       expect(screen.getByRole("table")).not.toHaveAttribute("aria-rowc…
+    680|       expect(document.querySelector("tr[data-row-id]")).not.toHaveAttr…
+    681|       expect(bodyRowIds()).toHaveLength(3000);
+       |                            ^
+    682|       view.unmount();
+    683|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 79 passed (87)
+   Start at  12:33:14
+   Duration  3.55s (transform 100ms, setup 41ms, collect 578ms, tests 2.15s, environment 232ms, prepare 179ms)
+

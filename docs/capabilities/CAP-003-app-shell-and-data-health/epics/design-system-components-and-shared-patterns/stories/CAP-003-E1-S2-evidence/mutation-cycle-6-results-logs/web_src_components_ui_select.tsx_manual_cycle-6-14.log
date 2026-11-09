@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w3/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 224ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles a group label and a separator with theme tokens 23ms
+     → expect(element).toHaveClass("text-base font-semibold pl-6 pr-2 py-1")
+
+Expected the element to have class:
+  text-base font-semibold pl-6 pr-2 py-1
+Received:
+  py-1 pl-6 pr-2 text-base
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles a group label and a separator with theme tokens
+Error: expect(element).toHaveClass("text-base font-semibold pl-6 pr-2 py-1")
+
+Expected the element to have class:
+  text-base font-semibold pl-6 pr-2 py-1
+Received:
+  py-1 pl-6 pr-2 text-base
+ ❯ src/components/ui/select.test.tsx:163:39
+    161|     await user.tab();
+    162|     await user.keyboard("{Enter}");
+    163|     expect(screen.getByText("Group")).toHaveClass("text-base", "font-s…
+       |                                       ^
+    164|     const separator = document.querySelector(".h-px");
+    165|     expect(separator).toHaveClass("-mx-1", "my-1", "h-px", "bg-muted");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:33
+   Duration  1.08s (transform 87ms, setup 32ms, collect 305ms, tests 224ms, environment 177ms, prepare 156ms)
+

@@ -1,0 +1,85 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 4 failed) 4029ms
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > compact: busy sets aria-busy on the table and its absence leaves none 12ms
+     → expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > history: busy sets aria-busy on the table and its absence leaves none 4ms
+     → expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > expandable: busy sets aria-busy on the table and its absence leaves none 8ms
+     → expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > virtualised: busy sets aria-busy on the table and its absence leaves none 6ms
+     → expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2532ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > compact: busy sets aria-busy on the table and its absence leaves none
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > history: busy sets aria-busy on the table and its absence leaves none
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > expandable: busy sets aria-busy on the table and its absence leaves none
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > virtualised: busy sets aria-busy on the table and its absence leaves none
+Error: expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+ ❯ src/components/ui/data-table.test.tsx:323:41
+    321|       stubRowHeight(32, 96);
+    322|       const { rerender } = render(<DataTable {...variantProps(variant,…
+    323|       expect(screen.getByRole("table")).toHaveAttribute("aria-busy", "…
+       |                                         ^
+    324|       rerender(<DataTable {...variantProps(variant, stocks(3))} />);
+    325|       expect(screen.getByRole("table")).not.toHaveAttribute("aria-busy…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 83 passed (87)
+   Start at  12:33:24
+   Duration  5.38s (transform 127ms, setup 47ms, collect 687ms, tests 4.03s, environment 185ms, prepare 142ms)
+

@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w3/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 746ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 377ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > download failed 3ms
+     → expected 'neutral' to be 'critical' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > download failed
+AssertionError: expected 'neutral' to be 'critical' // Object.is equality
+
+Expected: "critical"
+Received: "neutral"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:13
+   Duration  1.92s (transform 36ms, setup 35ms, collect 301ms, tests 746ms, environment 180ms, prepare 100ms)
+

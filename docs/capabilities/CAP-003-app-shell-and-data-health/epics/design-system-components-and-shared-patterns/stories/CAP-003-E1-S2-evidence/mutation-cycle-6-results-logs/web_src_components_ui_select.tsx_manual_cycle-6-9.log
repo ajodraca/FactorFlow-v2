@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w3/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 233ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens 29ms
+     → expect(element).toHaveClass("h-row data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground")
+
+Expected the element to have class:
+  h-row data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground
+Received:
+  relative flex h-8 w-full cursor-default select-none items-center rounded py-1 pl-6 pr-2 text-base outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens
+Error: expect(element).toHaveClass("h-row data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground")
+
+Expected the element to have class:
+  h-row data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground
+Received:
+  relative flex h-8 w-full cursor-default select-none items-center rounded py-1 pl-6 pr-2 text-base outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50
+ ❯ src/components/ui/select.test.tsx:121:20
+    119|     expect(surface.className).not.toMatch(/(^|\s)animate-/);
+    120|     const option = screen.getByRole("option", { name: "Followed" });
+    121|     expect(option).toHaveClass(
+       |                    ^
+    122|       "h-row",
+    123|       "data-[highlighted]:bg-accent",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:30
+   Duration  1.19s (transform 70ms, setup 31ms, collect 329ms, tests 233ms, environment 176ms, prepare 239ms)
+

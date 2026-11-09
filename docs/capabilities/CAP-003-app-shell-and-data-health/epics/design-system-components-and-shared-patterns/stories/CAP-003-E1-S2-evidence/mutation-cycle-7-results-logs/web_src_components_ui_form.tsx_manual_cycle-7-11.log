@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w3/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 102ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 255ms
+   × form root and field behaviour (DAC-E1-S2-2, AC-25) > colours the label as an error only while its field is in error 5ms
+     → expect(element).toHaveClass("text-base font-medium text-foreground")
+
+Expected the element to have class:
+  text-base font-medium text-foreground
+Received:
+  text-sm font-medium text-foreground
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 292ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form root and field behaviour (DAC-E1-S2-2, AC-25) > colours the label as an error only while its field is in error
+Error: expect(element).toHaveClass("text-base font-medium text-foreground")
+
+Expected the element to have class:
+  text-base font-medium text-foreground
+Received:
+  text-sm font-medium text-foreground
+ ❯ src/components/ui/form.test.tsx:212:19
+    210|     const label = screen.getByText("History depth", { selector: "label…
+    211|     expect(label).not.toHaveClass("text-destructive");
+    212|     expect(label).toHaveClass("text-base", "font-medium", "text-foregr…
+       |                   ^
+    213|     await user.type(screen.getByRole("spinbutton", { name: "History de…
+    214|     await user.tab();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:18
+   Duration  1.51s (transform 94ms, setup 128ms, collect 1.01s, tests 649ms, environment 956ms, prepare 619ms)
+

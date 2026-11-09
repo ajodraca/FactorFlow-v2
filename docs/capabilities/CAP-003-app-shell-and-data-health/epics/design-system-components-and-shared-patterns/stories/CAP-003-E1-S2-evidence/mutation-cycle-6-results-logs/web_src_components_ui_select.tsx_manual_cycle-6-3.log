@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w3/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 233ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > is the inline variant with the control classes 9ms
+     → expect(element).toHaveAttribute("data-variant", "inline") // element.getAttribute("data-variant") === "inline"
+
+Expected the element to have attribute:
+  data-variant="inline"
+Received:
+  data-variant="x"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > is the inline variant with the control classes
+Error: expect(element).toHaveAttribute("data-variant", "inline") // element.getAttribute("data-variant") === "inline"
+
+Expected the element to have attribute:
+  data-variant="inline"
+Received:
+  data-variant="x"
+ ❯ src/components/ui/select.test.tsx:103:21
+    101|   it("is the inline variant with the control classes", () => {
+    102|     const { trigger } = renderSelect();
+    103|     expect(trigger).toHaveAttribute("data-variant", "inline");
+       |                     ^
+    104|     for (const name of ["h-7", "rounded", "border", "border-input", "b…
+    105|       expect(trigger).toHaveClass(name);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:27
+   Duration  1.36s (transform 33ms, setup 40ms, collect 385ms, tests 233ms, environment 151ms, prepare 116ms)
+

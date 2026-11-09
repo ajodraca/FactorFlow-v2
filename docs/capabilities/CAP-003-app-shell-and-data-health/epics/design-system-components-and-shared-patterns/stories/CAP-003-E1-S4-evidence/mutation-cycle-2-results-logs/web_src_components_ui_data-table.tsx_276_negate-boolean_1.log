@@ -1,0 +1,73 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 2 failed) 3311ms
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic 77ms
+     → expected 'S0037' to be 'S0040' // Object.is equality
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2181ms
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window 43ms
+     → expected 'S0040' to be 'S0037' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic
+AssertionError: expected 'S0037' to be 'S0040' // Object.is equality
+
+Expected: "S0040"
+Received: "S0037"
+
+ ❯ src/components/ui/data-table.test.tsx:597:20
+    595|     scrollTo(50, 32);
+    596|     const ids = bodyRowIds();
+    597|     expect(ids[0]).toBe("S0040");
+       |                    ^
+    598|     expect(ids[ids.length - 1]).toBe("S0074");
+    599|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window
+AssertionError: expected 'S0040' to be 'S0037' // Object.is equality
+
+Expected: "S0037"
+Received: "S0040"
+
+ ❯ src/components/ui/data-table.test.tsx:773:29
+    771|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+    772|     scrollTo(50, 32);
+    773|     expect(bodyRowIds()[0]).toBe("S0037");
+       |                             ^
+    774|   });
+    775| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 85 passed (87)
+   Start at  12:33:04
+   Duration  4.99s (transform 128ms, setup 49ms, collect 761ms, tests 3.31s, environment 252ms, prepare 151ms)
+

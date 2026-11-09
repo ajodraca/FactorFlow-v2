@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w3/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 2 failed) 727ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 367ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > credential present 4ms
+     → expected 'critical' to be 'good' // Object.is equality
+   × Tier table (TC-COMP-021, DAC-E1-1) > credential missing 0ms
+     → expected 'good' to be 'critical' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > credential present
+AssertionError: expected 'critical' to be 'good' // Object.is equality
+
+Expected: "good"
+Received: "critical"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > credential missing
+AssertionError: expected 'good' to be 'critical' // Object.is equality
+
+Expected: "critical"
+Received: "good"
+
+ ❯ src/components/patterns/tiers.test.ts:224:28
+    222| 
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+       |                            ^
+    225|     expect(labelOf(status)).toBe(label);
+    226|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 34 passed (36)
+   Start at  15:17:20
+   Duration  1.87s (transform 40ms, setup 43ms, collect 309ms, tests 727ms, environment 197ms, prepare 198ms)
+

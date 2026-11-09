@@ -1,0 +1,31 @@
+# RED: review v2 mutant manual:v2d1 applied (data-table.tsx comparator: a.expansion === b.expansion); new IR-001 test fails, 100 others pass
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (101 tests | 1 failed) 2386ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 1559ms
+   × expanded rows follow what the caller renders (DEC-0307, IR-005) > does not re-render an open earlier row when a page is appended and the callbacks are stable (IR-001) 19ms
+     → expected [ 'S0001', 'S0003', 'S0004', 'S0005' ] to not include 'S0001'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > expanded rows follow what the caller renders (DEC-0307, IR-005) > does not re-render an open earlier row when a page is appended and the callbacks are stable (IR-001)
+AssertionError: expected [ 'S0001', 'S0003', 'S0004', 'S0005' ] to not include 'S0001'
+ ❯ src/components/ui/data-table.test.tsx:918:25
+    916|     view.rerender(withData([...first, ...stocks(6).slice(3)]));
+    917|     expect(screen.getByText("Stock 4")).toBeInTheDocument();
+    918|     expect(renders).not.toContain("S0001");
+       |                         ^
+    919|     expect(Array.from(new Set(renders)).sort()).toEqual(["S0003", "S00…
+    920|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 100 passed (101)
+   Start at  14:09:33
+   Duration  4.03s (transform 99ms, setup 53ms, collect 383ms, tests 2.39s, environment 371ms, prepare 452ms)
+

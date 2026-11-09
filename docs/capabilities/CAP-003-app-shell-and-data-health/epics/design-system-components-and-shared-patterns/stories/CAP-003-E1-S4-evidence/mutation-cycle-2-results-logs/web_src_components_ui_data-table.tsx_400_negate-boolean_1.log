@@ -1,0 +1,241 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w1/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w1/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w1/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 13 failed) 1243ms
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the next window on scroll and keeps the DOM bounded 131ms
+     → no scroller
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > measures the row height instead of assuming one 44ms
+     → no scroller
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > appends a keyset page without re-rendering earlier rows, asking for it once 25ms
+     → no scroller
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > never holds more than the window in the DOM across a scroll sweep 32ms
+     → no scroller
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks for the next page when the window end plus the prefetch reaches the loaded rows 10ms
+     → no scroller
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when the rows are replaced by as many different ones (a sort) 5ms
+     → no scroller
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when only the first row is replaced (a sort that changes the head) 5ms
+     → no scroller
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > never asks while busy or when there is no more 8ms
+     → no scroller
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > makes the scroller keyboard-focusable with no role or name of its own 3ms
+     → expect(received).toHaveAttribute()
+
+received value must be an HTMLElement or an SVGElement.
+
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic 62ms
+     → no scroller
+   × data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 32ms
+     → expect(received).toHaveStyle()
+
+received value must be an HTMLElement or an SVGElement.
+
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer 30ms
+     → no scroller
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window 55ms
+     → no scroller
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the next window on scroll and keeps the DOM bounded
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:366:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > measures the row height instead of assuming one
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:378:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > appends a keyset page without re-rendering earlier rows, asking for it once
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:392:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > never holds more than the window in the DOM across a scroll sweep
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:420:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks for the next page when the window end plus the prefetch reaches the loaded rows
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:523:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when the rows are replaced by as many different ones (a sort)
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:532:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when only the first row is replaced (a sort that changes the head)
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:544:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > never asks while busy or when there is no more
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:553:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > makes the scroller keyboard-focusable with no role or name of its own
+Error: expect(received).toHaveAttribute()
+
+received value must be an HTMLElement or an SVGElement.
+
+ ❯ src/components/ui/data-table.test.tsx:565:22
+    563|     paged(stocks(10), { hasMore: false });
+    564|     const scroller = document.querySelector('[data-slot="data-table-sc…
+    565|     expect(scroller).toHaveAttribute("tabindex", "0");
+       |                      ^
+    566|     expect(scroller).not.toHaveAttribute("role");
+    567|     expect(scroller).not.toHaveAttribute("aria-label");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:595:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers
+Error: expect(received).toHaveStyle()
+
+received value must be an HTMLElement or an SVGElement.
+
+ ❯ src/components/ui/data-table.test.tsx:670:73
+    668|     const { unmount } = render(<DataTable {...variantProps("virtualise…
+    669|     expect(document.querySelector("thead tr")).toHaveClass("sticky", "…
+    670|     expect(document.querySelector('[data-slot="data-table-scroller"]')…
+       |                                                                         ^
+    671|       height: "calc(var(--row-height) * 16)",
+    672|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:742:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window
+Error: no scroller
+ ❯ scrollTo src/components/ui/data-table.test.tsx:81:11
+     79|   const scroller = document.querySelector<HTMLElement>('[data-slot="da…
+     80|   if (!scroller) {
+     81|     throw new Error("no scroller");
+       |           ^
+     82|   }
+     83|   act(() => {
+ ❯ src/components/ui/data-table.test.tsx:772:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
+
+ Test Files  1 failed (1)
+      Tests  13 failed | 74 passed (87)
+   Start at  12:33:36
+   Duration  2.58s (transform 293ms, setup 50ms, collect 589ms, tests 1.24s, environment 209ms, prepare 182ms)
+

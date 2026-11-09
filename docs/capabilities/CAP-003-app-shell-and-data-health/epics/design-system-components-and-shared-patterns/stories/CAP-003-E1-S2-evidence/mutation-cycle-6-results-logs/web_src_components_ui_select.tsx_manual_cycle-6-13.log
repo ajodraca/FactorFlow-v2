@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w1/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 244ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles a group label and a separator with theme tokens 28ms
+     → expect(element).toHaveClass("-mx-1 my-1 h-px bg-muted")
+
+Expected the element to have class:
+  -mx-1 my-1 h-px bg-muted
+Received:
+  -mx-1 my-1 h-px bg-border
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles a group label and a separator with theme tokens
+Error: expect(element).toHaveClass("-mx-1 my-1 h-px bg-muted")
+
+Expected the element to have class:
+  -mx-1 my-1 h-px bg-muted
+Received:
+  -mx-1 my-1 h-px bg-border
+ ❯ src/components/ui/select.test.tsx:165:23
+    163|     expect(screen.getByText("Group")).toHaveClass("text-base", "font-s…
+    164|     const separator = document.querySelector(".h-px");
+    165|     expect(separator).toHaveClass("-mx-1", "my-1", "h-px", "bg-muted");
+       |                       ^
+    166|   });
+    167| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:32
+   Duration  1.05s (transform 31ms, setup 35ms, collect 305ms, tests 244ms, environment 168ms, prepare 89ms)
+

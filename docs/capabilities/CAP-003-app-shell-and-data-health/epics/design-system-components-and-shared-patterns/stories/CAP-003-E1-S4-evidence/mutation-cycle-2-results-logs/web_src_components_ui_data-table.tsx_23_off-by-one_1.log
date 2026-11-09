@@ -1,0 +1,492 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w1/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w1/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w1/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 20 failed) 3763ms
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the first window of 3000 rows with the spacer and row counts 133ms
+     → expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the next window on scroll and keeps the DOM bounded 106ms
+     → expected [ 'S0989', 'S0990', 'S0991', …(34) ] to have a length of 35 but got 37
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > measures the row height instead of assuming one 51ms
+     → expected 'S0989' to be 'S0990' // Object.is equality
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > appends a keyset page without re-rendering earlier rows, asking for it once 12ms
+     → expected [ 'S0019', 'S0020', 'S0021', …(34) ] to have a length of 35 but got 37
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > never holds more than the window in the DOM across a scroll sweep 65ms
+     → expected 39 to be less than or equal to 37
+   × windowFor (DAC-E1-S4-1, AC-26) > windows the top of 3000 rows 1ms
+     → expected { Object (start, end, ...) } to deeply equal { Object (start, end, ...) }
+   × windowFor (DAC-E1-S4-1, AC-26) > windows the middle with an overscan above 0ms
+     → expected { start: 989, end: 1026, …(2) } to deeply equal { start: 990, end: 1025, …(2) }
+   × windowFor (DAC-E1-S4-1, AC-26) > falls back to the top window when there is no layout, a negative scroll or NaN 0ms
+     → expected 26 to be 25 // Object.is equality
+   × windowFor (DAC-E1-S4-1, AC-26) > counts an open expansion above the window in the row tops 0ms
+     → expected { start: 89, end: 126, …(2) } to deeply equal { start: 90, end: 125, …(2) }
+   × windowFor (DAC-E1-S4-1, AC-26) > leaves the expansion of the window's first row below its top 5ms
+     → expected { start: 89, end: 126, …(2) } to match object { start: 90, end: 125, padTop: 2880 }
+(1 matching property omitted from actual)
+   × windowFor (DAC-E1-S4-1, AC-26) > counts an open expansion below the window in the bottom spacer 0ms
+     → expected 95264 to be 95296 // Object.is equality
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks for the next page when the window end plus the prefetch reaches the loaded rows 10ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array []
+
+
+Number of calls: 1
+
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic 78ms
+     → expected 'S0039' to be 'S0040' // Object.is equality
+   × windowFor edges (DAC-E1-S4-1) > clamps a scroll past the end to the last rows 2ms
+     → expected { start: 2988, end: 3000, …(2) } to deeply equal { start: 2989, end: 3000, …(2) }
+   × windowFor edges (DAC-E1-S4-1) > windows a one pixel row height 1ms
+     → expected { start: 89, end: 126, …(2) } to deeply equal { start: 90, end: 125, …(2) }
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2460ms
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > renders the top window with no spacer where layout reports a zero height 84ms
+     → expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > keeps the last measured height when a later measurement reports zero 33ms
+     → expected '95168px' to be '95200px' // Object.is equality
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer 51ms
+     → expected '2974px' to be '2975px' // Object.is equality
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > shows a one pixel bottom spacer when one row is left unrendered 5ms
+     → expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window 49ms
+     → expected 'S0036' to be 'S0037' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 20 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the first window of 3000 rows with the spacer and row counts
+AssertionError: expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+
+- Expected
++ Received
+
+- 25
++ 26
+
+ ❯ src/components/ui/data-table.test.tsx:353:17
+    351|     virtualised(stocks(3000));
+    352|     const ids = bodyRowIds();
+    353|     expect(ids).toHaveLength(25);
+       |                 ^
+    354|     expect(ids[0]).toBe("S0000");
+    355|     expect(ids[24]).toBe("S0024");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the next window on scroll and keeps the DOM bounded
+AssertionError: expected [ 'S0989', 'S0990', 'S0991', …(34) ] to have a length of 35 but got 37
+
+- Expected
++ Received
+
+- 35
++ 37
+
+ ❯ src/components/ui/data-table.test.tsx:368:17
+    366|     scrollTo(1000, 32);
+    367|     const ids = bodyRowIds();
+    368|     expect(ids).toHaveLength(35);
+       |                 ^
+    369|     expect(ids[0]).toBe("S0990");
+    370|     expect(ids[34]).toBe("S1024");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > measures the row height instead of assuming one
+AssertionError: expected 'S0989' to be 'S0990' // Object.is equality
+
+Expected: "S0990"
+Received: "S0989"
+
+ ❯ src/components/ui/data-table.test.tsx:380:20
+    378|     scrollTo(1000, 40);
+    379|     const ids = bodyRowIds();
+    380|     expect(ids[0]).toBe("S0990");
+       |                    ^
+    381|     expect(ids[ids.length - 1]).toBe("S1024");
+    382|     expect(spacer("top")?.style.height).toBe("39600px");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > appends a keyset page without re-rendering earlier rows, asking for it once
+AssertionError: expected [ 'S0019', 'S0020', 'S0021', …(34) ] to have a length of 35 but got 37
+
+- Expected
++ Received
+
+- 35
++ 37
+
+ ❯ src/components/ui/data-table.test.tsx:397:17
+    395|     rerender(element(first, { hasMore: true, busy: false }));
+    396|     const ids = bodyRowIds();
+    397|     expect(ids).toHaveLength(35);
+       |                 ^
+    398|     expect(ids[0]).toBe("S0020");
+    399|     expect(ids[34]).toBe("S0054");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > never holds more than the window in the DOM across a scroll sweep
+AssertionError: expected 39 to be less than or equal to 37
+ ❯ src/components/ui/data-table.test.tsx:421:60
+    419|     for (const row of [0, 500, 1500, 2990]) {
+    420|       scrollTo(row, 32);
+    421|       expect(document.querySelectorAll("tbody tr").length).toBeLessTha…
+       |                                                            ^
+    422|     }
+    423|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > windows the top of 3000 rows
+AssertionError: expected { Object (start, end, ...) } to deeply equal { Object (start, end, ...) }
+
+- Expected
++ Received
+
+  Object {
+-   "end": 25,
+-   "padBottom": 95200,
++   "end": 26,
++   "padBottom": 95168,
+    "padTop": 0,
+    "start": 0,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:430:92
+    428| 
+    429|   it("windows the top of 3000 rows", () => {
+    430|     expect(windowFor({ scrollTop: 0, rowHeight: 32, rowCount: 3000, ex…
+       |                                                                                            ^
+    431|       start: 0,
+    432|       end: 25,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > windows the middle with an overscan above
+AssertionError: expected { start: 989, end: 1026, …(2) } to deeply equal { start: 990, end: 1025, …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "end": 1025,
+-   "padBottom": 63200,
+-   "padTop": 31680,
+-   "start": 990,
++   "end": 1026,
++   "padBottom": 63168,
++   "padTop": 31648,
++   "start": 989,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:441:7
+    439|     expect(
+    440|       windowFor({ scrollTop: 32000, rowHeight: 32, rowCount: 3000, ext…
+    441|     ).toEqual({ start: 990, end: 1025, padTop: 31680, padBottom: 63200…
+       |       ^
+    442|   });
+    443| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > falls back to the top window when there is no layout, a negative scroll or NaN
+AssertionError: expected 26 to be 25 // Object.is equality
+
+- Expected
++ Received
+
+- 25
++ 26
+
+ ❯ src/components/ui/data-table.test.tsx:452:26
+    450|       const result = windowFor({ ...args, rowCount: 3000, extraHeights…
+    451|       expect(result.start).toBe(0);
+    452|       expect(result.end).toBe(25);
+       |                          ^
+    453|     }
+    454|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > counts an open expansion above the window in the row tops
+AssertionError: expected { start: 89, end: 126, …(2) } to deeply equal { start: 90, end: 125, …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "end": 125,
+-   "padBottom": 92000,
+-   "padTop": 2976,
+-   "start": 90,
++   "end": 126,
++   "padBottom": 91968,
++   "padTop": 2944,
++   "start": 89,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:475:7
+    473|     expect(
+    474|       windowFor({ scrollTop: 3296, rowHeight: 32, rowCount: 3000, extr…
+    475|     ).toEqual({ start: 90, end: 125, padTop: 2976, padBottom: 92000 });
+       |       ^
+    476|     const at = windowFor({ scrollTop: 3200, rowHeight: 32, rowCount: 3…
+    477|     expect(at.start).toBe(87);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > leaves the expansion of the window's first row below its top
+AssertionError: expected { start: 89, end: 126, …(2) } to match object { start: 90, end: 125, padTop: 2880 }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "end": 125,
+-   "padTop": 2880,
+-   "start": 90,
++   "end": 126,
++   "padTop": 2848,
++   "start": 89,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:488:20
+    486|       extraHeights: new Map([[90, 96]]),
+    487|     });
+    488|     expect(result).toMatchObject({ start: 90, end: 125, padTop: 2880 }…
+       |                    ^
+    489|   });
+    490| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > counts an open expansion below the window in the bottom spacer
+AssertionError: expected 95264 to be 95296 // Object.is equality
+
+- Expected
++ Received
+
+- 95296
++ 95264
+
+ ❯ src/components/ui/data-table.test.tsx:498:30
+    496|       extraHeights: new Map([[2000, 96]]),
+    497|     });
+    498|     expect(result.padBottom).toBe(95296);
+       |                              ^
+    499|   });
+    500| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks for the next page when the window end plus the prefetch reaches the loaded rows
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/components/ui/data-table.test.tsx:524:30
+    522|     const { onEndReached } = paged(stocks(50), { hasMore: true });
+    523|     scrollTo(4, 32);
+    524|     expect(onEndReached).not.toHaveBeenCalled();
+       |                              ^
+    525|     scrollTo(5, 32);
+    526|     expect(onEndReached).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic
+AssertionError: expected 'S0039' to be 'S0040' // Object.is equality
+
+Expected: "S0040"
+Received: "S0039"
+
+ ❯ src/components/ui/data-table.test.tsx:597:20
+    595|     scrollTo(50, 32);
+    596|     const ids = bodyRowIds();
+    597|     expect(ids[0]).toBe("S0040");
+       |                    ^
+    598|     expect(ids[ids.length - 1]).toBe("S0074");
+    599|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor edges (DAC-E1-S4-1) > clamps a scroll past the end to the last rows
+AssertionError: expected { start: 2988, end: 3000, …(2) } to deeply equal { start: 2989, end: 3000, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "end": 3000,
+    "padBottom": 0,
+-   "padTop": 95648,
+-   "start": 2989,
++   "padTop": 95616,
++   "start": 2988,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:608:7
+    606|     expect(
+    607|       windowFor({ scrollTop: 999999, rowHeight: 32, rowCount: 3000, ex…
+    608|     ).toEqual({ start: 2989, end: 3000, padTop: 95648, padBottom: 0 });
+       |       ^
+    609|   });
+    610| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor edges (DAC-E1-S4-1) > windows a one pixel row height
+AssertionError: expected { start: 89, end: 126, …(2) } to deeply equal { start: 90, end: 125, …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "end": 125,
+-   "padBottom": 2875,
+-   "padTop": 90,
+-   "start": 90,
++   "end": 126,
++   "padBottom": 2874,
++   "padTop": 89,
++   "start": 89,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:612:93
+    610| 
+    611|   it("windows a one pixel row height", () => {
+    612|     expect(windowFor({ scrollTop: 100, rowHeight: 1, rowCount: 3000, e…
+       |                                                                                             ^
+    613|       {
+    614|         start: 90,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > renders the top window with no spacer where layout reports a zero height
+AssertionError: expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+
+- Expected
++ Received
+
+- 25
++ 26
+
+ ❯ src/components/ui/data-table.test.tsx:710:26
+    708|   it("renders the top window with no spacer where layout reports a zer…
+    709|     render(<DataTable {...variantProps("virtualised", stocks(3000))} /…
+    710|     expect(bodyRowIds()).toHaveLength(25);
+       |                          ^
+    711|     expect(spacer("top")).toBeNull();
+    712|     expect(spacer("bottom")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > keeps the last measured height when a later measurement reports zero
+AssertionError: expected '95168px' to be '95200px' // Object.is equality
+
+Expected: "95200px"
+Received: "95168px"
+
+ ❯ src/components/ui/data-table.test.tsx:732:44
+    730|     stub.mockImplementation(() => ({ height: 0 }) as DOMRect);
+    731|     view.rerender(<DataTable {...variantProps("virtualised", data)} />…
+    732|     expect(spacer("bottom")?.style.height).toBe("95200px");
+       |                                            ^
+    733|   });
+    734| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer
+AssertionError: expected '2974px' to be '2975px' // Object.is equality
+
+Expected: "2975px"
+Received: "2974px"
+
+ ❯ src/components/ui/data-table.test.tsx:741:44
+    739|     });
+    740|     render(<DataTable {...variantProps("virtualised", stocks(3000))} /…
+    741|     expect(spacer("bottom")?.style.height).toBe("2975px");
+       |                                            ^
+    742|     scrollTo(11, 1);
+    743|     expect(spacer("top")?.style.height).toBe("1px");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > shows a one pixel bottom spacer when one row is left unrendered
+AssertionError: expected [ 'S0000', 'S0001', 'S0002', …(23) ] to have a length of 25 but got 26
+
+- Expected
++ Received
+
+- 25
++ 26
+
+ ❯ src/components/ui/data-table.test.tsx:753:26
+    751|     });
+    752|     render(<DataTable {...variantProps("virtualised", stocks(26))} />);
+    753|     expect(bodyRowIds()).toHaveLength(25);
+       |                          ^
+    754|     expect(spacer("bottom")?.style.height).toBe("1px");
+    755|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/20]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window
+AssertionError: expected 'S0036' to be 'S0037' // Object.is equality
+
+Expected: "S0037"
+Received: "S0036"
+
+ ❯ src/components/ui/data-table.test.tsx:773:29
+    771|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+    772|     scrollTo(50, 32);
+    773|     expect(bodyRowIds()[0]).toBe("S0037");
+       |                             ^
+    774|   });
+    775| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/20]⎯
+
+ Test Files  1 failed (1)
+      Tests  20 failed | 67 passed (87)
+   Start at  12:31:36
+   Duration  5.94s (transform 109ms, setup 64ms, collect 585ms, tests 3.76s, environment 286ms, prepare 581ms)
+

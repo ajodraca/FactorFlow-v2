@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ihenc3r9/w1/web
+
+ ❯ src/components/ui/progress.test.tsx (8 tests | 1 failed) 46ms
+   × progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > is indeterminate when a caller passes a null total 5ms
+     → expect(element).not.toHaveAttribute("aria-valuenow") // element.hasAttribute("aria-valuenow")
+
+Expected the element not to have attribute:
+  aria-valuenow
+Received:
+  aria-valuenow="0"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > is indeterminate when a caller passes a null total
+Error: expect(element).not.toHaveAttribute("aria-valuenow") // element.hasAttribute("aria-valuenow")
+
+Expected the element not to have attribute:
+  aria-valuenow
+Received:
+  aria-valuenow="0"
+ ❯ src/components/ui/progress.test.tsx:48:21
+     46|     );
+     47|     const bar = screen.getByRole("progressbar", { name: "Waiting for t…
+     48|     expect(bar).not.toHaveAttribute("aria-valuenow");
+       |                     ^
+     49|     expect(bar).toHaveAttribute("data-variant", "indeterminate");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:27:40
+   Duration  684ms (transform 31ms, setup 30ms, collect 67ms, tests 46ms, environment 168ms, prepare 81ms)
+

@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ooxad3s8/w3/web
+
+ ❯ src/components/ui/checkbox.test.tsx (6 tests | 1 failed) 114ms
+   × checkbox toggles on Space (DAC-E1-S2-1, AC-25) > draws a check when checked and a dash when mixed 5ms
+     → expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/checkbox.test.tsx > checkbox toggles on Space (DAC-E1-S2-1, AC-25) > draws a check when checked and a dash when mixed
+AssertionError: expected null not to be null
+ ❯ src/components/ui/checkbox.test.tsx:90:60
+     88|   it("draws a check when checked and a dash when mixed", () => {
+     89|     const { rerender } = render(<Checkbox checked aria-label="One" />);
+     90|     expect(document.querySelector("svg.lucide-check")).not.toBeNull();
+       |                                                            ^
+     91|     expect(document.querySelector("svg.lucide-minus")).toBeNull();
+     92|     rerender(<Checkbox checked="indeterminate" aria-label="One" />);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:14:17
+   Duration  1.24s (transform 38ms, setup 36ms, collect 377ms, tests 114ms, environment 176ms, prepare 28ms)
+

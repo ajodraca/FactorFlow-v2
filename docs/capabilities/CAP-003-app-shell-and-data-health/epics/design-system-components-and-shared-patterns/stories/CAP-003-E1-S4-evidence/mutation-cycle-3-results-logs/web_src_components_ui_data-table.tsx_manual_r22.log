@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w3/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 8ms
+ ✓ src/components/token-literals.test.ts (30 tests) 26ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 2 failed) 5643ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 3905ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > pads and colours the header cells and pads the body cells with the cell tokens 10ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium text-muted-foreground")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium text-muted-foreground
+Received:
+  text-left align-middle font-medium text-muted-foreground
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > separates the detail row, and gives the expander column the same padding 18ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-muted-foreground")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-muted-foreground
+Received:
+  text-left align-middle font-medium text-muted-foreground
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > pads and colours the header cells and pads the body cells with the cell tokens
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium text-muted-foreground")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium text-muted-foreground
+Received:
+  text-left align-middle font-medium text-muted-foreground
+ ❯ src/components/ui/data-table.test.tsx:918:66
+    916|   it("pads and colours the header cells and pads the body cells with t…
+    917|     render(<DataTable {...variantProps("compact", stocks(2))} />);
+    918|     expect(screen.getByRole("columnheader", { name: "Symbol" })).toHav…
+       |                                                                  ^
+    919|       ...PADDING,
+    920|       "text-left",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > separates the detail row, and gives the expander column the same padding
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-muted-foreground")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-muted-foreground
+Received:
+  text-left align-middle font-medium text-muted-foreground
+ ❯ src/components/ui/data-table.test.tsx:947:55
+    945|       ...PADDING,
+    946|     );
+    947|     expect(screen.getByText("Details").closest("th")).toHaveClass(
+       |                                                       ^
+    948|       ...PADDING,
+    949|       "text-muted-foreground",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 136 passed (138)
+   Start at  13:22:38
+   Duration  9.91s (transform 235ms, setup 1.08s, collect 1.26s, tests 5.68s, environment 3.33s, prepare 816ms)
+

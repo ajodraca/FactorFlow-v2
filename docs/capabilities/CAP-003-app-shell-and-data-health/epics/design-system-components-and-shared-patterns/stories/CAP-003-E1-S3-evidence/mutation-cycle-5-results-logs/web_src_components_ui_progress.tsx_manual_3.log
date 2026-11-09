@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ihenc3r9/w3/web
+
+stderr | src/components/ui/progress.test.tsx > progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > determinate exposes now, min and max and is labelled by its visible text
+Invalid prop `value` of value `812` supplied to `Progress`. The `value` prop must be:
+  - a positive number
+  - less than the value passed to `max` (or 100 if no `max` prop is set)
+  - `null` or `undefined` if the progress is indeterminate.
+
+Defaulting to `null`.
+
+ ❯ src/components/ui/progress.test.tsx (8 tests | 1 failed) 46ms
+   × progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > determinate exposes now, min and max and is labelled by its visible text 31ms
+     → expect(element).toHaveAttribute("aria-valuenow", "812") // element.getAttribute("aria-valuenow") === "812"
+
+Expected the element to have attribute:
+  aria-valuenow="812"
+Received:
+  null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > determinate exposes now, min and max and is labelled by its visible text
+Error: expect(element).toHaveAttribute("aria-valuenow", "812") // element.getAttribute("aria-valuenow") === "812"
+
+Expected the element to have attribute:
+  aria-valuenow="812"
+Received:
+  null
+ ❯ src/components/ui/progress.test.tsx:21:17
+     19|     );
+     20|     const bar = screen.getByRole("progressbar", { name: "812 of 1,236 …
+     21|     expect(bar).toHaveAttribute("aria-valuenow", "812");
+       |                 ^
+     22|     expect(bar).toHaveAttribute("aria-valuemin", "0");
+     23|     expect(bar).toHaveAttribute("aria-valuemax", "1236");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:27:40
+   Duration  684ms (transform 56ms, setup 31ms, collect 67ms, tests 46ms, environment 152ms, prepare 105ms)
+

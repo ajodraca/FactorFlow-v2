@@ -1,35 +1,45 @@
+import { Circle, CircleDot, Diamond, Icon, type IconNode, Square, Triangle } from "lucide-react";
 import type { JSX } from "react";
-import { TIER_CLASSES } from "../../screens/runs/outcome-badge";
+import { Badge } from "../ui/badge";
+import type { Tier } from "./tiers";
 
 /**
- * The status badge the CAP-002 score-set surfaces share: the not-current
- * banner and the as-of line (UX design 1.2; STD-UI-8). Its tier classes are
- * the delivered map in `web/src/screens/runs/outcome-badge.tsx`, imported
- * rather than restated (SA-DUP-001). The shapes are UX design 1.2's, which
- * gives CAP-002 badges shapes of their own so the tiers stay distinct in
- * greyscale: good a filled circle, warning a triangle, active a ringed dot,
- * critical a square.
+ * The status badge every surface shares (component design `ui-components` 2.3;
+ * DAC-E1-2; blueprint section 8; STD-UI-8): S1's `badge` `status-<tier>` variant
+ * with the label as text and the tier shape as an `aria-hidden` icon, so no
+ * status is carried by colour alone. The label comes from `labelOf` or from the
+ * caller's own answer word, which is why it stays a prop rather than a `Status`.
+ *
+ * Neutral is a hollow circle, active a ringed dot, good a filled circle,
+ * warning a triangle, serious a diamond and critical a square.
  */
 
-export type StatusTier = "good" | "warning" | "active" | "critical";
+/** Kept for the delivered CAP-002 callers (`as-of-line`, `set-history-dialog`, `history-tab`); new code imports `Tier`. */
+export type StatusTier = Tier;
 
-const BADGE = "inline-flex items-center gap-1 rounded px-2 py-1 text-xs";
+/** Lucide ships no filled circle, and the delivered tests want the circle element itself to carry the fill. */
+const FILLED_CIRCLE: IconNode = [
+  ["circle", { cx: "12", cy: "12", r: "10", fill: "currentColor", key: "filled-circle" }],
+];
 
-const TIER_SHAPES: Record<StatusTier, JSX.Element> = {
-  good: <circle cx="6" cy="6" r="5" fill="currentColor" />,
-  warning: <path d="M6 1 11 11H1Z" fill="currentColor" />,
-  active: (
-    <>
-      <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="6" cy="6" r="2" fill="currentColor" />
-    </>
-  ),
-  critical: <rect x="1.5" y="1.5" width="9" height="9" fill="currentColor" />,
+const ICON_PROPS = {
+  "aria-hidden": "true",
+  focusable: "false",
+  className: "h-3 w-3 shrink-0",
+} as const;
+
+const TIER_ICON: Record<Tier, JSX.Element> = {
+  neutral: <Circle {...ICON_PROPS} />,
+  active: <CircleDot {...ICON_PROPS} />,
+  good: <Icon iconNode={FILLED_CIRCLE} {...ICON_PROPS} />,
+  warning: <Triangle fill="currentColor" {...ICON_PROPS} />,
+  serious: <Diamond fill="currentColor" {...ICON_PROPS} />,
+  critical: <Square fill="currentColor" {...ICON_PROPS} />,
 };
 
 export interface StatusBadgeProps {
-  tier: StatusTier;
-  /** The badge's word, from the copy catalogue. */
+  tier: Tier;
+  /** The badge's word, from `labelOf` or the caller's own answer. */
   children: string;
   /** A native tooltip, such as the building set's start time on *Updating* (UX design 1.2). */
   title?: string;
@@ -39,15 +49,9 @@ export interface StatusBadgeProps {
 
 export function StatusBadge({ tier, children, title, className }: StatusBadgeProps): JSX.Element {
   return (
-    <span
-      data-variant={`status-${tier}`}
-      title={title}
-      className={[BADGE, className, TIER_CLASSES[tier]].filter(Boolean).join(" ")}
-    >
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
-        {TIER_SHAPES[tier]}
-      </svg>
+    <Badge variant={`status-${tier}` as const} title={title} className={className}>
+      {TIER_ICON[tier]}
       {children}
-    </span>
+    </Badge>
   );
 }

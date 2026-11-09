@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-gowzkx5u/w3/web
+
+ ❯ src/components/ui/input.test.tsx (9 tests | 1 failed) 76ms
+   × input (DAC-E1-S2-2, AC-25) > makes the suffix part of the accessible name outside a form 8ms
+     → expect(element).toHaveClass("text-muted-foreground")
+
+Expected the element to have class:
+  text-muted-foreground
+Received:
+  text-base
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/input.test.tsx > input (DAC-E1-S2-2, AC-25) > makes the suffix part of the accessible name outside a form
+Error: expect(element).toHaveClass("text-muted-foreground")
+
+Expected the element to have class:
+  text-muted-foreground
+Received:
+  text-base
+ ❯ src/components/ui/input.test.tsx:38:20
+     36|     const suffix = screen.getByText("years");
+     37|     expect(suffix).toBeVisible();
+     38|     expect(suffix).toHaveClass("text-muted-foreground");
+       |                    ^
+     39|     expect(suffix.parentElement).toContainElement(screen.getByRole("sp…
+     40|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  09:11:10
+   Duration  913ms (transform 27ms, setup 29ms, collect 68ms, tests 76ms, environment 176ms, prepare 177ms)
+

@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w1/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 87ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 315ms
+   × form root and field behaviour (DAC-E1-S2-2, AC-25) > styles the hint and the error with theme tokens 5ms
+     → expect(element).toHaveClass("text-sm text-muted-foreground")
+
+Expected the element to have class:
+  text-sm text-muted-foreground
+Received:
+  text-sm text-foreground
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 454ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form root and field behaviour (DAC-E1-S2-2, AC-25) > styles the hint and the error with theme tokens
+Error: expect(element).toHaveClass("text-sm text-muted-foreground")
+
+Expected the element to have class:
+  text-sm text-muted-foreground
+Received:
+  text-sm text-foreground
+ ❯ src/components/ui/form.test.tsx:251:42
+    249|     const user = userEvent.setup();
+    250|     render(<DepthForm onSubmit={vi.fn()} />);
+    251|     expect(screen.getByText(YEARS_HINT)).toHaveClass("text-sm", "text-…
+       |                                          ^
+    252|     await user.type(screen.getByRole("spinbutton", { name: "History de…
+    253|     await user.tab();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:19
+   Duration  1.51s (transform 128ms, setup 146ms, collect 1.01s, tests 856ms, environment 782ms, prepare 162ms)
+

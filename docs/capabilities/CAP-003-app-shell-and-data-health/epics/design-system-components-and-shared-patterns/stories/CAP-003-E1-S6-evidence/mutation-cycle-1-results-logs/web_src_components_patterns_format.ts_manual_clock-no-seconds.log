@@ -1,0 +1,55 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w2/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 4 failed) 84ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 28ms
+     → expected '17:52 CDT' to be '17:52:10 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 26ms
+     → expected '17:52 CDT' to be '17:52:10 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 6ms
+     → expected '17:52 CDT' to be '17:52:10 CDT' // Object.is equality
+   × clock and input guards > renders a clock with seconds and the zone 0ms
+     → expected '17:52 CDT' to be '17:52:10 CDT' // Object.is equality
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 198ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+AssertionError: expected '17:52 CDT' to be '17:52:10 CDT' // Object.is equality
+
+Expected: "17:52:10 CDT"
+Received: "17:52 CDT"
+
+ ❯ src/components/patterns/format.test.ts:63:51
+     61|       expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 1…
+     62|       expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 1…
+     63|       expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+       |                                                   ^
+     64|       expect(formatSessionDate("2026-03-08")).toBe("2026-03-08");
+     65|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > renders a clock with seconds and the zone
+AssertionError: expected '17:52 CDT' to be '17:52:10 CDT' // Object.is equality
+
+Expected: "17:52:10 CDT"
+Received: "17:52 CDT"
+
+ ❯ src/components/patterns/format.test.ts:94:49
+     92| describe("clock and input guards", () => {
+     93|   it("renders a clock with seconds and the zone", () => {
+     94|     expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+       |                                                 ^
+     95|     expect(formatClock(new Date("2026-01-16T06:00:30Z"))).toBe("00:00:…
+     96|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 36 passed (40)
+   Start at  16:52:32
+   Duration  2.16s (transform 94ms, setup 113ms, collect 269ms, tests 281ms, environment 1.21s, prepare 1.25s)
+

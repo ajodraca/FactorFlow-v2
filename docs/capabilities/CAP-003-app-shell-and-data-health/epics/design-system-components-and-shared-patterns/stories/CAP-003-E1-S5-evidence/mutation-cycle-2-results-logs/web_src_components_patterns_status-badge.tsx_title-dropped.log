@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4fz4h46c/w1/web
+
+ ❯ src/components/patterns/status-badge.test.tsx (31 tests | 1 failed) 84ms
+   × StatusBadge composition (DAC-E1-2) > forwards title and className and keeps the tier classes 3ms
+     → expect(element).toHaveAttribute("title", "2026-10-16 17:40 CDT") // element.getAttribute("title") === "2026-10-16 17:40 CDT"
+
+Expected the element to have attribute:
+  title="2026-10-16 17:40 CDT"
+Received:
+  null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge composition (DAC-E1-2) > forwards title and className and keeps the tier classes
+Error: expect(element).toHaveAttribute("title", "2026-10-16 17:40 CDT") // element.getAttribute("title") === "2026-10-16 17:40 CDT"
+
+Expected the element to have attribute:
+  title="2026-10-16 17:40 CDT"
+Received:
+  null
+ ❯ src/components/patterns/status-badge.test.tsx:132:19
+    130|     const badge = badgeOf("warning");
+    131| 
+    132|     expect(badge).toHaveAttribute("title", "2026-10-16 17:40 CDT");
+       |                   ^
+    133|     expect(badge).toHaveClass("w-fit", "text-status-warning");
+    134|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 30 passed (31)
+   Start at  15:18:09
+   Duration  1.27s (transform 85ms, setup 33ms, collect 392ms, tests 84ms, environment 273ms, prepare 147ms)
+

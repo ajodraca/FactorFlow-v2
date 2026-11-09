@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w1/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 1 failed) 23ms
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one 3ms
+     → expected 'Download 2026-01-15 17:40 CST' to be 'Download 2026-01-15 17:46 CST' // Object.is equality
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 67ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one
+AssertionError: expected 'Download 2026-01-15 17:40 CST' to be 'Download 2026-01-15 17:46 CST' // Object.is equality
+
+Expected: "Download 2026-01-15 17:46 CST"
+Received: "Download 2026-01-15 17:40 CST"
+
+ ❯ src/components/patterns/format.test.ts:86:80
+     84| 
+     85|   it("names a download from its start time when there is one", () => {
+     86|     expect(formatDownloadName("2026-01-15T23:46:00Z", "2026-01-15T23:4…
+       |                                                                                ^
+     87|       "Download 2026-01-15 17:46 CST",
+     88|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  16:52:23
+   Duration  1.68s (transform 104ms, setup 197ms, collect 221ms, tests 90ms, environment 692ms, prepare 358ms)
+

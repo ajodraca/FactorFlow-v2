@@ -1,0 +1,112 @@
+# TDD evidence for CAP-003-E1-S4 - Vendor data-table: compact, history, virtualised and expandable variants on TanStack Table.
+# One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged each cycle's patch.
+# Decisions applied from planning: DEC-0215, DEC-0306, DEC-0307.
+# Deviation from the plan's five cycles: data-table.tsx and data-table.test.tsx are two files that every behaviour task changes, and staging is file-granular, so tasks T002 (row-height half), T003-T006 and T008-T011 are one cycle (cycle-2) instead of cycles 2-5. The package manifest is cycle-1.
+# Deviation from the plan's text: the plan's manualSorting and autoResetExpanded options are not set. No sorted or expanded row model is wired, so both are inert (mutating them left every test green); the component says so in a comment. The licence of @tanstack/react-table was verified by hand against node_modules/@tanstack/react-table/LICENSE (MIT, Tanner Linsley); package-lock.json carries license MIT (DEC-0298).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T007]
+    description: >
+      Package half of TC-COMP-019: @tanstack/react-table ^8.21.3 added with npm install; licence verified by hand against node_modules/@tanstack/react-table/LICENSE (MIT, Tanner Linsley); package-lock.json carries license MIT for it and for the transitive @tanstack/table-core; no virtualisation library (DEC-0215). Baseline before any change: npm run test, 94 files and 2280 tests green.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-1-packages.log
+    red_log_sha256: af2ed30b0466395f8dcde7bcced779fcacfe634f85b66bed901ae9894a24b07f
+    red_evidence: >
+      With package.json and package-lock.json restored to HEAD, the package assertion of TC-COMP-019 fails: dependencies has no @tanstack/react-table.
+    green_evidence: >
+      With the manifests as changed, the same test passes.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a39718f52bad1141c7ef639faaffae6501869ae56d59adb00954b9e780fb0a87
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: "dependency manifest change only; the packages test is not production code"
+
+  - id: cycle-2
+    tasks: [T002, T003, T004, T005, T006, T008, T009, T010, T011, T012, T013]
+    description: >
+      data-table: the pure windowFor arithmetic, the table body common to every variant (programmatic headers, controlled single-column sort cycle ascending, descending, unsorted, aria-sort on the sorted column only, row header always on for history and opt-in elsewhere, busy), per-row expansion behind a named aria-expanded expander (kept open across appended pages), and the virtualised windowing over keyset pages with measured row and expansion heights, spacer rows, aria-rowcount and aria-rowindex, onEndReached once per loaded page, and a row memo that leaves earlier rows alone (TC-COMP-017, TC-COMP-018, TC-COMP-019, DEC-0306, DEC-0307). Reviews: first pass APPROVED with one MEDIUM (onEndReached never re-fired when a sort replaced the rows by as many); fixed by keying the fired page on the first row id and the count, with two tests, and the cycle re-reviewed APPROVED with no drift. Mutation survivors of the first runs were killed by tests (numeric class, colSpan, sticky header, zero-height layout, one pixel row, expansion height past the window, shift-click) or by removing dead code (the extras filter, the scrollTop and rowCount guards, the open-id set, the inert options).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-2-data-table.log
+    red_log_sha256: a3f2198507d02a860d0ded6d264bd27e27fbc65137194e89188e8d70e1e327de
+    red_evidence: >
+      data-table.test.tsx failed to resolve ./data-table before the module existed.
+    green_evidence: >
+      data-table.test.tsx 87 passed; npm run lint, npm run format, npx tsc --noEmit and npm run build are clean; the full suite passes with token-literals.test.ts and vendoring.test.ts unedited.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7a2b578ae72c488e762e7edb6220fb1c3275f5563eaa38134d8d0f628728af7d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: fa737d2394e297ef3d06c30d430b59fc564fc66f94a3545ff616f25eaad4f9c2
+      generated: 65
+      killed: 61
+      survived: 2
+      stillborn: 0
+      timeout: 2
+      score: 0.969
+      survivors:
+        - id: web/src/components/ui/data-table.tsx:266:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The layout effect's guard (!windowed || !tableRef.current) read as && only skips less: for a non-windowed table the effect then measures a row height and expansion heights that no non-windowed code reads, and tableRef.current is set whenever the effect runs, so every windowed render behaves the same.
+        - id: web/src/components/ui/data-table.tsx:301:drop-defaulted-argument:1
+          disposition: equivalent
+          reason: >
+            The non-windowed window literal is typed VisibleWindow; dropping padTop leaves undefined, and the only read, padTop > 0, is false for undefined exactly as for 0.
+
+  - id: cycle-3
+    tasks: [T002, T004, T006, T009, T010, T011]
+    description: >
+      Review v1 rework (IR-001 to IR-005, IR-008). Tests now pin the windowed aria-rowindex after a scroll, the memo's index and columns invalidation, the open expansion's height credited to its own row (IR-001, IR-002); the virtualised scroller's overflow-y-auto, the 24 px h-5 / h-5 w-5 sort and expander targets and the sr-only Details header (IR-003); the ten spec section 6 token classes and the sticky header background (IR-004). Production: an expanded row now also compares renderExpansion and getRowLabel in the row memo, so detail a caller loads into its own state reaches it (IR-005, DEC-0307); collapsed rows stay memoised. IR-008: the append test expands with Enter and awaits the rerender inside act, because TanStack resets its own page state in a microtask after data changes. Deviations, recorded here (IR-007): manualSorting and autoResetExpanded are not set, as cycle-2's header says (inert; no sorted or grouped row model is wired, TanStack table-core 8.21.3 index.esm.js:2740 and :3377); the expansion row's colSpan is columns.length + 1; heights are measured in a layout effect on every render; the prefetch key is the first row id plus the count; plan cycles 2 to 5 are cycle-2. IR-006 (aria-rowcount states the loaded count while hasMore) is not changed: T011 prescribes rowCount + 1 and a -1 or a total-count prop is a change to DEC-0307's owning design, so it is the owner's to decide.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-3-review-survivors.log
+    red_log_sha256: 391e2af2e82bf34f21e180afc4e9efaf6c734ab1b07b536664a113b06646d94c
+    red_evidence: >
+      Against the cycle-2 production code the two IR-005 tests fail (a changed renderExpansion and a changed getRowLabel never reach an open row); the other new tests pin behaviour the code already has, and the review's 18 surviving mutants fail them (mutation below).
+    green_evidence: >
+      data-table.test.tsx 100 passed with no act() warning; the full suite is 95 files and 2380 tests; npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 62bcc5af0b6c47c501516d9d5f198c13f4017c253c7237682f966aa2a8b71f36
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/cycle-3.patch
+    commit_hash: 12058ad2938a98c700c70299fa33ed7c96da3a85
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: cfe35ae0f5f0c8d37e53227184a084d9c1d05e7bf03cbe02b95974be5d094f6e
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T004, T006, T011]
+    description: >
+      Review v2 rework (IR-001). One test pins the half of DAC-E1-S4-1 the v2 review found unpinned: with stable renderExpansion and getRowLabel, an open earlier row is not re-rendered when a keyset page is appended (only the three new rows render). Test only; the production comparator already behaves so. IR-002 (late), IR-003 and IR-004 (LOW, carried) are not changed: IR-002 cannot block, IR-003 is the owner's to decide as cycle-3 recorded, IR-004 deviations stay recorded in this file.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/red-cycle-4-open-row-memo.log
+    red_log_sha256: f76ee50cdaf57f0604c1d72fc7f9eea397f1edaaee68826a3c63cce0dc1ace74
+    red_evidence: >
+      With the review's mutant manual:v2d1 applied (the open-row clause compares a.expansion === b.expansion, a new object on every render), the new test fails: renders is S0001, S0003, S0004, S0005, expected no S0001. The 100 other tests pass.
+    green_evidence: >
+      Against the unmutated code data-table.test.tsx passes 101 tests; the full suite is 95 files and 2381 tests; npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5136f0f542d8e634d789035df8fb7749f11d0bb37440289377f53f59e63dbfbd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S4-evidence/cycle-4.patch
+    commit_hash: 56a446bdae81f275081de7cf7b24adc4d133b505
+    mutation:
+      not_applicable: "test-only cycle: adds no production code; the review's mutant manual:v2d1 is the RED and is killed by the new test"

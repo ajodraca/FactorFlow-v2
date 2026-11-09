@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5br0l38r/w3/web
+
+ ❯ src/components/ui/textarea.test.tsx (7 tests | 1 failed) 116ms
+   × textarea list (DAC-E1-S2-1, AC-25) > is the list variant with four rows and no resize by default 35ms
+     → expect(element).toHaveAttribute("data-variant", "list") // element.getAttribute("data-variant") === "list"
+
+Expected the element to have attribute:
+  data-variant="list"
+Received:
+  data-variant="x"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/textarea.test.tsx > textarea list (DAC-E1-S2-1, AC-25) > is the list variant with four rows and no resize by default
+Error: expect(element).toHaveAttribute("data-variant", "list") // element.getAttribute("data-variant") === "list"
+
+Expected the element to have attribute:
+  data-variant="list"
+Received:
+  data-variant="x"
+ ❯ src/components/ui/textarea.test.tsx:23:19
+     21|   it("is the list variant with four rows and no resize by default", ()…
+     22|     const { field } = renderField();
+     23|     expect(field).toHaveAttribute("data-variant", "list");
+       |                   ^
+     24|     expect(field).toHaveAttribute("rows", "4");
+     25|     expect(field).toHaveClass("resize-none", "w-full", "rounded", "bor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:13:13
+   Duration  922ms (transform 26ms, setup 30ms, collect 74ms, tests 116ms, environment 181ms, prepare 101ms)
+

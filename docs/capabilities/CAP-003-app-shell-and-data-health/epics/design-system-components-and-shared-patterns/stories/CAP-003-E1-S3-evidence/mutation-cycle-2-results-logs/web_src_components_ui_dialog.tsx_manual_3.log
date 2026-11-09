@@ -1,0 +1,116 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o7mt325c/w0/web
+
+ ❯ src/components/ui/dialog.test.tsx (8 tests | 2 failed) 225ms
+   × dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 90ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Stop following AAPL
+</button>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <button
+      type="button"
+    >
+      Stop following AAPL
+    </button>
+  </div>
+</body>
+   × dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > closes on a click on the overlay and returns focus to the opener 24ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Stop following AAPL
+</button>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <button
+      type="button"
+    >
+      Stop following AAPL
+    </button>
+  </div>
+</body>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Stop following AAPL
+</button>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <button
+      type="button"
+    >
+      Stop following AAPL
+    </button>
+  </div>
+</body>
+ ❯ src/components/ui/dialog.test.tsx:80:20
+     78|     await user.keyboard("{Escape}");
+     79|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+     80|     expect(opener).toHaveFocus();
+       |                    ^
+     81|   });
+     82| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > closes on a click on the overlay and returns focus to the opener
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Stop following AAPL
+</button>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <button
+      type="button"
+    >
+      Stop following AAPL
+    </button>
+  </div>
+</body>
+ ❯ src/components/ui/dialog.test.tsx:92:20
+     90|     await user.click(overlay());
+     91|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+     92|     expect(opener).toHaveFocus();
+       |                    ^
+     93|   });
+     94| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  10:27:14
+   Duration  828ms (transform 31ms, setup 28ms, collect 88ms, tests 225ms, environment 162ms, prepare 102ms)
+

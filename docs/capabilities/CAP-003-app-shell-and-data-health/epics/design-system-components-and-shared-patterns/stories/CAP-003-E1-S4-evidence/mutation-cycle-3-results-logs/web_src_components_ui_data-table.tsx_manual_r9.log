@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 8ms
+ ✓ src/components/token-literals.test.ts (30 tests) 27ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 6419ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 4611ms
+   × windowed row numbering and the row memo (DAC-E1-S4-1, AC-25) > credits an open expansion's height to its own row, not to the next one 95ms
+     → expected 'S0031' to be 'S0030' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowed row numbering and the row memo (DAC-E1-S4-1, AC-25) > credits an open expansion's height to its own row, not to the next one
+AssertionError: expected 'S0031' to be 'S0030' // Object.is equality
+
+Expected: "S0030"
+Received: "S0031"
+
+ ❯ src/components/ui/data-table.test.tsx:852:29
+    850|     // 1350 lies inside row 40's detail (1312 to 1408), so row 40 is s…
+    851|     scrollToPx(1350);
+    852|     expect(bodyRowIds()[0]).toBe("S0030");
+       |                             ^
+    853|   });
+    854| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:22:27
+   Duration  9.75s (transform 143ms, setup 491ms, collect 722ms, tests 6.45s, environment 3.02s, prepare 1.32s)
+

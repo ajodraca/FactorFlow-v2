@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/ee2ae1d3-f440-42d4-83b0-70a1f714a8f0/scratchpad/work/mutation-run-u2kq1wuf/w3/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 3ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/token-literals.test.ts (30 tests) 98ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 173ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 279ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 386ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 383ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 426ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 316ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 474ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 530ms
+ ❯ src/components/ui/select.test.tsx (7 tests | 1 failed) 666ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 369ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens 111ms
+     → expect(element).toHaveClass("left-2 h-4 w-4")
+
+Expected the element to have class:
+  left-2 h-4 w-4
+Received:
+  absolute left-2 flex h-3.5 w-3.5 items-center justify-center
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > styles the open content and its options with theme tokens
+Error: expect(element).toHaveClass("left-2 h-4 w-4")
+
+Expected the element to have class:
+  left-2 h-4 w-4
+Received:
+  absolute left-2 flex h-3.5 w-3.5 items-center justify-center
+ ❯ src/components/ui/select.test.tsx:145:26
+    143|     expect(option.className).not.toMatch(/(^|\s)(rounded-sm|py-1\.5|pl…
+    144|     const indicatorBox = option.querySelector("span.absolute");
+    145|     expect(indicatorBox).toHaveClass("left-2", "h-4", "w-4");
+       |                          ^
+    146|     expect(indicatorBox?.className).not.toMatch(/3\.5/);
+    147|     const mark = screen.getByRole("option", { name: "All stocks" }).qu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 125 passed (126)
+   Start at  09:55:44
+   Duration  3.73s (transform 675ms, setup 1.60s, collect 6.79s, tests 3.74s, environment 9.55s, prepare 5.60s)
+

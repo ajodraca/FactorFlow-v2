@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-k31oxopg/w1/web
+
+ ❯ src/components/ui/radio-group.test.tsx (7 tests | 1 failed) 206ms
+   × radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > is the cards variant in equal-width columns and leaves orientation unset 8ms
+     → expect(element).toHaveAttribute("data-variant", "cards") // element.getAttribute("data-variant") === "cards"
+
+Expected the element to have attribute:
+  data-variant="cards"
+Received:
+  data-variant="x"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/radio-group.test.tsx > radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > is the cards variant in equal-width columns and leaves orientation unset
+Error: expect(element).toHaveAttribute("data-variant", "cards") // element.getAttribute("data-variant") === "cards"
+
+Expected the element to have attribute:
+  data-variant="cards"
+Received:
+  data-variant="x"
+ ❯ src/components/ui/radio-group.test.tsx:121:19
+    119|     renderGroup();
+    120|     const group = screen.getByRole("radiogroup");
+    121|     expect(group).toHaveAttribute("data-variant", "cards");
+       |                   ^
+    122|     expect(group).toHaveClass("grid", "grid-flow-col", "auto-cols-fr",…
+    123|     expect(group).not.toHaveAttribute("aria-orientation");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:16:22
+   Duration  1.05s (transform 34ms, setup 34ms, collect 291ms, tests 206ms, environment 188ms, prepare 201ms)
+

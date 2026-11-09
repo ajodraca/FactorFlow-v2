@@ -1,0 +1,64 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-jlv4vk6_/w1/web
+
+ ❯ src/components/ui/command.test.tsx (5 tests | 1 failed) 115ms
+   × command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 111ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Open the command palette
+</button>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <button
+      type="button"
+    >
+      Open the command palette
+    </button>
+  </div>
+</body>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Open the command palette
+</button>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <button
+      type="button"
+    >
+      Open the command palette
+    </button>
+  </div>
+</body>
+ ❯ src/components/ui/command.test.tsx:88:20
+     86|     await user.keyboard("{Escape}");
+     87|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+     88|     expect(opener).toHaveFocus();
+       |                    ^
+     89|   });
+     90| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  10:27:27
+   Duration  1.19s (transform 31ms, setup 32ms, collect 325ms, tests 115ms, environment 180ms, prepare 208ms)
+

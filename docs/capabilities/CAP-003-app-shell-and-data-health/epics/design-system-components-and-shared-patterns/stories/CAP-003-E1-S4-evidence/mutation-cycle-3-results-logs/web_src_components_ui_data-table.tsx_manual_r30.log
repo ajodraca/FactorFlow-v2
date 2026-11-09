@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w0/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 14ms
+ ✓ src/components/token-literals.test.ts (30 tests) 114ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 6014ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 4035ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > sets a row header left-aligned in the medium weight with the cell padding 11ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium
+Received:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > sets a row header left-aligned in the medium weight with the cell padding
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium
+Received:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left
+ ❯ src/components/ui/data-table.test.tsx:932:20
+    930|     render(<DataTable {...variantProps("history", stocks(2))} />);
+    931|     for (const cell of screen.getAllByRole("rowheader")) {
+    932|       expect(cell).toHaveClass(...PADDING, "text-left", "font-medium");
+       |                    ^
+    933|     }
+    934|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:23:00
+   Duration  9.10s (transform 204ms, setup 628ms, collect 1.20s, tests 6.14s, environment 1.98s, prepare 1.28s)
+

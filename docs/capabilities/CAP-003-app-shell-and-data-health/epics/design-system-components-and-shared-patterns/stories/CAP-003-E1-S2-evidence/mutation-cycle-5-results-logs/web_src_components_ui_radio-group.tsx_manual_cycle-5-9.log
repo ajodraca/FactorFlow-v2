@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-k31oxopg/w3/web
+
+ ❯ src/components/ui/radio-group.test.tsx (7 tests | 1 failed) 209ms
+   × radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > shows the title and description as blocks and hides the indicator box from assistive technology 7ms
+     → expect(element).toHaveClass("block font-semibold")
+
+Expected the element to have class:
+  block font-semibold
+Received:
+  hidden font-semibold
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/radio-group.test.tsx > radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > shows the title and description as blocks and hides the indicator box from assistive technology
+Error: expect(element).toHaveClass("block font-semibold")
+
+Expected the element to have class:
+  block font-semibold
+Received:
+  hidden font-semibold
+ ❯ src/components/ui/radio-group.test.tsx:109:19
+    107|     const { paste } = renderGroup();
+    108|     const title = screen.getByText("Paste a list");
+    109|     expect(title).toHaveClass("block", "font-semibold");
+       |                   ^
+    110|     const description = screen.getByText(PASTE_DESCRIPTION);
+    111|     expect(description).toHaveClass("block", "text-xs", "text-muted-fo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:16:24
+   Duration  1.13s (transform 28ms, setup 33ms, collect 398ms, tests 209ms, environment 239ms, prepare 45ms)
+

@@ -1,0 +1,333 @@
+diff --git a/web/src/components/ui/select.test.tsx b/web/src/components/ui/select.test.tsx
+new file mode 100644
+index 0000000..c292656
+--- /dev/null
++++ b/web/src/components/ui/select.test.tsx
+@@ -0,0 +1,178 @@
++import { render, screen } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
++import {
++  Select,
++  SelectContent,
++  SelectGroup,
++  SelectItem,
++  SelectLabel,
++  SelectSeparator,
++  SelectTrigger,
++  SelectValue,
++} from "./select";
++
++// Radix Select needs three pointer and scroll methods and ResizeObserver, none
++// of which jsdom provides. The prototype methods are defined once; the shared
++// test setup unstubs globals after each test, so ResizeObserver is stubbed
++// before each.
++//
++// jsdom's selector engine (nwsapi) also recurses on the `:fullscreen` and
++// `:modal` pseudo-classes, which jsdom's own default stylesheet asks about on
++// every computed-style read. The popper positioning reads styles, and opening
++// the list then takes about eight seconds. Neither pseudo-class can match in
++// jsdom, so they are answered directly.
++const originalMatches = Element.prototype.matches;
++beforeAll(() => {
++  Element.prototype.hasPointerCapture = () => false;
++  Element.prototype.releasePointerCapture = () => {};
++  Element.prototype.scrollIntoView = () => {};
++  Element.prototype.matches = function matches(this: Element, selector: string) {
++    return selector === ":fullscreen" || selector === ":modal"
++      ? false
++      : originalMatches.call(this, selector);
++  };
++});
++
++afterAll(() => {
++  Element.prototype.matches = originalMatches;
++});
++
++beforeEach(() => {
++  vi.stubGlobal(
++    "ResizeObserver",
++    class {
++      observe() {}
++      unobserve() {}
++      disconnect() {}
++    },
++  );
++});
++
++function renderSelect(changeSpy = vi.fn()) {
++  render(
++    <Select defaultValue="all" onValueChange={changeSpy}>
++      <SelectTrigger aria-label="Lifecycle">
++        <SelectValue />
++      </SelectTrigger>
++      <SelectContent>
++        <SelectItem value="all">All stocks</SelectItem>
++        <SelectItem value="followed">Followed</SelectItem>
++        <SelectItem value="stopped">Stopped following</SelectItem>
++      </SelectContent>
++    </Select>,
++  );
++  return { changeSpy, trigger: screen.getByRole("combobox", { name: "Lifecycle" }) };
++}
++
++// Implements TC-COMP-009
++describe("select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25)", () => {
++  it("exposes combobox and listbox roles and selects with the keyboard", async () => {
++    const user = userEvent.setup();
++    const { trigger, changeSpy } = renderSelect();
++
++    await user.tab();
++    expect(trigger).toHaveFocus();
++    expect(trigger).toHaveAttribute("aria-expanded", "false");
++    expect(trigger).toHaveTextContent("All stocks");
++
++    await user.keyboard("{Enter}");
++    expect(screen.getByRole("listbox")).toBeInTheDocument();
++    expect(trigger).toHaveAttribute("aria-expanded", "true");
++    expect(screen.getAllByRole("option")).toHaveLength(3);
++    expect(screen.getByRole("option", { name: "All stocks" })).toHaveAttribute("data-highlighted");
++
++    await user.keyboard("{ArrowDown}{Enter}");
++    expect(changeSpy).toHaveBeenCalledTimes(1);
++    expect(changeSpy).toHaveBeenCalledWith("followed");
++    expect(screen.queryByRole("listbox")).toBeNull();
++    expect(trigger).toHaveFocus();
++    expect(trigger).toHaveTextContent("Followed");
++
++    await user.keyboard(" ");
++    expect(screen.getByRole("listbox")).toBeInTheDocument();
++    await user.keyboard("{Escape}");
++    expect(screen.queryByRole("listbox")).toBeNull();
++    expect(changeSpy).toHaveBeenCalledTimes(1);
++    expect(trigger).toHaveTextContent("Followed");
++    expect(trigger).toHaveFocus();
++  });
++
++  it("is the inline variant with the control classes", () => {
++    const { trigger } = renderSelect();
++    expect(trigger).toHaveAttribute("data-variant", "inline");
++    for (const name of ["h-7", "rounded", "border", "border-input", "bg-background"]) {
++      expect(trigger).toHaveClass(name);
++    }
++  });
++
++  it("styles the open content and its options with theme tokens", async () => {
++    const user = userEvent.setup();
++    renderSelect();
++    await user.tab();
++    await user.keyboard("{Enter}");
++    const content = screen.getByRole("listbox").closest("[data-radix-popper-content-wrapper] > *");
++    const surface = content ?? screen.getByRole("listbox");
++    for (const name of ["bg-popover", "text-popover-foreground", "border", "border-border"]) {
++      expect(surface).toHaveClass(name);
++    }
++    expect(surface.className).not.toMatch(/(^|\s)animate-/);
++    const option = screen.getByRole("option", { name: "Followed" });
++    expect(option).toHaveClass(
++      "h-row",
++      "data-[highlighted]:bg-accent",
++      "data-[highlighted]:text-accent-foreground",
++    );
++  });
++
++  it("positions the popper content under the trigger with a trigger-sized viewport", async () => {
++    const user = userEvent.setup();
++    const { trigger } = renderSelect();
++    await user.tab();
++    await user.keyboard("{Enter}");
++    const wrapper = document.querySelector("[data-radix-popper-content-wrapper]");
++    expect(wrapper).not.toBeNull();
++    const content = wrapper?.firstElementChild;
++    expect(content).toHaveClass("data-[side=bottom]:translate-y-1", "data-[side=top]:-translate-y-1");
++    expect(content).toHaveClass("min-w-[var(--radix-select-trigger-width)]", "overflow-hidden", "rounded");
++    const viewport = content?.querySelector("[data-radix-select-viewport]");
++    expect(viewport).toHaveClass("p-1", "h-[var(--radix-select-trigger-height)]", "w-full");
++    expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
++    expect(trigger.querySelector("svg")).toHaveClass("h-4", "w-4", "text-muted-foreground");
++  });
++
++  it("styles a group label and a separator with theme tokens", async () => {
++    const user = userEvent.setup();
++    render(
++      <Select defaultValue="a">
++        <SelectTrigger aria-label="Pick">
++          <SelectValue />
++        </SelectTrigger>
++        <SelectContent>
++          <SelectGroup>
++            <SelectLabel>Group</SelectLabel>
++            <SelectItem value="a">A</SelectItem>
++          </SelectGroup>
++          <SelectSeparator />
++          <SelectItem value="b">B</SelectItem>
++        </SelectContent>
++      </Select>,
++    );
++    await user.tab();
++    await user.keyboard("{Enter}");
++    expect(screen.getByText("Group")).toHaveClass("text-base", "font-semibold", "pl-6", "pr-2", "py-1");
++    const separator = document.querySelector(".h-px");
++    expect(separator).toHaveClass("-mx-1", "my-1", "h-px", "bg-muted");
++  });
++
++  it("highlights the matching option when a letter is typed while open", async () => {
++    const user = userEvent.setup();
++    renderSelect();
++    await user.tab();
++    await user.keyboard("{Enter}");
++    await user.keyboard("s");
++    expect(screen.getByRole("option", { name: "Stopped following" })).toHaveAttribute(
++      "data-highlighted",
++    );
++  });
++});
+diff --git a/web/src/components/ui/select.tsx b/web/src/components/ui/select.tsx
+new file mode 100644
+index 0000000..9f3f46d
+--- /dev/null
++++ b/web/src/components/ui/select.tsx
+@@ -0,0 +1,143 @@
++import * as SelectPrimitive from "@radix-ui/react-select";
++import { Check, ChevronDown, ChevronUp } from "lucide-react";
++import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from "react";
++import { cn } from "./utils";
++
++/**
++ * Vendored shadcn/ui `select` over Radix (component design 2.1), with the
++ * `inline` variant on the trigger (DEC-0300). Radix supplies the `combobox` and
++ * `listbox` roles and the keyboard contract (Enter or Space opens, arrows and
++ * typeahead highlight, Enter selects, Escape closes and returns focus to the
++ * trigger; AC-25). The shipped control height, radius, ring offset, shadow and
++ * animation classes are replaced or dropped so every class resolves to a theme
++ * token (AC-26); no animation plugin is installed.
++ */
++export const Select = SelectPrimitive.Root;
++export const SelectGroup = SelectPrimitive.Group;
++export const SelectValue = SelectPrimitive.Value;
++
++export type SelectTriggerProps = ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
++  variant?: "inline";
++};
++
++export const SelectTrigger = forwardRef<
++  ElementRef<typeof SelectPrimitive.Trigger>,
++  SelectTriggerProps
++>(({ className, children, variant = "inline", ...props }, ref) => (
++  <SelectPrimitive.Trigger
++    ref={ref}
++    data-variant={variant}
++    className={cn(
++      "flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
++      className,
++    )}
++    {...props}
++  >
++    {children}
++    <SelectPrimitive.Icon asChild>
++      <ChevronDown className="h-4 w-4 text-muted-foreground" />
++    </SelectPrimitive.Icon>
++  </SelectPrimitive.Trigger>
++));
++SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
++
++export const SelectScrollUpButton = forwardRef<
++  ElementRef<typeof SelectPrimitive.ScrollUpButton>,
++  ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
++>(({ className, ...props }, ref) => (
++  <SelectPrimitive.ScrollUpButton
++    ref={ref}
++    className={cn("flex cursor-default items-center justify-center py-1", className)}
++    {...props}
++  >
++    <ChevronUp className="h-4 w-4" />
++  </SelectPrimitive.ScrollUpButton>
++));
++SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
++
++export const SelectScrollDownButton = forwardRef<
++  ElementRef<typeof SelectPrimitive.ScrollDownButton>,
++  ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
++>(({ className, ...props }, ref) => (
++  <SelectPrimitive.ScrollDownButton
++    ref={ref}
++    className={cn("flex cursor-default items-center justify-center py-1", className)}
++    {...props}
++  >
++    <ChevronDown className="h-4 w-4" />
++  </SelectPrimitive.ScrollDownButton>
++));
++SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
++
++export const SelectContent = forwardRef<
++  ElementRef<typeof SelectPrimitive.Content>,
++  ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
++>(({ className, children, position = "popper", ...props }, ref) => (
++  <SelectPrimitive.Portal>
++    <SelectPrimitive.Content
++      ref={ref}
++      position={position}
++      className={cn(
++        "relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded border border-border bg-popover text-popover-foreground",
++        position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
++        className,
++      )}
++      {...props}
++    >
++      <SelectScrollUpButton />
++      <SelectPrimitive.Viewport
++        className={cn(
++          "p-1",
++          position === "popper" &&
++            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
++        )}
++      >
++        {children}
++      </SelectPrimitive.Viewport>
++      <SelectScrollDownButton />
++    </SelectPrimitive.Content>
++  </SelectPrimitive.Portal>
++));
++SelectContent.displayName = SelectPrimitive.Content.displayName;
++
++export const SelectLabel = forwardRef<
++  ElementRef<typeof SelectPrimitive.Label>,
++  ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
++>(({ className, ...props }, ref) => (
++  <SelectPrimitive.Label
++    ref={ref}
++    className={cn("py-1 pl-6 pr-2 text-base font-semibold", className)}
++    {...props}
++  />
++));
++SelectLabel.displayName = SelectPrimitive.Label.displayName;
++
++export const SelectItem = forwardRef<
++  ElementRef<typeof SelectPrimitive.Item>,
++  ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
++>(({ className, children, ...props }, ref) => (
++  <SelectPrimitive.Item
++    ref={ref}
++    className={cn(
++      "relative flex h-row w-full cursor-default select-none items-center rounded py-1 pl-6 pr-2 text-base outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
++      className,
++    )}
++    {...props}
++  >
++    <span className="absolute left-2 flex h-4 w-4 items-center justify-center">
++      <SelectPrimitive.ItemIndicator>
++        <Check className="h-4 w-4" />
++      </SelectPrimitive.ItemIndicator>
++    </span>
++    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
++  </SelectPrimitive.Item>
++));
++SelectItem.displayName = SelectPrimitive.Item.displayName;
++
++export const SelectSeparator = forwardRef<
++  ElementRef<typeof SelectPrimitive.Separator>,
++  ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
++>(({ className, ...props }, ref) => (
++  <SelectPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-muted", className)} {...props} />
++));
++SelectSeparator.displayName = SelectPrimitive.Separator.displayName;

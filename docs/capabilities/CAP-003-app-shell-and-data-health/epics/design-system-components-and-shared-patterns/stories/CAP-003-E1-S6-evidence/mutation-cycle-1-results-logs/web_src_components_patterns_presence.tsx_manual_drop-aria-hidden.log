@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w0/web
+
+ ✓ src/components/patterns/format.test.ts (33 tests) 185ms
+ ❯ src/components/patterns/presence.test.tsx (7 tests | 1 failed) 71ms
+   × Absent (TC-COMP-025 edge, DAC-E1-8) > is an em dash hidden from assistive technology with the hidden words naming what is absent 7ms
+     → expect(element).toHaveAttribute("aria-hidden", "true") // element.getAttribute("aria-hidden") === "true"
+
+Expected the element to have attribute:
+  aria-hidden="true"
+Received:
+  null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/presence.test.tsx > Absent (TC-COMP-025 edge, DAC-E1-8) > is an em dash hidden from assistive technology with the hidden words naming what is absent
+Error: expect(element).toHaveAttribute("aria-hidden", "true") // element.getAttribute("aria-hidden") === "true"
+
+Expected the element to have attribute:
+  aria-hidden="true"
+Received:
+  null
+ ❯ src/components/patterns/presence.test.tsx:68:18
+     66|     expect(container).toHaveTextContent(/^—No closing price$/);
+     67|     const dash = screen.getByText("—");
+     68|     expect(dash).toHaveAttribute("aria-hidden", "true");
+       |                  ^
+     69|     expect(screen.getByText("No closing price")).toHaveClass("sr-only"…
+     70|     expect(container.firstElementChild).toHaveClass("text-value-missin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  16:52:38
+   Duration  1.72s (transform 68ms, setup 93ms, collect 740ms, tests 256ms, environment 843ms, prepare 383ms)
+

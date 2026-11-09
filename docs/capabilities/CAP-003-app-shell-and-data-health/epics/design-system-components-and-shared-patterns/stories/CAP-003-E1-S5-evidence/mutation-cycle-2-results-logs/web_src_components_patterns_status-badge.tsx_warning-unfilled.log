@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4fz4h46c/w1/web
+
+ ❯ src/components/patterns/status-badge.test.tsx (31 tests | 1 failed) 85ms
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > warning is a filled shape 3ms
+     → expect(element).toHaveAttribute("fill", "currentColor") // element.getAttribute("fill") === "currentColor"
+
+Expected the element to have attribute:
+  fill="currentColor"
+Received:
+  fill="none"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > warning is a filled shape
+Error: expect(element).toHaveAttribute("fill", "currentColor") // element.getAttribute("fill") === "currentColor"
+
+Expected the element to have attribute:
+  fill="currentColor"
+Received:
+  fill="none"
+ ❯ src/components/patterns/status-badge.test.tsx:92:26
+     90|     render(<StatusBadge tier={tier}>{LABEL[tier]}</StatusBadge>);
+     91| 
+     92|     expect(iconOf(tier)).toHaveAttribute("fill", "currentColor");
+       |                          ^
+     93|   });
+     94| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 30 passed (31)
+   Start at  15:18:08
+   Duration  1.21s (transform 34ms, setup 31ms, collect 317ms, tests 85ms, environment 162ms, prepare 29ms)
+

@@ -1,0 +1,196 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w0/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 10 failed) 39ms
+   × clock and input guards > throws RangeError on the non-instant "" 4ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: ""' but got 'Not an ISO-8602 instant: ""'
+   × clock and input guards > throws RangeError on the non-instant "2026-10-15" 1ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-10-15"' but got 'Not an ISO-8602 instant: "2026-10-15"'
+   × clock and input guards > throws RangeError on the non-instant "2026-10-15T22:46:00" 1ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-10-15T…' but got 'Not an ISO-8602 instant: "2026-10-15T…'
+   × clock and input guards > throws RangeError on the non-instant "not a time" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "not a time"' but got 'Not an ISO-8602 instant: "not a time"'
+   × clock and input guards > throws RangeError on the non-instant "2026-13-45T99:00:00Z" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-13-45T…' but got 'Not an ISO-8602 instant: "2026-13-45T…'
+   × clock and input guards > throws RangeError on an invalid Date 0ms
+     → expected [Function] to throw error matching /^Not an ISO-8601 instant/ but got 'Not an ISO-8602 instant: null'
+   × clock and input guards > throws RangeError on the signed expanded-year instant "-002026-10-15T22:46:00Z" 1ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "-002026-10-…' but got 'Not an ISO-8602 instant: "-002026-10-…'
+   × clock and input guards > throws RangeError on the signed expanded-year instant "+002026-10-15T22:46:00Z" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "+002026-10-…' but got 'Not an ISO-8602 instant: "+002026-10-…'
+   × clock and input guards > throws RangeError on the signed expanded-year instant "+012026-10-15T22:46:00Z" 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "+012026-10-…' but got 'Not an ISO-8602 instant: "+012026-10-…'
+   × clock and input guards > throws on a malformed start time instead of falling back to the request time 0ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: ""' but got 'Not an ISO-8602 instant: ""'
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 98ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant ""
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: ""' but got 'Not an ISO-8602 instant: ""'
+
+Expected: "Not an ISO-8601 instant: """
+Received: "Not an ISO-8602 instant: """
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-10-15"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-10-15"' but got 'Not an ISO-8602 instant: "2026-10-15"'
+
+Expected: "Not an ISO-8601 instant: "2026-10-15""
+Received: "Not an ISO-8602 instant: "2026-10-15""
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-10-15T22:46:00"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-10-15T…' but got 'Not an ISO-8602 instant: "2026-10-15T…'
+
+Expected: "Not an ISO-8601 instant: "2026-10-15T22:46:00""
+Received: "Not an ISO-8602 instant: "2026-10-15T22:46:00""
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "not a time"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "not a time"' but got 'Not an ISO-8602 instant: "not a time"'
+
+Expected: "Not an ISO-8601 instant: "not a time""
+Received: "Not an ISO-8602 instant: "not a time""
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-13-45T99:00:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-13-45T…' but got 'Not an ISO-8602 instant: "2026-13-45T…'
+
+Expected: "Not an ISO-8601 instant: "2026-13-45T99:00:00Z""
+Received: "Not an ISO-8602 instant: "2026-13-45T99:00:00Z""
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on an invalid Date
+AssertionError: expected [Function] to throw error matching /^Not an ISO-8601 instant/ but got 'Not an ISO-8602 instant: null'
+
+- Expected: 
+/^Not an ISO-8601 instant/
+
++ Received: 
+"Not an ISO-8602 instant: null"
+
+ ❯ src/components/patterns/format.test.ts:111:55
+    109| 
+    110|   it("throws RangeError on an invalid Date", () => {
+    111|     expect(() => formatInstant(new Date(Number.NaN))).toThrow(/^Not an…
+       |                                                       ^
+    112|     expect(() => formatClock(new Date(Number.NaN))).toThrow(/^Not an I…
+    113|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the signed expanded-year instant "-002026-10-15T22:46:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "-002026-10-…' but got 'Not an ISO-8602 instant: "-002026-10-…'
+
+Expected: "Not an ISO-8601 instant: "-002026-10-15T22:46:00Z""
+Received: "Not an ISO-8602 instant: "-002026-10-15T22:46:00Z""
+
+ ❯ src/components/patterns/format.test.ts:137:42
+    135|     (input) => {
+    136|       expect(() => formatInstant(input)).toThrow(RangeError);
+    137|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    138|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    139|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the signed expanded-year instant "+002026-10-15T22:46:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "+002026-10-…' but got 'Not an ISO-8602 instant: "+002026-10-…'
+
+Expected: "Not an ISO-8601 instant: "+002026-10-15T22:46:00Z""
+Received: "Not an ISO-8602 instant: "+002026-10-15T22:46:00Z""
+
+ ❯ src/components/patterns/format.test.ts:137:42
+    135|     (input) => {
+    136|       expect(() => formatInstant(input)).toThrow(RangeError);
+    137|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    138|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    139|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the signed expanded-year instant "+012026-10-15T22:46:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "+012026-10-…' but got 'Not an ISO-8602 instant: "+012026-10-…'
+
+Expected: "Not an ISO-8601 instant: "+012026-10-15T22:46:00Z""
+Received: "Not an ISO-8602 instant: "+012026-10-15T22:46:00Z""
+
+ ❯ src/components/patterns/format.test.ts:137:42
+    135|     (input) => {
+    136|       expect(() => formatInstant(input)).toThrow(RangeError);
+    137|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    138|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    139|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws on a malformed start time instead of falling back to the request time
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: ""' but got 'Not an ISO-8602 instant: ""'
+
+Expected: "Not an ISO-8601 instant: """
+Received: "Not an ISO-8602 instant: """
+
+ ❯ src/components/patterns/format.test.ts:149:66
+    147|   it("throws on a malformed start time instead of falling back to the …
+    148|     expect(() => formatDownloadName("", "2026-10-15T22:46:00Z")).toThr…
+    149|     expect(() => formatDownloadName("", "2026-10-15T22:46:00Z")).toThr…
+       |                                                                  ^
+    150|       `Not an ISO-8601 instant: ""`,
+    151|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  10 failed | 38 passed (48)
+   Start at  17:35:13
+   Duration  2.43s (transform 103ms, setup 178ms, collect 314ms, tests 137ms, environment 1.13s, prepare 982ms)
+

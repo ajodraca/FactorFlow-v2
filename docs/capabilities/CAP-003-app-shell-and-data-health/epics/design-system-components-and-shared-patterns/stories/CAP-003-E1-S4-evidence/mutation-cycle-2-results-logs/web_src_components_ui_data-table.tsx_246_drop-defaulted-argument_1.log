@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 1 failed) 3362ms
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > sorts from the keyboard, cycling ascending, descending, unsorted 73ms
+     → expect(element).toHaveAttribute("aria-sort", "ascending") // element.getAttribute("aria-sort") === "ascending"
+
+Expected the element to have attribute:
+  aria-sort="ascending"
+Received:
+  aria-sort="descending"
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2056ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > sorts from the keyboard, cycling ascending, descending, unsorted
+Error: expect(element).toHaveAttribute("aria-sort", "ascending") // element.getAttribute("aria-sort") === "ascending"
+
+Expected the element to have attribute:
+  aria-sort="ascending"
+Received:
+  aria-sort="descending"
+ ❯ src/components/ui/data-table.test.tsx:230:64
+    228|     // The numeric column cycles the same way: its first press is asce…
+    229|     await user.click(screen.getByRole("button", { name: "Gaps" }));
+    230|     expect(screen.getByRole("columnheader", { name: "Gaps" })).toHaveA…
+       |                                                                ^
+    231|       "aria-sort",
+    232|       "ascending",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 86 passed (87)
+   Start at  12:32:35
+   Duration  4.69s (transform 88ms, setup 45ms, collect 457ms, tests 3.36s, environment 233ms, prepare 148ms)
+

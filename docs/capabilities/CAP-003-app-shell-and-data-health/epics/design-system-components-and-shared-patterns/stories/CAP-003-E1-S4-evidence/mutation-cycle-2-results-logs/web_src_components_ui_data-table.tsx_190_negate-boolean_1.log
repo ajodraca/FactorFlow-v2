@@ -1,0 +1,115 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 3 failed) 4173ms
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives every expandable row a named expander that toggles aria-expanded and keeps focus 11ms
+     → expected <tr id=":r1a:" …(2)>…(1)</tr> to be null
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic 59ms
+     → expected <div aria-live="polite"></div> to be null
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 3238ms
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window 45ms
+     → expected 'S0004' to be 'S0037' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives every expandable row a named expander that toggles aria-expanded and keeps focus
+AssertionError: expected <tr id=":r1a:" …(2)>…(1)</tr> to be null
+
+- Expected: 
+null
+
++ Received: 
+<tr
+  class="border-b border-border"
+  data-expansion-for="S0000"
+  id=":r1a:"
+>
+  <td
+    colspan="4"
+  >
+    <div
+      aria-live="polite"
+    >
+      Detail S0000
+    </div>
+  </td>
+</tr>
+
+ ❯ src/components/ui/data-table.test.tsx:298:62
+    296|     const expander = screen.getByRole("button", { name: "Expand Stock …
+    297|     expect(expander).toHaveAttribute("aria-expanded", "false");
+    298|     expect(document.querySelector("tr[data-expansion-for]")).toBeNull(…
+       |                                                              ^
+    299|     for (let i = 0; i < 10 && document.activeElement !== expander; i++…
+    300|       await user.tab();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > drops a collapsed row's height from the window arithmetic
+AssertionError: expected <div aria-live="polite"></div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-live="polite"
+>
+  Detail S0003
+</div>
+
+ ❯ src/components/ui/data-table.test.tsx:594:48
+    592|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+    593|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+    594|     expect(screen.queryByText("Detail S0003")).toBeNull();
+       |                                                ^
+    595|     scrollTo(50, 32);
+    596|     const ids = bodyRowIds();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > keeps an open expansion's height in the offsets after it scrolls out of the window
+AssertionError: expected 'S0004' to be 'S0037' // Object.is equality
+
+Expected: "S0037"
+Received: "S0004"
+
+ ❯ src/components/ui/data-table.test.tsx:773:29
+    771|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+    772|     scrollTo(50, 32);
+    773|     expect(bodyRowIds()[0]).toBe("S0037");
+       |                             ^
+    774|   });
+    775| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 84 passed (87)
+   Start at  12:32:17
+   Duration  6.46s (transform 151ms, setup 99ms, collect 1.29s, tests 4.17s, environment 388ms, prepare 47ms)
+

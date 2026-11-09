@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w2/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 82ms
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 232ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 216ms
+   × form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 47ms
+     → expected <p id=":r0:-form-item-message" …(1)></p> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint
+AssertionError: expected <p id=":r0:-form-item-message" …(1)></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p
+  class="text-sm font-medium text-destructive"
+  id=":r0:-form-item-message"
+/>
+
+ ❯ src/components/ui/form.test.tsx:104:66
+    102|     expect(screen.queryByRole("alert")).toBeNull();
+    103|     // With nothing to report, the message renders no element at all.
+    104|     expect(document.querySelector("[id$='-form-item-message']")).toBeN…
+       |                                                                  ^
+    105|     expect(field.closest("div")?.parentElement).toHaveClass("space-y-2…
+    106|     expect(field).toHaveAccessibleDescription(YEARS_HINT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:24
+   Duration  1.01s (transform 76ms, setup 110ms, collect 751ms, tests 530ms, environment 518ms, prepare 281ms)
+

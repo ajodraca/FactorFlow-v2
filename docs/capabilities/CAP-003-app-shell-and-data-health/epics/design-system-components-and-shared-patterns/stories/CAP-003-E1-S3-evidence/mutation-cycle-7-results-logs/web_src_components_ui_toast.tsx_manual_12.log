@@ -1,0 +1,62 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 75ms
+ ✓ src/components/token-literals.test.ts (30 tests) 98ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 231ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 412ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 390ms
+ ❯ src/components/ui/toast.test.tsx (8 tests | 1 failed) 1209ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 522ms
+   × toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > marks the region with both toaster and group, so the group-[.toaster] tokens apply 208ms
+     → expected [ 'toaster' ] to deeply equal ArrayContaining ["toaster", "group"]
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 2068ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 638ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 381ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 852ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 495ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 1258ms
+   ✓ stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > is a labelled navigation holding one ordered list of four items 366ms
+   ✓ stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > makes only the done link a tab stop and activates it with Enter 435ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 225ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 6ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 1502ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 922ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 793ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 349ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1309ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 540ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1713ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 915ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1666ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 939ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/toast.test.tsx > toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > marks the region with both toaster and group, so the group-[.toaster] tokens apply
+AssertionError: expected [ 'toaster' ] to deeply equal ArrayContaining ["toaster", "group"]
+
+- Expected
++ Received
+
+- ArrayContaining [
++ Array [
+    "toaster",
+-   "group",
+  ]
+
+ ❯ src/components/ui/toast.test.tsx:138:30
+    136|     await raiseAll();
+    137|     const region = document.querySelector("[data-sonner-toaster]");
+    138|     expect(tokensOf(region)).toEqual(expect.arrayContaining(["toaster"…
+       |                              ^
+    139|   });
+    140| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:40
+   Duration  5.57s (transform 1.46s, setup 3.28s, collect 20.47s, tests 14.16s, environment 12.23s, prepare 2.57s)
+
