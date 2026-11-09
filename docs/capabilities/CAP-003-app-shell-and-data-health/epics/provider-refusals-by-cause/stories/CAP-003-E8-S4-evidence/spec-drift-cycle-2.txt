@@ -1,0 +1,31 @@
+# Independent spec-drift subagent (general-purpose, agentId a7b774d9d56ff12df), cycle-2 (review rework of
+# implementation review v1, IR-001), judged cycle-2.patch (diff_sha256
+# f727c36739527e34296ee7eea7faf908d99afe7296186abfde9c2f18878bd8ac, index tree 42d9db991bac26a4d99a90ba8f752bc8ad68e488).
+DRIFT_DETECTED: false
+
+**What I checked**
+- **The staged change is the patch.** `git diff --cached` is byte-identical to `CAP-003-E8-S4-evidence/cycle-2.patch` (`cmp` found no difference; sha256 `f727c367…8bd8ac` on both). `git write-tree` gives `42d9db99…488e488`, and HEAD is `d809d75`. Only one file is staged, `tests/integration/test_runner_provider_refusals.py`, with 89 lines added and none removed. No production file, capability spec, design, test spec, coverage matrix or story criterion is staged. The one unstaged edit to the story is outside this cycle: it only changes the frontmatter `status:` from `in-review` to `in-progress`.
+- **The placement the specs require.**
+  - Acquisition-runner §2.2 (sequence diagram, code block, and "after the cancellation check so a stock that is never fetched starts no budget, and before the symbol lookup so every provider request of the stock … is charged to one budget").
+  - §8 criterion 1 ("at the top of each stock … exactly once").
+  - System design §3.6 note 4 and the §4.2 *Stock boundary* row ("called once per stock at the top-of-stock checkpoint, after the heartbeat and the cancellation check").
+  - Story Description ("after the delivered `heartbeat` and `cancellation_requested` checks and before the symbol lookup").
+  - DAC-E8-7 in the story and in epic CAP-003-E8 §111, DAC-E8-S4-1, and AC-30.
+  - `runner.py` `execute_claimed` lines 202-229 matches all of these: heartbeat, then the claim-lost `return`, then `cancellation_requested`, then `start_instrument()`, then `_symbol_for_id` (skip with `continue`).
+- **New test: claim lost before the second stock.** It asserts `_ONE_STOCK + ["heartbeat"]`, `start_instrument.call_count == 1`, and run state `abandoned`.
+  - This matches §2.2's "claim lost → stop, write nothing" and DAC-E8-7's "a stock that is never fetched starts no budget".
+  - It follows IR-001's remediation 1 exactly: the `_abandon_run` precedent from `test_runner_reclaim.py`, triggered from a first-stock client side effect.
+  - The `abandoned` assertion only says the runner does not finalise after losing its claim. That is delivered behaviour (DAC-E4-S5-3), not something new.
+- **New test: stock skipped for a missing instrument row.** The roster is `[first, missing, second]`. The skipped stock records heartbeat, cancellation check, `start_instrument`, then the symbol lookup, and no `fetch_*`. `start_instrument` is called 3 times, and the lookup arguments come in roster order.
+  - This pins what §2.2 and the story Description state ("before the symbol lookup"). It is also remediation 2's primary option in IR-001.
+  - It does not pick a side of an open question. §2.2 ties "never fetched starts no budget" to the cancellation check. "Exactly once per stock" (DAC-E8-7, §8 criterion 1) covers every stock in the roster.
+  - I found no owner decision record that adopts the other reading (giving the skipped stock no budget). With no such record, pinning the written placement is correct, not drift.
+  - It does not pin result rows, the skip log or the outcome of the skipped stock, so nothing the specs leave open is constrained.
+- **Scope.** Both tests carry `# Implements CAP-003 TC-COMP-252` and the `postgres` marker. They extend TC-COMP-252 (acquisition-runner-tests.md §TC-COMP-252, traced to AC-30, DAC-E8-S4-1 and DAC-E8-7), which the coverage matrix maps at rows 377 and 415. This is test-only, as IR-001's required remediation allows. The added `_abandon_run` helper copies the `test_runner_reclaim.py` precedent IR-001 names.
+- **Focused run.** `tests/integration/test_runner_provider_refusals.py`: 13 passed in 9.64s (testcontainers).
+
+**Drift items:** none.
+
+**Notes (outside this cycle, not drift):**
+- DAC-E8-7 has different wording in different places. The coverage matrix (row 377) and story CAP-003-E8-S3 carry only the massive-client half. The epic and story E8-S4 carry both the client half and the runner half. This was already the case before this cycle.
+- The tests do not cover the mutation rerun or replacing the "equivalent" dispositions for M5 and m12 in the TDD evidence, which IR-001 also requires. That evidence lives in unstaged files I did not judge.

@@ -1,0 +1,311 @@
+# RED cycle-2 (review rework of implementation review v1): the reworked TC-COMP-252 tests against the review's
+# three surviving mutants. The new tests pin behaviour runner.py already delivers, so they pass on HEAD (control
+# below); their RED is the survivors. Trees: git archive of HEAD d809d75c02a2318442aa3acb9de8b906eccff33d, one copy per run, runner.py
+# mutated by the review's own old/new pair from e8s4-review/mutants-with-manual.json (each old asserted unique),
+# with the working-tree test file (worktree) or HEAD's (head) copied in.
+
+# --- control-head-runner: mutant none (HEAD runner.py)
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: worktree)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/control-head-runner
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 13 items / 9 deselected / 4 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 25%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget PASSED [ 75%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup PASSED [100%]
+
+======================= 4 passed, 9 deselected in 6.48s ========================
+
+# exit code: 0
+
+# --- review-r08-extra-call-on-claim-loss-head-tests: mutant src/factorflow/ingestion/runner.py:manual:review-r08-extra-call-on-claim-loss
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: head)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/review-r08-extra-call-on-claim-loss-head-tests
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 11 items / 9 deselected / 2 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [100%]
+
+======================= 2 passed, 9 deselected in 4.90s ========================
+
+# exit code: 0
+
+# --- review-r08-extra-call-on-claim-loss-worktree-tests: mutant src/factorflow/ingestion/runner.py:manual:review-r08-extra-call-on-claim-loss
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: worktree)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/review-r08-extra-call-on-claim-loss-worktree-tests
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 13 items / 9 deselected / 4 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 25%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget FAILED [ 75%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup PASSED [100%]
+
+=================================== FAILURES ===================================
+____ test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget ____
+
+migrated_runner_connection = <psycopg.Connection [IDLE] (host=localhost port=60466 user=test database=test_2dd0c5f5365d41f49b3ac5bf5273e99c) at 0x10dd9b0b0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10dd9a330>
+
+    @pytest.mark.postgres
+    # Implements CAP-003 TC-COMP-252
+    def test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget(
+        migrated_runner_connection: psycopg.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E8-7: with the claim lost during the first stock, the second
+        stock's `heartbeat` fails, so it is never fetched and starts no budget."""
+        conn = migrated_runner_connection
+        first = _insert_instrument(conn, "AAPL")
+        second = _insert_instrument(conn, "KO")
+        run_id = _insert_claimed_run(conn)
+        client = _stub_client()
+        actions = client.fetch_corporate_actions.return_value
+    
+        def abandon_then_answer(*_args: object) -> list[CorporateAction]:
+            _abandon_run(conn, run_id)
+            return actions
+    
+        client.fetch_corporate_actions.side_effect = abandon_then_answer
+        parent = _spied_parent(monkeypatch, client)
+    
+        AcquisitionRunner(connection=conn, client=client, today=_TODAY).execute_claimed(
+            run_id=run_id, depth_years=5, instrument_ids=[first, second]
+        )
+    
+>       assert [c[0] for c in parent.mock_calls] == _ONE_STOCK + ["heartbeat"]
+E       AssertionError: assert ['heartbeat',...ancials', ...] == ['heartbeat',...ancials', ...]
+E         
+E         Left contains one more item: 'client.start_instrument'
+E         
+E         Full diff:
+E           [
+E               'heartbeat',
+E               'cancellation_requested',...
+E         
+E         ...Full output truncated (8 lines hidden), use '-vv' to show
+
+tests/integration/test_runner_provider_refusals.py:625: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  factorflow.ingestion.runner:runner.py:208 run=ad562223-a331-4fdf-af5d-d010be2decc2 heartbeat returned False; claim lost — stopping
+=========================== short test summary info ============================
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget
+================== 1 failed, 3 passed, 9 deselected in 5.75s ===================
+
+# exit code: 1
+
+# --- review-r05-call-after-symbol-lookup-head-tests: mutant src/factorflow/ingestion/runner.py:manual:review-r05-call-after-symbol-lookup
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: head)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/review-r05-call-after-symbol-lookup-head-tests
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 11 items / 9 deselected / 2 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [100%]
+
+======================= 2 passed, 9 deselected in 4.16s ========================
+
+# exit code: 0
+
+# --- review-r05-call-after-symbol-lookup-worktree-tests: mutant src/factorflow/ingestion/runner.py:manual:review-r05-call-after-symbol-lookup
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: worktree)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/review-r05-call-after-symbol-lookup-worktree-tests
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 13 items / 9 deselected / 4 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 25%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget PASSED [ 75%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup _
+
+migrated_runner_connection = <psycopg.Connection [INTRANS] (host=localhost port=60488 user=test database=test_247a7da250474a23a01a84908a55b3ae) at 0x10d6c9f20>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d6c97b0>
+
+    @pytest.mark.postgres
+    # Implements CAP-003 TC-COMP-252
+    def test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup(
+        migrated_runner_connection: psycopg.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E8-7, acquisition-runner CAP-003 section 2.2: a roster stock with
+        no `instrument` row gets its one `start_instrument()` after its
+        `heartbeat` and `cancellation_requested` and before the symbol lookup
+        that skips it, as every other stock does."""
+        conn = migrated_runner_connection
+        first = _insert_instrument(conn, "AAPL")
+        second = _insert_instrument(conn, "KO")
+        missing = second + 1000
+        run_id = _insert_claimed_run(conn)
+        client = _stub_client()
+        parent = _spied_parent(monkeypatch, client)
+        lookup = Mock(wraps=runner_module._symbol_for_id)
+        parent.attach_mock(lookup, "symbol_lookup")
+        monkeypatch.setattr(runner_module, "_symbol_for_id", lookup)
+    
+        AcquisitionRunner(connection=conn, client=client, today=_TODAY).execute_claimed(
+            run_id=run_id, depth_years=5, instrument_ids=[first, missing, second]
+        )
+    
+        fetched = [
+            "heartbeat",
+            "cancellation_requested",
+            "client.start_instrument",
+            "symbol_lookup",
+            "client.fetch_reference",
+            "client.fetch_daily_bars",
+            "client.fetch_financials",
+            "client.fetch_corporate_actions",
+        ]
+        skipped = [
+            "heartbeat",
+            "cancellation_requested",
+            "client.start_instrument",
+            "symbol_lookup",
+        ]
+>       assert [c[0] for c in parent.mock_calls] == fetched + skipped + fetched
+E       AssertionError: assert ['heartbeat',...ly_bars', ...] == ['heartbeat',...ly_bars', ...]
+E         
+E         At index 2 diff: 'symbol_lookup' != 'client.start_instrument'
+E         Right contains one more item: 'client.fetch_corporate_actions'
+E         
+E         Full diff:
+E           [
+E               'heartbeat',...
+E         
+E         ...Full output truncated (22 lines hidden), use '-vv' to show
+
+tests/integration/test_runner_provider_refusals.py:671: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.ingestion.runner:runner.py:220 run=4ab8166c-ec20-48f5-a09a-f01067b39678 instrument_id=1002 not found in instrument table; skipping
+=========================== short test summary info ============================
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup
+================== 1 failed, 3 passed, 9 deselected in 2.77s ===================
+
+# exit code: 1
+
+# --- review-r12-call-inside-reference-helper-head-tests: mutant src/factorflow/ingestion/runner.py:manual:review-r12-call-inside-reference-helper
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: head)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/review-r12-call-inside-reference-helper-head-tests
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 11 items / 9 deselected / 2 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [100%]
+
+======================= 2 passed, 9 deselected in 3.87s ========================
+
+# exit code: 0
+
+# --- review-r12-call-inside-reference-helper-worktree-tests: mutant src/factorflow/ingestion/runner.py:manual:review-r12-call-inside-reference-helper
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider -v tests/integration/test_runner_provider_refusals.py -k 'start_instrument_is_called or starts_no_budget or starts_its_budget'   (test file: worktree)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/alvarodejodra/Projects/ai-agents/repos/factorflow-v2/FactorFlow-v2/.venv/bin/python
+hypothesis profile 'default'
+rootdir: /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-cool-blackburn-2ab918/cf10f361-cd9c-41a4-81da-9aaab2c4d910/scratchpad/e8s4-rework/trees/review-r12-call-inside-reference-helper-worktree-tests
+configfile: pyproject.toml
+plugins: anyio-4.15.1, hypothesis-6.168.0
+collecting ... collected 13 items / 9 deselected / 4 selected
+
+tests/integration/test_runner_provider_refusals.py::test_start_instrument_is_called_once_per_stock_after_its_heartbeat_and_cancellation_check PASSED [ 25%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_cancelled_before_it_is_fetched_starts_no_budget PASSED [ 50%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget PASSED [ 75%]
+tests/integration/test_runner_provider_refusals.py::test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup _
+
+migrated_runner_connection = <psycopg.Connection [INTRANS] (host=localhost port=60513 user=test database=test_153ecd9af4d843f19c92d6e6255dceba) at 0x1099056a0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109905260>
+
+    @pytest.mark.postgres
+    # Implements CAP-003 TC-COMP-252
+    def test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup(
+        migrated_runner_connection: psycopg.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """DAC-E8-7, acquisition-runner CAP-003 section 2.2: a roster stock with
+        no `instrument` row gets its one `start_instrument()` after its
+        `heartbeat` and `cancellation_requested` and before the symbol lookup
+        that skips it, as every other stock does."""
+        conn = migrated_runner_connection
+        first = _insert_instrument(conn, "AAPL")
+        second = _insert_instrument(conn, "KO")
+        missing = second + 1000
+        run_id = _insert_claimed_run(conn)
+        client = _stub_client()
+        parent = _spied_parent(monkeypatch, client)
+        lookup = Mock(wraps=runner_module._symbol_for_id)
+        parent.attach_mock(lookup, "symbol_lookup")
+        monkeypatch.setattr(runner_module, "_symbol_for_id", lookup)
+    
+        AcquisitionRunner(connection=conn, client=client, today=_TODAY).execute_claimed(
+            run_id=run_id, depth_years=5, instrument_ids=[first, missing, second]
+        )
+    
+        fetched = [
+            "heartbeat",
+            "cancellation_requested",
+            "client.start_instrument",
+            "symbol_lookup",
+            "client.fetch_reference",
+            "client.fetch_daily_bars",
+            "client.fetch_financials",
+            "client.fetch_corporate_actions",
+        ]
+        skipped = [
+            "heartbeat",
+            "cancellation_requested",
+            "client.start_instrument",
+            "symbol_lookup",
+        ]
+>       assert [c[0] for c in parent.mock_calls] == fetched + skipped + fetched
+E       AssertionError: assert ['heartbeat',...ly_bars', ...] == ['heartbeat',...ly_bars', ...]
+E         
+E         At index 2 diff: 'symbol_lookup' != 'client.start_instrument'
+E         Right contains one more item: 'client.fetch_corporate_actions'
+E         
+E         Full diff:
+E           [
+E               'heartbeat',...
+E         
+E         ...Full output truncated (22 lines hidden), use '-vv' to show
+
+tests/integration/test_runner_provider_refusals.py:671: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    factorflow.ingestion.runner:runner.py:220 run=f6903abe-d929-4923-89f9-10eb5bfa45ba instrument_id=1002 not found in instrument table; skipping
+=========================== short test summary info ============================
+FAILED tests/integration/test_runner_provider_refusals.py::test_a_stock_skipped_for_a_missing_symbol_starts_its_budget_before_the_symbol_lookup
+================== 1 failed, 3 passed, 9 deselected in 6.09s ===================
+
+# exit code: 1
+
+# summary (exit codes): {"control-head-runner": 0, "review-r08-extra-call-on-claim-loss-head-tests": 0, "review-r08-extra-call-on-claim-loss-worktree-tests": 1, "review-r05-call-after-symbol-lookup-head-tests": 0, "review-r05-call-after-symbol-lookup-worktree-tests": 1, "review-r12-call-inside-reference-helper-head-tests": 0, "review-r12-call-inside-reference-helper-worktree-tests": 1}

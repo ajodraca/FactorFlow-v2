@@ -1,0 +1,34 @@
+# Independent code-review subagent (general-purpose, agentId ae42aaa01333ff209), cycle-2 (review rework of
+# implementation review v1, IR-001), judged cycle-2.patch (diff_sha256
+# f727c36739527e34296ee7eea7faf908d99afe7296186abfde9c2f18878bd8ac, index tree 42d9db991bac26a4d99a90ba8f752bc8ad68e488)
+# and mutation-cycle-2-results.json (25 mutants: the review's r01-r16 and cycle-1's m2-m14 not duplicated by them).
+VERDICT: APPROVED
+
+## What I checked
+- **The staged patch matches the evidence.** `git diff --cached` is byte-identical to `cycle-2.patch` (sha256 f727c367…8ac), and the index tree is 42d9db99…e488. HEAD is d809d75 on `usr/alvaro-de-jodra/CAP-003-E8-S4`. The patch adds 89 lines to `tests/integration/test_runner_provider_refusals.py` and nothing else. `runner.py` and all other production code are unchanged. The repo state is the same as before my review.
+- **IR-001 remediation item 1 (claim lost) is met.** `test_a_stock_whose_claim_is_lost_before_it_is_fetched_starts_no_budget` abandons the run from the first stock's `fetch_corporate_actions` side effect. That copies how the cancellation test uses `_set_cancelling`. It then asserts:
+  - the call names are `_ONE_STOCK + ["heartbeat"]`
+  - `start_instrument.call_count == 1`
+  - the run state is `abandoned`
+
+  That is exactly the review's bounded result.
+- **Item 2 (missing symbol) is met, and goes further than required.** The roster is `[first, missing, second]`. A `_symbol_for_id` spy is attached to the same parent mock, so the test pins `start_instrument` before the lookup on both the fetched path and the skipped path, not just the call's presence. It also asserts the call count is 3 and the lookup arguments are `[first, missing, second]`. `missing = second + 1000` is deterministic because the `migrated_runner_connection` docstring says each test gets its own database.
+- **The assertions are sound.** They are literal call-name lists and counts, not values computed from the code under test. The ordering comes from one parent `Mock`, and the lookup spy is patched where the runner looks the function up, so it is not flaky. `_abandon_run` is copied word for word from `test_runner_reclaim.py:61-69` and cites where it came from, which follows the module's "Store helpers (copied, as every runner test file does)" convention.
+- **Style is consistent.** Both tests have `@pytest.mark.postgres` and `# Implements CAP-003 TC-COMP-252`, and docstrings cite DAC-E8-7 and §2.2. Names and structure follow the existing TC-COMP-252 tests. `ruff check` passes and `ruff format --check` reports the file already formatted.
+- **The tests pass.** I ran the focused module myself: 13 passed. It also passed in a clean copy (HEAD plus the staged test file).
+- **The survivors die for the right reasons.** `mutation-cycle-2-results.json` shows all 25 mutants killed: the review's r01 to r16 and the coder's m2 to m14. Per-mutant logs:
+  - r08 fails only the claim-lost test ("Left contains one more item: 'client.start_instrument'").
+  - r05 and r12 fail only the missing-symbol test ("At index 2 diff: 'symbol_lookup' != 'client.start_instrument'").
+
+  The cycle-2 RED log shows the same split, and each test passes against unchanged HEAD as the control.
+- **My extra mutants on the same seam were all killed** (run in a scratch copy, deleted afterwards):
+  - `x2`: call moved below the lookup on the fetched path and added inside the skip branch before `continue`, so the call count stays 3. Killed only by the lookup-spy ordering assertion. The review's minimum version, without the spy, would have let it survive, so the spy matters.
+  - `x4`: an extra call in the skip branch. Killed by the missing-symbol test.
+  - `x7`: claim-lost `return` changed to `continue`. Killed by the claim-lost test.
+  - `x9`: the call skipped when the instrument row is missing, using a separate pre-check query. Killed by the missing-symbol test.
+
+## Findings
+None blocking.
+
+- **INFO (outside this cycle's patch):** IR-001's remediation also requires recording cycle 2 in `CAP-003-E8-S4-tdd-evidence.yaml`. It also requires replacing the "equivalent" dispositions for M5 and m12 there and in the task plan's Other Notes. Neither edit is in this patch: the yaml is not in the staged, unstaged or untracked list, and only `CAP-003-E8-S4.md` is unstaged. Both edits must land before the re-review, or IR-001 stays partly open.
+- **NIT (no change needed):** the `_abandon_run` docstring repeats "as … does" twice ("Abandon the run as the reclaim sweeper does, as `_abandon_run` in … does"). It reads a little awkwardly.
