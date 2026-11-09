@@ -465,6 +465,34 @@ def test_one_throttle_budget_spans_every_execute_until_the_next_start() -> None:
     assert sleeper.calls[5:] == [pytest.approx(60.0)]
 
 
+# Implements CAP-003 TC-COMP-237
+def test_a_spent_budget_stays_spent_for_every_execute_until_the_next_start() -> None:
+    """CAP-003 TC-COMP-237 / DAC-E8-5 (rate-limit-governor section 2.4):
+    raising `ProviderRateLimited` does not release the stock's budget. Once
+    the 300s budget is spent, a further always-throttled `execute` before the
+    next `start_throttle_budget()` raises after exactly one send and sleeps
+    nothing more, so the sleeps between two starts stay at 300s
+    (implementation review v1 IR-001)."""
+    clock = FakeClock()
+    sleeper = FakeSleeper(clock)
+    governor = _governor(
+        60, clock, sleeper, max_throttle_wait=300.0, jitter=SequenceJitter([0.0]), now=clock
+    )
+
+    governor.start_throttle_budget()
+    first = FlakySender(fail_count=1_000_000)
+    with pytest.raises(ProviderRateLimited):
+        governor.execute(first, classify=_guarded_throttle(first))
+    assert sleeper.calls == [pytest.approx(60.0)] * 5
+
+    after_raise = FlakySender(fail_count=1_000_000)
+    with pytest.raises(ProviderRateLimited):
+        governor.execute(after_raise, classify=_guarded_throttle(after_raise))
+    assert after_raise.calls == 1
+    assert sleeper.calls == [pytest.approx(60.0)] * 5
+    assert sum(sleeper.calls) == pytest.approx(300.0)
+
+
 # --- CAP-003 TC-COMP-238 / DAC-E8-S2-4: jitter never overruns the budget ---
 
 
@@ -600,3 +628,45 @@ def test_retryable_backoff_and_its_permit_wait_are_not_charged_to_the_throttle_b
         governor.execute(always_failing, classify=_guarded_throttle(always_failing))
 
     assert sleeper.calls == [pytest.approx(60.0), pytest.approx(1.0), pytest.approx(59.0)]
+
+
+# Production clocks: `time.time` reads about 1.79e9 s in late 2026 while
+# `time.monotonic` reads seconds since boot. With the monotonic clock at 1000 s,
+# this offset puts the wall clock on an exact minute (1_794_000_000 s), so every
+# boundary wait is 60 s.
+_WALL_CLOCK_OFFSET = 1_793_999_000.0
+
+
+def test_throttle_waits_are_charged_on_the_monotonic_clock_not_the_wall_clock() -> None:
+    """CAP-003 DAC-E8-5 (rate-limit-governor section 2.3): a throttle wait is
+    charged as the monotonic time from the start of its sleep to the retried
+    request's permit; the wall clock `now` only places the minute boundary.
+    With production-shaped clocks -- `now` about 1.79e9 s ahead of
+    `monotonic`, both advancing together -- the 300s budget is still spent
+    after five 60s waits. Measuring the sleep's start on `now` would charge
+    about -1.79e9 s per wait, and the budget would never be spent
+    (implementation review v1 IR-002). Unlike the rows DAC-E8-S2-1 governs,
+    which pass one `FakeClock` as both clocks and so cannot tell the two
+    apart, this row derives `now` from that clock plus a fixed offset."""
+    clock = FakeClock(start=1_000.0)
+    sleeper = FakeSleeper(clock)
+    governor = RateLimitGovernor(
+        GovernorSettings(
+            requests_per_minute=60,
+            max_attempts=3,
+            initial_backoff_seconds=2.0,
+            max_throttle_wait_seconds=300.0,
+        ),
+        monotonic=clock,
+        sleep=sleeper,
+        jitter=SequenceJitter([0.0]),
+        now=lambda: clock() + _WALL_CLOCK_OFFSET,
+    )
+    send = FlakySender(fail_count=1_000_000)
+
+    governor.start_throttle_budget()
+    with pytest.raises(ProviderRateLimited):
+        governor.execute(send, classify=_guarded_throttle(send))
+
+    assert send.calls == 6
+    assert sleeper.calls == [pytest.approx(60.0)] * 5

@@ -32,6 +32,9 @@
 # StarletteDeprecationWarning; uv build ok; ruff check, ruff format --check and mypy src clean; start_throttle_budget has
 # no caller in src; no rate_limit.py hunk inside GovernorSettings or from_massive_settings, no logging, no new message
 # other than _THROTTLE_BUDGET_SPENT_MESSAGE; client.py and outcomes.py not in the diff (final-validation.log).
+# Cycle-3 is the rework for implementation review v1 (IR-001, IR-002 HIGH; IR-003 LOW): two test_governor_retry.py rows
+# and the errors.py module docstring, no production behaviour change; its mutation run is the review's 41 mutants
+# (scratchpad review-e8s2-v1/mutants.json, sha256 6362ffc4...6c37) retagged cycle-3, on the review's command.
 
 cycles:
   - id: cycle-1
@@ -153,6 +156,76 @@ cycles:
       results_sha256: 6aa0fc6a7c0f07ff7acba84999c4d6800736b00d16e7e6c89f22fb7a9fd0e490
       generated: 15
       killed: 15
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T008, T012, T013]
+    description: >
+      Review rework for implementation review v1. IR-001 (HIGH): no test failed if raising ProviderRateLimited released
+      the stock's spent budget. New TC-COMP-237 row test_a_spent_budget_stays_spent_for_every_execute_until_the_next_start:
+      after the 300 s budget is spent ([60.0] * 5, then ProviderRateLimited), a further always-throttled execute before
+      the next start_throttle_budget() raises ProviderRateLimited after exactly one send with no new sleep, so the sleeps
+      between two starts stay at 300 s (DAC-E8-5; rate-limit-governor section 2.4). IR-002 (HIGH): no test failed if
+      throttled_at was read from the wall clock. New row test_throttle_waits_are_charged_on_the_monotonic_clock_not_the_wall_clock,
+      beside T012: monotonic FakeClock at 1000 s, now = that clock + 1_793_999_000 s (a whole minute, about time.time in
+      late 2026), budget 300 s, always throttled with the 20-send guard; six sends, [60.0] * 5, then ProviderRateLimited
+      (DAC-E8-5 "measured from the start of the throttle sleep", section 2.3 monotonic). IR-003 (LOW): errors.py module
+      docstring now says a throttled response never becomes a MassiveError (DAC-E3-S3-6) and persistent throttling ends
+      as ProviderRateLimited, raised by the governor (massive-client sections 2.4, 2.5). rate_limit.py unchanged. Its
+      commit is the rework commit after the review commit 2c44be5, so commit_hash: stage resolves to it and the patch is
+      the staged diff over 2c44be5.
+    deviations: >
+      (1) The IR-002 row derives now from the monotonic FakeClock plus a fixed offset instead of passing one FakeClock as
+      both clocks, as DAC-E8-S2-1's Given and rate-limit-governor section 7 have every row do: one shared clock cannot
+      tell the monotonic charge from a wall-clock one, which is why review-throttled-at-from-wall-clock survived. The
+      Given's reason (a sleep advances the pacing and wall clocks together, review v14 FINDING-60) still holds, because
+      now moves in lockstep with the FakeClock; the offset is a whole number of minutes, so the boundary waits are the
+      ones one shared clock gives. IR-002's remediation allowed this placement as a recorded deviation; both cycle
+      reviewers accepted it. The row builds RateLimitGovernor directly because _governor()'s now parameter is typed
+      FakeClock; the helper and every delivered and story row are unchanged. Doc sync may name this row as section 7's
+      exception. (2) The cycle was staged twice: the first round's code review (approved) raised two non-blocking
+      wording points in the IR-002 row's comment and docstring (time.time is about 1.79e9 in late 2026, not 1.76e9; the
+      claim about the other rows overstated), which were fixed before the final RED, GREEN, mutation run and reviews
+      recorded here. The second round's non-blocking points (the docstring's "Unlike the rows DAC-E8-S2-1 governs" is
+      this deviation, recorded here; the IR-001 row's redundant sum assertion) need no code change.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/red-cycle-3.log
+    red_log_sha256: e336a5a6fe375712cde912cd1bae03d89257a0af4cd0d4ac3854cabde2339b0c
+    red_evidence: >
+      The rows pin behaviour the story already delivered, so they pass on HEAD (22 passed); their RED is the review's
+      two surviving mutants. In a scratch copy of HEAD with the staged test file, each mutant applied on its own:
+      review-reset-spent-on-raise fails only the IR-001 row (1 failed, 21 passed; after_raise.calls 6 == 1, a second
+      budget waited out) and review-throttled-at-from-wall-clock fails only the IR-002 row (1 failed, 21 passed; each
+      charge about -1.79e9 s, the 20-send guard's "throttling did not terminate" escapes pytest.raises).
+    green_evidence: >
+      tests/unit/test_governor_retry.py 22 passed; the whole-story focused suite the review ran 136 passed (134 + 2);
+      ruff check, ruff format --check and mypy src clean (green-cycle-3.log). Full suite on the final bytes:
+      2661 passed (2659 + 2), postgres tests included, 2 pre-existing deprecation warnings; uv build ok (full-suite-cycle-3.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/green-cycle-3.log
+        sha256: 17493383daa974170c20a9e68224a17557e8d7d4951ae42011b8e5e8ed50f300
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/code-review-cycle-3.txt
+        sha256: e4dceb358596b4d6a5584474f8f99f324b987dc20baabef9b858e6a4ea22a9e7
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/spec-drift-cycle-3.txt
+        sha256: ae2c6b54a2068efd8ff1c01afe17e479d08993b3747451f9788ab5e33879ca0e
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/full-suite-cycle-3.log
+        sha256: fa6483ee10853e993aa62a677c0b9fd857f1ed3f844ff1174d185651c57cedd5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8bc13db8397d068f90df544dab64fcdec6a8b13583c963acab33ebbb22497d2c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: 32a578802ce2ce64122bc418dc337f7aa2d6e302e2129064c01a7f89175e347b
+      generated: 41
+      killed: 41
       survived: 0
       stillborn: 0
       timeout: 0

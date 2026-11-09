@@ -15,9 +15,12 @@ failure field is not stably named -- a 404 carries `message`, while 401
 and 429 carry `error` -- and `status` is `"NOT_FOUND"` on a missing
 ticker and `"ERROR"` on everything else Massive returns as JSON. A 429
 additionally carries no distinguishing `status` value at all; it is told
-apart only by its message text, and per DAC-E3-S3-6 it must never become
-a `MassiveError` at all -- it is flow control for the rate-limit
-governor, not a failure.
+apart only by its message text, and per DAC-E3-S3-6 a throttled response
+never becomes a `MassiveError` here -- it is flow control for the
+rate-limit governor, not a failure. Only throttling that persists past
+the stock's throttle wait budget ends as one, `ProviderRateLimited`,
+which the governor raises and no response is classified into (CAP-003
+massive-client sections 2.4, 2.5).
 
 Per the owner's resolution recorded in this story's task plan Notes,
 malformed and valid-but-unknown error envelopes classify as
