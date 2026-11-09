@@ -26,6 +26,7 @@ import json
 from collections.abc import Callable, Sequence
 from datetime import date
 from pathlib import Path
+from typing import TypeGuard
 from unittest.mock import patch
 
 import pytest
@@ -592,6 +593,46 @@ def _not_a_max_retry_error_with_a_429_reason() -> ProtocolError:
             Outcome.RETRYABLE,
             id="a-reason-only-containing-the-429-text-is-retryable",
         ),
+        # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+        # section 2.3 rule 1): the 429 text with a prefix, with leading or
+        # trailing whitespace or in another letter case is not equal, so it is
+        # rule 2's RETRYABLE (implementation review v1 IR-001).
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+            ),
+            Outcome.RETRYABLE,
+            id="the-429-text-with-a-prefix-is-retryable",
+        ),
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+            ),
+            Outcome.RETRYABLE,
+            id="the-429-text-with-leading-whitespace-is-retryable",
+        ),
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+            ),
+            Outcome.RETRYABLE,
+            id="the-429-text-with-trailing-whitespace-is-retryable",
+        ),
+        pytest.param(
+            MaxRetryError(
+                None,
+                _REFERENCE_AAPL,
+                ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+            ),
+            Outcome.RETRYABLE,
+            id="the-429-text-in-another-case-is-retryable",
+        ),
         pytest.param(
             _not_a_max_retry_error_with_a_429_reason(),
             Outcome.RETRYABLE,
@@ -655,9 +696,12 @@ def test_a_fatal_bad_response_is_raised_typed_from_the_one_response(
     assert guard.fired == []
 
 
-def _calls_patch_on_rest_client(function: ast.AST) -> bool:
+def _patches_rest_client(function: ast.AST) -> bool:
+    """`patch("<...>.RESTClient")`, `patch.object(<module>, "RESTClient")`,
+    `monkeypatch.setattr("<...>.RESTClient", ...)` or
+    `monkeypatch.setattr(<module>, "RESTClient", ...)`."""
     for node in ast.walk(function):
-        if not isinstance(node, ast.Call) or not node.args:
+        if not isinstance(node, ast.Call):
             continue
         func = node.func
         name = (
@@ -667,15 +711,35 @@ def _calls_patch_on_rest_client(function: ast.AST) -> bool:
             if isinstance(func, ast.Attribute)
             else None
         )
-        target = node.args[0]
-        if (
-            name == "patch"
-            and isinstance(target, ast.Constant)
-            and isinstance(target.value, str)
-            and target.value.endswith(".RESTClient")
-        ):
+        if name not in {"patch", "object", "setattr"}:
+            continue
+        arguments = [
+            *node.args[:2],
+            *(k.value for k in node.keywords if k.arg in {"target", "attribute", "name"}),
+        ]
+        targets = [
+            arg.value
+            for arg in arguments
+            if isinstance(arg, ast.Constant) and isinstance(arg.value, str)
+        ]
+        if any(target == "RESTClient" or target.endswith(".RESTClient") for target in targets):
             return True
     return False
+
+
+def _reads_attempts(node: ast.AST) -> TypeGuard[ast.Attribute | ast.Subscript]:
+    return (isinstance(node, ast.Attribute) and node.attr == "attempts") or (
+        isinstance(node, ast.Subscript)
+        and isinstance(node.slice, ast.Constant)
+        and node.slice.value == "attempts"
+    )
+
+
+# The one `attempts` read under tests/ that is not a recorded value: the
+# column's default, read from `information_schema` (CAP-001 migration 0004).
+_SCHEMA_DEFAULT_READS = {
+    ("tests/integration/test_run_constraints.py", "result_columns['attempts']"),
+}
 
 
 def _names_a_429(function: ast.AST) -> bool:
@@ -698,10 +762,12 @@ def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempt
     (a) `client.py` imports `MaxRetryError` and `ResponseError` from
     `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
     urllib3's constant, never a hand-typed copy, which no behavioural test can
-    tell apart at urllib3 2.7.0; (c) no test function that patches
-    `RESTClient` names a `429` or the rate-limited fixture; (d) neither of
-    this story's test files reads a recorded `attempts` value. The lock-file
-    clause is checked by the story's validation, not here."""
+    tell apart at urllib3 2.7.0; (c) no test function that replaces
+    `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+    `429` or the rate-limited fixture; (d) no test file reads a recorded
+    `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+    column's default, which is schema metadata). The lock-file clause is
+    checked by the story's validation, not here."""
     client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
     client_tree = ast.parse(client_source.read_text())
 
@@ -736,27 +802,24 @@ def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempt
     assert "too many 429 error responses" not in string_constants
 
     offenders = []
+    reads = []
     for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
         tree = ast.parse(path.read_text(), filename=str(path))
-        for node in ast.walk(tree):
-            if (
-                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                and _calls_patch_on_rest_client(node)
-                and _names_a_429(node)
-            ):
-                offenders.append(f"{path.relative_to(REPO_ROOT)}::{node.name}")
-    assert offenders == []
-
-    for name in ("test_massive_retry.py", "test_massive_client_governor_integration.py"):
-        tree = ast.parse((REPO_ROOT / "tests" / "unit" / name).read_text())
-        reads = [
-            node.lineno
+        functions = [
+            node
             for node in ast.walk(tree)
-            if (isinstance(node, ast.Attribute) and node.attr == "attempts")
-            or (
-                isinstance(node, ast.Subscript)
-                and isinstance(node.slice, ast.Constant)
-                and node.slice.value == "attempts"
-            )
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         ]
-        assert reads == [], name
+        offenders += [
+            f"{path.relative_to(REPO_ROOT)}::{function.name}"
+            for function in functions
+            if _patches_rest_client(function) and _names_a_429(function)
+        ]
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        reads += [
+            f"{relative}:{node.lineno}"
+            for node in ast.walk(tree)
+            if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+        ]
+    assert offenders == []
+    assert reads == []

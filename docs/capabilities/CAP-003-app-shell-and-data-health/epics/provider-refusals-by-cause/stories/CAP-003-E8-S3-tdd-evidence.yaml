@@ -20,6 +20,9 @@
 # Interpreter: no venv in this clone; every command ran as <main checkout>/.venv/bin/python -m <tool> from the clone
 # root, with pytest given -o pythonpath=src.
 # No exception and no decision record: no TDD or review step was skipped.
+# Cycle-4 is the rework for implementation review v1 (IR-001 HIGH; IR-003 LOW; IR-002 is left to doc sync): test-only
+# changes to tests/unit/test_massive_retry.py, no production change; its mutation run is the review's 33 mutants
+# (scratchpad mut/mutants.json, sha256 3320dcab...4cc4) retagged cycle-4 plus two coder mutants, on the review's command.
 
 cycles:
   - id: cycle-1
@@ -216,3 +219,84 @@ cycles:
       not_applicable: >
         Test-only cycle: it changes the expected set of one delivered test and no production line, so there is no
         changed production line to mutate.
+
+  - id: cycle-4
+    tasks: [T009, T011, T012]
+    description: >
+      Review rework for implementation review v1, test-only (tests/unit/test_massive_retry.py; no production file
+      changes). IR-001 (HIGH): the review's mutants review-rule1-endswith, review-rule1-strip and review-rule1-casefold of
+      client.py:73 survived because no TC-COMP-248 row varied the 429 text by a prefix, padding or case. Four RETRYABLE
+      rows, each built from ResponseError.SPECIFIC_ERROR.format(status_code=429), never from the module's constant: the
+      text with the prefix "proxy: ", with a leading space, with a trailing newline, and upper-cased; each is not equal
+      to the 429 text, so rule 1 ("equal to", DAC-E8-2, massive-client section 2.3) does not match and rule 2 makes it
+      RETRYABLE. IR-003 (LOW): TC-COMP-251 clause (c) now recognises patch("<...>.RESTClient"),
+      patch.object(<module>, "RESTClient") and monkeypatch.setattr("<...>.RESTClient", ...) or (<module>, "RESTClient",
+      ...), positionally or by the target/attribute/name keywords; clause (d) now scans every tests/**/*.py file, as
+      TC-COMP-251 steps 2 and 3 say "every test", with one exact exemption, _SCHEMA_DEFAULT_READS =
+      (tests/integration/test_run_constraints.py, result_columns['attempts']): that CAP-001 test reads the attempts
+      column's default from information_schema, schema metadata and not a recorded value (spec review v5 FINDING-29),
+      the "by context" exclusion IR-003 offers. Widened, the guard flags nothing else in the current tree. Its commit is
+      the rework commit after the review commit 4d90723, so commit_hash: stage resolves to it and the patch is the staged
+      diff over 4d90723.
+    deviations: >
+      (1) Two whitespace rows, leading and trailing, instead of IR-001's one "surrounding whitespace" row: round 1's
+      code review showed a both-ends row leaves the lstrip and rstrip mutants of the same comparison alive; together the
+      two rows are the surrounding whitespace IR-001 names. (2) The cycle was staged twice. Round 1
+      (code-review-cycle-4-round1.txt, spec-drift-cycle-4-round1.txt; both approved, no drift) exempted from (d) every
+      function containing an "information_schema" string, which the code review showed was function-wide and
+      docstring-triggered; round 2 replaced it with the exact (file, expression) pair, split the whitespace row, read the
+      keyword forms in (c), and typed _reads_attempts as a TypeGuard (so strict mypy, outside the plan's mypy src scope,
+      adds only the file's existing MaxRetryError(None, ...) arg-type kind for the four new rows). RED, mutation, GREEN
+      and both reviews recorded here are round 2's. (3) Residual, non-blocking, both round-2 reviewers: (c) still looks at
+      one function at a time and at RESTClient itself, so a RESTClient method patch (patch.object(RESTClient,
+      "list_aggs", ...)), patch.multiple, a class-level decorator or a fixture-made patch is not seen; (d) cannot see a
+      getattr or a SQL-text read-back, and the exemption is keyed on the expression text in that one file; the
+      _SCHEMA_DEFAULT_READS comment's "the one attempts read" is the one AST-visible read (test_run_constraints.py:114-118
+      also round-trips an inserted 2 through SQL text). None occurs in the current tree. Follow-up for doc sync, with
+      IR-002: T011's wording and TC-COMP-251's preconditions describe the narrower cycle-2 guard.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/red-cycle-4.log
+    red_log_sha256: 6e7cc6f502ca95797a3c3dcd9dea1951416c6d4a14caf96f0db3e1ab2dc54ff3
+    red_evidence: >
+      The rows and the widened guard pin behaviour and a test-tree state the story already delivered, so they pass on
+      HEAD (control: 37 passed); their RED is the review's surviving mutants and planted offenders. In a git archive of
+      HEAD 4d90723 per defect with the staged test file: review-rule1-endswith fails the prefix and leading-whitespace
+      rows, review-rule1-strip the leading- and trailing-whitespace rows, review-rule1-casefold the other-case row, and
+      the coder's lstrip and rstrip mutants the leading and the trailing row (each THROTTLED where RETRYABLE is expected).
+      A planted tests/unit file with a monkeypatch.setattr, a positional and a keyword patch.object of RESTClient naming
+      a 429, an .attempts read, and a ["attempts"] read beside an information_schema string passes HEAD's guard (1
+      passed) and fails the reworked one, each form also failing it on its own.
+    green_evidence: >
+      tests/unit/test_massive_retry.py 37 passed; the review's five-file focused suite 91 passed (87 + 4); ruff check,
+      ruff format --check and mypy src clean; src, uv.lock, pyproject.toml and test_massive_redirects.py unchanged
+      (green-cycle-4.log). Full suite on the final bytes: 2690 passed (2686 + 4), postgres tests included, 2 pre-existing deprecation warnings; uv build ok (full-suite-cycle-4.log).
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/green-cycle-4.log
+        sha256: 88e922074286c038170108b96a62a3fdedaf495aadd87045f7617576cbf2f89e
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-4-round1.txt
+        sha256: 7ed4d01131dde0706aa384e43b2391d3aeb78db98241ba4a34d20931ede9df1f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/spec-drift-cycle-4-round1.txt
+        sha256: 8e1be7b96b0885439a21aafbaa38154d99f10cb786525cb6ff66269e773e436f
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/code-review-cycle-4.txt
+        sha256: 50e8f2a3e0f82345c79b634934a6e472cebe5fc5f8c157d02559c2d6fd45c68d
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/spec-drift-cycle-4.txt
+        sha256: 3f9a7dc166fb1efaaaa51ad7b62ef34971254403e868a0016ab0bbddf69deea1
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/full-suite-cycle-4.log
+        sha256: 3954edac145c61aa677c45a3b3b256f9da6728518df9a1840e3cfec168e4f7a7
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b83175950a90383d16e155457fe17b304c153a60c67ebfe8a4da6790711c4e1d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/provider-refusals-by-cause/stories/CAP-003-E8-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: ced333385e617e9338175636f02d7eebdee2e60b76613fdc00b0f2b904935aea
+      generated: 35
+      killed: 35
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,1977 @@
+# RED cycle-4 (review rework of implementation review v1): the reworked tests/unit/test_massive_retry.py against each defect it must catch.
+# Trees: git archive of HEAD 4d907238c9dd7078d3946540c584ee36c8bb75c6 (client.py and every test unchanged since 99f6dfc), one copy per defect, with the working-tree
+# test file (worktree) or HEAD's (head) copied in. The new rows pass on HEAD's client.py: their RED is the review's surviving mutants.
+
+# --- IR-001 mutant client.py:manual:review-rule1-endswith: 'and str(exc.reason) == _THROTTLED_RETRY_REASON' -> 'and str(exc.reason).endswith(_THROTTLED_RETRY_REASON)'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_classify_for_governor_matches_only_urllib3s_429_constant   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 17 deselected / 20 selected
+
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] PASSED [  5%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] PASSED [ 10%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] PASSED [ 15%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] PASSED [ 20%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] PASSED [ 25%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] PASSED [ 30%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] PASSED [ 35%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] PASSED [ 40%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] PASSED [ 45%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] PASSED [ 50%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] PASSED [ 55%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] PASSED [ 60%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] PASSED [ 65%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] PASSED [ 70%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] FAILED [ 75%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] FAILED [ 80%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] PASSED [ 85%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] PASSED [ 90%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] PASSED [ 95%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('proxy: too many 429 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10caa5440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('proxy: too many 429 error responses'))"))
+E        +    where <function classify_for_governor at 0x10caa5440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10caa5440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))"))
+E        +    where <function classify_for_governor at 0x10caa5440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10caa5440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('proxy: too many 429 error responses'))"))
+ +    where <function classify_for_governor at 0x10caa5440> = massive_client.classify_for_governor
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10caa5440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))"))
+ +    where <function classify_for_governor at 0x10caa5440> = massive_client.classify_for_governor
+================= 2 failed, 18 passed, 17 deselected in 0.27s ==================
+# exit code: 1
+
+# --- IR-001 mutant client.py:manual:review-rule1-strip: 'and str(exc.reason) == _THROTTLED_RETRY_REASON' -> 'and str(exc.reason).strip() == _THROTTLED_RETRY_REASON'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_classify_for_governor_matches_only_urllib3s_429_constant   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 17 deselected / 20 selected
+
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] PASSED [  5%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] PASSED [ 10%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] PASSED [ 15%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] PASSED [ 20%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] PASSED [ 25%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] PASSED [ 30%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] PASSED [ 35%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] PASSED [ 40%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] PASSED [ 45%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] PASSED [ 50%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] PASSED [ 55%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] PASSED [ 60%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] PASSED [ 65%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] PASSED [ 70%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] PASSED [ 75%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] FAILED [ 80%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] FAILED [ 85%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] PASSED [ 90%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] PASSED [ 95%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a855440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))"))
+E        +    where <function classify_for_governor at 0x10a855440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses\\n'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a855440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses\\n'))"))
+E        +    where <function classify_for_governor at 0x10a855440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a855440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))"))
+ +    where <function classify_for_governor at 0x10a855440> = massive_client.classify_for_governor
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a855440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses\\n'))"))
+ +    where <function classify_for_governor at 0x10a855440> = massive_client.classify_for_governor
+================= 2 failed, 18 passed, 17 deselected in 0.53s ==================
+# exit code: 1
+
+# --- IR-001 mutant client.py:manual:review-rule1-casefold: 'and str(exc.reason) == _THROTTLED_RETRY_REASON' -> 'and str(exc.reason).casefold() == _THROTTLED_RETRY_REASON.casefold()'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_classify_for_governor_matches_only_urllib3s_429_constant   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 17 deselected / 20 selected
+
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] PASSED [  5%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] PASSED [ 10%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] PASSED [ 15%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] PASSED [ 20%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] PASSED [ 25%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] PASSED [ 30%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] PASSED [ 35%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] PASSED [ 40%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] PASSED [ 45%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] PASSED [ 50%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] PASSED [ 55%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] PASSED [ 60%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] PASSED [ 65%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] PASSED [ 70%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] PASSED [ 75%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] PASSED [ 80%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] PASSED [ 85%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] FAILED [ 90%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] PASSED [ 95%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('TOO MANY 429 ERROR RESPONSES'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x108319440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('TOO MANY 429 ERROR RESPONSES'))"))
+E        +    where <function classify_for_governor at 0x108319440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x108319440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('TOO MANY 429 ERROR RESPONSES'))"))
+ +    where <function classify_for_governor at 0x108319440> = massive_client.classify_for_governor
+================= 1 failed, 19 passed, 17 deselected in 0.90s ==================
+# exit code: 1
+
+# --- IR-001 mutant client.py:manual:coder-rule1-lstrip: 'and str(exc.reason) == _THROTTLED_RETRY_REASON' -> 'and str(exc.reason).lstrip() == _THROTTLED_RETRY_REASON'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_classify_for_governor_matches_only_urllib3s_429_constant   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 17 deselected / 20 selected
+
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] PASSED [  5%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] PASSED [ 10%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] PASSED [ 15%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] PASSED [ 20%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] PASSED [ 25%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] PASSED [ 30%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] PASSED [ 35%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] PASSED [ 40%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] PASSED [ 45%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] PASSED [ 50%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] PASSED [ 55%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] PASSED [ 60%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] PASSED [ 65%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] PASSED [ 70%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] PASSED [ 75%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] FAILED [ 80%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] PASSED [ 85%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] PASSED [ 90%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] PASSED [ 95%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a419440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))"))
+E        +    where <function classify_for_governor at 0x10a419440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a419440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError(' too many 429 error responses'))"))
+ +    where <function classify_for_governor at 0x10a419440> = massive_client.classify_for_governor
+================= 1 failed, 19 passed, 17 deselected in 0.24s ==================
+# exit code: 1
+
+# --- IR-001 mutant client.py:manual:coder-rule1-rstrip: 'and str(exc.reason) == _THROTTLED_RETRY_REASON' -> 'and str(exc.reason).rstrip() == _THROTTLED_RETRY_REASON'
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_classify_for_governor_matches_only_urllib3s_429_constant   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 17 deselected / 20 selected
+
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] PASSED [  5%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] PASSED [ 10%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] PASSED [ 15%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] PASSED [ 20%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] PASSED [ 25%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] PASSED [ 30%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] PASSED [ 35%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] PASSED [ 40%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] PASSED [ 45%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] PASSED [ 50%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] PASSED [ 55%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] PASSED [ 60%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] PASSED [ 65%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] PASSED [ 70%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] PASSED [ 75%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] PASSED [ 80%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] FAILED [ 85%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] PASSED [ 90%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] PASSED [ 95%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] _
+
+exc = MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses\\n'))")
+expected = <Outcome.RETRYABLE: 'retryable'>
+
+    @pytest.mark.parametrize(
+        ("exc", "expected"),
+        [
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.THROTTLED,
+                id="429-max-retry-is-throttled",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=503)),
+                ),
+                Outcome.RETRYABLE,
+                id="503-max-retry-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(None, _REFERENCE_AAPL, ResponseError("too many redirects")),
+                Outcome.RETRYABLE,
+                id="refused-redirect-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    NewConnectionError(None, "Failed to establish a new connection"),
+                ),
+                Outcome.RETRYABLE,
+                id="connection-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.THROTTLED,
+                id="rate-limited-body-is-throttled",
+            ),
+            # Implementation-level rows (T012), beyond the case's steps.
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ProtocolError(ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="429-text-in-a-reason-that-is-not-a-response-error-is-retryable",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_not_found.json").read_text()),
+                Outcome.FATAL,
+                id="not-found-body-is-fatal",
+            ),
+            pytest.param(
+                BadResponse((FIXTURES / "error_unknown_shape.json").read_text()),
+                Outcome.RETRYABLE,
+                id="unknown-shape-body-is-retryable",
+            ),
+            # Implementation-level rows added after the cycle's mutation runs, beyond
+            # the plan: every other forcelisted status design section 2.3 rule 2
+            # names, rule 1's exact-text and MaxRetryError-only edges, and rule 2
+            # winning over rule 3 for an error that is not a `BadResponse`.
+            *[
+                pytest.param(
+                    MaxRetryError(
+                        None,
+                        _REFERENCE_AAPL,
+                        ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=status)),
+                    ),
+                    Outcome.RETRYABLE,
+                    id=f"{status}-max-retry-is-retryable",
+                )
+                for status in (413, 499, 500, 502, 504)
+            ],
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(
+                        ResponseError.SPECIFIC_ERROR.format(status_code=429) + " via a proxy"
+                    ),
+                ),
+                Outcome.RETRYABLE,
+                id="a-reason-only-containing-the-429-text-is-retryable",
+            ),
+            # Rule 1 compares the text with `==` (DAC-E8-2 "equal to"; design
+            # section 2.3 rule 1): the 429 text with a prefix, with leading or
+            # trailing whitespace or in another letter case is not equal, so it is
+            # rule 2's RETRYABLE (implementation review v1 IR-001).
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError("proxy: " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-a-prefix-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(" " + ResponseError.SPECIFIC_ERROR.format(status_code=429)),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-leading-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429) + "\n"),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-with-trailing-whitespace-is-retryable",
+            ),
+            pytest.param(
+                MaxRetryError(
+                    None,
+                    _REFERENCE_AAPL,
+                    ResponseError(ResponseError.SPECIFIC_ERROR.format(status_code=429).upper()),
+                ),
+                Outcome.RETRYABLE,
+                id="the-429-text-in-another-case-is-retryable",
+            ),
+            pytest.param(
+                _not_a_max_retry_error_with_a_429_reason(),
+                Outcome.RETRYABLE,
+                id="a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable",
+            ),
+            pytest.param(
+                ProtocolError((FIXTURES / "error_rate_limited.json").read_text()),
+                Outcome.RETRYABLE,
+                id="the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable",
+            ),
+        ],
+    )
+    # Implements CAP-003 TC-COMP-248
+    def test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body(
+        exc: BaseException, expected: Outcome
+    ) -> None:
+        """CAP-003 TC-COMP-248 / DAC-E8-S3-6: called directly, with no client and
+        nothing patched. The `429` text is built here from urllib3's own
+        `ResponseError.SPECIFIC_ERROR` with the literal 429, never from the
+        module's constant. The `BadResponse` rate-limited row is the only one
+        building a `BadResponse` for a `429`: it stands for an SDK without `429`
+        in its forcelist, not for production."""
+>       assert massive_client.classify_for_governor(exc) is expected
+E       assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+E        +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a9a1440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses\\n'))"))
+E        +    where <function classify_for_governor at 0x10a9a1440> = massive_client.classify_for_governor
+
+tests/unit/test_massive_retry.py:658: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] - assert <Outcome.THROTTLED: 'throttled'> is <Outcome.RETRYABLE: 'retryable'>
+ +  where <Outcome.THROTTLED: 'throttled'> = <function classify_for_governor at 0x10a9a1440>(MaxRetryError("None: Max retries exceeded with url: /v3/reference/tickers/AAPL (Caused by ResponseError('too many 429 error responses\\n'))"))
+ +    where <function classify_for_governor at 0x10a9a1440> = massive_client.classify_for_governor
+================= 1 failed, 19 passed, 17 deselected in 0.25s ==================
+# exit code: 1
+
+# --- IR-003: tests/unit/test_planted_guard_offenders.py planted in the tree: a monkeypatch.setattr, a positional and a keyword patch.object of RESTClient raising a 429 BadResponse, an attempts read in a third test file, and a ["attempts"] read in a function that also names information_schema
+# HEAD's guard (delivered (c) recognises only patch("...RESTClient"), (d) scans two files): passes, the gap IR-003 names
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: head)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 33 items / 32 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts PASSED [100%]
+
+======================= 1 passed, 32 deselected in 1.73s =======================
+# exit code: 0
+
+# The reworked guard: fails
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 36 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that replaces
+        `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+        `429` or the rate-limited fixture; (d) no test file reads a recorded
+        `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+        column's default, which is schema metadata). The lock-file clause is
+        checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+        assert {"MaxRetryError", "ResponseError"} <= imported
+    
+        assignments = [
+            node
+            for node in client_tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+                for target in node.targets
+            )
+        ]
+        assert len(assignments) == 1
+        value = assignments[0].value
+        assert isinstance(value, ast.Call)
+        assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+        assert value.args == []
+        assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+        string_constants = {
+            node.value
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        assert "too many 429 error responses" not in string_constants
+    
+        offenders = []
+        reads = []
+        for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            functions = [
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            offenders += [
+                f"{path.relative_to(REPO_ROOT)}::{function.name}"
+                for function in functions
+                if _patches_rest_client(function) and _names_a_429(function)
+            ]
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            reads += [
+                f"{relative}:{node.lineno}"
+                for node in ast.walk(tree)
+                if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+            ]
+>       assert offenders == []
+E       AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429', 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429', 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429'] == []
+E         
+E         Left contains 3 more items, first extra item: 'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429',
+E         +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429',
+E         +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429',
+E         + ]
+
+tests/unit/test_massive_retry.py:824: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts - AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429', 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429', 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429'] == []
+  
+  Left contains 3 more items, first extra item: 'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429'
+  
+  Full diff:
+  - []
+  + [
+  +     'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429',
+  +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429',
+  +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429',
+  + ]
+======================= 1 failed, 36 deselected in 1.30s =======================
+# exit code: 1
+
+# --- Each planted form on its own, reworked guard
+# planted: test_planted_monkeypatch_setattr_429 only
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 36 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that replaces
+        `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+        `429` or the rate-limited fixture; (d) no test file reads a recorded
+        `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+        column's default, which is schema metadata). The lock-file clause is
+        checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+        assert {"MaxRetryError", "ResponseError"} <= imported
+    
+        assignments = [
+            node
+            for node in client_tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+                for target in node.targets
+            )
+        ]
+        assert len(assignments) == 1
+        value = assignments[0].value
+        assert isinstance(value, ast.Call)
+        assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+        assert value.args == []
+        assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+        string_constants = {
+            node.value
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        assert "too many 429 error responses" not in string_constants
+    
+        offenders = []
+        reads = []
+        for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            functions = [
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            offenders += [
+                f"{path.relative_to(REPO_ROOT)}::{function.name}"
+                for function in functions
+                if _patches_rest_client(function) and _names_a_429(function)
+            ]
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            reads += [
+                f"{relative}:{node.lineno}"
+                for node in ast.walk(tree)
+                if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+            ]
+>       assert offenders == []
+E       AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429'] == []
+E         
+E         Left contains one more item: 'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429',
+E         + ]
+
+tests/unit/test_massive_retry.py:824: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts - AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429'] == []
+  
+  Left contains one more item: 'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429'
+  
+  Full diff:
+  - []
+  + [
+  +     'tests/unit/test_planted_guard_offenders.py::test_planted_monkeypatch_setattr_429',
+  + ]
+======================= 1 failed, 36 deselected in 1.43s =======================
+# exit code: 1
+
+# planted: test_planted_patch_object_429 only
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 36 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that replaces
+        `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+        `429` or the rate-limited fixture; (d) no test file reads a recorded
+        `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+        column's default, which is schema metadata). The lock-file clause is
+        checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+        assert {"MaxRetryError", "ResponseError"} <= imported
+    
+        assignments = [
+            node
+            for node in client_tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+                for target in node.targets
+            )
+        ]
+        assert len(assignments) == 1
+        value = assignments[0].value
+        assert isinstance(value, ast.Call)
+        assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+        assert value.args == []
+        assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+        string_constants = {
+            node.value
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        assert "too many 429 error responses" not in string_constants
+    
+        offenders = []
+        reads = []
+        for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            functions = [
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            offenders += [
+                f"{path.relative_to(REPO_ROOT)}::{function.name}"
+                for function in functions
+                if _patches_rest_client(function) and _names_a_429(function)
+            ]
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            reads += [
+                f"{relative}:{node.lineno}"
+                for node in ast.walk(tree)
+                if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+            ]
+>       assert offenders == []
+E       AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429'] == []
+E         
+E         Left contains one more item: 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429',
+E         + ]
+
+tests/unit/test_massive_retry.py:824: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts - AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429'] == []
+  
+  Left contains one more item: 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429'
+  
+  Full diff:
+  - []
+  + [
+  +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_429',
+  + ]
+======================= 1 failed, 36 deselected in 2.12s =======================
+# exit code: 1
+
+# planted: test_planted_patch_object_keyword_429 only
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 36 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that replaces
+        `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+        `429` or the rate-limited fixture; (d) no test file reads a recorded
+        `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+        column's default, which is schema metadata). The lock-file clause is
+        checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+        assert {"MaxRetryError", "ResponseError"} <= imported
+    
+        assignments = [
+            node
+            for node in client_tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+                for target in node.targets
+            )
+        ]
+        assert len(assignments) == 1
+        value = assignments[0].value
+        assert isinstance(value, ast.Call)
+        assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+        assert value.args == []
+        assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+        string_constants = {
+            node.value
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        assert "too many 429 error responses" not in string_constants
+    
+        offenders = []
+        reads = []
+        for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            functions = [
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            offenders += [
+                f"{path.relative_to(REPO_ROOT)}::{function.name}"
+                for function in functions
+                if _patches_rest_client(function) and _names_a_429(function)
+            ]
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            reads += [
+                f"{relative}:{node.lineno}"
+                for node in ast.walk(tree)
+                if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+            ]
+>       assert offenders == []
+E       AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429'] == []
+E         
+E         Left contains one more item: 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429',
+E         + ]
+
+tests/unit/test_massive_retry.py:824: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts - AssertionError: assert ['tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429'] == []
+  
+  Left contains one more item: 'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429'
+  
+  Full diff:
+  - []
+  + [
+  +     'tests/unit/test_planted_guard_offenders.py::test_planted_patch_object_keyword_429',
+  + ]
+======================= 1 failed, 36 deselected in 0.71s =======================
+# exit code: 1
+
+# planted: test_planted_attempts_read only
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 36 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that replaces
+        `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+        `429` or the rate-limited fixture; (d) no test file reads a recorded
+        `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+        column's default, which is schema metadata). The lock-file clause is
+        checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+        assert {"MaxRetryError", "ResponseError"} <= imported
+    
+        assignments = [
+            node
+            for node in client_tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+                for target in node.targets
+            )
+        ]
+        assert len(assignments) == 1
+        value = assignments[0].value
+        assert isinstance(value, ast.Call)
+        assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+        assert value.args == []
+        assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+        string_constants = {
+            node.value
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        assert "too many 429 error responses" not in string_constants
+    
+        offenders = []
+        reads = []
+        for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            functions = [
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            offenders += [
+                f"{path.relative_to(REPO_ROOT)}::{function.name}"
+                for function in functions
+                if _patches_rest_client(function) and _names_a_429(function)
+            ]
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            reads += [
+                f"{relative}:{node.lineno}"
+                for node in ast.walk(tree)
+                if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+            ]
+        assert offenders == []
+>       assert reads == []
+E       AssertionError: assert ['tests/unit/test_planted_guard_offenders.py:20'] == []
+E         
+E         Left contains one more item: 'tests/unit/test_planted_guard_offenders.py:20'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'tests/unit/test_planted_guard_offenders.py:20',
+E         + ]
+
+tests/unit/test_massive_retry.py:825: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts - AssertionError: assert ['tests/unit/test_planted_guard_offenders.py:20'] == []
+  
+  Left contains one more item: 'tests/unit/test_planted_guard_offenders.py:20'
+  
+  Full diff:
+  - []
+  + [
+  +     'tests/unit/test_planted_guard_offenders.py:20',
+  + ]
+======================= 1 failed, 36 deselected in 1.73s =======================
+# exit code: 1
+
+# planted: test_planted_attempts_read_beside_the_catalogue only
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py -k test_the_429_change_adds_no_package   (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items / 36 deselected / 1 selected
+
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts FAILED [100%]
+
+=================================== FAILURES ===================================
+_ test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts _
+
+    def test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts() -> None:
+        """CAP-003 TC-COMP-251 / DAC-E8-S3-9, read with `ast`, never a text regex
+        over test files (so this test's own constants cannot match its rules):
+        (a) `client.py` imports `MaxRetryError` and `ResponseError` from
+        `urllib3.exceptions`; (b) `_THROTTLED_RETRY_REASON` is built from
+        urllib3's constant, never a hand-typed copy, which no behavioural test can
+        tell apart at urllib3 2.7.0; (c) no test function that replaces
+        `RESTClient` (`patch`, `patch.object` or `monkeypatch.setattr`) names a
+        `429` or the rate-limited fixture; (d) no test file reads a recorded
+        `attempts` value (`_SCHEMA_DEFAULT_READS` names the one read of the
+        column's default, which is schema metadata). The lock-file clause is
+        checked by the story's validation, not here."""
+        client_source = REPO_ROOT / "src" / "factorflow" / "ingestion" / "massive" / "client.py"
+        client_tree = ast.parse(client_source.read_text())
+    
+        imported = {
+            alias.name
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "urllib3.exceptions"
+            for alias in node.names
+        }
+        assert {"MaxRetryError", "ResponseError"} <= imported
+    
+        assignments = [
+            node
+            for node in client_tree.body
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_THROTTLED_RETRY_REASON"
+                for target in node.targets
+            )
+        ]
+        assert len(assignments) == 1
+        value = assignments[0].value
+        assert isinstance(value, ast.Call)
+        assert ast.unparse(value.func) == "ResponseError.SPECIFIC_ERROR.format"
+        assert value.args == []
+        assert [(k.arg, ast.literal_eval(k.value)) for k in value.keywords] == [("status_code", 429)]
+        string_constants = {
+            node.value
+            for node in ast.walk(client_tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
+        assert "too many 429 error responses" not in string_constants
+    
+        offenders = []
+        reads = []
+        for path in sorted((REPO_ROOT / "tests").rglob("*.py")):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            functions = [
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            offenders += [
+                f"{path.relative_to(REPO_ROOT)}::{function.name}"
+                for function in functions
+                if _patches_rest_client(function) and _names_a_429(function)
+            ]
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            reads += [
+                f"{relative}:{node.lineno}"
+                for node in ast.walk(tree)
+                if _reads_attempts(node) and (relative, ast.unparse(node)) not in _SCHEMA_DEFAULT_READS
+            ]
+        assert offenders == []
+>       assert reads == []
+E       AssertionError: assert ['tests/unit/test_planted_guard_offenders.py:21'] == []
+E         
+E         Left contains one more item: 'tests/unit/test_planted_guard_offenders.py:21'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'tests/unit/test_planted_guard_offenders.py:21',
+E         + ]
+
+tests/unit/test_massive_retry.py:825: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts - AssertionError: assert ['tests/unit/test_planted_guard_offenders.py:21'] == []
+  
+  Left contains one more item: 'tests/unit/test_planted_guard_offenders.py:21'
+  
+  Full diff:
+  - []
+  + [
+  +     'tests/unit/test_planted_guard_offenders.py:21',
+  + ]
+======================= 1 failed, 36 deselected in 0.74s =======================
+# exit code: 1
+
+# --- Control: HEAD tree, reworked test file (no defect): passes
+# $ python -m pytest -o pythonpath=src -p no:cacheprovider tests/unit/test_massive_retry.py    (test file: worktree)
+============================= test session starts ==============================
+hypothesis profile 'default'
+collecting ... collected 37 items
+
+tests/unit/test_massive_retry.py::test_timeouts_and_server_errors_retry_to_the_attempt_limit[timeout] PASSED [  2%]
+tests/unit/test_massive_retry.py::test_timeouts_and_server_errors_retry_to_the_attempt_limit[server-error] PASSED [  5%]
+tests/unit/test_massive_retry.py::test_the_real_transport_clock_starts_on_a_minute_boundary PASSED [  8%]
+tests/unit/test_massive_retry.py::test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing[in-message] PASSED [ 10%]
+tests/unit/test_massive_retry.py::test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing[in-error] PASSED [ 13%]
+tests/unit/test_massive_retry.py::test_a_real_403_plan_refusal_is_sent_once_and_waits_nothing[beside-forbidden] PASSED [ 16%]
+tests/unit/test_massive_retry.py::test_an_unrecognised_403_is_still_retried_to_the_limit_as_unavailable[forbidden-envelope] PASSED [ 18%]
+tests/unit/test_massive_retry.py::test_an_unrecognised_403_is_still_retried_to_the_limit_as_unavailable[non-json-body] PASSED [ 21%]
+tests/unit/test_massive_retry.py::test_rate_limited_responses_are_paced_without_consuming_attempts PASSED [ 24%]
+tests/unit/test_massive_retry.py::test_a_persistent_real_429_spends_exactly_the_300_s_budget_and_raises_rate_limited PASSED [ 27%]
+tests/unit/test_massive_retry.py::test_a_spent_budget_fails_the_stocks_next_read_after_one_request_until_the_next_stock PASSED [ 29%]
+tests/unit/test_massive_retry.py::test_jitter_never_takes_the_real_transport_budget_past_300_s PASSED [ 32%]
+tests/unit/test_massive_retry.py::test_a_refused_redirect_and_a_forcelisted_503_stay_retryable_and_reach_no_other_host[refused-redirect] PASSED [ 35%]
+tests/unit/test_massive_retry.py::test_a_refused_redirect_and_a_forcelisted_503_stay_retryable_and_reach_no_other_host[forcelisted-503] PASSED [ 37%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-max-retry-is-throttled] PASSED [ 40%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[503-max-retry-is-retryable] PASSED [ 43%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[refused-redirect-is-retryable] PASSED [ 45%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[connection-error-is-retryable] PASSED [ 48%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[rate-limited-body-is-throttled] PASSED [ 51%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[429-text-in-a-reason-that-is-not-a-response-error-is-retryable] PASSED [ 54%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[not-found-body-is-fatal] PASSED [ 56%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[unknown-shape-body-is-retryable] PASSED [ 59%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[413-max-retry-is-retryable] PASSED [ 62%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[499-max-retry-is-retryable] PASSED [ 64%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[500-max-retry-is-retryable] PASSED [ 67%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[502-max-retry-is-retryable] PASSED [ 70%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[504-max-retry-is-retryable] PASSED [ 72%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-reason-only-containing-the-429-text-is-retryable] PASSED [ 75%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-a-prefix-is-retryable] PASSED [ 78%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-leading-whitespace-is-retryable] PASSED [ 81%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-with-trailing-whitespace-is-retryable] PASSED [ 83%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-429-text-in-another-case-is-retryable] PASSED [ 86%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[a-429-reason-on-an-error-that-is-not-a-max-retry-error-is-retryable] PASSED [ 89%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_matches_only_urllib3s_429_constant_and_still_throttles_the_body[the-rate-limited-body-on-an-error-that-is-not-a-bad-response-is-retryable] PASSED [ 91%]
+tests/unit/test_massive_retry.py::test_classify_for_governor_is_part_of_the_client_modules_interface PASSED [ 94%]
+tests/unit/test_massive_retry.py::test_a_fatal_bad_response_is_raised_typed_from_the_one_response PASSED [ 97%]
+tests/unit/test_massive_retry.py::test_the_429_change_adds_no_package_and_no_test_fakes_a_429_or_reads_attempts PASSED [100%]
+
+============================== 37 passed in 2.08s ==============================
+# exit code: 0
+
