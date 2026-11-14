@@ -1,0 +1,147 @@
+{
+ "schema": 1,
+ "repo_head": "2626e8cd85506d3e2f170e82748583c059be151a",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/data_health/reader.py:26:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 26,
+   "original": "        cur.execute(PROBLEM_ROWS_SQL, {\"cursor\": cursor, \"limit_plus_one\": limit + 1})",
+   "mutated": "        cur.execute(PROBLEM_ROWS_SQL, {\"cursor\": cursor, \"limit_plus_one\": limit + 2})"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:44:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 44,
+   "original": "    next_cursor = kept[-1] if len(symbols) > limit else None",
+   "mutated": "    next_cursor = kept[-1] if len(symbols) >= limit else None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:44:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 44,
+   "original": "    next_cursor = kept[-1] if len(symbols) > limit else None",
+   "mutated": "    next_cursor = kept[-2] if len(symbols) > limit else None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:50:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 50,
+   "original": "                retryable=any(f.outcome == \"failed\" for f in by_symbol[symbol]),",
+   "mutated": "                retryable=any(f.outcome != \"failed\" for f in by_symbol[symbol]),"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:planted-comment",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "SELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,",
+   "new": "SELECT i.symbol, -- UPDATE\n       s.data_type,\n       s.last_outcome            AS outcome,"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:cursor-ge",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "i2.symbol > %(cursor)s",
+   "new": "i2.symbol >= %(cursor)s"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:limit-literal",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "LIMIT %(limit_plus_one)s",
+   "new": "LIMIT 3"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:cursor-interpolated",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "i2.symbol > %(cursor)s",
+   "new": "i2.symbol > '{cursor}'"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:join-true",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
+   "new": "ON true\n WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN ("
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:subquery-outcome-failed-only",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "AND s2.last_outcome IN ('failed', 'not_found')",
+   "new": "AND s2.last_outcome IN ('failed')"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:subquery-any-lifecycle",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "WHERE i2.lifecycle = 'active'",
+   "new": "WHERE true"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:count-not-distinct",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "count(DISTINCT i.instrument_id)",
+   "new": "count(i.instrument_id)"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:count-no-coalesce",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "COALESCE((array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3], '{}')",
+   "new": "(array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3]"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:outer-outcome-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
+   "new": "   AND i.symbol IN ("
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:manual:retryable-all",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "old": "retryable=any(",
+   "new": "retryable=all("
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:manual:commit-after-fetch",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "old": "rows = cur.fetchall()",
+   "new": "rows = cur.fetchall()\n        conn.commit()"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:count-any-lifecycle",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n\"\"\"\n",
+   "new": "WHERE true\n   AND s.last_outcome IN ('failed', 'not_found')\n\"\"\"\n"
+  }
+ ]
+}

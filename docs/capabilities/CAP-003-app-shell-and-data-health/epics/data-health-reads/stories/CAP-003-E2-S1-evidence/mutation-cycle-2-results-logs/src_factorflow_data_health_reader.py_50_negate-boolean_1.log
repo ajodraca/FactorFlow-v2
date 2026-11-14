@@ -1,0 +1,42 @@
+...............F
+=================================== FAILURES ===================================
+________ test_retryable_rule_and_resolution_only_by_write_or_retirement ________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64566 user=test database=test_35bcab93b617481bb5ddd0663b2a4f42) at 0x10d185580>
+
+    def test_retryable_rule_and_resolution_only_by_write_or_retirement(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        r1 = _run(conn, requested_at=T0)
+        ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
+        for dt in ("prices", "fundamentals"):
+            _record(conn, r1, ids["NFX"], dt, "not_found")
+        for dt in ("reference", "corporate_actions"):
+            _record(conn, r1, ids["NFX"], dt, "written")
+        _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
+        for dt in ("reference", "fundamentals", "corporate_actions"):
+            _record(conn, r1, ids["FLD"], dt, "written")
+        _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
+        _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
+        conn.commit()
+    
+        def read() -> dict[str, bool]:
+            page = read_problems(conn, cursor=None, limit=500)
+            conn.rollback()
+            return {row.symbol: row.retryable for row in page.rows}
+    
+>       assert read() == {"FLD": True, "MIX": True, "NFX": False}
+E       AssertionError: assert {'FLD': False..., 'NFX': True} == {'FLD': True,... 'NFX': False}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'FLD': False} != {'FLD': True}
+E         {'NFX': True} != {'NFX': False}
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:178: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_retryable_rule_and_resolution_only_by_write_or_retirement
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed in 2.37s

@@ -1,0 +1,69 @@
+...............F
+=================================== FAILURES ===================================
+________ test_retryable_rule_and_resolution_only_by_write_or_retirement ________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64614 user=test database=test_6ab03d99cc10402da836bb1af50d921b) at 0x10d3be450>
+
+    def test_retryable_rule_and_resolution_only_by_write_or_retirement(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        r1 = _run(conn, requested_at=T0)
+        ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
+        for dt in ("prices", "fundamentals"):
+            _record(conn, r1, ids["NFX"], dt, "not_found")
+        for dt in ("reference", "corporate_actions"):
+            _record(conn, r1, ids["NFX"], dt, "written")
+        _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
+        for dt in ("reference", "fundamentals", "corporate_actions"):
+            _record(conn, r1, ids["FLD"], dt, "written")
+        _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
+        _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
+        conn.commit()
+    
+        def read() -> dict[str, bool]:
+            page = read_problems(conn, cursor=None, limit=500)
+            conn.rollback()
+            return {row.symbol: row.retryable for row in page.rows}
+    
+        assert read() == {"FLD": True, "MIX": True, "NFX": False}
+    
+        r2 = _run(conn, requested_at=T0 + timedelta(hours=1))
+        _record(conn, r2, ids["NFX"], "reference", "written", completed_at=T0 + timedelta(hours=1))
+        conn.commit()
+        assert set(read()) == {"FLD", "MIX", "NFX"}
+    
+        _record(conn, r2, ids["FLD"], "prices", "written", completed_at=T0 + timedelta(hours=1))
+        conn.commit()
+        assert set(read()) == {"MIX", "NFX"}
+    
+        retire_symbol(conn, "NFX")
+        conn.commit()
+        assert read() == {"MIX": True}
+        r3 = _run(conn, requested_at=T0 + timedelta(hours=2))
+        _record(
+            conn,
+            r3,
+            ids["MIX"],
+            "prices",
+            "failed",
+            reason="second attempt",
+            completed_at=T0 + timedelta(hours=2),
+        )
+        _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
+        conn.commit()
+        page = read_problems(conn, cursor=None, limit=500)
+        conn.rollback()
+        mix = page.rows[0]
+        prices = next(f for f in mix.failures if f.data_type == "prices")
+        assert [row.symbol for row in page.rows] == ["MIX"]
+        assert prices.run_id == r3
+>       assert prices.reason == "second attempt"
+E       AssertionError: assert None == 'second attempt'
+E        +  where None = Failure(data_type='prices', outcome='failed', reason=None, attempts=1, completed_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('e1be4f93-e4b2-49f4-ae33-3755b7d3230a')).reason
+
+tests/integration/test_data_health_problems.py:210: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_retryable_rule_and_resolution_only_by_write_or_retirement
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed in 2.25s

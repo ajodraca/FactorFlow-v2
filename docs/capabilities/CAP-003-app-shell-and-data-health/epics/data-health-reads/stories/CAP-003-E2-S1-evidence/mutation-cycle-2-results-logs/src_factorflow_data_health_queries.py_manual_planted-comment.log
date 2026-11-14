@@ -1,0 +1,22 @@
+F
+=================================== FAILURES ===================================
+_____________ test_sources_hold_no_write_or_ddl_token[queries.py] ______________
+
+name = 'queries.py'
+
+    @pytest.mark.parametrize("name", sorted(SOURCES))
+    def test_sources_hold_no_write_or_ddl_token(name: str) -> None:
+        found = write_tokens(SOURCES[name].read_text(encoding="utf-8"))
+    
+>       assert found == [], f"{name} holds write tokens: {found}"
+E       AssertionError: queries.py holds write tokens: ['UPDATE']
+E       assert ['UPDATE'] == []
+E         
+E         Left contains one more item: 'UPDATE'
+E         Use -v to get more diff
+
+tests/unit/test_data_health_sql_is_read_only.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_sql_is_read_only.py::test_sources_hold_no_write_or_ddl_token[queries.py]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.35s

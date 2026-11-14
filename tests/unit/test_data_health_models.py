@@ -92,7 +92,7 @@ def test_failure_rejects_assignment() -> None:
     failure = models.Failure("prices", "failed", "timeout", 3, WHEN, RUN_ID)
 
     with pytest.raises(dataclasses.FrozenInstanceError):
-        failure.attempts = 4  # type: ignore[misc]
+        failure.reason = "changed"  # type: ignore[misc]
 
 
 def test_problem_row_and_page_reject_assignment() -> None:

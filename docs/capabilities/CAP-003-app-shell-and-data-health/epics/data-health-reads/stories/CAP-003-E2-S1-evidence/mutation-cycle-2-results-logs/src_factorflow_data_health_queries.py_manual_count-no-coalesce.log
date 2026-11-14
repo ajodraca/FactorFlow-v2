@@ -1,0 +1,27 @@
+......................F
+=================================== FAILURES ===================================
+_______________________ test_the_count_on_an_empty_store _______________________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64658 user=test database=test_fa86b7cdcd3f4202b17ded11a4c9f358) at 0x108ab25d0>
+
+    def test_the_count_on_an_empty_store(migrated_writer_connection: psycopg.Connection) -> None:
+        conn = migrated_writer_connection
+    
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(queries.PROBLEM_COUNT_SQL)
+            counted = cur.fetchone()
+        conn.rollback()
+    
+>       assert counted == {"stock_count": 0, "symbols": [], "newest_completed_at": None}
+E       AssertionError: assert {'stock_count...ted_at': None} == {'stock_count...ted_at': None}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'symbols': None} != {'symbols': []}
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:359: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_the_count_on_an_empty_store
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 22 passed in 4.05s

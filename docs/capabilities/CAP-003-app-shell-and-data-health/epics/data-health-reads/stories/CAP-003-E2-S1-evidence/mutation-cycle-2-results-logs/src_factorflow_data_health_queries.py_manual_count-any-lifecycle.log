@@ -1,0 +1,33 @@
+.....................F
+=================================== FAILURES ===================================
+___________________ test_the_count_and_the_rows_are_one_set ____________________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64738 user=test database=test_d6cd839d8f974f6d8bdded37f4b08834) at 0x10b67b590>
+
+    def test_the_count_and_the_rows_are_one_set(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        _t008_store(conn)
+        t_new = T0 + timedelta(days=1)
+        bbb_run = _run(conn, requested_at=t_new)
+        with conn.cursor() as cur:
+            cur.execute("SELECT instrument_id FROM instrument WHERE symbol = 'BBB'")
+            row = cur.fetchone()
+            assert row is not None
+        _record(conn, bbb_run, int(row[0]), "fundamentals", "not_found", completed_at=t_new)
+        conn.commit()
+    
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(queries.PROBLEM_COUNT_SQL)
+            counted = cur.fetchone()
+        conn.rollback()
+        assert counted is not None
+>       assert counted["stock_count"] == 5
+E       assert 6 == 5
+
+tests/integration/test_data_health_problems.py:335: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_the_count_and_the_rows_are_one_set
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 21 passed in 3.10s

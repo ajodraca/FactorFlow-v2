@@ -1,0 +1,29 @@
+..................F
+=================================== FAILURES ===================================
+__________________ test_the_transaction_belongs_to_the_caller __________________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64734 user=test database=test_95ae49290d41429dbef79f29e2d35c34) at 0x1096d1220>
+postgres_connection_string = 'postgresql://test:test@localhost:64734/test_95ae49290d41429dbef79f29e2d35c34'
+
+    def test_the_transaction_belongs_to_the_caller(
+        migrated_writer_connection: psycopg.Connection, postgres_connection_string: str
+    ) -> None:
+        conn = migrated_writer_connection
+        _problem_stocks(conn, ["AAA", "BBB"])
+        conn.commit()
+        assert conn.info.transaction_status == psycopg.pq.TransactionStatus.IDLE
+    
+        read_problems(conn, cursor=None, limit=2)
+>       assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
+E       AssertionError: assert <TransactionStatus.IDLE: 0> == <TransactionStatus.INTRANS: 2>
+E        +  where <TransactionStatus.IDLE: 0> = <psycopg.ConnectionInfo object at 0x1096d3b90>.transaction_status
+E        +    where <psycopg.ConnectionInfo object at 0x1096d3b90> = <psycopg.Connection [IDLE] (host=localhost port=64734 user=test database=test_95ae49290d41429dbef79f29e2d35c34) at 0x1096d1220>.info
+E        +  and   <TransactionStatus.INTRANS: 2> = <enum 'TransactionStatus'>.INTRANS
+E        +    where <enum 'TransactionStatus'> = <module 'psycopg.pq' from '/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w3/.venv/lib/python3.12/site-packages/psycopg/pq/__init__.py'>.TransactionStatus
+E        +      where <module 'psycopg.pq' from '/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w3/.venv/lib/python3.12/site-packages/psycopg/pq/__init__.py'> = psycopg.pq
+
+tests/integration/test_data_health_problems.py:250: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_the_transaction_belongs_to_the_caller
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 18 passed in 3.01s
