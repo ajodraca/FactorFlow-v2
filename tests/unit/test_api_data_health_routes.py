@@ -89,16 +89,20 @@ def _install(
     )
 
 
-def _client(pool: _FakePool, *, raise_server_exceptions: bool = True) -> TestClient:
+def _client(
+    pool: _FakePool, *, raise_server_exceptions: bool = True, stamp_request_id: bool = True
+) -> TestClient:
     app = FastAPI()
     app.add_exception_handler(RequestValidationError, app_module._validation_error_handler)
     app.include_router(data_health.router)
     app.state.db_pool = pool
 
-    @app.middleware("http")
-    async def _stamp_request_id(request: Request, call_next: Any) -> Any:
-        request.state.request_id = _REQUEST_ID
-        return await call_next(request)
+    if stamp_request_id:
+
+        @app.middleware("http")
+        async def _stamp_request_id(request: Request, call_next: Any) -> Any:
+            request.state.request_id = _REQUEST_ID
+            return await call_next(request)
 
     return TestClient(
         app, base_url="http://127.0.0.1:8000", raise_server_exceptions=raise_server_exceptions
@@ -144,6 +148,25 @@ def test_a_cursor_that_is_not_a_symbol_is_refused_and_never_echoed(
     assert response.json() == _problems_refusal("data-health", "`cursor` must be a stock symbol.")
     assert "not a symbol" not in response.text
     assert "NOT A SYMBOL" not in response.text
+    assert pool.checkouts == 0
+
+
+# Implements TC-COMP-051
+def test_a_cursor_refusal_without_a_stamped_request_id_falls_back_to_unknown(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install(monkeypatch)
+    pool = _FakePool()
+    response = _client(pool, stamp_request_id=False).get("/api/data-health/problems?cursor=")
+    assert response.status_code == 422
+    assert response.json() == {
+        "error": {
+            "code": "validation_error",
+            "message": "`cursor` must be a stock symbol.",
+            "resource": "data-health",
+            "request_id": "unknown",
+        }
+    }
     assert pool.checkouts == 0
 
 

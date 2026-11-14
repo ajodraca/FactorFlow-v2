@@ -1,0 +1,17 @@
+### src_factorflow_api_data_health_models.py_rv_next-cursor-derived
+>       assert dumped == {**EXPECTED_PAGE_TWO_ROWS, "next_cursor": None}
+E       AssertionError: assert {'rows': [{'s...ursor': 'BBB'} == {'rows': [{'s...cursor': None}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'next_cursor': 'BBB'} != {'next_cursor': None}
+E         Use -v to get more diff
+1 failed, 5 passed, 2 warnings in 0.59s
+### src_factorflow_api_routes_data_health.py_rv_request-id-fallback
+>       assert response.json() == {
+E       AssertionError: assert {'error': {'c...t_id': 'n/a'}} == {'error': {'c...': 'unknown'}}
+E         
+E         Differing items:
+E         {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'n/a'}} != {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'unknown'}}
+E         Use -v to get more diff
+1 failed, 15 passed, 2 warnings in 0.60s

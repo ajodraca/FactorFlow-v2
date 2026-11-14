@@ -1,0 +1,42 @@
+...............F
+=================================== FAILURES ===================================
+___ test_a_cursor_refusal_without_a_stamped_request_id_falls_back_to_unknown ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b0b9940>
+
+    def test_a_cursor_refusal_without_a_stamped_request_id_falls_back_to_unknown(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _install(monkeypatch)
+        pool = _FakePool()
+        response = _client(pool, stamp_request_id=False).get("/api/data-health/problems?cursor=")
+        assert response.status_code == 422
+>       assert response.json() == {
+            "error": {
+                "code": "validation_error",
+                "message": "`cursor` must be a stock symbol.",
+                "resource": "data-health",
+                "request_id": "unknown",
+            }
+        }
+E       AssertionError: assert {'error': {'c...t_id': 'n/a'}} == {'error': {'c...': 'unknown'}}
+E         
+E         Differing items:
+E         {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'n/a'}} != {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'unknown'}}
+E         Use -v to get more diff
+
+tests/unit/test_api_data_health_routes.py:162: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ggcyncaz/w0/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.12/site-packages/starlette/testclient.py:53
+  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ggcyncaz/w0/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_api_data_health_routes.py::test_a_cursor_refusal_without_a_stamped_request_id_falls_back_to_unknown
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed, 2 warnings in 0.60s

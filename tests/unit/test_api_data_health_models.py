@@ -466,6 +466,13 @@ def test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order() -> None
 
 
 # Implements TC-COMP-050
+def test_a_final_page_with_rows_keeps_its_null_cursor() -> None:
+    final_page = ProblemPage(PAGE_TWO_ROWS.rows, None)
+    dumped = ProblemPageResponse.from_reader(final_page).model_dump(mode="json")
+    assert dumped == {**EXPECTED_PAGE_TWO_ROWS, "next_cursor": None}
+
+
+# Implements TC-COMP-050
 def test_zero_counts_stay_zero_and_absent_counts_are_null() -> None:
     zeros = DataHealthResponse.from_reader(HEALTH_ZEROS).model_dump(mode="json")
     assert zeros["checks"]["daily_prices"]["gap_stock_count"] == 0

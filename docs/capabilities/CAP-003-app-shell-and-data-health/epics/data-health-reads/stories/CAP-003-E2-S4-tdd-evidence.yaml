@@ -58,3 +58,31 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-3
+    tasks: [T005, T004, T013]
+    description: >
+      Review rework of implementation-review-v2, tests only (production code unchanged). IR-001: _client takes stamp_request_id (default True); a cursor refusal on an app without the stamping middleware asserts request_id "unknown", killing the fallback mutant, while the stamped-id assertions stay. IR-002: a final page that has rows and a null next_cursor is serialised unchanged, killing a cursor derived from the last row. IR-003 (plan text) is a LOW plan-bookkeeping finding and is not addressed here.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/red-cycle-3-rework.log
+    red_log_sha256: 4c3bec5527a75147fe4788841626fe3cbafef4422ac21fa56fa2f0d4ed491f59
+    red_evidence: >
+      With each mutant applied (rv:request-id-fallback, rv:next-cursor-derived), the new tests fail on assertions; the log is the per-mutant failure excerpt.
+    green_evidence: >
+      test_api_data_health_models.py and test_api_data_health_routes.py 30 passed against the unchanged production code.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c5f72e3e13bfe98668336f656bf5239ac572a9e31917f1047fb0a67531149bd2
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: dbd07f2d9f2d25864350dff44e1bde7d2d70cc4b53f116fec2637d7628e7ef00
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "repo_head": "8ad371a",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/routes/data_health.py:rv:request-id-fallback",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/data_health.py",
+      "old": "request_id=getattr(request.state, \"request_id\", \"unknown\")",
+      "new": "request_id=getattr(request.state, \"request_id\", \"n/a\")",
+      "line": 1
+    },
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:next-cursor-derived",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "next_cursor=value.next_cursor,",
+      "new": "next_cursor=value.rows[-1].symbol if value.rows else None,",
+      "line": 1
+    }
+  ]
+}
