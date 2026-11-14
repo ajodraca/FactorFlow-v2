@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w2/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 704ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 369ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > scores failed 4ms
+     → expected 'Score update failed x' to be 'Score update failed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > scores failed
+AssertionError: expected 'Score update failed x' to be 'Score update failed' // Object.is equality
+
+Expected: "Score update failed"
+Received: "Score update failed x"
+
+ ❯ src/components/patterns/tiers.test.ts:225:29
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+    225|     expect(labelOf(status)).toBe(label);
+       |                             ^
+    226|   });
+    227| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:33
+   Duration  2.01s (transform 33ms, setup 43ms, collect 317ms, tests 704ms, environment 215ms, prepare 152ms)
+

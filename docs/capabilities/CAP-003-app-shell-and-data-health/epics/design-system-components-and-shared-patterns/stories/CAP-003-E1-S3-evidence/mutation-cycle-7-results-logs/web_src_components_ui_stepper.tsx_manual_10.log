@@ -1,0 +1,47 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w1/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 12ms
+ ✓ src/components/token-literals.test.ts (30 tests) 67ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 365ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 449ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 586ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 945ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 406ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 141ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1573ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 625ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 386ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 549ms
+ ❯ src/components/ui/stepper.test.tsx (15 tests | 1 failed) 583ms
+   × stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004) > sets every dot's number in the numeric face 75ms
+     → expected [ 'flex', 'shrink-0', …(6) ] to include 'font-numeric'
+ ✓ src/components/ui/card.test.tsx (9 tests) 389ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 914ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 435ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 904ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1118ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 539ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1021ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 427ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/stepper.test.tsx > stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004) > sets every dot's number in the numeric face
+AssertionError: expected [ 'flex', 'shrink-0', …(6) ] to include 'font-numeric'
+ ❯ src/components/ui/stepper.test.tsx:177:19
+    175|   it("sets every dot's number in the numeric face", () => {
+    176|     for (const { dot } of dotsAndTitles()) {
+    177|       expect(dot).toContain("font-numeric");
+       |                   ^
+    178|       expect(dot).toContain("text-xs");
+    179|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:56
+   Duration  6.23s (transform 2.20s, setup 4.32s, collect 19.04s, tests 10.01s, environment 24.04s, prepare 5.87s)
+

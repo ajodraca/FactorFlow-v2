@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o7mt325c/w0/web
+
+ ❯ src/components/ui/dialog.test.tsx (8 tests | 1 failed) 228ms
+   × ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > is not pending when the prop is omitted 8ms
+     → expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="true"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > is not pending when the prop is omitted
+Error: expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="true"
+ ❯ src/components/ui/dialog.test.tsx:158:24
+    156|     );
+    157|     const dialog = await screen.findByRole("dialog", { name: TITLE });
+    158|     expect(dialog).not.toHaveAttribute("aria-busy");
+       |                        ^
+    159|     await user.click(within(dialog).getByRole("button", { name: CONFIR…
+    160|     expect(onConfirm).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:27:11
+   Duration  1.09s (transform 34ms, setup 31ms, collect 111ms, tests 228ms, environment 151ms, prepare 27ms)
+

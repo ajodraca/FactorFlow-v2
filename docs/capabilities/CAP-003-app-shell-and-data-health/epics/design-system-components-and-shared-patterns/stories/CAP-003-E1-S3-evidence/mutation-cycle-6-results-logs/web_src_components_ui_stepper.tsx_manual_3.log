@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-a0jsk1_t/w3/web
+
+stderr | src/components/ui/stepper.test.tsx > stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > follows the href when no onSelect is given
+Error: Not implemented: navigation (except hash changes)
+    at module.exports (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+    at navigateFetch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+    at exports.navigate (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+    at Timeout._onTimeout (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/nodes/HTMLHyperlinkElementUtils-impl.js:81:7)
+    at listOnTimeout (node:internal/timers:588:17)
+    at processTimers (node:internal/timers:523:7) undefined
+
+ ❯ src/components/ui/stepper.test.tsx (8 tests | 1 failed) 98ms
+   × stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > links only a done step that has an href 6ms
+     → expected [ <a href="/current" …(2)></a>, …(1) ] to have a length of +0 but got 2
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/stepper.test.tsx > stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > links only a done step that has an href
+AssertionError: expected [ <a href="/current" …(2)></a>, …(1) ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ src/components/ui/stepper.test.tsx:85:43
+     83|       />,
+     84|     );
+     85|     expect(screen.queryAllByRole("link")).toHaveLength(0);
+       |                                           ^
+     86|   });
+     87| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:27:47
+   Duration  947ms (transform 30ms, setup 31ms, collect 301ms, tests 98ms, environment 169ms, prepare 42ms)
+

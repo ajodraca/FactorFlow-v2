@@ -1,0 +1,78 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ihenc3r9/w0/web
+
+ ❯ src/components/ui/progress.test.tsx (8 tests | 3 failed) 51ms
+   × progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > indeterminate carries no aria-valuenow 6ms
+     → expect(element).toHaveAttribute("data-variant", "indeterminate") // element.getAttribute("data-variant") === "indeterminate"
+
+Expected the element to have attribute:
+  data-variant="indeterminate"
+Received:
+  data-variant="determinate"
+   × progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > is indeterminate when a caller passes a null total 3ms
+     → expect(element).not.toHaveAttribute("aria-valuenow") // element.hasAttribute("aria-valuenow")
+
+Expected the element not to have attribute:
+  aria-valuenow
+Received:
+  aria-valuenow="0"
+   × progress indicator and tokens (DEC-0303) > draws the indeterminate indicator with the hatch pattern and no transform 3ms
+     → expected 'h-full w-full flex-1 bg-status-active…' to contain 'bg-pattern-indeterminate'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > indeterminate carries no aria-valuenow
+Error: expect(element).toHaveAttribute("data-variant", "indeterminate") // element.getAttribute("data-variant") === "indeterminate"
+
+Expected the element to have attribute:
+  data-variant="indeterminate"
+Received:
+  data-variant="determinate"
+ ❯ src/components/ui/progress.test.tsx:37:17
+     35|     expect(bar).not.toHaveAttribute("aria-valuenow");
+     36|     expect(bar).toHaveAttribute("data-state", "indeterminate");
+     37|     expect(bar).toHaveAttribute("data-variant", "indeterminate");
+       |                 ^
+     38|   });
+     39| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress indeterminate has no valuenow; determinate exposes range (DAC-E1-S3-3, DAC-E1-14, AC-25) > is indeterminate when a caller passes a null total
+Error: expect(element).not.toHaveAttribute("aria-valuenow") // element.hasAttribute("aria-valuenow")
+
+Expected the element not to have attribute:
+  aria-valuenow
+Received:
+  aria-valuenow="0"
+ ❯ src/components/ui/progress.test.tsx:48:21
+     46|     );
+     47|     const bar = screen.getByRole("progressbar", { name: "Waiting for t…
+     48|     expect(bar).not.toHaveAttribute("aria-valuenow");
+       |                     ^
+     49|     expect(bar).toHaveAttribute("data-variant", "indeterminate");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/ui/progress.test.tsx > progress indicator and tokens (DEC-0303) > draws the indeterminate indicator with the hatch pattern and no transform
+AssertionError: expected 'h-full w-full flex-1 bg-status-active…' to contain 'bg-pattern-indeterminate'
+
+Expected: "bg-pattern-indeterminate"
+Received: "h-full w-full flex-1 bg-status-active transition-all"
+
+ ❯ src/components/ui/progress.test.tsx:97:33
+     95|     );
+     96|     const indicator = indicatorOf(screen.getByRole("progressbar"));
+     97|     expect(indicator.className).toContain("bg-pattern-indeterminate");
+       |                                 ^
+     98|     expect(indicator.className).not.toContain("bg-status-active");
+     99|     expect(indicator.style.transform).toBe("");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed (8)
+   Start at  10:27:39
+   Duration  874ms (transform 30ms, setup 31ms, collect 73ms, tests 51ms, environment 154ms, prepare 145ms)
+

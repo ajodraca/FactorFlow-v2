@@ -1,0 +1,276 @@
+# TDD evidence for CAP-003-E1-S2 - Vendor the form family.
+# Each cycle is its own local commit on the story branch; independent code-review and spec-drift subagents judged each cycle's patch.
+# Decisions applied from planning: DEC-0299, DEC-0300.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T014]
+    description: >
+      Form family packages (TC-COMP-011 packages half): seven packages added with npm install; licences verified by hand against node_modules/<pkg>/LICENSE (all MIT: react-hook-form 7.91.0, zod 4.6.7, @hookform/resolvers 7.0.3, @radix-ui/react-label 2.1.17, react-radio-group 1.5.1, react-checkbox 1.4.1, react-select 2.4.1); package-lock.json carries license MIT for each.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-1-packages.log
+    red_log_sha256: 55ae86ccb7689c54839a1a0e34548b0891af9a1b57f6af5c8012d2aa802d6123
+    red_evidence: >
+      2 failed, 6 passed before the packages were installed (not in dependencies; no lock licence).
+    green_evidence: >
+      vendoring 8 passed after npm install.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 15ae938276e29520009adc71c59523d571eec64111f5d3a9e4af41f3d2859feb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-1.patch
+    commit_hash: 79c2fbafd04b4b749543590e4356dc2ea02065e4
+    mutation:
+      not_applicable: "dependency manifest change only; the vendoring test is not production code"
+
+  - id: cycle-2
+    tasks: [T009, T016]
+    description: >
+      input: text and numeric variants, suffix part of the accessible name through aria-labelledby (TC-COMP-010, DEC-0299, DEC-0300).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-2-input.log
+    red_log_sha256: e8392c8668038408517f375a891d2ca7540c0aacfdb90878dbe8e0556e10192e
+    red_evidence: >
+      input.test.tsx failed to resolve ./input before the module existed.
+    green_evidence: >
+      input 9 passed; token-literals scan clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b429fbf6563187b294e9198cd6597212a7c0892a268c9d8b289f5479a6ffc155
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-2.patch
+    commit_hash: 5180212015d9c371e2485fe09e1c409c3e1c8e7e
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: c9340fe686b57a62b0a9b0048fe733b933ca9a7d6192029732aaded8c5d1415b
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T010, T017]
+    description: >
+      textarea: list variant with four rows, no resize and the cell padding tokens; no key handler (TC-COMP-010, DEC-0300).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-3-textarea.log
+    red_log_sha256: 9457360c1a1c18410e1c4beaec64d06d366d8d4ca588161364912c524ced22db
+    red_evidence: >
+      textarea.test.tsx failed to resolve ./textarea before the module existed.
+    green_evidence: >
+      textarea 7 passed; token-literals scan clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4e2eb1181ba537e0922ecd14d07c7a744ce3a3b3f8ef8482241fcb787b881323
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-3.patch
+    commit_hash: 0bfeadbcf4f6d033ee0906fd746f2ed6579a3797
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: e942bae72f71c8c8ba4b692146d81ae5fb8dd8af1f2a8a1368a95db288865b7b
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T006, T013, T018]
+    description: >
+      checkbox: default variant over Radix, Space toggles and Enter does not, tri-state mixed, box border is the input token (TC-COMP-009, DEC-0300).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-4-checkbox.log
+    red_log_sha256: 5f0a9978be48d384edc8674132cb0643b80a5392ae12cc1878a6b90052f0dbf9
+    red_evidence: >
+      checkbox.test.tsx failed to resolve ./checkbox before the module existed.
+    green_evidence: >
+      checkbox 6 passed; token-literals scan and tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 93b5556289eae9eb0e3b0baae4b2003d3b08efbcc26ef5b2398752b52357017f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-4.patch
+    commit_hash: 001bbf2c1f7c784c4801c7d6704ad81bfffb8396
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: fc6f120f0e714c06f08c289dfdab91949fe472a7c370aea87aaab35c44bad3b4
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T004, T011, T019]
+    description: >
+      radio-group: cards variant over Radix with RadioGroupCard (title names it, description describes it), orientation left unset so both arrow axes move the selection (TC-COMP-009, DEC-0300, Resolved Conflict 3). The test holds the arrow key down until Radix's animation-frame check checks the focused card, as a person's keypress does. A first mutation run left two survivors (title span display, indicator aria-hidden); a test pinning both killed them.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-5-radio-group.log
+    red_log_sha256: face8e6bf2fc19cb7701577d4df6679d136cfb8007a044db9505cee9072bc70e
+    red_evidence: >
+      radio-group.test.tsx failed to resolve ./radio-group before the module existed.
+    green_evidence: >
+      radio-group 7 passed; token-literals scan and tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ade639e7a60583cb7d2d5c1b4d64ed4dae46562cd86d89d16e6d107753ef8b30
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-5.patch
+    commit_hash: 7bf9bb91264e95cdc739d9c62af3b234ef8548ce
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 09e8c0dbf5e7749651ec529f5cf828e21ceaf728103e9da0417d75b99f23df37
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-6
+    tasks: [T005, T012, T020]
+    description: >
+      select: inline variant over Radix Select with the shadcn parts, popper content, token-backed classes and no animation classes (TC-COMP-009, DEC-0300). The test answers the :fullscreen and :modal pseudo-classes directly, because jsdom's selector engine recurses on them and opening the list otherwise takes about eight seconds. Mutation: a first run left five survivors (popper wrapper and viewport, group label, separator, redundant aria-hidden, item-aligned position); tests pinned them and the redundant aria-hidden was removed, since lucide sets it.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-6-select.log
+    red_log_sha256: 952e523f6f0b7fc844ea0e0de3670e1805d8cecca0389cb282617138bcf6f18c
+    red_evidence: >
+      select.test.tsx failed to resolve ./select before the module existed.
+    green_evidence: >
+      select 6 passed in about 0.2 s; token-literals scan, tsc and biome lint clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 79f53077a7b4d09b615a9a870cf93f00305b74ca1cf0a7a247878928ea6807b5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-6.patch
+    commit_hash: 5da802a8fd75cf077d15bbffcdd06e9d3c066ab9
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-6-results.json
+      results_sha256: cfe2f3039b160c2355b39293455cdb1bd4b065ccf6e5d5f7995a11c5546d9742
+      generated: 17
+      killed: 17
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-7
+    tasks: [T007, T008, T015]
+    description: >
+      form: shadcn form on react-hook-form with FormRoot (stacked, inline, noValidate), FormLabel id, FormControl aria-labelledby/aria-describedby/aria-invalid and role=alert FormMessage (TC-COMP-010, DEC-0299, DEC-0300). Mutation ran form, input and radio-group tests together; a first run left three survivors (item spacing, empty message, a contrived shouldUnregister mutant); two tests pinned the first two and the third was dropped as not a specified behaviour.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-7-form.log
+    red_log_sha256: ec74db1c840c85a474ba47a2305f772e36ee6509d4da3e76d79f165a4ba2043f
+    red_evidence: >
+      form.test.tsx failed to resolve ./form before the module existed.
+    green_evidence: >
+      form 9 passed; token-literals scan, tsc and biome lint clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7913b47217205da51b6b4c49b587c9b8b6d93411820e53103beb087f14fcd4c8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-7.patch
+    commit_hash: 57906d2507fab4fdc80036111e2d7c315d9ef684
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-7-results.json
+      results_sha256: 3e91923baf537f9523106aa309c1229a7eba3f815beb7985cdda02018fe16a6a
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-8
+    tasks: [T003]
+    description: >
+      AC-26 literal scan over the six form family components (TC-COMP-011 scan half). Test-only cycle appended to S1's token-literals.test.ts. RED was observed by planting min-h-[80px] in textarea.tsx and reverting it, because the six files already exist by this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-8-scan.log
+    red_log_sha256: 9ced5ea058379334d5206e451dfa5822de93781ced0fafd52da69a6074f4cfa1
+    red_evidence: >
+      2 failed, 28 passed with min-h-[80px] planted in textarea.tsx (the new per-file case and S1's whole-tree scan).
+    green_evidence: >
+      token-literals 30 passed with the plant reverted.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8dd0b85d0b28aff1ed37317f6cc9451cc9b37253547046305a219dad7ca8b366
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-8.patch
+    commit_hash: 12b446e470469f342f8ba1df445ee9af3df9f234
+    mutation:
+      not_applicable: "test-only cycle: the token-literals block adds no production code"
+
+  - id: cycle-9
+    tasks: [T021, T022]
+    description: >
+      Format-only cycle: biome format --write on input.tsx, select.tsx and select.test.tsx after npm run format flagged them (T022). Whitespace, line wrapping and three trailing commas only; no token, class or assertion changed. The generator finds no catalogue mutant on re-wrapped lines, so four hand-written mutants over them were scored.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-9-format.log
+    red_log_sha256: a3a554b26464eb9c07f7f9089d37f52935ac5fd69c2001221aec9c589a6f293e
+    red_evidence: >
+      No red phase: a formatter run changes no token; npm run format reported three files before and none after.
+    green_evidence: >
+      components suite 372 passed; npm run format, lint and tsc clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3990cd0d2a9aad1e2ce473ad1a02514d4df5f2f28cab2f77a59f223ec46984bb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-9.patch
+    commit_hash: ebac20f0e7cc82ef63dc5ebdf6f5c367ac29a445
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-9-results.json
+      results_sha256: 6b25f02fa3f09c61fc5549cbfdcce67526a432fc27025e51ba420800863cfefe
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-10
+    tasks: [T009, T010, T011, T012, T013, T004, T018, T020]
+    description: >
+      Review v1 rework (IR-001 to IR-007). Tests now pin the focus ring on input, textarea and the select trigger (IR-001); the absence of the shipped ring-2, ring-offset, md:text-sm, shadow, max-h-96, rounded-sm py-1.5 pl-8 and h-3.5 literals (IR-002); the spec section 6 tokens for placeholder, textarea surface and body size, radio indicator fill and trigger text size (IR-003); radio arrow wrap-around and no mark on an unchecked checkbox (IR-004). Optional findings: SelectLabel takes text-muted-foreground (IR-005), the checkbox doc comment states the consumer carries the 24 px target (IR-006), textarea.test.tsx drops its TC-COMP-010 and DAC-E1-S2-1 claims (IR-007). RED is the reviewer's own run: the 20 mutants survived the pre-rework tests.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/red-cycle-10-review-survivors.log
+    red_log_sha256: b87bf4fd0638d4691cd6d6d70f59dca094a9fc2a449ede5e85a3d074b9141f9e
+    red_evidence: >
+      20 of 41 review mutants survived the pre-rework suites plus tsc (adversarial review v1 mutation file).
+    green_evidence: >
+      components/ui and token-literals suites pass with the new tests; the same 20 mutants are all killed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d39dcbca7831c5876cd28504431cf5eb9b73a349e67602960197a7e20ec59094
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/cycle-10.patch
+    commit_hash: 18e7d13916d022d6e88016c69f8a24d0af9f9044
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S2-evidence/mutation-cycle-10-results.json
+      results_sha256: 771078c3f5a9238c2be4308e88fc3e45bbbbd53073c495763447889d14148a6c
+      generated: 20
+      killed: 20
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

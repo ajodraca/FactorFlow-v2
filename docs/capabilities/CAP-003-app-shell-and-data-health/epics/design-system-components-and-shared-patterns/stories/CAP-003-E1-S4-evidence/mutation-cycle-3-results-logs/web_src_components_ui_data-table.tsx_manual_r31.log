@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w1/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 13ms
+ ✓ src/components/token-literals.test.ts (30 tests) 48ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 6038ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 4038ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > separates the detail row, and gives the expander column the same padding 22ms
+     → expect(element).toHaveClass("border-b border-border")
+
+Expected the element to have class:
+  border-b border-border
+Received:
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > separates the detail row, and gives the expander column the same padding
+Error: expect(element).toHaveClass("border-b border-border")
+
+Expected the element to have class:
+  border-b border-border
+Received:
+
+ ❯ src/components/ui/data-table.test.tsx:940:62
+    938|     render(<DataTable {...variantProps("expandable", stocks(2))} />);
+    939|     await user.click(screen.getByRole("button", { name: "Expand Stock …
+    940|     expect(document.querySelector("tr[data-expansion-for]")).toHaveCla…
+       |                                                              ^
+    941|       "border-b",
+    942|       "border-border",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:23:00
+   Duration  9.13s (transform 176ms, setup 471ms, collect 1.23s, tests 6.10s, environment 1.97s, prepare 1.15s)
+

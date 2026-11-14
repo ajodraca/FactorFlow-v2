@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 27ms
+ ✓ src/components/token-literals.test.ts (30 tests) 58ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 3843ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2190ms
+   ✓ virtualised measuring (DAC-E1-S4-1, AC-26) > renders the top window with no spacer where layout reports a zero height 317ms
+   × expanded rows follow what the caller renders (DEC-0307, IR-005) > shows a changed renderExpansion in an open row, and re-renders no collapsed row 27ms
+     → expected [ 'S0000', 'S0001', 'S0002' ] to deeply equal [ 'S0001' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > expanded rows follow what the caller renders (DEC-0307, IR-005) > shows a changed renderExpansion in an open row, and re-renders no collapsed row
+AssertionError: expected [ 'S0000', 'S0001', 'S0002' ] to deeply equal [ 'S0001' ]
+
+- Expected
++ Received
+
+  Array [
++   "S0000",
+    "S0001",
++   "S0002",
+  ]
+
+ ❯ src/components/ui/data-table.test.tsx:886:42
+    884|     expect(screen.getByText("Loaded S0001")).toBeInTheDocument();
+    885|     expect(screen.queryByText("Loading S0001")).toBeNull();
+    886|     expect(Array.from(new Set(renders))).toEqual(["S0001"]);
+       |                                          ^
+    887|   });
+    888| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:23:10
+   Duration  8.01s (transform 196ms, setup 846ms, collect 1.64s, tests 3.93s, environment 4.00s, prepare 2.64s)
+

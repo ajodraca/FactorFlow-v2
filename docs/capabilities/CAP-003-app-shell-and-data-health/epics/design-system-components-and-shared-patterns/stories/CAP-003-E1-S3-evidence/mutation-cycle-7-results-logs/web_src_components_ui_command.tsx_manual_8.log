@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w1/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 4ms
+ ✓ src/components/token-literals.test.ts (30 tests) 306ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 374ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 631ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 954ms
+   ✓ button blocked stays focusable, aria-disabled and inert (DAC-E1-S1-3) > takes keyboard focus, announces itself as disabled and is described by its reason 345ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1432ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 442ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 652ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 2220ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 1036ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 321ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 665ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 412ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 758ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 472ms
+ ❯ src/components/ui/command.test.tsx (10 tests | 1 failed) 971ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 679ms
+   × command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > sets group headings in the small muted face 47ms
+     → [&_[cmdk-group-heading]]:text-xs: expected [ 'flex', 'h-full', 'w-full', …(8) ] to include '[&_[cmdk-group-heading]]:text-xs'
+ ✓ src/components/ui/form.test.tsx (9 tests) 910ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 196ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 900ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 431ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1198ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 799ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > sets group headings in the small muted face
+AssertionError: [&_[cmdk-group-heading]]:text-xs: expected [ 'flex', 'h-full', 'w-full', …(8) ] to include '[&_[cmdk-group-heading]]:text-xs'
+ ❯ src/components/ui/command.test.tsx:205:27
+    203|       "[&_[cmdk-group-heading]]:text-muted-foreground",
+    204|     ]) {
+    205|       expect(root, token).toContain(token);
+       |                           ^
+    206|     }
+    207|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:18
+   Duration  7.14s (transform 1.61s, setup 3.89s, collect 23.57s, tests 12.32s, environment 28.19s, prepare 8.18s)
+

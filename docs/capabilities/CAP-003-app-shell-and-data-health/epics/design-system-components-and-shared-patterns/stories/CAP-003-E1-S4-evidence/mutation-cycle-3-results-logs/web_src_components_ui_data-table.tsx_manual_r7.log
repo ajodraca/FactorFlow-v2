@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w3/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 9ms
+ ✓ src/components/token-literals.test.ts (30 tests) 82ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 7114ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 4513ms
+   ✓ virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer 348ms
+   × windowed row numbering and the row memo (DAC-E1-S4-1, AC-25) > numbers every windowed row by its position in the loaded list after a scroll 139ms
+     → expected '2' to be '992' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowed row numbering and the row memo (DAC-E1-S4-1, AC-25) > numbers every windowed row by its position in the loaded list after a scroll
+AssertionError: expected '2' to be '992' // Object.is equality
+
+Expected: "992"
+Received: "2"
+
+ ❯ src/components/ui/data-table.test.tsx:817:33
+    815|     render(windowedTable(stocks(3000)));
+    816|     scrollTo(1000, 32);
+    817|     expect(rowIndexOf("S0990")).toBe("992");
+       |                                 ^
+    818|     expect(rowIndexOf("S1024")).toBe("1026");
+    819|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:22:16
+   Duration  10.29s (transform 139ms, setup 457ms, collect 947ms, tests 7.20s, environment 2.51s, prepare 1.21s)
+

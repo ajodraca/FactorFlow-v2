@@ -1,0 +1,28 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/9726b736-e801-42ab-9498-4b7890f0d9ef/scratchpad/work/mutation-run-2abe74ol/w0/web
+
+ ❯ src/components/patterns/format.test.ts (40 tests | 1 failed) 31ms
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 0 as 0 2ms
+     → Not a count: 0
+ ✓ src/components/patterns/presence.test.tsx (8 tests) 93ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 0 as 0
+RangeError: Not a count: 0
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (!Number.isSafeInteger(n) || n <= 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 47 passed (48)
+   Start at  17:35:21
+   Duration  2.33s (transform 93ms, setup 153ms, collect 252ms, tests 124ms, environment 1.06s, prepare 874ms)
+

@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w0/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 2 failed) 811ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 403ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > check daily_prices exceptions 3ms
+     → expected 'Needs attention x' to be 'Needs attention' // Object.is equality
+   × Tier table (TC-COMP-021, DAC-E1-1) > check company_financials exceptions 0ms
+     → expected 'Needs attention x' to be 'Needs attention' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > check daily_prices exceptions
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > check company_financials exceptions
+AssertionError: expected 'Needs attention x' to be 'Needs attention' // Object.is equality
+
+Expected: "Needs attention"
+Received: "Needs attention x"
+
+ ❯ src/components/patterns/tiers.test.ts:225:29
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+    225|     expect(labelOf(status)).toBe(label);
+       |                             ^
+    226|   });
+    227| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 34 passed (36)
+   Start at  15:17:35
+   Duration  2.06s (transform 46ms, setup 40ms, collect 339ms, tests 811ms, environment 196ms, prepare 194ms)
+

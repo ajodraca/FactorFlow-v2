@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-jlv4vk6_/w0/web
+
+ ❯ src/components/ui/command.test.tsx (5 tests | 1 failed) 82ms
+   × command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 79ms
+     → expect(element).toHaveAttribute("aria-selected", "true") // element.getAttribute("aria-selected") === "true"
+
+Expected the element to have attribute:
+  aria-selected="true"
+Received:
+  aria-selected="false"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus
+Error: expect(element).toHaveAttribute("aria-selected", "true") // element.getAttribute("aria-selected") === "true"
+
+Expected the element to have attribute:
+  aria-selected="true"
+Received:
+  aria-selected="false"
+ ❯ src/components/ui/command.test.tsx:77:22
+     75|     expect(home).toHaveAttribute("aria-selected", "true");
+     76|     await user.keyboard("{ArrowUp}");
+     77|     expect(settings).toHaveAttribute("aria-selected", "true");
+       |                      ^
+     78|     await user.keyboard("{ArrowDown}");
+     79|     expect(home).toHaveAttribute("aria-selected", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  10:27:27
+   Duration  1.16s (transform 32ms, setup 34ms, collect 342ms, tests 82ms, environment 182ms, prepare 131ms)
+

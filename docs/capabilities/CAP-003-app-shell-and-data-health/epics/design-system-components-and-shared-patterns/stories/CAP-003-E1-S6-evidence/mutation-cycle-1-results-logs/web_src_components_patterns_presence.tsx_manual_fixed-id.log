@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w0/web
+
+ ✓ src/components/patterns/format.test.ts (33 tests) 23ms
+ ❯ src/components/patterns/presence.test.tsx (7 tests | 1 failed) 71ms
+   × NotDeterminable (TC-COMP-025) > gives two instances their own descriptions 5ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Second reason.
+Received:
+  First reason.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/presence.test.tsx > NotDeterminable (TC-COMP-025) > gives two instances their own descriptions
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Second reason.
+Received:
+  First reason.
+ ❯ src/components/patterns/presence.test.tsx:53:20
+     51|     const [first, second] = screen.getAllByText("Not determinable");
+     52|     expect(first).toHaveAccessibleDescription("First reason.");
+     53|     expect(second).toHaveAccessibleDescription("Second reason.");
+       |                    ^
+     54|   });
+     55| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  16:52:40
+   Duration  1.13s (transform 98ms, setup 176ms, collect 159ms, tests 94ms, environment 672ms, prepare 456ms)
+

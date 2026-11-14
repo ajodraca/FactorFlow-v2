@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/ee2ae1d3-f440-42d4-83b0-70a1f714a8f0/scratchpad/work/mutation-run-u2kq1wuf/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 3ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 10ms
+ ✓ src/components/token-literals.test.ts (30 tests) 84ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 175ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 92ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 337ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 365ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 557ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 230ms
+ ❯ src/components/ui/select.test.tsx (7 tests | 1 failed) 654ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > shows the --ring focus ring and the base text size on the trigger (AC-25, AC-26) 9ms
+     → expect(element).toHaveClass("focus:ring")
+
+Expected the element to have class:
+  focus:ring
+Received:
+  flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1
+ ✓ src/components/ui/form.test.tsx (9 tests) 514ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 726ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 324ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > shows the --ring focus ring and the base text size on the trigger (AC-25, AC-26)
+Error: expect(element).toHaveClass("focus:ring")
+
+Expected the element to have class:
+  focus:ring
+Received:
+  flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1
+ ❯ src/components/ui/select.test.tsx:112:23
+    110|     const { trigger } = renderSelect();
+    111|     for (const name of ["focus:outline-none", "focus:ring", "focus:rin…
+    112|       expect(trigger).toHaveClass(name);
+       |                       ^
+    113|     }
+    114|     expect(trigger).not.toHaveClass("text-sm");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 125 passed (126)
+   Start at  09:55:40
+   Duration  3.72s (transform 539ms, setup 2.46s, collect 6.75s, tests 3.75s, environment 10.05s, prepare 4.46s)
+

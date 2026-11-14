@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-jlv4vk6_/w2/web
+
+ ❯ src/components/ui/command.test.tsx (5 tests | 1 failed) 72ms
+   × command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 69ms
+     → expect(element).toHaveAccessibleName()
+
+Expected element to have accessible name:
+  Search FactorFlow
+Received:
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus
+Error: expect(element).toHaveAccessibleName()
+
+Expected element to have accessible name:
+  Search FactorFlow
+Received:
+
+ ❯ src/components/ui/command.test.tsx:70:19
+     68|     const input = screen.getByRole("combobox");
+     69|     expect(input).toHaveFocus();
+     70|     expect(input).toHaveAccessibleName("Search FactorFlow");
+       |                   ^
+     71|     expect(input).toHaveAttribute("placeholder", "Jump to a stock or p…
+     72| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  10:27:28
+   Duration  856ms (transform 30ms, setup 29ms, collect 298ms, tests 72ms, environment 148ms, prepare 122ms)
+

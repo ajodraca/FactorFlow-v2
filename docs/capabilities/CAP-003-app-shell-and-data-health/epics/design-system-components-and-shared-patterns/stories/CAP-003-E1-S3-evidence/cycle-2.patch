@@ -1,0 +1,311 @@
+diff --git a/web/src/components/ui/dialog.test.tsx b/web/src/components/ui/dialog.test.tsx
+new file mode 100644
+index 0000000..56a3b57
+--- /dev/null
++++ b/web/src/components/ui/dialog.test.tsx
+@@ -0,0 +1,193 @@
++import { render, screen, waitFor, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { useState } from "react";
++import { describe, expect, it, vi } from "vitest";
++import { ConfirmDialog } from "./dialog";
++
++const TITLE = "Stop following AAPL";
++const DESCRIPTION =
++  "Stop following AAPL? Its history is kept, and strategies holding it keep holding it. You can follow it again later.";
++const CONFIRM = "Stop following";
++
++function Harness({
++  onConfirm,
++  onOpenChange,
++  pending = false,
++  withRefusal = false,
++}: {
++  onConfirm: () => void;
++  onOpenChange?: (open: boolean) => void;
++  pending?: boolean;
++  withRefusal?: boolean;
++}) {
++  const [open, setOpen] = useState(false);
++  return (
++    <>
++      <button type="button" onClick={() => setOpen(true)}>
++        {TITLE}
++      </button>
++      <ConfirmDialog
++        open={open}
++        onOpenChange={(next) => {
++          onOpenChange?.(next);
++          setOpen(next);
++        }}
++        title={TITLE}
++        description={DESCRIPTION}
++        confirmLabel={CONFIRM}
++        onConfirm={onConfirm}
++        pending={pending}
++      >
++        {withRefusal ? <p>Couldn't stop following AAPL: not found.</p> : null}
++      </ConfirmDialog>
++    </>
++  );
++}
++
++function overlay(): Element {
++  const node = document.querySelector("[data-slot='overlay']");
++  if (node === null) throw new Error("no overlay rendered");
++  return node;
++}
++
++// Implements TC-COMP-012
++describe("dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25)", () => {
++  it("is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc", async () => {
++    const user = userEvent.setup();
++    render(<Harness onConfirm={vi.fn()} />);
++    const opener = screen.getByRole("button", { name: TITLE });
++    await user.click(opener);
++
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++    expect(dialog).toHaveAttribute("aria-modal", "true");
++    expect(dialog).toHaveAttribute("data-variant", "confirm");
++    expect(screen.queryByRole("alertdialog")).toBeNull();
++    expect(dialog).toHaveAccessibleDescription(DESCRIPTION);
++
++    const buttons = within(dialog).getAllByRole("button");
++    expect(buttons.map((b) => b.textContent)).toEqual(["Cancel", CONFIRM]);
++    expect(buttons[0]).toHaveFocus();
++
++    await user.tab();
++    expect(within(dialog).getByRole("button", { name: CONFIRM })).toHaveFocus();
++    await user.tab();
++    expect(within(dialog).getByRole("button", { name: "Cancel" })).toHaveFocus();
++    await user.tab({ shift: true });
++    expect(within(dialog).getByRole("button", { name: CONFIRM })).toHaveFocus();
++
++    await user.keyboard("{Escape}");
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    expect(opener).toHaveFocus();
++  });
++
++  it("closes on a click on the overlay and returns focus to the opener", async () => {
++    const user = userEvent.setup();
++    render(<Harness onConfirm={vi.fn()} />);
++    const opener = screen.getByRole("button", { name: TITLE });
++    await user.click(opener);
++    await screen.findByRole("dialog", { name: TITLE });
++
++    await user.click(overlay());
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    expect(opener).toHaveFocus();
++  });
++});
++
++describe("ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15)", () => {
++  it("calls onConfirm exactly once on confirm and stays open until the consumer closes it", async () => {
++    const user = userEvent.setup();
++    const onConfirm = vi.fn();
++    render(<Harness onConfirm={onConfirm} />);
++    await user.click(screen.getByRole("button", { name: TITLE }));
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++
++    await user.click(within(dialog).getByRole("button", { name: CONFIRM }));
++    expect(onConfirm).toHaveBeenCalledTimes(1);
++    expect(screen.getByRole("dialog", { name: TITLE })).toBeInTheDocument();
++  });
++
++  it("does not close and does not confirm while pending", async () => {
++    const user = userEvent.setup();
++    const onConfirm = vi.fn();
++    const onOpenChange = vi.fn();
++    render(<Harness onConfirm={onConfirm} onOpenChange={onOpenChange} pending />);
++    await user.click(screen.getByRole("button", { name: TITLE }));
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++    onOpenChange.mockClear();
++
++    expect(dialog).toHaveAttribute("aria-busy", "true");
++    const confirm = within(dialog).getByRole("button", { name: CONFIRM });
++    expect(confirm).toHaveAttribute("aria-disabled", "true");
++
++    await user.keyboard("{Escape}");
++    expect(screen.getByRole("dialog", { name: TITLE })).toBeInTheDocument();
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++    expect(screen.getByRole("dialog", { name: TITLE })).toBeInTheDocument();
++    await user.click(overlay());
++    expect(screen.getByRole("dialog", { name: TITLE })).toBeInTheDocument();
++    await user.click(confirm);
++    expect(onConfirm).not.toHaveBeenCalled();
++    expect(onOpenChange).not.toHaveBeenCalledWith(false);
++  });
++
++  it("is not busy when not pending", async () => {
++    const user = userEvent.setup();
++    render(<Harness onConfirm={vi.fn()} />);
++    await user.click(screen.getByRole("button", { name: TITLE }));
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++    expect(dialog).not.toHaveAttribute("aria-busy");
++    expect(within(dialog).getByRole("button", { name: CONFIRM })).not.toHaveAttribute(
++      "aria-disabled",
++    );
++  });
++
++  it("is not pending when the prop is omitted", async () => {
++    const user = userEvent.setup();
++    const onConfirm = vi.fn();
++    render(
++      <ConfirmDialog
++        open
++        onOpenChange={vi.fn()}
++        title={TITLE}
++        description={DESCRIPTION}
++        confirmLabel={CONFIRM}
++        onConfirm={onConfirm}
++      />,
++    );
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++    expect(dialog).not.toHaveAttribute("aria-busy");
++    await user.click(within(dialog).getByRole("button", { name: CONFIRM }));
++    expect(onConfirm).toHaveBeenCalledTimes(1);
++  });
++
++  it("renders children between the description and the buttons", async () => {
++    const user = userEvent.setup();
++    render(<Harness onConfirm={vi.fn()} withRefusal />);
++    await user.click(screen.getByRole("button", { name: TITLE }));
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++    const refusal = within(dialog).getByText("Couldn't stop following AAPL: not found.");
++    const description = within(dialog).getByText(DESCRIPTION);
++    const cancel = within(dialog).getByRole("button", { name: "Cancel" });
++    expect(
++      description.compareDocumentPosition(refusal) & Node.DOCUMENT_POSITION_FOLLOWING,
++    ).toBeTruthy();
++    expect(refusal.compareDocumentPosition(cancel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++  });
++
++  it("uses the default button variant and no destructive styling (DAC-E1-15)", async () => {
++    const user = userEvent.setup();
++    render(<Harness onConfirm={vi.fn()} />);
++    await user.click(screen.getByRole("button", { name: TITLE }));
++    const dialog = await screen.findByRole("dialog", { name: TITLE });
++    expect(within(dialog).getByRole("button", { name: CONFIRM })).toHaveAttribute(
++      "data-variant",
++      "default",
++    );
++    expect(within(dialog).getByRole("button", { name: "Cancel" })).toHaveAttribute(
++      "data-variant",
++      "outline",
++    );
++    expect(dialog.querySelector("[class*='bg-destructive']")).toBeNull();
++    expect(dialog.className).not.toContain("bg-destructive");
++  });
++});
+diff --git a/web/src/components/ui/dialog.tsx b/web/src/components/ui/dialog.tsx
+new file mode 100644
+index 0000000..52c7959
+--- /dev/null
++++ b/web/src/components/ui/dialog.tsx
+@@ -0,0 +1,106 @@
++import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
++import { type ReactNode, useRef } from "react";
++import { Button } from "./button";
++
++/**
++ * Vendored shadcn/ui `alert-dialog` as the design system's `dialog` `confirm`
++ * variant (component design 2.1; dialog spec sections 4, 5 and 7; DAC-E1-14;
++ * DAC-E1-15; DEC-0301, DEC-0305).
++ *
++ * Radix AlertDialog supplies the focus trap and the Cancel-first focus. Two of
++ * its defaults are overridden on purpose: the content is a `dialog`, not an
++ * `alertdialog` (that role belongs to `destructive` and `real-money`, which are
++ * not vendored), and it carries `aria-modal`, which Radix does not set. There
++ * is no `variant` prop and no destructive styling: stopping following and
++ * cancelling a download delete nothing.
++ *
++ * The confirm action is a plain button, not `AlertDialogPrimitive.Action`, so
++ * the dialog stays open until the consumer knows the result and closes it. While
++ * `pending`, nothing closes the dialog and the confirm action is
++ * `aria-disabled`. `children` render between the description and the buttons,
++ * where a refusal is kept inside the dialog.
++ */
++export interface ConfirmDialogProps {
++  open: boolean;
++  onOpenChange: (open: boolean) => void;
++  title: string;
++  description: string;
++  confirmLabel: string;
++  onConfirm: () => void;
++  /** True while the consumer waits for the result of the confirmed action. */
++  pending?: boolean;
++  children?: ReactNode;
++}
++
++export function ConfirmDialog({
++  open,
++  onOpenChange,
++  title,
++  description,
++  confirmLabel,
++  onConfirm,
++  pending = false,
++  children,
++}: ConfirmDialogProps) {
++  // Radix returns focus only to a Trigger, and a confirmation is controlled by
++  // its caller, so the opener is recorded when the dialog opens and refocused
++  // when it closes. A removed opener leaves focus on the body for the consumer.
++  const opener = useRef<HTMLElement | null>(null);
++
++  const requestChange = (next: boolean) => {
++    if (!next && pending) return;
++    onOpenChange(next);
++  };
++
++  return (
++    <AlertDialogPrimitive.Root open={open} onOpenChange={requestChange}>
++      <AlertDialogPrimitive.Portal>
++        <AlertDialogPrimitive.Overlay
++          data-slot="overlay"
++          className="fixed inset-0 z-50 bg-foreground/40"
++          onClick={() => requestChange(false)}
++        />
++        <AlertDialogPrimitive.Content
++          // biome-ignore lint/a11y/useSemanticElements: Radix AlertDialog renders an alertdialog; `confirm` must be a dialog (dialog spec section 5, DAC-E1-S3-1), so the role is overridden on the content.
++          role="dialog"
++          aria-modal="true"
++          data-variant="confirm"
++          aria-busy={pending || undefined}
++          className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-prose translate-x-[-50%] translate-y-[-50%] gap-4 rounded border border-border bg-popover p-6 text-popover-foreground"
++          onOpenAutoFocus={() => {
++            opener.current =
++              document.activeElement instanceof HTMLElement ? document.activeElement : null;
++          }}
++          onCloseAutoFocus={(event) => {
++            event.preventDefault();
++            if (opener.current?.isConnected) opener.current.focus();
++          }}
++        >
++          <div className="flex flex-col gap-2">
++            <AlertDialogPrimitive.Title className="text-lg font-semibold">
++              {title}
++            </AlertDialogPrimitive.Title>
++            <AlertDialogPrimitive.Description className="text-base text-muted-foreground">
++              {description}
++            </AlertDialogPrimitive.Description>
++          </div>
++          {children}
++          <div className="flex justify-end gap-2">
++            <AlertDialogPrimitive.Cancel asChild>
++              <Button variant="outline">Cancel</Button>
++            </AlertDialogPrimitive.Cancel>
++            <Button
++              variant="default"
++              aria-disabled={pending ? "true" : undefined}
++              onClick={() => {
++                if (!pending) onConfirm();
++              }}
++            >
++              {confirmLabel}
++            </Button>
++          </div>
++        </AlertDialogPrimitive.Content>
++      </AlertDialogPrimitive.Portal>
++    </AlertDialogPrimitive.Root>
++  );
++}

@@ -1,0 +1,480 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w0/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 1 failed) 3787ms
+   × TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives compact a row header only when asked (Recent downloads) 22ms
+     → Unable to find an accessible element with the role "rowheader"
+
+Here are the accessible roles:
+
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+    [33mdata-variant[39m=[32m"compact"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead />[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Symbol Name Gaps":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border"[39m
+  [36m/>[39m
+
+  Name "S0000 Stock 0 0":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0000"[39m
+  [36m/>[39m
+
+  Name "S0001 Stock 1 1":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0001"[39m
+  [36m/>[39m
+
+  Name "S0002 Stock 2 2":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0002"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "Symbol":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Name":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Gaps":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  cell:
+
+  Name "S0000":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 0":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  Name "S0001":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  Name "S0002":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 2":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "2":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<table[39m
+      [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+      [33mdata-variant[39m=[32m"compact"[39m
+    [36m>[39m
+      [36m<thead>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border"[39m
+        [36m>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mSymbol[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mName[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mGaps[0m
+          [36m</th>[39m
+        [36m</tr>[39m
+      [36m</thead>[39m
+      [36m<tbody>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0000"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0000[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 0[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m0[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0001"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0001[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 1[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m1[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0002"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0002[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 2[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m2[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+      [36m</tbody>[39m
+    [36m</table>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2612ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-018 data-table headers, history row header and expandable expander semantics (DAC-E1-S4-2, AC-25) > gives compact a row header only when asked (Recent downloads)
+TestingLibraryElementError: Unable to find an accessible element with the role "rowheader"
+
+Here are the accessible roles:
+
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+    [33mdata-variant[39m=[32m"compact"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead />[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Symbol Name Gaps":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border"[39m
+  [36m/>[39m
+
+  Name "S0000 Stock 0 0":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0000"[39m
+  [36m/>[39m
+
+  Name "S0001 Stock 1 1":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0001"[39m
+  [36m/>[39m
+
+  Name "S0002 Stock 2 2":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+    [33mdata-row-id[39m=[32m"S0002"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "Symbol":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Name":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Gaps":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  cell:
+
+  Name "S0000":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 0":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "0":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  Name "S0001":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "1":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  Name "S0002":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "Stock 2":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+  [36m/>[39m
+
+  Name "2":
+  [36m<td[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<table[39m
+      [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+      [33mdata-variant[39m=[32m"compact"[39m
+    [36m>[39m
+      [36m<thead>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border"[39m
+        [36m>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mSymbol[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mName[0m
+          [36m</th>[39m
+          [36m<th[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle font-medium text-muted-foreground text-right font-numeric"[39m
+            [33mscope[39m=[32m"col"[39m
+          [36m>[39m
+            [0mGaps[0m
+          [36m</th>[39m
+        [36m</tr>[39m
+      [36m</thead>[39m
+      [36m<tbody>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0000"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0000[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 0[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m0[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0001"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0001[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 1[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m1[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+        [36m<tr[39m
+          [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
+          [33mdata-row-id[39m=[32m"S0002"[39m
+        [36m>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mS0002[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
+          [36m>[39m
+            [0mStock 2[0m
+          [36m</td>[39m
+          [36m<td[39m
+            [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-right font-numeric"[39m
+          [36m>[39m
+            [0m2[0m
+          [36m</td>[39m
+        [36m</tr>[39m
+      [36m</tbody>[39m
+    [36m</table>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/components/ui/data-table.test.tsx:290:19
+    288|     expect(screen.queryAllByRole("rowheader")).toHaveLength(0);
+    289|     rerender(<DataTable {...variantProps("compact", stocks(3))} rowHea…
+    290|     expect(screen.getAllByRole("rowheader")).toHaveLength(3);
+       |                   ^
+    291|   });
+    292| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 86 passed (87)
+   Start at  12:32:24
+   Duration  5.27s (transform 95ms, setup 61ms, collect 430ms, tests 3.79s, environment 290ms, prepare 147ms)
+

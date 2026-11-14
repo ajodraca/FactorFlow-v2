@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w1/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 811ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 406ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > check company_financials ok 3ms
+     → expected 'All financials present x' to be 'All financials present' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > check company_financials ok
+AssertionError: expected 'All financials present x' to be 'All financials present' // Object.is equality
+
+Expected: "All financials present"
+Received: "All financials present x"
+
+ ❯ src/components/patterns/tiers.test.ts:225:29
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+    225|     expect(labelOf(status)).toBe(label);
+       |                             ^
+    226|   });
+    227| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:35
+   Duration  2.06s (transform 38ms, setup 51ms, collect 316ms, tests 811ms, environment 189ms, prepare 242ms)
+

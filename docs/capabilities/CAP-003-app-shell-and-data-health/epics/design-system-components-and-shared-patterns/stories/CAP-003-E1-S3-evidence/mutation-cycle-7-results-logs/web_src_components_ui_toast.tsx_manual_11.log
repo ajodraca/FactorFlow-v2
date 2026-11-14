@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w1/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 5ms
+ ✓ src/components/token-literals.test.ts (30 tests) 102ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 309ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 501ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 632ms
+ ❯ src/components/ui/toast.test.tsx (8 tests | 1 failed) 1233ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 566ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 320ms
+   × toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > gives each toast the popover surface and the theme radius, with no shipped shadow 56ms
+     → group-[.toaster]:shadow-lg: expected [ 'group', 'toast', …(6) ] to not include 'group-[.toaster]:shadow-lg'
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1539ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 849ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 616ms
+   ✓ stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > is a labelled navigation holding one ordered list of four items 314ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 129ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 344ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 387ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 5ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 869ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 437ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 594ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 407ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 64ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 871ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 538ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 507ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/toast.test.tsx > toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > gives each toast the popover surface and the theme radius, with no shipped shadow
+AssertionError: group-[.toaster]:shadow-lg: expected [ 'group', 'toast', …(6) ] to not include 'group-[.toaster]:shadow-lg'
+ ❯ src/components/ui/toast.test.tsx:158:35
+    156|       "group-[.toaster]:shadow-lg",
+    157|     ]) {
+    158|       expect(tokens, shipped).not.toContain(shipped);
+       |                                   ^
+    159|     }
+    160|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:34
+   Duration  6.34s (transform 2.58s, setup 5.14s, collect 21.25s, tests 8.71s, environment 24.76s, prepare 10.80s)
+

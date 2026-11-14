@@ -1,0 +1,87 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w1/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 18ms
+ ✓ src/components/token-literals.test.ts (30 tests) 96ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 3 failed) 5766ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 3988ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > pads and colours the header cells and pads the body cells with the cell tokens 14ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle
+Received:
+  align-middle
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > sets a row header left-aligned in the medium weight with the cell padding 6ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium
+Received:
+  align-middle text-left font-medium
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > separates the detail row, and gives the expander column the same padding 17ms
+     → expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle
+Received:
+  align-middle
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > pads and colours the header cells and pads the body cells with the cell tokens
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle
+Received:
+  align-middle
+ ❯ src/components/ui/data-table.test.tsx:925:20
+    923|     );
+    924|     for (const cell of screen.getAllByRole("cell")) {
+    925|       expect(cell).toHaveClass(...PADDING);
+       |                    ^
+    926|     }
+    927|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > sets a row header left-aligned in the medium weight with the cell padding
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium
+Received:
+  align-middle text-left font-medium
+ ❯ src/components/ui/data-table.test.tsx:932:20
+    930|     render(<DataTable {...variantProps("history", stocks(2))} />);
+    931|     for (const cell of screen.getAllByRole("rowheader")) {
+    932|       expect(cell).toHaveClass(...PADDING, "text-left", "font-medium");
+       |                    ^
+    933|     }
+    934|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > separates the detail row, and gives the expander column the same padding
+Error: expect(element).toHaveClass("px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle")
+
+Expected the element to have class:
+  px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle
+Received:
+  align-middle
+ ❯ src/components/ui/data-table.test.tsx:944:82
+    942|       "border-border",
+    943|     );
+    944|     expect(screen.getByRole("button", { name: "Expand Stock 0" }).clos…
+       |                                                                                  ^
+    945|       ...PADDING,
+    946|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 135 passed (138)
+   Start at  13:22:38
+   Duration  10.03s (transform 297ms, setup 642ms, collect 1.38s, tests 5.88s, environment 3.87s, prepare 974ms)
+

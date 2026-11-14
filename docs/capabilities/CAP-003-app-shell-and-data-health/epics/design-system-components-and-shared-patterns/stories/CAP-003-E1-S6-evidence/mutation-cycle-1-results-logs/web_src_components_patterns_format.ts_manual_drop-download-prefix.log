@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w2/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 2 failed) 31ms
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from requested_at when started_at is null 3ms
+     → expected '2026-10-15 17:46 CDT' to be 'Download 2026-10-15 17:46 CDT' // Object.is equality
+   × formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one 1ms
+     → expected '2026-01-15 17:46 CST' to be 'Download 2026-01-15 17:46 CST' // Object.is equality
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 79ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from requested_at when started_at is null
+AssertionError: expected '2026-10-15 17:46 CDT' to be 'Download 2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "Download 2026-10-15 17:46 CDT"
+Received: "2026-10-15 17:46 CDT"
+
+ ❯ src/components/patterns/format.test.ts:82:62
+     80| 
+     81|   it("names a download from requested_at when started_at is null", () …
+     82|     expect(formatDownloadName(null, "2026-10-15T22:46:00Z")).toBe("Dow…
+       |                                                              ^
+     83|   });
+     84| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > names a download from its start time when there is one
+AssertionError: expected '2026-01-15 17:46 CST' to be 'Download 2026-01-15 17:46 CST' // Object.is equality
+
+Expected: "Download 2026-01-15 17:46 CST"
+Received: "2026-01-15 17:46 CST"
+
+ ❯ src/components/patterns/format.test.ts:86:80
+     84| 
+     85|   it("names a download from its start time when there is one", () => {
+     86|     expect(formatDownloadName("2026-01-15T23:46:00Z", "2026-01-15T23:4…
+       |                                                                                ^
+     87|       "Download 2026-01-15 17:46 CST",
+     88|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 38 passed (40)
+   Start at  16:52:29
+   Duration  2.49s (transform 80ms, setup 263ms, collect 446ms, tests 110ms, environment 1.03s, prepare 937ms)
+

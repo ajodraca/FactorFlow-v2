@@ -1,0 +1,72 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w3/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 8 failed) 84ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > returns a session date unshifted 7ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 8ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 4ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 17ms
+     → Not an ISO-8601 date: "2026-03-08"
+   × clock and input guards > throws RangeError on the non-date "" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-date "2026-1-5" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-date "20261015" 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-date "2026-10-15T00:00:00Z" 0ms
+     → expected function to throw an error, but it didn't
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 118ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > returns a session date unshifted
+RangeError: Not an ISO-8601 date: "2026-03-08"
+ ❯ Module.formatSessionDate src/components/patterns/format.ts:65:11
+     63| export function formatSessionDate(value: string): string {
+     64|   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+     65|     throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value…
+       |           ^
+     66|   }
+     67|   return value;
+ ❯ src/components/patterns/format.test.ts:43:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+RangeError: Not an ISO-8601 date: "2026-03-08"
+ ❯ Module.formatSessionDate src/components/patterns/format.ts:65:11
+     63| export function formatSessionDate(value: string): string {
+     64|   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+     65|     throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value…
+       |           ^
+     66|   }
+     67|   return value;
+ ❯ src/components/patterns/format.test.ts:64:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-date ""
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-date "2026-1-5"
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-date "20261015"
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-date "2026-10-15T00:00:00Z"
+AssertionError: expected function to throw an error, but it didn't
+ ❯ src/components/patterns/format.test.ts:118:46
+    116|     "throws RangeError on the non-date %j",
+    117|     (input) => {
+    118|       expect(() => formatSessionDate(input)).toThrow(RangeError);
+       |                                              ^
+    119|     },
+    120|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 32 passed (40)
+   Start at  16:52:29
+   Duration  2.47s (transform 78ms, setup 125ms, collect 539ms, tests 202ms, environment 966ms, prepare 510ms)
+

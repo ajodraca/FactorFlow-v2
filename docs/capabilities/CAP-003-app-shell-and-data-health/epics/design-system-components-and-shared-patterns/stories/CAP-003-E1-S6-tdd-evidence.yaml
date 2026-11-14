@@ -1,0 +1,65 @@
+# TDD evidence for CAP-003-E1-S6 - Presence Renderings and the America/Chicago Formatters.
+# One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged the cycle's patch.
+# Deviation from the plan: one cycle, not two. Both modules were staged together and a permission rule denied the unstage (git reset), so one patch, one pair of reviews and one mutation run cover both.
+# Deviation from the plan: format.ts builds its Intl.DateTimeFormat per call (chicago()), not as one module-level instance. A module-level instance reads the machine zone at load, so the planned drop-timezone mutant survived the TZ-pinned tests; per call, it is killed under TZ=Asia/Tokyo. The code reviewer rated the per-call cost MEDIUM (revisit if a 3000-row table consumes it).
+# Deviation from the plan: the RangeError message is asserted for every non-instant, so the NaN guard is not masked by Intl's own RangeError (the drop-nan-guard mutant survived until then).
+# Mutation (cycle-1): 26 hand-written mutants, the plan's six plus one per guard, branch, format field and attribute of the two modules. The catalogue does generate 21 TypeScript mutants over format.ts (review v1 IR-003); cycle-2 runs them.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009]
+    description: >
+      The two shared pattern modules. format.ts exports Instant, formatInstant, formatClock, formatSessionDate, formatCount and formatDownloadName to DEC-0309, built from Intl.DateTimeFormat parts in en-US with timeZone America/Chicago, hourCycle h23 and timeZoneName short; malformed input throws RangeError. presence.tsx exports Absent (an aria-hidden em dash plus sr-only words in text-value-missing) and NotDeterminable (the coverage-unknown badge, its reason visible beside it and as its aria-describedby) to DEC-0310. format.test.ts asserts independent literals for TC-COMP-023 and TC-COMP-024, the clock, the guards and a describe.each over TZ=Asia/Tokyo, UTC and America/Los_Angeles; presence.test.tsx asserts TC-COMP-025 and the Absent edge case. T008 and T009 add no behaviour: baseline at the review base (1f957aa) was npm run test, 97 files and 2461 tests green, as the v1 review measured it; after, 99 files and 2501 tests green, no delivered file changed. Reviews: code review APPROVED (no CRITICAL or HIGH; one MEDIUM, per-call formatter, and LOWs accepted) and spec drift none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S6-evidence/red-cycle-1-2-presence-and-formatters.log
+    red_log_sha256: bdee3c63d113ece903e8bc082ffec06bab5edb973c694495cf7c65677f6c27da
+    red_evidence: >
+      format.test.ts and presence.test.tsx both failed to resolve ./format and ./presence before the modules existed.
+    green_evidence: >
+      format.test.ts 33 tests and presence.test.tsx 7 tests pass; npm run test (99 files, 2501 tests), npm run lint, npm run format, npx tsc --noEmit and npm run build are clean; grep toLocale on format.ts prints nothing.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 066ca65c90c4d6ad3efee93bd179e9458727e2b5bff8e765c425cc104fbd3b2f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S6-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S6-evidence/mutation-cycle-1-results.json
+      results_sha256: bb9d1c764740364f5719c1b477896b8611673c0b0cba8fd2f651e1e2df69de3b
+      generated: 26
+      killed: 26
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T005]
+    description: >
+      Review v1 rework (IR-001, IR-002, IR-003). Test only; the production code already behaves so. IR-001: presence.test.tsx pins the plan-fixed wrapper (inline-flex items-center gap-2) and reason (text-xs text-muted-foreground) classes of NotDeterminable. IR-002: format.test.ts asserts the RangeError message naming the input for every non-date and non-count, rejects x2026-03-08, 2 ** 53 and 1e21, signed expanded-year instants, and an empty started_at that must not fall back to requested_at. IR-003: the catalogue's 21 generated mutants over format.ts are run, and the suite baseline is restated as measured at the review base. IR-004 and IR-005 are optional and not taken up. After: npm run test 99 files and 2509 tests green, npm run lint, npm run format, npx tsc --noEmit and npm run build clean.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S6-evidence/red-cycle-2-review-survivors.log
+    red_log_sha256: 556480e927a95ae4a1d430669898847dc8b5c0a3eb8938faa9c1abc51133ed89
+    red_evidence: >
+      The review's 11 non-equivalent survivors, re-applied one at a time to the production files, each fail a new test: wrapper-no-class, wrapper-no-gap, reason-not-muted, reason-not-xs, date-shape-drop-caret, session message blank and off-by-one, count-message, count-isinteger, download-or and iso-drop-caret. 11 of 11 killed; the log lists each mutant and the failing test.
+    green_evidence: >
+      Against the unmutated code format.test.ts (40 tests) and presence.test.tsx (8 tests) pass; npm run test, npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4797d99330ddbed8be88a46985fbbc497892fb2f6464f24cc9c799ea8521b1e5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S6-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S6-evidence/mutation-cycle-2-results.json
+      results_sha256: 014314c964179b154eefbc1e8eab31e933eec5e7e943f512dd2bb68d6b8e3e2d
+      generated: 21
+      killed: 21
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 5ms
+ ✓ src/components/token-literals.test.ts (30 tests) 259ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 194ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 387ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 612ms
+   ✓ button blocked stays focusable, aria-disabled and inert (DAC-E1-S1-3) > fires no handler and submits no form on Enter, Space or click 338ms
+ ❯ src/components/ui/toast.test.tsx (8 tests | 1 failed) 1251ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 481ms
+   × toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > colours the icon by outcome: critical, warning, good 74ms
+     → expected [] to deeply equal [ Array(1) ]
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 609ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 2197ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 782ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 329ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 320ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 5ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 852ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 393ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 742ms
+   ✓ textarea list (AC-25) > inserts a newline on Enter and never submits the form 333ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 471ms
+   ✓ card (AC-26) > titles the card with a real level-2 heading at the large text size 351ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 1757ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 970ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1926ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 878ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > wraps from the last card to the first and back with the arrow keys 316ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1708ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 412ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 337ms
+   ✓ form root and field behaviour (DAC-E1-S2-2, AC-25) > reports every error at once, focuses the first and keeps what was typed 304ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 2427ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 1452ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/toast.test.tsx > toast resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-006) > colours the icon by outcome: critical, warning, good
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- Array [
+-   "[&_[data-icon]]:text-status-warning",
+- ]
++ Array []
+
+ ❯ src/components/ui/toast.test.tsx:170:42
+    168|       );
+    169|     expect(accentOf("Download failed")).toEqual(["[&_[data-icon]]:text…
+    170|     expect(accentOf("Download partial")).toEqual(["[&_[data-icon]]:tex…
+       |                                          ^
+    171|     expect(accentOf("Download complete")).toEqual(["[&_[data-icon]]:te…
+    172|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:33
+   Duration  6.26s (transform 1.24s, setup 3.39s, collect 21.03s, tests 15.72s, environment 16.48s, prepare 1.82s)
+

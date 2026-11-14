@@ -1,0 +1,36 @@
+diff --git a/web/src/components/token-literals.test.ts b/web/src/components/token-literals.test.ts
+index 8573431..f65ad20 100644
+--- a/web/src/components/token-literals.test.ts
++++ b/web/src/components/token-literals.test.ts
+@@ -250,3 +250,31 @@ describe("literal scan (AC-26, DAC-E1-S1-2)", () => {
+     expect(isScannedSource("web/src/components/ui/styles.css")).toBe(false);
+   });
+ });
++
++// The six form family components (CAP-003-E1-S2) are scanned and clean. Listed
++// independently of the scan so a file moved out of the scanned tree fails here.
++const FORM_FAMILY_FILES = [
++  "web/src/components/ui/form.tsx",
++  "web/src/components/ui/input.tsx",
++  "web/src/components/ui/textarea.tsx",
++  "web/src/components/ui/checkbox.tsx",
++  "web/src/components/ui/radio-group.tsx",
++  "web/src/components/ui/select.tsx",
++];
++
++// Implements TC-COMP-011
++describe("form family is scanned and clean (TC-COMP-011)", () => {
++  it.each(FORM_FAMILY_FILES)("%s exists, is scanned and holds no literal", (relPath) => {
++    const source = readFileSync(path.join(REPO_ROOT, relPath), "utf-8");
++    expect(isScannedSource(relPath)).toBe(true);
++    expect(SCANNED_DIRECTORIES.some((directory) => relPath.startsWith(directory))).toBe(true);
++    expect(literalsIn(relPath, source)).toEqual([]);
++  });
++
++  it("finds a shipped literal planted in a vendored file", () => {
++    const planted = 'const a = "min-h-[80px]";';
++    expect(literalsIn("web/src/components/ui/textarea.tsx", planted)).toEqual([
++      "web/src/components/ui/textarea.tsx: 80px",
++    ]);
++  });
++});

@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5br0l38r/w3/web
+
+ ❯ src/components/ui/textarea.test.tsx (7 tests | 1 failed) 124ms
+   × textarea list (DAC-E1-S2-1, AC-25) > forwards a ref to the textarea element 5ms
+     → expected null to be <textarea rows="4" …(3)></textarea> // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/textarea.test.tsx > textarea list (DAC-E1-S2-1, AC-25) > forwards a ref to the textarea element
+AssertionError: expected null to be <textarea rows="4" …(3)></textarea> // Object.is equality
+
+- Expected: 
+<textarea
+  aria-label="Symbols"
+  class="flex w-full resize-none rounded border border-input bg-background px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"
+  data-variant="list"
+  rows="4"
+/>
+
++ Received: 
+null
+
+ ❯ src/components/ui/textarea.test.tsx:68:25
+     66|     const ref = createRef<HTMLTextAreaElement>();
+     67|     render(<Textarea ref={ref} aria-label="Symbols" />);
+     68|     expect(ref.current).toBe(screen.getByRole("textbox", { name: "Symb…
+       |                         ^
+     69|     expect(ref.current?.tagName).toBe("TEXTAREA");
+     70|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:13:12
+   Duration  974ms (transform 26ms, setup 37ms, collect 69ms, tests 124ms, environment 188ms, prepare 99ms)
+

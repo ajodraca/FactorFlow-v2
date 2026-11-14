@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4fz4h46c/w3/web
+
+ ❯ src/components/patterns/status-badge.test.tsx (31 tests | 2 failed) 83ms
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > neutral is one hollow circle 6ms
+     → expected [ 'circle', 'circle' ] to deeply equal [ 'circle' ]
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape 4ms
+     → expected 5 to be 6 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > neutral is one hollow circle
+AssertionError: expected [ 'circle', 'circle' ] to deeply equal [ 'circle' ]
+
+- Expected
++ Received
+
+  Array [
+    "circle",
++   "circle",
+  ]
+
+ ❯ src/components/patterns/status-badge.test.tsx:57:24
+     55|     const icon = iconOf("neutral");
+     56| 
+     57|     expect(tags(icon)).toEqual(["circle"]);
+       |                        ^
+     58|     expect(icon).toHaveAttribute("fill", "none");
+     59|     expect(icon.firstElementChild).not.toHaveAttribute("fill");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape
+AssertionError: expected 5 to be 6 // Object.is equality
+
+- Expected
++ Received
+
+- 6
++ 5
+
+ ❯ src/components/patterns/status-badge.test.tsx:112:38
+    110|     });
+    111| 
+    112|     expect(new Set(signatures).size).toBe(6);
+       |                                      ^
+    113|   });
+    114| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 29 passed (31)
+   Start at  15:18:04
+   Duration  1.17s (transform 55ms, setup 35ms, collect 373ms, tests 83ms, environment 260ms, prepare 249ms)
+

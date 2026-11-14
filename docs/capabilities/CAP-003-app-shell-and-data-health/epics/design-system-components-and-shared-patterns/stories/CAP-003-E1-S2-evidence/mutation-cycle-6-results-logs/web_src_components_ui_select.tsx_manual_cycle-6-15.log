@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w2/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 2 failed) 169ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 54ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  All stocks
+Received:
+
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > highlights the matching option when a letter is typed while open 26ms
+     → expect(element).toHaveAttribute("data-highlighted") // element.hasAttribute("data-highlighted")
+
+Expected the element to have attribute:
+  data-highlighted
+Received:
+  null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  All stocks
+Received:
+
+ ❯ src/components/ui/select.test.tsx:77:21
+     75|     expect(trigger).toHaveFocus();
+     76|     expect(trigger).toHaveAttribute("aria-expanded", "false");
+     77|     expect(trigger).toHaveTextContent("All stocks");
+       |                     ^
+     78| 
+     79|     await user.keyboard("{Enter}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > highlights the matching option when a letter is typed while open
+Error: expect(element).toHaveAttribute("data-highlighted") // element.hasAttribute("data-highlighted")
+
+Expected the element to have attribute:
+  data-highlighted
+Received:
+  null
+ ❯ src/components/ui/select.test.tsx:174:71
+    172|     await user.keyboard("{Enter}");
+    173|     await user.keyboard("s");
+    174|     expect(screen.getByRole("option", { name: "Stopped following" })).…
+       |                                                                       ^
+    175|       "data-highlighted",
+    176|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 4 passed (6)
+   Start at  09:22:33
+   Duration  1.02s (transform 30ms, setup 29ms, collect 291ms, tests 169ms, environment 151ms, prepare 187ms)
+

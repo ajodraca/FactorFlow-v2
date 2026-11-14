@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-gowzkx5u/w1/web
+
+ ❯ src/components/ui/input.test.tsx (9 tests | 1 failed) 75ms
+   × input (DAC-E1-S2-2, AC-25) > styles an invalid input with the destructive border 4ms
+     → expect(element).toHaveClass("aria-[invalid=true]:border-destructive")
+
+Expected the element to have class:
+  aria-[invalid=true]:border-destructive
+Received:
+  h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-input
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/input.test.tsx > input (DAC-E1-S2-2, AC-25) > styles an invalid input with the destructive border
+Error: expect(element).toHaveClass("aria-[invalid=true]:border-destructive")
+
+Expected the element to have class:
+  aria-[invalid=true]:border-destructive
+Received:
+  h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-input
+ ❯ src/components/ui/input.test.tsx:72:41
+     70|   it("styles an invalid input with the destructive border", () => {
+     71|     render(<Input aria-label="Symbol" aria-invalid="true" />);
+     72|     expect(screen.getByRole("textbox")).toHaveClass("aria-[invalid=tru…
+       |                                         ^
+     73|   });
+     74| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  09:11:10
+   Duration  913ms (transform 28ms, setup 31ms, collect 70ms, tests 75ms, environment 185ms, prepare 210ms)
+

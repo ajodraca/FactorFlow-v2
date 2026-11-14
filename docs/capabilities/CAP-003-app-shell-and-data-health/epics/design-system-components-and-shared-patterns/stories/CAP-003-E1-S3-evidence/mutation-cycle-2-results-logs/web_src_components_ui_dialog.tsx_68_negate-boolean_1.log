@@ -1,0 +1,84 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o7mt325c/w2/web
+
+ ❯ src/components/ui/dialog.test.tsx (8 tests | 3 failed) 211ms
+   × ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 17ms
+     → expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+   × ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > is not busy when not pending 14ms
+     → expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="false"
+   × ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > is not pending when the prop is omitted 6ms
+     → expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="false"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending
+Error: expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+ ❯ src/components/ui/dialog.test.tsx:118:20
+    116|     onOpenChange.mockClear();
+    117| 
+    118|     expect(dialog).toHaveAttribute("aria-busy", "true");
+       |                    ^
+    119|     const confirm = within(dialog).getByRole("button", { name: CONFIRM…
+    120|     expect(confirm).toHaveAttribute("aria-disabled", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > is not busy when not pending
+Error: expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="false"
+ ❯ src/components/ui/dialog.test.tsx:138:24
+    136|     await user.click(screen.getByRole("button", { name: TITLE }));
+    137|     const dialog = await screen.findByRole("dialog", { name: TITLE });
+    138|     expect(dialog).not.toHaveAttribute("aria-busy");
+       |                        ^
+    139|     expect(within(dialog).getByRole("button", { name: CONFIRM })).not.…
+    140|       "aria-disabled",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > is not pending when the prop is omitted
+Error: expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="false"
+ ❯ src/components/ui/dialog.test.tsx:158:24
+    156|     );
+    157|     const dialog = await screen.findByRole("dialog", { name: TITLE });
+    158|     expect(dialog).not.toHaveAttribute("aria-busy");
+       |                        ^
+    159|     await user.click(within(dialog).getByRole("button", { name: CONFIR…
+    160|     expect(onConfirm).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed (8)
+   Start at  10:27:12
+   Duration  788ms (transform 32ms, setup 30ms, collect 95ms, tests 211ms, environment 151ms, prepare 62ms)
+

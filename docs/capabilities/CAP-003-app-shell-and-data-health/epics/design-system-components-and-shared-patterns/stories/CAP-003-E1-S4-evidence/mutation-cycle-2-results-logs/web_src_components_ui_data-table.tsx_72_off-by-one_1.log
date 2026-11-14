@@ -1,0 +1,144 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 5 failed) 3335ms
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the next window on scroll and keeps the DOM bounded 70ms
+     → expected 'S0989' to be 'S0990' // Object.is equality
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > measures the row height instead of assuming one 50ms
+     → expected 'S0989' to be 'S0990' // Object.is equality
+   × windowFor (DAC-E1-S4-1, AC-26) > windows the middle with an overscan above 2ms
+     → expected { start: 989, end: 1024, …(2) } to deeply equal { start: 990, end: 1025, …(2) }
+   × windowFor (DAC-E1-S4-1, AC-26) > counts an open expansion above the window in the row tops 0ms
+     → expected 86 to be 87 // Object.is equality
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2327ms
+   × virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer 24ms
+     → expected undefined to be '1px' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > renders the next window on scroll and keeps the DOM bounded
+AssertionError: expected 'S0989' to be 'S0990' // Object.is equality
+
+Expected: "S0990"
+Received: "S0989"
+
+ ❯ src/components/ui/data-table.test.tsx:369:20
+    367|     const ids = bodyRowIds();
+    368|     expect(ids).toHaveLength(35);
+    369|     expect(ids[0]).toBe("S0990");
+       |                    ^
+    370|     expect(ids[34]).toBe("S1024");
+    371|     expect(spacer("top")?.style.height).toBe("31680px");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > measures the row height instead of assuming one
+AssertionError: expected 'S0989' to be 'S0990' // Object.is equality
+
+Expected: "S0990"
+Received: "S0989"
+
+ ❯ src/components/ui/data-table.test.tsx:380:20
+    378|     scrollTo(1000, 40);
+    379|     const ids = bodyRowIds();
+    380|     expect(ids[0]).toBe("S0990");
+       |                    ^
+    381|     expect(ids[ids.length - 1]).toBe("S1024");
+    382|     expect(spacer("top")?.style.height).toBe("39600px");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > windows the middle with an overscan above
+AssertionError: expected { start: 989, end: 1024, …(2) } to deeply equal { start: 990, end: 1025, …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "end": 1025,
+-   "padBottom": 63200,
+-   "padTop": 31680,
+-   "start": 990,
++   "end": 1024,
++   "padBottom": 63232,
++   "padTop": 31648,
++   "start": 989,
+  }
+
+ ❯ src/components/ui/data-table.test.tsx:441:7
+    439|     expect(
+    440|       windowFor({ scrollTop: 32000, rowHeight: 32, rowCount: 3000, ext…
+    441|     ).toEqual({ start: 990, end: 1025, padTop: 31680, padBottom: 63200…
+       |       ^
+    442|   });
+    443| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > windowFor (DAC-E1-S4-1, AC-26) > counts an open expansion above the window in the row tops
+AssertionError: expected 86 to be 87 // Object.is equality
+
+- Expected
++ Received
+
+- 87
++ 86
+
+ ❯ src/components/ui/data-table.test.tsx:477:22
+    475|     ).toEqual({ start: 90, end: 125, padTop: 2976, padBottom: 92000 });
+    476|     const at = windowFor({ scrollTop: 3200, rowHeight: 32, rowCount: 3…
+    477|     expect(at.start).toBe(87);
+       |                      ^
+    478|     expect(at.end).toBe(122);
+    479|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised measuring (DAC-E1-S4-1, AC-26) > measures a one pixel row and shows a one pixel spacer
+AssertionError: expected undefined to be '1px' // Object.is equality
+
+- Expected: 
+"1px"
+
++ Received: 
+undefined
+
+ ❯ src/components/ui/data-table.test.tsx:743:41
+    741|     expect(spacer("bottom")?.style.height).toBe("2975px");
+    742|     scrollTo(11, 1);
+    743|     expect(spacer("top")?.style.height).toBe("1px");
+       |                                         ^
+    744|     document.body.innerHTML = "";
+    745|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 82 passed (87)
+   Start at  12:31:56
+   Duration  5.03s (transform 132ms, setup 86ms, collect 641ms, tests 3.33s, environment 429ms, prepare 250ms)
+

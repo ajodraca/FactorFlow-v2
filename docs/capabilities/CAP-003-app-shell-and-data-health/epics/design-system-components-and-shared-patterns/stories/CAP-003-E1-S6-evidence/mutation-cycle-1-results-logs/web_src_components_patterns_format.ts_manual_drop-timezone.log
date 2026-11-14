@@ -1,0 +1,67 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w0/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 3 failed) 35ms
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone 15ms
+     → expected '2026-10-16 07:46 GMT+9' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone 2ms
+     → expected '2026-10-15 22:46 UTC' to be '2026-10-15 17:46 CDT' // Object.is equality
+   × formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone 2ms
+     → expected '2026-10-15 15:46 PDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 84ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=Asia/Tokyo > does not read the machine zone
+AssertionError: expected '2026-10-16 07:46 GMT+9' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "2026-10-16 07:46 GMT+9"
+
+ ❯ src/components/patterns/format.test.ts:61:53
+     59| 
+     60|     it("does not read the machine zone", () => {
+     61|       expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 1…
+       |                                                     ^
+     62|       expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 1…
+     63|       expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=UTC > does not read the machine zone
+AssertionError: expected '2026-10-15 22:46 UTC' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "2026-10-15 22:46 UTC"
+
+ ❯ src/components/patterns/format.test.ts:61:53
+     59| 
+     60|     it("does not read the machine zone", () => {
+     61|       expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 1…
+       |                                                     ^
+     62|       expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 1…
+     63|       expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatInstant and formatSessionDate (TC-COMP-023) > under TZ=America/Los_Angeles > does not read the machine zone
+AssertionError: expected '2026-10-15 15:46 PDT' to be '2026-10-15 17:46 CDT' // Object.is equality
+
+Expected: "2026-10-15 17:46 CDT"
+Received: "2026-10-15 15:46 PDT"
+
+ ❯ src/components/patterns/format.test.ts:61:53
+     59| 
+     60|     it("does not read the machine zone", () => {
+     61|       expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 1…
+       |                                                     ^
+     62|       expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 1…
+     63|       expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 37 passed (40)
+   Start at  16:52:23
+   Duration  1.59s (transform 82ms, setup 243ms, collect 212ms, tests 119ms, environment 854ms, prepare 412ms)
+

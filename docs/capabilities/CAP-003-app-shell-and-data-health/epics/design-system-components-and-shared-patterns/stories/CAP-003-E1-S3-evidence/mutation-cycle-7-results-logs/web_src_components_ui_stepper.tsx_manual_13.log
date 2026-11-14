@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w2/web
+
+ ✓ src/components/token-literals.test.ts (30 tests) 69ms
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 4ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 267ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 248ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 332ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1042ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 321ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 399ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1557ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 660ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 760ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 379ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 351ms
+ ❯ src/components/ui/stepper.test.tsx (15 tests | 1 failed) 857ms
+   ✓ stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > makes only the done link a tab stop and activates it with Enter 319ms
+   × stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004) > sets the summary in the small muted face 6ms
+     → expected [] to deeply equal ArrayContaining{…}
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 802ms
+   ✓ textarea list (AC-25) > inserts a newline on Enter and never submits the form 346ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 1122ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 487ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 16ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1641ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 650ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > returns to the checked card on Shift+Tab, not to each radio in turn 421ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 392ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1919ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 993ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > highlights the matching option when a letter is typed while open 303ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1612ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 430ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 413ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/stepper.test.tsx > stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004) > sets the summary in the small muted face
+AssertionError: expected [] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   "text-xs",
+-   "text-muted-foreground",
+- ]
++ Array []
+
+ ❯ src/components/ui/stepper.test.tsx:192:31
+    190|     renderStepper();
+    191|     const summary = screen.getByText("Found");
+    192|     expect(tokensOf(summary)).toEqual(expect.arrayContaining(["text-xs…
+       |                               ^
+    193|   });
+    194| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:09:01
+   Duration  5.28s (transform 876ms, setup 1.84s, collect 13.15s, tests 12.99s, environment 11.06s, prepare 5.57s)
+

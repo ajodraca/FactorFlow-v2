@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 1 failed) 1663ms
+   × data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 31ms
+     → expect(element).toHaveClass("sticky top-0")
+
+Expected the element to have class:
+  sticky top-0
+Received:
+  h-row border-b border-border
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers
+Error: expect(element).toHaveClass("sticky top-0")
+
+Expected the element to have class:
+  sticky top-0
+Received:
+  h-row border-b border-border
+ ❯ src/components/ui/data-table.test.tsx:669:48
+    667|     stubRowHeight(32, 96);
+    668|     const { unmount } = render(<DataTable {...variantProps("virtualise…
+    669|     expect(document.querySelector("thead tr")).toHaveClass("sticky", "…
+       |                                                ^
+    670|     expect(document.querySelector('[data-slot="data-table-scroller"]')…
+    671|       height: "calc(var(--row-height) * 16)",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 86 passed (87)
+   Start at  12:33:29
+   Duration  3.39s (transform 149ms, setup 60ms, collect 703ms, tests 1.66s, environment 372ms, prepare 161ms)
+

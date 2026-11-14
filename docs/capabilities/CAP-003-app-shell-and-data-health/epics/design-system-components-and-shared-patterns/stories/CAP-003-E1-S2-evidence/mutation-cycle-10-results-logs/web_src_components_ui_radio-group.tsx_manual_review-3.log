@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/ee2ae1d3-f440-42d4-83b0-70a1f714a8f0/scratchpad/work/mutation-run-u2kq1wuf/w1/web
+
+ ✓ src/components/ui/utils.test.ts (5 tests) 4ms
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 5ms
+ ✓ src/components/token-literals.test.ts (30 tests) 30ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 85ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 180ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 325ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 465ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 447ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 378ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 309ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 720ms
+ ❯ src/components/ui/radio-group.test.tsx (9 tests | 1 failed) 779ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 354ms
+   × radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > fills the checked indicator with the primary token 44ms
+     → expect(element).toHaveClass("fill-current text-primary")
+
+Expected the element to have class:
+  fill-current text-primary
+Received:
+  lucide lucide-circle h-2 w-2 fill-current text-foreground
+ ✓ src/components/ui/select.test.tsx (7 tests) 779ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 475ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/radio-group.test.tsx > radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > fills the checked indicator with the primary token
+Error: expect(element).toHaveClass("fill-current text-primary")
+
+Expected the element to have class:
+  fill-current text-primary
+Received:
+  lucide lucide-circle h-2 w-2 fill-current text-foreground
+ ❯ src/components/ui/radio-group.test.tsx:172:17
+    170|     const dot = later.querySelector("svg");
+    171|     expect(dot).not.toBeNull();
+    172|     expect(dot).toHaveClass("fill-current", "text-primary");
+       |                 ^
+    173|     expect(dot).not.toHaveClass("text-foreground");
+    174|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 125 passed (126)
+   Start at  09:55:40
+   Duration  3.58s (transform 392ms, setup 2.21s, collect 7.85s, tests 4.20s, environment 9.90s, prepare 663ms)
+

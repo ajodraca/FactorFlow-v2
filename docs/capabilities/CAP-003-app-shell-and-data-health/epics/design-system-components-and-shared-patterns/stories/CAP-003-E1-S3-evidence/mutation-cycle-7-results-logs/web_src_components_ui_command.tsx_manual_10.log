@@ -1,0 +1,54 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w2/web
+
+ ✓ src/components/token-literals.test.ts (30 tests) 124ms
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 3ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 297ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 296ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 469ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1213ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 393ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 436ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1776ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 332ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > calls onConfirm exactly once on confirm and stays open until the consumer closes it 313ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 321ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 136ms
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 757ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 467ms
+ ✓ src/components/ui/stepper.test.tsx (15 tests) 665ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 36ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 826ms
+   ✓ textarea list (AC-25) > inserts a newline on Enter and never submits the form 369ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 372ms
+ ❯ src/components/ui/command.test.tsx (10 tests | 1 failed) 1393ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 880ms
+   × command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > styles the dialog content and scrim with the popover and foreground tokens 91ms
+     → expected [ 'fixed', 'left-[50%]', …(13) ] to not include 'shadow-lg'
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1740ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 721ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > wraps from the last card to the first and back with the arrow keys 385ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1692ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 651ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1882ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 913ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command palette resolves to design-system tokens, not shipped literals (AC-26, IR-002, IR-003, IR-005) > styles the dialog content and scrim with the popover and foreground tokens
+AssertionError: expected [ 'fixed', 'left-[50%]', …(13) ] to not include 'shadow-lg'
+ ❯ src/components/ui/command.test.tsx:159:25
+    157|     const content = tokensOf(dialog);
+    158|     expect(content).toContain("bg-popover");
+    159|     expect(content).not.toContain("shadow-lg");
+       |                         ^
+    160|     const scrim = tokensOf(document.querySelector("[data-state='open']…
+    161|     expect(scrim).toContain("bg-foreground/40");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:26
+   Duration  6.42s (transform 1.24s, setup 3.95s, collect 22.63s, tests 13.68s, environment 17.19s, prepare 2.43s)
+

@@ -1,0 +1,108 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w0/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 8 failed) 161ms
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 0 as 0 3ms
+     → Not a count: 0
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 999 as 999 0ms
+     → Not a count: 999
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 1000 as 1,000 0ms
+     → Not a count: 1000
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 1236 as 1,236 0ms
+     → Not a count: 1236
+   × formatCount and formatDownloadName (TC-COMP-024) > formats 1234567 as 1,234,567 0ms
+     → Not a count: 1234567
+   × clock and input guards > throws RangeError on the non-count 1.5 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-count NaN 0ms
+     → expected function to throw an error, but it didn't
+   × clock and input guards > throws RangeError on the non-count Infinity 0ms
+     → expected function to throw an error, but it didn't
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 107ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 0 as 0
+RangeError: Not a count: 0
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (Number.isSafeInteger(n) || n < 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 999 as 999
+RangeError: Not a count: 999
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (Number.isSafeInteger(n) || n < 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 1000 as 1,000
+RangeError: Not a count: 1000
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (Number.isSafeInteger(n) || n < 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 1236 as 1,236
+RangeError: Not a count: 1236
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (Number.isSafeInteger(n) || n < 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > formatCount and formatDownloadName (TC-COMP-024) > formats 1234567 as 1,234,567
+RangeError: Not a count: 1234567
+ ❯ Module.formatCount src/components/patterns/format.ts:73:11
+     71| export function formatCount(n: number): string {
+     72|   if (Number.isSafeInteger(n) || n < 0) {
+     73|     throw new RangeError(`Not a count: ${String(n)}`);
+       |           ^
+     74|   }
+     75|   return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
+ ❯ src/components/patterns/format.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-count 1.5
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-count NaN
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-count Infinity
+AssertionError: expected function to throw an error, but it didn't
+ ❯ src/components/patterns/format.test.ts:125:36
+    123|     "throws RangeError on the non-count %d",
+    124|     (n) => {
+    125|       expect(() => formatCount(n)).toThrow(RangeError);
+       |                                    ^
+    126|     },
+    127|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 32 passed (40)
+   Start at  16:52:29
+   Duration  2.49s (transform 98ms, setup 200ms, collect 540ms, tests 267ms, environment 988ms, prepare 381ms)
+

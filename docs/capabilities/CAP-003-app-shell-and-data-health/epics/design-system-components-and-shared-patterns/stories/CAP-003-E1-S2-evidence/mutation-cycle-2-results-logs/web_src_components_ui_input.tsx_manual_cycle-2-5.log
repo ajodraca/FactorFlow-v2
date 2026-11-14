@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-gowzkx5u/w3/web
+
+ ❯ src/components/ui/input.test.tsx (9 tests | 1 failed) 81ms
+   × input (DAC-E1-S2-2, AC-25) > renders the text variant by default 32ms
+     → expect(element).toHaveClass("border-input")
+
+Expected the element to have class:
+  border-input
+Received:
+  h-7 w-full rounded border border-primary bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/input.test.tsx > input (DAC-E1-S2-2, AC-25) > renders the text variant by default
+Error: expect(element).toHaveClass("border-input")
+
+Expected the element to have class:
+  border-input
+Received:
+  h-7 w-full rounded border border-primary bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive
+ ❯ src/components/ui/input.test.tsx:15:21
+     13|     expect(["text", null]).toContain(field.getAttribute("type"));
+     14|     for (const name of ["h-7", "rounded", "border", "border-input", "b…
+     15|       expect(field).toHaveClass(name);
+       |                     ^
+     16|     }
+     17|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  09:11:09
+   Duration  798ms (transform 28ms, setup 31ms, collect 74ms, tests 81ms, environment 165ms, prepare 51ms)
+

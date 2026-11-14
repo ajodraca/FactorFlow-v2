@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4fz4h46c/w2/web
+
+ ❯ src/components/patterns/status-badge.test.tsx (31 tests | 2 failed) 93ms
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > critical is one rect from lucide-square 4ms
+     → expected [ 'path' ] to deeply equal [ 'rect' ]
+   × StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape 11ms
+     → expected 5 to be 6 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > critical is one rect from lucide-square
+AssertionError: expected [ 'path' ] to deeply equal [ 'rect' ]
+
+- Expected
++ Received
+
+  Array [
+-   "rect",
++   "path",
+  ]
+
+ ❯ src/components/patterns/status-badge.test.tsx:85:24
+     83|     const icon = iconOf(tier);
+     84| 
+     85|     expect(tags(icon)).toEqual([tag]);
+       |                        ^
+     86|     expect(icon).toHaveClass(className);
+     87|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/status-badge.test.tsx > StatusBadge words and shapes (TC-COMP-022, DAC-E1-S5-3) > no two tiers share a shape
+AssertionError: expected 5 to be 6 // Object.is equality
+
+- Expected
++ Received
+
+- 6
++ 5
+
+ ❯ src/components/patterns/status-badge.test.tsx:112:38
+    110|     });
+    111| 
+    112|     expect(new Set(signatures).size).toBe(6);
+       |                                      ^
+    113|   });
+    114| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 29 passed (31)
+   Start at  15:18:03
+   Duration  1.47s (transform 55ms, setup 50ms, collect 429ms, tests 93ms, environment 217ms, prepare 81ms)
+

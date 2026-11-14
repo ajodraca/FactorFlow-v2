@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/2a44e875-93f1-4cf0-9bd1-9b6eed2e0a87/scratchpad/work3/mutation-run-i_g4ic28/w3/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 9ms
+ ✓ src/components/token-literals.test.ts (30 tests) 415ms
+   ✓ tailwind.config.js keys (DAC-E1-11) > gains only the vendored colour keys, no other 348ms
+ ❯ src/components/ui/data-table.test.tsx (100 tests | 1 failed) 7109ms
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 4335ms
+   × data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > hides the Details header text visually and sizes the expander to the 24 px target 32ms
+     → expect(element).toHaveClass("h-5 w-5 p-0")
+
+Expected the element to have class:
+  h-5 w-5 p-0
+Received:
+  inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground p-0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > data-table token classes and targets (AC-25, AC-26, IR-003, IR-004) > hides the Details header text visually and sizes the expander to the 24 px target
+Error: expect(element).toHaveClass("h-5 w-5 p-0")
+
+Expected the element to have class:
+  h-5 w-5 p-0
+Received:
+  inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground p-0
+ ❯ src/components/ui/data-table.test.tsx:956:68
+    954|     render(<DataTable {...variantProps("expandable", stocks(2))} />);
+    955|     expect(screen.getByText("Details")).toHaveClass("sr-only");
+    956|     expect(screen.getByRole("button", { name: "Expand Stock 0" })).toH…
+       |                                                                    ^
+    957|   });
+    958| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 137 passed (138)
+   Start at  13:22:48
+   Duration  11.30s (transform 360ms, setup 666ms, collect 1.73s, tests 7.53s, environment 3.25s, prepare 1.16s)
+

@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w3/web
+
+ ✓ src/components/patterns/format.test.ts (33 tests) 21ms
+ ❯ src/components/patterns/presence.test.tsx (7 tests | 1 failed) 70ms
+   × Absent (TC-COMP-025 edge, DAC-E1-8) > is an em dash hidden from assistive technology with the hidden words naming what is absent 9ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^—No closing price$/
+Received:
+  0No closing price
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/presence.test.tsx > Absent (TC-COMP-025 edge, DAC-E1-8) > is an em dash hidden from assistive technology with the hidden words naming what is absent
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^—No closing price$/
+Received:
+  0No closing price
+ ❯ src/components/patterns/presence.test.tsx:66:23
+     64|   it("is an em dash hidden from assistive technology with the hidden w…
+     65|     const { container } = render(<Absent label="No closing price" />);
+     66|     expect(container).toHaveTextContent(/^—No closing price$/);
+       |                       ^
+     67|     const dash = screen.getByText("—");
+     68|     expect(dash).toHaveAttribute("aria-hidden", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  16:52:35
+   Duration  2.11s (transform 231ms, setup 189ms, collect 150ms, tests 91ms, environment 1.02s, prepare 1.12s)
+

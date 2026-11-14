@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-jlv4vk6_/w2/web
+
+ ❯ src/components/ui/command.test.tsx (5 tests | 2 failed) 74ms
+   × command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 68ms
+     → expected 'fixed left-[50%] top-[50%] z-50 w-ful…' to contain 'max-w-[560px]'
+   × overlay family scan and packages (TC-COMP-016) > finds exactly one length literal, the command dialog's 560 px 2ms
+     → expected [] to deeply equal [ Array(1) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/command.test.tsx > command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus
+AssertionError: expected 'fixed left-[50%] top-[50%] z-50 w-ful…' to contain 'max-w-[560px]'
+
+Expected: "max-w-[560px]"
+Received: "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"
+
+ ❯ src/components/ui/command.test.tsx:66:30
+     64| 
+     65|     const dialog = await screen.findByRole("dialog", { name: "Search F…
+     66|     expect(dialog.className).toContain("max-w-[560px]");
+       |                              ^
+     67| 
+     68|     const input = screen.getByRole("combobox");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/ui/command.test.tsx > overlay family scan and packages (TC-COMP-016) > finds exactly one length literal, the command dialog's 560 px
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- Array [
+-   "web/src/components/ui/command.tsx: 560px",
+- ]
++ Array []
+
+ ❯ src/components/ui/command.test.tsx:111:19
+    109|       ),
+    110|     );
+    111|     expect(found).toEqual(["web/src/components/ui/command.tsx: 560px"]…
+       |                   ^
+    112|   });
+    113| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  10:27:27
+   Duration  1.15s (transform 81ms, setup 32ms, collect 350ms, tests 74ms, environment 185ms, prepare 82ms)
+

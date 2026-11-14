@@ -1,0 +1,89 @@
+# TDD evidence for CAP-003-E1-S5 - The One Tier Function: tiers.ts and StatusBadge.
+# One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged each cycle's patch.
+# Deviation from the plan: T003's table has 29 rows, not 28, because the plan also asks for the explicit failed: false item row on top of the kind rows (a reviewer found it missing; added, cycle-1 re-reviewed).
+# Deviation from the plan: the T002 @ts-expect-error guards sit on the status property line inside a multi-line call and are wrapped in expect(() => ...).toThrow() so they also hold at runtime under vitest.
+# Mutation: mutation-run.py generates no mutants for TypeScript (its operators target Swift and Python), so every mutant is hand-written: the plan's five, plus one per tier row, label and ternary of tiers.ts and one per shape, attribute and prop of status-badge.tsx.
+# Cycle-1 and cycle-2 red log is one run covering both test files (tiers.test.ts could not resolve ./tiers; six status-badge tests failed).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T006]
+    description: >
+      The one tier function: tiers.ts exports Tier, NeedsYouKind, Status, tierOf and labelOf over every UX brief 12.2 row (28 DAC-E1-1 rows plus the explicit failed: false item row, 29), each a switch with a never default. tiers.test.ts asserts every row by input, label and tier, the partial-never-good and cancelled-never-critical guards, and, through the TypeScript compiler API, that a planted status kind or scores state fails to type-check inside both tierOf and labelOf (TC-COMP-020, TC-COMP-021). Baseline before any change: npm run test, 95 files and 2381 tests green. Reviews: code review APPROVED and spec drift none on the first pass except one drift (the missing explicit failed: false row), fixed, then both reviews repeated APPROVED and none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/red-cycle-1-2-tiers-and-badge.log
+    red_log_sha256: d3260346b157d962867245145db39578bed41d4415a9c29395a0dd10c95ce2ef
+    red_evidence: >
+      tiers.test.ts failed to resolve ./tiers before the module existed.
+    green_evidence: >
+      tiers.test.ts 36 passed; npx tsc --noEmit, npm run lint and npm run format are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: af01b382b07bb17a08ec47b53ab2e80abdb1ca0290a9b6bdad87cb85369a5ab8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: 55699d6ece64b062569b849b934b92425a40d4c1b821ad698ec545525bb4b206
+      generated: 54
+      killed: 54
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T004, T005, T007, T008, T009]
+    description: >
+      The StatusBadge takeover: status-badge.tsx is rewritten in place over S1's badge status-<tier> variant with the label as text and the tier shape (hollow circle, ringed dot, filled circle, triangle, diamond, square) as an aria-hidden lucide-react icon, keeping the delivered props and the StatusTier alias so no CAP-002 caller is edited and the import from a screen is gone. status-badge.test.tsx asserts the label in the accessible name, the shape against a literal fixture, six distinct signatures, fill, size, icon-before-label, the variant classes, title and className forwarding, no tab stop and no import from screens (TC-COMP-022). T008 and T009 add no behaviour: the delivered CAP-002 tests that render StatusBadge pass unedited, and lint, format, tsc and build are clean. Reviews: code review APPROVED, spec drift none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/red-cycle-1-2-tiers-and-badge.log
+    red_log_sha256: d3260346b157d962867245145db39578bed41d4415a9c29395a0dd10c95ce2ef
+    red_evidence: >
+      With the delivered status-badge.tsx, six status-badge tests failed: no neutral or serious shape, no lucide-react icon, and an import from a screen.
+    green_evidence: >
+      status-badge.test.tsx passes; the full suite passes with every delivered caller test unedited; npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c4250037beab607d3d19c175cf2427d0c934c64760f3cc27a616f715a2a3cac
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: deda8f310f1be4693e1f31f1ac8486e05d979cdea17f8ce5f236a392dc466bd0
+      generated: 21
+      killed: 20
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.952
+      survivors:
+        - id: web/src/components/patterns/status-badge.tsx:aria-hidden-removed
+          disposition: equivalent
+          reason: >
+            lucide-react adds aria-hidden="true" to every icon that has no aria-label or children, so removing the explicit prop leaves the rendered attribute unchanged, which the tests assert; the code reviewer agreed.
+
+  - id: cycle-3
+    tasks: [T002, T004, T005]
+    description: >
+      Review v1 rework (IR-001, IR-002, IR-003). Test only; the production code already behaves so. IR-001: TC-COMP-020 now plants a new value in each remaining union a tierOf or labelOf switch ends in assertNever for (download state, result outcome, check status, check name, item kind) and requires a type error inside every function that switches on it, so the eight nested defaults the review replaced with a literal each fail. IR-002: status-badge.test.tsx pins each tier's drawn shape (tag, geometry inside the 24-unit viewBox, effective fill) as a fixture, bases the distinctness test on it, and asserts an untitled badge has no title attribute, so a zero-radius or off-canvas good circle, a filled active ring and a title defaulting to the label each fail. IR-003: cycle-1 and cycle-2 mutation results are now cited by harness-relative paths. IR-004 (LOW, optional) is not changed. Reviews: code review APPROVED, spec drift none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/red-cycle-3-review-survivors.log
+    red_log_sha256: 5a7414510bde7dfd5861fd52185cd668f64f6108e95ec2a0ed2c1dff031f8fe0
+    red_evidence: >
+      The review's 12 non-equivalent survivors, re-applied one at a time to the production files, each fail a new test: tiers.ts defaults at lines 63, 72 and 115 (literal neutral) and 143, 152, 178, 183 and 202 (empty label), and status-badge.tsx good-radius-zero, good-outside-viewbox, active-filled and title-defaults-to-label. 12 of 12 killed; the log lists each mutant and the failing test.
+    green_evidence: >
+      Against the unmutated code tiers.test.ts and status-badge.test.tsx pass; npm run lint and npm run format are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f98c8129433095f7fbfc59582f8caa652905b91f14a69db71745a61ae6e42828
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S5-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: "test-only cycle: adds no production code; the review's 12 surviving mutants are the RED and are all killed by the new tests"

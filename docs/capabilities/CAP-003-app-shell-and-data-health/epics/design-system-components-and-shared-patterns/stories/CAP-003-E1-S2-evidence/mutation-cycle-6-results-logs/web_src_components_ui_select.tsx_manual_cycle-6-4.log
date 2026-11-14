@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w2/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 249ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > is the inline variant with the control classes 13ms
+     → expect(element).toHaveClass("h-7")
+
+Expected the element to have class:
+  h-7
+Received:
+  flex h-8 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > is the inline variant with the control classes
+Error: expect(element).toHaveClass("h-7")
+
+Expected the element to have class:
+  h-7
+Received:
+  flex h-8 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1
+ ❯ src/components/ui/select.test.tsx:105:23
+    103|     expect(trigger).toHaveAttribute("data-variant", "inline");
+    104|     for (const name of ["h-7", "rounded", "border", "border-input", "b…
+    105|       expect(trigger).toHaveClass(name);
+       |                       ^
+    106|     }
+    107|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:28
+   Duration  1.22s (transform 32ms, setup 30ms, collect 331ms, tests 249ms, environment 168ms, prepare 111ms)
+

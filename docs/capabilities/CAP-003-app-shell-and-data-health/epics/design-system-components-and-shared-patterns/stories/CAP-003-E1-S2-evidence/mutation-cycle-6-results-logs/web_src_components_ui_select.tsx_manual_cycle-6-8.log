@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oy4vrcko/w2/web
+
+ ❯ src/components/ui/select.test.tsx (6 tests | 1 failed) 228ms
+   × select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > positions the popper content under the trigger with a trigger-sized viewport 23ms
+     → expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/select.test.tsx > select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > positions the popper content under the trigger with a trigger-sized viewport
+AssertionError: expected null not to be null
+ ❯ src/components/ui/select.test.tsx:134:25
+    132|     await user.keyboard("{Enter}");
+    133|     const wrapper = document.querySelector("[data-radix-popper-content…
+    134|     expect(wrapper).not.toBeNull();
+       |                         ^
+    135|     const content = wrapper?.firstElementChild;
+    136|     expect(content).toHaveClass("data-[side=bottom]:translate-y-1", "d…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:22:30
+   Duration  1.02s (transform 33ms, setup 30ms, collect 310ms, tests 228ms, environment 155ms, prepare 29ms)
+

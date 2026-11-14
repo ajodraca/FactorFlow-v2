@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-nnhahbs7/w2/web
+
+ ✓ src/components/ui/vendoring.test.ts (8 tests) 4ms
+ ✓ src/components/token-literals.test.ts (30 tests) 23ms
+ ✓ src/components/ui/input.test.tsx (10 tests) 475ms
+ ✓ src/components/ui/progress.test.tsx (10 tests) 433ms
+ ✓ src/components/ui/button.test.tsx (11 tests) 709ms
+   ✓ button blocked stays focusable, aria-disabled and inert (DAC-E1-S1-3) > takes keyboard focus, announces itself as disabled and is described by its reason 323ms
+ ✓ src/components/ui/toast.test.tsx (8 tests) 1401ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > keeps error and warning, drops success, and never moves focus 422ms
+   ✓ toast error and warning persist, never take focus, announce politely (DAC-E1-S3-2, AC-25) > reaches a close button on a persisting toast by keyboard and dismisses only that toast 503ms
+ ✓ src/components/ui/dialog.test.tsx (10 tests) 1704ms
+   ✓ dialog confirm traps focus, Cancel first and focused, Esc restores focus (DAC-E1-S3-1, DAC-E1-14, AC-25) > is a modal dialog with Cancel first and focused, traps Tab and returns focus on Esc 588ms
+   ✓ ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 345ms
+ ✓ src/components/ui/badge.test.tsx (13 tests) 267ms
+ ❯ src/components/ui/stepper.test.tsx (15 tests | 1 failed) 1006ms
+   ✓ stepper marks the current step and links only done steps (DAC-E1-14, AC-25, DEC-0304) > is a labelled navigation holding one ordered list of four items 414ms
+   × stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004) > gives the done link a ring of the focus width in the ring colour, and no ring-4 or outline 17ms
+     → expected [ 'text-foreground', 'rounded', …(4) ] to include 'focus-visible:ring'
+ ✓ src/components/ui/checkbox.test.tsx (7 tests) 654ms
+   ✓ checkbox toggles on Space (DAC-E1-S2-1, AC-25) > takes focus, toggles on Space and ignores Enter 437ms
+ ✓ src/components/ui/command.test.tsx (10 tests) 1495ms
+   ✓ command dialog labelled, loops, focuses input, renders caller empty copy (DAC-E1-S3-4, DAC-E1-14, AC-25) > opens a labelled dialog with the input focused, loops the selection and restores focus 834ms
+ ✓ src/components/ui/utils.test.ts (5 tests) 5ms
+ ✓ src/components/ui/textarea.test.tsx (8 tests) 737ms
+ ✓ src/components/ui/form.test.tsx (9 tests) 1318ms
+   ✓ form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > names the numeric input by its label and suffix, and describes it by its hint 337ms
+ ✓ src/components/ui/radio-group.test.tsx (9 tests) 1673ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > moves the selection with both arrow axes and is a single tab stop 710ms
+   ✓ radio-group cards are one tab stop with arrows moving the selection (DAC-E1-S2-1, AC-25) > wraps from the last card to the first and back with the arrow keys 322ms
+ ✓ src/components/ui/card.test.tsx (9 tests) 327ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 1917ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > exposes combobox and listbox roles and selects with the keyboard 969ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > positions the popper content under the trigger with a trigger-sized viewport 378ms
+   ✓ select inline opens and closes from the keyboard (DAC-E1-S2-1, AC-25) > highlights the matching option when a letter is typed while open 316ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/stepper.test.tsx > stepper resolves to design-system tokens and an ordered list (AC-25, AC-26, IR-001 to IR-004) > gives the done link a ring of the focus width in the ring colour, and no ring-4 or outline
+AssertionError: expected [ 'text-foreground', 'rounded', …(4) ] to include 'focus-visible:ring'
+ ❯ src/components/ui/stepper.test.tsx:151:20
+    149|     renderStepper();
+    150|     const tokens = tokensOf(screen.getByRole("link", { name: "Market d…
+    151|     expect(tokens).toContain("focus-visible:ring");
+       |                    ^
+    152|     expect(tokens).toContain("focus-visible:ring-ring");
+    153|     expect(tokens).toContain("focus-visible:outline-none");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 178 passed (179)
+   Start at  11:08:48
+   Duration  4.84s (transform 505ms, setup 1.96s, collect 14.47s, tests 14.15s, environment 11.02s, prepare 2.38s)
+

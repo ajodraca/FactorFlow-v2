@@ -1,0 +1,127 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web
+
+stderr | src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > keeps an expansion open across an appended page
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+Warning: An update to DataTable inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at DataTable (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b92jxq32/w2/web/src/components/ui/data-table.tsx:165:11)
+
+ ❯ src/components/ui/data-table.test.tsx (87 tests | 5 failed) 3843ms
+   × TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > appends a keyset page without re-rendering earlier rows, asking for it once 12ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks for the next page when the window end plus the prefetch reaches the loaded rows 7ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when the rows are replaced by as many different ones (a sort) 15ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when only the first row is replaced (a sort that changes the head) 9ms
+     → expected "spy" to be called 2 times, but got 0 times
+   × virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > never asks while busy or when there is no more 15ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array []
+
+
+Number of calls: 1
+
+   ✓ data-table classes and structure (AC-26, DAC-E1-S4-2) > gives only the virtualised header a sticky position, and only it a scroller and spacers 2641ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > TC-COMP-017 data-table virtualised windows 3000 rows and appends keyset pages (DAC-E1-S4-1, AC-26, DEC-0306) > appends a keyset page without re-rendering earlier rows, asking for it once
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/components/ui/data-table.test.tsx:393:26
+    391|     });
+    392|     scrollTo(30, 32);
+    393|     expect(onEndReached).toHaveBeenCalledTimes(1);
+       |                          ^
+    394|     renders = [];
+    395|     rerender(element(first, { hasMore: true, busy: false }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks for the next page when the window end plus the prefetch reaches the loaded rows
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/components/ui/data-table.test.tsx:526:26
+    524|     expect(onEndReached).not.toHaveBeenCalled();
+    525|     scrollTo(5, 32);
+    526|     expect(onEndReached).toHaveBeenCalledTimes(1);
+       |                          ^
+    527|   });
+    528| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when the rows are replaced by as many different ones (a sort)
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/components/ui/data-table.test.tsx:533:26
+    531|     const { onEndReached, rerender, element } = paged(stocks(50), { ha…
+    532|     scrollTo(30, 32);
+    533|     expect(onEndReached).toHaveBeenCalledTimes(1);
+       |                          ^
+    534|     const replaced = stocks(50).map((row) => ({ ...row, symbol: `R${ro…
+    535|     rerender(element(replaced));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > asks again when only the first row is replaced (a sort that changes the head)
+AssertionError: expected "spy" to be called 2 times, but got 0 times
+ ❯ src/components/ui/data-table.test.tsx:547:26
+    545|     const [head, ...rest] = stocks(50);
+    546|     rerender(element([{ ...head, symbol: "HEAD" }, ...rest]));
+    547|     expect(onEndReached).toHaveBeenCalledTimes(2);
+       |                          ^
+    548|   });
+    549| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/components/ui/data-table.test.tsx > virtualised paging, keyboard and expansion (DAC-E1-S4-1, DAC-E1-S4-2, AC-25) > never asks while busy or when there is no more
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/components/ui/data-table.test.tsx:554:35
+    552|     const busy = paged(stocks(50), { hasMore: true, busy: true });
+    553|     scrollTo(30, 32);
+    554|     expect(busy.onEndReached).not.toHaveBeenCalled();
+       |                                   ^
+    555|     busy.unmount();
+    556|     const done = paged(stocks(50), { hasMore: false });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 82 passed (87)
+   Start at  12:33:23
+   Duration  5.14s (transform 95ms, setup 55ms, collect 441ms, tests 3.84s, environment 410ms, prepare 115ms)
+

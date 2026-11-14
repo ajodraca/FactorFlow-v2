@@ -1,0 +1,78 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o7mt325c/w2/web
+
+ ❯ src/components/ui/dialog.test.tsx (8 tests | 1 failed) 219ms
+   × ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending 24ms
+     → Unable to find an accessible element with the role "dialog" and name "Stop following AAPL"
+
+Here are the accessible roles:
+
+  button:
+
+  Name "Stop following AAPL":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<button[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mStop following AAPL[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/dialog.test.tsx > ConfirmDialog contract (DEC-0301, DAC-E1-S3-1, DAC-E1-15) > does not close and does not confirm while pending
+TestingLibraryElementError: Unable to find an accessible element with the role "dialog" and name "Stop following AAPL"
+
+Here are the accessible roles:
+
+  button:
+
+  Name "Stop following AAPL":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<button[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mStop following AAPL[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/ui/dialog.test.tsx:123:19
+    121| 
+    122|     await user.keyboard("{Escape}");
+    123|     expect(screen.getByRole("dialog", { name: TITLE })).toBeInTheDocum…
+       |                   ^
+    124|     await user.click(within(dialog).getByRole("button", { name: "Cance…
+    125|     expect(screen.getByRole("dialog", { name: TITLE })).toBeInTheDocum…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:27:11
+   Duration  1.09s (transform 35ms, setup 32ms, collect 111ms, tests 219ms, environment 156ms, prepare 117ms)
+

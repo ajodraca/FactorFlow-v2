@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5br0l38r/w1/web
+
+ ❯ src/components/ui/textarea.test.tsx (7 tests | 1 failed) 117ms
+   × textarea list (DAC-E1-S2-1, AC-25) > is the list variant with four rows and no resize by default 35ms
+     → expect(element).toHaveAttribute("rows", "4") // element.getAttribute("rows") === "4"
+
+Expected the element to have attribute:
+  rows="4"
+Received:
+  rows="5"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/textarea.test.tsx > textarea list (DAC-E1-S2-1, AC-25) > is the list variant with four rows and no resize by default
+Error: expect(element).toHaveAttribute("rows", "4") // element.getAttribute("rows") === "4"
+
+Expected the element to have attribute:
+  rows="4"
+Received:
+  rows="5"
+ ❯ src/components/ui/textarea.test.tsx:24:19
+     22|     const { field } = renderField();
+     23|     expect(field).toHaveAttribute("data-variant", "list");
+     24|     expect(field).toHaveAttribute("rows", "4");
+       |                   ^
+     25|     expect(field).toHaveClass("resize-none", "w-full", "rounded", "bor…
+     26|     expect(field).toHaveClass("aria-[invalid=true]:border-destructive"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:13:12
+   Duration  965ms (transform 26ms, setup 37ms, collect 70ms, tests 117ms, environment 181ms, prepare 219ms)
+

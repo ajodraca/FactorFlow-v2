@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w2/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 743ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 387ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > download succeeded 3ms
+     → expected 'Complete x' to be 'Complete' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > download succeeded
+AssertionError: expected 'Complete x' to be 'Complete' // Object.is equality
+
+Expected: "Complete"
+Received: "Complete x"
+
+ ❯ src/components/patterns/tiers.test.ts:225:29
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+    225|     expect(labelOf(status)).toBe(label);
+       |                             ^
+    226|   });
+    227| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:28
+   Duration  1.86s (transform 32ms, setup 38ms, collect 305ms, tests 743ms, environment 173ms, prepare 261ms)
+

@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5e8al5qt/w0/web
+
+ ✓ src/components/ui/input.test.tsx (9 tests) 84ms
+ ❯ src/components/ui/form.test.tsx (9 tests | 1 failed) 211ms
+   × form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change 43ms
+     → expect(element).toHaveAttribute("aria-invalid", "true") // element.getAttribute("aria-invalid") === "true"
+
+Expected the element to have attribute:
+  aria-invalid="true"
+Received:
+  aria-invalid="false"
+ ✓ src/components/ui/radio-group.test.tsx (7 tests) 236ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/form.test.tsx > form field naming, description and announced errors (DAC-E1-S2-2, AC-25) > links an invalid field to its announced error on blur and clears it on change
+Error: expect(element).toHaveAttribute("aria-invalid", "true") // element.getAttribute("aria-invalid") === "true"
+
+Expected the element to have attribute:
+  aria-invalid="true"
+Received:
+  aria-invalid="false"
+ ❯ src/components/ui/form.test.tsx:122:19
+    120|     const alert = await screen.findByRole("alert");
+    121|     expect(alert).toHaveTextContent(YEARS_ERROR);
+    122|     expect(field).toHaveAttribute("aria-invalid", "true");
+       |                   ^
+    123|     expect((field.getAttribute("aria-describedby") ?? "").split(" ")).…
+    124|     expect(field).toHaveAccessibleDescription(`${YEARS_HINT} ${YEARS_E…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  09:25:16
+   Duration  1.23s (transform 89ms, setup 125ms, collect 1.07s, tests 531ms, environment 624ms, prepare 360ms)
+

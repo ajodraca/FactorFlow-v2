@@ -95,3 +95,44 @@ describe("package.json dependencies and licences (DAC-E1-12, DAC-E1-S1-5)", () =
     expect(wrong).toEqual([]);
   });
 });
+
+// The seven packages the form family adds, and the licence each must carry in
+// package-lock.json (tech stack v7 Key Libraries; DAC-E1-S2-3).
+const FORM_FAMILY_PACKAGES: Record<string, string> = {
+  "react-hook-form": "MIT",
+  zod: "MIT",
+  "@hookform/resolvers": "MIT",
+  "@radix-ui/react-label": "MIT",
+  "@radix-ui/react-radio-group": "MIT",
+  "@radix-ui/react-checkbox": "MIT",
+  "@radix-ui/react-select": "MIT",
+};
+
+// Implements TC-COMP-011
+describe("form family packages (TC-COMP-011)", () => {
+  const manifest = JSON.parse(readFileSync(path.join(REPO_ROOT, "package.json"), "utf-8"));
+  const lock = JSON.parse(readFileSync(path.join(REPO_ROOT, "package-lock.json"), "utf-8"));
+  const names = Object.keys(FORM_FAMILY_PACKAGES);
+
+  it("lists all seven in dependencies", () => {
+    const missing = names.filter((name) => !(name in manifest.dependencies));
+    expect(missing).toEqual([]);
+  });
+
+  it("records the expected licence for each in package-lock.json", () => {
+    const wrong = names
+      .map((name) => ({
+        name,
+        expected: FORM_FAMILY_PACKAGES[name],
+        actual: lock.packages[`node_modules/${name}`]?.license,
+      }))
+      .filter(({ expected, actual }) => actual !== expected)
+      .map(({ name, expected, actual }) => `${name}: ${actual} (expected ${expected})`);
+    expect(wrong).toEqual([]);
+  });
+
+  it("lists none in devDependencies", () => {
+    const misplaced = names.filter((name) => name in (manifest.devDependencies ?? {}));
+    expect(misplaced).toEqual([]);
+  });
+});

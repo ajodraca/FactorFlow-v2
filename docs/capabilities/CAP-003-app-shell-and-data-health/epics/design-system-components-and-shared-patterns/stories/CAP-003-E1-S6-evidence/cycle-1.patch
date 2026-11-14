@@ -1,0 +1,365 @@
+diff --git a/web/src/components/patterns/format.test.ts b/web/src/components/patterns/format.test.ts
+new file mode 100644
+index 0000000..49cacdd
+--- /dev/null
++++ b/web/src/components/patterns/format.test.ts
+@@ -0,0 +1,132 @@
++import { afterEach, beforeEach, describe, expect, it } from "vitest";
++import {
++  formatClock,
++  formatCount,
++  formatDownloadName,
++  formatInstant,
++  formatSessionDate,
++} from "./format";
++
++// Implements TC-COMP-023
++describe("formatInstant and formatSessionDate (TC-COMP-023)", () => {
++  it("reads CDT for an October instant and CST for a January one", () => {
++    expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 17:46 CDT");
++    expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 17:46 CST");
++  });
++
++  it("shows seconds only when asked", () => {
++    expect(formatInstant("2026-10-15T22:52:10Z", { seconds: true })).toBe(
++      "2026-10-15 17:52:10 CDT",
++    );
++    expect(formatInstant("2026-10-15T22:52:10Z", { seconds: false })).toBe("2026-10-15 17:52 CDT");
++    expect(formatInstant("2026-10-15T22:52:10Z")).toBe("2026-10-15 17:52 CDT");
++  });
++
++  it("takes a Date as well as a string (DEC-0309)", () => {
++    expect(formatInstant(new Date("2026-10-15T22:46:00Z"))).toBe("2026-10-15 17:46 CDT");
++  });
++
++  it("takes the zone as the instant falls across the autumn change", () => {
++    expect(formatInstant("2026-11-01T06:30:00Z")).toBe("2026-11-01 01:30 CDT");
++    expect(formatInstant("2026-11-01T07:30:00Z")).toBe("2026-11-01 01:30 CST");
++  });
++
++  it("spells midnight 00, never 24", () => {
++    expect(formatInstant("2026-10-16T05:00:00Z")).toBe("2026-10-16 00:00 CDT");
++  });
++
++  it("accepts an explicit offset", () => {
++    expect(formatInstant("2026-10-15T17:46:00-05:00")).toBe("2026-10-15 17:46 CDT");
++  });
++
++  it("returns a session date unshifted", () => {
++    expect(formatSessionDate("2026-03-08")).toBe("2026-03-08");
++  });
++
++  describe.each(["Asia/Tokyo", "UTC", "America/Los_Angeles"])("under TZ=%s", (zone) => {
++    let previous: string | undefined;
++    beforeEach(() => {
++      previous = process.env.TZ;
++      process.env.TZ = zone;
++    });
++    afterEach(() => {
++      if (previous === undefined) {
++        Reflect.deleteProperty(process.env, "TZ");
++      } else {
++        process.env.TZ = previous;
++      }
++    });
++
++    it("does not read the machine zone", () => {
++      expect(formatInstant("2026-10-15T22:46:00Z")).toBe("2026-10-15 17:46 CDT");
++      expect(formatInstant("2026-01-15T23:46:00Z")).toBe("2026-01-15 17:46 CST");
++      expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
++      expect(formatSessionDate("2026-03-08")).toBe("2026-03-08");
++    });
++  });
++});
++
++// Implements TC-COMP-024
++describe("formatCount and formatDownloadName (TC-COMP-024)", () => {
++  it.each([
++    [0, "0"],
++    [999, "999"],
++    [1000, "1,000"],
++    [1236, "1,236"],
++    [1234567, "1,234,567"],
++  ])("formats %d as %s", (n, expected) => {
++    expect(formatCount(n)).toBe(expected);
++  });
++
++  it("names a download from requested_at when started_at is null", () => {
++    expect(formatDownloadName(null, "2026-10-15T22:46:00Z")).toBe("Download 2026-10-15 17:46 CDT");
++  });
++
++  it("names a download from its start time when there is one", () => {
++    expect(formatDownloadName("2026-01-15T23:46:00Z", "2026-01-15T23:40:00Z")).toBe(
++      "Download 2026-01-15 17:46 CST",
++    );
++  });
++});
++
++describe("clock and input guards", () => {
++  it("renders a clock with seconds and the zone", () => {
++    expect(formatClock("2026-10-15T22:52:10Z")).toBe("17:52:10 CDT");
++    expect(formatClock(new Date("2026-01-16T06:00:30Z"))).toBe("00:00:30 CST");
++  });
++
++  it.each(["", "2026-10-15", "2026-10-15T22:46:00", "not a time", "2026-13-45T99:00:00Z"])(
++    "throws RangeError on the non-instant %j",
++    (input) => {
++      expect(() => formatInstant(input)).toThrow(RangeError);
++      expect(() => formatInstant(input)).toThrow(
++        `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
++      );
++      expect(() => formatClock(input)).toThrow(RangeError);
++      expect(() => formatClock(input)).toThrow(`Not an ISO-8601 instant: ${JSON.stringify(input)}`);
++    },
++  );
++
++  it("throws RangeError on an invalid Date", () => {
++    expect(() => formatInstant(new Date(Number.NaN))).toThrow(/^Not an ISO-8601 instant/);
++    expect(() => formatClock(new Date(Number.NaN))).toThrow(/^Not an ISO-8601 instant/);
++  });
++
++  it.each(["", "2026-1-5", "20261015", "2026-10-15T00:00:00Z"])(
++    "throws RangeError on the non-date %j",
++    (input) => {
++      expect(() => formatSessionDate(input)).toThrow(RangeError);
++    },
++  );
++
++  it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
++    "throws RangeError on the non-count %d",
++    (n) => {
++      expect(() => formatCount(n)).toThrow(RangeError);
++    },
++  );
++
++  it("throws RangeError when the download instants are not instants", () => {
++    expect(() => formatDownloadName(null, "2026-10-15")).toThrow(RangeError);
++  });
++});
+diff --git a/web/src/components/patterns/format.ts b/web/src/components/patterns/format.ts
+new file mode 100644
+index 0000000..d2491df
+--- /dev/null
++++ b/web/src/components/patterns/format.ts
+@@ -0,0 +1,81 @@
++/**
++ * The shared formatters (component design 2.5; DAC-E1-9; STD-UI-5; capability
++ * OQ-1). Every instant renders in America/Chicago with its zone as the
++ * instant falls (CDT or CST), built from Intl.DateTimeFormat parts in en-US,
++ * so the viewer's machine zone is never read and no locale format is used.
++ * Signatures are provisional, recorded as DEC-0309. The shell's
++ * formatTimestamp stays as delivered (system design assumption 5).
++ */
++
++/** A `Date`, or an ISO-8601 instant string with `Z` or an offset. */
++export type Instant = Date | string;
++
++const TIME_ZONE = "America/Chicago";
++
++/** An ISO-8601 instant with its zone: `Z` or an offset, never a local wall-clock time. */
++const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
++
++/** Built per call so the zone is always the one named here, never one cached at load. */
++function chicago(): Intl.DateTimeFormat {
++  return new Intl.DateTimeFormat("en-US", {
++    timeZone: TIME_ZONE,
++    year: "numeric",
++    month: "2-digit",
++    day: "2-digit",
++    hour: "2-digit",
++    minute: "2-digit",
++    second: "2-digit",
++    // h23, not hour12: false, so midnight is "00" on every engine, never "24".
++    hourCycle: "h23",
++    timeZoneName: "short",
++  });
++}
++
++function toDate(value: Instant): Date {
++  const when = typeof value === "string" ? new Date(value) : value;
++  if ((typeof value === "string" && !ISO_INSTANT.test(value)) || Number.isNaN(when.getTime())) {
++    throw new RangeError(`Not an ISO-8601 instant: ${JSON.stringify(value)}`);
++  }
++  return when;
++}
++
++function partsOf(value: Instant): (type: Intl.DateTimeFormatPartTypes) => string {
++  const parts = chicago().formatToParts(toDate(value));
++  return (type) => parts.find((candidate) => candidate.type === type)?.value ?? "";
++}
++
++/** `2026-10-15 17:46 CDT`, with seconds (`17:52:10`) only when asked. */
++export function formatInstant(value: Instant, options?: { seconds?: boolean }): string {
++  const part = partsOf(value);
++  const clock = options?.seconds
++    ? `${part("hour")}:${part("minute")}:${part("second")}`
++    : `${part("hour")}:${part("minute")}`;
++  return `${part("year")}-${part("month")}-${part("day")} ${clock} ${part("timeZoneName")}`;
++}
++
++/** `17:52:10 CDT`, for a *checked {time}* clause. */
++export function formatClock(value: Instant): string {
++  const part = partsOf(value);
++  return `${part("hour")}:${part("minute")}:${part("second")} ${part("timeZoneName")}`;
++}
++
++/** A calendar date, returned as received after a shape check, never through `Date`. */
++export function formatSessionDate(value: string): string {
++  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
++    throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value)}`);
++  }
++  return value;
++}
++
++/** A whole, non-negative count with `,` thousands separators. */
++export function formatCount(n: number): string {
++  if (!Number.isSafeInteger(n) || n < 0) {
++    throw new RangeError(`Not a count: ${String(n)}`);
++  }
++  return String(n).replace(/\B(?=(\d{3})+$)/g, ",");
++}
++
++/** `Download {instant}` from the start time, else the request time (capability OQ-1). */
++export function formatDownloadName(startedAt: Instant | null, requestedAt: Instant): string {
++  return `Download ${formatInstant(startedAt ?? requestedAt)}`;
++}
+diff --git a/web/src/components/patterns/presence.test.tsx b/web/src/components/patterns/presence.test.tsx
+new file mode 100644
+index 0000000..59a0b38
+--- /dev/null
++++ b/web/src/components/patterns/presence.test.tsx
+@@ -0,0 +1,81 @@
++import { render, screen } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { describe, expect, it } from "vitest";
++import { Absent, NotDeterminable } from "./presence";
++
++const REASON = "Gap detection needs at least two stocks with data in range.";
++
++function badgeOf(container: HTMLElement): HTMLElement {
++  const badge = container.querySelector<HTMLElement>("[data-variant]");
++  if (!badge) throw new Error("no badge rendered");
++  return badge;
++}
++
++// Implements TC-COMP-025
++describe("NotDeterminable (TC-COMP-025)", () => {
++  it("describes itself by its reason, which is also visible beside the badge", () => {
++    render(<NotDeterminable reason={REASON} />);
++    expect(screen.getByText("Not determinable")).toHaveAccessibleDescription(REASON);
++    const reason = screen.getByText(REASON);
++    expect(reason.closest("[data-variant]")).toBeNull();
++    expect(reason).not.toHaveClass("sr-only");
++  });
++
++  it("is the coverage-unknown badge, never a passed check or a dimmed absent", () => {
++    const { container } = render(<NotDeterminable reason={REASON} />);
++    const badge = badgeOf(container);
++    expect(badge).toHaveAttribute("data-variant", "coverage-unknown");
++    expect(badge).toHaveClass(
++      "bg-pattern-indeterminate",
++      "bg-value-indeterminate-muted",
++      "text-value-indeterminate",
++    );
++    expect(badge).not.toHaveClass("text-value-missing");
++    expect(badge.className).not.toMatch(/opacity-/);
++  });
++
++  it("takes a caller's label and keeps the badge and the description", () => {
++    const { container } = render(<NotDeterminable reason={REASON} label="Unknown" />);
++    expect(screen.getByText("Unknown")).toHaveAccessibleDescription(REASON);
++    expect(screen.queryByText("Not determinable")).toBeNull();
++    expect(badgeOf(container)).toHaveAttribute("data-variant", "coverage-unknown");
++  });
++
++  it("gives two instances their own descriptions", () => {
++    render(
++      <>
++        <NotDeterminable reason="First reason." />
++        <NotDeterminable reason="Second reason." />
++      </>,
++    );
++    const [first, second] = screen.getAllByText("Not determinable");
++    expect(first).toHaveAccessibleDescription("First reason.");
++    expect(second).toHaveAccessibleDescription("Second reason.");
++  });
++
++  it("is not a tab stop", async () => {
++    render(<NotDeterminable reason={REASON} />);
++    await userEvent.tab();
++    expect(document.body).toHaveFocus();
++  });
++});
++
++describe("Absent (TC-COMP-025 edge, DAC-E1-8)", () => {
++  it("is an em dash hidden from assistive technology with the hidden words naming what is absent", () => {
++    const { container } = render(<Absent label="No closing price" />);
++    expect(container).toHaveTextContent(/^—No closing price$/);
++    const dash = screen.getByText("—");
++    expect(dash).toHaveAttribute("aria-hidden", "true");
++    expect(screen.getByText("No closing price")).toHaveClass("sr-only");
++    expect(container.firstElementChild).toHaveClass("text-value-missing");
++    expect(container.textContent).not.toMatch(/0/);
++  });
++
++  it("is not a tab stop and carries no role", async () => {
++    render(<Absent label="No closing price" />);
++    await userEvent.tab();
++    expect(document.body).toHaveFocus();
++    expect(screen.queryByRole("img")).toBeNull();
++    expect(screen.queryByRole("status")).toBeNull();
++  });
++});
+diff --git a/web/src/components/patterns/presence.tsx b/web/src/components/patterns/presence.tsx
+new file mode 100644
+index 0000000..3058453
+--- /dev/null
++++ b/web/src/components/patterns/presence.tsx
+@@ -0,0 +1,47 @@
++import { type JSX, useId } from "react";
++import { Badge } from "../ui/badge";
++
++/**
++ * Present, absent and not determinable are three different things (component
++ * design 2.5; UX design 0.7; DAC-E1-8; STD-UI-4; STD-UI-14). A blank means
++ * only "does not apply" and is not this module's. Props are provisional,
++ * recorded as DEC-0310.
++ */
++
++/**
++ * Absent: an em dash for a value that does not exist, never zero and never
++ * blank. The dash is hidden from assistive technology; `label` is the full
++ * hidden phrase naming what is absent.
++ */
++export function Absent({ label }: { label: string }): JSX.Element {
++  return (
++    <span className="text-value-missing">
++      <span aria-hidden="true">—</span>
++      <span className="sr-only">{label}</span>
++    </span>
++  );
++}
++
++/**
++ * Not determinable: the `coverage-unknown` badge with its reason beside it and
++ * as its accessible description. Never a dimmed absent, never a passed check.
++ */
++export function NotDeterminable({
++  reason,
++  label = "Not determinable",
++}: {
++  reason: string;
++  label?: string;
++}): JSX.Element {
++  const id = useId();
++  return (
++    <span className="inline-flex items-center gap-2">
++      <Badge variant="coverage-unknown" aria-describedby={id}>
++        {label}
++      </Badge>
++      <span id={id} className="text-xs text-muted-foreground">
++        {reason}
++      </span>
++    </span>
++  );
++}

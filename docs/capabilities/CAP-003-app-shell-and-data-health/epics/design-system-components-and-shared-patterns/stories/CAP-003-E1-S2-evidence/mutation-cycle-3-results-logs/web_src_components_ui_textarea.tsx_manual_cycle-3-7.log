@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5br0l38r/w0/web
+
+ ❯ src/components/ui/textarea.test.tsx (7 tests | 1 failed) 116ms
+   × textarea list (DAC-E1-S2-1, AC-25) > is the list variant with four rows and no resize by default 35ms
+     → expect(element).toHaveClass("aria-[invalid=true]:border-destructive")
+
+Expected the element to have class:
+  aria-[invalid=true]:border-destructive
+Received:
+  flex w-full resize-none rounded border border-input bg-background px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-input
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ui/textarea.test.tsx > textarea list (DAC-E1-S2-1, AC-25) > is the list variant with four rows and no resize by default
+Error: expect(element).toHaveClass("aria-[invalid=true]:border-destructive")
+
+Expected the element to have class:
+  aria-[invalid=true]:border-destructive
+Received:
+  flex w-full resize-none rounded border border-input bg-background px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-input
+ ❯ src/components/ui/textarea.test.tsx:26:19
+     24|     expect(field).toHaveAttribute("rows", "4");
+     25|     expect(field).toHaveClass("resize-none", "w-full", "rounded", "bor…
+     26|     expect(field).toHaveClass("aria-[invalid=true]:border-destructive"…
+       |                   ^
+     27|   });
+     28| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:13:13
+   Duration  932ms (transform 24ms, setup 37ms, collect 62ms, tests 116ms, environment 181ms, prepare 93ms)
+

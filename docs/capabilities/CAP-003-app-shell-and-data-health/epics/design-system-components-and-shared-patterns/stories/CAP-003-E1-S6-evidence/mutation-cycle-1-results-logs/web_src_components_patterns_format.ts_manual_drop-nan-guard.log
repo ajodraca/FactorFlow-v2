@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0bnmp9ln/w0/web
+
+ ❯ src/components/patterns/format.test.ts (33 tests | 2 failed) 67ms
+   × clock and input guards > throws RangeError on the non-instant "2026-13-45T99:00:00Z" 4ms
+     → expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-13-45T…' but got 'Invalid time value'
+   × clock and input guards > throws RangeError on an invalid Date 1ms
+     → expected [Function] to throw error matching /^Not an ISO-8601 instant/ but got 'Invalid time value'
+ ✓ src/components/patterns/presence.test.tsx (7 tests) 67ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on the non-instant "2026-13-45T99:00:00Z"
+AssertionError: expected [Function] to throw error including 'Not an ISO-8601 instant: "2026-13-45T…' but got 'Invalid time value'
+
+Expected: "Not an ISO-8601 instant: "2026-13-45T99:00:00Z""
+Received: "Invalid time value"
+
+ ❯ src/components/patterns/format.test.ts:102:42
+    100|     (input) => {
+    101|       expect(() => formatInstant(input)).toThrow(RangeError);
+    102|       expect(() => formatInstant(input)).toThrow(
+       |                                          ^
+    103|         `Not an ISO-8601 instant: ${JSON.stringify(input)}`,
+    104|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/format.test.ts > clock and input guards > throws RangeError on an invalid Date
+AssertionError: expected [Function] to throw error matching /^Not an ISO-8601 instant/ but got 'Invalid time value'
+
+- Expected: 
+/^Not an ISO-8601 instant/
+
++ Received: 
+"Invalid time value"
+
+ ❯ src/components/patterns/format.test.ts:111:55
+    109| 
+    110|   it("throws RangeError on an invalid Date", () => {
+    111|     expect(() => formatInstant(new Date(Number.NaN))).toThrow(/^Not an…
+       |                                                       ^
+    112|     expect(() => formatClock(new Date(Number.NaN))).toThrow(/^Not an I…
+    113|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 38 passed (40)
+   Start at  16:52:32
+   Duration  2.16s (transform 89ms, setup 163ms, collect 372ms, tests 134ms, environment 1.29s, prepare 992ms)
+

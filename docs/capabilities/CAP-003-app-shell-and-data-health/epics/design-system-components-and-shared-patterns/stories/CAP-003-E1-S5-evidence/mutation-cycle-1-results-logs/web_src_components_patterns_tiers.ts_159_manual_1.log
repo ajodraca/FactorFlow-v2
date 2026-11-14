@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ato6hsjk/w1/web
+
+ ❯ src/components/patterns/tiers.test.ts (36 tests | 1 failed) 694ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 358ms
+   × Tier table (TC-COMP-021, DAC-E1-1) > scores not_current 3ms
+     → expected 'Not reflecting the latest download x' to be 'Not reflecting the latest download' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/tiers.test.ts > Tier table (TC-COMP-021, DAC-E1-1) > scores not_current
+AssertionError: expected 'Not reflecting the latest download x' to be 'Not reflecting the latest download' // Object.is equality
+
+Expected: "Not reflecting the latest download"
+Received: "Not reflecting the latest download x"
+
+ ❯ src/components/patterns/tiers.test.ts:225:29
+    223|   it.each(TABLE)("%s", (_name, status, [label, tier]) => {
+    224|     expect(tierOf(status)).toBe(tier);
+    225|     expect(labelOf(status)).toBe(label);
+       |                             ^
+    226|   });
+    227| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 passed (36)
+   Start at  15:17:33
+   Duration  2.00s (transform 35ms, setup 42ms, collect 329ms, tests 694ms, environment 214ms, prepare 305ms)
+
