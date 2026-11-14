@@ -1,0 +1,44 @@
+...............F
+=================================== FAILURES ===================================
+_____ test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor _____
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49413 user=test database=test_5ef3ff5b67db4e719c2cad1e144b03cc) at 0x10b0cdbb0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b0cd370>
+
+    def test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor(
+        migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = migrated_writer_connection
+        _roster(conn, 1200)
+        _seed_one_stock_with_prices(conn)
+        conn.commit()
+        calls = _coverage_spy(monkeypatch)
+    
+>       read_data_health(conn)
+
+tests/integration/test_data_health_checks.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=49413 user=test database=test_5ef3ff5b67db4e719c2cad1e144b03cc) at 0x10b0cdbb0>
+
+    def read_data_health(conn: psycopg.Connection) -> DataHealth:
+        """The Data health aggregate: both checks, the verdict counts and the first problem page.
+    
+        One pass over ``coverage-service``'s active-stock pages (500 each, to a null
+        cursor), so memory holds one page and five symbols per check whatever the
+        roster size. Before anything was acquired both checks are ``None``, never
+        zero counts (AC-21). ``affected_count`` is the statement behind
+        ``Problems.stock_count`` (DEC-0201). The caller owns the transaction.
+        """
+        with conn.cursor() as cur:
+            cur.execute(DATA_HEALTH_HEAD_SQL)
+            head = cur.fetchone()
+>       assert head is None  # an aggregate over a table always returns one row
+               ^^^^^^^^^^^^
+E       AssertionError
+
+src/factorflow/data_health/reader.py:308: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed in 1.99s

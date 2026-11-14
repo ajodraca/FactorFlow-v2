@@ -1,0 +1,24 @@
+..........F
+=================================== FAILURES ===================================
+__ test_more_than_five_exceptions_across_a_page_boundary_keep_the_first_five ___
+
+    def test_more_than_five_exceptions_across_a_page_boundary_keep_the_first_five() -> None:
+        fold = _fold(
+            [
+                _view([_unknown(s) for s in ("AAA", "BBB", "CCC", "DDD")], next_cursor="DDD"),
+                _view([_unknown(s) for s in ("EEE", "FFF", "GGG")]),
+            ]
+        )
+        first_five = ("AAA", "BBB", "CCC", "DDD", "EEE")
+    
+>       assert fold.daily_prices().exception_symbols == first_five
+E       AssertionError: assert ('AAA', 'BBB'... 'EEE', 'FFF') == ('AAA', 'BBB'... 'DDD', 'EEE')
+E         
+E         Left contains one more item: 'FFF'
+E         Use -v to get more diff
+
+tests/unit/test_data_health_checks.py:209: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_more_than_five_exceptions_across_a_page_boundary_keep_the_first_five
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 10 passed in 0.36s

@@ -106,3 +106,29 @@ SELECT run_id, state, ended_at, failure_reason
  ORDER BY ended_at DESC, run_id DESC
  LIMIT 1
 """
+
+# The head of the data-health read (component design 2.5, DEC-0213): `now()` as
+# `checked_at`, the followed count, and the latest prices coverage end over
+# active instruments. `latest_session` is the value `coverage-service` reports
+# as each instrument's prices `covered_to`, maximised, so the fold can count a
+# stock as behind while it pages (one pass, no second read of the roster).
+DATA_HEALTH_HEAD_SQL: Final[str] = """
+SELECT now() AS checked_at,
+       (SELECT count(*) FROM instrument i WHERE i.lifecycle = 'active') AS followed_count,
+       (SELECT max(cs.covered_to)
+          FROM coverage_segment cs
+          JOIN instrument i ON i.instrument_id = cs.instrument_id
+         WHERE i.lifecycle = 'active'
+           AND cs.data_type = 'prices') AS latest_session
+"""
+
+# The fundamentals acquisition state of one coverage page's stocks: the facts
+# `problem_count` and `as_of` are defined by (DEC-0213 e). The page fixes the
+# population, so no lifecycle predicate is needed.
+FUNDAMENTALS_STATE_SQL: Final[str] = """
+SELECT i.symbol, s.last_outcome, s.last_acquired_at
+  FROM instrument i
+  JOIN acquisition_state s ON s.instrument_id = i.instrument_id
+ WHERE s.data_type = 'fundamentals'
+   AND i.symbol = ANY(%(symbols)s)
+"""

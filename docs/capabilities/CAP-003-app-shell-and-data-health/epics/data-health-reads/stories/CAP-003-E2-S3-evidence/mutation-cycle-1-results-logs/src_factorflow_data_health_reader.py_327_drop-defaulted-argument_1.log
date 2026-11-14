@@ -1,0 +1,63 @@
+...............F
+=================================== FAILURES ===================================
+_____ test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor _____
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49452 user=test database=test_43dace022295483db67c94fce342fe00) at 0x10b6e29f0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b6e0830>
+
+    def test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor(
+        migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = migrated_writer_connection
+        _roster(conn, 1200)
+        _seed_one_stock_with_prices(conn)
+        conn.commit()
+        calls = _coverage_spy(monkeypatch)
+    
+>       read_data_health(conn)
+
+tests/integration/test_data_health_checks.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=49452 user=test database=test_43dace022295483db67c94fce342fe00) at 0x10b6e29f0>
+
+    def read_data_health(conn: psycopg.Connection) -> DataHealth:
+        """The Data health aggregate: both checks, the verdict counts and the first problem page.
+    
+        One pass over ``coverage-service``'s active-stock pages (500 each, to a null
+        cursor), so memory holds one page and five symbols per check whatever the
+        roster size. Before anything was acquired both checks are ``None``, never
+        zero counts (AC-21). ``affected_count`` is the statement behind
+        ``Problems.stock_count`` (DEC-0201). The caller owns the transaction.
+        """
+        with conn.cursor() as cur:
+            cur.execute(DATA_HEALTH_HEAD_SQL)
+            head = cur.fetchone()
+        assert head is not None  # an aggregate over a table always returns one row
+        checked_at, followed_count, latest_session = head
+    
+        view = read_coverage(conn, lifecycle="active", cursor=None, limit=MAX_LIMIT)
+        never_acquired = view.never_acquired
+        fold = _ChecksFold(latest_session=latest_session)
+        if not never_acquired:
+            while True:
+                fold.add_page(view, _fundamentals_state(conn, [i.symbol for i in view.instruments]))
+                if view.next_cursor is None:
+                    break
+                view = read_coverage(conn, lifecycle="active", cursor=view.next_cursor, limit=MAX_LIMIT)
+    
+        with conn.cursor() as cur:
+            cur.execute(PROBLEM_COUNT_SQL)
+            count_row = cur.fetchone()
+        assert count_row is not None
+        affected_count = count_row[0]
+    
+>       problems = read_problems(conn, limit=_FIRST_PAGE_LIMIT)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: read_problems() missing 1 required keyword-only argument: 'cursor'
+
+src/factorflow/data_health/reader.py:327: TypeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed in 2.01s

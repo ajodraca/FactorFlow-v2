@@ -1,0 +1,34 @@
+...............F
+=================================== FAILURES ===================================
+_____ test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor _____
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49528 user=test database=test_c619878599f54fdebf37a5f6621cb71e) at 0x10b23ba10>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b23a330>
+
+    def test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor(
+        migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = migrated_writer_connection
+        _roster(conn, 1200)
+        _seed_one_stock_with_prices(conn)
+        conn.commit()
+        calls = _coverage_spy(monkeypatch)
+    
+        read_data_health(conn)
+    
+>       assert calls == [
+            ((conn,), {"lifecycle": "active", "cursor": None, "limit": 500}),
+            ((conn,), {"lifecycle": "active", "cursor": "S0500", "limit": 500}),
+            ((conn,), {"lifecycle": "active", "cursor": "S1000", "limit": 500}),
+        ]
+E       AssertionError: assert [((<psycopg.C...limit': 500})] == [((<psycopg.C...limit': 500})]
+E         
+E         At index 0 diff: ((<psycopg.Connection [INTRANS] (host=localhost port=49528 user=test database=test_c619878599f54fdebf37a5f6621cb71e) at 0x10b23ba10>,), {'lifecycle': 'active', 'cursor': None, 'limit': 50}) != ((<psycopg.Connection [INTRANS] (host=localhost port=49528 user=test database=test_c619878599f54fdebf37a5f6621cb71e) at 0x10b23ba10>,), {'lifecycle': 'active', 'cursor': None, 'limit': 500})
+E         Left contains one more item: ((<psycopg.Connection [INTRANS] (host=localhost port=49528 user=test database=test_c619878599f54fdebf37a5f6621cb71e) at 0x10b23ba10>,), {'lifecycle': 'active', 'cursor': 'S1050', 'limit': 500})
+E         Use -v to get more diff
+
+tests/integration/test_data_health_checks.py:170: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed in 2.02s

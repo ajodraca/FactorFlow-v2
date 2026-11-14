@@ -1,0 +1,39 @@
+...............F
+=================================== FAILURES ===================================
+_____ test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor _____
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49532 user=test database=test_625abf5d572140f5a62ce8c31dc33468) at 0x10ce02780>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ce02960>
+
+    def test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor(
+        migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = migrated_writer_connection
+        _roster(conn, 1200)
+        _seed_one_stock_with_prices(conn)
+        conn.commit()
+        calls = _coverage_spy(monkeypatch)
+    
+>       read_data_health(conn)
+
+tests/integration/test_data_health_checks.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/factorflow/data_health/reader.py:319: in read_data_health
+    view = read_coverage(conn, lifecycle="active", cursor=None, limit=MAX_LIMIT)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<psycopg.Connection [INTRANS] (host=localhost port=49532 user=test database=test_625abf5d572140f5a62ce8c31dc33468) at 0x10ce02780>,)
+kwargs = {'lifecycle': 'active', 'cursor': None, 'limit': 500}
+
+    def spy(*args: Any, **kwargs: Any) -> Any:
+        calls.append((args, kwargs))
+        if len(calls) > 10:
+>           raise AssertionError("read_coverage called more than 10 times")
+E           AssertionError: read_coverage called more than 10 times
+
+tests/integration/test_data_health_checks.py:145: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 15 passed in 2.10s

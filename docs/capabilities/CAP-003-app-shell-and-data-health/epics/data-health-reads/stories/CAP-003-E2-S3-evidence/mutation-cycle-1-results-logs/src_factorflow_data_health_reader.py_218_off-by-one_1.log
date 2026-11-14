@@ -1,0 +1,27 @@
+......F
+=================================== FAILURES ===================================
+______________ test_unknown_presence_counts_as_absent_not_behind _______________
+
+    def test_unknown_presence_counts_as_absent_not_behind() -> None:
+        fold = _fold([_view([_stock("AAA"), _unknown("UNK")])])
+    
+        assert fold.daily_prices() == DailyPricesCheck(
+            "exceptions", 1, 0, 0, D5, GapDetectionState(True, None), 1, ("UNK",)
+        )
+>       assert fold.company_financials() == CompanyFinancialsCheck(
+            "exceptions", 1, 0, None, 1, ("UNK",)
+        )
+E       AssertionError: assert CompanyFinanc...bols=('UNK',)) == CompanyFinanc...bols=('UNK',))
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing attributes:
+E         ['absent_count']
+E         
+E         Drill down into differing attribute absent_count:
+E           absent_count: 2 != 1
+
+tests/unit/test_data_health_checks.py:163: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_unknown_presence_counts_as_absent_not_behind
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 6 passed in 0.33s

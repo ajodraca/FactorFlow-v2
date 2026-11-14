@@ -1,0 +1,60 @@
+....................F
+=================================== FAILURES ===================================
+_______ test_retired_stocks_are_excluded_and_3000_stocks_take_six_pages ________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49462 user=test database=test_f250d2c8570a48568b63fc826e87c844) at 0x10c947860>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c947e60>
+
+    @pytest.mark.slow
+    def test_retired_stocks_are_excluded_and_3000_stocks_take_six_pages(
+        migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        conn = migrated_writer_connection
+        _roster(conn, 3000)
+        s1, s2, s3 = _id(conn, "S0001"), _id(conn, "S0002"), _id(conn, "S0003")
+        _bars(conn, s1, [D2, D3, D4, D5])
+        _segment(conn, s1, "prices", D2, D5)
+        _bars(conn, s2, [D2, D3, D4])
+        _segment(conn, s2, "prices", D2, D4)
+        run = _run(conn, state="partial", requested_at=T1, ended_at=T1)
+        _record(conn, run, s3, "fundamentals", "failed", reason="provider timeout", completed_at=T1)
+        retired = _instrument(conn, "R0001", "retired")
+        _record(conn, run, retired, "prices", "failed", reason="provider timeout", completed_at=T1)
+        _record(
+            conn, run, retired, "fundamentals", "failed", reason="provider timeout", completed_at=T1
+        )
+        _segment(conn, retired, "prices", D2, date(2024, 1, 8))
+        conn.commit()
+        calls = _coverage_spy(monkeypatch)
+    
+        result = read_data_health(conn)
+    
+        assert [c[1]["cursor"] for c in calls] == [None, "S0500", "S1000", "S1500", "S2000", "S2500"]
+        assert all(c[1]["lifecycle"] == "active" and c[1]["limit"] == 500 for c in calls)
+        assert result.followed_count == 3000
+>       assert result.daily_prices == DailyPricesCheck(
+            "exceptions",
+            2998,
+            0,
+            1,
+            D5,
+            GapDetectionState(True, None),
+            2999,
+            ("S0002", "S0003", "S0004", "S0005", "S0006"),
+        )
+E       AssertionError: assert DailyPricesCh...04', 'S0005')) == DailyPricesCh...05', 'S0006'))
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing attributes:
+E         ['behind_count', 'latest_session', 'exception_count', 'exception_symbols']
+E         
+E         Drill down into differing attribute behind_count:
+E           behind_count: 2 != 1...
+E         
+E         ...Full output truncated (11 lines hidden), use '-vv' to show
+
+tests/integration/test_data_health_checks.py:288: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_retired_stocks_are_excluded_and_3000_stocks_take_six_pages
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 20 passed in 2.61s

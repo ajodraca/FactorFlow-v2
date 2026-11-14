@@ -1,0 +1,24 @@
+.........F
+=================================== FAILURES ===================================
+________________ test_gaps_and_behind_is_one_stock_in_the_union ________________
+
+    def test_gaps_and_behind_is_one_stock_in_the_union() -> None:
+        fold = _fold([_view([_stock("AAA"), _stock("GBH", covered_to=D4, missing_days=1)])])
+    
+>       assert fold.daily_prices() == DailyPricesCheck(
+            "exceptions", 0, 1, 1, D5, GapDetectionState(True, None), 1, ("GBH",)
+        )
+E       AssertionError: assert DailyPricesCh...bols=('GBH',)) == DailyPricesCh...bols=('GBH',))
+E         
+E         Omitting 7 identical items, use -vv to show
+E         Differing attributes:
+E         ['gap_stock_count']
+E         
+E         Drill down into differing attribute gap_stock_count:
+E           gap_stock_count: 0 != 1
+
+tests/unit/test_data_health_checks.py:194: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_gaps_and_behind_is_one_stock_in_the_union
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 9 passed in 0.34s

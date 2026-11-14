@@ -1,0 +1,36 @@
+# TDD evidence for CAP-003-E2-S3 - read_data_health, the Daily prices and Company financials checks.
+# One cycle, committed once at the stage boundary (commit_hash: stage). Decisions applied from planning: none.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016]
+    description: >
+      The two statements (DATA_HEALTH_HEAD_SQL, FUNDAMENTALS_STATE_SQL), the private fold (_Union, _ChecksFold), _fundamentals_state, read_data_health (coverage-service paged unchanged to a null cursor, never_acquired giving null checks, caller-owned transaction, no exception caught) and the package export; the unit and integration tests of TC-COMP-035, TC-COMP-038, TC-COMP-047, TC-COMP-048 and TC-COMP-049.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/red-cycle-1-checks.log
+    red_log_sha256: 273c685f539241490fd9c7463d5ea02a3aa4fd239fb4e0edd87849d21dee76d3
+    red_evidence: >
+      tests/unit/test_data_health_checks.py failed at collection with ImportError: cannot import name '_ChecksFold' from 'factorflow.data_health.reader'; read_data_health did not exist.
+    green_evidence: >
+      test_data_health_checks.py (unit and integration, 3000-stock slow test included) and test_data_health_sql_is_read_only.py 43 passed; ruff check, ruff format and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4336af6af40d16d36eb706fceb8f2f59a8575602b68863a67bc92b82843dbf2a
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: e2ac78fede8864ade0f75a126c44ea17543043411dbd97f73a7d2566667f2d17
+      generated: 50
+      killed: 49
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.98
+      survivors:
+        - id: src/factorflow/data_health/reader.py:251:off-by-one:1
+          disposition: equivalent
+          reason: >
+            `acquired_at > self.as_of` to `>=` only differs when the two instants are equal, and then the assignment stores the same value: as_of is unchanged either way.

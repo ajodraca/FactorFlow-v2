@@ -1,0 +1,69 @@
+F
+=================================== FAILURES ===================================
+__________ test_daily_prices_status_and_null_gap_count[a-absent-only] __________
+
+view = CoverageView(never_acquired=False, gap_detection=GapDetection(available=True, reason=None, missing_days=0), instrument...one, depth_shortfall_years=None, gaps=GapDetection(available=True, reason=None, missing_days=None))], next_cursor=None)
+expected = DailyPricesCheck(status='exceptions', absent_count=1, gap_stock_count=0, behind_count=0, latest_session=datetime.date(2024, 1, 5), gap_detection=GapDetectionState(available=True, reason=None), exception_count=1, exception_symbols=('BBB',))
+
+    @pytest.mark.parametrize(
+        ("view", "expected"),
+        [
+            pytest.param(
+                _view([_stock("AAA"), _absent("BBB")]),
+                DailyPricesCheck("exceptions", 1, 0, 0, D5, GapDetectionState(True, None), 1, ("BBB",)),
+                id="a-absent-only",
+            ),
+            pytest.param(
+                _view([_stock("AAA"), _stock("CCC", covered_to=D4)]),
+                DailyPricesCheck("exceptions", 0, 0, 1, D5, GapDetectionState(True, None), 1, ("CCC",)),
+                id="b-behind-only",
+            ),
+            pytest.param(
+                _view([_stock("AAA", missing_days=2), _stock("BBB")]),
+                DailyPricesCheck("exceptions", 0, 1, 0, D5, GapDetectionState(True, None), 1, ("AAA",)),
+                id="c-gaps-only",
+            ),
+            pytest.param(
+                _view([_stock("AAA", gaps_available=False)], available=False),
+                DailyPricesCheck(
+                    "not_determinable", 0, None, 0, D5, GapDetectionState(False, REASON), 0, ()
+                ),
+                id="d-not-determinable",
+            ),
+            pytest.param(
+                _view([_stock("AAA"), _stock("BBB")]),
+                DailyPricesCheck("ok", 0, 0, 0, D5, GapDetectionState(True, None), 0, ()),
+                id="e-ok",
+            ),
+            pytest.param(
+                _view(
+                    [_stock("AAA", gaps_available=False), _absent("BBB", gaps_available=False)],
+                    available=False,
+                ),
+                DailyPricesCheck(
+                    "exceptions", 1, None, 0, D5, GapDetectionState(False, REASON), 1, ("BBB",)
+                ),
+                id="f-unavailable-and-absent",
+            ),
+        ],
+    )
+    def test_daily_prices_status_and_null_gap_count(
+        view: CoverageView, expected: DailyPricesCheck
+    ) -> None:
+>       assert _fold([view]).daily_prices() == expected
+E       AssertionError: assert DailyPricesCh...bols=('BBB',)) == DailyPricesCh...bols=('BBB',))
+E         
+E         Omitting 7 identical items, use -vv to show
+E         Differing attributes:
+E         ['status']
+E         
+E         Drill down into differing attribute status:
+E           status: 'ok' != 'exceptions'
+E           - exceptions
+E           + ok
+
+tests/unit/test_data_health_checks.py:153: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_daily_prices_status_and_null_gap_count[a-absent-only]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.34s
