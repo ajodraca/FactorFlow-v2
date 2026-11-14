@@ -1,8 +1,9 @@
-import type { JSX } from "react";
+import { Fragment, type JSX, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { CurrentSet, LaterSet, RunOutcome } from "../../api/classification-types";
 import { RESULTS, SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
 import { formatTimestamp } from "../../screens/research/format";
+import { cn } from "../ui/utils";
 import { StatusBadge, type StatusTier } from "./status-badge";
 
 /**
@@ -136,10 +137,10 @@ function LiveRegion({
 }
 
 /**
- * The line, or `null` with no set (the never-populated body has no line), or
- * its skeleton while the first read is pending (DEC-0154).
+ * The Research line, or `null` with no set (the never-populated body has no
+ * line), or its skeleton while the first read is pending (DEC-0154).
  */
-export function AsOfLine({
+function ResearchAsOfLine({
   set,
   later,
   checkedAt,
@@ -194,4 +195,46 @@ export function AsOfLine({
       ) : null}
     </p>
   );
+}
+
+/**
+ * The generic form's props (component design `ui-components` 2.1; DAC-E1-13;
+ * DEC-0315): the parts of one as-of line, at least one, and the host's own
+ * classes.
+ */
+export interface AsOfLinePartsProps {
+  parts: readonly [ReactNode, ...ReactNode[]];
+  className?: string;
+}
+
+/**
+ * The separator between two parts. The spaces sit inside an `inline-block`: they
+ * keep the word boundaries in the text a screen reader and `textContent` read,
+ * and an inline-block drops collapsible spaces at the start and end of its own
+ * line, so the visible gap is the `--space-2` padding alone.
+ */
+const SEPARATOR = " · ";
+
+/**
+ * The as-of line, one pattern for every surface (blueprint 4.8; AC-26;
+ * DAC-E1-13, DAC-E1-S10-1; DEC-0315). With `parts` it renders them in one `p`
+ * at `--text-xs` `--muted-foreground`, each part after the first preceded by
+ * the middle-dot separator with `--space-2` either side, so a screen reader
+ * reads one line. With the Research props it renders the Research line.
+ */
+export function AsOfLine(props: AsOfLineProps | AsOfLinePartsProps): JSX.Element | null {
+  if ("parts" in props) {
+    return (
+      <p data-testid="as-of-line" className={cn("text-xs text-muted-foreground", props.className)}>
+        {props.parts.map((part, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: parts are positional and never reorder.
+          <Fragment key={index}>
+            {index > 0 ? <span className="inline-block px-2">{SEPARATOR}</span> : null}
+            {part}
+          </Fragment>
+        ))}
+      </p>
+    );
+  }
+  return <ResearchAsOfLine {...props} />;
 }

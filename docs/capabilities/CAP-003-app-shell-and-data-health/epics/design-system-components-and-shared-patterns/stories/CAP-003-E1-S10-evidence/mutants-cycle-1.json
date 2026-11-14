@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "repo_head": "1ba1100559fbe17200604141d57cd33fa3d46ee0",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/components/patterns/as-of-line.tsx:232:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/components/patterns/as-of-line.tsx",
+      "line": 232,
+      "original": "            {index > 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
+      "mutated": "            {index >= 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}"
+    },
+    {
+      "id": "web/src/components/patterns/as-of-line.tsx:232:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/components/patterns/as-of-line.tsx",
+      "line": 232,
+      "original": "            {index > 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
+      "mutated": "            {index > 1 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}"
+    },
+    {
+      "id": "web/src/components/patterns/as-of-line.tsx:manual:separator-spaces",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/components/patterns/as-of-line.tsx",
+      "old": "const SEPARATOR = \" \u00b7 \";",
+      "new": "const SEPARATOR = \"   \";"
+    },
+    {
+      "id": "web/src/components/patterns/as-of-line.tsx:manual:padding",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/components/patterns/as-of-line.tsx",
+      "old": "className=\"inline-block px-2\"",
+      "new": "className=\"inline-block px-1\""
+    },
+    {
+      "id": "web/src/components/patterns/as-of-line.tsx:manual:host-class",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/components/patterns/as-of-line.tsx",
+      "old": "cn(\"text-xs text-muted-foreground\", props.className)",
+      "new": "cn(\"text-xs text-muted-foreground\")"
+    },
+    {
+      "id": "web/src/components/patterns/as-of-line.tsx:manual:reverse-parts",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/components/patterns/as-of-line.tsx",
+      "old": "{props.parts.map(",
+      "new": "{[...props.parts].reverse().map("
+    }
+  ]
+}

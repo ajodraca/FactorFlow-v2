@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E1-S10 - AsOfLine generic form.
+# Cycle 1 is committed on its own; cycle 2 shares the final stage commit (commit_hash: stage) so each cycle's reviewed patch is isolated.
+# Decisions applied from planning: DEC-0315.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T004, T005]
+    description: >
+      Generic AsOfLine parts form: one p at text-xs text-muted-foreground, parts joined by an inline-block px-2 middle-dot separator, non-empty tuple type, host className merged with cn (TC-COMP-033, DAC-E1-S10-1, DEC-0315). The Research body is renamed ResearchAsOfLine unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-1-generic-form.log
+    red_log_sha256: e649d694c0d311a53525025134ade5ae1af6a4ad42cc11a104fa6f61a91fceb6
+    red_evidence: >
+      as-of-line.test.tsx: 8 new cases failed (AsOfLine read the missing set) and the 24 delivered cases passed; tsc reported parts unknown.
+    green_evidence: >
+      as-of-line.test.tsx 33 passed; npx tsc --noEmit, npm run lint and npm run format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2b17153ce164ee4e006beec750efa1f5dd3c26d068f280181eab3e62e2e64086
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results.json
+      results_sha256: f4271272f2a0bbf5af81a7224df656b28c4a40c14f8839441e038e21b5b5b197
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

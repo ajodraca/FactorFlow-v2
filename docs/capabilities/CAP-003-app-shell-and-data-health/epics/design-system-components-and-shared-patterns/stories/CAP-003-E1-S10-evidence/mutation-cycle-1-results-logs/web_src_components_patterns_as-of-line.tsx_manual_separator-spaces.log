@@ -1,0 +1,76 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w2/web
+
+stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 3 failed) 166ms
+   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots 5ms
+     → expected 'Market closed prices current to 2026-…' to be 'Market closed · prices current to 202…' // Object.is equality
+   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable 3ms
+     → expected [] to have a length of 2 but got +0
+   × AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between 1ms
+     → expected [] to have a length of 1 but got +0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
+AssertionError: expected 'Market closed prices current to 2026-…' to be 'Market closed · prices current to 202…' // Object.is equality
+
+Expected: "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT"
+Received: "Market closed prices current to 2026-10-15 checked 18:52:14 CDT"
+
+ ❯ src/components/patterns/as-of-line.test.tsx:444:57
+    442|   it("reads as one line joined by middle dots", () => {
+    443|     renderGeneric([...PARTS]);
+    444|     expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
+       |                                                         ^
+    445|       "Market closed · prices current to 2026-10-15 · checked 18:52:14…
+    446|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ src/components/patterns/as-of-line.test.tsx:453:18
+    451|     renderGeneric([...PARTS]);
+    452|     const seps = separators(screen.getByTestId("as-of-line"));
+    453|     expect(seps).toHaveLength(2);
+       |                  ^
+    454|     for (const sep of seps) {
+    455|       expect(sep).toHaveClass("inline-block");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/components/patterns/as-of-line.test.tsx:512:30
+    510|     const children = Array.from(line.children);
+    511|     expect(children.map((c) => c.getAttribute("data-testid"))).toEqual…
+    512|     expect(separators(line)).toHaveLength(1);
+       |                              ^
+    513|     expect(children[1]).toBe(separators(line)[0]);
+    514|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 30 passed (33)
+   Start at  09:41:36
+   Duration  1.44s (transform 88ms, setup 36ms, collect 479ms, tests 166ms, environment 175ms, prepare 28ms)
+
