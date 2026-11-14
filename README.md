@@ -75,7 +75,9 @@ at most one `building` at a time), `classification_set_factor`, `factor_input`
 and `factor_classification`. The classification scheduler is described in
 [`docs/reference/classification-scheduler.md`](docs/reference/classification-scheduler.md);
 the API process starts it in its lifespan, and each set it builds writes the
-factor tables.
+factor tables. The read-only data-health reader (`src/factorflow/data_health/`,
+not yet served over HTTP) is described in
+[`docs/reference/data-health-reader.md`](docs/reference/data-health-reader.md).
 What exists today is described
 below and in `docs/reference/` — everything else in `docs/` is
 specification for work not yet implemented.
