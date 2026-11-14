@@ -1,0 +1,32 @@
+# TDD evidence for CAP-003-E2-S4 - data-health-api router and response models for the three reads.
+# One cycle, committed once at the stage boundary (commit_hash: stage). Decisions applied from planning: none.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013]
+    description: >
+      The response models (data_health_models.py, from_reader copies of the reader dataclasses, checks always an object) and the router (routes/data_health.py: three GET reads, one pooled connection each, limit bounded by Query, cursor normalised and refused with 422 before any checkout, psycopg.Error uncaught); unit tests of TC-COMP-037, TC-COMP-050, TC-COMP-051, TC-COMP-052 and TC-COMP-053.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/red-cycle-1.log
+    red_log_sha256: 265008014de11639ec54f9845823edf6a7b1bc5a663717f9605736d8e8f4cf23
+    red_evidence: >
+      Both test files failed at collection with ImportError: factorflow.api.data_health_models and factorflow.api.routes.data_health did not exist.
+    green_evidence: >
+      test_api_data_health_models.py and test_api_data_health_routes.py 26 passed; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8125b8a134e64ccf7d95c3e55402adba67d17b6ca7af76c41a2d60d14ccab3be
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 8fa7c9827d87ed63444642247790ea4dcb55b75e2016b09d2428d8f652844b00
+      generated: 67
+      killed: 67
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
