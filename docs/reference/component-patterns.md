@@ -43,6 +43,10 @@ CAP-003-E1-S9 added `state-region.tsx`, the region that renders a
 ([The state region](#the-state-region-state-regiontsx)). No screen imports it
 yet; its only importer is its test.
 
+CAP-003-E1-S10 generalised `as-of-line.tsx`: `AsOfLine` now takes either the
+Research props or a list of parts, and the Research line composes the parts
+form ([The as-of line](#the-as-of-line-as-of-linetsx)).
+
 Six of the eight are pure functions of their props: no state, no effect, no
 fetch. The inspector is one exception: it holds its read's state and issues
 `getStockEvidence` itself ([The inspector](#the-inspector-inspector-paneltsx)).
@@ -341,11 +345,31 @@ this against UX design 1.2 Token Usage as a follow-up.
 
 ## The as-of line (`as-of-line.tsx`)
 
-`AsOfLine({ set, later, checkedAt, pollFailed, onTryAgain, announcement =
-null, sortLabel, onOpenEarlierSets, loading = false })` renders the line under
-a scored surface's title (AC-21; DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3,
-DAC-E4-S4-4; DEC-0154), and is the one place a score-set change is
-announced.
+`AsOfLine` is one pattern with two forms, told apart by whether the props
+carry `parts` (CAP-003-E1-S10; DAC-E1-13, DAC-E1-S10-1; DEC-0315). CAP-002
+delivered the file for the Research line alone and CAP-003 took it over.
+
+**The parts form**, `AsOfLine({ parts, className })`, takes `parts`, a
+non-empty list of nodes (`readonly [ReactNode, ...ReactNode[]]`), and an
+optional `className`. It renders one `p` with `data-testid` `as-of-line` and
+the classes `text-xs text-muted-foreground`, with `className` merged in by
+`cn`. Each part after the first is preceded by a
+`span` with the classes `inline-block px-2` holding ` · `. The spaces keep
+the word boundaries in the text a screen reader and `textContent` read, and
+the inline-block drops collapsible spaces at the start and end of its own
+line, so the visible gap is the `px-2` padding alone. The parts are keyed by
+position and never reorder.
+
+**The Research form**, `AsOfLine({ set, later, checkedAt, pollFailed,
+onTryAgain, announcement = null, sortLabel, onOpenEarlierSets, loading =
+false })`, renders the line under a scored surface's title (AC-21;
+DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3, DAC-E4-S4-4; DEC-0154), and is the one
+place a score-set change is announced. It composes the parts form with
+`className` `min-h-7`: its parts are the *Scores from* part and the download
+part followed by what trails them (the *checked* time, the live region and
+**Try again**), or, with a `sortLabel`, those two parts and then
+*sorted by {label}* followed by the same trail. The rest of this section
+describes the Research form.
 
 | Prop | Type | Meaning |
 |------|------|---------|
@@ -370,8 +394,8 @@ table beneath does not shift (UX design 1.2, Loading).
 with these children in DOM order:
 
 1. the set sentence: `SCORE_SET.scoresFrom(produced)`, with the produced time
-   (`formatTimestamp(set.endedAt)`) in a `font-numeric` span, then
-   `SCORE_SET.separator` (` · `), then
+   (`formatTimestamp(set.endedAt)`) in a `font-numeric` span, then the parts
+   form's separator, then
    `SCORE_SET.fromTheDownloadStarted(started)`, with the start time
    (`formatTimestamp(set.runStartedAt)`) as a react-router `Link` to
    `SHELL_ROUTES.download(set.runId)` whose `aria-label` is
@@ -381,7 +405,7 @@ with these children in DOM order:
 2. the outcome badge, from `set.runOutcome`: `succeeded` is tier `good`
    reading `SCORE_SET.complete`, *Complete*; `partial` is tier `warning`
    reading `SCORE_SET.partial`, *Partial*;
-3. ` · sorted by {sortLabel}` (`SCORE_SET.sortedBy`), when `sortLabel` is
+3. the separator and `SCORE_SET.sortedBy(sortLabel)`, when `sortLabel` is
    given;
 4. `SCORE_SET.checked(time)`, *checked {time}*, in a `font-numeric` span,
    where `time` is `formatTimestamp(checkedAt, { seconds: true })`, only
