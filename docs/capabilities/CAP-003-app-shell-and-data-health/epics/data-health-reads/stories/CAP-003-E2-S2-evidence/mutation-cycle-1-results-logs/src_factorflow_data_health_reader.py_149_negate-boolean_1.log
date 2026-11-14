@@ -1,0 +1,66 @@
+............F
+=================================== FAILURES ===================================
+____________________ test_empty_store_reads_zero_and_nones _____________________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49696 user=test database=test_653af99b3d0f4b8aaae17ddd5cb92821) at 0x108a8ab10>
+
+    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
+        conn = migrated_writer_connection
+    
+>       attention = read_attention(conn)
+                    ^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_data_health_attention.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+conn = <psycopg.Connection [INTRANS] (host=localhost port=49696 user=test database=test_653af99b3d0f4b8aaae17ddd5cb92821) at 0x108a8ab10>
+
+    def read_attention(conn: psycopg.Connection) -> Attention:
+        """The attention aggregate: five statements, one result, nothing written.
+    
+        The latest download and the latest terminal download are two selections, so
+        a running download never displaces the last ended one. The caller owns the
+        transaction; ``checked_at`` is the first statement's ``now()``.
+        """
+        with conn.cursor() as cur:
+            cur.execute(FOLLOWED_COUNT_SQL)
+            followed = cur.fetchone()
+            cur.execute(PRICES_AS_OF_SQL)
+            prices = cur.fetchone()
+            cur.execute(PROBLEM_COUNT_SQL)
+            problem_row = cur.fetchone()
+            cur.execute(LATEST_DOWNLOAD_SQL)
+            download_row = cur.fetchone()
+            cur.execute(LATEST_TERMINAL_SQL)
+            terminal_row = cur.fetchone()
+    
+        assert followed is not None  # an aggregate over a table always returns one row
+        assert prices is not None
+        assert problem_row is not None
+        followed_count, checked_at = followed
+        stock_count, symbols, newest_completed_at = problem_row
+        problems = Problems(stock_count, tuple(symbols), newest_completed_at)
+    
+        latest_download: LatestDownload | None = None
+        if download_row is not None:
+            run_id, state, requested_at, started_at, ended_at, named, done = download_row
+            latest_download = LatestDownload(
+                run_id,
+                state,
+                requested_at,
+                started_at,
+                ended_at,
+                Progress(done, named if named > 0 else None),
+            )
+    
+        latest_terminal: LatestTerminalDownload | None = None
+        if terminal_row is None:
+>           latest_terminal = LatestTerminalDownload(*terminal_row)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: factorflow.data_health.models.LatestTerminalDownload() argument after * must be an iterable, not NoneType
+
+src/factorflow/data_health/reader.py:150: TypeError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 12 passed in 2.20s

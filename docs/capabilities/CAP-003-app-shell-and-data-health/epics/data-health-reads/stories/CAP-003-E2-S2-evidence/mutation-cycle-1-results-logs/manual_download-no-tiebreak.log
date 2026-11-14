@@ -1,0 +1,33 @@
+................................F
+=================================== FAILURES ===================================
+__________ test_tie_on_requested_at_picks_the_run_health_picks[False] __________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49728 user=test database=test_44c7a4677d5d4268a8401a8dc71e1e5d) at 0x108c68f80>
+high_first = False
+
+    @pytest.mark.parametrize("high_first", [True, False])
+    def test_tie_on_requested_at_picks_the_run_health_picks(
+        migrated_writer_connection: psycopg.Connection, high_first: bool
+    ) -> None:
+        conn = migrated_writer_connection
+        for run_id, ended in (
+            ((HIGH, _t(3)), (LOW, _t(2))) if high_first else ((LOW, _t(2)), (HIGH, _t(3)))
+        ):
+            _run(conn, state="failed", requested_at=_t(1), ended_at=ended, run_id=run_id)
+        conn.commit()
+    
+        attention = read_attention(conn)
+        recent = get_most_recent_run(conn)
+        conn.rollback()
+    
+        assert attention.latest_download is not None
+>       assert attention.latest_download.run_id == HIGH
+E       AssertionError: assert UUID('00000000-0000-0000-0000-000000000001') == UUID('00000000-0000-0000-0000-000000000002')
+E        +  where UUID('00000000-0000-0000-0000-000000000001') = LatestDownload(run_id=UUID('00000000-0000-0000-0000-000000000001'), state='failed', requested_at=datetime.datetime(202...datetime.datetime(2026, 10, 20, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=0, total=None)).run_id
+E        +    where LatestDownload(run_id=UUID('00000000-0000-0000-0000-000000000001'), state='failed', requested_at=datetime.datetime(202...datetime.datetime(2026, 10, 20, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=0, total=None)) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 8, 153894, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), foll...e(2026, 10, 21, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('00000000-0000-0000-0000-000000000002')),)).latest_download
+
+tests/integration/test_data_health_attention.py:545: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_tie_on_requested_at_picks_the_run_health_picks[False]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 32 passed in 4.98s

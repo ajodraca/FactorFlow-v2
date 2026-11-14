@@ -1,0 +1,44 @@
+F
+=================================== FAILURES ===================================
+_______________ test_data_problems_item_follows_the_stock_count ________________
+
+    def test_data_problems_item_follows_the_stock_count() -> None:
+>       assert _items(problems=NONE_PROBLEMS) == ()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_data_health_items.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_data_health_items.py:34: in _items
+    return reader._attention_items(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+problems = Problems(stock_count=0, symbols=(), newest_completed_at=None)
+latest_terminal = None, credential_present = True
+checked_at = datetime.datetime(2026, 10, 24, 9, 0, tzinfo=datetime.timezone.utc)
+
+    def _attention_items(
+        *,
+        problems: Problems,
+        latest_terminal: LatestTerminalDownload | None,
+        credential_present: bool,
+        checked_at: datetime,
+    ) -> tuple[AttentionItem, ...]:
+        """The server items of DEC-0203, in component design 2.7's row order.
+    
+        Each exists exactly while its cause holds in the store. ``data_problems``
+        follows the stock count; ``download_not_complete`` only a latest terminal
+        download that is ``failed`` or ``abandoned``; ``credential_missing`` the
+        absence of the key. ``run_id`` is set for ``download_not_complete`` alone.
+        """
+        items: list[AttentionItem] = []
+        if problems.stock_count > 0 and problems.newest_completed_at is not None:
+            items.append(AttentionItem("data_problems", problems.newest_completed_at, None))
+>       if latest_terminal is None and latest_terminal.state in ("failed", "abandoned"):
+                                       ^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'state'
+
+src/factorflow/data_health/reader.py:101: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.34s

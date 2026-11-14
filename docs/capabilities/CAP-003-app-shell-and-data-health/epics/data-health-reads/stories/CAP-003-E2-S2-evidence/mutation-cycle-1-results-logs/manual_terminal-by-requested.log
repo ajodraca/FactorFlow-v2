@@ -1,0 +1,46 @@
+.................F
+=================================== FAILURES ===================================
+____ test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at _____
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49753 user=test database=test_f9e1f33a7ecd4789a6dd3b3257a2f1d6) at 0x10cb225d0>
+
+    def test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        x = _run(
+            conn,
+            state="failed",
+            requested_at=_t(1),
+            started_at=_t(1),
+            ended_at=_t(5),
+            failure_reason="no credential",
+        )
+        # Cancelled while still requested: the two overlap without breaking the single-active index.
+        y = _run(conn, state="cancelled", requested_at=_t(2), ended_at=_t(3))
+        conn.commit()
+    
+        attention = read_attention(conn)
+        conn.rollback()
+    
+        assert attention.latest_download is not None
+        assert attention.latest_download.run_id == y  # greatest requested_at
+>       assert attention.latest_terminal_download == LatestTerminalDownload(
+            x, "failed", _t(5), "no credential"
+        )
+E       AssertionError: assert LatestTermina...e_reason=None) == LatestTermina...o credential')
+E         
+E         Differing attributes:
+E         ['run_id', 'state', 'ended_at', 'failure_reason']
+E         
+E         Drill down into differing attribute run_id:
+E           run_id: UUID('5ce23233-abab-4998-b997-aeae473529e5') != UUID('545bfa46-a53c-4c43-9fce-bda91e9431ed')
+E         ...
+E         
+E         ...Full output truncated (10 lines hidden), use '-vv' to show
+
+tests/integration/test_data_health_attention.py:305: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 17 passed in 3.07s

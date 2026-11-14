@@ -1,0 +1,35 @@
+..............F
+=================================== FAILURES ===================================
+_______________ test_a_single_named_instrument_is_a_total_of_one _______________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49683 user=test database=test_e51053f3397a4983ad3927296f0d2b34) at 0x10acd8aa0>
+
+    def test_a_single_named_instrument_is_a_total_of_one(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        iid = _instrument(conn, "AAA")
+        run = _run(conn, state="running", requested_at=_t(1), started_at=_t(1), instruments_named=1)
+        for data_type in DATA_TYPES:
+            _record(conn, run, iid, data_type, "written", completed_at=_t(2))
+        conn.commit()
+    
+        attention = read_attention(conn)
+        conn.rollback()
+    
+        assert attention.latest_download is not None
+>       assert attention.latest_download.progress == Progress(1, 1)
+E       AssertionError: assert Progress(done=1, total=None) == Progress(done=1, total=1)
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing attributes:
+E         ['total']
+E         
+E         Drill down into differing attribute total:
+E           total: None != 1
+
+tests/integration/test_data_health_attention.py:238: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_a_single_named_instrument_is_a_total_of_one
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 14 passed in 5.43s

@@ -1,0 +1,31 @@
+.....F
+=================================== FAILURES ===================================
+__ test_download_not_complete_only_for_failed_and_abandoned[cancelled-False] ___
+
+state = 'cancelled', item = False
+
+    @pytest.mark.parametrize(
+        ("state", "item"),
+        [
+            ("failed", True),
+            ("abandoned", True),
+            ("succeeded", False),
+            ("partial", False),
+            ("cancelled", False),
+        ],
+    )
+    def test_download_not_complete_only_for_failed_and_abandoned(state: str, item: bool) -> None:
+        terminal = LatestTerminalDownload(RUN, state, T2, "reason")
+    
+        expected = (AttentionItem("download_not_complete", T2, RUN),) if item else ()
+>       assert _items(latest_terminal=terminal) == expected
+E       AssertionError: assert (AttentionIte...000000007')),) == ()
+E         
+E         Left contains one more item: AttentionItem(kind='download_not_complete', recorded_at=datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc), run_id=UUID('00000000-0000-0000-0000-000000000007'))
+E         Use -v to get more diff
+
+tests/unit/test_data_health_items.py:66: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_items.py::test_download_not_complete_only_for_failed_and_abandoned[cancelled-False]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 5 passed in 0.35s

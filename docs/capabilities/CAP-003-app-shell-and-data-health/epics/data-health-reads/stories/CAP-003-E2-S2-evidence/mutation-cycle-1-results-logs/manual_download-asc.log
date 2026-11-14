@@ -1,0 +1,34 @@
+.............F
+=================================== FAILURES ===================================
+_ test_progress_counts_complete_instruments_and_total_is_null_before_the_claim _
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49724 user=test database=test_edf2afff3bc641d082e1371646579553) at 0x10cf58dd0>
+
+    def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
+        # An earlier run holds all four results for all 50 instruments, so a count that is
+        # not restricted to the latest run would read 50.
+        r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
+        for iid in ids:
+            for data_type in DATA_TYPES:
+                _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
+        r1 = _run(conn, state="requested", requested_at=_t(2))
+        conn.commit()
+    
+        before = read_attention(conn)
+        conn.rollback()
+    
+        assert before.latest_download is not None
+>       assert before.latest_download.run_id == r1
+E       AssertionError: assert UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074') == UUID('c68ddb37-88f1-4a2d-80bd-98b98e354c67')
+E        +  where UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074') = LatestDownload(run_id=UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074'), state='succeeded', requested_at=datetime.datetime(...atetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=50, total=None)).run_id
+E        +    where LatestDownload(run_id=UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074'), state='succeeded', requested_at=datetime.datetime(...atetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=50, total=None)) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 4, 574059, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), foll...ded_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), failure_reason=None), items=()).latest_download
+
+tests/integration/test_data_health_attention.py:192: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_progress_counts_complete_instruments_and_total_is_null_before_the_claim
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 passed in 2.24s

@@ -1,0 +1,27 @@
+................F
+=================================== FAILURES ===================================
+____________ test_abandoned_latest_terminal_download_gives_the_item ____________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49802 user=test database=test_a8a669d1808940d2adbbda8cd3216770) at 0x108b421e0>
+
+    def test_abandoned_latest_terminal_download_gives_the_item(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        c = _run(conn, state="abandoned", requested_at=_t(1), ended_at=_t(2))
+        conn.commit()
+    
+        attention = read_attention(conn)
+        conn.rollback()
+    
+>       assert attention.latest_terminal_download == LatestTerminalDownload(c, "abandoned", _t(2), None)
+E       AssertionError: assert None == LatestTerminalDownload(run_id=UUID('1db1dab6-f1af-4ab2-a027-9518b30d75c9'), state='abandoned', ended_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), failure_reason=None)
+E        +  where None = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 12, 287573, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...nfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=0, total=None)), latest_terminal_download=None, items=()).latest_terminal_download
+E        +  and   LatestTerminalDownload(run_id=UUID('1db1dab6-f1af-4ab2-a027-9518b30d75c9'), state='abandoned', ended_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), failure_reason=None) = LatestTerminalDownload(UUID('1db1dab6-f1af-4ab2-a027-9518b30d75c9'), 'abandoned', datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), None)
+E        +    where datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc) = _t(2)
+
+tests/integration/test_data_health_attention.py:279: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_abandoned_latest_terminal_download_gives_the_item
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 16 passed in 2.91s

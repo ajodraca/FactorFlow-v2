@@ -1,0 +1,31 @@
+............F
+=================================== FAILURES ===================================
+____________________ test_empty_store_reads_zero_and_nones _____________________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49992 user=test database=test_3122cf8bc88d44f48e8da4b763a7cf18) at 0x108e5af90>
+
+    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
+        conn = migrated_writer_connection
+    
+        attention = read_attention(conn)
+    
+        assert attention.followed_count == 0
+        assert attention.prices_as_of is None
+        assert attention.latest_download is None
+        assert attention.latest_terminal_download is None
+>       assert attention.problems == Problems(0, (), None)
+E       AssertionError: assert Problems(stoc...leted_at=None) == Problems(stoc...leted_at=None)
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing attributes:
+E         ['symbols']
+E         
+E         Drill down into differing attribute symbols:
+E           symbols: [] != ()
+E           Use -v to get more diff
+
+tests/integration/test_data_health_attention.py:160: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 12 passed in 2.08s
