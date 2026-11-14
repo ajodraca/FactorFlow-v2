@@ -388,3 +388,32 @@ def test_not_determinable_on_a_real_store(migrated_writer_connection: psycopg.Co
         (),
     )
     assert result.company_financials == CompanyFinancialsCheck("ok", 0, 0, T1, 0, ())
+
+
+def test_problem_count_and_as_of_come_from_the_fundamentals_row_only(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    ids = {s: _instrument(conn, s) for s in ("WWW", "XXX", "YYY")}
+    run = _run(conn, state="succeeded", requested_at=T1, ended_at=T3)
+    fundamentals_from, fundamentals_to = SEGMENT_FUNDAMENTALS
+    for instrument_id in ids.values():
+        _bars(conn, instrument_id, [D2, D3])
+        _segment(conn, instrument_id, "prices", D2, D3)
+        _segment(conn, instrument_id, "fundamentals", fundamentals_from, fundamentals_to)
+
+    # Each stock's fundamentals row is recorded first; another data type's row,
+    # with a different outcome, is recorded after it.
+    _record(conn, run, ids["WWW"], "fundamentals", "failed", reason="timeout", completed_at=T1)
+    _record(conn, run, ids["WWW"], "prices", "written", completed_at=T2)
+    _record(conn, run, ids["XXX"], "fundamentals", "failed", reason="timeout", completed_at=T1)
+    _record(conn, run, ids["XXX"], "corporate_actions", "written", completed_at=T3)
+    _record(conn, run, ids["YYY"], "fundamentals", "written", completed_at=T1)
+    _record(conn, run, ids["YYY"], "prices", "failed", reason="timeout", completed_at=T3)
+    conn.commit()
+
+    result = read_data_health(conn)
+
+    assert result.company_financials == CompanyFinancialsCheck(
+        "exceptions", 0, 2, T1, 2, ("WWW", "XXX")
+    )

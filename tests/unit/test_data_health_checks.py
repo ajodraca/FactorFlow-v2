@@ -80,12 +80,16 @@ def _absent(symbol: str, *, gaps_available: bool = True) -> InstrumentCoverage:
 
 
 def _view(
-    stocks: list[InstrumentCoverage], *, available: bool = True, next_cursor: str | None = None
+    stocks: list[InstrumentCoverage],
+    *,
+    available: bool = True,
+    next_cursor: str | None = None,
+    reason: str = REASON,
 ) -> CoverageView:
     return CoverageView(
         never_acquired=False,
         gap_detection=GapDetection(
-            available, None if available else REASON, 0 if available else None
+            available, None if available else reason, 0 if available else None
         ),
         instruments=stocks,
         next_cursor=next_cursor,
@@ -249,6 +253,34 @@ def test_gap_availability_is_the_conjunction_over_pages() -> None:
     assert check.gap_stock_count is None
     assert check.gap_detection == GapDetectionState(False, REASON)
     assert check.status == "not_determinable"
+
+
+def test_gap_availability_keeps_the_first_unavailable_reason_across_pages() -> None:
+    fold = _fold(
+        [
+            _view(
+                [_stock("AAA", gaps_available=False)],
+                available=False,
+                reason="r1",
+                next_cursor="AAA",
+            ),
+            _view([_stock("BBB")], next_cursor="BBB"),
+            _view([_stock("CCC", gaps_available=False)], available=False, reason="r2"),
+        ]
+    )
+
+    check = fold.daily_prices()
+    assert check.gap_stock_count is None
+    assert check.gap_detection == GapDetectionState(False, "r1")
+    assert check.status == "not_determinable"
+
+
+def test_read_data_health_is_exported_from_the_package() -> None:
+    import factorflow.data_health as package
+    from factorflow.data_health import reader
+
+    assert package.read_data_health is reader.read_data_health
+    assert "read_data_health" in package.__all__
 
 
 def test_no_prices_anywhere_leaves_latest_session_null() -> None:

@@ -1,0 +1,43 @@
+{
+ "schema": 1,
+ "repo_head": "a83fec63a7fb663f25aee8b5cf9628d683707a9b",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "rv:state-any-datatype",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 1,
+   "old": " WHERE s.data_type = 'fundamentals'\n   AND i.symbol",
+   "new": " WHERE i.symbol",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:availability-last-page-wins",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 1,
+   "old": "        if not view.gap_detection.available and self.gaps_available:\n            self.gaps_available = False\n            self.gaps_reason = view.gap_detection.reason\n",
+   "new": "        self.gaps_available = view.gap_detection.available\n        self.gaps_reason = view.gap_detection.reason\n",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:gap-reason-last-unavailable",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 1,
+   "old": "not view.gap_detection.available and self.gaps_available:",
+   "new": "not view.gap_detection.available:",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:export-dropped",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/__init__.py",
+   "line": 1,
+   "old": "from factorflow.data_health.reader import read_attention, read_data_health, read_problems\n\n__all__ = [\"read_attention\", \"read_data_health\", \"read_problems\"]",
+   "new": "from factorflow.data_health.reader import read_attention, read_problems\n\n__all__ = [\"read_attention\", \"read_problems\"]",
+   "cycle": "cycle-2"
+  }
+ ]
+}

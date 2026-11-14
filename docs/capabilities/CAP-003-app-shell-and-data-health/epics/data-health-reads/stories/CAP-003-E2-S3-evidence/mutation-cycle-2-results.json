@@ -1,0 +1,90 @@
+{
+  "command": "uv run --offline --all-extras pytest tests/unit/test_data_health_checks.py tests/integration/test_data_health_checks.py tests/unit/test_data_health_sql_is_read_only.py -x -q -p no:cacheprovider",
+  "repo_head": "a83fec63a7fb663f25aee8b5cf9628d683707a9b",
+  "tree_patch_sha256": "4c9fb70883d4f7c879ed0f48524008f7d69b11b36d166e1eb70f0aadd593c377",
+  "mutants_sha256": "47c50197b358b2e5abee20583303740c57748c23467cfc26f9a9f24d4213e2d1",
+  "schema": 1,
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/mutants2.json",
+  "jobs": 2,
+  "planned": 4,
+  "started": "2026-11-14T20:30:44Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 7.9,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/logs2/baseline-w0.log",
+      "log_sha256": "53bdbf6a4435d8042fa5ddfdb16c94d5bb2230c1823e30bfed9ecd889f53a580"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 7.9,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/logs2/baseline-w1.log",
+      "log_sha256": "92f33da08d3ececbfef4b1a3123a53d1648182703f9590a3b768afb3014d8ee1"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "rv:state-any-datatype",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "line": 1,
+      "old": " WHERE s.data_type = 'fundamentals'\n   AND i.symbol",
+      "new": " WHERE i.symbol",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.4,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/logs2/rv_state-any-datatype.log",
+      "log_sha256": "b1f1c35049ff27007ad5a3f9476320f940b6719852536e8560b0ef68100e130e"
+    },
+    {
+      "id": "rv:availability-last-page-wins",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/reader.py",
+      "line": 1,
+      "old": "        if not view.gap_detection.available and self.gaps_available:\n            self.gaps_available = False\n            self.gaps_reason = view.gap_detection.reason\n",
+      "new": "        self.gaps_available = view.gap_detection.available\n        self.gaps_reason = view.gap_detection.reason\n",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.3,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/logs2/rv_availability-last-page-wins.log",
+      "log_sha256": "f2e4291ef3b8c8350ef43d361a50ea7c9e0c332abac3d96360d300d5a9ccb6d5"
+    },
+    {
+      "id": "rv:gap-reason-last-unavailable",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/reader.py",
+      "line": 1,
+      "old": "not view.gap_detection.available and self.gaps_available:",
+      "new": "not view.gap_detection.available:",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.0,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/logs2/rv_gap-reason-last-unavailable.log",
+      "log_sha256": "31ee5bb959cdd8935a498cdfb956745907edef6d51574da6210f94ef5051a733"
+    },
+    {
+      "id": "rv:export-dropped",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/__init__.py",
+      "line": 1,
+      "old": "from factorflow.data_health.reader import read_attention, read_data_health, read_problems\n\n__all__ = [\"read_attention\", \"read_data_health\", \"read_problems\"]",
+      "new": "from factorflow.data_health.reader import read_attention, read_problems\n\n__all__ = [\"read_attention\", \"read_problems\"]",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.0,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/7325ab10-fa47-4723-90b6-cd94e4b7dc98/scratchpad/logs2/rv_export-dropped.log",
+      "log_sha256": "4bab96d5351f30443cecab098781367df6df34713f1a17fdd6dda01f375465f0"
+    }
+  ],
+  "finished": "2026-11-14T20:30:58Z"
+}

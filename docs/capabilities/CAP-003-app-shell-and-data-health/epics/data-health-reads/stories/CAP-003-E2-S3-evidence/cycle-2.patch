@@ -1,0 +1,95 @@
+diff --git a/tests/integration/test_data_health_checks.py b/tests/integration/test_data_health_checks.py
+index 67ba414..de739a0 100644
+--- a/tests/integration/test_data_health_checks.py
++++ b/tests/integration/test_data_health_checks.py
+@@ -388,3 +388,32 @@ def test_not_determinable_on_a_real_store(migrated_writer_connection: psycopg.Co
+         (),
+     )
+     assert result.company_financials == CompanyFinancialsCheck("ok", 0, 0, T1, 0, ())
++
++
++def test_problem_count_and_as_of_come_from_the_fundamentals_row_only(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    ids = {s: _instrument(conn, s) for s in ("WWW", "XXX", "YYY")}
++    run = _run(conn, state="succeeded", requested_at=T1, ended_at=T3)
++    fundamentals_from, fundamentals_to = SEGMENT_FUNDAMENTALS
++    for instrument_id in ids.values():
++        _bars(conn, instrument_id, [D2, D3])
++        _segment(conn, instrument_id, "prices", D2, D3)
++        _segment(conn, instrument_id, "fundamentals", fundamentals_from, fundamentals_to)
++
++    # Each stock's fundamentals row is recorded first; another data type's row,
++    # with a different outcome, is recorded after it.
++    _record(conn, run, ids["WWW"], "fundamentals", "failed", reason="timeout", completed_at=T1)
++    _record(conn, run, ids["WWW"], "prices", "written", completed_at=T2)
++    _record(conn, run, ids["XXX"], "fundamentals", "failed", reason="timeout", completed_at=T1)
++    _record(conn, run, ids["XXX"], "corporate_actions", "written", completed_at=T3)
++    _record(conn, run, ids["YYY"], "fundamentals", "written", completed_at=T1)
++    _record(conn, run, ids["YYY"], "prices", "failed", reason="timeout", completed_at=T3)
++    conn.commit()
++
++    result = read_data_health(conn)
++
++    assert result.company_financials == CompanyFinancialsCheck(
++        "exceptions", 0, 2, T1, 2, ("WWW", "XXX")
++    )
+diff --git a/tests/unit/test_data_health_checks.py b/tests/unit/test_data_health_checks.py
+index 84b05d3..7e690f4 100644
+--- a/tests/unit/test_data_health_checks.py
++++ b/tests/unit/test_data_health_checks.py
+@@ -80,12 +80,16 @@ def _absent(symbol: str, *, gaps_available: bool = True) -> InstrumentCoverage:
+ 
+ 
+ def _view(
+-    stocks: list[InstrumentCoverage], *, available: bool = True, next_cursor: str | None = None
++    stocks: list[InstrumentCoverage],
++    *,
++    available: bool = True,
++    next_cursor: str | None = None,
++    reason: str = REASON,
+ ) -> CoverageView:
+     return CoverageView(
+         never_acquired=False,
+         gap_detection=GapDetection(
+-            available, None if available else REASON, 0 if available else None
++            available, None if available else reason, 0 if available else None
+         ),
+         instruments=stocks,
+         next_cursor=next_cursor,
+@@ -251,6 +255,34 @@ def test_gap_availability_is_the_conjunction_over_pages() -> None:
+     assert check.status == "not_determinable"
+ 
+ 
++def test_gap_availability_keeps_the_first_unavailable_reason_across_pages() -> None:
++    fold = _fold(
++        [
++            _view(
++                [_stock("AAA", gaps_available=False)],
++                available=False,
++                reason="r1",
++                next_cursor="AAA",
++            ),
++            _view([_stock("BBB")], next_cursor="BBB"),
++            _view([_stock("CCC", gaps_available=False)], available=False, reason="r2"),
++        ]
++    )
++
++    check = fold.daily_prices()
++    assert check.gap_stock_count is None
++    assert check.gap_detection == GapDetectionState(False, "r1")
++    assert check.status == "not_determinable"
++
++
++def test_read_data_health_is_exported_from_the_package() -> None:
++    import factorflow.data_health as package
++    from factorflow.data_health import reader
++
++    assert package.read_data_health is reader.read_data_health
++    assert "read_data_health" in package.__all__
++
++
+ def test_no_prices_anywhere_leaves_latest_session_null() -> None:
+     fold = _fold(
+         [_view([_unknown("AAA", gaps_available=False)], available=False)], latest_session=None
