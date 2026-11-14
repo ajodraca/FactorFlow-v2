@@ -266,6 +266,47 @@ def test_running_download_does_not_displace_the_latest_terminal_one(
 
 
 # Implements TC-COMP-044
+def test_latest_download_maps_three_distinct_instants_field_for_field(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    r = _run(
+        conn,
+        state="succeeded",
+        requested_at=_t(1),
+        started_at=_t(2),
+        ended_at=_t(3),
+        instruments_named=4,
+    )
+    conn.commit()
+
+    attention = read_attention(conn)
+    conn.rollback()
+
+    # requested_at, started_at and ended_at are three different non-null instants, so a
+    # swapped or constant column cannot produce the same value (IR-001).
+    assert attention.latest_download == LatestDownload(
+        r, "succeeded", _t(1), _t(2), _t(3), Progress(0, 4)
+    )
+
+
+# Implements TC-COMP-044
+def test_a_requested_latest_download_has_no_start_and_no_end(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    r = _run(conn, state="requested", requested_at=_t(4))
+    conn.commit()
+
+    attention = read_attention(conn)
+    conn.rollback()
+
+    assert attention.latest_download == LatestDownload(
+        r, "requested", _t(4), None, None, Progress(0, None)
+    )
+
+
+# Implements TC-COMP-044
 def test_abandoned_latest_terminal_download_gives_the_item(
     migrated_writer_connection: psycopg.Connection,
 ) -> None:

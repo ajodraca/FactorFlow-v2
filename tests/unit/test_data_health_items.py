@@ -86,12 +86,21 @@ def test_all_three_causes_give_three_items_and_none_give_none() -> None:
     )
 
     assert len(items) == 3
-    assert {i.kind for i in items} == {
-        "data_problems",
-        "download_not_complete",
-        "credential_missing",
+    # Each item holds its own recency when the causes coexist (IR-002).
+    assert {i.kind: i for i in items} == {
+        "data_problems": AttentionItem("data_problems", T1, None),
+        "download_not_complete": AttentionItem("download_not_complete", T2, RUN),
+        "credential_missing": AttentionItem("credential_missing", CHECKED, None),
     }
     assert _items() == ()
+
+
+# Implements TC-COMP-044
+def test_read_attention_is_exported_from_the_package() -> None:
+    import factorflow.data_health as package
+
+    assert package.read_attention is reader.read_attention
+    assert "read_attention" in package.__all__
 
 
 # Implements TC-COMP-045

@@ -1,0 +1,42 @@
+.................F
+=================================== FAILURES ===================================
+______ test_latest_download_maps_three_distinct_instants_field_for_field _______
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=58128 user=test database=test_55ab6218b5ad4263be1fcce473b3f5d0) at 0x10a653320>
+
+    def test_latest_download_maps_three_distinct_instants_field_for_field(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        r = _run(
+            conn,
+            state="succeeded",
+            requested_at=_t(1),
+            started_at=_t(2),
+            ended_at=_t(3),
+            instruments_named=4,
+        )
+        conn.commit()
+    
+        attention = read_attention(conn)
+        conn.rollback()
+    
+        # requested_at, started_at and ended_at are three different non-null instants, so a
+        # swapped or constant column cannot produce the same value (IR-001).
+>       assert attention.latest_download == LatestDownload(
+            r, "succeeded", _t(1), _t(2), _t(3), Progress(0, 4)
+        )
+E       AssertionError: assert LatestDownloa...e=0, total=4)) == LatestDownloa...e=0, total=4))
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing attributes:
+E         ['ended_at']
+E         
+E         Drill down into differing attribute ended_at:
+E           ended_at: None != datetime.datetime(2026, 10, 21, 0, 0, tzinfo=datetime.timezone.utc)
+
+tests/integration/test_data_health_attention.py:288: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_latest_download_maps_three_distinct_instants_field_for_field
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 17 passed in 2.51s

@@ -1,0 +1,142 @@
+{
+  "command": "uv run --offline --all-extras pytest tests/unit/test_data_health_items.py tests/integration/test_data_health_attention.py -x -q -p no:cacheprovider",
+  "repo_head": "85c9754937bfca924f94573697045891f8df24ff",
+  "tree_patch_sha256": "4518e7a67d4f342b74ce038c1220a559574a57e0f349692d22b2d0ee8d492e0a",
+  "mutants_sha256": "3b47f9191d34204c860da19bf9b20c227312f91e07d016e0f17adeb0a8684273",
+  "schema": 1,
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutants-cycle-2.json",
+  "jobs": 3,
+  "planned": 7,
+  "started": "2026-11-14T18:59:28Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 7.6,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
+      "log_sha256": "cc78e2e43c5ce001648de01d6ebbba2bb6ad6939e6b2afef10e268ffc106ca00"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 7.7,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
+      "log_sha256": "6c988bcaf08f855443b30e6dccfc3f6ef3fefb60c5ebfdc6fed7aac9e14a7613"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 7.7,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
+      "log_sha256": "f9f5af84ee95ff03aa3961181e9d017051a072134b1c594fce5de50f761ba96c"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "rv:download-requested-from-started",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "line": 85,
+      "old": "r.state,\n       r.requested_at,",
+      "new": "r.state,\n       r.started_at,",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_download-requested-from-started.log",
+      "log_sha256": "617b3e67c3f4e50201c20a88dadd0941c783eef5a6f61f2d936c15d3a71fa532"
+    },
+    {
+      "id": "rv:download-started-from-requested",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "line": 86,
+      "old": "r.requested_at,\n       r.started_at,",
+      "new": "r.requested_at,\n       r.requested_at,",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.6,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_download-started-from-requested.log",
+      "log_sha256": "1025cd0eed51effd7bcb51f8980e3edb355abc03b99af5e0444d5fb3139da7d3"
+    },
+    {
+      "id": "rv:download-ended-null",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "line": 87,
+      "old": "       r.ended_at,",
+      "new": "       NULL::timestamptz,",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.7,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_download-ended-null.log",
+      "log_sha256": "b0b85440e690af50701d00de85479de8cd393a37f070ec640d153af03ca2f41e"
+    },
+    {
+      "id": "rv:reader-swap-requested-started",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/reader.py",
+      "line": 142,
+      "old": "            requested_at,\n            started_at,\n",
+      "new": "            started_at,\n            requested_at,\n",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.3,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_reader-swap-requested-started.log",
+      "log_sha256": "4f1ac7a10dd406e38b5478305812a280399bd817a44476eb9c0c451cb945a923"
+    },
+    {
+      "id": "rv:reader-ended-none",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/reader.py",
+      "line": 144,
+      "old": "            ended_at,\n            Progress(",
+      "new": "            None,\n            Progress(",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.4,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_reader-ended-none.log",
+      "log_sha256": "642c8228549424eef3c8643d8fa78d8f84ff1ee32cac7ae267a8ee15b9cc1cf9"
+    },
+    {
+      "id": "rv:credential-item-recorded",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/reader.py",
+      "line": 106,
+      "old": "AttentionItem(\"credential_missing\", checked_at, None)",
+      "new": "AttentionItem(\"credential_missing\", problems.newest_completed_at or checked_at, None)",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.1,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_credential-item-recorded.log",
+      "log_sha256": "385c759e931af1c9645a4f72715b1ecd3891e51009f295c818211351a81bd506"
+    },
+    {
+      "id": "rv:export-dropped",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/__init__.py",
+      "line": 7,
+      "old": "from factorflow.data_health.reader import read_attention, read_problems\n\n__all__ = [\"read_attention\", \"read_problems\"]",
+      "new": "from factorflow.data_health.reader import read_problems\n\n__all__ = [\"read_problems\"]",
+      "cycle": "cycle-2",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.1,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-2-results-logs/rv_export-dropped.log",
+      "log_sha256": "f0c983005d106ebc1c40a8f301570f8685e59dac29c136fd9f997b59177a88da"
+    }
+  ],
+  "finished": "2026-11-14T18:59:43Z"
+}
