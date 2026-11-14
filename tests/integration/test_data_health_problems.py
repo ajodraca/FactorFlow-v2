@@ -26,6 +26,8 @@ pytestmark = pytest.mark.postgres
 T0 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
 
 Outcome = Literal["written", "not_found", "failed"]
+# The reason format real `failed` rows carry; it stays retryable (TC-COMP-041).
+UNAVAILABLE = "[unavailable] provider timed out"
 
 
 def _instrument(conn: psycopg.Connection, symbol: str) -> int:
@@ -68,6 +70,7 @@ def _record(
     reason: str | None = None,
     attempts: int = 1,
     completed_at: datetime = T0,
+    acquired_at: datetime | None = None,
 ) -> None:
     with conn.cursor() as cur:
         cur.execute(
@@ -83,7 +86,7 @@ def _record(
             "ON CONFLICT (instrument_id, data_type) DO UPDATE SET "
             "last_acquired_at = EXCLUDED.last_acquired_at, "
             "last_run_id = EXCLUDED.last_run_id, last_outcome = EXCLUDED.last_outcome",
-            (instrument_id, data_type, completed_at, run_id, outcome),
+            (instrument_id, data_type, acquired_at or completed_at, run_id, outcome),
         )
 
 
@@ -91,7 +94,7 @@ def _problem_stocks(conn: psycopg.Connection, symbols: list[str]) -> UUID:
     """One active stock per symbol, each with one ``failed`` prices result."""
     run = _run(conn)
     for symbol in symbols:
-        _record(conn, run, _instrument(conn, symbol), "prices", "failed", reason="boom")
+        _record(conn, run, _instrument(conn, symbol), "prices", "failed", reason=UNAVAILABLE)
     return run
 
 
@@ -163,10 +166,10 @@ def test_retryable_rule_and_resolution_only_by_write_or_retirement(
         _record(conn, r1, ids["NFX"], dt, "not_found")
     for dt in ("reference", "corporate_actions"):
         _record(conn, r1, ids["NFX"], dt, "written")
-    _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
+    _record(conn, r1, ids["FLD"], "prices", "failed", reason=UNAVAILABLE)
     for dt in ("reference", "fundamentals", "corporate_actions"):
         _record(conn, r1, ids["FLD"], dt, "written")
-    _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
+    _record(conn, r1, ids["MIX"], "prices", "failed", reason=UNAVAILABLE)
     _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
     conn.commit()
 
@@ -199,9 +202,14 @@ def test_retryable_rule_and_resolution_only_by_write_or_retirement(
         reason="second attempt",
         completed_at=T0 + timedelta(hours=2),
     )
-    _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
     conn.commit()
     page = read_problems(conn, cursor=None, limit=500)
+    conn.rollback()
+    assert read_problems(conn, cursor=None, limit=500) == page
+    conn.rollback()
+    _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
+    conn.commit()
+    assert read_problems(conn, cursor=None, limit=500) == page
     conn.rollback()
     mix = page.rows[0]
     prices = next(f for f in mix.failures if f.data_type == "prices")
@@ -287,7 +295,7 @@ def test_failure_facts_come_from_the_matched_result(
 
 def _t008_store(conn: psycopg.Connection) -> None:
     run = _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
-    _record(conn, run, _instrument(conn, "ABR"), "prices", "failed", reason="boom")
+    _record(conn, run, _instrument(conn, "ABR"), "prices", "failed", reason=UNAVAILABLE)
     retire_symbol(conn, "ABR")
     abw = _instrument(conn, "ABW")
     for dt in ("reference", "prices", "fundamentals", "corporate_actions"):
@@ -357,3 +365,93 @@ def test_the_count_on_an_empty_store(migrated_writer_connection: psycopg.Connect
     conn.rollback()
 
     assert counted == {"stock_count": 0, "symbols": [], "newest_completed_at": None}
+
+
+def test_failure_facts_ignore_other_instruments_and_the_state_clock(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
+    run = _run(conn)
+    _record(
+        conn,
+        run,
+        _instrument(conn, "AAA"),
+        "prices",
+        "failed",
+        reason="aaa reason",
+        attempts=2,
+        completed_at=t_result,
+        acquired_at=t_state,
+    )
+    _record(
+        conn,
+        run,
+        _instrument(conn, "BBB"),
+        "prices",
+        "written",
+        reason="bbb note",
+        attempts=5,
+        completed_at=t_other,
+    )
+    conn.commit()
+
+    page = read_problems(conn, cursor=None, limit=10)
+
+    assert [row.symbol for row in page.rows] == ["AAA"]
+    assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
+
+
+def test_paging_follows_symbol_order_not_data_type_order(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    run = _run(conn)
+    _record(conn, run, _instrument(conn, "AAA"), "prices", "failed", reason=UNAVAILABLE)
+    _record(conn, run, _instrument(conn, "BBB"), "fundamentals", "not_found")
+    _record(conn, run, _instrument(conn, "CCC"), "corporate_actions", "not_found")
+    conn.commit()
+
+    first = read_problems(conn, cursor=None, limit=1)
+    conn.rollback()
+    second = read_problems(conn, cursor=first.next_cursor, limit=1)
+    conn.rollback()
+    third = read_problems(conn, cursor=second.next_cursor, limit=1)
+    conn.rollback()
+
+    assert [_page_symbols(p.rows) for p in (first, second, third)] == [
+        ("AAA",),
+        ("BBB",),
+        ("CCC",),
+    ]
+    assert [p.next_cursor for p in (first, second, third)] == ["AAA", "BBB", None]
+
+
+def test_the_newest_completion_time_comes_only_from_the_matched_results(
+    migrated_writer_connection: psycopg.Connection,
+) -> None:
+    conn = migrated_writer_connection
+    t_new = T0 + timedelta(days=1)
+    t_late = T0 + timedelta(days=2)
+    aaa = _instrument(conn, "AAA")
+    bbb = _instrument(conn, "BBB")
+    old_run = _run(conn, requested_at=T0)
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO run_instrument_result "
+            "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
+            "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
+            (old_run, aaa, UNAVAILABLE, t_late),
+        )
+    new_run = _run(conn, requested_at=t_new)
+    _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
+    _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
+    _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
+    conn.commit()
+
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(queries.PROBLEM_COUNT_SQL)
+        counted = cur.fetchone()
+    conn.rollback()
+
+    assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}

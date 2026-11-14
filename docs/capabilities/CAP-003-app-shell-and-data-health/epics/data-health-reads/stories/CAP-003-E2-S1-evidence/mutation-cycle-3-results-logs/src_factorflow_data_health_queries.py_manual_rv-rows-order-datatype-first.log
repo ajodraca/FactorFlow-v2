@@ -1,0 +1,38 @@
+......................................................F
+=================================== FAILURES ===================================
+_____________ test_paging_follows_symbol_order_not_data_type_order _____________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=57931 user=test database=test_21a910311c834e05bb75c921d22b5a32) at 0x10a773fb0>
+
+    def test_paging_follows_symbol_order_not_data_type_order(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        run = _run(conn)
+        _record(conn, run, _instrument(conn, "AAA"), "prices", "failed", reason=UNAVAILABLE)
+        _record(conn, run, _instrument(conn, "BBB"), "fundamentals", "not_found")
+        _record(conn, run, _instrument(conn, "CCC"), "corporate_actions", "not_found")
+        conn.commit()
+    
+        first = read_problems(conn, cursor=None, limit=1)
+        conn.rollback()
+        second = read_problems(conn, cursor=first.next_cursor, limit=1)
+        conn.rollback()
+        third = read_problems(conn, cursor=second.next_cursor, limit=1)
+        conn.rollback()
+    
+>       assert [_page_symbols(p.rows) for p in (first, second, third)] == [
+            ("AAA",),
+            ("BBB",),
+            ("CCC",),
+        ]
+E       AssertionError: assert [('BBB',), ('CCC',), ('BBB',)] == [('AAA',), ('BBB',), ('CCC',)]
+E         
+E         At index 0 diff: ('BBB',) != ('AAA',)
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_paging_follows_symbol_order_not_data_type_order
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 54 passed in 3.03s

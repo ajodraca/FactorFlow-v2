@@ -1,0 +1,46 @@
+.......................................................F
+=================================== FAILURES ===================================
+_____ test_the_newest_completion_time_comes_only_from_the_matched_results ______
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=57814 user=test database=test_ec1244741aaa41a18f21177a3e75f8bc) at 0x108b190a0>
+
+    def test_the_newest_completion_time_comes_only_from_the_matched_results(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        t_new = T0 + timedelta(days=1)
+        t_late = T0 + timedelta(days=2)
+        aaa = _instrument(conn, "AAA")
+        bbb = _instrument(conn, "BBB")
+        old_run = _run(conn, requested_at=T0)
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO run_instrument_result "
+                "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
+                "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
+                (old_run, aaa, UNAVAILABLE, t_late),
+            )
+        new_run = _run(conn, requested_at=t_new)
+        _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
+        _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
+        _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
+        conn.commit()
+    
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(queries.PROBLEM_COUNT_SQL)
+            counted = cur.fetchone()
+        conn.rollback()
+    
+>       assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
+E       AssertionError: assert {'stock_count...y='Etc/UTC'))} == {'stock_count...timezone.utc)}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'newest_completed_at': datetime.datetime(2026, 10, 22, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))} != {'newest_completed_at': datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc)}
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:457: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_the_newest_completion_time_comes_only_from_the_matched_results
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 55 passed in 4.20s

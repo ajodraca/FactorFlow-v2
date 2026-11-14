@@ -1,0 +1,142 @@
+{
+  "command": "uv run --all-extras pytest tests/unit/test_data_health_sql_is_read_only.py tests/unit/test_data_health_models.py tests/integration/test_data_health_problems.py -x -q -p no:cacheprovider",
+  "repo_head": "a21df1699c468c32957a2eebb51ff6e966c6dfc3",
+  "tree_patch_sha256": "593ad974c999f24910a95ed6adf74709b49138c0f450d8a9e327847df467b990",
+  "mutants_sha256": "fa5b0125bd646d817982dee554bb5f0e1e67ade90d7314f8614d4ae55e2af0ca",
+  "schema": 1,
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-3.json",
+  "jobs": 4,
+  "planned": 7,
+  "started": "2026-11-14T17:33:08Z",
+  "baselines": [
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 6.7,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log",
+      "log_sha256": "0abca28423cae7f3d0a73bd14d5f2510d24c37f44f42b09baf94230887e17d2e"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 6.8,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log",
+      "log_sha256": "fc89c678d76cf810f7265cb741584c4a6a2f0592e95fbdb29710e854748c6c5b"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 6.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log",
+      "log_sha256": "475b2c74ea5686672e036b64d07634d3374be022085257d3e052121de5e5a836"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 6.9,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log",
+      "log_sha256": "0429fecfc60e44f2316ded49401f551c80aadfc76a6705d436a02776f7be584c"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-rows-join-no-instrument",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
+      "new": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.0,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-join-no-instrument.log",
+      "log_sha256": "faa4fa7a59d932b77e2e4bd74bc9b48090cb2b86cf700fa6394c9e320237b980"
+    },
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-instrument",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
+      "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.2,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-instrument.log",
+      "log_sha256": "b54028dc7d416655544991aa50d447c87fd32341bc8220610fbc91489e2af3d9"
+    },
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-datatype",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n",
+      "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.1,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-datatype.log",
+      "log_sha256": "10080875c85f9c982bb69517a92d46aed98edd12b989dbeb128f5d082c9b9fa2"
+    },
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-run",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
+      "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON true\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 5.1,
+      "worker": 3,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-run.log",
+      "log_sha256": "fb491be88102311c98dda3e677fcc9b78a74c0b6db126dbc47505d28f48ced26"
+    },
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-rows-order-datatype-first",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": " ORDER BY i.symbol, s.data_type",
+      "new": " ORDER BY s.data_type, i.symbol",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 4.0,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-order-datatype-first.log",
+      "log_sha256": "52571faabb36eb7bfd09360d63c3f1142ba37f849909445aa62e7ddb2132a8ba"
+    },
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-subquery-no-order",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": "          ORDER BY i2.symbol\n",
+      "new": "",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.1,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-subquery-no-order.log",
+      "log_sha256": "1f8c776d456b3b9e05b5724fb8d5fba3aed3c0cd5369a26d991d4e8801a93429"
+    },
+    {
+      "id": "src/factorflow/data_health/queries.py:manual:rv-completed-at-from-state",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "src/factorflow/data_health/queries.py",
+      "old": "       r.completed_at,\n",
+      "new": "       s.last_acquired_at AS completed_at,\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 3.9,
+      "worker": 3,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-completed-at-from-state.log",
+      "log_sha256": "9cfa0f66f54308841b95ebcc8904baa2aaa8b75b6182ed443cab1795d12e9577"
+    }
+  ],
+  "finished": "2026-11-14T17:33:24Z"
+}

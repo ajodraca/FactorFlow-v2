@@ -1,5 +1,5 @@
 # TDD evidence for CAP-003-E2-S1 - data-health-reader models, queries and read_problems.
-# Cycle 1 (models) is committed on its own; cycle 2 is the final stage commit (commit_hash: 2626e8cd85506d3e2f170e82748583c059be151a), so each cycle's reviewed patch is isolated.
+# Cycle 1 (models) is committed on its own as 2626e8c, a deviation from T017's one-commit rule (IR-004): that commit's full suite is red at tests/unit/test_data_health_models.py:95 (a delivered guard forbids .attempts under tests/), fixed in cycle 2; it is the owner's call whether to merge without it. Cycle 2 is commit 0e4f098. Cycle 3 is the review-rework commit (implementation-review-v1: IR-001, IR-002, IR-003, IR-005, IR-006), the final stage commit; IR-004 is recorded here.
 # Decisions applied from planning: none.
 
 cycles:
@@ -48,7 +48,7 @@ cycles:
       drift_detected: false
     diff_sha256: b549f06cb60adb3227ed1a6705b70ebc7fc3e8c87d1633f3ce1f46641ec44f2c
     reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/cycle-2.patch
-    commit_hash: stage
+    commit_hash: 0e4f098b3955b48252ebb9346e11c4bfc86011c7
     mutation:
       runner: scripts/mutation-run.py
       results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results.json
@@ -64,3 +64,32 @@ cycles:
           disposition: equivalent
           reason: >
             limit + 1 to limit + 2 fetches one more stock than the lookahead needs, but read_problems keeps the first limit stocks and sets next_cursor only when more than limit stocks came back, so the rows, the last kept symbol and the cursor are unchanged for every input.
+
+  - id: cycle-3
+    tasks: [T004, T005, T007, T008, T009]
+    description: >
+      Review rework of implementation-review-v1, tests only (production code unchanged). IR-001: a second instrument's written result in the same run and data type, and a state clock that differs from the result's completed_at, so the failure facts must come from the matched result. IR-002: a paging store whose symbol order differs from its data-type order, plus a static pin of the subquery's ORDER BY i2.symbol before LIMIT. IR-003: results outside the matched set (another instrument, the same instrument's other data type, an earlier run) later than the matched one, so newest_completed_at comes only from the matched results. IR-005: failed fixtures use an [unavailable] reason. IR-006: consecutive reads of an unchanged store return equal pages, with a read between R3 and R4. IR-004 is a deviation, recorded in the header.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-3-rework.log
+    red_log_sha256: 537c3f6dd23caf6371e9bd19bf0228aaa2dd6a6f4c025b601b67425e967b52b0
+    red_evidence: >
+      With five of the review's surviving mutants applied to queries.py (rv-rows-join-no-instrument, rv-rows-order-datatype-first, rv-subquery-no-order, rv-completed-at-from-state, rv-count-join-no-datatype), the four new tests fail: 4 failed, 23 passed.
+    green_evidence: >
+      The three focused files 56 passed; full uv run pytest 2778 passed; ruff check, ruff format --check and mypy src clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 43f4fb3a8000a877021a955ffb89884a9ea2ec311e150d5a0b85625a3ae4a352
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: 42d88b272910a0a8f8155458415ba1ef0d032c299e4c1d3bf20d951b1725b1e1
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,16 @@
+.............F
+=================================== FAILURES ===================================
+__________ test_problem_rows_subquery_orders_symbols_before_the_limit __________
+
+    def test_problem_rows_subquery_orders_symbols_before_the_limit() -> None:
+>       assert _SUBQUERY_ORDERED_BEFORE_LIMIT.search(queries.PROBLEM_ROWS_SQL) is not None
+E       AssertionError: assert None is not None
+E        +  where None = <built-in method search of re.Pattern object at 0x7735bd7c10>('\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY i.symbol, s.data_type\n')
+E        +    where <built-in method search of re.Pattern object at 0x7735bd7c10> = re.compile('SELECT DISTINCT i2\\.symbol.*?ORDER BY i2\\.symbol\\s+LIMIT\\s+%\\(limit_plus_one\\)s', re.DOTALL).search
+E        +    and   '\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY i.symbol, s.data_type\n' = queries.PROBLEM_ROWS_SQL
+
+tests/unit/test_data_health_sql_is_read_only.py:92: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_sql_is_read_only.py::test_problem_rows_subquery_orders_symbols_before_the_limit
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 passed in 0.38s

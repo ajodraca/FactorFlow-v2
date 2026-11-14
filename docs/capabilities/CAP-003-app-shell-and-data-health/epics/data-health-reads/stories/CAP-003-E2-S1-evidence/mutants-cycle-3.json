@@ -1,0 +1,63 @@
+{
+ "schema": 1,
+ "repo_head": "a21df1699c468c32957a2eebb51ff6e966c6dfc3",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-rows-join-no-instrument",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
+   "new": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-instrument",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
+   "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-datatype",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n",
+   "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-run",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
+   "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON true\n"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-rows-order-datatype-first",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": " ORDER BY i.symbol, s.data_type",
+   "new": " ORDER BY s.data_type, i.symbol"
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-subquery-no-order",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "          ORDER BY i2.symbol\n",
+   "new": ""
+  },
+  {
+   "id": "src/factorflow/data_health/queries.py:manual:rv-completed-at-from-state",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "old": "       r.completed_at,\n",
+   "new": "       s.last_acquired_at AS completed_at,\n"
+  }
+ ]
+}

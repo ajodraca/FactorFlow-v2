@@ -17,6 +17,9 @@ WRITE_TOKENS = ("INSERT", "UPDATE", "DELETE", "TRUNCATE", "ALTER", "DROP")
 _WRITE_PATTERN = re.compile(r"\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b", re.IGNORECASE)
 _UNBOUND_PERCENT = re.compile(r"%(?!\([a-z_]+\)s)")
 _LIMIT_BOUND = re.compile(r"LIMIT\s+%\(limit_plus_one\)s")
+_SUBQUERY_ORDERED_BEFORE_LIMIT = re.compile(
+    r"SELECT DISTINCT i2\.symbol.*?ORDER BY i2\.symbol\s+LIMIT\s+%\(limit_plus_one\)s", re.DOTALL
+)
 _FIRST_KEYWORD = re.compile(r"\s*(\w+)")
 
 SOURCES = {
@@ -82,3 +85,8 @@ def test_problem_rows_binds_cursor_and_limit() -> None:
 
     assert "%(cursor)s" in text
     assert _LIMIT_BOUND.search(text) is not None
+
+
+# Implements TC-COMP-040
+def test_problem_rows_subquery_orders_symbols_before_the_limit() -> None:
+    assert _SUBQUERY_ORDERED_BEFORE_LIMIT.search(queries.PROBLEM_ROWS_SQL) is not None

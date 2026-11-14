@@ -1,0 +1,49 @@
+.....................................................F
+=================================== FAILURES ===================================
+_______ test_failure_facts_ignore_other_instruments_and_the_state_clock ________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=57817 user=test database=test_2fabf8dc81664d00b919802995d4de6b) at 0x10ca336b0>
+
+    def test_failure_facts_ignore_other_instruments_and_the_state_clock(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
+        run = _run(conn)
+        _record(
+            conn,
+            run,
+            _instrument(conn, "AAA"),
+            "prices",
+            "failed",
+            reason="aaa reason",
+            attempts=2,
+            completed_at=t_result,
+            acquired_at=t_state,
+        )
+        _record(
+            conn,
+            run,
+            _instrument(conn, "BBB"),
+            "prices",
+            "written",
+            reason="bbb note",
+            attempts=5,
+            completed_at=t_other,
+        )
+        conn.commit()
+    
+        page = read_problems(conn, cursor=None, limit=10)
+    
+        assert [row.symbol for row in page.rows] == ["AAA"]
+>       assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
+E       AssertionError: assert (Failure(data...c7099c1d44'))) == (Failure(data...7099c1d44')),)
+E         
+E         Left contains one more item: Failure(data_type='prices', outcome='failed', reason='bbb note', attempts=5, completed_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('37e8d3ac-9860-408a-9c85-50c7099c1d44'))
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:402: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_failure_facts_ignore_other_instruments_and_the_state_clock
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 53 passed in 3.98s
