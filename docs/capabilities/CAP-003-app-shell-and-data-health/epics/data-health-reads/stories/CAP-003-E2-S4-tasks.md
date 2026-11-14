@@ -7,7 +7,8 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-14
+last_reworked_review: CAP-003-E2-S4-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -238,4 +239,4 @@ None. No PROVISIONAL decision: every value this plan uses is fixed by an artifac
   - `src/factorflow/api/routes/data_health.py: with request.app.state.db_pool.connection() as conn: → with request.app.state.db_pool.connection() as conn, request.app.state.db_pool.connection() as _second:` (in `get_attention`; T006, `checkouts == 2`)
   - `src/factorflow/api/routes/data_health.py: cursor_symbol = normalise(cursor) if cursor is not None else None → cursor_symbol = cursor` (T005)
   - `src/factorflow/api/routes/data_health.py: message="`cursor` must be a stock symbol." → message=f"`cursor` must be a stock symbol, not {cursor!r}."` (T005)
-- **Equivalent mutants** (record as such, with the reason): `getattr(request.state, "request_id", "unknown")` → `"unknown"` is not observable on the minimal app, which has no request-id middleware; the request id on these routes is observed through `create_app` in CAP-003-E2-S6.
+- **Equivalent mutants**: none. `getattr(request.state, "request_id", "unknown")` → `"unknown"` was recorded here as equivalent; implementation review v1 (IR-002) found that no planned test observes the id on this refusal, so the route tests stamp `request.state.request_id` through a minimal middleware and assert the refusal carries it.

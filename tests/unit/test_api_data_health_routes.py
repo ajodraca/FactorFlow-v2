@@ -14,7 +14,7 @@ from typing import Any
 
 import psycopg
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
@@ -28,11 +28,14 @@ from tests.unit.test_api_data_health_models import (
     EXPECTED_ATTENTION_FULL,
     EXPECTED_HEALTH_FULL,
     EXPECTED_PAGE_FULL,
+    EXPECTED_PAGE_TWO_ROWS,
     HEALTH_FULL,
     HEALTH_NEVER,
+    PAGE_TWO_ROWS,
 )
 
 _CONN = object()
+_REQUEST_ID = "req-test-1"
 
 
 class _FakePool:
@@ -91,6 +94,12 @@ def _client(pool: _FakePool, *, raise_server_exceptions: bool = True) -> TestCli
     app.add_exception_handler(RequestValidationError, app_module._validation_error_handler)
     app.include_router(data_health.router)
     app.state.db_pool = pool
+
+    @app.middleware("http")
+    async def _stamp_request_id(request: Request, call_next: Any) -> Any:
+        request.state.request_id = _REQUEST_ID
+        return await call_next(request)
+
     return TestClient(
         app, base_url="http://127.0.0.1:8000", raise_server_exceptions=raise_server_exceptions
     )
@@ -102,7 +111,7 @@ def _problems_refusal(resource: str, message: str) -> dict[str, Any]:
             "code": "validation_error",
             "message": message,
             "resource": resource,
-            "request_id": "unknown",
+            "request_id": _REQUEST_ID,
         }
     }
 
@@ -148,6 +157,14 @@ def test_a_lower_case_cursor_is_normalised_before_the_reader(
     assert response.status_code == 200
     assert len(spy.calls) == 1
     assert spy.calls[0][1]["cursor"] == "KO"
+
+
+# Implements TC-COMP-052
+def test_problems_returns_a_multi_row_page_unchanged(monkeypatch: pytest.MonkeyPatch) -> None:
+    _install(monkeypatch, problems=_Spy(PAGE_TWO_ROWS))
+    response = _client(_FakePool()).get("/api/data-health/problems")
+    assert response.status_code == 200
+    assert response.json() == EXPECTED_PAGE_TWO_ROWS
 
 
 # Implements TC-COMP-052

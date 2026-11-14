@@ -30,3 +30,31 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-2
+    tasks: [T004, T005, T006, T013]
+    description: >
+      Review rework of implementation-review-v1, tests only (production code unchanged). IR-001: a two-row problem page (AAA, BBB) asserted against a hand-written literal through ProblemPageResponse.from_reader and the problems route. IR-002: the route tests stamp request.state.request_id through a minimal middleware and assert the cursor and limit refusals carry it; the plan's equivalent-mutant note is corrected. IR-003: the plan's omitted fourth hand-written mutant (checks None when never acquired) is run and killed; cycle-1's three remove-attribute mutants were syntax-error (stillborn) compile failures that the runner's pattern scored as kills, so they are not counted as evidence here.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/red-cycle-2-rework.log
+    red_log_sha256: 77872f41749aa3de77b70137f69d674277063ca726e21e334c317e0f3dd1b295
+    red_evidence: >
+      With each mutant applied (rv:rows-reversed, rv:rows-first-only, rv:request-id-constant, rv:checks-none-when-never), the new tests fail on assertions; the log is the per-mutant failure excerpt.
+    green_evidence: >
+      test_api_data_health_models.py and test_api_data_health_routes.py 28 passed against the unchanged production code.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4b1910f65ef994895da3ca3cb3b64eacbd9be099d509d094a924a7b1ae60d4d6
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: 184dff324e171c0f223c36b6d56b2d9db02924e59438d62982d5de0a2251eff3
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

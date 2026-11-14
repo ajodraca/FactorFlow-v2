@@ -1,0 +1,104 @@
+{
+  "command": "cd {workdir} && uv run --all-extras pytest tests/unit/test_api_data_health_models.py tests/unit/test_api_data_health_routes.py -q -x -p no:cacheprovider",
+  "repo_head": "711c8fb5c6c05253abb7952ee0246e79d40ed345",
+  "tree_patch_sha256": "2534eb94e361a0da45f56a2e1f245cab9f9e80bd1b1040a09e594ef18a9c020f",
+  "mutants_sha256": "72a163d523b1452a921611c54786f8dba087ab89ed76705638fd35713e02db1c",
+  "schema": 1,
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutants-cycle-2.json",
+  "jobs": 4,
+  "planned": 4,
+  "started": "2026-11-14T22:06:49Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 4.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
+      "log_sha256": "78c5d38ab2f2407652543863e0db88e48a3db8de3201bad62c956bffc891a4cb"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 4.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
+      "log_sha256": "273f046470ccc84ec9508c40129488b2f86d7618101af7b3007d88893df0710d"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 4.0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
+      "log_sha256": "7c2ce71c75a9c9ba4b0ddb4a90727932a91751b542c38f5ca7c3ca91e3141476"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 4.1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
+      "log_sha256": "a3ce98a701bc35ea3086e693fada9a3885045d880065005fdafe8b9df0e6cfac"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:rows-reversed",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "for row in value.rows]",
+      "new": "for row in reversed(value.rows)]",
+      "line": 1,
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-reversed.log",
+      "log_sha256": "0803592c20f5bcf20c5843be935c212269818751388ab0ce62f4bbb4c73af2f2"
+    },
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:rows-first-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "for row in value.rows]",
+      "new": "for row in value.rows[:1]]",
+      "line": 1,
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-first-only.log",
+      "log_sha256": "a588cdabe2e2e3e0968469b61295960a0eb84d144a31f2272a639cf2ef9d264b"
+    },
+    {
+      "id": "src/factorflow/api/routes/data_health.py:rv:request-id-constant",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/data_health.py",
+      "old": "request_id=getattr(request.state, \"request_id\", \"unknown\")",
+      "new": "request_id=\"unknown\"",
+      "line": 1,
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_routes_data_health.py_rv_request-id-constant.log",
+      "log_sha256": "28bdff57ace05a34c83001ac98f0aec47ccb9cbc2480b89fe3f8810c53836599"
+    },
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:checks-none-when-never",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "    checks: ChecksResponse\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=ChecksResponse(",
+      "new": "    checks: ChecksResponse | None\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=None if value.never_acquired else ChecksResponse(",
+      "line": 1,
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 3,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_checks-none-when-never.log",
+      "log_sha256": "f737f53245d9922274b7aa5c1fdd0e4f28ba02e8824f600d66bb4305c3db487d"
+    }
+  ],
+  "finished": "2026-11-14T22:06:55Z"
+}

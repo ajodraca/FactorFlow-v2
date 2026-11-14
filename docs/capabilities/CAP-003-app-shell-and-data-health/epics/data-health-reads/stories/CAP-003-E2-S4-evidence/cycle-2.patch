@@ -1,0 +1,613 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutants-cycle-2.json
+new file mode 100644
+index 0000000..7691e5b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutants-cycle-2.json
+@@ -0,0 +1,43 @@
++{
++  "schema": 1,
++  "repo_head": "711c8fb",
++  "range": "HEAD..worktree",
++  "mutants": [
++    {
++      "id": "src/factorflow/api/data_health_models.py:rv:rows-reversed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/data_health_models.py",
++      "old": "for row in value.rows]",
++      "new": "for row in reversed(value.rows)]",
++      "line": 1
++    },
++    {
++      "id": "src/factorflow/api/data_health_models.py:rv:rows-first-only",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/data_health_models.py",
++      "old": "for row in value.rows]",
++      "new": "for row in value.rows[:1]]",
++      "line": 1
++    },
++    {
++      "id": "src/factorflow/api/routes/data_health.py:rv:request-id-constant",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/data_health.py",
++      "old": "request_id=getattr(request.state, \"request_id\", \"unknown\")",
++      "new": "request_id=\"unknown\"",
++      "line": 1
++    },
++    {
++      "id": "src/factorflow/api/data_health_models.py:rv:checks-none-when-never",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/data_health_models.py",
++      "old": "    checks: ChecksResponse\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=ChecksResponse(",
++      "new": "    checks: ChecksResponse | None\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=None if value.never_acquired else ChecksResponse(",
++      "line": 1
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..1a425e9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w0
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w0
++Installed 43 packages in 136ms
++............................                                             [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w0/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w0/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++28 passed, 2 warnings in 0.75s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..05569f9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w1
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w1
++Installed 43 packages in 191ms
++............................                                             [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++28 passed, 2 warnings in 0.75s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..8a3ae1e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w2
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w2
++Installed 43 packages in 189ms
++............................                                             [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++28 passed, 2 warnings in 0.75s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+new file mode 100644
+index 0000000..6df86a8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+@@ -0,0 +1,17 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w3
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w3
++Installed 43 packages in 190ms
++............................                                             [100%]
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w3/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w3/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++28 passed, 2 warnings in 0.75s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_checks-none-when-never.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_checks-none-when-never.log
+new file mode 100644
+index 0000000..722f0a2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_checks-none-when-never.log
+@@ -0,0 +1,33 @@
++..F
++=================================== FAILURES ===================================
++__________ test_data_health_serialises_every_field_with_nulls_present __________
++
++    def test_data_health_serialises_every_field_with_nulls_present() -> None:
++        for fixture, expected in (
++            (HEALTH_FULL, EXPECTED_HEALTH_FULL),
++            (HEALTH_ZEROS, EXPECTED_HEALTH_ZEROS),
++            (HEALTH_NEVER, EXPECTED_HEALTH_NEVER),
++        ):
++>           assert DataHealthResponse.from_reader(fixture).model_dump(mode="json") == expected
++E           AssertionError: assert {'checked_at'...ount': 0, ...} == {'checked_at'...ount': 0, ...}
++E             
++E             Omitting 5 identical items, use -vv to show
++E             Differing items:
++E             {'checks': None} != {'checks': {'daily_prices': None, 'company_financials': None}}
++E             Use -v to get more diff
++
++tests/unit/test_api_data_health_models.py:453: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w3/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w3/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_data_health_models.py::test_data_health_serialises_every_field_with_nulls_present
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 2 passed, 2 warnings in 0.65s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-first-only.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-first-only.log
+new file mode 100644
+index 0000000..3c6551d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-first-only.log
+@@ -0,0 +1,29 @@
++....F
++=================================== FAILURES ===================================
++______ test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order ______
++
++    def test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order() -> None:
++        dumped = ProblemPageResponse.from_reader(PAGE_TWO_ROWS).model_dump(mode="json")
++>       assert dumped == EXPECTED_PAGE_TWO_ROWS
++E       AssertionError: assert {'rows': [{'s...ursor': 'BBB'} == {'rows': [{'s...ursor': 'BBB'}
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing items:
++E         {'rows': [{'symbol': 'AAA', 'failures': [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'attempts': 3, ...}], 'retryable': True}]} != {'rows': [{'symbol': 'AAA', 'failures': [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'a...es': [{'data_type': 'fundamentals', 'outcome': 'not_found', 'reason': None, 'attempts': 1, ...}], 'retryable': False}]}
++E         Use -v to get more diff
++
++tests/unit/test_api_data_health_models.py:465: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w1/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w1/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_data_health_models.py::test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 4 passed, 2 warnings in 0.65s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-reversed.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-reversed.log
+new file mode 100644
+index 0000000..d028083
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-reversed.log
+@@ -0,0 +1,29 @@
++....F
++=================================== FAILURES ===================================
++______ test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order ______
++
++    def test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order() -> None:
++        dumped = ProblemPageResponse.from_reader(PAGE_TWO_ROWS).model_dump(mode="json")
++>       assert dumped == EXPECTED_PAGE_TWO_ROWS
++E       AssertionError: assert {'rows': [{'s...ursor': 'BBB'} == {'rows': [{'s...ursor': 'BBB'}
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing items:
++E         {'rows': [{'symbol': 'BBB', 'failures': [{'data_type': 'fundamentals', 'outcome': 'not_found', 'reason': None, 'attemp... [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'attempts': 3, ...}], 'retryable': True}]} != {'rows': [{'symbol': 'AAA', 'failures': [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'a...es': [{'data_type': 'fundamentals', 'outcome': 'not_found', 'reason': None, 'attempts': 1, ...}], 'retryable': False}]}
++E         Use -v to get more diff
++
++tests/unit/test_api_data_health_models.py:465: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w0/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w0/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_data_health_models.py::test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 4 passed, 2 warnings in 0.65s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_routes_data_health.py_rv_request-id-constant.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_routes_data_health.py_rv_request-id-constant.log
+new file mode 100644
+index 0000000..bc3a8c1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_routes_data_health.py_rv_request-id-constant.log
+@@ -0,0 +1,37 @@
++............F
++=================================== FAILURES ===================================
++_ test_a_cursor_that_is_not_a_symbol_is_refused_and_never_echoed[cursor=not%20a%20symbol] _
++
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108c7f440>
++query = 'cursor=not%20a%20symbol'
++
++    @pytest.mark.parametrize("query", ["cursor=not%20a%20symbol", "cursor="])
++    def test_a_cursor_that_is_not_a_symbol_is_refused_and_never_echoed(
++        monkeypatch: pytest.MonkeyPatch, query: str
++    ) -> None:
++        _install(monkeypatch)
++        pool = _FakePool()
++        response = _client(pool).get(f"/api/data-health/problems?{query}")
++        assert response.status_code == 422
++>       assert response.json() == _problems_refusal("data-health", "`cursor` must be a stock symbol.")
++E       AssertionError: assert {'error': {'c...': 'unknown'}} == {'error': {'c...'req-test-1'}}
++E         
++E         Differing items:
++E         {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'unknown'}} != {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'req-test-1'}}
++E         Use -v to get more diff
++
++tests/unit/test_api_data_health_routes.py:144: AssertionError
++=============================== warnings summary ===============================
++.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w2/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
++    from starlette.testclient import TestClient as TestClient  # noqa
++
++.venv/lib/python3.12/site-packages/starlette/testclient.py:53
++  /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-o_mdpob0/w2/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++=========================== short test summary info ============================
++FAILED tests/unit/test_api_data_health_routes.py::test_a_cursor_that_is_not_a_symbol_is_refused_and_never_echoed[cursor=not%20a%20symbol]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed, 2 warnings in 0.65s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..2e6fc0e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,104 @@
++{
++  "command": "cd {workdir} && uv run --all-extras pytest tests/unit/test_api_data_health_models.py tests/unit/test_api_data_health_routes.py -q -x -p no:cacheprovider",
++  "repo_head": "711c8fb5c6c05253abb7952ee0246e79d40ed345",
++  "tree_patch_sha256": "2534eb94e361a0da45f56a2e1f245cab9f9e80bd1b1040a09e594ef18a9c020f",
++  "mutants_sha256": "72a163d523b1452a921611c54786f8dba087ab89ed76705638fd35713e02db1c",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutants-cycle-2.json",
++  "jobs": 4,
++  "planned": 4,
++  "started": "2026-11-14T22:06:49Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 4.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "78c5d38ab2f2407652543863e0db88e48a3db8de3201bad62c956bffc891a4cb"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 4.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
++      "log_sha256": "273f046470ccc84ec9508c40129488b2f86d7618101af7b3007d88893df0710d"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 4.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "7c2ce71c75a9c9ba4b0ddb4a90727932a91751b542c38f5ca7c3ca91e3141476"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 4.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "a3ce98a701bc35ea3086e693fada9a3885045d880065005fdafe8b9df0e6cfac"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/api/data_health_models.py:rv:rows-reversed",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/data_health_models.py",
++      "old": "for row in value.rows]",
++      "new": "for row in reversed(value.rows)]",
++      "line": 1,
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-reversed.log",
++      "log_sha256": "0803592c20f5bcf20c5843be935c212269818751388ab0ce62f4bbb4c73af2f2"
++    },
++    {
++      "id": "src/factorflow/api/data_health_models.py:rv:rows-first-only",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/data_health_models.py",
++      "old": "for row in value.rows]",
++      "new": "for row in value.rows[:1]]",
++      "line": 1,
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_rows-first-only.log",
++      "log_sha256": "a588cdabe2e2e3e0968469b61295960a0eb84d144a31f2272a639cf2ef9d264b"
++    },
++    {
++      "id": "src/factorflow/api/routes/data_health.py:rv:request-id-constant",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/routes/data_health.py",
++      "old": "request_id=getattr(request.state, \"request_id\", \"unknown\")",
++      "new": "request_id=\"unknown\"",
++      "line": 1,
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_routes_data_health.py_rv_request-id-constant.log",
++      "log_sha256": "28bdff57ace05a34c83001ac98f0aec47ccb9cbc2480b89fe3f8810c53836599"
++    },
++    {
++      "id": "src/factorflow/api/data_health_models.py:rv:checks-none-when-never",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/api/data_health_models.py",
++      "old": "    checks: ChecksResponse\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=ChecksResponse(",
++      "new": "    checks: ChecksResponse | None\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=None if value.never_acquired else ChecksResponse(",
++      "line": 1,
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/mutation-cycle-2-results-logs/src_factorflow_api_data_health_models.py_rv_checks-none-when-never.log",
++      "log_sha256": "f737f53245d9922274b7aa5c1fdd0e4f28ba02e8824f600d66bb4305c3db487d"
++    }
++  ],
++  "finished": "2026-11-14T22:06:55Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/red-cycle-2-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/red-cycle-2-rework.log
+new file mode 100644
+index 0000000..9940aa3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-evidence/red-cycle-2-rework.log
+@@ -0,0 +1,39 @@
++### src_factorflow_api_data_health_models.py_rv_checks-none-when-never
++>           assert DataHealthResponse.from_reader(fixture).model_dump(mode="json") == expected
++E           AssertionError: assert {'checked_at'...ount': 0, ...} == {'checked_at'...ount': 0, ...}
++E             
++E             Omitting 5 identical items, use -vv to show
++E             Differing items:
++E             {'checks': None} != {'checks': {'daily_prices': None, 'company_financials': None}}
++E             Use -v to get more diff
++tests/unit/test_api_data_health_models.py:453: AssertionError
++1 failed, 2 passed, 2 warnings in 0.65s
++### src_factorflow_api_data_health_models.py_rv_rows-first-only
++>       assert dumped == EXPECTED_PAGE_TWO_ROWS
++E       AssertionError: assert {'rows': [{'s...ursor': 'BBB'} == {'rows': [{'s...ursor': 'BBB'}
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing items:
++E         {'rows': [{'symbol': 'AAA', 'failures': [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'attempts': 3, ...}], 'retryable': True}]} != {'rows': [{'symbol': 'AAA', 'failures': [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'a...es': [{'data_type': 'fundamentals', 'outcome': 'not_found', 'reason': None, 'attempts': 1, ...}], 'retryable': False}]}
++E         Use -v to get more diff
++tests/unit/test_api_data_health_models.py:465: AssertionError
++1 failed, 4 passed, 2 warnings in 0.65s
++### src_factorflow_api_data_health_models.py_rv_rows-reversed
++>       assert dumped == EXPECTED_PAGE_TWO_ROWS
++E       AssertionError: assert {'rows': [{'s...ursor': 'BBB'} == {'rows': [{'s...ursor': 'BBB'}
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing items:
++E         {'rows': [{'symbol': 'BBB', 'failures': [{'data_type': 'fundamentals', 'outcome': 'not_found', 'reason': None, 'attemp... [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'attempts': 3, ...}], 'retryable': True}]} != {'rows': [{'symbol': 'AAA', 'failures': [{'data_type': 'prices', 'outcome': 'failed', 'reason': 'provider timeout', 'a...es': [{'data_type': 'fundamentals', 'outcome': 'not_found', 'reason': None, 'attempts': 1, ...}], 'retryable': False}]}
++E         Use -v to get more diff
++tests/unit/test_api_data_health_models.py:465: AssertionError
++1 failed, 4 passed, 2 warnings in 0.65s
++### src_factorflow_api_routes_data_health.py_rv_request-id-constant
++>       assert response.json() == _problems_refusal("data-health", "`cursor` must be a stock symbol.")
++E       AssertionError: assert {'error': {'c...': 'unknown'}} == {'error': {'c...'req-test-1'}}
++E         
++E         Differing items:
++E         {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'unknown'}} != {'error': {'code': 'validation_error', 'message': '`cursor` must be a stock symbol.', 'resource': 'data-health', 'request_id': 'req-test-1'}}
++E         Use -v to get more diff
++tests/unit/test_api_data_health_routes.py:144: AssertionError
++1 failed, 12 passed, 2 warnings in 0.65s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-tasks.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-tasks.md
+index 00a2f40..36aeebf 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-tasks.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S4-tasks.md
+@@ -7,7 +7,8 @@ status: draft
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-11-07
+-updated: 2026-11-07
++updated: 2026-11-14
++last_reworked_review: CAP-003-E2-S4-implementation-review-v1.md
+ ai_provenance:
+   agent_id: implementation-planning-agent
+   agent_version: "1.0"
+@@ -238,4 +239,4 @@ None. No PROVISIONAL decision: every value this plan uses is fixed by an artifac
+   - `src/factorflow/api/routes/data_health.py: with request.app.state.db_pool.connection() as conn: → with request.app.state.db_pool.connection() as conn, request.app.state.db_pool.connection() as _second:` (in `get_attention`; T006, `checkouts == 2`)
+   - `src/factorflow/api/routes/data_health.py: cursor_symbol = normalise(cursor) if cursor is not None else None → cursor_symbol = cursor` (T005)
+   - `src/factorflow/api/routes/data_health.py: message="`cursor` must be a stock symbol." → message=f"`cursor` must be a stock symbol, not {cursor!r}."` (T005)
+-- **Equivalent mutants** (record as such, with the reason): `getattr(request.state, "request_id", "unknown")` → `"unknown"` is not observable on the minimal app, which has no request-id middleware; the request id on these routes is observed through `create_app` in CAP-003-E2-S6.
++- **Equivalent mutants**: none. `getattr(request.state, "request_id", "unknown")` → `"unknown"` was recorded here as equivalent; implementation review v1 (IR-002) found that no planned test observes the id on this refusal, so the route tests stamp `request.state.request_id` through a minimal middleware and assert the refusal carries it.
+diff --git a/tests/unit/test_api_data_health_models.py b/tests/unit/test_api_data_health_models.py
+index 684e5f7..c8c936d 100644
+--- a/tests/unit/test_api_data_health_models.py
++++ b/tests/unit/test_api_data_health_models.py
+@@ -90,6 +90,21 @@ PAGE_FULL = ProblemPage(
+     ),
+     "AAA",
+ )
++PAGE_TWO_ROWS = ProblemPage(
++    (
++        ProblemRow(
++            "AAA",
++            (Failure("prices", "failed", "provider timeout", 3, T0, RUN_A),),
++            True,
++        ),
++        ProblemRow(
++            "BBB",
++            (Failure("fundamentals", "not_found", None, 1, T_EST, RUN_B),),
++            False,
++        ),
++    ),
++    "BBB",
++)
+ HEALTH_FULL = DataHealth(
+     checked_at=T0,
+     never_acquired=False,
+@@ -214,6 +229,39 @@ EXPECTED_PAGE_FULL: dict[str, Any] = {
+     ],
+     "next_cursor": "AAA",
+ }
++EXPECTED_PAGE_TWO_ROWS: dict[str, Any] = {
++    "rows": [
++        {
++            "symbol": "AAA",
++            "failures": [
++                {
++                    "data_type": "prices",
++                    "outcome": "failed",
++                    "reason": "provider timeout",
++                    "attempts": 3,
++                    "completed_at": "2026-10-20T21:00:00Z",
++                    "run_id": "aaaaaaaa-0000-0000-0000-000000000001",
++                }
++            ],
++            "retryable": True,
++        },
++        {
++            "symbol": "BBB",
++            "failures": [
++                {
++                    "data_type": "fundamentals",
++                    "outcome": "not_found",
++                    "reason": None,
++                    "attempts": 1,
++                    "completed_at": "2026-10-20T16:30:00-05:00",
++                    "run_id": "bbbbbbbb-0000-0000-0000-000000000002",
++                }
++            ],
++            "retryable": False,
++        },
++    ],
++    "next_cursor": "BBB",
++}
+ EXPECTED_HEALTH_FULL: dict[str, Any] = {
+     "checked_at": "2026-10-20T21:00:00Z",
+     "never_acquired": False,
+@@ -411,6 +459,12 @@ def test_problem_page_serialises_every_field() -> None:
+     assert dumped == EXPECTED_PAGE_FULL
+ 
+ 
++# Implements TC-COMP-050
++def test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order() -> None:
++    dumped = ProblemPageResponse.from_reader(PAGE_TWO_ROWS).model_dump(mode="json")
++    assert dumped == EXPECTED_PAGE_TWO_ROWS
++
++
+ # Implements TC-COMP-050
+ def test_zero_counts_stay_zero_and_absent_counts_are_null() -> None:
+     zeros = DataHealthResponse.from_reader(HEALTH_ZEROS).model_dump(mode="json")
+diff --git a/tests/unit/test_api_data_health_routes.py b/tests/unit/test_api_data_health_routes.py
+index e36aba6..45bad15 100644
+--- a/tests/unit/test_api_data_health_routes.py
++++ b/tests/unit/test_api_data_health_routes.py
+@@ -14,7 +14,7 @@ from typing import Any
+ 
+ import psycopg
+ import pytest
+-from fastapi import FastAPI
++from fastapi import FastAPI, Request
+ from fastapi.exceptions import RequestValidationError
+ from fastapi.routing import APIRoute
+ from fastapi.testclient import TestClient
+@@ -28,11 +28,14 @@ from tests.unit.test_api_data_health_models import (
+     EXPECTED_ATTENTION_FULL,
+     EXPECTED_HEALTH_FULL,
+     EXPECTED_PAGE_FULL,
++    EXPECTED_PAGE_TWO_ROWS,
+     HEALTH_FULL,
+     HEALTH_NEVER,
++    PAGE_TWO_ROWS,
+ )
+ 
+ _CONN = object()
++_REQUEST_ID = "req-test-1"
+ 
+ 
+ class _FakePool:
+@@ -91,6 +94,12 @@ def _client(pool: _FakePool, *, raise_server_exceptions: bool = True) -> TestCli
+     app.add_exception_handler(RequestValidationError, app_module._validation_error_handler)
+     app.include_router(data_health.router)
+     app.state.db_pool = pool
++
++    @app.middleware("http")
++    async def _stamp_request_id(request: Request, call_next: Any) -> Any:
++        request.state.request_id = _REQUEST_ID
++        return await call_next(request)
++
+     return TestClient(
+         app, base_url="http://127.0.0.1:8000", raise_server_exceptions=raise_server_exceptions
+     )
+@@ -102,7 +111,7 @@ def _problems_refusal(resource: str, message: str) -> dict[str, Any]:
+             "code": "validation_error",
+             "message": message,
+             "resource": resource,
+-            "request_id": "unknown",
++            "request_id": _REQUEST_ID,
+         }
+     }
+ 
+@@ -150,6 +159,14 @@ def test_a_lower_case_cursor_is_normalised_before_the_reader(
+     assert spy.calls[0][1]["cursor"] == "KO"
+ 
+ 
++# Implements TC-COMP-052
++def test_problems_returns_a_multi_row_page_unchanged(monkeypatch: pytest.MonkeyPatch) -> None:
++    _install(monkeypatch, problems=_Spy(PAGE_TWO_ROWS))
++    response = _client(_FakePool()).get("/api/data-health/problems")
++    assert response.status_code == 200
++    assert response.json() == EXPECTED_PAGE_TWO_ROWS
++
++
+ # Implements TC-COMP-052
+ def test_attention_delegates_once_with_one_connection(monkeypatch: pytest.MonkeyPatch) -> None:
+     spy = _Spy(ATTENTION_FULL)

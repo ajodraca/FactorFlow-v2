@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "repo_head": "711c8fb",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:rows-reversed",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "for row in value.rows]",
+      "new": "for row in reversed(value.rows)]",
+      "line": 1
+    },
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:rows-first-only",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "for row in value.rows]",
+      "new": "for row in value.rows[:1]]",
+      "line": 1
+    },
+    {
+      "id": "src/factorflow/api/routes/data_health.py:rv:request-id-constant",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/routes/data_health.py",
+      "old": "request_id=getattr(request.state, \"request_id\", \"unknown\")",
+      "new": "request_id=\"unknown\"",
+      "line": 1
+    },
+    {
+      "id": "src/factorflow/api/data_health_models.py:rv:checks-none-when-never",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "src/factorflow/api/data_health_models.py",
+      "old": "    checks: ChecksResponse\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=ChecksResponse(",
+      "new": "    checks: ChecksResponse | None\n    problems: ProblemPageResponse\n\n    @classmethod\n    def from_reader(cls, value: reader.DataHealth) -> \"DataHealthResponse\":\n        # `checks` is always an object; its two members are null together\n        # exactly when `never_acquired` (system design 4.2).\n        return cls(\n            checked_at=value.checked_at,\n            never_acquired=value.never_acquired,\n            followed_count=value.followed_count,\n            affected_count=value.affected_count,\n            checks=None if value.never_acquired else ChecksResponse(",
+      "line": 1
+    }
+  ]
+}

@@ -90,6 +90,21 @@ PAGE_FULL = ProblemPage(
     ),
     "AAA",
 )
+PAGE_TWO_ROWS = ProblemPage(
+    (
+        ProblemRow(
+            "AAA",
+            (Failure("prices", "failed", "provider timeout", 3, T0, RUN_A),),
+            True,
+        ),
+        ProblemRow(
+            "BBB",
+            (Failure("fundamentals", "not_found", None, 1, T_EST, RUN_B),),
+            False,
+        ),
+    ),
+    "BBB",
+)
 HEALTH_FULL = DataHealth(
     checked_at=T0,
     never_acquired=False,
@@ -213,6 +228,39 @@ EXPECTED_PAGE_FULL: dict[str, Any] = {
         }
     ],
     "next_cursor": "AAA",
+}
+EXPECTED_PAGE_TWO_ROWS: dict[str, Any] = {
+    "rows": [
+        {
+            "symbol": "AAA",
+            "failures": [
+                {
+                    "data_type": "prices",
+                    "outcome": "failed",
+                    "reason": "provider timeout",
+                    "attempts": 3,
+                    "completed_at": "2026-10-20T21:00:00Z",
+                    "run_id": "aaaaaaaa-0000-0000-0000-000000000001",
+                }
+            ],
+            "retryable": True,
+        },
+        {
+            "symbol": "BBB",
+            "failures": [
+                {
+                    "data_type": "fundamentals",
+                    "outcome": "not_found",
+                    "reason": None,
+                    "attempts": 1,
+                    "completed_at": "2026-10-20T16:30:00-05:00",
+                    "run_id": "bbbbbbbb-0000-0000-0000-000000000002",
+                }
+            ],
+            "retryable": False,
+        },
+    ],
+    "next_cursor": "BBB",
 }
 EXPECTED_HEALTH_FULL: dict[str, Any] = {
     "checked_at": "2026-10-20T21:00:00Z",
@@ -409,6 +457,12 @@ def test_data_health_serialises_every_field_with_nulls_present() -> None:
 def test_problem_page_serialises_every_field() -> None:
     dumped = ProblemPageResponse.from_reader(HEALTH_FULL.problems).model_dump(mode="json")
     assert dumped == EXPECTED_PAGE_FULL
+
+
+# Implements TC-COMP-050
+def test_a_multi_row_problem_page_keeps_every_row_in_the_readers_order() -> None:
+    dumped = ProblemPageResponse.from_reader(PAGE_TWO_ROWS).model_dump(mode="json")
+    assert dumped == EXPECTED_PAGE_TWO_ROWS
 
 
 # Implements TC-COMP-050
