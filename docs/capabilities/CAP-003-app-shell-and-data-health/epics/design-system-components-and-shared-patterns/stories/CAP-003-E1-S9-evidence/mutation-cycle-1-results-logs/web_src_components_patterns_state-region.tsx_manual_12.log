@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wol55lku/w3/web
+
+ ❯ src/components/patterns/state-region.test.tsx (23 tests | 1 failed) 69ms
+   × StateRegion (TC-COMP-031) > renders the error's operation and reason with Try again wired to the caller's retry 31ms
+     → expect(element).toHaveAttribute("data-variant", "outline") // element.getAttribute("data-variant") === "outline"
+
+Expected the element to have attribute:
+  data-variant="outline"
+Received:
+  data-variant="default"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion (TC-COMP-031) > renders the error's operation and reason with Try again wired to the caller's retry
+Error: expect(element).toHaveAttribute("data-variant", "outline") // element.getAttribute("data-variant") === "outline"
+
+Expected the element to have attribute:
+  data-variant="outline"
+Received:
+  data-variant="default"
+ ❯ src/components/patterns/state-region.test.tsx:77:20
+     75|     expect(screen.getByText(LITERALS.error)).toBeInTheDocument();
+     76|     const button = screen.getByRole("button", { name: "Try again" });
+     77|     expect(button).toHaveAttribute("data-variant", "outline");
+       |                    ^
+     78|     expect(retry).not.toHaveBeenCalled();
+     79|     await user.click(button);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 passed (23)
+   Start at  08:30:06
+   Duration  795ms (transform 34ms, setup 34ms, collect 68ms, tests 69ms, environment 163ms, prepare 28ms)
+

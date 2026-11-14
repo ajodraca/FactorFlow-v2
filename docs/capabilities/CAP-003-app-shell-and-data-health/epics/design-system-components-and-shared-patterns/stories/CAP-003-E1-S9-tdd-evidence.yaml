@@ -1,0 +1,34 @@
+# TDD evidence for CAP-003-E1-S9 - StateRegion.
+# One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged the cycle's patch.
+# Decisions applied from planning: DEC-0313, DEC-0314.
+# Deviation: T002-T005 form one cycle (tests and production file are one new pair); the error wrapper is <output> (implicit role=status) because biome a11y/useSemanticElements rejects <div role="status">.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005]
+    description: >
+      StateRegion: eight-state dispatch, caller renderer map with notApplicable, polite error wrapper with outline Try again, busy loading wrapper, unreachable left to the shell, type-level refusal (TC-COMP-031, TC-COMP-032, DEC-0313, DEC-0314).
+    red_log: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S9-evidence/red-cycle-1-state-region.log
+    red_log_sha256: 84af5bad936a4d0ad0e54473c15324afe7f9cd22d7ffbe4ab68e2c0c61c5b143
+    red_evidence: >
+      state-region.test.tsx failed to resolve ./state-region before the module existed.
+    green_evidence: >
+      state-region 23 passed; npx tsc --noEmit exits 0 with both @ts-expect-error directives consumed; full suite 2532 passed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6f78f3ba06c42269c81e86265bb34d8d0ae4955058bf466d7a1ae91303cff002
+    reviewed_patch: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S9-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S9-evidence/mutation-cycle-1-results.json
+      results_sha256: b2afd754386c96d9147b116fb458a22bb0cfe4b057572551c1f22dd332b2233e
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
