@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-k_jmhxkd/w3/web
+
+ ❯ src/components/patterns/state-region.test.tsx (39 tests | 1 failed) 92ms
+   × StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > keeps the error announcement polite, never assertive or off 5ms
+     → expected [ null, 'polite' ] to include 'off'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > keeps the error announcement polite, never assertive or off
+AssertionError: expected [ null, 'polite' ] to include 'off'
+ ❯ src/components/patterns/state-region.test.tsx:218:30
+    216|   it("keeps the error announcement polite, never assertive or off", ()…
+    217|     region(FIXTURE.error);
+    218|     expect([null, "polite"]).toContain(screen.getByRole("status").getA…
+       |                              ^
+    219|   });
+    220| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  09:02:16
+   Duration  915ms (transform 42ms, setup 35ms, collect 113ms, tests 92ms, environment 174ms, prepare 126ms)
+

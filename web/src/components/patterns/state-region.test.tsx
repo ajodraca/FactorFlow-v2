@@ -110,6 +110,33 @@ describe("type-level coverage (DAC-E1-S9-2)", () => {
     expect(rendersUnreachable).toBeDefined();
     expect(partialNotApplicable).toBeDefined();
   });
+
+  it("refuses an omitted unreachable key, an entry with no reason, and an undefined reason (DEC-0313)", () => {
+    // @ts-expect-error -- unreachable is required: the shell's reason must be recorded (DEC-0313)
+    const omitsUnreachable: StateRenderers<Row> = {
+      loading: RENDERERS.loading,
+      "empty-never-populated": RENDERERS["empty-never-populated"],
+      "empty-no-match": RENDERERS["empty-no-match"],
+      populated: RENDERERS.populated,
+      partial: RENDERERS.partial,
+      unavailable: RENDERERS.unavailable,
+      error: RENDERERS.error,
+    };
+    // @ts-expect-error -- an entry with neither a renderer nor a reason does not type-check
+    const emptyEntry: StateRenderers<Row> = { ...RENDERERS, error: {} };
+    const noReason = { notApplicable: undefined };
+    // @ts-expect-error -- the reason is a string, never undefined
+    const undefinedReason: StateRenderers<Row> = { ...RENDERERS, error: noReason };
+    expect(omitsUnreachable).toBeDefined();
+    expect(emptyEntry).toBeDefined();
+    expect(undefinedReason).toBeDefined();
+  });
+
+  it("refuses a call without onRetry (DEC-0313)", () => {
+    // @ts-expect-error -- onRetry is a required top-level prop
+    const missingRetry = <StateRegion state={FIXTURE.error} renderers={RENDERERS} />;
+    expect(missingRetry).toBeDefined();
+  });
 });
 
 describe("StateRegion wrappers (DEC-0314)", () => {
@@ -159,5 +186,45 @@ describe("StateRegion wrappers (DEC-0314)", () => {
     };
     const { container } = region(FIXTURE.error, renderers);
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003)", () => {
+  it.each(KINDS.filter((k) => k !== "loading"))("has no busy ancestor for %s", (kind) => {
+    region(FIXTURE[kind]);
+    expect(screen.getByText(LITERALS[kind]).closest("[aria-busy]")).toBeNull();
+  });
+
+  it.each(KINDS.filter((k) => k !== "loading" && k !== "error"))(
+    "renders %s's output as the container's only child, unwrapped",
+    (kind) => {
+      const { container } = region(FIXTURE[kind]);
+      expect(container.children).toHaveLength(1);
+      expect(container.firstElementChild).toBe(screen.getByText(LITERALS[kind]));
+    },
+  );
+
+  it("wraps the loading skeleton in one busy element holding only the skeleton", () => {
+    const { container } = region(FIXTURE.loading);
+    const busy = container.firstElementChild;
+    expect(container.children).toHaveLength(1);
+    expect(busy).toHaveAttribute("aria-busy", "true");
+    expect(busy?.children).toHaveLength(1);
+    expect(busy?.firstElementChild).toBe(screen.getByText(LITERALS.loading));
+  });
+
+  it("keeps the error announcement polite, never assertive or off", () => {
+    region(FIXTURE.error);
+    expect([null, "polite"]).toContain(screen.getByRole("status").getAttribute("aria-live"));
+  });
+
+  it("makes Try again a type=button, fit-width control beside the status in a spaced column", () => {
+    region(FIXTURE.error);
+    const status = screen.getByRole("status");
+    const button = screen.getByRole("button", { name: "Try again" });
+    expect(button).toHaveAttribute("type", "button");
+    expect(button).toHaveClass("w-fit");
+    expect(status.parentElement).toBe(button.parentElement);
+    expect(status.parentElement).toHaveClass("flex", "flex-col", "gap-2");
   });
 });

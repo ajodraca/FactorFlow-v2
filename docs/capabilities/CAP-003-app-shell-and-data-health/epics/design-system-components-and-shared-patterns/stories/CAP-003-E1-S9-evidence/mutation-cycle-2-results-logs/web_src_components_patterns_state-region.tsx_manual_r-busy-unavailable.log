@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-k_jmhxkd/w1/web
+
+ ❯ src/components/patterns/state-region.test.tsx (39 tests | 2 failed) 84ms
+   × StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > has no busy ancestor for unavailable 4ms
+     → expected <div aria-busy="true"><p></p></div> to be null
+   × StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > renders unavailable's output as the container's only child, unwrapped 1ms
+     → expected <div aria-busy="true"><p></p></div> to be <p></p> // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > has no busy ancestor for unavailable
+AssertionError: expected <div aria-busy="true"><p></p></div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-busy="true"
+>
+  <p>
+    Unavailable: No trading calendar yet
+  </p>
+</div>
+
+ ❯ src/components/patterns/state-region.test.tsx:195:69
+    193|   it.each(KINDS.filter((k) => k !== "loading"))("has no busy ancestor …
+    194|     region(FIXTURE[kind]);
+    195|     expect(screen.getByText(LITERALS[kind]).closest("[aria-busy]")).to…
+       |                                                                     ^
+    196|   });
+    197| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > renders unavailable's output as the container's only child, unwrapped
+AssertionError: expected <div aria-busy="true"><p></p></div> to be <p></p> // Object.is equality
+
+- Expected
++ Received
+
++ <div
++   aria-busy="true"
++ >
+    <p>
+      Unavailable: No trading calendar yet
+    </p>
++ </div>
+
+ ❯ src/components/patterns/state-region.test.tsx:203:43
+    201|       const { container } = region(FIXTURE[kind]);
+    202|       expect(container.children).toHaveLength(1);
+    203|       expect(container.firstElementChild).toBe(screen.getByText(LITERA…
+       |                                           ^
+    204|     },
+    205|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 37 passed (39)
+   Start at  09:02:15
+   Duration  814ms (transform 33ms, setup 31ms, collect 69ms, tests 84ms, environment 162ms, prepare 77ms)
+

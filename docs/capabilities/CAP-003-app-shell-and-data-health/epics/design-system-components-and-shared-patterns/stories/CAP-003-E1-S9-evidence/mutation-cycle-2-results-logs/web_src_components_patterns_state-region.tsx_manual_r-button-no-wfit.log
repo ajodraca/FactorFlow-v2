@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-k_jmhxkd/w2/web
+
+ ❯ src/components/patterns/state-region.test.tsx (39 tests | 1 failed) 79ms
+   × StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > makes Try again a type=button, fit-width control beside the status in a spaced column 5ms
+     → expect(element).toHaveClass("w-fit")
+
+Expected the element to have class:
+  w-fit
+Received:
+  inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > makes Try again a type=button, fit-width control beside the status in a spaced column
+Error: expect(element).toHaveClass("w-fit")
+
+Expected the element to have class:
+  w-fit
+Received:
+  inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground
+ ❯ src/components/patterns/state-region.test.tsx:226:20
+    224|     const button = screen.getByRole("button", { name: "Try again" });
+    225|     expect(button).toHaveAttribute("type", "button");
+    226|     expect(button).toHaveClass("w-fit");
+       |                    ^
+    227|     expect(status.parentElement).toBe(button.parentElement);
+    228|     expect(status.parentElement).toHaveClass("flex", "flex-col", "gap-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  09:02:17
+   Duration  868ms (transform 33ms, setup 33ms, collect 76ms, tests 79ms, environment 172ms, prepare 82ms)
+
