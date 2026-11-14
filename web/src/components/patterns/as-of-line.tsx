@@ -26,6 +26,11 @@ import { StatusBadge, type StatusTier } from "./status-badge";
  * `role="status"` is atomic by default, and an atomic region would re-read the
  * retained announcement whenever *Updating* or the failure text toggles
  * (CAP-002-E4-S4 Open Gap 6).
+ *
+ * CAP-002 delivered this file for the Research line alone; CAP-003
+ * `ui-components` took it over (owner decision 2026-10-25; DAC-E1-13). The
+ * Research line now composes the generic `AsOfLine`, whose parts are joined by
+ * the pattern's own separator, and renders the same text it always did.
  */
 
 export interface AsOfLineProps {
@@ -56,19 +61,30 @@ const OUTCOME: Record<RunOutcome, { tier: StatusTier; word: string }> = {
   partial: { tier: "warning", word: SCORE_SET.partial },
 };
 
-/** *Scores from {time} · from the download started {time}*, the start time linked to the run. */
-function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
+/** *Scores from {time}*: the words, then the produced time in the numeric face. */
+function ScoresFromPart({ set }: { set: CurrentSet }): JSX.Element {
   const produced = formatTimestamp(set.endedAt);
   const scores = SCORE_SET.scoresFrom(produced);
-  const started = formatTimestamp(set.runStartedAt);
-  const clause = SCORE_SET.fromTheDownloadStarted(started);
-  // Each builder's words precede its time: the produced time takes the numeric
-  // face, the start time is the link.
   return (
     <>
       {scores.slice(0, scores.length - produced.length)}
       <span className="font-numeric">{produced}</span>
-      {SCORE_SET.separator}
+    </>
+  );
+}
+
+/** *from the download started {time}*, the start time linked to the run, then the outcome badge. */
+function DownloadPart({
+  set,
+  outcome,
+}: {
+  set: CurrentSet;
+  outcome: { tier: StatusTier; word: string };
+}): JSX.Element {
+  const started = formatTimestamp(set.runStartedAt);
+  const clause = SCORE_SET.fromTheDownloadStarted(started);
+  return (
+    <>
       {clause.slice(0, clause.length - started.length)}
       <Link
         to={SHELL_ROUTES.download(set.runId)}
@@ -76,7 +92,8 @@ function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
         className="font-numeric underline"
       >
         {started}
-      </Link>
+      </Link>{" "}
+      <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
     </>
   );
 }
@@ -163,10 +180,10 @@ function ResearchAsOfLine({
   const building = later?.state === "building";
   const buildingSince = later?.state === "building" ? formatTimestamp(later.startedAt) : null;
   const outcome = OUTCOME[set.runOutcome];
-  return (
-    <p data-testid="as-of-line" className={`${LINE_HEIGHT} text-xs text-muted-foreground`}>
-      <SetSentence set={set} /> <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
-      {sortLabel === undefined ? null : `${SCORE_SET.separator}${SCORE_SET.sortedBy(sortLabel)}`}
+  // What follows the last part, with no separator: the *checked* time while a
+  // later set builds, the live region and, after a failed poll, **Try again**.
+  const tail = (
+    <>
       {building && checkedAt !== null ? (
         <>
           {" "}
@@ -193,7 +210,31 @@ function ResearchAsOfLine({
           </button>
         </>
       ) : null}
-    </p>
+    </>
+  );
+  const download = <DownloadPart set={set} outcome={outcome} />;
+  return (
+    <AsOfLine
+      className={LINE_HEIGHT}
+      parts={
+        sortLabel === undefined
+          ? [
+              <ScoresFromPart key="scores" set={set} />,
+              <Fragment key="download">
+                {download}
+                {tail}
+              </Fragment>,
+            ]
+          : [
+              <ScoresFromPart key="scores" set={set} />,
+              download,
+              <Fragment key="sort">
+                {SCORE_SET.sortedBy(sortLabel)}
+                {tail}
+              </Fragment>,
+            ]
+      }
+    />
   );
 }
 

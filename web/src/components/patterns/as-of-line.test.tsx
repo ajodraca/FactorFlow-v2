@@ -529,3 +529,29 @@ describe("AsOfLine generic form: element parts, host classes, non-empty parts", 
     expect(never).toBeTypeOf("function");
   });
 });
+
+describe("TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13)", () => {
+  // Implements TC-COMP-034
+  it("joins its two parts with one separator span and no sort clause", () => {
+    renderLine();
+    const line = screen.getByTestId("as-of-line");
+    expect(separators(line)).toHaveLength(1);
+    const [sep] = separators(line);
+    expect(sep).toHaveClass("inline-block");
+    expect(sep).toHaveClass("px-2");
+    expect(sep.previousSibling?.textContent).toBe("2026-10-15 17:46 CDT");
+    expect(sep.nextSibling?.textContent).toBe("from the download started ");
+  });
+
+  // Implements TC-COMP-034
+  it("adds a second separator immediately before the sort clause", () => {
+    renderLine({ sortLabel: "value" });
+    const line = screen.getByTestId("as-of-line");
+    const seps = separators(line);
+    expect(seps).toHaveLength(2);
+    expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
+    expect(collapsed(line)).toBe(
+      "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value",
+    );
+  });
+});

@@ -1,5 +1,5 @@
 # TDD evidence for CAP-003-E1-S10 - AsOfLine generic form.
-# Cycle 1 is committed on its own; cycle 2 shares the final stage commit (commit_hash: stage) so each cycle's reviewed patch is isolated.
+# Cycle 1 is committed on its own; cycle 2 is the final stage commit (commit_hash: stage), so each cycle's reviewed patch is isolated.
 # Decisions applied from planning: DEC-0315.
 
 cycles:
@@ -19,13 +19,42 @@ cycles:
       drift_detected: false
     diff_sha256: 2b17153ce164ee4e006beec750efa1f5dd3c26d068f280181eab3e62e2e64086
     reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/cycle-1.patch
-    commit_hash: stage
+    commit_hash: e49e68e83432ed00eb6ed59c7386b9be36063993
     mutation:
       runner: scripts/mutation-run.py
       results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results.json
       results_sha256: f4271272f2a0bbf5af81a7224df656b28c4a40c14f8839441e038e21b5b5b197
       generated: 6
       killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T006, T007, T008]
+    description: >
+      The Research as-of line composes the generic AsOfLine: ScoresFromPart and DownloadPart builders, the sort clause as its own part, the checked time, live region and Try again appended to the last part with no separator, SCORE_SET.separator no longer written (TC-COMP-034, DAC-E1-13, DAC-E1-S10-2). No caller edited.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-2-research-composition.log
+    red_log_sha256: cc73f1e4e84430bd3718784e15f9714a43c785d1c45bd1e302c3ac00aa0e2c65
+    red_evidence: >
+      as-of-line.test.tsx: the 2 TC-COMP-034 cases failed (zero separator spans, the delivered line writes the dot as text) while the 31 other cases passed.
+    green_evidence: >
+      as-of-line.test.tsx 35 passed; npm run test 100 files, 2559 tests passed; npx tsc --noEmit, npm run lint, npm run format and npm run build clean; no file under web/src/screens, app or api edited.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: bffaf4b7622bb8e69a495e72a2afc820326944f5876cda234a51343a25ef0ec0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results.json
+      results_sha256: 12705e94efc314e6f9763acb2301d5ac426dd682f423ddd390b344b54ee7cd64
+      generated: 3
+      killed: 3
       survived: 0
       stillborn: 0
       timeout: 0

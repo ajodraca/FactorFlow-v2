@@ -1,0 +1,78 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w0/web
+
+stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 3 failed) 195ms
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > holds the announcement, Updating, Earlier sets… and the failure text, and nothing else 10ms
+     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to match /^Scores from 2026-10-15 17:46 CDT · f…/
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause 2ms
+     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
+   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause 18ms
+     → expected ' · ' to be 'sorted by value' // Object.is equality
+ ✓ src/screens/research/results-pane.test.tsx (60 tests) 812ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > holds the announcement, Updating, Earlier sets… and the failure text, and nothing else
+AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to match /^Scores from 2026-10-15 17:46 CDT · f…/
+
+- Expected: 
+/^Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value checked 2026-10-15 17:52:10 CDT/
+
++ Received: 
+"Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · · sorted by value checked 2026-10-15 17:52:10 CDT  Try again"
+
+ ❯ src/components/patterns/as-of-line.test.tsx:341:21
+    339|     // Outside the region, in order: the sentence with the link, the o…
+    340|     const outside = visibleText(container).replace(visibleText(status)…
+    341|     expect(outside).toMatch(
+       |                     ^
+    342|       /^Scores from 2026-10-15 17:46 CDT · from the download started 2…
+    343|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause
+AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
+
+Expected: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
+Received: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
+
+ ❯ src/components/patterns/as-of-line.test.tsx:350:43
+    348|     const announcement = SCORE_SET.scoresUpdatedTo("2026-10-16 17:48 C…
+    349|     const sorted = renderLine({ announcement, sortLabel: "value" });
+    350|     expect(visibleText(sorted.container)).toBe(
+       |                                           ^
+    351|       `Scores from 2026-10-15 17:46 CDT · from the download started 20…
+    352|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause
+AssertionError: expected ' · ' to be 'sorted by value' // Object.is equality
+
+Expected: "sorted by value"
+Received: " · "
+
+ ❯ src/components/patterns/as-of-line.test.tsx:552:46
+    550|     const seps = separators(line);
+    551|     expect(seps).toHaveLength(2);
+    552|     expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
+       |                                              ^
+    553|     expect(collapsed(line)).toBe(
+    554|       "Scores from 2026-10-15 17:46 CDT · from the download started 20…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 92 passed (95)
+   Start at  09:44:08
+   Duration  2.86s (transform 369ms, setup 173ms, collect 1.84s, tests 1.01s, environment 781ms, prepare 258ms)
+
