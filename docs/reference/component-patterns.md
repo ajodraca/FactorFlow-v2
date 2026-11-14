@@ -38,6 +38,11 @@ CAP-002-E5-S1 added one:
 - `comparison-table.tsx`, the table that sets 2 to 6 stocks side by side,
   one column each.
 
+CAP-003-E1-S9 added `state-region.tsx`, the region that renders a
+`ScreenState` through one entry per kind
+([The state region](#the-state-region-state-regiontsx)). No screen imports it
+yet; its only importer is its test.
+
 Six of the eight are pure functions of their props: no state, no effect, no
 fetch. The inspector is one exception: it holds its read's state and issues
 `getStockEvidence` itself ([The inspector](#the-inspector-inspector-paneltsx)).
@@ -686,3 +691,50 @@ Open warnings from the story's implementation review v3: the cells take
 `px-3 py-2` with no row height token or row rule, not the `data-table` row
 tokens UX 1.5 cites (IR-004); and the named `section` is a region landmark
 that repeats the table's own name (IR-005).
+
+## The state region (`state-region.tsx`)
+
+`StateRegion<T>({ state, renderers, onRetry })` renders a data-bearing
+region's `ScreenState<T>` (`web/src/api/types.ts`) by dispatching on
+`state.kind` to the caller's entry for that kind (component design 2.7;
+STD-UI-23). It returns a `JSX.Element`, or `null` where noted below.
+
+| Prop | Type | Meaning |
+|------|------|---------|
+| `state` | `ScreenState<T>` | the region's current state |
+| `renderers` | `StateRenderers<T>` | one entry per kind, below |
+| `onRetry` | `() => void` | called by **Try again**; required |
+
+### The renderer map
+
+Every kind except `unreachable` takes either a function of that kind's state
+or `{ notApplicable: "reason" }`; `unreachable` takes only a reason. A call
+that omits a kind, gives an entry no reason, or gives `unreachable` a
+function does not type-check (DEC-0313). The reason is a record for the
+reader of the call: it is never rendered.
+
+| Kind | Renders |
+|------|---------|
+| `loading` | the caller's skeleton inside one `div` with `aria-busy="true"` |
+| `empty-never-populated` | the caller's entry, unwrapped |
+| `empty-no-match` | the caller's entry, unwrapped; never the entry above (the two are never conflated) |
+| `populated`, `partial`, `unavailable` | the caller's entry, unwrapped |
+| `error` | see below |
+| `unreachable` | nothing: the shell replaces the main region (AC-23) |
+
+A kind whose entry is `notApplicable` and which arrives anyway renders
+nothing.
+
+### The error rendering
+
+The caller's `error` entry supplies the whole sentence. `StateRegion` wraps
+it in an `output` element, which is a polite status region, and puts a
+`Button` (`type="button"`, `variant="outline"`, `w-fit`) labelled **Try
+again** after it, outside the announcement, in a `flex flex-col gap-2`
+column. The button calls `onRetry`. Every visible string except **Try again**
+is the caller's, and `StateRegion` never reads `requestId` or any other field
+of the state, so the request id is never shown (DEC-0314).
+
+Tests: `state-region.test.tsx` (TC-COMP-031, TC-COMP-032), covering the type
+refusals, the busy and polite markup, retry wiring and the `notApplicable`
+cases.
