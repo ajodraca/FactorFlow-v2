@@ -3,17 +3,16 @@
 `src/factorflow/data_health/` holds the read-only reads behind the app shell
 and the Data health screen (`component-design-data-health-reader.md` sections
 2.1 to 2.4; CAP-003-E2-S1, CAP-003-E2-S2). `read_problems` and
-`read_attention` exist so far; `read_data_health` follows in CAP-003-E2-S3 on
-the same models and queries. Nothing under `src/` calls the
-module yet: the `data-health-api` routes that will (CAP-003-E2-S4) are not
-built.
+`read_attention` and `read_data_health` exist (CAP-003-E2-S3 adds the last).
+Nothing under `src/` calls the module yet: the `data-health-api` routes that
+will (CAP-003-E2-S4) are not built.
 
 | File | Holds |
 |---|---|
-| `__init__.py` | Re-exports `read_attention` and `read_problems` |
+| `__init__.py` | Re-exports `read_attention`, `read_data_health` and `read_problems` |
 | `models.py` | The frozen dataclasses of the reads, in the domain vocabulary (no sentence, no tier; DEC-0200) |
 | `queries.py` | The parameterised `SELECT` constants, one read each |
-| `reader.py` | `read_problems`, `read_attention` and the private `_attention_items` |
+| `reader.py` | `read_problems`, `read_attention`, `read_data_health`, the private `_attention_items` and the private fold `_ChecksFold` |
 
 The module writes nothing and edits no delivered file (DEC-0211). Neither
 `queries.py` nor `reader.py` may contain an `INSERT`, `UPDATE`, `DELETE`,
@@ -88,6 +87,43 @@ caller's connection, in this order, whatever the roster size (AC-28), calls no
   and it alone carries `run_id`); `credential_missing` (the key is absent,
   `recorded_at` is `checked_at`). Items carry no tier and no copy (DEC-0200).
 
+## `read_data_health(conn) -> DataHealth`
+
+The Data health aggregate (DEC-0201, DEC-0213, DEC-0220). The caller owns the
+transaction.
+
+1. `DATA_HEALTH_HEAD_SQL` gives `checked_at` (`now()`), `followed_count`
+   (active instruments) and `latest_session`: the greatest `prices`
+   `coverage_segment.covered_to` over active instruments, or `None`.
+2. `read_coverage(conn, lifecycle="active", cursor=None, limit=MAX_LIMIT)` (500)
+   is the delivered `coverage-service` function, called unchanged and paged to a
+   null `next_cursor`. A `ValueError` from it propagates; nothing catches it.
+3. If the first view's `never_acquired` is true, no further page is read and
+   `daily_prices` and `company_financials` are `None`, never zero counts
+   (AC-21). Otherwise each page is folded by `_ChecksFold.add_page` together
+   with that page's `FUNDAMENTALS_STATE_SQL` rows (`last_outcome`,
+   `last_acquired_at` per symbol, one statement per page), so memory holds one
+   page and at most five symbols per check whatever the roster size.
+4. `PROBLEM_COUNT_SQL` gives `affected_count`, the statement behind
+   `Problems.stock_count` (DEC-0201), and `read_problems(conn, cursor=None,
+   limit=50)` gives the first problem page.
+
+The fold, per stock:
+
+| Check | Counts | In the union (`exception_count`, first five `exception_symbols`) |
+|---|---|---|
+| Daily prices | `absent_count` (`presence["prices"]` is `absent` or `unknown`); `behind_count` (`covered_to` earlier than `latest_session`, never for a null `covered_to` or `latest_session`); `gap_stock_count` (`gaps.missing_days > 0`) | a stock with any of the three, counted once |
+| Company financials | `absent_count` (`presence["fundamentals"]` is `absent` or `unknown`); `problem_count` (fundamentals `last_outcome` is `failed` or `not_found`); `as_of` (the greatest `last_acquired_at` among `written` rows) | a stock that is absent or has a problem, counted once |
+
+- `DailyPricesCheck.status` is `exceptions` when absent, behind or gap counts
+  sum above 0, else `not_determinable` when gap detection is unavailable, else
+  `ok`. A page whose `gap_detection.available` is false makes it unavailable for
+  the whole read and the first such page's `reason` is kept; `gap_stock_count`
+  is then `None`.
+- `CompanyFinancialsCheck.status` is `exceptions` or `ok`.
+- Only the fundamentals `acquisition_state` row feeds `problem_count` and
+  `as_of`; another data type's state is never read for a stock without one.
+
 ## Models
 
 Defined in `models.py`, all `@dataclass(frozen=True)`:
@@ -102,9 +138,16 @@ Defined in `models.py`, all `@dataclass(frozen=True)`:
   `Progress`, `LatestDownload`, `LatestTerminalDownload`, `Problems` and
   `AttentionItem` as its parts; `read_attention` builds them.
 
-`models.py` also defines the shapes a later story fills: `GapDetectionState`,
-`DailyPricesCheck`, `CompanyFinancialsCheck` and `DataHealth`. Nothing builds
-them yet.
+- `GapDetectionState`: `available`, `reason` (nullable).
+- `DailyPricesCheck`: `status`, `absent_count`, `gap_stock_count` (nullable),
+  `behind_count`, `latest_session` (nullable), `gap_detection`,
+  `exception_count`, `exception_symbols`.
+- `CompanyFinancialsCheck`: `status`, `absent_count`, `problem_count`, `as_of`
+  (nullable), `exception_count`, `exception_symbols`.
+- `DataHealth`: `checked_at`, `never_acquired`, `followed_count`,
+  `affected_count`, `daily_prices` and `company_financials` (both `None`
+  exactly when `never_acquired`), `problems` (the first page of 50);
+  `read_data_health` builds them.
 
 ## Tests
 
@@ -121,3 +164,11 @@ selection and its tie-breaks, and each item existing exactly while its cause
 holds. `tests/unit/test_data_health_items.py` covers `_attention_items`, the
 package export and that the reader calls `credential_present()` and never
 reads the key.
+`tests/unit/test_data_health_checks.py` covers the fold with fake coverage
+pages: status, unknown presence, the union and its five-symbol cap across page
+boundaries, `as_of`, the cross-page gap availability and reason, and the
+package export. `tests/integration/test_data_health_checks.py` (marked
+`postgres`) runs `read_data_health` against a real PostgreSQL: the paging call
+sequence, error propagation, the never-acquired store, retired stocks and 3000
+stocks over six pages (`slow`), a store with every group, `not_determinable`,
+and that `problem_count` and `as_of` come from the fundamentals row only.

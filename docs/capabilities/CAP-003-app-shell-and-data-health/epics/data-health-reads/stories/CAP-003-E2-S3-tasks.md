@@ -8,6 +8,7 @@ owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-06
 updated: 2026-11-14
+docs_synced_review: CAP-003-E2-S3-implementation-review-v2.md
 last_reworked_review: CAP-003-E2-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
