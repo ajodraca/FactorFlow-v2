@@ -1,0 +1,79 @@
+# TDD evidence for CAP-003-E1-S7 - worstDataTier and dataTileBadge: the One Data Verdict.
+# One commit for the whole story-coding stage (commit_hash: stage); independent code-review and spec-drift subagents judged the cycle's patch.
+# Deviation from the plan: one cycle, not three. The tier order, the verdict and the tile badge are one 90-line module and one test file, written and staged together, so one patch, one pair of reviews and one mutation run cover all three planned cycles.
+# Cycle-2 is the review v1 rework (IR-001..IR-003); the one-cycle merge above is a deviation from T009's three cycles, accepted by review v1.
+# Mutation (cycle-1): 13 generated mutants plus 14 hand-written ones (the plan's five and one per guard, branch and field). 23 killed; 4 survivors, all equivalent (below).
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T007, T008, T009]
+    description: >
+      worst-data-tier.ts exports TIER_ORDER (frozen Record<Tier, number>, critical 0, serious 1, warning 2, good 3, active 3, neutral 4; DEC-0311), DataAnswer, worstDataTier (null before any download ended; problem tier, download tier and clause by DAC-E1-4; affected >= followed is critical, DEC-0312) and dataTileBadge (worse of verdict and score tier, tie to the verdict, null whenever the verdict is null). worst-data-tier.test.ts covers TC-COMP-026, TC-COMP-001 and TC-COMP-027 with independent literals, and the TIER_ORDER semantics. T007 and T008 add no behaviour: npm run lint, npm run format, npx tsc --noEmit and npm run build are clean, and the planted second TIER_ORDER in planted-order.ts failed the suite and was deleted. The whole suite ran 100 files, 2561 tests; two tests timed out or raced under load (build-output.test.tsx at 5000 ms while the reviews ran, results-table.test.tsx once) and both pass, 99 of 99, with --testTimeout=60000; neither touches the files changed here. Reviews: code review APPROVED (no CRITICAL, HIGH or MEDIUM; LOWs accepted) and spec drift none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-1-verdict-and-order.log
+    red_log_sha256: 1d162cc269b73b34eaf726b03af668724d8c7b45a91efbb8c8cab2237e16cee1
+    red_evidence: >
+      worst-data-tier.test.ts failed to resolve ./worst-data-tier before the module existed (no tests collected).
+    green_evidence: >
+      worst-data-tier.test.ts 51 tests pass, 1 skipped (the needs-you.ts import check, until CAP-003-E1-S8); npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 695306acd11b582daec061ad6be09fedd95d4c6d061fce261277febcf1ea4bff
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results.json
+      results_sha256: 4e07a911d43abe7d460f9c46e7fff0e7d28b2f30c14c6e542892fac3b9ed0e52
+      generated: 27
+      killed: 23
+      survived: 4
+      stillborn: 0
+      timeout: 0
+      score: 0.852
+      survivors:
+        - id: web/src/components/patterns/worst-data-tier.ts:25:off-by-one:1
+          disposition: equivalent
+          reason: >
+            neutral: 4 becomes 5; the order critical, serious, warning, good, neutral is unchanged, and the tests pin relations, not the constant's numbers (the contract is the order, DEC-0311)
+        - id: web/src/components/patterns/worst-data-tier.ts:65:off-by-one:1
+          disposition: equivalent
+          reason: >
+            the download tier replaces the problem tier on a tie; the tier is the same and the word follows the tier, and downloadClause is set from the download alone, so the returned object is identical
+        - id: web/src/components/patterns/worst-data-tier.ts:manual:zero-to-ge
+          disposition: equivalent
+          reason: >
+            affectedCount <= 0 differs from === 0 only for a negative count, which the wire never produces (tasks Other Notes, inputs outside the domain)
+        - id: web/src/components/patterns/worst-data-tier.ts:manual:download-lt-to-le
+          disposition: equivalent
+          reason: >
+            the same tie as the line 65 mutant: the replaced tier equals the original, so the answer is identical
+  - id: cycle-2
+    tasks: [T002, T009]
+    description: >
+      Review v1 rework (IR-001, IR-002, IR-003). Test only; the production code already behaves so. IR-001: worst-data-tier.test.ts adds two TC-COMP-026 rows, affectedCount 1 and 5 with followedCount 0 and a succeeded download, which DEC-0312 fixes as critical No; the reviewer's non-equivalent survivor (affectedCount >= followedCount && followedCount > 0) now fails them. IR-002: this commit carries Decision-Id trailers for DEC-0311 and DEC-0312. IR-003: the baseline at the review base is measured as 99 files and 2509 tests (this story's file adds 52 tests, 54 with the two new rows; the suite is now 100 files, 2563 tests, 1 skipped), the cycle-1 one-cycle merge of the plan's three cycles is a deviation recorded against T009 here and in the header, and the planted second TIER_ORDER check is kept as planted-order-check.log (planted-order.ts, exit 1, 2 failed, then deleted).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-2-followed-zero.log
+    red_log_sha256: dcbe772ba137923fbe10fc40cd711da3da3b908f07145158baba2a4a0ace7e25
+    red_evidence: >
+      The production code already returns critical No for followedCount 0, so no test can fail against it. The review's non-equivalent survivor, re-applied to worst-data-tier.ts, fails both new rows (affected 1 of 0 and 5 of 0), as do followed-zero-to-warning (followedCount !== 0) and critical-to-gt (>); the log lists each mutant and its failing tests.
+    green_evidence: >
+      Against the unmutated code worst-data-tier.test.ts passes (53 tests, 1 skipped); npm run test (100 files, 2562 passed, 1 skipped, with --testTimeout=60000: two unrelated volume tests, coverage-table and run-detail, time out at the default under a load average above 900), npm run lint, npm run format, npx tsc --noEmit and npm run build are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d49c6eca51c6e35c595603bcea9bba8340419ee3b65a5aaf45cd9f7d175e3077
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results.json
+      results_sha256: 5e8ba0f526ca12db53aa0460da4ea042642dd6c0a28154730f634212d59a288b
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

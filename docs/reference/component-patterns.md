@@ -26,6 +26,9 @@ CAP-003-E1-S6 added `format.ts`, the America/Chicago formatters, and
 `presence.tsx`, the *absent* and *not determinable* renderings. No screen
 imports either yet; their only importers are their tests.
 
+CAP-003-E1-S7 added `worst-data-tier.ts`, the data verdict and the one tier
+order. No screen imports it yet; its only importer is its test.
+
 CAP-002-E4-S7 added the two selection controls:
 
 - `selection-tray.tsx`, the tray under the results that counts the checked
@@ -209,6 +212,56 @@ critical. Not determinable is not a tier: it renders through
 `default: return assertNever(...)`, which throws `Unhandled status: <JSON>`,
 so a kind or state added to `Status` without a row fails to type-check.
 `labelOf` is the one source of status labels. Tests: `tiers.test.ts`.
+
+## The data verdict (`worst-data-tier.ts`)
+
+`worst-data-tier.ts` composes the answer to *is my data good?* once, so Data
+health's verdict and Home's data tile cannot disagree (CAP-003-E1-S7;
+`ui-components` 2.4; AC-8, AC-11, AC-21; DAC-E1-3, DAC-E1-4, DAC-E1-5). It
+imports the `RunState` type and `Status`, `Tier`, `tierOf` and `labelOf` from
+`tiers.ts`, and exports `TIER_ORDER`, `DataAnswer`, `worstDataTier` and
+`dataTileBadge`. The checks' tiers are not an input (DEC-0210 as amended), and
+not determinable is not an answer of this module.
+
+**`TIER_ORDER`** is the one six-tier order of the owner interface (DEC-0217 as
+amended, DEC-0311): a frozen `Record<Tier, number>` where a lower rank is
+worse — critical 0, serious 1, warning 2, good 3, active 3, neutral 4. Active
+ranks alongside good, and "x is worse than y" is `TIER_ORDER[x] <
+TIER_ORDER[y]`. `sortAttention` (`needs-you.ts`, CAP-003-E1-S8, not yet
+present) is to import it; no other source under `web/src` may declare a tier
+order.
+
+**`worstDataTier({ affectedCount, followedCount, latestTerminalDownload })`**
+returns a `DataAnswer`, `{ tier, word, downloadClause }`, or `null`:
+
+- `null` when `latestTerminalDownload` is `null`: no verdict, and never *Yes*,
+  before a download has ended. No count is read.
+- The problem tier: `good` when `affectedCount` is 0; otherwise `critical` when
+  `affectedCount >= followedCount`, which includes a `followedCount` of 0
+  (DEC-0312, provisional); otherwise `warning`.
+- The download tier: `failed` is `critical` with the clause `"failed"`;
+  `abandoned` is `serious` with the clause `"interrupted"`. Every other state,
+  `cancelled` and `partial` included, contributes no tier and no clause.
+- The worse of the two wins, by `TIER_ORDER`; on a tie the problem tier stands.
+  The clause comes from the download alone, so an `abandoned` download keeps
+  `"interrupted"` under a critical problem set.
+- The word follows the tier: good *Yes*, warning and serious *Mostly yes*,
+  critical *No*.
+
+**`dataTileBadge(verdict, scores)`** gives Home's data tile its badge,
+`{ tier, label, from }`, or `null` when `verdict` is `null`, whatever the score
+state. `scores` is a `Status` of `of: "scores"`, or `null`. The scores win only
+when `tierOf(scores)` is strictly worse than the verdict's tier; then the label
+is `labelOf(scores)` and `from` is `"scores"`. Otherwise the badge is the
+verdict's tier and word, `from: "verdict"`: a tie goes to the verdict, active
+ties good, and neutral never wins.
+
+Tests: `worst-data-tier.test.ts` (TC-COMP-026, TC-COMP-001, TC-COMP-027). The
+TC-COMP-027 cases scan every non-test `.ts` and `.tsx` source under `web/src`,
+comments stripped, and fail when a second file declares `TIER_ORDER` or an
+order literal, or names `TIER_ORDER` without importing it from
+`worst-data-tier`; once `needs-you.ts` exists, they also require it to import
+`TIER_ORDER`.
 
 ## The status badge (`status-badge.tsx`)
 

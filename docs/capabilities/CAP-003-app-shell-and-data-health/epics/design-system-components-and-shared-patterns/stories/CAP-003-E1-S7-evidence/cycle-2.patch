@@ -1,0 +1,433 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-2.json
+new file mode 100644
+index 0000000..0e1eaab
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-2.json
+@@ -0,0 +1,31 @@
++{
++ "schema": 1,
++ "repo_head": "6e570b27d3a2593143ac50b1664a89d203db9591",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:reviewer-followed-gt-zero",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "affectedCount >= followedCount ? \"critical\"",
++   "new": "affectedCount >= followedCount && followedCount > 0 ? \"critical\""
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:followed-zero-to-warning",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "affectedCount >= followedCount ? \"critical\"",
++   "new": "affectedCount >= followedCount && followedCount !== 0 ? \"critical\""
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:critical-to-gt",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "affectedCount >= followedCount ? \"critical\"",
++   "new": "affectedCount > followedCount ? \"critical\""
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..aa7e083
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+@@ -0,0 +1,13 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w0/web
++
++ ✓ src/components/token-literals.test.ts (30 tests) 228ms
++ ✓ src/components/patterns/worst-data-tier.test.ts (54 tests | 1 skipped) 12ms
++ ✓ src/components/patterns/tiers.test.ts (41 tests) 2144ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 605ms
++
++ Test Files  3 passed (3)
++      Tests  124 passed | 1 skipped (125)
++   Start at  19:10:16
++   Duration  6.09s (transform 238ms, setup 332ms, collect 1.28s, tests 2.38s, environment 3.35s, prepare 2.78s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..4028aec
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+@@ -0,0 +1,13 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w1/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (54 tests | 1 skipped) 9ms
++ ✓ src/components/token-literals.test.ts (30 tests) 37ms
++ ✓ src/components/patterns/tiers.test.ts (41 tests) 2058ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 587ms
++
++ Test Files  3 passed (3)
++      Tests  124 passed | 1 skipped (125)
++   Start at  19:10:16
++   Duration  6.02s (transform 161ms, setup 643ms, collect 1.06s, tests 2.10s, environment 3.33s, prepare 2.12s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..46054ea
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+@@ -0,0 +1,13 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w2/web
++
++ ✓ src/components/token-literals.test.ts (30 tests) 41ms
++ ✓ src/components/patterns/worst-data-tier.test.ts (54 tests | 1 skipped) 94ms
++ ✓ src/components/patterns/tiers.test.ts (41 tests) 2101ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 551ms
++
++ Test Files  3 passed (3)
++      Tests  124 passed | 1 skipped (125)
++   Start at  19:10:16
++   Duration  6.11s (transform 131ms, setup 464ms, collect 951ms, tests 2.24s, environment 3.47s, prepare 2.57s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_critical-to-gt.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_critical-to-gt.log
+new file mode 100644
+index 0000000..ffa6f61
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_critical-to-gt.log
+@@ -0,0 +1,75 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w2/web
++
++ ✓ src/components/token-literals.test.ts (30 tests) 78ms
++ ❯ src/components/patterns/worst-data-tier.test.ts (54 tests | 3 failed | 1 skipped) 67ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 13ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 9ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 1ms
++     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++ ✓ src/components/patterns/tiers.test.ts (41 tests) 3710ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 763ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new status kind fails to type-check in both tierOf and labelOf 382ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new scores state fails to type-check in both tierOf and labelOf 419ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new download state fails to type-check inside every function that switches on it 315ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new check name fails to type-check inside every function that switches on it 308ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new item kind fails to type-check inside every function that switches on it 1023ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:43:9
++     41|       expect(
++     42|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     43|       ).toEqual(expected);
++       |         ^
++     44|     },
++     45|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++AssertionError: expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "serious",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:60:9
++     58|       expect(
++     59|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     60|       ).toEqual(expected);
++       |         ^
++     61|     },
++     62|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  3 failed | 121 passed | 1 skipped (125)
++   Start at  19:10:32
++   Duration  7.49s (transform 207ms, setup 207ms, collect 917ms, tests 3.86s, environment 3.52s, prepare 1.47s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_followed-zero-to-warning.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_followed-zero-to-warning.log
+new file mode 100644
+index 0000000..4292d7a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_followed-zero-to-warning.log
+@@ -0,0 +1,49 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w1/web
++
++ ✓ src/components/token-literals.test.ts (30 tests) 253ms
++ ❯ src/components/patterns/worst-data-tier.test.ts (54 tests | 2 failed | 1 skipped) 16ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 4ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++ ✓ src/components/patterns/tiers.test.ts (41 tests) 3703ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 770ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new status kind fails to type-check in both tierOf and labelOf 342ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new scores state fails to type-check in both tierOf and labelOf 361ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new download state fails to type-check inside every function that switches on it 368ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new result outcome fails to type-check inside every function that switches on it 316ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new item kind fails to type-check inside every function that switches on it 1017ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:43:9
++     41|       expect(
++     42|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     43|       ).toEqual(expected);
++       |         ^
++     44|     },
++     45|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  2 failed | 122 passed | 1 skipped (125)
++   Start at  19:10:32
++   Duration  7.50s (transform 432ms, setup 573ms, collect 1.13s, tests 3.97s, environment 3.00s, prepare 1.75s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_reviewer-followed-gt-zero.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_reviewer-followed-gt-zero.log
+new file mode 100644
+index 0000000..ec67f05
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_reviewer-followed-gt-zero.log
+@@ -0,0 +1,49 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w0/web
++
++ ✓ src/components/token-literals.test.ts (30 tests) 203ms
++ ❯ src/components/patterns/worst-data-tier.test.ts (54 tests | 2 failed | 1 skipped) 18ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 5ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++ ✓ src/components/patterns/tiers.test.ts (41 tests) 3587ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 791ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new status kind fails to type-check in both tierOf and labelOf 352ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new scores state fails to type-check in both tierOf and labelOf 344ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new download state fails to type-check inside every function that switches on it 321ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new check name fails to type-check inside every function that switches on it 304ms
++   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new item kind fails to type-check inside every function that switches on it 828ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:43:9
++     41|       expect(
++     42|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     43|       ).toEqual(expected);
++       |         ^
++     44|     },
++     45|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  2 failed | 122 passed | 1 skipped (125)
++   Start at  19:10:32
++   Duration  7.45s (transform 397ms, setup 407ms, collect 1.15s, tests 3.81s, environment 3.40s, prepare 2.16s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..5886f5e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,79 @@
++{
++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run --root web src/components/patterns/worst-data-tier.test.ts src/components/patterns/tiers.test.ts src/components/token-literals.test.ts && npx tsc --noEmit",
++  "repo_head": "fcdc56eecf82c65aa0f9d1ee54af618ea415cf56",
++  "tree_patch_sha256": "b17169b453833afc5f747a23aaaf5afc3cceef36eb2692fa38711057005e0189",
++  "mutants_sha256": "77622a009b0aa5f4916abea221f421616779efaf8c37d96529236bea8829dab0",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-2.json",
++  "jobs": 3,
++  "planned": 3,
++  "started": "2026-11-09T01:10:14Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 17.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "da669f6d0d2c2fe7c445da6a51d40038ed2edea8ec5d7505c0920f7b2f43a0d9"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 17.2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "b3347a28b85610574e7748a4a6d95ae1c28b82da93b66dfd52fe1de2c1ce6d62"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 17.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "d2397d0a68e00bca73bfb457e36ee93e356a793f7cd4f0fee5b1751d02cfd6ee"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:reviewer-followed-gt-zero",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "affectedCount >= followedCount ? \"critical\"",
++      "new": "affectedCount >= followedCount && followedCount > 0 ? \"critical\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 8.7,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_reviewer-followed-gt-zero.log",
++      "log_sha256": "784e6c3b99802d317c046b3b3ef2d2749ce01dc3fb3da52438a3423a929b778e"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:followed-zero-to-warning",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "affectedCount >= followedCount ? \"critical\"",
++      "new": "affectedCount >= followedCount && followedCount !== 0 ? \"critical\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 8.7,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_followed-zero-to-warning.log",
++      "log_sha256": "4cdc28f8dc687bb7cf203bdfd1bbc9ca0a16da430563470df6823fae9b565382"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:critical-to-gt",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "affectedCount >= followedCount ? \"critical\"",
++      "new": "affectedCount > followedCount ? \"critical\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 8.7,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_critical-to-gt.log",
++      "log_sha256": "8790ca4b08b069ba532a43017344330d955d351e78c4b8286db30f19260fecf9"
++    }
++  ],
++  "finished": "2026-11-09T01:10:40Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-2-followed-zero.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-2-followed-zero.log
+new file mode 100644
+index 0000000..69347b3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-2-followed-zero.log
+@@ -0,0 +1,42 @@
++RED for cycle-2 (review v1 IR-001): the production code already behaves so, so the observed failure is the non-equivalent survivor re-applied to worst-data-tier.ts; each fails the new followedCount 0 rows.
++=== baseline-w0.log
++      Tests  124 passed | 1 skipped (125)
++=== baseline-w1.log
++      Tests  124 passed | 1 skipped (125)
++=== baseline-w2.log
++      Tests  124 passed | 1 skipped (125)
++=== web_src_components_patterns_worst-data-tier.ts_manual_critical-to-gt.log
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 13ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 9ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 1ms
++     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++     43|       ).toEqual(expected);
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++=== web_src_components_patterns_worst-data-tier.ts_manual_followed-zero-to-warning.log
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 4ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++     43|       ).toEqual(expected);
++      Tests  2 failed | 122 passed | 1 skipped (125)
++=== web_src_components_patterns_worst-data-tier.ts_manual_reviewer-followed-gt-zero.log
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 5ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++     43|       ).toEqual(expected);
++      Tests  2 failed | 122 passed | 1 skipped (125)
+diff --git a/web/src/components/patterns/worst-data-tier.test.ts b/web/src/components/patterns/worst-data-tier.test.ts
+index d5d6be1..f2094eb 100644
+--- a/web/src/components/patterns/worst-data-tier.test.ts
++++ b/web/src/components/patterns/worst-data-tier.test.ts
+@@ -31,6 +31,9 @@ describe("worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4)", () => {
+     [1, 1, { tier: "critical", word: "No", downloadClause: null }],
+     [11, 10, { tier: "critical", word: "No", downloadClause: null }],
+     [0, 0, { tier: "good", word: "Yes", downloadClause: null }],
++    // DEC-0312: an inconsistent read (affected with nobody followed) is critical, never better than the data.
++    [1, 0, { tier: "critical", word: "No", downloadClause: null }],
++    [5, 0, { tier: "critical", word: "No", downloadClause: null }],
+   ];
+   it.each(problemRows)(
+     "succeeded download, affected %i of %i",

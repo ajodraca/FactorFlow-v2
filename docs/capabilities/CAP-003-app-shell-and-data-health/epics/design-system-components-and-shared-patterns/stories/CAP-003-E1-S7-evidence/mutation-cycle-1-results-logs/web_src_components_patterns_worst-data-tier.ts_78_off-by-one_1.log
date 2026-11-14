@@ -1,0 +1,117 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 4 failed | 1 skipped) 26ms
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current 8ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 1ms
+     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good) 1ms
+     → expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict 0ms
+     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current
+AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "verdict",
+-   "label": "Mostly yes",
++   "from": "scores",
++   "label": "Not reflecting the latest download",
+    "tier": "warning",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:104:59
+    102| 
+    103|   it("a tie goes to the verdict: warning + not_current", () => {
+    104|     expect(dataTileBadge(WARNING, scores("not_current"))).toEqual({
+       |                                                           ^
+    105|       tier: "warning",
+    106|       label: "Mostly yes",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
+AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "verdict",
+-   "label": "Yes",
+-   "tier": "good",
++   "from": "scores",
++   "label": "Updating",
++   "tier": "active",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
+    131|     "good verdict stays when scores are %j (active ranks alongside goo…
+    132|     (s) => {
+    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
+       |                                      ^
+    134|     },
+    135|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good)
+AssertionError: expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "verdict",
+-   "label": "Yes",
++   "from": "scores",
++   "label": "Current",
+    "tier": "good",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
+    131|     "good verdict stays when scores are %j (active ranks alongside goo…
+    132|     (s) => {
+    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
+       |                                      ^
+    134|     },
+    135|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict
+AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "verdict",
+-   "label": "No",
++   "from": "scores",
++   "label": "Score update failed",
+    "tier": "critical",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:154:55
+    152| 
+    153|   it("critical + failed: a tie at critical goes to the verdict", () =>…
+    154|     expect(dataTileBadge(CRITICAL, scores("failed"))).toEqual({
+       |                                                       ^
+    155|       tier: "critical",
+    156|       label: "No",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 47 passed | 1 skipped (52)
+   Start at  18:22:53
+   Duration  4.50s (transform 252ms, setup 143ms, collect 368ms, tests 26ms, environment 1.49s, prepare 745ms)
+

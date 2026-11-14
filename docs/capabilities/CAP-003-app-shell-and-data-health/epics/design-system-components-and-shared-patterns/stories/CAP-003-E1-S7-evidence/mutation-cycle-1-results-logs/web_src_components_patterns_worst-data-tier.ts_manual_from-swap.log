@@ -1,0 +1,87 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 43ms
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed 13ms
+     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win 1ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win 7ms
+     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed
+AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "scores",
++   "from": "verdict",
+    "label": "Score update failed",
+    "tier": "critical",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:96:54
+     94| 
+     95|   it("a worse score state wins with its own label: warning + failed", …
+     96|     expect(dataTileBadge(WARNING, scores("failed"))).toEqual({
+       |                                                      ^
+     97|       tier: "critical",
+     98|       label: "Score update failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win
+AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "scores",
++   "from": "verdict",
+    "label": "Not reflecting the latest download",
+    "tier": "warning",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:123:56
+    121| 
+    122|   it("good + not_current: the scores win", () => {
+    123|     expect(dataTileBadge(GOOD, scores("not_current"))).toEqual({
+       |                                                        ^
+    124|       tier: "warning",
+    125|       label: "Not reflecting the latest download",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win
+AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "scores",
++   "from": "verdict",
+    "label": "Score update failed",
+    "tier": "critical",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:146:54
+    144| 
+    145|   it("serious + failed: the scores win", () => {
+    146|     expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
+       |                                                      ^
+    147|       tier: "critical",
+    148|       label: "Score update failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 48 passed | 1 skipped (52)
+   Start at  18:23:17
+   Duration  1.84s (transform 97ms, setup 102ms, collect 106ms, tests 43ms, environment 488ms, prepare 298ms)
+

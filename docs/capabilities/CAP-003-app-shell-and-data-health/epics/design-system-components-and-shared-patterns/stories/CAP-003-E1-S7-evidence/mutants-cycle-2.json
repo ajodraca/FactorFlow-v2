@@ -1,0 +1,31 @@
+{
+ "schema": 1,
+ "repo_head": "6e570b27d3a2593143ac50b1664a89d203db9591",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:reviewer-followed-gt-zero",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "affectedCount >= followedCount ? \"critical\"",
+   "new": "affectedCount >= followedCount && followedCount > 0 ? \"critical\""
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:followed-zero-to-warning",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "affectedCount >= followedCount ? \"critical\"",
+   "new": "affectedCount >= followedCount && followedCount !== 0 ? \"critical\""
+  },
+  {
+   "id": "web/src/components/patterns/worst-data-tier.ts:manual:critical-to-gt",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/components/patterns/worst-data-tier.ts",
+   "old": "affectedCount >= followedCount ? \"critical\"",
+   "new": "affectedCount > followedCount ? \"critical\""
+  }
+ ]
+}

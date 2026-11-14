@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (54 tests | 2 failed | 1 skipped) 15ms
+   × TIER_ORDER is the one tier order (TC-COMP-027, DAC-E1-S7-2) > exactly one source declares TIER_ORDER, exported, in worst-data-tier.ts 5ms
+     → expected [ …(2) ] to deeply equal [ Array(1) ]
+   × TIER_ORDER is the one tier order (TC-COMP-027, DAC-E1-S7-2) > every other source that mentions TIER_ORDER imports it from worst-data-tier 1ms
+     → expected [ Array(1) ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER is the one tier order (TC-COMP-027, DAC-E1-S7-2) > exactly one source declares TIER_ORDER, exported, in worst-data-tier.ts
+AssertionError: expected [ …(2) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  Array [
++   "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/planted-order.ts",
+    "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/worst-data-tier.ts",
+  ]
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:230:23
+    228|       /\b(?:const|let|var)\s+TIER_ORDER\b/.test(stripped.get(file) ?? …
+    229|     );
+    230|     expect(declaring).toEqual([ORDER_MODULE]);
+       |                       ^
+    231|     const exported = (stripped.get(ORDER_MODULE) ?? "").match(/export\…
+    232|     expect(exported).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER is the one tier order (TC-COMP-027, DAC-E1-S7-2) > every other source that mentions TIER_ORDER imports it from worst-data-tier
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/planted-order.ts",
++ ]
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:240:23
+    238|       return file !== ORDER_MODULE && /\bTIER_ORDER\b/.test(text) && !…
+    239|     });
+    240|     expect(offenders).toEqual([]);
+       |                       ^
+    241|   });
+    242| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 51 passed | 1 skipped (54)
+   Start at  19:11:28
+   Duration  3.93s (transform 116ms, setup 115ms, collect 54ms, tests 15ms, environment 1.77s, prepare 772ms)
+

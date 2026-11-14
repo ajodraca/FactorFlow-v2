@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-egwrzyre/w1/web
+
+ ✓ src/components/token-literals.test.ts (30 tests) 253ms
+ ❯ src/components/patterns/worst-data-tier.test.ts (54 tests | 2 failed | 1 skipped) 16ms
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0 4ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0 1ms
+     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+ ✓ src/components/patterns/tiers.test.ts (41 tests) 3703ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > the unspliced source type-checks clean 770ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new status kind fails to type-check in both tierOf and labelOf 342ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new scores state fails to type-check in both tierOf and labelOf 361ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new download state fails to type-check inside every function that switches on it 368ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new result outcome fails to type-check inside every function that switches on it 316ms
+   ✓ Status exhaustiveness (TC-COMP-020, DAC-E1-S5-1) > a new item kind fails to type-check inside every function that switches on it 1017ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 0
+ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 5 of 0
+AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
+
+- Expected
++ Received
+
+  Object {
+    "downloadClause": null,
+-   "tier": "critical",
+-   "word": "No",
++   "tier": "warning",
++   "word": "Mostly yes",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:43:9
+     41|       expect(
+     42|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
+     43|       ).toEqual(expected);
+       |         ^
+     44|     },
+     45|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 122 passed | 1 skipped (125)
+   Start at  19:10:32
+   Duration  7.50s (transform 432ms, setup 573ms, collect 1.13s, tests 3.97s, environment 3.00s, prepare 1.75s)
+

@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 2 failed | 1 skipped) 34ms
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win 9ms
+     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', …(2) }
+   × TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise 1ms
+     → expected 1 to be less than 1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win
+AssertionError: expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "scores",
+-   "label": "Score update failed",
+-   "tier": "critical",
++   "from": "verdict",
++   "label": "Mostly yes",
++   "tier": "serious",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:146:54
+    144| 
+    145|   it("serious + failed: the scores win", () => {
+    146|     expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
+       |                                                      ^
+    147|       tier: "critical",
+    148|       label: "Score update failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise
+AssertionError: expected 1 to be less than 1
+ ❯ src/components/patterns/worst-data-tier.test.ts:276:33
+    274| 
+    275|   it("critical < serious < warning < good < neutral, pairwise", () => {
+    276|     expect(TIER_ORDER.critical).toBeLessThan(TIER_ORDER.serious);
+       |                                 ^
+    277|     expect(TIER_ORDER.serious).toBeLessThan(TIER_ORDER.warning);
+    278|     expect(TIER_ORDER.warning).toBeLessThan(TIER_ORDER.good);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 49 passed | 1 skipped (52)
+   Start at  18:22:43
+   Duration  2.71s (transform 117ms, setup 99ms, collect 122ms, tests 34ms, environment 527ms, prepare 650ms)
+

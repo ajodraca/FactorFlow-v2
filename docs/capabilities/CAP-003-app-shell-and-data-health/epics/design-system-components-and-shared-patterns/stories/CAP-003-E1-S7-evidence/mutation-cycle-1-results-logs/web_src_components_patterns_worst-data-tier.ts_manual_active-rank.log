@@ -1,0 +1,88 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 26ms
+   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 8ms
+     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
+   × TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good 1ms
+     → expected 2 to be 3 // Object.is equality
+   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 1ms
+     → expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
+AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "from": "verdict",
+-   "label": "Yes",
+-   "tier": "good",
++   "from": "scores",
++   "label": "Updating",
++   "tier": "active",
+  }
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
+    131|     "good verdict stays when scores are %j (active ranks alongside goo…
+    132|     (s) => {
+    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
+       |                                      ^
+    134|     },
+    135|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good
+AssertionError: expected 2 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:283:31
+    281| 
+    282|   it("active ranks alongside good", () => {
+    283|     expect(TIER_ORDER.active).toBe(TIER_ORDER.good);
+       |                               ^
+    284|   });
+    285| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
+AssertionError: expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
+
+- Expected
++ Received
+
+  Array [
+    "critical",
+    "serious",
++   "active",
+    "warning",
+    "good",
+-   "active",
+    "neutral",
+  ]
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
+    287|     const list = ["neutral", "good", "critical", "active", "warning", …
+    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
+    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
+       |                    ^
+    290|   });
+    291| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 48 passed | 1 skipped (52)
+   Start at  18:23:01
+   Duration  4.65s (transform 386ms, setup 456ms, collect 186ms, tests 26ms, environment 947ms, prepare 393ms)
+

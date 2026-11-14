@@ -1,0 +1,3686 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..dae5480
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-1.json
+@@ -0,0 +1,236 @@
++{
++ "schema": 1,
++ "repo_head": "6e570b27d3a2593143ac50b1664a89d203db9591",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:20:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 20,
++   "original": "  critical: 0,",
++   "mutated": "  critical: 1,"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:21:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 21,
++   "original": "  serious: 1,",
++   "mutated": "  serious: 2,"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:22:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 22,
++   "original": "  warning: 2,",
++   "mutated": "  warning: 3,"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:23:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 23,
++   "original": "  good: 3,",
++   "mutated": "  good: 4,"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:24:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 24,
++   "original": "  active: 3,",
++   "mutated": "  active: 4,"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:25:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 25,
++   "original": "  neutral: 4,",
++   "mutated": "  neutral: 5,"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:53:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 53,
++   "original": "    affectedCount === 0 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
++   "mutated": "    affectedCount === 0 ? \"good\" : affectedCount > followedCount ? \"critical\" : \"warning\";"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:53:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 53,
++   "original": "    affectedCount === 0 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
++   "mutated": "    affectedCount === 1 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:65:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 65,
++   "original": "  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
++   "mutated": "  if (downloadTier !== null || TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:65:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 65,
++   "original": "  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
++   "mutated": "  if (downloadTier !== null && TIER_ORDER[downloadTier] <= TIER_ORDER[tier]) {"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:78:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 78,
++   "original": "  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
++   "mutated": "  if (scores !== null || TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:78:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 78,
++   "original": "  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
++   "mutated": "  if (scores !== null && TIER_ORDER[tierOf(scores)] <= TIER_ORDER[verdict.tier]) {"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:81:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "line": 81,
++   "original": "  return { tier: verdict.tier, label: verdict.word, from: \"verdict\" };",
++   "mutated": "  return { tier: nil, label: verdict.word, from: \"verdict\" };"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:active-rank",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "active: 3",
++   "new": "active: 2"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:tie-to-scores",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]",
++   "new": "TIER_ORDER[tierOf(scores)] <= TIER_ORDER[verdict.tier]"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:clause-only-if-wins",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "  return { tier, word: WORD[tier], downloadClause };",
++   "new": "  return { tier, word: WORD[tier], downloadClause: tier === downloadTier ? downloadClause : null };"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:ge-to-gt",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "affectedCount >= followedCount",
++   "new": "affectedCount > followedCount"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:serious-word",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "serious: \"Mostly yes\"",
++   "new": "serious: \"No\""
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:drop-freeze",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "Object.freeze({",
++   "new": "({"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:zero-to-ge",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "affectedCount === 0 ?",
++   "new": "affectedCount <= 0 ?"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:download-lt-to-le",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "TIER_ORDER[downloadTier] < TIER_ORDER[tier]",
++   "new": "TIER_ORDER[downloadTier] <= TIER_ORDER[tier]"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:abandoned-warning",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "downloadTier = \"serious\"",
++   "new": "downloadTier = \"warning\""
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:failed-clause",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "downloadClause = \"failed\"",
++   "new": "downloadClause = \"interrupted\""
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:null-guard",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "latestTerminalDownload === null",
++   "new": "latestTerminalDownload !== null"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:verdict-null-guard",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "verdict === null",
++   "new": "verdict !== null"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:label-verdict",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "label: labelOf(scores)",
++   "new": "label: verdict.word"
++  },
++  {
++   "id": "web/src/components/patterns/worst-data-tier.ts:manual:from-swap",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/components/patterns/worst-data-tier.ts",
++   "old": "from: \"scores\"",
++   "new": "from: \"verdict\""
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..30580d8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 28ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:22:38
++   Duration  3.32s (transform 134ms, setup 159ms, collect 133ms, tests 28ms, environment 799ms, prepare 819ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..69836ec
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 24ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:22:38
++   Duration  3.28s (transform 85ms, setup 149ms, collect 127ms, tests 24ms, environment 783ms, prepare 577ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..bb0f19c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 22ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:22:38
++   Duration  3.28s (transform 111ms, setup 159ms, collect 121ms, tests 22ms, environment 807ms, prepare 609ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+new file mode 100644
+index 0000000..c1abb0e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 21ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:22:38
++   Duration  3.28s (transform 144ms, setup 144ms, collect 141ms, tests 21ms, environment 804ms, prepare 662ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_20_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_20_off-by-one_1.log
+new file mode 100644
+index 0000000..6f45007
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_20_off-by-one_1.log
+@@ -0,0 +1,53 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 2 failed | 1 skipped) 34ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win 9ms
++     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', …(2) }
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise 1ms
++     → expected 1 to be less than 1
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win
++AssertionError: expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "scores",
++-   "label": "Score update failed",
++-   "tier": "critical",
+++   "from": "verdict",
+++   "label": "Mostly yes",
+++   "tier": "serious",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:146:54
++    144| 
++    145|   it("serious + failed: the scores win", () => {
++    146|     expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
++       |                                                      ^
++    147|       tier: "critical",
++    148|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise
++AssertionError: expected 1 to be less than 1
++ ❯ src/components/patterns/worst-data-tier.test.ts:276:33
++    274| 
++    275|   it("critical < serious < warning < good < neutral, pairwise", () => {
++    276|     expect(TIER_ORDER.critical).toBeLessThan(TIER_ORDER.serious);
++       |                                 ^
++    277|     expect(TIER_ORDER.serious).toBeLessThan(TIER_ORDER.warning);
++    278|     expect(TIER_ORDER.warning).toBeLessThan(TIER_ORDER.good);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 49 passed | 1 skipped (52)
++   Start at  18:22:43
++   Duration  2.71s (transform 117ms, setup 99ms, collect 122ms, tests 34ms, environment 527ms, prepare 650ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_21_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_21_off-by-one_1.log
+new file mode 100644
+index 0000000..4413430
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_21_off-by-one_1.log
+@@ -0,0 +1,79 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 40ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10 12ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise 1ms
++     → expected 2 to be less than 2
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 1ms
++     → expected [ 'critical', 'warning', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++-   "tier": "serious",
+++   "tier": "warning",
++    "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise
++AssertionError: expected 2 to be less than 2
++ ❯ src/components/patterns/worst-data-tier.test.ts:277:32
++    275|   it("critical < serious < warning < good < neutral, pairwise", () => {
++    276|     expect(TIER_ORDER.critical).toBeLessThan(TIER_ORDER.serious);
++    277|     expect(TIER_ORDER.serious).toBeLessThan(TIER_ORDER.warning);
++       |                                ^
++    278|     expect(TIER_ORDER.warning).toBeLessThan(TIER_ORDER.good);
++    279|     expect(TIER_ORDER.good).toBeLessThan(TIER_ORDER.neutral);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
++AssertionError: expected [ 'critical', 'warning', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++- Expected
+++ Received
++
++  Array [
++    "critical",
++-   "serious",
++    "warning",
+++   "serious",
++    "good",
++    "active",
++    "neutral",
++  ]
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
++    287|     const list = ["neutral", "good", "critical", "active", "warning", …
++    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
++    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
++       |                    ^
++    290|   });
++    291| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:22:43
++   Duration  2.74s (transform 108ms, setup 137ms, collect 98ms, tests 40ms, environment 547ms, prepare 408ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_22_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_22_off-by-one_1.log
+new file mode 100644
+index 0000000..0ec6e52
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_22_off-by-one_1.log
+@@ -0,0 +1,81 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 34ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win 11ms
++     → expected { tier: 'good', label: 'Yes', …(1) } to deeply equal { tier: 'warning', …(2) }
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise 1ms
++     → expected 3 to be less than 3
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 1ms
++     → expected [ 'critical', 'serious', 'good', …(3) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win
++AssertionError: expected { tier: 'good', label: 'Yes', …(1) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "scores",
++-   "label": "Not reflecting the latest download",
++-   "tier": "warning",
+++   "from": "verdict",
+++   "label": "Yes",
+++   "tier": "good",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:123:56
++    121| 
++    122|   it("good + not_current: the scores win", () => {
++    123|     expect(dataTileBadge(GOOD, scores("not_current"))).toEqual({
++       |                                                        ^
++    124|       tier: "warning",
++    125|       label: "Not reflecting the latest download",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise
++AssertionError: expected 3 to be less than 3
++ ❯ src/components/patterns/worst-data-tier.test.ts:278:32
++    276|     expect(TIER_ORDER.critical).toBeLessThan(TIER_ORDER.serious);
++    277|     expect(TIER_ORDER.serious).toBeLessThan(TIER_ORDER.warning);
++    278|     expect(TIER_ORDER.warning).toBeLessThan(TIER_ORDER.good);
++       |                                ^
++    279|     expect(TIER_ORDER.good).toBeLessThan(TIER_ORDER.neutral);
++    280|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
++AssertionError: expected [ 'critical', 'serious', 'good', …(3) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++- Expected
+++ Received
++
++  Array [
++    "critical",
++    "serious",
++-   "warning",
++    "good",
++    "active",
+++   "warning",
++    "neutral",
++  ]
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
++    287|     const list = ["neutral", "good", "critical", "active", "warning", …
++    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
++    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
++       |                    ^
++    290|   });
++    291| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:22:43
++   Duration  2.82s (transform 117ms, setup 151ms, collect 93ms, tests 34ms, environment 611ms, prepare 660ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_23_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_23_off-by-one_1.log
+new file mode 100644
+index 0000000..1e07b06
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_23_off-by-one_1.log
+@@ -0,0 +1,102 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 4 failed | 1 skipped) 33ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 9ms
++     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise 1ms
++     → expected 4 to be less than 4
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good 1ms
++     → expected 3 to be 4 // Object.is equality
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 1ms
++     → expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
++-   "tier": "good",
+++   "from": "scores",
+++   "label": "Updating",
+++   "tier": "active",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > critical < serious < warning < good < neutral, pairwise
++AssertionError: expected 4 to be less than 4
++ ❯ src/components/patterns/worst-data-tier.test.ts:279:29
++    277|     expect(TIER_ORDER.serious).toBeLessThan(TIER_ORDER.warning);
++    278|     expect(TIER_ORDER.warning).toBeLessThan(TIER_ORDER.good);
++    279|     expect(TIER_ORDER.good).toBeLessThan(TIER_ORDER.neutral);
++       |                             ^
++    280|   });
++    281| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good
++AssertionError: expected 3 to be 4 // Object.is equality
++
++- Expected
+++ Received
++
++- 4
+++ 3
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:283:31
++    281| 
++    282|   it("active ranks alongside good", () => {
++    283|     expect(TIER_ORDER.active).toBe(TIER_ORDER.good);
++       |                               ^
++    284|   });
++    285| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
++AssertionError: expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++- Expected
+++ Received
++
++  Array [
++    "critical",
++    "serious",
++    "warning",
++-   "good",
++    "active",
++    "neutral",
+++   "good",
++  ]
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
++    287|     const list = ["neutral", "good", "critical", "active", "warning", …
++    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
++    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
++       |                    ^
++    290|   });
++    291| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 47 passed | 1 skipped (52)
++   Start at  18:22:43
++   Duration  2.72s (transform 117ms, setup 107ms, collect 113ms, tests 33ms, environment 522ms, prepare 420ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_24_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_24_off-by-one_1.log
+new file mode 100644
+index 0000000..d3cc396
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_24_off-by-one_1.log
+@@ -0,0 +1,61 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 2 failed | 1 skipped) 58ms
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good 8ms
++     → expected 4 to be 3 // Object.is equality
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 2ms
++     → expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good
++AssertionError: expected 4 to be 3 // Object.is equality
++
++- Expected
+++ Received
++
++- 3
+++ 4
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:283:31
++    281| 
++    282|   it("active ranks alongside good", () => {
++    283|     expect(TIER_ORDER.active).toBe(TIER_ORDER.good);
++       |                               ^
++    284|   });
++    285| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
++AssertionError: expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++- Expected
+++ Received
++
++  Array [
++    "critical",
++    "serious",
++    "warning",
++    "good",
++-   "active",
++    "neutral",
+++   "active",
++  ]
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
++    287|     const list = ["neutral", "good", "critical", "active", "warning", …
++    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
++    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
++       |                    ^
++    290|   });
++    291| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 49 passed | 1 skipped (52)
++   Start at  18:22:47
++   Duration  3.20s (transform 198ms, setup 246ms, collect 219ms, tests 58ms, environment 679ms, prepare 867ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_25_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_25_off-by-one_1.log
+new file mode 100644
+index 0000000..a29bae6
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_25_off-by-one_1.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 19ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:22:47
++   Duration  3.14s (transform 151ms, setup 377ms, collect 175ms, tests 19ms, environment 522ms, prepare 893ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_1.log
+new file mode 100644
+index 0000000..b1e3adb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_1.log
+@@ -0,0 +1,67 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 32ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 8ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 5ms
++     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++AssertionError: expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "serious",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:22:47
++   Duration  3.23s (transform 262ms, setup 323ms, collect 190ms, tests 32ms, environment 663ms, prepare 368ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_2.log
+new file mode 100644
+index 0000000..cd2a24c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_2.log
+@@ -0,0 +1,131 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 9 failed | 1 skipped) 57ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 10 22ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 1ms
++     → expected { tier: 'good', word: 'Yes', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 0 1ms
++     → expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > requested download contributes no tier 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > running download contributes no tier 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelling download contributes no tier 0ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download contributes no tier 0ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > partial download contributes no tier 0ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelled download contributes no tier 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 10
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "good",
++-   "word": "Yes",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
++AssertionError: expected { tier: 'good', word: 'Yes', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "good",
+++   "word": "Yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 0
++AssertionError: expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "good",
++-   "word": "Yes",
+++   "tier": "critical",
+++   "word": "No",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > requested download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > running download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelling download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > partial download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelled download contributes no tier
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "good",
++-   "word": "Yes",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:75:9
++     73|       expect(
++     74|         worstDataTier({ affectedCount: 0, followedCount: 10, latestTer…
++     75|       ).toEqual({ tier: "good", word: "Yes", downloadClause: null });
++       |         ^
++     76|       expect(
++     77|         worstDataTier({ affectedCount: 3, followedCount: 10, latestTer…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
++
++ Test Files  1 failed (1)
++      Tests  9 failed | 42 passed | 1 skipped (52)
++   Start at  18:22:47
++   Duration  3.21s (transform 160ms, setup 128ms, collect 170ms, tests 57ms, environment 888ms, prepare 829ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_negate-boolean_1.log
+new file mode 100644
+index 0000000..8542aab
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_negate-boolean_1.log
+@@ -0,0 +1,38 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 failed | 1 skipped) 28ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 7ms
++     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++AssertionError: expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "serious",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 50 passed | 1 skipped (52)
++   Start at  18:22:53
++   Duration  5.17s (transform 334ms, setup 145ms, collect 373ms, tests 28ms, environment 1.81s, prepare 1.96s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_off-by-one_1.log
+new file mode 100644
+index 0000000..e6c0a14
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_off-by-one_1.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 22ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:22:53
++   Duration  4.82s (transform 154ms, setup 143ms, collect 250ms, tests 22ms, environment 774ms, prepare 394ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_negate-boolean_1.log
+new file mode 100644
+index 0000000..1f10b35
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_negate-boolean_1.log
+@@ -0,0 +1,284 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 11 failed | 1 skipped) 58ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current 24ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are null 1ms
++     → Cannot read properties of null (reading 'of')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"never_classified"} 1ms
++     → expected { tier: 'neutral', …(2) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"building"} 1ms
++     → expected { tier: 'active', …(2) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"current"} 1ms
++     → expected { Object (tier, label, ...) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are null (active ranks alongside good) 0ms
++     → Cannot read properties of null (reading 'of')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 1ms
++     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"never_classified"} (active ranks alongside good) 6ms
++     → expected { tier: 'neutral', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good) 1ms
++     → expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious outranks warning: serious + not_current 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict 1ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
+++   "from": "scores",
+++   "label": "Not reflecting the latest download",
++    "tier": "warning",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:104:59
++    102| 
++    103|   it("a tie goes to the verdict: warning + not_current", () => {
++    104|     expect(dataTileBadge(WARNING, scores("not_current"))).toEqual({
++       |                                                           ^
++    105|       tier: "warning",
++    106|       label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are null
++TypeError: Cannot read properties of null (reading 'of')
++ ❯ Module.tierOf src/components/patterns/tiers.ts:43:18
++     41| 
++     42| export function tierOf(status: Status): Tier {
++     43|   switch (status.of) {
++       |                  ^
++     44|     case "download":
++     45|       switch (status.state) {
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:78:37
++ ❯ src/components/patterns/worst-data-tier.test.ts:114:14
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"never_classified"}
++AssertionError: expected { tier: 'neutral', …(2) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
++-   "tier": "warning",
+++   "from": "scores",
+++   "label": "No scores yet",
+++   "tier": "neutral",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:114:41
++    112|     "warning verdict stays when scores are %j",
++    113|     (s) => {
++    114|       expect(dataTileBadge(WARNING, s)).toEqual({
++       |                                         ^
++    115|         tier: "warning",
++    116|         label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"building"}
++AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
++-   "tier": "warning",
+++   "from": "scores",
+++   "label": "Updating",
+++   "tier": "active",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:114:41
++    112|     "warning verdict stays when scores are %j",
++    113|     (s) => {
++    114|       expect(dataTileBadge(WARNING, s)).toEqual({
++       |                                         ^
++    115|         tier: "warning",
++    116|         label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"current"}
++AssertionError: expected { Object (tier, label, ...) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
++-   "tier": "warning",
+++   "from": "scores",
+++   "label": "Current",
+++   "tier": "good",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:114:41
++    112|     "warning verdict stays when scores are %j",
++    113|     (s) => {
++    114|       expect(dataTileBadge(WARNING, s)).toEqual({
++       |                                         ^
++    115|         tier: "warning",
++    116|         label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are null (active ranks alongside good)
++TypeError: Cannot read properties of null (reading 'of')
++ ❯ Module.tierOf src/components/patterns/tiers.ts:43:18
++     41| 
++     42| export function tierOf(status: Status): Tier {
++     43|   switch (status.of) {
++       |                  ^
++     44|     case "download":
++     45|       switch (status.state) {
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:78:37
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:14
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
++-   "tier": "good",
+++   "from": "scores",
+++   "label": "Updating",
+++   "tier": "active",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"never_classified"} (active ranks alongside good)
++AssertionError: expected { tier: 'neutral', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
++-   "tier": "good",
+++   "from": "scores",
+++   "label": "No scores yet",
+++   "tier": "neutral",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good)
++AssertionError: expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
+++   "from": "scores",
+++   "label": "Current",
++    "tier": "good",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious outranks warning: serious + not_current
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
++-   "tier": "serious",
+++   "from": "scores",
+++   "label": "Not reflecting the latest download",
+++   "tier": "warning",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:138:59
++    136| 
++    137|   it("serious outranks warning: serious + not_current", () => {
++    138|     expect(dataTileBadge(SERIOUS, scores("not_current"))).toEqual({
++       |                                                           ^
++    139|       tier: "serious",
++    140|       label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "No",
+++   "from": "scores",
+++   "label": "Score update failed",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:154:55
++    152| 
++    153|   it("critical + failed: a tie at critical goes to the verdict", () =>…
++    154|     expect(dataTileBadge(CRITICAL, scores("failed"))).toEqual({
++       |                                                       ^
++    155|       tier: "critical",
++    156|       label: "No",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯
++
++ Test Files  1 failed (1)
++      Tests  11 failed | 40 passed | 1 skipped (52)
++   Start at  18:22:53
++   Duration  5.13s (transform 328ms, setup 134ms, collect 280ms, tests 58ms, environment 1.48s, prepare 2.43s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_off-by-one_1.log
+new file mode 100644
+index 0000000..ba64fda
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_off-by-one_1.log
+@@ -0,0 +1,117 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 4 failed | 1 skipped) 26ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current 8ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 1ms
++     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good) 1ms
++     → expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict 0ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
+++   "from": "scores",
+++   "label": "Not reflecting the latest download",
++    "tier": "warning",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:104:59
++    102| 
++    103|   it("a tie goes to the verdict: warning + not_current", () => {
++    104|     expect(dataTileBadge(WARNING, scores("not_current"))).toEqual({
++       |                                                           ^
++    105|       tier: "warning",
++    106|       label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
++-   "tier": "good",
+++   "from": "scores",
+++   "label": "Updating",
+++   "tier": "active",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good)
++AssertionError: expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
+++   "from": "scores",
+++   "label": "Current",
++    "tier": "good",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "No",
+++   "from": "scores",
+++   "label": "Score update failed",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:154:55
++    152| 
++    153|   it("critical + failed: a tie at critical goes to the verdict", () =>…
++    154|     expect(dataTileBadge(CRITICAL, scores("failed"))).toEqual({
++       |                                                       ^
++    155|       tier: "critical",
++    156|       label: "No",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 47 passed | 1 skipped (52)
++   Start at  18:22:53
++   Duration  4.50s (transform 252ms, setup 143ms, collect 368ms, tests 26ms, environment 1.49s, prepare 745ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_81_drop-field-copy_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_81_drop-field-copy_1.log
+new file mode 100644
+index 0000000..4524426
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_81_drop-field-copy_1.log
+@@ -0,0 +1,105 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 11 failed | 1 skipped) 29ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current 6ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are null 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"never_classified"} 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"building"} 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"current"} 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are null (active ranks alongside good) 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"never_classified"} (active ranks alongside good) 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good) 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious outranks warning: serious + not_current 0ms
++     → nil is not defined
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict 0ms
++     → nil is not defined
++
++⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current
++ReferenceError: nil is not defined
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:81:18
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++     81|   return { tier: nil, label: verdict.word, from: "verdict" };
++       |                  ^
++     82| }
++     83| 
++ ❯ src/components/patterns/worst-data-tier.test.ts:104:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are null
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"never_classified"}
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"building"}
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"current"}
++ReferenceError: nil is not defined
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:81:18
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++     81|   return { tier: nil, label: verdict.word, from: "verdict" };
++       |                  ^
++     82| }
++     83| 
++ ❯ src/components/patterns/worst-data-tier.test.ts:114:14
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are null (active ranks alongside good)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"never_classified"} (active ranks alongside good)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good)
++ReferenceError: nil is not defined
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:81:18
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++     81|   return { tier: nil, label: verdict.word, from: "verdict" };
++       |                  ^
++     82| }
++     83| 
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:14
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious outranks warning: serious + not_current
++ReferenceError: nil is not defined
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:81:18
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++     81|   return { tier: nil, label: verdict.word, from: "verdict" };
++       |                  ^
++     82| }
++     83| 
++ ❯ src/components/patterns/worst-data-tier.test.ts:138:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict
++ReferenceError: nil is not defined
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:81:18
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++     81|   return { tier: nil, label: verdict.word, from: "verdict" };
++       |                  ^
++     82| }
++     83| 
++ ❯ src/components/patterns/worst-data-tier.test.ts:154:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
++
++ Test Files  1 failed (1)
++      Tests  11 failed | 40 passed | 1 skipped (52)
++   Start at  18:23:01
++   Duration  4.56s (transform 362ms, setup 266ms, collect 298ms, tests 29ms, environment 1.09s, prepare 1.40s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_abandoned-warning.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_abandoned-warning.log
+new file mode 100644
+index 0000000..99cc2f8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_abandoned-warning.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 2 failed | 1 skipped) 34ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10 8ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10 2ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'serious', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++-   "tier": "serious",
+++   "tier": "warning",
++    "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 49 passed | 1 skipped (52)
++   Start at  18:23:13
++   Duration  2.73s (transform 82ms, setup 107ms, collect 79ms, tests 34ms, environment 507ms, prepare 747ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_active-rank.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_active-rank.log
+new file mode 100644
+index 0000000..090ca3e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_active-rank.log
+@@ -0,0 +1,88 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 26ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 8ms
++     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good 1ms
++     → expected 2 to be 3 // Object.is equality
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 1ms
++     → expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
++-   "tier": "good",
+++   "from": "scores",
+++   "label": "Updating",
+++   "tier": "active",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good
++AssertionError: expected 2 to be 3 // Object.is equality
++
++- Expected
+++ Received
++
++- 3
+++ 2
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:283:31
++    281| 
++    282|   it("active ranks alongside good", () => {
++    283|     expect(TIER_ORDER.active).toBe(TIER_ORDER.good);
++       |                               ^
++    284|   });
++    285| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
++AssertionError: expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
++
++- Expected
+++ Received
++
++  Array [
++    "critical",
++    "serious",
+++   "active",
++    "warning",
++    "good",
++-   "active",
++    "neutral",
++  ]
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
++    287|     const list = ["neutral", "good", "critical", "active", "warning", …
++    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
++    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
++       |                    ^
++    290|   });
++    291| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:23:01
++   Duration  4.65s (transform 386ms, setup 456ms, collect 186ms, tests 26ms, environment 947ms, prepare 393ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_clause-only-if-wins.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_clause-only-if-wins.log
+new file mode 100644
+index 0000000..61511ca
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_clause-only-if-wins.log
+@@ -0,0 +1,37 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 failed | 1 skipped) 34ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 11ms
++     → expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++AssertionError: expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "downloadClause": "interrupted",
+++   "downloadClause": null,
++    "tier": "critical",
++    "word": "No",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 50 passed | 1 skipped (52)
++   Start at  18:23:01
++   Duration  3.96s (transform 305ms, setup 281ms, collect 303ms, tests 34ms, environment 936ms, prepare 476ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_download-lt-to-le.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_download-lt-to-le.log
+new file mode 100644
+index 0000000..fa672db
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_download-lt-to-le.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 27ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:23:13
++   Duration  2.72s (transform 95ms, setup 122ms, collect 88ms, tests 27ms, environment 555ms, prepare 973ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_drop-freeze.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_drop-freeze.log
+new file mode 100644
+index 0000000..68cc879
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_drop-freeze.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 failed | 1 skipped) 110ms
++   × TIER_ORDER semantics (DEC-0217, DEC-0311) > is frozen 70ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > is frozen
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:293:41
++    291| 
++    292|   it("is frozen", () => {
++    293|     expect(Object.isFrozen(TIER_ORDER)).toBe(true);
++       |                                         ^
++    294|   });
++    295| });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 50 passed | 1 skipped (52)
++   Start at  18:23:07
++   Duration  4.85s (transform 144ms, setup 243ms, collect 256ms, tests 110ms, environment 1.32s, prepare 1.13s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_failed-clause.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_failed-clause.log
+new file mode 100644
+index 0000000..412aef6
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_failed-clause.log
+@@ -0,0 +1,43 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 56ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 0 of 10 23ms
++     → expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 3 of 10 8ms
++     → expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 10 of 10 2ms
++     → expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 0 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 3 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 10 of 10
++AssertionError: expected { tier: 'critical', word: 'No', …(1) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "downloadClause": "failed",
+++   "downloadClause": "interrupted",
++    "tier": "critical",
++    "word": "No",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:23:13
++   Duration  2.67s (transform 201ms, setup 110ms, collect 88ms, tests 56ms, environment 523ms, prepare 961ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_from-swap.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_from-swap.log
+new file mode 100644
+index 0000000..dc786ef
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_from-swap.log
+@@ -0,0 +1,87 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 43ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed 13ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win 1ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win 7ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "scores",
+++   "from": "verdict",
++    "label": "Score update failed",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:96:54
++     94| 
++     95|   it("a worse score state wins with its own label: warning + failed", …
++     96|     expect(dataTileBadge(WARNING, scores("failed"))).toEqual({
++       |                                                      ^
++     97|       tier: "critical",
++     98|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "scores",
+++   "from": "verdict",
++    "label": "Not reflecting the latest download",
++    "tier": "warning",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:123:56
++    121| 
++    122|   it("good + not_current: the scores win", () => {
++    123|     expect(dataTileBadge(GOOD, scores("not_current"))).toEqual({
++       |                                                        ^
++    124|       tier: "warning",
++    125|       label: "Not reflecting the latest download",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "scores",
+++   "from": "verdict",
++    "label": "Score update failed",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:146:54
++    144| 
++    145|   it("serious + failed: the scores win", () => {
++    146|     expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
++       |                                                      ^
++    147|       tier: "critical",
++    148|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:23:17
++   Duration  1.84s (transform 97ms, setup 102ms, collect 106ms, tests 43ms, environment 488ms, prepare 298ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_ge-to-gt.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_ge-to-gt.log
+new file mode 100644
+index 0000000..97d1173
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_ge-to-gt.log
+@@ -0,0 +1,67 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 122ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 8ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 93ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 1ms
++     → expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": null,
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "warning",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++AssertionError: expected { tier: 'serious', …(2) } to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++-   "tier": "critical",
++-   "word": "No",
+++   "tier": "serious",
+++   "word": "Mostly yes",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:23:07
++   Duration  4.98s (transform 125ms, setup 171ms, collect 198ms, tests 122ms, environment 1.41s, prepare 1.57s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_label-verdict.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_label-verdict.log
+new file mode 100644
+index 0000000..f3af976
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_label-verdict.log
+@@ -0,0 +1,87 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 3 failed | 1 skipped) 31ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed 8ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win 2ms
++     → expected { tier: 'warning', label: 'Yes', …(1) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win 1ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "from": "scores",
++-   "label": "Score update failed",
+++   "label": "Mostly yes",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:96:54
++     94| 
++     95|   it("a worse score state wins with its own label: warning + failed", …
++     96|     expect(dataTileBadge(WARNING, scores("failed"))).toEqual({
++       |                                                      ^
++     97|       tier: "critical",
++     98|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win
++AssertionError: expected { tier: 'warning', label: 'Yes', …(1) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "from": "scores",
++-   "label": "Not reflecting the latest download",
+++   "label": "Yes",
++    "tier": "warning",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:123:56
++    121| 
++    122|   it("good + not_current: the scores win", () => {
++    123|     expect(dataTileBadge(GOOD, scores("not_current"))).toEqual({
++       |                                                        ^
++    124|       tier: "warning",
++    125|       label: "Not reflecting the latest download",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "from": "scores",
++-   "label": "Score update failed",
+++   "label": "Mostly yes",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:146:54
++    144| 
++    145|   it("serious + failed: the scores win", () => {
++    146|     expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
++       |                                                      ^
++    147|       tier: "critical",
++    148|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 48 passed | 1 skipped (52)
++   Start at  18:23:16
++   Duration  2.20s (transform 107ms, setup 122ms, collect 99ms, tests 31ms, environment 482ms, prepare 572ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_null-guard.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_null-guard.log
+new file mode 100644
+index 0000000..07fe0cf
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_null-guard.log
+@@ -0,0 +1,276 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 22 failed | 1 skipped) 36ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 0 of 10 (DAC-E1-3) 8ms
++     → expected { tier: 'good', word: 'Yes', …(1) } to be null
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 3 of 10 (DAC-E1-3) 2ms
++     → expected { tier: 'warning', …(2) } to be null
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 10 of 10 (DAC-E1-3) 1ms
++     → expected { tier: 'critical', word: 'No', …(1) } to be null
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 10 1ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 3 of 10 1ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 9 of 10 1ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10 0ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1 0ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 11 of 10 1ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 0 1ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 0 of 10 1ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 3 of 10 0ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 10 of 10 0ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10 0ms
++     → expected null to deeply equal { tier: 'serious', …(2) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10 0ms
++     → expected null to deeply equal { tier: 'serious', …(2) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10 0ms
++     → expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > requested download contributes no tier 1ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > running download contributes no tier 0ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelling download contributes no tier 0ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download contributes no tier 1ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > partial download contributes no tier 0ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelled download contributes no tier 0ms
++     → expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++⎯⎯⎯⎯⎯⎯ Failed Tests 22 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 0 of 10 (DAC-E1-3)
++AssertionError: expected { tier: 'good', word: 'Yes', …(1) } to be null
++
++- Expected: 
++null
++
+++ Received: 
++Object {
++  "downloadClause": null,
++  "tier": "good",
++  "word": "Yes",
++}
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:22:9
++     20|       expect(
++     21|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     22|       ).toBeNull();
++       |         ^
++     23|     },
++     24|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 3 of 10 (DAC-E1-3)
++AssertionError: expected { tier: 'warning', …(2) } to be null
++
++- Expected: 
++null
++
+++ Received: 
++Object {
++  "downloadClause": null,
++  "tier": "warning",
++  "word": "Mostly yes",
++}
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:22:9
++     20|       expect(
++     21|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     22|       ).toBeNull();
++       |         ^
++     23|     },
++     24|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > returns null before any download ended: affected 10 of 10 (DAC-E1-3)
++AssertionError: expected { tier: 'critical', word: 'No', …(1) } to be null
++
++- Expected: 
++null
++
+++ Received: 
++Object {
++  "downloadClause": null,
++  "tier": "critical",
++  "word": "No",
++}
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:22:9
++     20|       expect(
++     21|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     22|       ).toBeNull();
++       |         ^
++     23|     },
++     24|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 0 of 0
++AssertionError: expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++- Expected: 
++Object {
++  "downloadClause": null,
++  "tier": "good",
++  "word": "Yes",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 3 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 9 of 10
++AssertionError: expected null to deeply equal { tier: 'warning', …(2) }
++
++- Expected: 
++Object {
++  "downloadClause": null,
++  "tier": "warning",
++  "word": "Mostly yes",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 10 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 1 of 1
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download, affected 11 of 10
++AssertionError: expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected: 
++Object {
++  "downloadClause": null,
++  "tier": "critical",
++  "word": "No",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:40:9
++     38|       expect(
++     39|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     40|       ).toEqual(expected);
++       |         ^
++     41|     },
++     42|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 0 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 3 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > failed download, affected 10 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 10 of 10
++AssertionError: expected null to deeply equal { tier: 'critical', word: 'No', …(1) }
++
++- Expected: 
++Object {
++  "downloadClause": "failed",
++  "tier": "critical",
++  "word": "No",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10
++AssertionError: expected null to deeply equal { tier: 'serious', …(2) }
++
++- Expected: 
++Object {
++  "downloadClause": "interrupted",
++  "tier": "serious",
++  "word": "Mostly yes",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/22]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > requested download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > running download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelling download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > succeeded download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > partial download contributes no tier
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > cancelled download contributes no tier
++AssertionError: expected null to deeply equal { tier: 'good', word: 'Yes', …(1) }
++
++- Expected: 
++Object {
++  "downloadClause": null,
++  "tier": "good",
++  "word": "Yes",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:75:9
++     73|       expect(
++     74|         worstDataTier({ affectedCount: 0, followedCount: 10, latestTer…
++     75|       ).toEqual({ tier: "good", word: "Yes", downloadClause: null });
++       |         ^
++     76|       expect(
++     77|         worstDataTier({ affectedCount: 3, followedCount: 10, latestTer…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/22]⎯
++
++ Test Files  1 failed (1)
++      Tests  22 failed | 29 passed | 1 skipped (52)
++   Start at  18:23:14
++   Duration  1.96s (transform 69ms, setup 85ms, collect 97ms, tests 36ms, environment 565ms, prepare 476ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_serious-word.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_serious-word.log
+new file mode 100644
+index 0000000..b2583ff
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_serious-word.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 2 failed | 1 skipped) 110ms
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10 8ms
++     → expected { tier: 'serious', word: 'No', …(1) } to deeply equal { tier: 'serious', …(2) }
++   × worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10 1ms
++     → expected { tier: 'serious', word: 'No', …(1) } to deeply equal { tier: 'serious', …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 0 of 10
++ FAIL  src/components/patterns/worst-data-tier.test.ts > worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4) > abandoned download, affected 3 of 10
++AssertionError: expected { tier: 'serious', word: 'No', …(1) } to deeply equal { tier: 'serious', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "downloadClause": "interrupted",
++    "tier": "serious",
++-   "word": "Mostly yes",
+++   "word": "No",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:57:9
++     55|       expect(
++     56|         worstDataTier({ affectedCount, followedCount, latestTerminalDo…
++     57|       ).toEqual(expected);
++       |         ^
++     58|     },
++     59|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 49 passed | 1 skipped (52)
++   Start at  18:23:07
++   Duration  4.81s (transform 279ms, setup 323ms, collect 309ms, tests 110ms, environment 1.21s, prepare 876ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_tie-to-scores.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_tie-to-scores.log
+new file mode 100644
+index 0000000..9a20ed8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_tie-to-scores.log
+@@ -0,0 +1,117 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w1/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 4 failed | 1 skipped) 27ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current 8ms
++     → expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 1ms
++     → expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good) 1ms
++     → expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict 0ms
++     → expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current
++AssertionError: expected { tier: 'warning', …(2) } to deeply equal { tier: 'warning', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Mostly yes",
+++   "from": "scores",
+++   "label": "Not reflecting the latest download",
++    "tier": "warning",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:104:59
++    102| 
++    103|   it("a tie goes to the verdict: warning + not_current", () => {
++    104|     expect(dataTileBadge(WARNING, scores("not_current"))).toEqual({
++       |                                                           ^
++    105|       tier: "warning",
++    106|       label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++AssertionError: expected { tier: 'active', …(2) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
++-   "tier": "good",
+++   "from": "scores",
+++   "label": "Updating",
+++   "tier": "active",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good)
++AssertionError: expected { Object (tier, label, ...) } to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "Yes",
+++   "from": "scores",
+++   "label": "Current",
++    "tier": "good",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict
++AssertionError: expected { tier: 'critical', …(2) } to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++- Expected
+++ Received
++
++  Object {
++-   "from": "verdict",
++-   "label": "No",
+++   "from": "scores",
+++   "label": "Score update failed",
++    "tier": "critical",
++  }
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:154:55
++    152| 
++    153|   it("critical + failed: a tie at critical goes to the verdict", () =>…
++    154|     expect(dataTileBadge(CRITICAL, scores("failed"))).toEqual({
++       |                                                       ^
++    155|       tier: "critical",
++    156|       label: "No",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 47 passed | 1 skipped (52)
++   Start at  18:23:01
++   Duration  4.44s (transform 253ms, setup 337ms, collect 176ms, tests 27ms, environment 929ms, prepare 1.00s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_verdict-null-guard.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_verdict-null-guard.log
+new file mode 100644
+index 0000000..2ea88d6
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_verdict-null-guard.log
+@@ -0,0 +1,272 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w3/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 20 failed | 1 skipped) 31ms
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed 6ms
++     → expected null to deeply equal { tier: 'critical', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current 1ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are null 1ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"never_classified"} 0ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"building"} 1ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"current"} 0ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win 0ms
++     → expected null to deeply equal { tier: 'warning', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are null (active ranks alongside good) 1ms
++     → expected null to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good) 1ms
++     → expected null to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"never_classified"} (active ranks alongside good) 0ms
++     → expected null to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good) 0ms
++     → expected null to deeply equal { tier: 'good', label: 'Yes', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious outranks warning: serious + not_current 0ms
++     → expected null to deeply equal { tier: 'serious', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win 0ms
++     → expected null to deeply equal { tier: 'critical', …(2) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict 0ms
++     → expected null to deeply equal { tier: 'critical', label: 'No', …(1) }
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for a null score state 1ms
++     → Cannot read properties of null (reading 'tier')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state never_classified (failed and not_current included) 0ms
++     → Cannot read properties of null (reading 'tier')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state building (failed and not_current included) 0ms
++     → Cannot read properties of null (reading 'tier')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state not_current (failed and not_current included) 0ms
++     → Cannot read properties of null (reading 'tier')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state failed (failed and not_current included) 0ms
++     → Cannot read properties of null (reading 'tier')
++   × dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state current (failed and not_current included) 0ms
++     → Cannot read properties of null (reading 'tier')
++
++⎯⎯⎯⎯⎯⎯ Failed Tests 20 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a worse score state wins with its own label: warning + failed
++AssertionError: expected null to deeply equal { tier: 'critical', …(2) }
++
++- Expected: 
++Object {
++  "from": "scores",
++  "label": "Score update failed",
++  "tier": "critical",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:96:54
++     94| 
++     95|   it("a worse score state wins with its own label: warning + failed", …
++     96|     expect(dataTileBadge(WARNING, scores("failed"))).toEqual({
++       |                                                      ^
++     97|       tier: "critical",
++     98|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a tie goes to the verdict: warning + not_current
++AssertionError: expected null to deeply equal { tier: 'warning', …(2) }
++
++- Expected: 
++Object {
++  "from": "verdict",
++  "label": "Mostly yes",
++  "tier": "warning",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:104:59
++    102| 
++    103|   it("a tie goes to the verdict: warning + not_current", () => {
++    104|     expect(dataTileBadge(WARNING, scores("not_current"))).toEqual({
++       |                                                           ^
++    105|       tier: "warning",
++    106|       label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are null
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"never_classified"}
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"building"}
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > warning verdict stays when scores are {"of":"scores","state":"current"}
++AssertionError: expected null to deeply equal { tier: 'warning', …(2) }
++
++- Expected: 
++Object {
++  "from": "verdict",
++  "label": "Mostly yes",
++  "tier": "warning",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:114:41
++    112|     "warning verdict stays when scores are %j",
++    113|     (s) => {
++    114|       expect(dataTileBadge(WARNING, s)).toEqual({
++       |                                         ^
++    115|         tier: "warning",
++    116|         label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good + not_current: the scores win
++AssertionError: expected null to deeply equal { tier: 'warning', …(2) }
++
++- Expected: 
++Object {
++  "from": "scores",
++  "label": "Not reflecting the latest download",
++  "tier": "warning",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:123:56
++    121| 
++    122|   it("good + not_current: the scores win", () => {
++    123|     expect(dataTileBadge(GOOD, scores("not_current"))).toEqual({
++       |                                                        ^
++    124|       tier: "warning",
++    125|       label: "Not reflecting the latest download",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are null (active ranks alongside good)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"building"} (active ranks alongside good)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"never_classified"} (active ranks alongside good)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > good verdict stays when scores are {"of":"scores","state":"current"} (active ranks alongside good)
++AssertionError: expected null to deeply equal { tier: 'good', label: 'Yes', …(1) }
++
++- Expected: 
++Object {
++  "from": "verdict",
++  "label": "Yes",
++  "tier": "good",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:133:38
++    131|     "good verdict stays when scores are %j (active ranks alongside goo…
++    132|     (s) => {
++    133|       expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Y…
++       |                                      ^
++    134|     },
++    135|   );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious outranks warning: serious + not_current
++AssertionError: expected null to deeply equal { tier: 'serious', …(2) }
++
++- Expected: 
++Object {
++  "from": "verdict",
++  "label": "Mostly yes",
++  "tier": "serious",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:138:59
++    136| 
++    137|   it("serious outranks warning: serious + not_current", () => {
++    138|     expect(dataTileBadge(SERIOUS, scores("not_current"))).toEqual({
++       |                                                           ^
++    139|       tier: "serious",
++    140|       label: "Mostly yes",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > serious + failed: the scores win
++AssertionError: expected null to deeply equal { tier: 'critical', …(2) }
++
++- Expected: 
++Object {
++  "from": "scores",
++  "label": "Score update failed",
++  "tier": "critical",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:146:54
++    144| 
++    145|   it("serious + failed: the scores win", () => {
++    146|     expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
++       |                                                      ^
++    147|       tier: "critical",
++    148|       label: "Score update failed",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > critical + failed: a tie at critical goes to the verdict
++AssertionError: expected null to deeply equal { tier: 'critical', label: 'No', …(1) }
++
++- Expected: 
++Object {
++  "from": "verdict",
++  "label": "No",
++  "tier": "critical",
++}
++
+++ Received: 
++null
++
++ ❯ src/components/patterns/worst-data-tier.test.ts:154:55
++    152| 
++    153|   it("critical + failed: a tie at critical goes to the verdict", () =>…
++    154|     expect(dataTileBadge(CRITICAL, scores("failed"))).toEqual({
++       |                                                       ^
++    155|       tier: "critical",
++    156|       label: "No",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for a null score state
++TypeError: Cannot read properties of null (reading 'tier')
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:81:26
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++     81|   return { tier: verdict.tier, label: verdict.word, from: "verdict" };
++       |                          ^
++     82| }
++     83| 
++ ❯ src/components/patterns/worst-data-tier.test.ts:170:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state never_classified (failed and not_current included)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state building (failed and not_current included)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state not_current (failed and not_current included)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state failed (failed and not_current included)
++ FAIL  src/components/patterns/worst-data-tier.test.ts > dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3) > a null verdict yields null for score state current (failed and not_current included)
++TypeError: Cannot read properties of null (reading 'tier')
++ ❯ Module.dataTileBadge src/components/patterns/worst-data-tier.ts:78:74
++     76|     return null;
++     77|   }
++     78|   if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdi…
++       |                                                                          ^
++     79|     return { tier: tierOf(scores), label: labelOf(scores), from: "scor…
++     80|   }
++ ❯ src/components/patterns/worst-data-tier.test.ts:175:14
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
++
++ Test Files  1 failed (1)
++      Tests  20 failed | 31 passed | 1 skipped (52)
++   Start at  18:23:16
++   Duration  2.20s (transform 96ms, setup 108ms, collect 92ms, tests 31ms, environment 507ms, prepare 742ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_zero-to-ge.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_zero-to-ge.log
+new file mode 100644
+index 0000000..86a91a4
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_zero-to-ge.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
++
++ ✓ src/components/patterns/worst-data-tier.test.ts (52 tests | 1 skipped) 99ms
++
++ Test Files  1 passed (1)
++      Tests  51 passed | 1 skipped (52)
++   Start at  18:23:07
++   Duration  4.82s (transform 251ms, setup 171ms, collect 332ms, tests 99ms, environment 1.15s, prepare 1.07s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..a1fc052
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,435 @@
++{
++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run --root web src/components/patterns/worst-data-tier.test.ts",
++  "repo_head": "6e570b27d3a2593143ac50b1664a89d203db9591",
++  "tree_patch_sha256": "9b4872b78af4284b3ac7f661d4ab91a137bcdd85ff07745d2eff8fc157d3a879",
++  "mutants_sha256": "7360a1f1e9f5f8dc0273c01151b18b291e20596e090cff95e706066d9d8b8749",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 27,
++  "started": "2026-11-09T00:22:36Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 5.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "287220dddf72fbee21a39a5600063d49ca8e66b484d3f2dca4be4f5bdb7dae20"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 5.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "b5ff363b04fbccdec65b5f02c9dc907cff064852b45545f614745e58267dbebb"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 5.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "cdb2d068793b026d2107a99a766cb69170ffe8d4ce08af7eb6ce47dc741cf395"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 5.2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "4b52dff2c378c6b1f3949e9cf9c223dda65c1dc117d0af4fcb1ceeeb1b3e630a"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:20:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 20,
++      "original": "  critical: 0,",
++      "mutated": "  critical: 1,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_20_off-by-one_1.log",
++      "log_sha256": "219742ae3a0bff4a12a647646574c6e39b9f8224f32e04034808696a43c9a7e6"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:21:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 21,
++      "original": "  serious: 1,",
++      "mutated": "  serious: 2,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_21_off-by-one_1.log",
++      "log_sha256": "7dc8f8798e19e56621cf46670d8e2adfca91ce08254a559ddf4339e6944e1a1c"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:22:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 22,
++      "original": "  warning: 2,",
++      "mutated": "  warning: 3,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_22_off-by-one_1.log",
++      "log_sha256": "da923234a5f2290105acc072bdd39221a4c5937b414e5419409dc3f2b15ea727"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:23:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 23,
++      "original": "  good: 3,",
++      "mutated": "  good: 4,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_23_off-by-one_1.log",
++      "log_sha256": "9fbde6c06288ca8829d92b059c790389d86336b499d0391027fa9b9bd93f39c0"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:24:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 24,
++      "original": "  active: 3,",
++      "mutated": "  active: 4,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.7,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_24_off-by-one_1.log",
++      "log_sha256": "ee43edd8a41183dff714d0889e0cabf182e80662fca2f91a14b7797c1f7296a1"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:25:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 25,
++      "original": "  neutral: 4,",
++      "mutated": "  neutral: 5,",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 4.6,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_25_off-by-one_1.log",
++      "log_sha256": "a6d498297ec0dd2e3cef4e76f6a646079cb8f84bae4a1fb4e7d7315b4d16896f"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:53:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 53,
++      "original": "    affectedCount === 0 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
++      "mutated": "    affectedCount === 0 ? \"good\" : affectedCount > followedCount ? \"critical\" : \"warning\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.7,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_1.log",
++      "log_sha256": "a09fb29905cd50e2b9071f7ba3e564f0ce3f3c50714bcd1eab68be778181b030"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:53:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 53,
++      "original": "    affectedCount === 0 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
++      "mutated": "    affectedCount === 1 ? \"good\" : affectedCount >= followedCount ? \"critical\" : \"warning\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.7,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_53_off-by-one_2.log",
++      "log_sha256": "caaaf110af817b05a6c519300690ccf8ca0de2c2d58039b8c207e3c66eef08a5"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:65:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 65,
++      "original": "  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
++      "mutated": "  if (downloadTier !== null || TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_negate-boolean_1.log",
++      "log_sha256": "48009ebc3c5ed7ec8987aaef18903072a5a8f28990b98041a8dc3f4627d28f8c"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:65:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 65,
++      "original": "  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {",
++      "mutated": "  if (downloadTier !== null && TIER_ORDER[downloadTier] <= TIER_ORDER[tier]) {",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 7.6,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_65_off-by-one_1.log",
++      "log_sha256": "c24fd23abd614175ead801e4c9b83e8f30b4ba7d4819f0c562c10391fba65e29"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:78:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 78,
++      "original": "  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
++      "mutated": "  if (scores !== null || TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_negate-boolean_1.log",
++      "log_sha256": "e6c35ea5894b7bbe1f0ab3178b22887acb59d83e1a75042c882b2459e23ffe09"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:78:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 78,
++      "original": "  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {",
++      "mutated": "  if (scores !== null && TIER_ORDER[tierOf(scores)] <= TIER_ORDER[verdict.tier]) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_78_off-by-one_1.log",
++      "log_sha256": "a99626e4fd28daadd359094f92688e5e8d6c083c0c124738a689925cca7add87"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:81:drop-field-copy:1",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "line": 81,
++      "original": "  return { tier: verdict.tier, label: verdict.word, from: \"verdict\" };",
++      "mutated": "  return { tier: nil, label: verdict.word, from: \"verdict\" };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.6,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_81_drop-field-copy_1.log",
++      "log_sha256": "89ddf4e065d15fd21dc9d8da130570193f517828683355c67d5acd2535b7dd20"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:active-rank",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "active: 3",
++      "new": "active: 2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.4,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_active-rank.log",
++      "log_sha256": "e482eafb98a882bc6754ffc679f4e1b27dd9738457fd7f5998257c020b811586"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:tie-to-scores",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]",
++      "new": "TIER_ORDER[tierOf(scores)] <= TIER_ORDER[verdict.tier]",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_tie-to-scores.log",
++      "log_sha256": "4fc8754a9ad0708864b2bf33f26cf8dcf0fdd5e16653cea5e210f2674cf28a2e"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:clause-only-if-wins",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "  return { tier, word: WORD[tier], downloadClause };",
++      "new": "  return { tier, word: WORD[tier], downloadClause: tier === downloadTier ? downloadClause : null };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.2,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_clause-only-if-wins.log",
++      "log_sha256": "054956793bdaaf79ddd8e3820b5246eca042fecea73679b2e3c402e86028184b"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:ge-to-gt",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "affectedCount >= followedCount",
++      "new": "affectedCount > followedCount",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.5,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_ge-to-gt.log",
++      "log_sha256": "a54072f97d34c82866298dbbd618026fad002f0024cb95a3cba9c02d688ad07e"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:serious-word",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "serious: \"Mostly yes\"",
++      "new": "serious: \"No\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.4,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_serious-word.log",
++      "log_sha256": "b847ca7971025b44a565e753c544e773b78386d05cc778dec9493fdfafa5e27e"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:drop-freeze",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "Object.freeze({",
++      "new": "({",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_drop-freeze.log",
++      "log_sha256": "b3d5200011f95d110c19ac3a8530bf0cf96dd92091afb3b8e8a14b750e56e4bd"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:zero-to-ge",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "affectedCount === 0 ?",
++      "new": "affectedCount <= 0 ?",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 6.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_zero-to-ge.log",
++      "log_sha256": "1519d7b5155d298aff2f1a8ee1b841e56e4ca304a02c09fc57d1d5a1a0acc14f"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:download-lt-to-le",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "TIER_ORDER[downloadTier] < TIER_ORDER[tier]",
++      "new": "TIER_ORDER[downloadTier] <= TIER_ORDER[tier]",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 3.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_download-lt-to-le.log",
++      "log_sha256": "791e9821db759b721384c9c072706bda7ed4de001d4027950b9d1bf2e5307982"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:abandoned-warning",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "downloadTier = \"serious\"",
++      "new": "downloadTier = \"warning\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_abandoned-warning.log",
++      "log_sha256": "6267781a84365fb5cdaf37b040a94890b0cc26cc3cef10ebc921f36b69a6d23f"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:failed-clause",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "downloadClause = \"failed\"",
++      "new": "downloadClause = \"interrupted\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.8,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_failed-clause.log",
++      "log_sha256": "69f11e3446d4a75553cc1f0e660559cd9c8fc7d35cb7c9660486b710ffdb1a0f"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:null-guard",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "latestTerminalDownload === null",
++      "new": "latestTerminalDownload !== null",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_null-guard.log",
++      "log_sha256": "892484065439cdac6403e6b3e96d730344ca451081a00b935cfbef5d942f4b45"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:verdict-null-guard",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "verdict === null",
++      "new": "verdict !== null",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_verdict-null-guard.log",
++      "log_sha256": "bf1ddac0fb9a0acea46c9e88e9e25433190636a232359c8085d129cac070deaa"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:label-verdict",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "label: labelOf(scores)",
++      "new": "label: verdict.word",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_label-verdict.log",
++      "log_sha256": "09ab66d40eb0c0c4ab3ee6a51c0cb7813f8028a43be81dab6f1775c33c430ce6"
++    },
++    {
++      "id": "web/src/components/patterns/worst-data-tier.ts:manual:from-swap",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/worst-data-tier.ts",
++      "old": "from: \"scores\"",
++      "new": "from: \"verdict\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_worst-data-tier.ts_manual_from-swap.log",
++      "log_sha256": "8256ab1335be63641724243b550095776752c6893d0b312ecc2ef51e8e41bbea"
++    }
++  ],
++  "finished": "2026-11-09T00:23:19Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-1-verdict-and-order.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-1-verdict-and-order.log
+new file mode 100644
+index 0000000..4553071
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S7-evidence/red-cycle-1-verdict-and-order.log
+@@ -0,0 +1,36 @@
++
++> factorflow-web@0.2.0 test
++> vitest run worst-data-tier
++
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/patterns/worst-data-tier.test.ts (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/worst-data-tier.test.ts [ src/components/patterns/worst-data-tier.test.ts ]
++Error: Failed to resolve import "./worst-data-tier" from "web/src/components/patterns/worst-data-tier.test.ts". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/worst-data-tier.test.ts:12:7
++  7  |    dataTileBadge,
++  8  |    worstDataTier
++  9  |  } from "./worst-data-tier";
++     |          ^
++  10 |  describe("worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4)", () => {
++  11 |    it.each([
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  18:21:17
++   Duration  5.32s (transform 143ms, setup 619ms, collect 0ms, tests 0ms, environment 1.89s, prepare 1.51s)
++
+diff --git a/web/src/components/patterns/worst-data-tier.test.ts b/web/src/components/patterns/worst-data-tier.test.ts
+new file mode 100644
+index 0000000..d5d6be1
+--- /dev/null
++++ b/web/src/components/patterns/worst-data-tier.test.ts
+@@ -0,0 +1,295 @@
++import { existsSync, readFileSync, readdirSync } from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import { describe, expect, it } from "vitest";
++import type { RunState } from "../../api/types";
++import type { Status } from "./tiers";
++import { type DataAnswer, TIER_ORDER, dataTileBadge, worstDataTier } from "./worst-data-tier";
++
++type ScoresStatus = Extract<Status, { of: "scores" }>;
++
++// Implements TC-COMP-026
++describe("worstDataTier (TC-COMP-026, DAC-E1-3, DAC-E1-4)", () => {
++  it.each([
++    [0, 10],
++    [3, 10],
++    [10, 10],
++  ])(
++    "returns null before any download ended: affected %i of %i (DAC-E1-3)",
++    (affectedCount, followedCount) => {
++      expect(
++        worstDataTier({ affectedCount, followedCount, latestTerminalDownload: null }),
++      ).toBeNull();
++    },
++  );
++
++  const problemRows: [number, number, DataAnswer][] = [
++    [0, 10, { tier: "good", word: "Yes", downloadClause: null }],
++    [3, 10, { tier: "warning", word: "Mostly yes", downloadClause: null }],
++    [9, 10, { tier: "warning", word: "Mostly yes", downloadClause: null }],
++    [10, 10, { tier: "critical", word: "No", downloadClause: null }],
++    [1, 1, { tier: "critical", word: "No", downloadClause: null }],
++    [11, 10, { tier: "critical", word: "No", downloadClause: null }],
++    [0, 0, { tier: "good", word: "Yes", downloadClause: null }],
++  ];
++  it.each(problemRows)(
++    "succeeded download, affected %i of %i",
++    (affectedCount, followedCount, expected) => {
++      expect(
++        worstDataTier({ affectedCount, followedCount, latestTerminalDownload: "succeeded" }),
++      ).toEqual(expected);
++    },
++  );
++
++  const downloadRows: [RunState, number, number, DataAnswer][] = [
++    ["failed", 0, 10, { tier: "critical", word: "No", downloadClause: "failed" }],
++    ["failed", 3, 10, { tier: "critical", word: "No", downloadClause: "failed" }],
++    ["failed", 10, 10, { tier: "critical", word: "No", downloadClause: "failed" }],
++    ["abandoned", 0, 10, { tier: "serious", word: "Mostly yes", downloadClause: "interrupted" }],
++    ["abandoned", 3, 10, { tier: "serious", word: "Mostly yes", downloadClause: "interrupted" }],
++    ["abandoned", 10, 10, { tier: "critical", word: "No", downloadClause: "interrupted" }],
++  ];
++  it.each(downloadRows)(
++    "%s download, affected %i of %i",
++    (state, affectedCount, followedCount, expected) => {
++      expect(
++        worstDataTier({ affectedCount, followedCount, latestTerminalDownload: state }),
++      ).toEqual(expected);
++    },
++  );
++
++  // A RunState added later without a decision fails `npx tsc --noEmit` here.
++  const noTier: Record<Exclude<RunState, "failed" | "abandoned">, true> = {
++    requested: true,
++    running: true,
++    cancelling: true,
++    succeeded: true,
++    partial: true,
++    cancelled: true,
++  };
++  it.each(Object.keys(noTier) as (keyof typeof noTier)[])(
++    "%s download contributes no tier",
++    (state) => {
++      expect(
++        worstDataTier({ affectedCount: 0, followedCount: 10, latestTerminalDownload: state }),
++      ).toEqual({ tier: "good", word: "Yes", downloadClause: null });
++      expect(
++        worstDataTier({ affectedCount: 3, followedCount: 10, latestTerminalDownload: state }),
++      ).toEqual({ tier: "warning", word: "Mostly yes", downloadClause: null });
++    },
++  );
++});
++
++// Implements TC-COMP-001
++describe("dataTileBadge (TC-COMP-001, DAC-E1-5, DAC-E1-3)", () => {
++  const GOOD: DataAnswer = { tier: "good", word: "Yes", downloadClause: null };
++  const WARNING: DataAnswer = { tier: "warning", word: "Mostly yes", downloadClause: null };
++  const SERIOUS: DataAnswer = {
++    tier: "serious",
++    word: "Mostly yes",
++    downloadClause: "interrupted",
++  };
++  const CRITICAL: DataAnswer = { tier: "critical", word: "No", downloadClause: "failed" };
++  const scores = (state: ScoresStatus["state"]): ScoresStatus => ({ of: "scores", state });
++
++  it("a worse score state wins with its own label: warning + failed", () => {
++    expect(dataTileBadge(WARNING, scores("failed"))).toEqual({
++      tier: "critical",
++      label: "Score update failed",
++      from: "scores",
++    });
++  });
++
++  it("a tie goes to the verdict: warning + not_current", () => {
++    expect(dataTileBadge(WARNING, scores("not_current"))).toEqual({
++      tier: "warning",
++      label: "Mostly yes",
++      from: "verdict",
++    });
++  });
++
++  it.each([null, scores("never_classified"), scores("building"), scores("current")])(
++    "warning verdict stays when scores are %j",
++    (s) => {
++      expect(dataTileBadge(WARNING, s)).toEqual({
++        tier: "warning",
++        label: "Mostly yes",
++        from: "verdict",
++      });
++    },
++  );
++
++  it("good + not_current: the scores win", () => {
++    expect(dataTileBadge(GOOD, scores("not_current"))).toEqual({
++      tier: "warning",
++      label: "Not reflecting the latest download",
++      from: "scores",
++    });
++  });
++
++  it.each([null, scores("building"), scores("never_classified"), scores("current")])(
++    "good verdict stays when scores are %j (active ranks alongside good)",
++    (s) => {
++      expect(dataTileBadge(GOOD, s)).toEqual({ tier: "good", label: "Yes", from: "verdict" });
++    },
++  );
++
++  it("serious outranks warning: serious + not_current", () => {
++    expect(dataTileBadge(SERIOUS, scores("not_current"))).toEqual({
++      tier: "serious",
++      label: "Mostly yes",
++      from: "verdict",
++    });
++  });
++
++  it("serious + failed: the scores win", () => {
++    expect(dataTileBadge(SERIOUS, scores("failed"))).toEqual({
++      tier: "critical",
++      label: "Score update failed",
++      from: "scores",
++    });
++  });
++
++  it("critical + failed: a tie at critical goes to the verdict", () => {
++    expect(dataTileBadge(CRITICAL, scores("failed"))).toEqual({
++      tier: "critical",
++      label: "No",
++      from: "verdict",
++    });
++  });
++
++  // A score state added later must be listed here.
++  const everyScoreState: Record<ScoresStatus["state"], true> = {
++    never_classified: true,
++    building: true,
++    not_current: true,
++    failed: true,
++    current: true,
++  };
++  it("a null verdict yields null for a null score state", () => {
++    expect(dataTileBadge(null, null)).toBeNull();
++  });
++  it.each(Object.keys(everyScoreState) as ScoresStatus["state"][])(
++    "a null verdict yields null for score state %s (failed and not_current included)",
++    (state) => {
++      expect(dataTileBadge(null, scores(state))).toBeNull();
++    },
++  );
++});
++
++const THIS_FILE = fileURLToPath(import.meta.url);
++const PATTERNS_DIR = path.dirname(THIS_FILE);
++const WEB_SRC = path.resolve(PATTERNS_DIR, "..", "..");
++const ORDER_MODULE = path.join(PATTERNS_DIR, "worst-data-tier.ts");
++
++function sourceFiles(directory: string): string[] {
++  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
++    const full = path.join(directory, entry.name);
++    if (entry.isDirectory()) {
++      return sourceFiles(full);
++    }
++    return /\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name) ? [full] : [];
++  });
++}
++
++function stripComments(source: string): string {
++  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
++}
++
++const IMPORT_TIER_ORDER =
++  /import\s*(?:type\s*)?\{[^}]*\bTIER_ORDER\b[^}]*\}\s*from\s*["'][^"']*\/worst-data-tier["']/;
++
++const TIER_NAME = "critical|serious|warning|good|active|neutral";
++const ARRAY_ORDER = new RegExp(
++  `\\[\\s*(["'])(${TIER_NAME})\\1\\s*,\\s*(["'])(${TIER_NAME})\\3\\s*,\\s*(["'])(${TIER_NAME})\\5`,
++);
++const RECORD_ORDER = new RegExp(
++  `\\b(${TIER_NAME})\\s*:\\s*-?\\d+\\s*,\\s*(${TIER_NAME})\\s*:\\s*-?\\d+`,
++);
++
++function tierOrderLiteralsIn(source: string): string[] {
++  return [ARRAY_ORDER, RECORD_ORDER].flatMap((pattern) => {
++    const match = pattern.exec(source);
++    return match ? [match[0]] : [];
++  });
++}
++
++// Implements TC-COMP-027
++describe("TIER_ORDER is the one tier order (TC-COMP-027, DAC-E1-S7-2)", () => {
++  const files = sourceFiles(WEB_SRC).filter((file) => file !== THIS_FILE);
++  const stripped = new Map(files.map((file) => [file, stripComments(readFileSync(file, "utf-8"))]));
++
++  it("exactly one source declares TIER_ORDER, exported, in worst-data-tier.ts", () => {
++    expect(files.length).toBeGreaterThan(0);
++    const declaring = files.filter((file) =>
++      /\b(?:const|let|var)\s+TIER_ORDER\b/.test(stripped.get(file) ?? ""),
++    );
++    expect(declaring).toEqual([ORDER_MODULE]);
++    const exported = (stripped.get(ORDER_MODULE) ?? "").match(/export\s+const\s+TIER_ORDER\b/g);
++    expect(exported).toHaveLength(1);
++  });
++
++  it("every other source that mentions TIER_ORDER imports it from worst-data-tier", () => {
++    const offenders = files.filter((file) => {
++      const text = stripped.get(file) ?? "";
++      return file !== ORDER_MODULE && /\bTIER_ORDER\b/.test(text) && !IMPORT_TIER_ORDER.test(text);
++    });
++    expect(offenders).toEqual([]);
++  });
++
++  const needsYou = path.join(PATTERNS_DIR, "needs-you.ts");
++  it.runIf(existsSync(needsYou))(
++    "sortAttention's module imports TIER_ORDER from ./worst-data-tier",
++    () => {
++      expect(IMPORT_TIER_ORDER.test(stripComments(readFileSync(needsYou, "utf-8")))).toBe(true);
++    },
++  );
++
++  it("tierOrderLiteralsIn finds a second order literal and ignores the Tier union", () => {
++    expect(tierOrderLiteralsIn('const ORDER = ["critical", "serious", "warning"]')).toHaveLength(1);
++    expect(tierOrderLiteralsIn("{ critical: 0, serious: 1 }")).toHaveLength(1);
++    expect(tierOrderLiteralsIn('type Tier = "neutral" | "active" | "good"')).toEqual([]);
++    expect(tierOrderLiteralsIn("{ active: 2, retired: 1 }")).toEqual([]);
++  });
++
++  it("no other source declares a second order literal", () => {
++    const offenders = files
++      .filter((file) => file !== ORDER_MODULE)
++      .filter((file) => tierOrderLiteralsIn(stripped.get(file) ?? "").length > 0);
++    expect(offenders).toEqual([]);
++  });
++});
++
++describe("TIER_ORDER semantics (DEC-0217, DEC-0311)", () => {
++  it("ranks exactly the six tiers", () => {
++    expect(Object.keys(TIER_ORDER).sort()).toEqual([
++      "active",
++      "critical",
++      "good",
++      "neutral",
++      "serious",
++      "warning",
++    ]);
++  });
++
++  it("critical < serious < warning < good < neutral, pairwise", () => {
++    expect(TIER_ORDER.critical).toBeLessThan(TIER_ORDER.serious);
++    expect(TIER_ORDER.serious).toBeLessThan(TIER_ORDER.warning);
++    expect(TIER_ORDER.warning).toBeLessThan(TIER_ORDER.good);
++    expect(TIER_ORDER.good).toBeLessThan(TIER_ORDER.neutral);
++  });
++
++  it("active ranks alongside good", () => {
++    expect(TIER_ORDER.active).toBe(TIER_ORDER.good);
++  });
++
++  it("an ascending sort puts the most severe first, active with good", () => {
++    const list = ["neutral", "good", "critical", "active", "warning", "serious"] as const;
++    const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER[b]);
++    expect(sorted).toEqual(["critical", "serious", "warning", "good", "active", "neutral"]);
++  });
++
++  it("is frozen", () => {
++    expect(Object.isFrozen(TIER_ORDER)).toBe(true);
++  });
++});
+diff --git a/web/src/components/patterns/worst-data-tier.ts b/web/src/components/patterns/worst-data-tier.ts
+new file mode 100644
+index 0000000..269b0a3
+--- /dev/null
++++ b/web/src/components/patterns/worst-data-tier.ts
+@@ -0,0 +1,82 @@
++import type { RunState } from "../../api/types";
++import { type Status, type Tier, labelOf, tierOf } from "./tiers";
++
++/**
++ * The data verdict, composed once (component design `ui-components` 2.4;
++ * DAC-E1-3, DAC-E1-4, DAC-E1-5; AC-8, AC-11, AC-21). Data health's verdict and
++ * Home's data tile both call these, so the two surfaces cannot disagree. The
++ * checks' tiers do not feed the answer (DEC-0210 as amended): only the problem
++ * set and the latest terminal download do. Not determinable is not an answer of
++ * this module.
++ */
++
++/**
++ * The one six-tier order of the owner interface (DEC-0217 as amended, DEC-0311):
++ * ascending rank is severity order, lower is worse, and active ranks alongside
++ * good. `sortAttention` (`needs-you.ts`) imports it; no other order may be
++ * declared (TC-COMP-027).
++ */
++export const TIER_ORDER: Readonly<Record<Tier, number>> = Object.freeze({
++  critical: 0,
++  serious: 1,
++  warning: 2,
++  good: 3,
++  active: 3,
++  neutral: 4,
++});
++
++export type DataAnswer = {
++  tier: "good" | "warning" | "serious" | "critical";
++  word: "Yes" | "Mostly yes" | "No";
++  downloadClause: "failed" | "interrupted" | null;
++};
++
++const WORD: Record<DataAnswer["tier"], DataAnswer["word"]> = {
++  good: "Yes",
++  warning: "Mostly yes",
++  serious: "Mostly yes",
++  critical: "No",
++};
++
++export function worstDataTier(inputs: {
++  affectedCount: number;
++  followedCount: number;
++  latestTerminalDownload: RunState | null;
++}): DataAnswer | null {
++  const { affectedCount, followedCount, latestTerminalDownload } = inputs;
++  if (latestTerminalDownload === null) {
++    return null;
++  }
++
++  // DEC-0312: affected >= followed is critical, which includes followedCount 0.
++  let tier: DataAnswer["tier"] =
++    affectedCount === 0 ? "good" : affectedCount >= followedCount ? "critical" : "warning";
++
++  let downloadTier: DataAnswer["tier"] | null = null;
++  let downloadClause: DataAnswer["downloadClause"] = null;
++  if (latestTerminalDownload === "failed") {
++    downloadTier = "critical";
++    downloadClause = "failed";
++  } else if (latestTerminalDownload === "abandoned") {
++    downloadTier = "serious";
++    downloadClause = "interrupted";
++  }
++
++  if (downloadTier !== null && TIER_ORDER[downloadTier] < TIER_ORDER[tier]) {
++    tier = downloadTier;
++  }
++  return { tier, word: WORD[tier], downloadClause };
++}
++
++export function dataTileBadge(
++  verdict: DataAnswer | null,
++  scores: Extract<Status, { of: "scores" }> | null,
++): { tier: Tier; label: string; from: "verdict" | "scores" } | null {
++  if (verdict === null) {
++    return null;
++  }
++  if (scores !== null && TIER_ORDER[tierOf(scores)] < TIER_ORDER[verdict.tier]) {
++    return { tier: tierOf(scores), label: labelOf(scores), from: "scores" };
++  }
++  return { tier: verdict.tier, label: verdict.word, from: "verdict" };
++}

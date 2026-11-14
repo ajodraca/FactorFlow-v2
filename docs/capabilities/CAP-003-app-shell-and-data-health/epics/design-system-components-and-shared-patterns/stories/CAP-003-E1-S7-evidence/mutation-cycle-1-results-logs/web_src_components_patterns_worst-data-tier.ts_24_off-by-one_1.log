@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-d_x0wcj8/w0/web
+
+ ❯ src/components/patterns/worst-data-tier.test.ts (52 tests | 2 failed | 1 skipped) 58ms
+   × TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good 8ms
+     → expected 4 to be 3 // Object.is equality
+   × TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good 2ms
+     → expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > active ranks alongside good
+AssertionError: expected 4 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 4
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:283:31
+    281| 
+    282|   it("active ranks alongside good", () => {
+    283|     expect(TIER_ORDER.active).toBe(TIER_ORDER.good);
+       |                               ^
+    284|   });
+    285| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/worst-data-tier.test.ts > TIER_ORDER semantics (DEC-0217, DEC-0311) > an ascending sort puts the most severe first, active with good
+AssertionError: expected [ 'critical', 'serious', …(4) ] to deeply equal [ 'critical', 'serious', …(4) ]
+
+- Expected
++ Received
+
+  Array [
+    "critical",
+    "serious",
+    "warning",
+    "good",
+-   "active",
+    "neutral",
++   "active",
+  ]
+
+ ❯ src/components/patterns/worst-data-tier.test.ts:289:20
+    287|     const list = ["neutral", "good", "critical", "active", "warning", …
+    288|     const sorted = [...list].sort((a, b) => TIER_ORDER[a] - TIER_ORDER…
+    289|     expect(sorted).toEqual(["critical", "serious", "warning", "good", …
+       |                    ^
+    290|   });
+    291| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 49 passed | 1 skipped (52)
+   Start at  18:22:47
+   Duration  3.20s (transform 198ms, setup 246ms, collect 219ms, tests 58ms, environment 679ms, prepare 867ms)
+
