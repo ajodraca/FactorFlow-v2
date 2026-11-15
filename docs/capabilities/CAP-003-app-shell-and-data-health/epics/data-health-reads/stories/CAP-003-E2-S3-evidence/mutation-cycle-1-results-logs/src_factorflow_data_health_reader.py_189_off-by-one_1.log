@@ -1,0 +1,46 @@
+...................F
+=================================== FAILURES ===================================
+_ test_a_download_that_ended_with_every_request_failed_is_never_acquired_with_rows _
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49311 user=test database=test_4ca7d9bb3c774c2591f04a6346350944) at 0x108d1ea50>
+
+    def test_a_download_that_ended_with_every_request_failed_is_never_acquired_with_rows(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        _roster(conn, 60, prefix="P")
+        run = _run(conn, state="failed", requested_at=T1, ended_at=T2)
+        with conn.cursor() as cur:
+            cur.execute("SELECT instrument_id FROM instrument ORDER BY symbol")
+            ids = [int(r[0]) for r in cur.fetchall()]
+        for instrument_id in ids:
+            for data_type in ("reference", "prices", "fundamentals", "corporate_actions"):
+                _record(
+                    conn,
+                    run,
+                    instrument_id,
+                    data_type,
+                    "failed",
+                    reason="provider timeout",
+                    completed_at=T2,
+                )
+        conn.commit()
+    
+        result = read_data_health(conn)
+    
+        assert result.never_acquired is True
+        assert result.daily_prices is None
+        assert result.company_financials is None
+        assert result.followed_count == 60
+        assert result.affected_count == 60
+>       assert len(result.problems.rows) == 50
+E       AssertionError: assert 51 == 50
+E        +  where 51 = len((ProblemRow(symbol='P0001', failures=(Failure(data_type='corporate_actions', outcome='failed', reason='provider timeou... tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('ddf064b0-4f6e-4ecb-b009-949cba65ab77'))), retryable=True), ...))
+E        +    where (ProblemRow(symbol='P0001', failures=(Failure(data_type='corporate_actions', outcome='failed', reason='provider timeou... tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('ddf064b0-4f6e-4ecb-b009-949cba65ab77'))), retryable=True), ...) = ProblemPage(rows=(ProblemRow(symbol='P0001', failures=(Failure(data_type='corporate_actions', outcome='failed', reason...ZoneInfo(key='Etc/UTC')), run_id=UUID('ddf064b0-4f6e-4ecb-b009-949cba65ab77'))), retryable=True)), next_cursor='P0051').rows
+E        +      where ProblemPage(rows=(ProblemRow(symbol='P0001', failures=(Failure(data_type='corporate_actions', outcome='failed', reason...ZoneInfo(key='Etc/UTC')), run_id=UUID('ddf064b0-4f6e-4ecb-b009-949cba65ab77'))), retryable=True)), next_cursor='P0051') = DataHealth(checked_at=datetime.datetime(2026, 11, 14, 19, 44, 52, 546166, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), ne...oneInfo(key='Etc/UTC')), run_id=UUID('ddf064b0-4f6e-4ecb-b009-949cba65ab77'))), retryable=True)), next_cursor='P0051')).problems
+
+tests/integration/test_data_health_checks.py:253: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_a_download_that_ended_with_every_request_failed_is_never_acquired_with_rows
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 19 passed in 2.34s

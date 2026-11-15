@@ -1,0 +1,49 @@
+.....................................................F
+=================================== FAILURES ===================================
+_______ test_failure_facts_ignore_other_instruments_and_the_state_clock ________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=57932 user=test database=test_8f259bdb778b4695b051143f84a32a28) at 0x1089ef5c0>
+
+    def test_failure_facts_ignore_other_instruments_and_the_state_clock(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
+        run = _run(conn)
+        _record(
+            conn,
+            run,
+            _instrument(conn, "AAA"),
+            "prices",
+            "failed",
+            reason="aaa reason",
+            attempts=2,
+            completed_at=t_result,
+            acquired_at=t_state,
+        )
+        _record(
+            conn,
+            run,
+            _instrument(conn, "BBB"),
+            "prices",
+            "written",
+            reason="bbb note",
+            attempts=5,
+            completed_at=t_other,
+        )
+        conn.commit()
+    
+        page = read_problems(conn, cursor=None, limit=10)
+    
+        assert [row.symbol for row in page.rows] == ["AAA"]
+>       assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
+E       AssertionError: assert (Failure(data...7e28e5aac')),) == (Failure(data...7e28e5aac')),)
+E         
+E         At index 0 diff: Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('8d81c096-a222-4ee1-9c50-3d47e28e5aac')) != Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=UUID('8d81c096-a222-4ee1-9c50-3d47e28e5aac'))
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:402: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_failure_facts_ignore_other_instruments_and_the_state_clock
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 53 passed in 2.98s

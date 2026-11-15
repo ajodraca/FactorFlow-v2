@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wol55lku/w0/web
+
+ ❯ src/components/patterns/state-region.test.tsx (23 tests | 1 failed) 79ms
+   × StateRegion (TC-COMP-031) > leaves unreachable to the shell: nothing rendered, the reason never shown 4ms
+     → expect(element).toBeEmptyDOMElement()
+
+Received:
+  "The shell replaces the main region (AC-23)"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion (TC-COMP-031) > leaves unreachable to the shell: nothing rendered, the reason never shown
+Error: expect(element).toBeEmptyDOMElement()
+
+Received:
+  "The shell replaces the main region (AC-23)"
+ ❯ src/components/patterns/state-region.test.tsx:85:23
+     83|   it("leaves unreachable to the shell: nothing rendered, the reason ne…
+     84|     const { container } = region({ kind: "unreachable" });
+     85|     expect(container).toBeEmptyDOMElement();
+       |                       ^
+     86|     expect(screen.queryByText("The shell replaces the main region (AC-…
+     87|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 passed (23)
+   Start at  08:30:04
+   Duration  795ms (transform 34ms, setup 36ms, collect 76ms, tests 79ms, environment 170ms, prepare 104ms)
+

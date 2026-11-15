@@ -41,6 +41,15 @@ CAP-002-E5-S1 added one:
 - `comparison-table.tsx`, the table that sets 2 to 6 stocks side by side,
   one column each.
 
+CAP-003-E1-S9 added `state-region.tsx`, the region that renders a
+`ScreenState` through one entry per kind
+([The state region](#the-state-region-state-regiontsx)). No screen imports it
+yet; its only importer is its test.
+
+CAP-003-E1-S10 generalised `as-of-line.tsx`: `AsOfLine` now takes either the
+Research props or a list of parts, and the Research line composes the parts
+form ([The as-of line](#the-as-of-line-as-of-linetsx)).
+
 Six of the eight are pure functions of their props: no state, no effect, no
 fetch. The inspector is one exception: it holds its read's state and issues
 `getStockEvidence` itself ([The inspector](#the-inspector-inspector-paneltsx)).
@@ -389,11 +398,31 @@ this against UX design 1.2 Token Usage as a follow-up.
 
 ## The as-of line (`as-of-line.tsx`)
 
-`AsOfLine({ set, later, checkedAt, pollFailed, onTryAgain, announcement =
-null, sortLabel, onOpenEarlierSets, loading = false })` renders the line under
-a scored surface's title (AC-21; DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3,
-DAC-E4-S4-4; DEC-0154), and is the one place a score-set change is
-announced.
+`AsOfLine` is one pattern with two forms, told apart by whether the props
+carry `parts` (CAP-003-E1-S10; DAC-E1-13, DAC-E1-S10-1; DEC-0315). CAP-002
+delivered the file for the Research line alone and CAP-003 took it over.
+
+**The parts form**, `AsOfLine({ parts, className })`, takes `parts`, a
+non-empty list of nodes (`readonly [ReactNode, ...ReactNode[]]`), and an
+optional `className`. It renders one `p` with `data-testid` `as-of-line` and
+the classes `text-xs text-muted-foreground`, with `className` merged in by
+`cn`. Each part after the first is preceded by a
+`span` with the classes `inline-block px-2` holding ` · `. The spaces keep
+the word boundaries in the text a screen reader and `textContent` read, and
+the inline-block drops collapsible spaces at the start and end of its own
+line, so the visible gap is the `px-2` padding alone. The parts are keyed by
+position and never reorder.
+
+**The Research form**, `AsOfLine({ set, later, checkedAt, pollFailed,
+onTryAgain, announcement = null, sortLabel, onOpenEarlierSets, loading =
+false })`, renders the line under a scored surface's title (AC-21;
+DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3, DAC-E4-S4-4; DEC-0154), and is the one
+place a score-set change is announced. It composes the parts form with
+`className` `min-h-7`: its parts are the *Scores from* part and the download
+part followed by what trails them (the *checked* time, the live region and
+**Try again**), or, with a `sortLabel`, those two parts and then
+*sorted by {label}* followed by the same trail. The rest of this section
+describes the Research form.
 
 | Prop | Type | Meaning |
 |------|------|---------|
@@ -418,8 +447,8 @@ table beneath does not shift (UX design 1.2, Loading).
 with these children in DOM order:
 
 1. the set sentence: `SCORE_SET.scoresFrom(produced)`, with the produced time
-   (`formatTimestamp(set.endedAt)`) in a `font-numeric` span, then
-   `SCORE_SET.separator` (` · `), then
+   (`formatTimestamp(set.endedAt)`) in a `font-numeric` span, then the parts
+   form's separator, then
    `SCORE_SET.fromTheDownloadStarted(started)`, with the start time
    (`formatTimestamp(set.runStartedAt)`) as a react-router `Link` to
    `SHELL_ROUTES.download(set.runId)` whose `aria-label` is
@@ -429,7 +458,7 @@ with these children in DOM order:
 2. the outcome badge, from `set.runOutcome`: `succeeded` is tier `good`
    reading `SCORE_SET.complete`, *Complete*; `partial` is tier `warning`
    reading `SCORE_SET.partial`, *Partial*;
-3. ` · sorted by {sortLabel}` (`SCORE_SET.sortedBy`), when `sortLabel` is
+3. the separator and `SCORE_SET.sortedBy(sortLabel)`, when `sortLabel` is
    given;
 4. `SCORE_SET.checked(time)`, *checked {time}*, in a `font-numeric` span,
    where `time` is `formatTimestamp(checkedAt, { seconds: true })`, only
@@ -739,3 +768,50 @@ Open warnings from the story's implementation review v3: the cells take
 `px-3 py-2` with no row height token or row rule, not the `data-table` row
 tokens UX 1.5 cites (IR-004); and the named `section` is a region landmark
 that repeats the table's own name (IR-005).
+
+## The state region (`state-region.tsx`)
+
+`StateRegion<T>({ state, renderers, onRetry })` renders a data-bearing
+region's `ScreenState<T>` (`web/src/api/types.ts`) by dispatching on
+`state.kind` to the caller's entry for that kind (component design 2.7;
+STD-UI-23). It returns a `JSX.Element`, or `null` where noted below.
+
+| Prop | Type | Meaning |
+|------|------|---------|
+| `state` | `ScreenState<T>` | the region's current state |
+| `renderers` | `StateRenderers<T>` | one entry per kind, below |
+| `onRetry` | `() => void` | called by **Try again**; required |
+
+### The renderer map
+
+Every kind except `unreachable` takes either a function of that kind's state
+or `{ notApplicable: "reason" }`; `unreachable` takes only a reason. A call
+that omits a kind, gives an entry no reason, or gives `unreachable` a
+function does not type-check (DEC-0313). The reason is a record for the
+reader of the call: it is never rendered.
+
+| Kind | Renders |
+|------|---------|
+| `loading` | the caller's skeleton inside one `div` with `aria-busy="true"` |
+| `empty-never-populated` | the caller's entry, unwrapped |
+| `empty-no-match` | the caller's entry, unwrapped; never the entry above (the two are never conflated) |
+| `populated`, `partial`, `unavailable` | the caller's entry, unwrapped |
+| `error` | see below |
+| `unreachable` | nothing: the shell replaces the main region (AC-23) |
+
+A kind whose entry is `notApplicable` and which arrives anyway renders
+nothing.
+
+### The error rendering
+
+The caller's `error` entry supplies the whole sentence. `StateRegion` wraps
+it in an `output` element, which is a polite status region, and puts a
+`Button` (`type="button"`, `variant="outline"`, `w-fit`) labelled **Try
+again** after it, outside the announcement, in a `flex flex-col gap-2`
+column. The button calls `onRetry`. Every visible string except **Try again**
+is the caller's, and `StateRegion` never reads `requestId` or any other field
+of the state, so the request id is never shown (DEC-0314).
+
+Tests: `state-region.test.tsx` (TC-COMP-031, TC-COMP-032), covering the type
+refusals, the busy and polite markup, retry wiring and the `notApplicable`
+cases.

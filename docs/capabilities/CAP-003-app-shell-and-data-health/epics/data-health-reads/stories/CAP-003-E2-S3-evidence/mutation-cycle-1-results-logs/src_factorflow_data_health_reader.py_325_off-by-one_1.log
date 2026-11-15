@@ -1,0 +1,24 @@
+..................F
+=================================== FAILURES ===================================
+_____________ test_empty_store_is_never_acquired_with_null_checks ______________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49443 user=test database=test_f76af97f728246259acb7c9d3473dc0d) at 0x1095d71a0>
+
+    def test_empty_store_is_never_acquired_with_null_checks(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        result = read_data_health(migrated_writer_connection)
+    
+        assert result.never_acquired is True
+        assert result.daily_prices is None
+        assert result.company_financials is None
+        assert result.followed_count == 0
+>       assert result.affected_count == 0
+E       AssertionError: assert [] == 0
+E        +  where [] = DataHealth(checked_at=datetime.datetime(2026, 11, 14, 19, 45, 20, 654130, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), ne...ount=0, affected_count=[], daily_prices=None, company_financials=None, problems=ProblemPage(rows=(), next_cursor=None)).affected_count
+
+tests/integration/test_data_health_checks.py:219: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_empty_store_is_never_acquired_with_null_checks
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 18 passed in 2.39s

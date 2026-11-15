@@ -1,0 +1,42 @@
+...................F
+=================================== FAILURES ===================================
+_______________ test_failure_facts_come_from_the_matched_result ________________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64667 user=test database=test_c1cce9533206403c927e8faa99744fe7) at 0x10a9efd40>
+
+    def test_failure_facts_come_from_the_matched_result(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        t1, t2, t3 = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
+        aaa = _instrument(conn, "AAA")
+        r1 = _run(conn, requested_at=t1)
+        _record(conn, r1, aaa, "prices", "failed", reason="old reason", attempts=1, completed_at=t1)
+        r2 = _run(conn, requested_at=t2)
+        _record(
+            conn, r2, aaa, "prices", "failed", reason="provider timeout", attempts=3, completed_at=t2
+        )
+        _record(conn, r2, aaa, "fundamentals", "not_found", reason=None, attempts=2, completed_at=t3)
+        _record(conn, r2, aaa, "reference", "written", completed_at=t2)
+        _record(conn, r2, aaa, "corporate_actions", "written", completed_at=t2)
+        conn.commit()
+    
+        page = read_problems(conn, cursor=None, limit=10)
+    
+        assert len(page.rows) == 1
+>       assert page.rows[0].failures == (
+            Failure("fundamentals", "not_found", None, 2, t3, r2),
+            Failure("prices", "failed", "provider timeout", 3, t2, r2),
+        )
+E       AssertionError: assert (Failure(data...63026d4bcd'))) == (Failure(data...63026d4bcd')))
+E         
+E         At index 0 diff: Failure(data_type='corporate_actions', outcome='written', reason=None, attempts=1, completed_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('961277f0-79bb-4cce-8feb-b963026d4bcd')) != Failure(data_type='fundamentals', outcome='not_found', reason=None, attempts=2, completed_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), run_id=UUID('961277f0-79bb-4cce-8feb-b963026d4bcd'))
+E         Left contains 2 more items, first extra item: Failure(data_type='prices', outcome='failed', reason='provider ti...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/integration/test_data_health_problems.py:282: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_failure_facts_come_from_the_matched_result
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 19 passed in 3.62s

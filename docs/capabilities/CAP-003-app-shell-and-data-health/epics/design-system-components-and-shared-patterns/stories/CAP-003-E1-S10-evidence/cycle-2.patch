@@ -1,0 +1,651 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-2.json
+new file mode 100644
+index 0000000..863213f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-2.json
+@@ -0,0 +1,31 @@
++{
++  "schema": 1,
++  "repo_head": "e49e68e83432ed00eb6ed59c7386b9be36063993",
++  "range": "HEAD..worktree",
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:sort-as-text",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{SCORE_SET.sortedBy(sortLabel)}\n                {tail}",
++      "new": "{\" \u00b7 \"}{SCORE_SET.sortedBy(sortLabel)}{tail}"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:class-lost",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "className={LINE_HEIGHT}",
++      "new": "className=\"\""
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:drop-space",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "</Link>{\" \"}",
++      "new": "</Link>"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..0776f9d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w0/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (35 tests) 167ms
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 1661ms
++
++ Test Files  2 passed (2)
++      Tests  95 passed (95)
++   Start at  09:43:54
++   Duration  5.29s (transform 506ms, setup 194ms, collect 2.14s, tests 1.83s, environment 1.13s, prepare 2.30s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..be9eca5
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w1/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (35 tests) 181ms
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 1411ms
++
++ Test Files  2 passed (2)
++      Tests  95 passed (95)
++   Start at  09:43:54
++   Duration  5.00s (transform 489ms, setup 180ms, collect 2.13s, tests 1.59s, environment 1.15s, prepare 1.96s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..77dc412
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+@@ -0,0 +1,20 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (35 tests) 166ms
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 1844ms
++   ✓ results pane states and props > (d) Save carries the list's count and set id, never the summary's 303ms
++
++ Test Files  2 passed (2)
++      Tests  95 passed (95)
++   Start at  09:43:54
++   Duration  5.45s (transform 492ms, setup 169ms, collect 2.12s, tests 2.01s, environment 1.18s, prepare 1.54s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+new file mode 100644
+index 0000000..be7c614
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w3/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (35 tests) 166ms
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 1459ms
++
++ Test Files  2 passed (2)
++      Tests  95 passed (95)
++   Start at  09:43:54
++   Duration  5.22s (transform 492ms, setup 206ms, collect 2.12s, tests 1.63s, environment 1.10s, prepare 2.16s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_class-lost.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_class-lost.log
+new file mode 100644
+index 0000000..ff19970
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_class-lost.log
+@@ -0,0 +1,36 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w1/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 1 failed) 193ms
++   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set 5ms
++     → expected one min-h class, found none
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 830ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set
++Error: expected one min-h class, found none
++ ❯ heightToken src/components/patterns/as-of-line.test.tsx:95:11
++     93|   const tokens = element.className.match(/\bmin-h-\S+/g) ?? [];
++     94|   if (tokens.length !== 1) {
++     95|     throw new Error(`expected one min-h class, found ${tokens.join(" "…
++       |           ^
++     96|   }
++     97|   return tokens[0];
++ ❯ src/components/patterns/as-of-line.test.tsx:375:24
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 94 passed (95)
++   Start at  09:44:08
++   Duration  2.87s (transform 326ms, setup 165ms, collect 1.84s, tests 1.02s, environment 789ms, prepare 288ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_drop-space.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_drop-space.log
+new file mode 100644
+index 0000000..580fc57
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_drop-space.log
+@@ -0,0 +1,78 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 3 failed) 220ms
++   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > holds the announcement, Updating, Earlier sets… and the failure text, and nothing else 11ms
++     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to match /^Scores from 2026-10-15 17:46 CDT · f…/
++   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause 3ms
++     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
++   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause 7ms
++     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 836ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > holds the announcement, Updating, Earlier sets… and the failure text, and nothing else
++AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to match /^Scores from 2026-10-15 17:46 CDT · f…/
++
++- Expected: 
++/^Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value checked 2026-10-15 17:52:10 CDT/
++
+++ Received: 
++"Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDTComplete · sorted by value checked 2026-10-15 17:52:10 CDT  Try again"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:341:21
++    339|     // Outside the region, in order: the sentence with the link, the o…
++    340|     const outside = visibleText(container).replace(visibleText(status)…
++    341|     expect(outside).toMatch(
++       |                     ^
++    342|       /^Scores from 2026-10-15 17:46 CDT · from the download started 2…
++    343|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause
++AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
++
++Expected: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
++Received: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDTComplete · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:350:43
++    348|     const announcement = SCORE_SET.scoresUpdatedTo("2026-10-16 17:48 C…
++    349|     const sorted = renderLine({ announcement, sortLabel: "value" });
++    350|     expect(visibleText(sorted.container)).toBe(
++       |                                           ^
++    351|       `Scores from 2026-10-15 17:46 CDT · from the download started 20…
++    352|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause
++AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
++
++Expected: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value"
++Received: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDTComplete · sorted by value"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:553:29
++    551|     expect(seps).toHaveLength(2);
++    552|     expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
++    553|     expect(collapsed(line)).toBe(
++       |                             ^
++    554|       "Scores from 2026-10-15 17:46 CDT · from the download started 20…
++    555|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  3 failed | 92 passed (95)
++   Start at  09:44:08
++   Duration  2.87s (transform 353ms, setup 165ms, collect 1.83s, tests 1.06s, environment 722ms, prepare 318ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_sort-as-text.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_sort-as-text.log
+new file mode 100644
+index 0000000..3bbc949
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_sort-as-text.log
+@@ -0,0 +1,78 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w0/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 3 failed) 195ms
++   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > holds the announcement, Updating, Earlier sets… and the failure text, and nothing else 10ms
++     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to match /^Scores from 2026-10-15 17:46 CDT · f…/
++   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause 2ms
++     → expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
++   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause 18ms
++     → expected ' · ' to be 'sorted by value' // Object.is equality
++ ✓ src/screens/research/results-pane.test.tsx (60 tests) 812ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > holds the announcement, Updating, Earlier sets… and the failure text, and nothing else
++AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to match /^Scores from 2026-10-15 17:46 CDT · f…/
++
++- Expected: 
++/^Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value checked 2026-10-15 17:52:10 CDT/
++
+++ Received: 
++"Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · · sorted by value checked 2026-10-15 17:52:10 CDT  Try again"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:341:21
++    339|     // Outside the region, in order: the sentence with the link, the o…
++    340|     const outside = visibleText(container).replace(visibleText(status)…
++    341|     expect(outside).toMatch(
++       |                     ^
++    342|       /^Scores from 2026-10-15 17:46 CDT · from the download started 2…
++    343|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > separates the completion announcement from the text before it, with and without a sort clause
++AssertionError: expected 'Scores from 2026-10-15 17:46 CDT · fr…' to be 'Scores from 2026-10-15 17:46 CDT · fr…' // Object.is equality
++
++Expected: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
++Received: "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · · sorted by value Scores updated to 2026-10-16 17:48 CDT from the download started 2026-10-16 17:30 CDT"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:350:43
++    348|     const announcement = SCORE_SET.scoresUpdatedTo("2026-10-16 17:48 C…
++    349|     const sorted = renderLine({ announcement, sortLabel: "value" });
++    350|     expect(visibleText(sorted.container)).toBe(
++       |                                           ^
++    351|       `Scores from 2026-10-15 17:46 CDT · from the download started 20…
++    352|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause
++AssertionError: expected ' · ' to be 'sorted by value' // Object.is equality
++
++Expected: "sorted by value"
++Received: " · "
++
++ ❯ src/components/patterns/as-of-line.test.tsx:552:46
++    550|     const seps = separators(line);
++    551|     expect(seps).toHaveLength(2);
++    552|     expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
++       |                                              ^
++    553|     expect(collapsed(line)).toBe(
++    554|       "Scores from 2026-10-15 17:46 CDT · from the download started 20…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  3 failed | 92 passed (95)
++   Start at  09:44:08
++   Duration  2.86s (transform 369ms, setup 173ms, collect 1.84s, tests 1.01s, environment 781ms, prepare 258ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..5aa4185
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,86 @@
++{
++  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/components/patterns/as-of-line.test.tsx web/src/screens/research/results-pane.test.tsx && npx tsc --noEmit",
++  "repo_head": "e49e68e83432ed00eb6ed59c7386b9be36063993",
++  "tree_patch_sha256": "87737c8ddc136be1e765a2d1f4e2c26b297fc011097a82e7f8958da4324f23a9",
++  "mutants_sha256": "00104a535ab0f0e1b06a000fb7123146c41039ba0577f348882c9dffc21bfb17",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-2.json",
++  "jobs": 4,
++  "planned": 3,
++  "started": "2026-11-14T15:43:53Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 15.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
++      "log_sha256": "a735861954101d41bd04e36d1f12f5956ce37e703f0adbe8da6e2f647757646f"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 15.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "737b8f33caa3b5234b4e7b4eeffa346ba0157dd8d2895282e932cf7cc46e2041"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 15.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "d1cba3f65d53ba0529ba798b4d32848384ce7968f865d6e30ab353455cf3398e"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 15.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "52c723b57bc71fff4177aabde9cddb7706b775965e03902e99c85971c6f65fba"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:sort-as-text",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{SCORE_SET.sortedBy(sortLabel)}\n                {tail}",
++      "new": "{\" \u00b7 \"}{SCORE_SET.sortedBy(sortLabel)}{tail}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_sort-as-text.log",
++      "log_sha256": "5da4da7be049e2469da26880d9f3130a1f3bcfcda7e23b792314d8ad4c557a93"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:class-lost",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "className={LINE_HEIGHT}",
++      "new": "className=\"\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.4,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_class-lost.log",
++      "log_sha256": "e289896a8fcde0202685747f3a1b914a0f6c0820ee5896f3e8f8919ac966982e"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:drop-space",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "</Link>{\" \"}",
++      "new": "</Link>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.4,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-2-results-logs/web_src_components_patterns_as-of-line.tsx_manual_drop-space.log",
++      "log_sha256": "6212858e4b75f244d8213e9b71c963502923368ec87f453f6552037ecbfc374b"
++    }
++  ],
++  "finished": "2026-11-14T15:44:11Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-2-research-composition.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-2-research-composition.log
+new file mode 100644
+index 0000000..35d842b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-2-research-composition.log
+@@ -0,0 +1,58 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 2 failed) 156ms
++   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > joins its two parts with one separator span and no sort clause 4ms
++     → expected [] to have a length of 1 but got +0
++   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause 1ms
++     → expected [] to have a length of 2 but got +0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > joins its two parts with one separator span and no sort clause
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/components/patterns/as-of-line.test.tsx:538:30
++    536|     renderLine();
++    537|     const line = screen.getByTestId("as-of-line");
++    538|     expect(separators(line)).toHaveLength(1);
++       |                              ^
++    539|     const [sep] = separators(line);
++    540|     expect(sep).toHaveClass("inline-block");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause
++AssertionError: expected [] to have a length of 2 but got +0
++
++- Expected
+++ Received
++
++- 2
+++ 0
++
++ ❯ src/components/patterns/as-of-line.test.tsx:551:18
++    549|     const line = screen.getByTestId("as-of-line");
++    550|     const seps = separators(line);
++    551|     expect(seps).toHaveLength(2);
++       |                  ^
++    552|     expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
++    553|     expect(collapsed(line)).toBe(
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 33 passed (35)
++   Start at  09:42:42
++   Duration  1.28s (transform 69ms, setup 61ms, collect 481ms, tests 156ms, environment 289ms, prepare 152ms)
++
+diff --git a/web/src/components/patterns/as-of-line.test.tsx b/web/src/components/patterns/as-of-line.test.tsx
+index b824175..b18103a 100644
+--- a/web/src/components/patterns/as-of-line.test.tsx
++++ b/web/src/components/patterns/as-of-line.test.tsx
+@@ -529,3 +529,29 @@ describe("AsOfLine generic form: element parts, host classes, non-empty parts",
+     expect(never).toBeTypeOf("function");
+   });
+ });
++
++describe("TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13)", () => {
++  // Implements TC-COMP-034
++  it("joins its two parts with one separator span and no sort clause", () => {
++    renderLine();
++    const line = screen.getByTestId("as-of-line");
++    expect(separators(line)).toHaveLength(1);
++    const [sep] = separators(line);
++    expect(sep).toHaveClass("inline-block");
++    expect(sep).toHaveClass("px-2");
++    expect(sep.previousSibling?.textContent).toBe("2026-10-15 17:46 CDT");
++    expect(sep.nextSibling?.textContent).toBe("from the download started ");
++  });
++
++  // Implements TC-COMP-034
++  it("adds a second separator immediately before the sort clause", () => {
++    renderLine({ sortLabel: "value" });
++    const line = screen.getByTestId("as-of-line");
++    const seps = separators(line);
++    expect(seps).toHaveLength(2);
++    expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
++    expect(collapsed(line)).toBe(
++      "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value",
++    );
++  });
++});
+diff --git a/web/src/components/patterns/as-of-line.tsx b/web/src/components/patterns/as-of-line.tsx
+index 8c5ff1a..729b394 100644
+--- a/web/src/components/patterns/as-of-line.tsx
++++ b/web/src/components/patterns/as-of-line.tsx
+@@ -26,6 +26,11 @@ import { StatusBadge, type StatusTier } from "./status-badge";
+  * `role="status"` is atomic by default, and an atomic region would re-read the
+  * retained announcement whenever *Updating* or the failure text toggles
+  * (CAP-002-E4-S4 Open Gap 6).
++ *
++ * CAP-002 delivered this file for the Research line alone; CAP-003
++ * `ui-components` took it over (owner decision 2026-10-25; DAC-E1-13). The
++ * Research line now composes the generic `AsOfLine`, whose parts are joined by
++ * the pattern's own separator, and renders the same text it always did.
+  */
+ 
+ export interface AsOfLineProps {
+@@ -56,19 +61,30 @@ const OUTCOME: Record<RunOutcome, { tier: StatusTier; word: string }> = {
+   partial: { tier: "warning", word: SCORE_SET.partial },
+ };
+ 
+-/** *Scores from {time} · from the download started {time}*, the start time linked to the run. */
+-function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
++/** *Scores from {time}*: the words, then the produced time in the numeric face. */
++function ScoresFromPart({ set }: { set: CurrentSet }): JSX.Element {
+   const produced = formatTimestamp(set.endedAt);
+   const scores = SCORE_SET.scoresFrom(produced);
+-  const started = formatTimestamp(set.runStartedAt);
+-  const clause = SCORE_SET.fromTheDownloadStarted(started);
+-  // Each builder's words precede its time: the produced time takes the numeric
+-  // face, the start time is the link.
+   return (
+     <>
+       {scores.slice(0, scores.length - produced.length)}
+       <span className="font-numeric">{produced}</span>
+-      {SCORE_SET.separator}
++    </>
++  );
++}
++
++/** *from the download started {time}*, the start time linked to the run, then the outcome badge. */
++function DownloadPart({
++  set,
++  outcome,
++}: {
++  set: CurrentSet;
++  outcome: { tier: StatusTier; word: string };
++}): JSX.Element {
++  const started = formatTimestamp(set.runStartedAt);
++  const clause = SCORE_SET.fromTheDownloadStarted(started);
++  return (
++    <>
+       {clause.slice(0, clause.length - started.length)}
+       <Link
+         to={SHELL_ROUTES.download(set.runId)}
+@@ -76,7 +92,8 @@ function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
+         className="font-numeric underline"
+       >
+         {started}
+-      </Link>
++      </Link>{" "}
++      <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
+     </>
+   );
+ }
+@@ -163,10 +180,10 @@ function ResearchAsOfLine({
+   const building = later?.state === "building";
+   const buildingSince = later?.state === "building" ? formatTimestamp(later.startedAt) : null;
+   const outcome = OUTCOME[set.runOutcome];
+-  return (
+-    <p data-testid="as-of-line" className={`${LINE_HEIGHT} text-xs text-muted-foreground`}>
+-      <SetSentence set={set} /> <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
+-      {sortLabel === undefined ? null : `${SCORE_SET.separator}${SCORE_SET.sortedBy(sortLabel)}`}
++  // What follows the last part, with no separator: the *checked* time while a
++  // later set builds, the live region and, after a failed poll, **Try again**.
++  const tail = (
++    <>
+       {building && checkedAt !== null ? (
+         <>
+           {" "}
+@@ -193,7 +210,31 @@ function ResearchAsOfLine({
+           </button>
+         </>
+       ) : null}
+-    </p>
++    </>
++  );
++  const download = <DownloadPart set={set} outcome={outcome} />;
++  return (
++    <AsOfLine
++      className={LINE_HEIGHT}
++      parts={
++        sortLabel === undefined
++          ? [
++              <ScoresFromPart key="scores" set={set} />,
++              <Fragment key="download">
++                {download}
++                {tail}
++              </Fragment>,
++            ]
++          : [
++              <ScoresFromPart key="scores" set={set} />,
++              download,
++              <Fragment key="sort">
++                {SCORE_SET.sortedBy(sortLabel)}
++                {tail}
++              </Fragment>,
++            ]
++      }
++    />
+   );
+ }
+ 

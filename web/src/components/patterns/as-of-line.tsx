@@ -1,8 +1,9 @@
-import type { JSX } from "react";
+import { Fragment, type JSX, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { CurrentSet, LaterSet, RunOutcome } from "../../api/classification-types";
 import { RESULTS, SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
 import { formatTimestamp } from "../../screens/research/format";
+import { cn } from "../ui/utils";
 import { StatusBadge, type StatusTier } from "./status-badge";
 
 /**
@@ -25,6 +26,11 @@ import { StatusBadge, type StatusTier } from "./status-badge";
  * `role="status"` is atomic by default, and an atomic region would re-read the
  * retained announcement whenever *Updating* or the failure text toggles
  * (CAP-002-E4-S4 Open Gap 6).
+ *
+ * CAP-002 delivered this file for the Research line alone; CAP-003
+ * `ui-components` took it over (owner decision 2026-10-25; DAC-E1-13). The
+ * Research line now composes the generic `AsOfLine`, whose parts are joined by
+ * the pattern's own separator, and renders the same text it always did.
  */
 
 export interface AsOfLineProps {
@@ -55,19 +61,30 @@ const OUTCOME: Record<RunOutcome, { tier: StatusTier; word: string }> = {
   partial: { tier: "warning", word: SCORE_SET.partial },
 };
 
-/** *Scores from {time} · from the download started {time}*, the start time linked to the run. */
-function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
+/** *Scores from {time}*: the words, then the produced time in the numeric face. */
+function ScoresFromPart({ set }: { set: CurrentSet }): JSX.Element {
   const produced = formatTimestamp(set.endedAt);
   const scores = SCORE_SET.scoresFrom(produced);
-  const started = formatTimestamp(set.runStartedAt);
-  const clause = SCORE_SET.fromTheDownloadStarted(started);
-  // Each builder's words precede its time: the produced time takes the numeric
-  // face, the start time is the link.
   return (
     <>
       {scores.slice(0, scores.length - produced.length)}
       <span className="font-numeric">{produced}</span>
-      {SCORE_SET.separator}
+    </>
+  );
+}
+
+/** *from the download started {time}*, the start time linked to the run, then the outcome badge. */
+function DownloadPart({
+  set,
+  outcome,
+}: {
+  set: CurrentSet;
+  outcome: { tier: StatusTier; word: string };
+}): JSX.Element {
+  const started = formatTimestamp(set.runStartedAt);
+  const clause = SCORE_SET.fromTheDownloadStarted(started);
+  return (
+    <>
       {clause.slice(0, clause.length - started.length)}
       <Link
         to={SHELL_ROUTES.download(set.runId)}
@@ -75,7 +92,8 @@ function SetSentence({ set }: { set: CurrentSet }): JSX.Element {
         className="font-numeric underline"
       >
         {started}
-      </Link>
+      </Link>{" "}
+      <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
     </>
   );
 }
@@ -136,10 +154,10 @@ function LiveRegion({
 }
 
 /**
- * The line, or `null` with no set (the never-populated body has no line), or
- * its skeleton while the first read is pending (DEC-0154).
+ * The Research line, or `null` with no set (the never-populated body has no
+ * line), or its skeleton while the first read is pending (DEC-0154).
  */
-export function AsOfLine({
+function ResearchAsOfLine({
   set,
   later,
   checkedAt,
@@ -162,10 +180,10 @@ export function AsOfLine({
   const building = later?.state === "building";
   const buildingSince = later?.state === "building" ? formatTimestamp(later.startedAt) : null;
   const outcome = OUTCOME[set.runOutcome];
-  return (
-    <p data-testid="as-of-line" className={`${LINE_HEIGHT} text-xs text-muted-foreground`}>
-      <SetSentence set={set} /> <StatusBadge tier={outcome.tier}>{outcome.word}</StatusBadge>
-      {sortLabel === undefined ? null : `${SCORE_SET.separator}${SCORE_SET.sortedBy(sortLabel)}`}
+  // What follows the last part, with no separator: the *checked* time while a
+  // later set builds, the live region and, after a failed poll, **Try again**.
+  const tail = (
+    <>
       {building && checkedAt !== null ? (
         <>
           {" "}
@@ -192,6 +210,72 @@ export function AsOfLine({
           </button>
         </>
       ) : null}
-    </p>
+    </>
   );
+  const download = <DownloadPart set={set} outcome={outcome} />;
+  return (
+    <AsOfLine
+      className={LINE_HEIGHT}
+      parts={
+        sortLabel === undefined
+          ? [
+              <ScoresFromPart key="scores" set={set} />,
+              <Fragment key="download">
+                {download}
+                {tail}
+              </Fragment>,
+            ]
+          : [
+              <ScoresFromPart key="scores" set={set} />,
+              download,
+              <Fragment key="sort">
+                {SCORE_SET.sortedBy(sortLabel)}
+                {tail}
+              </Fragment>,
+            ]
+      }
+    />
+  );
+}
+
+/**
+ * The generic form's props (component design `ui-components` 2.1; DAC-E1-13;
+ * DEC-0315): the parts of one as-of line, at least one, and the host's own
+ * classes.
+ */
+export interface AsOfLinePartsProps {
+  parts: readonly [ReactNode, ...ReactNode[]];
+  className?: string;
+}
+
+/**
+ * The separator between two parts. The spaces sit inside an `inline-block`: they
+ * keep the word boundaries in the text a screen reader and `textContent` read,
+ * and an inline-block drops collapsible spaces at the start and end of its own
+ * line, so the visible gap is the `--space-2` padding alone.
+ */
+const SEPARATOR = " · ";
+
+/**
+ * The as-of line, one pattern for every surface (blueprint 4.8; AC-26;
+ * DAC-E1-13, DAC-E1-S10-1; DEC-0315). With `parts` it renders them in one `p`
+ * at `--text-xs` `--muted-foreground`, each part after the first preceded by
+ * the middle-dot separator with `--space-2` either side, so a screen reader
+ * reads one line. With the Research props it renders the Research line.
+ */
+export function AsOfLine(props: AsOfLineProps | AsOfLinePartsProps): JSX.Element | null {
+  if ("parts" in props) {
+    return (
+      <p data-testid="as-of-line" className={cn("text-xs text-muted-foreground", props.className)}>
+        {props.parts.map((part, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: parts are positional and never reorder.
+          <Fragment key={index}>
+            {index > 0 ? <span className="inline-block px-2">{SEPARATOR}</span> : null}
+            {part}
+          </Fragment>
+        ))}
+      </p>
+    );
+  }
+  return <ResearchAsOfLine {...props} />;
 }

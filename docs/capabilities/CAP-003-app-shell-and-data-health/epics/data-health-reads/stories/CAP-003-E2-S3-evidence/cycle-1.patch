@@ -1,0 +1,1407 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..208c7ba
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/mutants-cycle-1.json
+@@ -0,0 +1,457 @@
++{
++ "schema": 1,
++ "repo_head": "c4e031f8cc1df324da43863c083ac10953056944",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "src/factorflow/data_health/reader.py:186:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 186,
++   "original": "_EXCEPTION_SYMBOLS_KEPT: Final = 5",
++   "mutated": "_EXCEPTION_SYMBOLS_KEPT: Final = 6"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:189:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 189,
++   "original": "_FIRST_PAGE_LIMIT: Final = 50",
++   "mutated": "_FIRST_PAGE_LIMIT: Final = 51"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:198:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 198,
++   "original": "    count: int = 0",
++   "mutated": "    count: int = 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:202:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 202,
++   "original": "        self.count += 1",
++   "mutated": "        self.count += 2"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:203:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 203,
++   "original": "        if len(self.symbols) < _EXCEPTION_SYMBOLS_KEPT:",
++   "mutated": "        if len(self.symbols) <= _EXCEPTION_SYMBOLS_KEPT:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:212:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 212,
++   "original": "    prices_absent: int = 0",
++   "mutated": "    prices_absent: int = 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:213:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 213,
++   "original": "    prices_behind: int = 0",
++   "mutated": "    prices_behind: int = 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:214:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 214,
++   "original": "    prices_gaps: int = 0",
++   "mutated": "    prices_gaps: int = 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:215:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 215,
++   "original": "    gaps_available: bool = True",
++   "mutated": "    gaps_available: bool = False"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:218:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 218,
++   "original": "    financials_absent: int = 0",
++   "mutated": "    financials_absent: int = 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:219:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 219,
++   "original": "    financials_problems: int = 0",
++   "mutated": "    financials_problems: int = 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:226:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 226,
++   "original": "        if not view.gap_detection.available and self.gaps_available:",
++   "mutated": "        if view.gap_detection.available and self.gaps_available:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:227:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 227,
++   "original": "            self.gaps_available = False",
++   "mutated": "            pass"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:227:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 227,
++   "original": "            self.gaps_available = False",
++   "mutated": "            self.gaps_available = True"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:228:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 228,
++   "original": "            self.gaps_reason = view.gap_detection.reason",
++   "mutated": "            pass"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:232:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 232,
++   "original": "                stock.covered_to is not None",
++   "mutated": "                stock.covered_to is None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:233:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 233,
++   "original": "                and self.latest_session is not None",
++   "mutated": "                and self.latest_session is None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:234:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 234,
++   "original": "                and stock.covered_to < self.latest_session",
++   "mutated": "                and stock.covered_to <= self.latest_session"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:236:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 236,
++   "original": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0",
++   "mutated": "            gap = stock.gaps.missing_days is None and stock.gaps.missing_days > 0"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:236:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 236,
++   "original": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0",
++   "mutated": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days >= 0"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:236:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 236,
++   "original": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0",
++   "mutated": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:250:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 250,
++   "original": "            if outcome == \"written\" and acquired_at is not None:",
++   "mutated": "            if outcome != \"written\" and acquired_at is not None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:250:negate-boolean:2",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 250,
++   "original": "            if outcome == \"written\" and acquired_at is not None:",
++   "mutated": "            if outcome == \"written\" and acquired_at is None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:251:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 251,
++   "original": "                if self.as_of is None or acquired_at > self.as_of:",
++   "mutated": "                if self.as_of is None or acquired_at >= self.as_of:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:252:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 252,
++   "original": "                    self.as_of = acquired_at",
++   "mutated": "                    pass"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:256:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 256,
++   "original": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:",
++   "mutated": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) >= 0:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:256:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 256,
++   "original": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:",
++   "mutated": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 1) > 0:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:256:off-by-one:3",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 256,
++   "original": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:",
++   "mutated": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 1:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:258:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 258,
++   "original": "        elif not self.gaps_available:",
++   "mutated": "        elif self.gaps_available:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:274:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 274,
++   "original": "        exceptions = self.financials_absent + self.financials_problems > 0",
++   "mutated": "        exceptions = self.financials_absent + self.financials_problems >= 0"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:274:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 274,
++   "original": "        exceptions = self.financials_absent + self.financials_problems > 0",
++   "mutated": "        exceptions = self.financials_absent + self.financials_problems > 1"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:289:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 289,
++   "original": "    if not symbols:",
++   "mutated": "    if symbols:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:308:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 308,
++   "original": "    assert head is not None  # an aggregate over a table always returns one row",
++   "mutated": "    assert head is None  # an aggregate over a table always returns one row"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:311:drop-defaulted-argument:1",
++   "cycle": "cycle-1",
++   "operator": "drop-defaulted-argument",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 311,
++   "original": "    view = read_coverage(conn, lifecycle=\"active\", cursor=None, limit=MAX_LIMIT)",
++   "mutated": "    view = read_coverage(conn, lifecycle=\"active\", limit=MAX_LIMIT)"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:314:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 314,
++   "original": "    if not never_acquired:",
++   "mutated": "    if never_acquired:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:315:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 315,
++   "original": "        while True:",
++   "mutated": "        while False:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:324:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 324,
++   "original": "    assert count_row is not None",
++   "mutated": "    assert count_row is None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:325:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 325,
++   "original": "    affected_count = count_row[0]",
++   "mutated": "    affected_count = count_row[1]"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:327:drop-defaulted-argument:1",
++   "cycle": "cycle-1",
++   "operator": "drop-defaulted-argument",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 327,
++   "original": "    problems = read_problems(conn, cursor=None, limit=_FIRST_PAGE_LIMIT)",
++   "mutated": "    problems = read_problems(conn, limit=_FIRST_PAGE_LIMIT)"
++  },
++  {
++   "id": "man:head-latest-any-lifecycle",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 121,
++   "old": "WHERE i.lifecycle = 'active'\n           AND cs.data_type = 'prices'",
++   "new": "WHERE cs.data_type = 'prices'",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:head-latest-fundamentals",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 122,
++   "old": "AND cs.data_type = 'prices') AS latest_session",
++   "new": "AND cs.data_type = 'fundamentals') AS latest_session",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:head-followed-any-lifecycle",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 117,
++   "old": "(SELECT count(*) FROM instrument i WHERE i.lifecycle = 'active')",
++   "new": "(SELECT count(*) FROM instrument i)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:state-prices",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 132,
++   "old": "WHERE s.data_type = 'fundamentals'\n   AND i.symbol",
++   "new": "WHERE s.data_type = 'prices'\n   AND i.symbol",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:unknown-not-absent",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 191,
++   "old": "_UNSEEN = (Presence.ABSENT, Presence.UNKNOWN)",
++   "new": "_UNSEEN = (Presence.ABSENT,)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:not-found-not-problem",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 245,
++   "old": "outcome in (\"failed\", \"not_found\")",
++   "new": "outcome in (\"failed\",)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:limit-50",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 311,
++   "old": "cursor=None, limit=MAX_LIMIT)\n    never_acquired",
++   "new": "cursor=None, limit=50)\n    never_acquired",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:cursor-none",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 319,
++   "old": "cursor=view.next_cursor, limit=MAX_LIMIT)",
++   "new": "cursor=None, limit=MAX_LIMIT)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:lifecycle-none",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 311,
++   "old": "read_coverage(conn, lifecycle=\"active\", cursor=None",
++   "new": "read_coverage(conn, lifecycle=None, cursor=None",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:affected-len",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 325,
++   "old": "affected_count = count_row[0]",
++   "new": "affected_count = len(problems_rows)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "man:commit-at-end",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 335,
++   "old": "        problems,\n    )",
++   "new": "        problems,\n    ) if conn.commit() is None else None",
++   "cycle": "cycle-1"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/red-cycle-1-checks.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/red-cycle-1-checks.log
+new file mode 100644
+index 0000000..fae2e18
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S3-evidence/red-cycle-1-checks.log
+@@ -0,0 +1,16 @@
++
++==================================== ERRORS ====================================
++____________ ERROR collecting tests/unit/test_data_health_checks.py ____________
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_data_health_checks.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/unit/test_data_health_checks.py:21: in <module>
++    from factorflow.data_health.reader import _ChecksFold, _Union
++E   ImportError: cannot import name '_ChecksFold' from 'factorflow.data_health.reader' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/src/factorflow/data_health/reader.py)
++=========================== short test summary info ============================
++ERROR tests/unit/test_data_health_checks.py
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 error in 0.31s
+diff --git a/src/factorflow/data_health/__init__.py b/src/factorflow/data_health/__init__.py
+index 21c857a..2ec2ac1 100644
+--- a/src/factorflow/data_health/__init__.py
++++ b/src/factorflow/data_health/__init__.py
+@@ -1,9 +1,9 @@
+ """The data-health-reader: read-only reads behind the shell and the Data health screen.
+ 
+-Component design 2.1. ``read_problems`` and ``read_attention`` exist so far;
+-``read_data_health`` follows in a later story.
++Component design 2.1. ``read_problems``, ``read_attention`` and
++``read_data_health`` are exported.
+ """
+ 
+-from factorflow.data_health.reader import read_attention, read_problems
++from factorflow.data_health.reader import read_attention, read_data_health, read_problems
+ 
+-__all__ = ["read_attention", "read_problems"]
++__all__ = ["read_attention", "read_data_health", "read_problems"]
+diff --git a/src/factorflow/data_health/queries.py b/src/factorflow/data_health/queries.py
+index b47d703..1467307 100644
+--- a/src/factorflow/data_health/queries.py
++++ b/src/factorflow/data_health/queries.py
+@@ -106,3 +106,29 @@ SELECT run_id, state, ended_at, failure_reason
+  ORDER BY ended_at DESC, run_id DESC
+  LIMIT 1
+ """
++
++# The head of the data-health read (component design 2.5, DEC-0213): `now()` as
++# `checked_at`, the followed count, and the latest prices coverage end over
++# active instruments. `latest_session` is the value `coverage-service` reports
++# as each instrument's prices `covered_to`, maximised, so the fold can count a
++# stock as behind while it pages (one pass, no second read of the roster).
++DATA_HEALTH_HEAD_SQL: Final[str] = """
++SELECT now() AS checked_at,
++       (SELECT count(*) FROM instrument i WHERE i.lifecycle = 'active') AS followed_count,
++       (SELECT max(cs.covered_to)
++          FROM coverage_segment cs
++          JOIN instrument i ON i.instrument_id = cs.instrument_id
++         WHERE i.lifecycle = 'active'
++           AND cs.data_type = 'prices') AS latest_session
++"""
++
++# The fundamentals acquisition state of one coverage page's stocks: the facts
++# `problem_count` and `as_of` are defined by (DEC-0213 e). The page fixes the
++# population, so no lifecycle predicate is needed.
++FUNDAMENTALS_STATE_SQL: Final[str] = """
++SELECT i.symbol, s.last_outcome, s.last_acquired_at
++  FROM instrument i
++  JOIN acquisition_state s ON s.instrument_id = i.instrument_id
++ WHERE s.data_type = 'fundamentals'
++   AND i.symbol = ANY(%(symbols)s)
++"""
+diff --git a/src/factorflow/data_health/reader.py b/src/factorflow/data_health/reader.py
+index b1f3457..908fc07 100644
+--- a/src/factorflow/data_health/reader.py
++++ b/src/factorflow/data_health/reader.py
+@@ -12,18 +12,32 @@ DAC-E2-S2-1 to DAC-E2-S2-4): five fixed statements on the caller's connection, n
+ call to ``coverage-service``, and the same caller-owned transaction. Its items
+ carry no tier and no copy (DEC-0200); the three kinds are DEC-0203's, and the
+ progress ``total`` is ``None`` while ``instruments_named`` is 0 (DEC-0213 f).
++
++``read_data_health`` is the Data health read (component design 2.5, 3 and 5;
++DEC-0201, DEC-0213, DEC-0220; AC-11, AC-12, AC-21, AC-24; DAC-E2-4, DAC-E2-5,
++DAC-E2-15, DAC-E2-S3-1 to DAC-E2-S3-3). It pages ``coverage-service`` unchanged
++to a null cursor, folds each page into running counts that keep at most five
++exception symbols per check, and leaves the transaction to the caller. A
++``ValueError`` from ``read_coverage`` is never caught here.
+ """
+ 
+-from datetime import datetime
+-from typing import Literal, cast
++from collections.abc import Mapping
++from dataclasses import dataclass, field
++from datetime import date, datetime
++from typing import Final, Literal, cast
+ 
+ import psycopg
+ 
+ from factorflow.config.settings import credential_present
++from factorflow.coverage.service import MAX_LIMIT, CoverageView, Presence, read_coverage
+ from factorflow.data_health.models import (
+     Attention,
+     AttentionItem,
++    CompanyFinancialsCheck,
++    DailyPricesCheck,
++    DataHealth,
+     Failure,
++    GapDetectionState,
+     LatestDownload,
+     LatestTerminalDownload,
+     ProblemPage,
+@@ -32,7 +46,9 @@ from factorflow.data_health.models import (
+     Progress,
+ )
+ from factorflow.data_health.queries import (
++    DATA_HEALTH_HEAD_SQL,
+     FOLLOWED_COUNT_SQL,
++    FUNDAMENTALS_STATE_SQL,
+     LATEST_DOWNLOAD_SQL,
+     LATEST_TERMINAL_SQL,
+     PRICES_AS_OF_SQL,
+@@ -165,3 +181,156 @@ def read_attention(conn: psycopg.Connection) -> Attention:
+             checked_at=checked_at,
+         ),
+     )
++
++
++_EXCEPTION_SYMBOLS_KEPT: Final = 5
++# The first problem page of component design 2.2; the value equals the API's
++# default page size, kept local so the reader does not import the API layer.
++_FIRST_PAGE_LIMIT: Final = 50
++
++_UNSEEN = (Presence.ABSENT, Presence.UNKNOWN)
++
++
++@dataclass
++class _Union:
++    """Distinct stocks in any group of one check: a count and the first five symbols."""
++
++    count: int = 0
++    symbols: list[str] = field(default_factory=list)
++
++    def add(self, symbol: str) -> None:
++        self.count += 1
++        if len(self.symbols) < _EXCEPTION_SYMBOLS_KEPT:
++            self.symbols.append(symbol)
++
++
++@dataclass
++class _ChecksFold:
++    """Running counts of both checks over coverage pages, in ascending symbol order."""
++
++    latest_session: date | None
++    prices_absent: int = 0
++    prices_behind: int = 0
++    prices_gaps: int = 0
++    gaps_available: bool = True
++    gaps_reason: str | None = None
++    prices_union: _Union = field(default_factory=_Union)
++    financials_absent: int = 0
++    financials_problems: int = 0
++    as_of: datetime | None = None
++    financials_union: _Union = field(default_factory=_Union)
++
++    def add_page(
++        self, view: CoverageView, fundamentals: Mapping[str, tuple[str, datetime]]
++    ) -> None:
++        if not view.gap_detection.available and self.gaps_available:
++            self.gaps_available = False
++            self.gaps_reason = view.gap_detection.reason
++        for stock in view.instruments:
++            absent = stock.presence["prices"] in _UNSEEN
++            behind = (
++                stock.covered_to is not None
++                and self.latest_session is not None
++                and stock.covered_to < self.latest_session
++            )
++            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0
++            self.prices_absent += absent
++            self.prices_behind += behind
++            self.prices_gaps += gap
++            if absent or behind or gap:
++                self.prices_union.add(stock.symbol)
++
++            outcome, acquired_at = fundamentals.get(stock.symbol, (None, None))
++            f_absent = stock.presence["fundamentals"] in _UNSEEN
++            f_problem = outcome in ("failed", "not_found")
++            self.financials_absent += f_absent
++            self.financials_problems += f_problem
++            if f_absent or f_problem:
++                self.financials_union.add(stock.symbol)
++            if outcome == "written" and acquired_at is not None:
++                if self.as_of is None or acquired_at > self.as_of:
++                    self.as_of = acquired_at
++
++    def daily_prices(self) -> DailyPricesCheck:
++        gap_stock_count = self.prices_gaps if self.gaps_available else None
++        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:
++            status: Literal["ok", "exceptions", "not_determinable"] = "exceptions"
++        elif not self.gaps_available:
++            status = "not_determinable"
++        else:
++            status = "ok"
++        return DailyPricesCheck(
++            status,
++            self.prices_absent,
++            gap_stock_count,
++            self.prices_behind,
++            self.latest_session,
++            GapDetectionState(self.gaps_available, self.gaps_reason),
++            self.prices_union.count,
++            tuple(self.prices_union.symbols),
++        )
++
++    def company_financials(self) -> CompanyFinancialsCheck:
++        exceptions = self.financials_absent + self.financials_problems > 0
++        return CompanyFinancialsCheck(
++            "exceptions" if exceptions else "ok",
++            self.financials_absent,
++            self.financials_problems,
++            self.as_of,
++            self.financials_union.count,
++            tuple(self.financials_union.symbols),
++        )
++
++
++def _fundamentals_state(
++    conn: psycopg.Connection, symbols: list[str]
++) -> dict[str, tuple[str, datetime]]:
++    """Each symbol's fundamentals ``last_outcome`` and ``last_acquired_at``."""
++    if not symbols:
++        return {}
++    with conn.cursor() as cur:
++        cur.execute(FUNDAMENTALS_STATE_SQL, {"symbols": symbols})
++        return {symbol: (outcome, acquired_at) for symbol, outcome, acquired_at in cur.fetchall()}
++
++
++def read_data_health(conn: psycopg.Connection) -> DataHealth:
++    """The Data health aggregate: both checks, the verdict counts and the first problem page.
++
++    One pass over ``coverage-service``'s active-stock pages (500 each, to a null
++    cursor), so memory holds one page and five symbols per check whatever the
++    roster size. Before anything was acquired both checks are ``None``, never
++    zero counts (AC-21). ``affected_count`` is the statement behind
++    ``Problems.stock_count`` (DEC-0201). The caller owns the transaction.
++    """
++    with conn.cursor() as cur:
++        cur.execute(DATA_HEALTH_HEAD_SQL)
++        head = cur.fetchone()
++    assert head is not None  # an aggregate over a table always returns one row
++    checked_at, followed_count, latest_session = head
++
++    view = read_coverage(conn, lifecycle="active", cursor=None, limit=MAX_LIMIT)
++    never_acquired = view.never_acquired
++    fold = _ChecksFold(latest_session=latest_session)
++    if not never_acquired:
++        while True:
++            fold.add_page(view, _fundamentals_state(conn, [i.symbol for i in view.instruments]))
++            if view.next_cursor is None:
++                break
++            view = read_coverage(conn, lifecycle="active", cursor=view.next_cursor, limit=MAX_LIMIT)
++
++    with conn.cursor() as cur:
++        cur.execute(PROBLEM_COUNT_SQL)
++        count_row = cur.fetchone()
++    assert count_row is not None
++    affected_count = count_row[0]
++
++    problems = read_problems(conn, cursor=None, limit=_FIRST_PAGE_LIMIT)
++    return DataHealth(
++        checked_at,
++        never_acquired,
++        followed_count,
++        affected_count,
++        None if never_acquired else fold.daily_prices(),
++        None if never_acquired else fold.company_financials(),
++        problems,
++    )
+diff --git a/tests/integration/test_data_health_checks.py b/tests/integration/test_data_health_checks.py
+new file mode 100644
+index 0000000..67ba414
+--- /dev/null
++++ b/tests/integration/test_data_health_checks.py
+@@ -0,0 +1,390 @@
++"""Integration tests: read_data_health over coverage-service pages (CAP-003-E2-S3).
++
++- TC-COMP-038 (DAC-E2-15): ``read_coverage`` is paged unchanged to a null cursor.
++- TC-COMP-048 (DAC-E2-S3-2, AC-21): ``never_acquired`` with and without an ended download.
++- TC-COMP-049 (DAC-E2-S3-3): retired stocks are excluded; six pages at 3000 stocks.
++- A real store with every group and a partial download (AC-11, AC-12, DAC-E2-5, DAC-E2-S3-1).
++- Not determinable on a real store (DAC-E2-4, AC-24).
++"""
++
++import hashlib
++from datetime import UTC, date, datetime, timedelta
++from typing import Any
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.coverage import service as coverage_service
++from factorflow.data_health.models import (
++    CompanyFinancialsCheck,
++    DailyPricesCheck,
++    GapDetectionState,
++    ProblemPage,
++)
++from factorflow.data_health.reader import read_data_health
++
++pytestmark = pytest.mark.postgres
++
++D2, D3, D4, D5 = (date(2024, 1, day) for day in (2, 3, 4, 5))
++T1 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
++T2 = T1 + timedelta(hours=1)
++T3 = T1 + timedelta(hours=2)
++SEGMENT_FUNDAMENTALS = (date(2023, 10, 1), date(2024, 3, 31))
++
++
++def _instrument(conn: psycopg.Connection, symbol: str, lifecycle: str = "active") -> int:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO instrument (symbol, lifecycle, retired_at) "
++            "VALUES (%s, %s, CASE WHEN %s = 'retired' THEN now() END) RETURNING instrument_id",
++            (symbol, lifecycle, lifecycle),
++        )
++        row = cur.fetchone()
++    assert row is not None
++    return int(row[0])
++
++
++def _roster(conn: psycopg.Connection, n: int, prefix: str = "S") -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO instrument (symbol, lifecycle) "
++            "SELECT %s || lpad(n::text, 4, '0'), 'active' FROM generate_series(1, %s) AS n",
++            (prefix, n),
++        )
++
++
++def _id(conn: psycopg.Connection, symbol: str) -> int:
++    with conn.cursor() as cur:
++        cur.execute("SELECT instrument_id FROM instrument WHERE symbol = %s", (symbol,))
++        row = cur.fetchone()
++    assert row is not None
++    return int(row[0])
++
++
++def _bars(conn: psycopg.Connection, instrument_id: int, dates: list[date]) -> None:
++    with conn.cursor() as cur:
++        cur.executemany(
++            "INSERT INTO daily_bar (instrument_id, session_date, value_hash, open_price, "
++            "high_price, low_price, close_price, volume) VALUES (%s, %s, %s, 1, 1, 1, 1, 1)",
++            [
++                (instrument_id, d, hashlib.sha256(f"{instrument_id}{d}".encode()).digest())
++                for d in dates
++            ],
++        )
++
++
++def _segment(
++    conn: psycopg.Connection,
++    instrument_id: int,
++    data_type: str,
++    covered_from: date,
++    covered_to: date,
++) -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
++            "VALUES (%s, %s, %s, %s)",
++            (instrument_id, data_type, covered_from, covered_to),
++        )
++
++
++def _run(
++    conn: psycopg.Connection, *, state: str, requested_at: datetime, ended_at: datetime
++) -> UUID:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO acquisition_run (state, requested_at, ended_at, history_depth_years) "
++            "VALUES (%s, %s, %s, 1) RETURNING run_id",
++            (state, requested_at, ended_at),
++        )
++        row = cur.fetchone()
++    assert row is not None
++    return UUID(str(row[0]))
++
++
++def _record(
++    conn: psycopg.Connection,
++    run_id: UUID,
++    instrument_id: int,
++    data_type: str,
++    outcome: str,
++    *,
++    reason: str | None = None,
++    attempts: int = 1,
++    completed_at: datetime,
++) -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO run_instrument_result "
++            "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
++            (run_id, instrument_id, data_type, outcome, reason, attempts, completed_at),
++        )
++        cur.execute(
++            "INSERT INTO acquisition_state "
++            "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
++            "VALUES (%s, %s, %s, %s, %s) "
++            "ON CONFLICT (instrument_id, data_type) DO UPDATE SET "
++            "last_acquired_at = EXCLUDED.last_acquired_at, "
++            "last_run_id = EXCLUDED.last_run_id, last_outcome = EXCLUDED.last_outcome",
++            (instrument_id, data_type, completed_at, run_id, outcome),
++        )
++
++
++Call = tuple[tuple[Any, ...], dict[str, Any]]
++
++
++def _coverage_spy(monkeypatch: pytest.MonkeyPatch) -> list[Call]:
++    calls: list[Call] = []
++    delivered = coverage_service.read_coverage
++
++    def spy(*args: Any, **kwargs: Any) -> Any:
++        calls.append((args, kwargs))
++        if len(calls) > 10:
++            raise AssertionError("read_coverage called more than 10 times")
++        return delivered(*args, **kwargs)
++
++    monkeypatch.setattr("factorflow.data_health.reader.read_coverage", spy)
++    return calls
++
++
++def _seed_one_stock_with_prices(conn: psycopg.Connection, symbol: str = "S0001") -> None:
++    instrument_id = _id(conn, symbol)
++    _bars(conn, instrument_id, [D2, D3])
++    _segment(conn, instrument_id, "prices", D2, D3)
++
++
++# Implements TC-COMP-038
++def test_read_data_health_pages_read_coverage_unchanged_to_a_null_cursor(
++    migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn = migrated_writer_connection
++    _roster(conn, 1200)
++    _seed_one_stock_with_prices(conn)
++    conn.commit()
++    calls = _coverage_spy(monkeypatch)
++
++    read_data_health(conn)
++
++    assert calls == [
++        ((conn,), {"lifecycle": "active", "cursor": None, "limit": 500}),
++        ((conn,), {"lifecycle": "active", "cursor": "S0500", "limit": 500}),
++        ((conn,), {"lifecycle": "active", "cursor": "S1000", "limit": 500}),
++    ]
++
++
++# Implements TC-COMP-038
++def test_one_page_store_makes_one_call_with_a_null_cursor(
++    migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn = migrated_writer_connection
++    _roster(conn, 3)
++    _seed_one_stock_with_prices(conn)
++    conn.commit()
++    calls = _coverage_spy(monkeypatch)
++
++    read_data_health(conn)
++
++    assert calls == [((conn,), {"lifecycle": "active", "cursor": None, "limit": 500})]
++
++
++# Implements TC-COMP-038
++def test_value_error_from_read_coverage_propagates_unchanged(
++    migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    err = ValueError("limit must be between 1 and 500, got 0")
++
++    def raising(*args: Any, **kwargs: Any) -> Any:
++        raise err
++
++    monkeypatch.setattr("factorflow.data_health.reader.read_coverage", raising)
++
++    with pytest.raises(ValueError) as excinfo:
++        read_data_health(migrated_writer_connection)
++
++    assert excinfo.value is err
++
++
++# Implements TC-COMP-048
++def test_empty_store_is_never_acquired_with_null_checks(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    result = read_data_health(migrated_writer_connection)
++
++    assert result.never_acquired is True
++    assert result.daily_prices is None
++    assert result.company_financials is None
++    assert result.followed_count == 0
++    assert result.affected_count == 0
++    assert result.problems == ProblemPage(rows=(), next_cursor=None)
++
++
++# Implements TC-COMP-048
++def test_a_download_that_ended_with_every_request_failed_is_never_acquired_with_rows(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    _roster(conn, 60, prefix="P")
++    run = _run(conn, state="failed", requested_at=T1, ended_at=T2)
++    with conn.cursor() as cur:
++        cur.execute("SELECT instrument_id FROM instrument ORDER BY symbol")
++        ids = [int(r[0]) for r in cur.fetchall()]
++    for instrument_id in ids:
++        for data_type in ("reference", "prices", "fundamentals", "corporate_actions"):
++            _record(
++                conn,
++                run,
++                instrument_id,
++                data_type,
++                "failed",
++                reason="provider timeout",
++                completed_at=T2,
++            )
++    conn.commit()
++
++    result = read_data_health(conn)
++
++    assert result.never_acquired is True
++    assert result.daily_prices is None
++    assert result.company_financials is None
++    assert result.followed_count == 60
++    assert result.affected_count == 60
++    assert len(result.problems.rows) == 50
++    assert result.problems.rows[0].symbol == "P0001"
++    assert result.problems.rows[-1].symbol == "P0050"
++    assert result.problems.next_cursor == "P0050"
++    assert all(len(row.failures) == 4 and row.retryable for row in result.problems.rows)
++
++
++# Implements TC-COMP-049
++@pytest.mark.slow
++def test_retired_stocks_are_excluded_and_3000_stocks_take_six_pages(
++    migrated_writer_connection: psycopg.Connection, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    conn = migrated_writer_connection
++    _roster(conn, 3000)
++    s1, s2, s3 = _id(conn, "S0001"), _id(conn, "S0002"), _id(conn, "S0003")
++    _bars(conn, s1, [D2, D3, D4, D5])
++    _segment(conn, s1, "prices", D2, D5)
++    _bars(conn, s2, [D2, D3, D4])
++    _segment(conn, s2, "prices", D2, D4)
++    run = _run(conn, state="partial", requested_at=T1, ended_at=T1)
++    _record(conn, run, s3, "fundamentals", "failed", reason="provider timeout", completed_at=T1)
++    retired = _instrument(conn, "R0001", "retired")
++    _record(conn, run, retired, "prices", "failed", reason="provider timeout", completed_at=T1)
++    _record(
++        conn, run, retired, "fundamentals", "failed", reason="provider timeout", completed_at=T1
++    )
++    _segment(conn, retired, "prices", D2, date(2024, 1, 8))
++    conn.commit()
++    calls = _coverage_spy(monkeypatch)
++
++    result = read_data_health(conn)
++
++    assert [c[1]["cursor"] for c in calls] == [None, "S0500", "S1000", "S1500", "S2000", "S2500"]
++    assert all(c[1]["lifecycle"] == "active" and c[1]["limit"] == 500 for c in calls)
++    assert result.followed_count == 3000
++    assert result.daily_prices == DailyPricesCheck(
++        "exceptions",
++        2998,
++        0,
++        1,
++        D5,
++        GapDetectionState(True, None),
++        2999,
++        ("S0002", "S0003", "S0004", "S0005", "S0006"),
++    )
++    assert result.company_financials == CompanyFinancialsCheck(
++        "exceptions", 3000, 1, None, 3000, ("S0001", "S0002", "S0003", "S0004", "S0005")
++    )
++    assert result.affected_count == 1
++    assert [r.symbol for r in result.problems.rows] == ["S0003"]
++    assert result.problems.next_cursor is None
++
++
++def test_a_real_store_with_every_group_and_a_partial_download(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    ids = {s: _instrument(conn, s) for s in ("AAA", "BBB", "CCC", "DDD", "EEE")}
++    retired = _instrument(conn, "RET", "retired")
++    run = _run(conn, state="partial", requested_at=T1, ended_at=T3)
++    fundamentals_from, fundamentals_to = SEGMENT_FUNDAMENTALS
++
++    _bars(conn, ids["AAA"], [D2, D3, D4, D5])
++    _segment(conn, ids["AAA"], "prices", D2, D5)
++    _segment(conn, ids["AAA"], "fundamentals", fundamentals_from, fundamentals_to)
++    _record(conn, run, ids["AAA"], "prices", "written", completed_at=T1)
++    _record(conn, run, ids["AAA"], "fundamentals", "written", completed_at=T1)
++
++    _bars(conn, ids["BBB"], [D2, D3, D5])
++    _segment(conn, ids["BBB"], "prices", D2, D5)
++    _record(conn, run, ids["BBB"], "prices", "written", completed_at=T1)
++    _record(
++        conn, run, ids["BBB"], "fundamentals", "failed", reason="provider timeout", completed_at=T3
++    )
++
++    _bars(conn, ids["CCC"], [D2, D3])
++    _segment(conn, ids["CCC"], "prices", D2, D3)
++    _segment(conn, ids["CCC"], "fundamentals", fundamentals_from, fundamentals_to)
++    _record(conn, run, ids["CCC"], "prices", "written", completed_at=T1)
++    _record(conn, run, ids["CCC"], "fundamentals", "written", completed_at=T2)
++
++    _bars(conn, ids["EEE"], [D2, D3, D4, D5])
++    _segment(conn, ids["EEE"], "prices", D2, D5)
++    _record(conn, run, ids["EEE"], "prices", "written", completed_at=T1)
++    _record(conn, run, ids["EEE"], "fundamentals", "not_found", completed_at=T1)
++
++    _segment(conn, retired, "prices", D2, date(2024, 1, 8))
++    _record(
++        conn, run, retired, "fundamentals", "failed", reason="provider timeout", completed_at=T3
++    )
++    conn.commit()
++
++    result = read_data_health(conn)
++
++    assert result.never_acquired is False
++    assert result.followed_count == 5
++    assert result.daily_prices == DailyPricesCheck(
++        "exceptions", 1, 1, 1, D5, GapDetectionState(True, None), 3, ("BBB", "CCC", "DDD")
++    )
++    assert result.company_financials == CompanyFinancialsCheck(
++        "exceptions", 3, 2, T2, 3, ("BBB", "DDD", "EEE")
++    )
++    assert result.affected_count == 2
++    assert [r.symbol for r in result.problems.rows] == ["BBB", "EEE"]
++    assert result.problems.next_cursor is None
++    assert result.checked_at.tzinfo is not None
++    with conn.cursor() as cur:
++        cur.execute("SELECT now()")
++        row = cur.fetchone()
++    assert row is not None
++    assert result.checked_at == row[0]
++    assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
++
++
++def test_not_determinable_on_a_real_store(migrated_writer_connection: psycopg.Connection) -> None:
++    conn = migrated_writer_connection
++    solo = _instrument(conn, "SOLO")
++    _bars(conn, solo, [D2, D3, D4, D5])
++    _segment(conn, solo, "prices", D2, D5)
++    _segment(conn, solo, "fundamentals", *SEGMENT_FUNDAMENTALS)
++    run = _run(conn, state="succeeded", requested_at=T1, ended_at=T1)
++    _record(conn, run, solo, "prices", "written", completed_at=T1)
++    _record(conn, run, solo, "fundamentals", "written", completed_at=T1)
++    conn.commit()
++
++    result = read_data_health(conn)
++
++    assert result.daily_prices == DailyPricesCheck(
++        "not_determinable",
++        0,
++        None,
++        0,
++        D5,
++        GapDetectionState(False, "fewer_than_two_instruments_with_data"),
++        0,
++        (),
++    )
++    assert result.company_financials == CompanyFinancialsCheck("ok", 0, 0, T1, 0, ())
+diff --git a/tests/unit/test_data_health_checks.py b/tests/unit/test_data_health_checks.py
+new file mode 100644
+index 0000000..84b05d3
+--- /dev/null
++++ b/tests/unit/test_data_health_checks.py
+@@ -0,0 +1,261 @@
++"""Unit tests: the Daily prices and Company financials checks fold (CAP-003-E2-S3).
++
++The fold in ``reader.py`` is driven with hand-built ``coverage-service`` values
++and no database.
++
++- TC-COMP-035 (DAC-E2-4; AC-11, AC-24): the Daily prices status and the null gap count.
++- TC-COMP-047 (DAC-E2-S3-1, DAC-E2-5; AC-11): counting rules and exception unions.
++- DAC-E2-S3-3: the union keeps at most five symbols.
++"""
++
++from datetime import UTC, date, datetime, timedelta
++
++import pytest
++
++from factorflow.coverage.service import CoverageView, GapDetection, InstrumentCoverage, Presence
++from factorflow.data_health.models import (
++    CompanyFinancialsCheck,
++    DailyPricesCheck,
++    GapDetectionState,
++)
++from factorflow.data_health.reader import _ChecksFold, _Union
++
++D2, D3, D4, D5 = (date(2024, 1, day) for day in (2, 3, 4, 5))
++T1 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
++T2 = T1 + timedelta(hours=1)
++T3 = T1 + timedelta(hours=2)
++# Written as a literal so the expected value is independent of the code under test.
++REASON = "fewer_than_two_instruments_with_data"
++
++
++def _stock(
++    symbol: str,
++    *,
++    prices: Presence = Presence.PRESENT,
++    fundamentals: Presence = Presence.PRESENT,
++    covered_to: date | None = D5,
++    missing_days: int | None = 0,
++    gaps_available: bool = True,
++) -> InstrumentCoverage:
++    return InstrumentCoverage(
++        symbol=symbol,
++        lifecycle="active",
++        presence={
++            "reference": Presence.PRESENT,
++            "prices": prices,
++            "fundamentals": fundamentals,
++            "corporate_actions": Presence.PRESENT,
++        },
++        covered_from=D2 if covered_to is not None else None,
++        covered_to=covered_to,
++        last_acquired_at=None,
++        depth_shortfall_years=None,
++        gaps=GapDetection(
++            gaps_available,
++            None if gaps_available else REASON,
++            missing_days if gaps_available else None,
++        ),
++    )
++
++
++def _unknown(symbol: str, *, gaps_available: bool = True) -> InstrumentCoverage:
++    return _stock(
++        symbol,
++        prices=Presence.UNKNOWN,
++        fundamentals=Presence.UNKNOWN,
++        covered_to=None,
++        missing_days=None,
++        gaps_available=gaps_available,
++    )
++
++
++def _absent(symbol: str, *, gaps_available: bool = True) -> InstrumentCoverage:
++    return _stock(
++        symbol,
++        prices=Presence.ABSENT,
++        covered_to=None,
++        missing_days=None,
++        gaps_available=gaps_available,
++    )
++
++
++def _view(
++    stocks: list[InstrumentCoverage], *, available: bool = True, next_cursor: str | None = None
++) -> CoverageView:
++    return CoverageView(
++        never_acquired=False,
++        gap_detection=GapDetection(
++            available, None if available else REASON, 0 if available else None
++        ),
++        instruments=stocks,
++        next_cursor=next_cursor,
++    )
++
++
++def _fold(
++    pages: list[CoverageView],
++    fundamentals: list[dict[str, tuple[str, datetime]]] | None = None,
++    *,
++    latest_session: date | None = D5,
++) -> _ChecksFold:
++    fold = _ChecksFold(latest_session=latest_session)
++    for index, page in enumerate(pages):
++        fold.add_page(page, fundamentals[index] if fundamentals else {})
++    return fold
++
++
++# Implements TC-COMP-035
++@pytest.mark.parametrize(
++    ("view", "expected"),
++    [
++        pytest.param(
++            _view([_stock("AAA"), _absent("BBB")]),
++            DailyPricesCheck("exceptions", 1, 0, 0, D5, GapDetectionState(True, None), 1, ("BBB",)),
++            id="a-absent-only",
++        ),
++        pytest.param(
++            _view([_stock("AAA"), _stock("CCC", covered_to=D4)]),
++            DailyPricesCheck("exceptions", 0, 0, 1, D5, GapDetectionState(True, None), 1, ("CCC",)),
++            id="b-behind-only",
++        ),
++        pytest.param(
++            _view([_stock("AAA", missing_days=2), _stock("BBB")]),
++            DailyPricesCheck("exceptions", 0, 1, 0, D5, GapDetectionState(True, None), 1, ("AAA",)),
++            id="c-gaps-only",
++        ),
++        pytest.param(
++            _view([_stock("AAA", gaps_available=False)], available=False),
++            DailyPricesCheck(
++                "not_determinable", 0, None, 0, D5, GapDetectionState(False, REASON), 0, ()
++            ),
++            id="d-not-determinable",
++        ),
++        pytest.param(
++            _view([_stock("AAA"), _stock("BBB")]),
++            DailyPricesCheck("ok", 0, 0, 0, D5, GapDetectionState(True, None), 0, ()),
++            id="e-ok",
++        ),
++        pytest.param(
++            _view(
++                [_stock("AAA", gaps_available=False), _absent("BBB", gaps_available=False)],
++                available=False,
++            ),
++            DailyPricesCheck(
++                "exceptions", 1, None, 0, D5, GapDetectionState(False, REASON), 1, ("BBB",)
++            ),
++            id="f-unavailable-and-absent",
++        ),
++    ],
++)
++def test_daily_prices_status_and_null_gap_count(
++    view: CoverageView, expected: DailyPricesCheck
++) -> None:
++    assert _fold([view]).daily_prices() == expected
++
++
++# Implements TC-COMP-047
++def test_unknown_presence_counts_as_absent_not_behind() -> None:
++    fold = _fold([_view([_stock("AAA"), _unknown("UNK")])])
++
++    assert fold.daily_prices() == DailyPricesCheck(
++        "exceptions", 1, 0, 0, D5, GapDetectionState(True, None), 1, ("UNK",)
++    )
++    assert fold.company_financials() == CompanyFinancialsCheck(
++        "exceptions", 1, 0, None, 1, ("UNK",)
++    )
++
++
++# Implements TC-COMP-047
++def test_absent_and_failed_is_in_both_counts_and_once_in_the_union() -> None:
++    fold = _fold(
++        [_view([_stock("FLD", fundamentals=Presence.ABSENT)])],
++        [{"FLD": ("failed", T1)}],
++    )
++
++    assert fold.company_financials() == CompanyFinancialsCheck(
++        "exceptions", 1, 1, None, 1, ("FLD",)
++    )
++
++
++# Implements TC-COMP-047
++def test_not_found_is_a_problem_and_written_is_not() -> None:
++    fold = _fold(
++        [_view([_stock("AAA"), _stock("NFD")])],
++        [{"AAA": ("written", T1), "NFD": ("not_found", T2)}],
++    )
++
++    assert fold.company_financials() == CompanyFinancialsCheck("exceptions", 0, 1, T1, 1, ("NFD",))
++
++
++# Implements TC-COMP-047
++def test_gaps_and_behind_is_one_stock_in_the_union() -> None:
++    fold = _fold([_view([_stock("AAA"), _stock("GBH", covered_to=D4, missing_days=1)])])
++
++    assert fold.daily_prices() == DailyPricesCheck(
++        "exceptions", 0, 1, 1, D5, GapDetectionState(True, None), 1, ("GBH",)
++    )
++
++
++# Implements TC-COMP-047
++def test_more_than_five_exceptions_across_a_page_boundary_keep_the_first_five() -> None:
++    fold = _fold(
++        [
++            _view([_unknown(s) for s in ("AAA", "BBB", "CCC", "DDD")], next_cursor="DDD"),
++            _view([_unknown(s) for s in ("EEE", "FFF", "GGG")]),
++        ]
++    )
++    first_five = ("AAA", "BBB", "CCC", "DDD", "EEE")
++
++    assert fold.daily_prices().exception_symbols == first_five
++    assert fold.daily_prices().exception_count == 7
++    assert fold.company_financials().exception_symbols == first_five
++    assert fold.company_financials().exception_count == 7
++
++
++def test_union_keeps_at_most_five_symbols() -> None:
++    union = _Union()
++
++    for number in range(1, 3001):
++        union.add(f"S{number:04d}")
++        assert len(union.symbols) <= 5
++
++    assert union.count == 3000
++    assert union.symbols == ["S0001", "S0002", "S0003", "S0004", "S0005"]
++
++
++def test_financials_as_of_is_the_latest_written_across_pages() -> None:
++    fold = _fold(
++        [
++            _view([_stock("AAA"), _stock("BBB")], next_cursor="BBB"),
++            _view([_stock("CCC")]),
++        ],
++        [{"AAA": ("written", T2), "BBB": ("failed", T3)}, {"CCC": ("written", T1)}],
++    )
++
++    check = fold.company_financials()
++    assert check.as_of == T2
++    assert check.problem_count == 1
++
++
++def test_gap_availability_is_the_conjunction_over_pages() -> None:
++    fold = _fold(
++        [
++            _view([_stock("AAA")], next_cursor="AAA"),
++            _view([_stock("BBB", gaps_available=False)], available=False),
++        ]
++    )
++
++    check = fold.daily_prices()
++    assert check.gap_stock_count is None
++    assert check.gap_detection == GapDetectionState(False, REASON)
++    assert check.status == "not_determinable"
++
++
++def test_no_prices_anywhere_leaves_latest_session_null() -> None:
++    fold = _fold(
++        [_view([_unknown("AAA", gaps_available=False)], available=False)], latest_session=None
++    )
++
++    assert fold.daily_prices() == DailyPricesCheck(
++        "exceptions", 1, None, 0, None, GapDetectionState(False, REASON), 1, ("AAA",)
++    )

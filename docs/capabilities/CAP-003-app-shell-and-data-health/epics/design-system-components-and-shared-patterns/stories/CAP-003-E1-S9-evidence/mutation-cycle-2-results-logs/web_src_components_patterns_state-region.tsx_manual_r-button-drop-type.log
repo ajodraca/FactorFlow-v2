@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-k_jmhxkd/w0/web
+
+ ❯ src/components/patterns/state-region.test.tsx (39 tests | 1 failed) 79ms
+   × StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > makes Try again a type=button, fit-width control beside the status in a spaced column 5ms
+     → expect(element).toHaveAttribute("type", "button") // element.getAttribute("type") === "button"
+
+Expected the element to have attribute:
+  type="button"
+Received:
+  null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/state-region.test.tsx > StateRegion wrapper contract (DEC-0314, review v1 IR-002, IR-003) > makes Try again a type=button, fit-width control beside the status in a spaced column
+Error: expect(element).toHaveAttribute("type", "button") // element.getAttribute("type") === "button"
+
+Expected the element to have attribute:
+  type="button"
+Received:
+  null
+ ❯ src/components/patterns/state-region.test.tsx:225:20
+    223|     const status = screen.getByRole("status");
+    224|     const button = screen.getByRole("button", { name: "Try again" });
+    225|     expect(button).toHaveAttribute("type", "button");
+       |                    ^
+    226|     expect(button).toHaveClass("w-fit");
+    227|     expect(status.parentElement).toBe(button.parentElement);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  09:02:17
+   Duration  950ms (transform 61ms, setup 35ms, collect 78ms, tests 79ms, environment 179ms, prepare 293ms)
+

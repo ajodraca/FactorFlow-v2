@@ -1,0 +1,938 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-3.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-3.json
+new file mode 100644
+index 0000000..ec35717
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-3.json
+@@ -0,0 +1,63 @@
++{
++ "schema": 1,
++ "repo_head": "a21df1699c468c32957a2eebb51ff6e966c6dfc3",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-rows-join-no-instrument",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
++   "new": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-instrument",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
++   "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-datatype",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n",
++   "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-run",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
++   "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON true\n"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-rows-order-datatype-first",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": " ORDER BY i.symbol, s.data_type",
++   "new": " ORDER BY s.data_type, i.symbol"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-subquery-no-order",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "          ORDER BY i2.symbol\n",
++   "new": ""
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:rv-completed-at-from-state",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "       r.completed_at,\n",
++   "new": "       s.last_acquired_at AS completed_at,\n"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..451b37d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w0
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w0
++Installed 43 packages in 191ms
++........................................................                 [100%]
++56 passed in 4.03s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..cf2c72b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w1
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w1
++Installed 43 packages in 193ms
++........................................................                 [100%]
++56 passed in 4.11s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..e0c50bb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w2
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w2
++Installed 43 packages in 193ms
++........................................................                 [100%]
++56 passed in 4.07s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log
+new file mode 100644
+index 0000000..7ebc4f9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w3
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-794302wa/w3
++Installed 43 packages in 193ms
++........................................................                 [100%]
++56 passed in 3.86s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-completed-at-from-state.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-completed-at-from-state.log
+new file mode 100644
+index 0000000..f2a0a62
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-completed-at-from-state.log
+@@ -0,0 +1,49 @@
++.....................................................F
++=================================== FAILURES ===================================
++_______ test_failure_facts_ignore_other_instruments_and_the_state_clock ________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=57932 user=test database=test_8f259bdb778b4695b051143f84a32a28) at 0x1089ef5c0>
++
++    def test_failure_facts_ignore_other_instruments_and_the_state_clock(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
++        run = _run(conn)
++        _record(
++            conn,
++            run,
++            _instrument(conn, "AAA"),
++            "prices",
++            "failed",
++            reason="aaa reason",
++            attempts=2,
++            completed_at=t_result,
++            acquired_at=t_state,
++        )
++        _record(
++            conn,
++            run,
++            _instrument(conn, "BBB"),
++            "prices",
++            "written",
++            reason="bbb note",
++            attempts=5,
++            completed_at=t_other,
++        )
++        conn.commit()
++    
++        page = read_problems(conn, cursor=None, limit=10)
++    
++        assert [row.symbol for row in page.rows] == ["AAA"]
++>       assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
++E       AssertionError: assert (Failure(data...7e28e5aac')),) == (Failure(data...7e28e5aac')),)
++E         
++E         At index 0 diff: Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('8d81c096-a222-4ee1-9c50-3d47e28e5aac')) != Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=UUID('8d81c096-a222-4ee1-9c50-3d47e28e5aac'))
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:402: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_failure_facts_ignore_other_instruments_and_the_state_clock
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 53 passed in 2.98s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-datatype.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-datatype.log
+new file mode 100644
+index 0000000..b3e00ea
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-datatype.log
+@@ -0,0 +1,46 @@
++.......................................................F
++=================================== FAILURES ===================================
++_____ test_the_newest_completion_time_comes_only_from_the_matched_results ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=57815 user=test database=test_dc2590eb17e045dd865f9f7758f7bbca) at 0x10cefda30>
++
++    def test_the_newest_completion_time_comes_only_from_the_matched_results(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_new = T0 + timedelta(days=1)
++        t_late = T0 + timedelta(days=2)
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        old_run = _run(conn, requested_at=T0)
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO run_instrument_result "
++                "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++                "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
++                (old_run, aaa, UNAVAILABLE, t_late),
++            )
++        new_run = _run(conn, requested_at=t_new)
++        _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
++        _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
++        _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
++        conn.commit()
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++    
++>       assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
++E       AssertionError: assert {'stock_count...y='Etc/UTC'))} == {'stock_count...timezone.utc)}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing items:
++E         {'newest_completed_at': datetime.datetime(2026, 10, 22, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))} != {'newest_completed_at': datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc)}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:457: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_newest_completion_time_comes_only_from_the_matched_results
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 55 passed in 4.09s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-instrument.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-instrument.log
+new file mode 100644
+index 0000000..633da32
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-instrument.log
+@@ -0,0 +1,46 @@
++.......................................................F
++=================================== FAILURES ===================================
++_____ test_the_newest_completion_time_comes_only_from_the_matched_results ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=57814 user=test database=test_ec1244741aaa41a18f21177a3e75f8bc) at 0x108b190a0>
++
++    def test_the_newest_completion_time_comes_only_from_the_matched_results(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_new = T0 + timedelta(days=1)
++        t_late = T0 + timedelta(days=2)
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        old_run = _run(conn, requested_at=T0)
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO run_instrument_result "
++                "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++                "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
++                (old_run, aaa, UNAVAILABLE, t_late),
++            )
++        new_run = _run(conn, requested_at=t_new)
++        _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
++        _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
++        _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
++        conn.commit()
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++    
++>       assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
++E       AssertionError: assert {'stock_count...y='Etc/UTC'))} == {'stock_count...timezone.utc)}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing items:
++E         {'newest_completed_at': datetime.datetime(2026, 10, 22, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))} != {'newest_completed_at': datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc)}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:457: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_newest_completion_time_comes_only_from_the_matched_results
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 55 passed in 4.20s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-run.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-run.log
+new file mode 100644
+index 0000000..f92cf88
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-run.log
+@@ -0,0 +1,46 @@
++.......................................................F
++=================================== FAILURES ===================================
++_____ test_the_newest_completion_time_comes_only_from_the_matched_results ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=57816 user=test database=test_39c38bfc4924405aac9f8457cec83e6f) at 0x10c447920>
++
++    def test_the_newest_completion_time_comes_only_from_the_matched_results(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_new = T0 + timedelta(days=1)
++        t_late = T0 + timedelta(days=2)
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        old_run = _run(conn, requested_at=T0)
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO run_instrument_result "
++                "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++                "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
++                (old_run, aaa, UNAVAILABLE, t_late),
++            )
++        new_run = _run(conn, requested_at=t_new)
++        _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
++        _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
++        _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
++        conn.commit()
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++    
++>       assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
++E       AssertionError: assert {'stock_count...y='Etc/UTC'))} == {'stock_count...timezone.utc)}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing items:
++E         {'newest_completed_at': datetime.datetime(2026, 10, 22, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))} != {'newest_completed_at': datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc)}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:457: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_newest_completion_time_comes_only_from_the_matched_results
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 55 passed in 4.07s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-join-no-instrument.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-join-no-instrument.log
+new file mode 100644
+index 0000000..0e4aa0a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-join-no-instrument.log
+@@ -0,0 +1,49 @@
++.....................................................F
++=================================== FAILURES ===================================
++_______ test_failure_facts_ignore_other_instruments_and_the_state_clock ________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=57817 user=test database=test_2fabf8dc81664d00b919802995d4de6b) at 0x10ca336b0>
++
++    def test_failure_facts_ignore_other_instruments_and_the_state_clock(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
++        run = _run(conn)
++        _record(
++            conn,
++            run,
++            _instrument(conn, "AAA"),
++            "prices",
++            "failed",
++            reason="aaa reason",
++            attempts=2,
++            completed_at=t_result,
++            acquired_at=t_state,
++        )
++        _record(
++            conn,
++            run,
++            _instrument(conn, "BBB"),
++            "prices",
++            "written",
++            reason="bbb note",
++            attempts=5,
++            completed_at=t_other,
++        )
++        conn.commit()
++    
++        page = read_problems(conn, cursor=None, limit=10)
++    
++        assert [row.symbol for row in page.rows] == ["AAA"]
++>       assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
++E       AssertionError: assert (Failure(data...c7099c1d44'))) == (Failure(data...7099c1d44')),)
++E         
++E         Left contains one more item: Failure(data_type='prices', outcome='failed', reason='bbb note', attempts=5, completed_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('37e8d3ac-9860-408a-9c85-50c7099c1d44'))
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:402: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_failure_facts_ignore_other_instruments_and_the_state_clock
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 53 passed in 3.98s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-order-datatype-first.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-order-datatype-first.log
+new file mode 100644
+index 0000000..4fa7c5b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-order-datatype-first.log
+@@ -0,0 +1,38 @@
++......................................................F
++=================================== FAILURES ===================================
++_____________ test_paging_follows_symbol_order_not_data_type_order _____________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=57931 user=test database=test_21a910311c834e05bb75c921d22b5a32) at 0x10a773fb0>
++
++    def test_paging_follows_symbol_order_not_data_type_order(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        run = _run(conn)
++        _record(conn, run, _instrument(conn, "AAA"), "prices", "failed", reason=UNAVAILABLE)
++        _record(conn, run, _instrument(conn, "BBB"), "fundamentals", "not_found")
++        _record(conn, run, _instrument(conn, "CCC"), "corporate_actions", "not_found")
++        conn.commit()
++    
++        first = read_problems(conn, cursor=None, limit=1)
++        conn.rollback()
++        second = read_problems(conn, cursor=first.next_cursor, limit=1)
++        conn.rollback()
++        third = read_problems(conn, cursor=second.next_cursor, limit=1)
++        conn.rollback()
++    
++>       assert [_page_symbols(p.rows) for p in (first, second, third)] == [
++            ("AAA",),
++            ("BBB",),
++            ("CCC",),
++        ]
++E       AssertionError: assert [('BBB',), ('CCC',), ('BBB',)] == [('AAA',), ('BBB',), ('CCC',)]
++E         
++E         At index 0 diff: ('BBB',) != ('AAA',)
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:422: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_paging_follows_symbol_order_not_data_type_order
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 54 passed in 3.03s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-subquery-no-order.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-subquery-no-order.log
+new file mode 100644
+index 0000000..23e235c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-subquery-no-order.log
+@@ -0,0 +1,16 @@
++.............F
++=================================== FAILURES ===================================
++__________ test_problem_rows_subquery_orders_symbols_before_the_limit __________
++
++    def test_problem_rows_subquery_orders_symbols_before_the_limit() -> None:
++>       assert _SUBQUERY_ORDERED_BEFORE_LIMIT.search(queries.PROBLEM_ROWS_SQL) is not None
++E       AssertionError: assert None is not None
++E        +  where None = <built-in method search of re.Pattern object at 0x7735bd7c10>('\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY i.symbol, s.data_type\n')
++E        +    where <built-in method search of re.Pattern object at 0x7735bd7c10> = re.compile('SELECT DISTINCT i2\\.symbol.*?ORDER BY i2\\.symbol\\s+LIMIT\\s+%\\(limit_plus_one\\)s', re.DOTALL).search
++E        +    and   '\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY i.symbol, s.data_type\n' = queries.PROBLEM_ROWS_SQL
++
++tests/unit/test_data_health_sql_is_read_only.py:92: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_sql_is_read_only.py::test_problem_rows_subquery_orders_symbols_before_the_limit
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 0.38s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results.json
+new file mode 100644
+index 0000000..e961fb7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results.json
+@@ -0,0 +1,142 @@
++{
++  "command": "uv run --all-extras pytest tests/unit/test_data_health_sql_is_read_only.py tests/unit/test_data_health_models.py tests/integration/test_data_health_problems.py -x -q -p no:cacheprovider",
++  "repo_head": "a21df1699c468c32957a2eebb51ff6e966c6dfc3",
++  "tree_patch_sha256": "593ad974c999f24910a95ed6adf74709b49138c0f450d8a9e327847df467b990",
++  "mutants_sha256": "fa5b0125bd646d817982dee554bb5f0e1e67ade90d7314f8614d4ae55e2af0ca",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-3.json",
++  "jobs": 4,
++  "planned": 7,
++  "started": "2026-11-14T17:33:08Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log",
++      "log_sha256": "0abca28423cae7f3d0a73bd14d5f2510d24c37f44f42b09baf94230887e17d2e"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.8,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log",
++      "log_sha256": "fc89c678d76cf810f7265cb741584c4a6a2f0592e95fbdb29710e854748c6c5b"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 6.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log",
++      "log_sha256": "475b2c74ea5686672e036b64d07634d3374be022085257d3e052121de5e5a836"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log",
++      "log_sha256": "0429fecfc60e44f2316ded49401f551c80aadfc76a6705d436a02776f7be584c"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-rows-join-no-instrument",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
++      "new": "AS run_id\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-join-no-instrument.log",
++      "log_sha256": "faa4fa7a59d932b77e2e4bd74bc9b48090cb2b86cf700fa6394c9e320237b980"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-instrument",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
++      "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-instrument.log",
++      "log_sha256": "b54028dc7d416655544991aa50d447c87fd32341bc8220610fbc91489e2af3d9"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-datatype",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n",
++      "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-datatype.log",
++      "log_sha256": "10080875c85f9c982bb69517a92d46aed98edd12b989dbeb128f5d082c9b9fa2"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-count-join-no-run",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON r.run_id = s.last_run_id\n",
++      "new": "AS newest_completed_at\n  FROM instrument i\n  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id\n  JOIN run_instrument_result r  ON true\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.1,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-count-join-no-run.log",
++      "log_sha256": "fb491be88102311c98dda3e677fcc9b78a74c0b6db126dbc47505d28f48ced26"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-rows-order-datatype-first",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": " ORDER BY i.symbol, s.data_type",
++      "new": " ORDER BY s.data_type, i.symbol",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-rows-order-datatype-first.log",
++      "log_sha256": "52571faabb36eb7bfd09360d63c3f1142ba37f849909445aa62e7ddb2132a8ba"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-subquery-no-order",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "          ORDER BY i2.symbol\n",
++      "new": "",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-subquery-no-order.log",
++      "log_sha256": "1f8c776d456b3b9e05b5724fb8d5fba3aed3c0cd5369a26d991d4e8801a93429"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:rv-completed-at-from-state",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "       r.completed_at,\n",
++      "new": "       s.last_acquired_at AS completed_at,\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-3-results-logs/src_factorflow_data_health_queries.py_manual_rv-completed-at-from-state.log",
++      "log_sha256": "9cfa0f66f54308841b95ebcc8904baa2aaa8b75b6182ed443cab1795d12e9577"
++    }
++  ],
++  "finished": "2026-11-14T17:33:24Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-3-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-3-rework.log
+new file mode 100644
+index 0000000..976e6d8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-3-rework.log
+@@ -0,0 +1,135 @@
++.............F..........FFF                                              [100%]
++=================================== FAILURES ===================================
++__________ test_problem_rows_subquery_orders_symbols_before_the_limit __________
++
++    def test_problem_rows_subquery_orders_symbols_before_the_limit() -> None:
++>       assert _SUBQUERY_ORDERED_BEFORE_LIMIT.search(queries.PROBLEM_ROWS_SQL) is not None
++E       AssertionError: assert None is not None
++E        +  where None = <built-in method search of re.Pattern object at 0x7892940010>('\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY s.data_type, i.symbol\n')
++E        +    where <built-in method search of re.Pattern object at 0x7892940010> = re.compile('SELECT DISTINCT i2\\.symbol.*?ORDER BY i2\\.symbol\\s+LIMIT\\s+%\\(limit_plus_one\\)s', re.DOTALL).search
++E        +    and   '\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY s.data_type, i.symbol\n' = queries.PROBLEM_ROWS_SQL
++
++tests/unit/test_data_health_sql_is_read_only.py:92: AssertionError
++_______ test_failure_facts_ignore_other_instruments_and_the_state_clock ________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=58042 user=test database=test_38046da6bb6544688211c6cef5bb2566) at 0x10da2a210>
++
++    def test_failure_facts_ignore_other_instruments_and_the_state_clock(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
++        run = _run(conn)
++        _record(
++            conn,
++            run,
++            _instrument(conn, "AAA"),
++            "prices",
++            "failed",
++            reason="aaa reason",
++            attempts=2,
++            completed_at=t_result,
++            acquired_at=t_state,
++        )
++        _record(
++            conn,
++            run,
++            _instrument(conn, "BBB"),
++            "prices",
++            "written",
++            reason="bbb note",
++            attempts=5,
++            completed_at=t_other,
++        )
++        conn.commit()
++    
++        page = read_problems(conn, cursor=None, limit=10)
++    
++        assert [row.symbol for row in page.rows] == ["AAA"]
++>       assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
++E       AssertionError: assert (Failure(data...21998a033b'))) == (Failure(data...1998a033b')),)
++E         
++E         At index 0 diff: Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('70e1aba2-eba1-4b78-b84b-4c21998a033b')) != Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=UUID('70e1aba2-eba1-4b78-b84b-4c21998a033b'))
++E         Left contains one more item: Failure(data_type='prices', outcome='failed', reason='bbb note', attempts=5, completed_...
++E         
++E         ...Full output truncated (2 lines hidden), use '-vv' to show
++
++tests/integration/test_data_health_problems.py:402: AssertionError
++_____________ test_paging_follows_symbol_order_not_data_type_order _____________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=58042 user=test database=test_61dce9fd48954a888d1af01da959ce7f) at 0x10da2af30>
++
++    def test_paging_follows_symbol_order_not_data_type_order(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        run = _run(conn)
++        _record(conn, run, _instrument(conn, "AAA"), "prices", "failed", reason=UNAVAILABLE)
++        _record(conn, run, _instrument(conn, "BBB"), "fundamentals", "not_found")
++        _record(conn, run, _instrument(conn, "CCC"), "corporate_actions", "not_found")
++        conn.commit()
++    
++        first = read_problems(conn, cursor=None, limit=1)
++        conn.rollback()
++        second = read_problems(conn, cursor=first.next_cursor, limit=1)
++        conn.rollback()
++        third = read_problems(conn, cursor=second.next_cursor, limit=1)
++        conn.rollback()
++    
++>       assert [_page_symbols(p.rows) for p in (first, second, third)] == [
++            ("AAA",),
++            ("BBB",),
++            ("CCC",),
++        ]
++E       AssertionError: assert [('BBB',), ('CCC',), ('BBB',)] == [('AAA',), ('BBB',), ('CCC',)]
++E         
++E         At index 0 diff: ('BBB',) != ('AAA',)
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:422: AssertionError
++_____ test_the_newest_completion_time_comes_only_from_the_matched_results ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=58042 user=test database=test_0a115741b5484255958795f8ec02b1ff) at 0x10da29c70>
++
++    def test_the_newest_completion_time_comes_only_from_the_matched_results(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t_new = T0 + timedelta(days=1)
++        t_late = T0 + timedelta(days=2)
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        old_run = _run(conn, requested_at=T0)
++        with conn.cursor() as cur:
++            cur.execute(
++                "INSERT INTO run_instrument_result "
++                "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++                "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
++                (old_run, aaa, UNAVAILABLE, t_late),
++            )
++        new_run = _run(conn, requested_at=t_new)
++        _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
++        _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
++        _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
++        conn.commit()
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++    
++>       assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
++E       AssertionError: assert {'stock_count...y='Etc/UTC'))} == {'stock_count...timezone.utc)}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing items:
++E         {'newest_completed_at': datetime.datetime(2026, 10, 22, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))} != {'newest_completed_at': datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc)}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:457: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_sql_is_read_only.py::test_problem_rows_subquery_orders_symbols_before_the_limit
++FAILED tests/integration/test_data_health_problems.py::test_failure_facts_ignore_other_instruments_and_the_state_clock
++FAILED tests/integration/test_data_health_problems.py::test_paging_follows_symbol_order_not_data_type_order
++FAILED tests/integration/test_data_health_problems.py::test_the_newest_completion_time_comes_only_from_the_matched_results
++4 failed, 23 passed in 5.63s
+diff --git a/tests/integration/test_data_health_problems.py b/tests/integration/test_data_health_problems.py
+index 604756b..b230d1e 100644
+--- a/tests/integration/test_data_health_problems.py
++++ b/tests/integration/test_data_health_problems.py
+@@ -26,6 +26,8 @@ pytestmark = pytest.mark.postgres
+ T0 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
+ 
+ Outcome = Literal["written", "not_found", "failed"]
++# The reason format real `failed` rows carry; it stays retryable (TC-COMP-041).
++UNAVAILABLE = "[unavailable] provider timed out"
+ 
+ 
+ def _instrument(conn: psycopg.Connection, symbol: str) -> int:
+@@ -68,6 +70,7 @@ def _record(
+     reason: str | None = None,
+     attempts: int = 1,
+     completed_at: datetime = T0,
++    acquired_at: datetime | None = None,
+ ) -> None:
+     with conn.cursor() as cur:
+         cur.execute(
+@@ -83,7 +86,7 @@ def _record(
+             "ON CONFLICT (instrument_id, data_type) DO UPDATE SET "
+             "last_acquired_at = EXCLUDED.last_acquired_at, "
+             "last_run_id = EXCLUDED.last_run_id, last_outcome = EXCLUDED.last_outcome",
+-            (instrument_id, data_type, completed_at, run_id, outcome),
++            (instrument_id, data_type, acquired_at or completed_at, run_id, outcome),
+         )
+ 
+ 
+@@ -91,7 +94,7 @@ def _problem_stocks(conn: psycopg.Connection, symbols: list[str]) -> UUID:
+     """One active stock per symbol, each with one ``failed`` prices result."""
+     run = _run(conn)
+     for symbol in symbols:
+-        _record(conn, run, _instrument(conn, symbol), "prices", "failed", reason="boom")
++        _record(conn, run, _instrument(conn, symbol), "prices", "failed", reason=UNAVAILABLE)
+     return run
+ 
+ 
+@@ -163,10 +166,10 @@ def test_retryable_rule_and_resolution_only_by_write_or_retirement(
+         _record(conn, r1, ids["NFX"], dt, "not_found")
+     for dt in ("reference", "corporate_actions"):
+         _record(conn, r1, ids["NFX"], dt, "written")
+-    _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
++    _record(conn, r1, ids["FLD"], "prices", "failed", reason=UNAVAILABLE)
+     for dt in ("reference", "fundamentals", "corporate_actions"):
+         _record(conn, r1, ids["FLD"], dt, "written")
+-    _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
++    _record(conn, r1, ids["MIX"], "prices", "failed", reason=UNAVAILABLE)
+     _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
+     conn.commit()
+ 
+@@ -199,10 +202,15 @@ def test_retryable_rule_and_resolution_only_by_write_or_retirement(
+         reason="second attempt",
+         completed_at=T0 + timedelta(hours=2),
+     )
+-    _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
+     conn.commit()
+     page = read_problems(conn, cursor=None, limit=500)
+     conn.rollback()
++    assert read_problems(conn, cursor=None, limit=500) == page
++    conn.rollback()
++    _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
++    conn.commit()
++    assert read_problems(conn, cursor=None, limit=500) == page
++    conn.rollback()
+     mix = page.rows[0]
+     prices = next(f for f in mix.failures if f.data_type == "prices")
+     assert [row.symbol for row in page.rows] == ["MIX"]
+@@ -287,7 +295,7 @@ def test_failure_facts_come_from_the_matched_result(
+ 
+ def _t008_store(conn: psycopg.Connection) -> None:
+     run = _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
+-    _record(conn, run, _instrument(conn, "ABR"), "prices", "failed", reason="boom")
++    _record(conn, run, _instrument(conn, "ABR"), "prices", "failed", reason=UNAVAILABLE)
+     retire_symbol(conn, "ABR")
+     abw = _instrument(conn, "ABW")
+     for dt in ("reference", "prices", "fundamentals", "corporate_actions"):
+@@ -357,3 +365,93 @@ def test_the_count_on_an_empty_store(migrated_writer_connection: psycopg.Connect
+     conn.rollback()
+ 
+     assert counted == {"stock_count": 0, "symbols": [], "newest_completed_at": None}
++
++
++def test_failure_facts_ignore_other_instruments_and_the_state_clock(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
++    run = _run(conn)
++    _record(
++        conn,
++        run,
++        _instrument(conn, "AAA"),
++        "prices",
++        "failed",
++        reason="aaa reason",
++        attempts=2,
++        completed_at=t_result,
++        acquired_at=t_state,
++    )
++    _record(
++        conn,
++        run,
++        _instrument(conn, "BBB"),
++        "prices",
++        "written",
++        reason="bbb note",
++        attempts=5,
++        completed_at=t_other,
++    )
++    conn.commit()
++
++    page = read_problems(conn, cursor=None, limit=10)
++
++    assert [row.symbol for row in page.rows] == ["AAA"]
++    assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
++
++
++def test_paging_follows_symbol_order_not_data_type_order(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    run = _run(conn)
++    _record(conn, run, _instrument(conn, "AAA"), "prices", "failed", reason=UNAVAILABLE)
++    _record(conn, run, _instrument(conn, "BBB"), "fundamentals", "not_found")
++    _record(conn, run, _instrument(conn, "CCC"), "corporate_actions", "not_found")
++    conn.commit()
++
++    first = read_problems(conn, cursor=None, limit=1)
++    conn.rollback()
++    second = read_problems(conn, cursor=first.next_cursor, limit=1)
++    conn.rollback()
++    third = read_problems(conn, cursor=second.next_cursor, limit=1)
++    conn.rollback()
++
++    assert [_page_symbols(p.rows) for p in (first, second, third)] == [
++        ("AAA",),
++        ("BBB",),
++        ("CCC",),
++    ]
++    assert [p.next_cursor for p in (first, second, third)] == ["AAA", "BBB", None]
++
++
++def test_the_newest_completion_time_comes_only_from_the_matched_results(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    t_new = T0 + timedelta(days=1)
++    t_late = T0 + timedelta(days=2)
++    aaa = _instrument(conn, "AAA")
++    bbb = _instrument(conn, "BBB")
++    old_run = _run(conn, requested_at=T0)
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO run_instrument_result "
++            "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++            "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
++            (old_run, aaa, UNAVAILABLE, t_late),
++        )
++    new_run = _run(conn, requested_at=t_new)
++    _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
++    _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
++    _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
++    conn.commit()
++
++    with conn.cursor(row_factory=dict_row) as cur:
++        cur.execute(queries.PROBLEM_COUNT_SQL)
++        counted = cur.fetchone()
++    conn.rollback()
++
++    assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
+diff --git a/tests/unit/test_data_health_sql_is_read_only.py b/tests/unit/test_data_health_sql_is_read_only.py
+index c784418..2181902 100644
+--- a/tests/unit/test_data_health_sql_is_read_only.py
++++ b/tests/unit/test_data_health_sql_is_read_only.py
+@@ -17,6 +17,9 @@ WRITE_TOKENS = ("INSERT", "UPDATE", "DELETE", "TRUNCATE", "ALTER", "DROP")
+ _WRITE_PATTERN = re.compile(r"\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b", re.IGNORECASE)
+ _UNBOUND_PERCENT = re.compile(r"%(?!\([a-z_]+\)s)")
+ _LIMIT_BOUND = re.compile(r"LIMIT\s+%\(limit_plus_one\)s")
++_SUBQUERY_ORDERED_BEFORE_LIMIT = re.compile(
++    r"SELECT DISTINCT i2\.symbol.*?ORDER BY i2\.symbol\s+LIMIT\s+%\(limit_plus_one\)s", re.DOTALL
++)
+ _FIRST_KEYWORD = re.compile(r"\s*(\w+)")
+ 
+ SOURCES = {
+@@ -82,3 +85,8 @@ def test_problem_rows_binds_cursor_and_limit() -> None:
+ 
+     assert "%(cursor)s" in text
+     assert _LIMIT_BOUND.search(text) is not None
++
++
++# Implements TC-COMP-040
++def test_problem_rows_subquery_orders_symbols_before_the_limit() -> None:
++    assert _SUBQUERY_ORDERED_BEFORE_LIMIT.search(queries.PROBLEM_ROWS_SQL) is not None

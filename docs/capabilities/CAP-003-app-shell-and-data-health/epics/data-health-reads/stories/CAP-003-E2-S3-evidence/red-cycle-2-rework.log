@@ -1,0 +1,30 @@
+### rv_state-any-datatype.log
+>       assert result.company_financials == CompanyFinancialsCheck(
+E       AssertionError: assert CompanyFinanc...bols=('YYY',)) == CompanyFinanc...'WWW', 'XXX'))
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing attributes:
+E         ['problem_count', 'as_of', 'exception_count', 'exception_symbols']
+E         
+E         Drill down into differing attribute problem_count:
+### rv_availability-last-page-wins.log
+        assert check.gap_stock_count is None
+>       assert check.gap_detection == GapDetectionState(False, "r1")
+E       AssertionError: assert GapDetectionS..., reason='r2') == GapDetectionS..., reason='r1')
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing attributes:
+E         ['reason']
+E         
+### rv_gap-reason-last-unavailable.log
+        assert check.gap_stock_count is None
+>       assert check.gap_detection == GapDetectionState(False, "r1")
+E       AssertionError: assert GapDetectionS..., reason='r2') == GapDetectionS..., reason='r1')
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing attributes:
+E         ['reason']
+E         
+### rv_export-dropped.log
+>       assert package.read_data_health is reader.read_data_health
+E       AttributeError: module 'factorflow.data_health' has no attribute 'read_data_health'

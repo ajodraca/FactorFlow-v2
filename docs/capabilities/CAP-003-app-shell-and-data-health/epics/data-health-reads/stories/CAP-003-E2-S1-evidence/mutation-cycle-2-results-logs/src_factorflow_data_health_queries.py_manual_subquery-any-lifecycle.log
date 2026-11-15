@@ -1,0 +1,31 @@
+....................F
+=================================== FAILURES ===================================
+_______________ test_retired_and_clean_stocks_take_no_page_slot ________________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64623 user=test database=test_905d975ffa1949edb8f2a3171af93751) at 0x10adc6e70>
+
+    def test_retired_and_clean_stocks_take_no_page_slot(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        _t008_store(conn)
+    
+        first = read_problems(conn, cursor=None, limit=2)
+        second = read_problems(conn, cursor=first.next_cursor, limit=2)
+        third = read_problems(conn, cursor=second.next_cursor, limit=2)
+    
+>       assert [_page_symbols(p.rows) for p in (first, second, third)] == [
+            ("AAA", "BBB"),
+            ("CCC", "DDD"),
+            ("EEE",),
+        ]
+E       AssertionError: assert [('AAA', 'BBB...'AAA', 'BBB')] == [('AAA', 'BBB...D'), ('EEE',)]
+E         
+E         At index 1 diff: ('AAA', 'BBB') != ('CCC', 'DDD')
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:308: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_retired_and_clean_stocks_take_no_page_slot
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 20 passed in 3.60s

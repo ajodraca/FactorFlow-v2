@@ -1,0 +1,37 @@
+..............F
+=================================== FAILURES ===================================
+_ test_gap_availability_keeps_the_first_unavailable_reason_whatever_the_page_order _
+
+    def test_gap_availability_keeps_the_first_unavailable_reason_whatever_the_page_order() -> None:
+        fold = _fold(
+            [
+                _view(
+                    [_stock("AAA", gaps_available=False)],
+                    available=False,
+                    reason="r1",
+                    next_cursor="AAA",
+                ),
+                _view([_stock("BBB")], next_cursor="BBB"),
+                _view([_stock("CCC", gaps_available=False)], available=False, reason="r2"),
+            ]
+        )
+    
+        check = fold.daily_prices()
+        assert check.gap_stock_count is None
+>       assert check.gap_detection == GapDetectionState(False, "r1")
+E       AssertionError: assert GapDetectionS..., reason='r2') == GapDetectionS..., reason='r1')
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing attributes:
+E         ['reason']
+E         
+E         Drill down into differing attribute reason:
+E           reason: 'r2' != 'r1'
+E           - r1
+E           + r2
+
+tests/unit/test_data_health_checks.py:274: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_gap_availability_keeps_the_first_unavailable_reason_whatever_the_page_order
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 14 passed in 0.71s

@@ -1,0 +1,1784 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-2.json
+new file mode 100644
+index 0000000..ae95ff7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutants-cycle-2.json
+@@ -0,0 +1,147 @@
++{
++ "schema": 1,
++ "repo_head": "2626e8cd85506d3e2f170e82748583c059be151a",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "src/factorflow/data_health/reader.py:26:off-by-one:1",
++   "cycle": "cycle-2",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 26,
++   "original": "        cur.execute(PROBLEM_ROWS_SQL, {\"cursor\": cursor, \"limit_plus_one\": limit + 1})",
++   "mutated": "        cur.execute(PROBLEM_ROWS_SQL, {\"cursor\": cursor, \"limit_plus_one\": limit + 2})"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:44:off-by-one:1",
++   "cycle": "cycle-2",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 44,
++   "original": "    next_cursor = kept[-1] if len(symbols) > limit else None",
++   "mutated": "    next_cursor = kept[-1] if len(symbols) >= limit else None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:44:off-by-one:2",
++   "cycle": "cycle-2",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 44,
++   "original": "    next_cursor = kept[-1] if len(symbols) > limit else None",
++   "mutated": "    next_cursor = kept[-2] if len(symbols) > limit else None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:50:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 50,
++   "original": "                retryable=any(f.outcome == \"failed\" for f in by_symbol[symbol]),",
++   "mutated": "                retryable=any(f.outcome != \"failed\" for f in by_symbol[symbol]),"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:planted-comment",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "SELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,",
++   "new": "SELECT i.symbol, -- UPDATE\n       s.data_type,\n       s.last_outcome            AS outcome,"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:cursor-ge",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "i2.symbol > %(cursor)s",
++   "new": "i2.symbol >= %(cursor)s"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:limit-literal",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "LIMIT %(limit_plus_one)s",
++   "new": "LIMIT 3"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:cursor-interpolated",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "i2.symbol > %(cursor)s",
++   "new": "i2.symbol > '{cursor}'"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:join-true",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
++   "new": "ON true\n WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN ("
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:subquery-outcome-failed-only",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "AND s2.last_outcome IN ('failed', 'not_found')",
++   "new": "AND s2.last_outcome IN ('failed')"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:subquery-any-lifecycle",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "WHERE i2.lifecycle = 'active'",
++   "new": "WHERE true"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:count-not-distinct",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "count(DISTINCT i.instrument_id)",
++   "new": "count(i.instrument_id)"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:count-no-coalesce",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "COALESCE((array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3], '{}')",
++   "new": "(array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3]"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:outer-outcome-dropped",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
++   "new": "   AND i.symbol IN ("
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:manual:retryable-all",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "old": "retryable=any(",
++   "new": "retryable=all("
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:manual:commit-after-fetch",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "old": "rows = cur.fetchall()",
++   "new": "rows = cur.fetchall()\n        conn.commit()"
++  },
++  {
++   "id": "src/factorflow/data_health/queries.py:manual:count-any-lifecycle",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "old": "WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n\"\"\"\n",
++   "new": "WHERE true\n   AND s.last_outcome IN ('failed', 'not_found')\n\"\"\"\n"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..6160eb8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w0
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w0
++Installed 43 packages in 193ms
++.......................                                                  [100%]
++23 passed in 3.39s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..1eec8e7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w1
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w1
++Installed 43 packages in 184ms
++.......................                                                  [100%]
++23 passed in 3.46s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..e27c07a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w2
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w2
++Installed 43 packages in 160ms
++.......................                                                  [100%]
++23 passed in 3.43s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+new file mode 100644
+index 0000000..e7d5fb9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w3
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w3
++Installed 43 packages in 193ms
++.......................                                                  [100%]
++23 passed in 3.60s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-any-lifecycle.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-any-lifecycle.log
+new file mode 100644
+index 0000000..829a239
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-any-lifecycle.log
+@@ -0,0 +1,33 @@
++.....................F
++=================================== FAILURES ===================================
++___________________ test_the_count_and_the_rows_are_one_set ____________________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64738 user=test database=test_d6cd839d8f974f6d8bdded37f4b08834) at 0x10b67b590>
++
++    def test_the_count_and_the_rows_are_one_set(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        _t008_store(conn)
++        t_new = T0 + timedelta(days=1)
++        bbb_run = _run(conn, requested_at=t_new)
++        with conn.cursor() as cur:
++            cur.execute("SELECT instrument_id FROM instrument WHERE symbol = 'BBB'")
++            row = cur.fetchone()
++            assert row is not None
++        _record(conn, bbb_run, int(row[0]), "fundamentals", "not_found", completed_at=t_new)
++        conn.commit()
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++        assert counted is not None
++>       assert counted["stock_count"] == 5
++E       assert 6 == 5
++
++tests/integration/test_data_health_problems.py:335: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_count_and_the_rows_are_one_set
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 21 passed in 3.10s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-no-coalesce.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-no-coalesce.log
+new file mode 100644
+index 0000000..79a6d52
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-no-coalesce.log
+@@ -0,0 +1,27 @@
++......................F
++=================================== FAILURES ===================================
++_______________________ test_the_count_on_an_empty_store _______________________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64658 user=test database=test_fa86b7cdcd3f4202b17ded11a4c9f358) at 0x108ab25d0>
++
++    def test_the_count_on_an_empty_store(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++    
++>       assert counted == {"stock_count": 0, "symbols": [], "newest_completed_at": None}
++E       AssertionError: assert {'stock_count...ted_at': None} == {'stock_count...ted_at': None}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing items:
++E         {'symbols': None} != {'symbols': []}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:359: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_count_on_an_empty_store
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 22 passed in 4.05s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-not-distinct.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-not-distinct.log
+new file mode 100644
+index 0000000..c5c5dac
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-not-distinct.log
+@@ -0,0 +1,33 @@
++.....................F
++=================================== FAILURES ===================================
++___________________ test_the_count_and_the_rows_are_one_set ____________________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64642 user=test database=test_e9c2f1611c6e48ffb5fe72001f04d54d) at 0x108f88260>
++
++    def test_the_count_and_the_rows_are_one_set(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        _t008_store(conn)
++        t_new = T0 + timedelta(days=1)
++        bbb_run = _run(conn, requested_at=t_new)
++        with conn.cursor() as cur:
++            cur.execute("SELECT instrument_id FROM instrument WHERE symbol = 'BBB'")
++            row = cur.fetchone()
++            assert row is not None
++        _record(conn, bbb_run, int(row[0]), "fundamentals", "not_found", completed_at=t_new)
++        conn.commit()
++    
++        with conn.cursor(row_factory=dict_row) as cur:
++            cur.execute(queries.PROBLEM_COUNT_SQL)
++            counted = cur.fetchone()
++        conn.rollback()
++        assert counted is not None
++>       assert counted["stock_count"] == 5
++E       assert 6 == 5
++
++tests/integration/test_data_health_problems.py:335: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_count_and_the_rows_are_one_set
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 21 passed in 4.10s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-ge.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-ge.log
+new file mode 100644
+index 0000000..182e50a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-ge.log
+@@ -0,0 +1,30 @@
++.............F
++=================================== FAILURES ===================================
++__________________ test_pages_of_two_over_five_problem_stocks __________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64608 user=test database=test_2c4490f5978444bc8c5d413091185eb5) at 0x108f2bce0>
++
++    def test_pages_of_two_over_five_problem_stocks(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
++        conn.commit()
++    
++        first = read_problems(conn, cursor=None, limit=2)
++        second = read_problems(conn, cursor=first.next_cursor, limit=2)
++        third = read_problems(conn, cursor=second.next_cursor, limit=2)
++    
++        assert _page_symbols(first.rows) == ("AAA", "BBB")
++        assert first.next_cursor == "BBB"
++>       assert _page_symbols(second.rows) == ("CCC", "DDD")
++E       AssertionError: assert ('BBB', 'CCC') == ('CCC', 'DDD')
++E         
++E         At index 0 diff: 'BBB' != 'CCC'
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:132: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_pages_of_two_over_five_problem_stocks
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 2.10s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-interpolated.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-interpolated.log
+new file mode 100644
+index 0000000..2207844
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-interpolated.log
+@@ -0,0 +1,27 @@
++...........F
++=================================== FAILURES ===================================
++_____________ test_statements_are_bound_selects[PROBLEM_ROWS_SQL] ______________
++
++name = 'PROBLEM_ROWS_SQL'
++
++    @pytest.mark.parametrize("name", sorted(_statements()))
++    def test_statements_are_bound_selects(name: str) -> None:
++        text = _statements()[name]
++        first = _FIRST_KEYWORD.match(text)
++    
++>       assert "{" not in text.replace("'{}'", ""), f"{name} interpolates"
++E       AssertionError: PROBLEM_ROWS_SQL interpolates
++E       assert '{' not in '\nSELECT i.....data_type\n'
++E         
++E         '{' is contained here:
++E           symbol > '{cursor}')
++E         ?           +
++E                     ORDER BY i2.symbol
++E                     LIMIT %(limit_plus_one)s)
++E            ORDER BY i.symbol, s.data_type
++
++tests/unit/test_data_health_sql_is_read_only.py:73: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_sql_is_read_only.py::test_statements_are_bound_selects[PROBLEM_ROWS_SQL]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 11 passed in 0.33s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_join-true.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_join-true.log
+new file mode 100644
+index 0000000..faadd44
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_join-true.log
+@@ -0,0 +1,69 @@
++...............F
++=================================== FAILURES ===================================
++________ test_retryable_rule_and_resolution_only_by_write_or_retirement ________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64614 user=test database=test_6ab03d99cc10402da836bb1af50d921b) at 0x10d3be450>
++
++    def test_retryable_rule_and_resolution_only_by_write_or_retirement(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        r1 = _run(conn, requested_at=T0)
++        ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
++        for dt in ("prices", "fundamentals"):
++            _record(conn, r1, ids["NFX"], dt, "not_found")
++        for dt in ("reference", "corporate_actions"):
++            _record(conn, r1, ids["NFX"], dt, "written")
++        _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
++        for dt in ("reference", "fundamentals", "corporate_actions"):
++            _record(conn, r1, ids["FLD"], dt, "written")
++        _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
++        _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
++        conn.commit()
++    
++        def read() -> dict[str, bool]:
++            page = read_problems(conn, cursor=None, limit=500)
++            conn.rollback()
++            return {row.symbol: row.retryable for row in page.rows}
++    
++        assert read() == {"FLD": True, "MIX": True, "NFX": False}
++    
++        r2 = _run(conn, requested_at=T0 + timedelta(hours=1))
++        _record(conn, r2, ids["NFX"], "reference", "written", completed_at=T0 + timedelta(hours=1))
++        conn.commit()
++        assert set(read()) == {"FLD", "MIX", "NFX"}
++    
++        _record(conn, r2, ids["FLD"], "prices", "written", completed_at=T0 + timedelta(hours=1))
++        conn.commit()
++        assert set(read()) == {"MIX", "NFX"}
++    
++        retire_symbol(conn, "NFX")
++        conn.commit()
++        assert read() == {"MIX": True}
++        r3 = _run(conn, requested_at=T0 + timedelta(hours=2))
++        _record(
++            conn,
++            r3,
++            ids["MIX"],
++            "prices",
++            "failed",
++            reason="second attempt",
++            completed_at=T0 + timedelta(hours=2),
++        )
++        _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
++        conn.commit()
++        page = read_problems(conn, cursor=None, limit=500)
++        conn.rollback()
++        mix = page.rows[0]
++        prices = next(f for f in mix.failures if f.data_type == "prices")
++        assert [row.symbol for row in page.rows] == ["MIX"]
++        assert prices.run_id == r3
++>       assert prices.reason == "second attempt"
++E       AssertionError: assert None == 'second attempt'
++E        +  where None = Failure(data_type='prices', outcome='failed', reason=None, attempts=1, completed_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('e1be4f93-e4b2-49f4-ae33-3755b7d3230a')).reason
++
++tests/integration/test_data_health_problems.py:210: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_retryable_rule_and_resolution_only_by_write_or_retirement
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 15 passed in 2.25s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_limit-literal.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_limit-literal.log
+new file mode 100644
+index 0000000..5bd37d0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_limit-literal.log
+@@ -0,0 +1,18 @@
++............F
++=================================== FAILURES ===================================
++___________________ test_problem_rows_binds_cursor_and_limit ___________________
++
++    def test_problem_rows_binds_cursor_and_limit() -> None:
++        text = queries.PROBLEM_ROWS_SQL
++    
++        assert "%(cursor)s" in text
++>       assert _LIMIT_BOUND.search(text) is not None
++E       AssertionError: assert None is not None
++E        +  where None = <built-in method search of re.Pattern object at 0x10cc9fe00>('\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...S NULL OR i2.symbol > %(cursor)s)\n          ORDER BY i2.symbol\n          LIMIT 3)\n ORDER BY i.symbol, s.data_type\n')
++E        +    where <built-in method search of re.Pattern object at 0x10cc9fe00> = re.compile('LIMIT\\s+%\\(limit_plus_one\\)s').search
++
++tests/unit/test_data_health_sql_is_read_only.py:84: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_sql_is_read_only.py::test_problem_rows_binds_cursor_and_limit
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 0.35s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_outer-outcome-dropped.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_outer-outcome-dropped.log
+new file mode 100644
+index 0000000..ed3bae2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_outer-outcome-dropped.log
+@@ -0,0 +1,42 @@
++...................F
++=================================== FAILURES ===================================
++_______________ test_failure_facts_come_from_the_matched_result ________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64667 user=test database=test_c1cce9533206403c927e8faa99744fe7) at 0x10a9efd40>
++
++    def test_failure_facts_come_from_the_matched_result(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        t1, t2, t3 = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
++        aaa = _instrument(conn, "AAA")
++        r1 = _run(conn, requested_at=t1)
++        _record(conn, r1, aaa, "prices", "failed", reason="old reason", attempts=1, completed_at=t1)
++        r2 = _run(conn, requested_at=t2)
++        _record(
++            conn, r2, aaa, "prices", "failed", reason="provider timeout", attempts=3, completed_at=t2
++        )
++        _record(conn, r2, aaa, "fundamentals", "not_found", reason=None, attempts=2, completed_at=t3)
++        _record(conn, r2, aaa, "reference", "written", completed_at=t2)
++        _record(conn, r2, aaa, "corporate_actions", "written", completed_at=t2)
++        conn.commit()
++    
++        page = read_problems(conn, cursor=None, limit=10)
++    
++        assert len(page.rows) == 1
++>       assert page.rows[0].failures == (
++            Failure("fundamentals", "not_found", None, 2, t3, r2),
++            Failure("prices", "failed", "provider timeout", 3, t2, r2),
++        )
++E       AssertionError: assert (Failure(data...63026d4bcd'))) == (Failure(data...63026d4bcd')))
++E         
++E         At index 0 diff: Failure(data_type='corporate_actions', outcome='written', reason=None, attempts=1, completed_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('961277f0-79bb-4cce-8feb-b963026d4bcd')) != Failure(data_type='fundamentals', outcome='not_found', reason=None, attempts=2, completed_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), run_id=UUID('961277f0-79bb-4cce-8feb-b963026d4bcd'))
++E         Left contains 2 more items, first extra item: Failure(data_type='prices', outcome='failed', reason='provider ti...
++E         
++E         ...Full output truncated (2 lines hidden), use '-vv' to show
++
++tests/integration/test_data_health_problems.py:282: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_failure_facts_come_from_the_matched_result
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 19 passed in 3.62s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_planted-comment.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_planted-comment.log
+new file mode 100644
+index 0000000..f7b5662
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_planted-comment.log
+@@ -0,0 +1,22 @@
++F
++=================================== FAILURES ===================================
++_____________ test_sources_hold_no_write_or_ddl_token[queries.py] ______________
++
++name = 'queries.py'
++
++    @pytest.mark.parametrize("name", sorted(SOURCES))
++    def test_sources_hold_no_write_or_ddl_token(name: str) -> None:
++        found = write_tokens(SOURCES[name].read_text(encoding="utf-8"))
++    
++>       assert found == [], f"{name} holds write tokens: {found}"
++E       AssertionError: queries.py holds write tokens: ['UPDATE']
++E       assert ['UPDATE'] == []
++E         
++E         Left contains one more item: 'UPDATE'
++E         Use -v to get more diff
++
++tests/unit/test_data_health_sql_is_read_only.py:46: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_sql_is_read_only.py::test_sources_hold_no_write_or_ddl_token[queries.py]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.35s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-any-lifecycle.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-any-lifecycle.log
+new file mode 100644
+index 0000000..17ed951
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-any-lifecycle.log
+@@ -0,0 +1,31 @@
++....................F
++=================================== FAILURES ===================================
++_______________ test_retired_and_clean_stocks_take_no_page_slot ________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64623 user=test database=test_905d975ffa1949edb8f2a3171af93751) at 0x10adc6e70>
++
++    def test_retired_and_clean_stocks_take_no_page_slot(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        _t008_store(conn)
++    
++        first = read_problems(conn, cursor=None, limit=2)
++        second = read_problems(conn, cursor=first.next_cursor, limit=2)
++        third = read_problems(conn, cursor=second.next_cursor, limit=2)
++    
++>       assert [_page_symbols(p.rows) for p in (first, second, third)] == [
++            ("AAA", "BBB"),
++            ("CCC", "DDD"),
++            ("EEE",),
++        ]
++E       AssertionError: assert [('AAA', 'BBB...'AAA', 'BBB')] == [('AAA', 'BBB...D'), ('EEE',)]
++E         
++E         At index 1 diff: ('AAA', 'BBB') != ('CCC', 'DDD')
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:308: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_retired_and_clean_stocks_take_no_page_slot
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 20 passed in 3.60s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-outcome-failed-only.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-outcome-failed-only.log
+new file mode 100644
+index 0000000..b4fc3b2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-outcome-failed-only.log
+@@ -0,0 +1,41 @@
++...............F
++=================================== FAILURES ===================================
++________ test_retryable_rule_and_resolution_only_by_write_or_retirement ________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64619 user=test database=test_964e964433f24f1f9540c242fddfba41) at 0x10ab33200>
++
++    def test_retryable_rule_and_resolution_only_by_write_or_retirement(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        r1 = _run(conn, requested_at=T0)
++        ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
++        for dt in ("prices", "fundamentals"):
++            _record(conn, r1, ids["NFX"], dt, "not_found")
++        for dt in ("reference", "corporate_actions"):
++            _record(conn, r1, ids["NFX"], dt, "written")
++        _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
++        for dt in ("reference", "fundamentals", "corporate_actions"):
++            _record(conn, r1, ids["FLD"], dt, "written")
++        _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
++        _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
++        conn.commit()
++    
++        def read() -> dict[str, bool]:
++            page = read_problems(conn, cursor=None, limit=500)
++            conn.rollback()
++            return {row.symbol: row.retryable for row in page.rows}
++    
++>       assert read() == {"FLD": True, "MIX": True, "NFX": False}
++E       AssertionError: assert {'FLD': True, 'MIX': True} == {'FLD': True,... 'NFX': False}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Right contains 1 more item:
++E         {'NFX': False}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:178: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_retryable_rule_and_resolution_only_by_write_or_retirement
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 15 passed in 2.35s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_26_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_26_off-by-one_1.log
+new file mode 100644
+index 0000000..354924b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_26_off-by-one_1.log
+@@ -0,0 +1,2 @@
++.......................                                                  [100%]
++23 passed in 3.07s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_1.log
+new file mode 100644
+index 0000000..fefb9ac
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_1.log
+@@ -0,0 +1,26 @@
++..............F
++=================================== FAILURES ===================================
++_________ test_full_final_page_has_no_cursor_and_past_the_end_is_empty _________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64568 user=test database=test_de7a2616f6304364bd8f33a278dc481e) at 0x10b134e90>
++
++    def test_full_final_page_has_no_cursor_and_past_the_end_is_empty(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
++        conn.commit()
++    
++        full = read_problems(conn, cursor="BBB", limit=3)
++        beyond = read_problems(conn, cursor="ZZZ", limit=2)
++    
++        assert _page_symbols(full.rows) == ("CCC", "DDD", "EEE")
++>       assert full.next_cursor is None
++E       AssertionError: assert 'EEE' is None
++E        +  where 'EEE' = ProblemPage(rows=(ProblemRow(symbol='CCC', failures=(Failure(data_type='prices', outcome='failed', reason='boom', atte....ZoneInfo(key='Etc/UTC')), run_id=UUID('460102d7-2a72-47f4-a0b0-470aaa4c1529')),), retryable=True)), next_cursor='EEE').next_cursor
++
++tests/integration/test_data_health_problems.py:150: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_full_final_page_has_no_cursor_and_past_the_end_is_empty
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 14 passed in 2.33s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_2.log
+new file mode 100644
+index 0000000..5c33d2b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_2.log
+@@ -0,0 +1,29 @@
++.............F
++=================================== FAILURES ===================================
++__________________ test_pages_of_two_over_five_problem_stocks __________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64567 user=test database=test_370338821c1547ada186a3950a43abb8) at 0x10a881400>
++
++    def test_pages_of_two_over_five_problem_stocks(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
++        conn.commit()
++    
++        first = read_problems(conn, cursor=None, limit=2)
++        second = read_problems(conn, cursor=first.next_cursor, limit=2)
++        third = read_problems(conn, cursor=second.next_cursor, limit=2)
++    
++        assert _page_symbols(first.rows) == ("AAA", "BBB")
++>       assert first.next_cursor == "BBB"
++E       AssertionError: assert 'AAA' == 'BBB'
++E         
++E         - BBB
++E         + AAA
++
++tests/integration/test_data_health_problems.py:131: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_pages_of_two_over_five_problem_stocks
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 2.19s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_50_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_50_negate-boolean_1.log
+new file mode 100644
+index 0000000..cef8843
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_50_negate-boolean_1.log
+@@ -0,0 +1,42 @@
++...............F
++=================================== FAILURES ===================================
++________ test_retryable_rule_and_resolution_only_by_write_or_retirement ________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64566 user=test database=test_35bcab93b617481bb5ddd0663b2a4f42) at 0x10d185580>
++
++    def test_retryable_rule_and_resolution_only_by_write_or_retirement(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        r1 = _run(conn, requested_at=T0)
++        ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
++        for dt in ("prices", "fundamentals"):
++            _record(conn, r1, ids["NFX"], dt, "not_found")
++        for dt in ("reference", "corporate_actions"):
++            _record(conn, r1, ids["NFX"], dt, "written")
++        _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
++        for dt in ("reference", "fundamentals", "corporate_actions"):
++            _record(conn, r1, ids["FLD"], dt, "written")
++        _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
++        _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
++        conn.commit()
++    
++        def read() -> dict[str, bool]:
++            page = read_problems(conn, cursor=None, limit=500)
++            conn.rollback()
++            return {row.symbol: row.retryable for row in page.rows}
++    
++>       assert read() == {"FLD": True, "MIX": True, "NFX": False}
++E       AssertionError: assert {'FLD': False..., 'NFX': True} == {'FLD': True,... 'NFX': False}
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing items:
++E         {'FLD': False} != {'FLD': True}
++E         {'NFX': True} != {'NFX': False}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:178: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_retryable_rule_and_resolution_only_by_write_or_retirement
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 15 passed in 2.37s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_commit-after-fetch.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_commit-after-fetch.log
+new file mode 100644
+index 0000000..947fceb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_commit-after-fetch.log
+@@ -0,0 +1,29 @@
++..................F
++=================================== FAILURES ===================================
++__________________ test_the_transaction_belongs_to_the_caller __________________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64734 user=test database=test_95ae49290d41429dbef79f29e2d35c34) at 0x1096d1220>
++postgres_connection_string = 'postgresql://test:test@localhost:64734/test_95ae49290d41429dbef79f29e2d35c34'
++
++    def test_the_transaction_belongs_to_the_caller(
++        migrated_writer_connection: psycopg.Connection, postgres_connection_string: str
++    ) -> None:
++        conn = migrated_writer_connection
++        _problem_stocks(conn, ["AAA", "BBB"])
++        conn.commit()
++        assert conn.info.transaction_status == psycopg.pq.TransactionStatus.IDLE
++    
++        read_problems(conn, cursor=None, limit=2)
++>       assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
++E       AssertionError: assert <TransactionStatus.IDLE: 0> == <TransactionStatus.INTRANS: 2>
++E        +  where <TransactionStatus.IDLE: 0> = <psycopg.ConnectionInfo object at 0x1096d3b90>.transaction_status
++E        +    where <psycopg.ConnectionInfo object at 0x1096d3b90> = <psycopg.Connection [IDLE] (host=localhost port=64734 user=test database=test_95ae49290d41429dbef79f29e2d35c34) at 0x1096d1220>.info
++E        +  and   <TransactionStatus.INTRANS: 2> = <enum 'TransactionStatus'>.INTRANS
++E        +    where <enum 'TransactionStatus'> = <module 'psycopg.pq' from '/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w3/.venv/lib/python3.12/site-packages/psycopg/pq/__init__.py'>.TransactionStatus
++E        +      where <module 'psycopg.pq' from '/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-w4gr2q7d/w3/.venv/lib/python3.12/site-packages/psycopg/pq/__init__.py'> = psycopg.pq
++
++tests/integration/test_data_health_problems.py:250: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_the_transaction_belongs_to_the_caller
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 18 passed in 3.01s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_retryable-all.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_retryable-all.log
+new file mode 100644
+index 0000000..c3670b3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_retryable-all.log
+@@ -0,0 +1,41 @@
++...............F
++=================================== FAILURES ===================================
++________ test_retryable_rule_and_resolution_only_by_write_or_retirement ________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=64708 user=test database=test_84c0cbb60a4645a4940d454cabfe1a5c) at 0x10b65bb90>
++
++    def test_retryable_rule_and_resolution_only_by_write_or_retirement(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        r1 = _run(conn, requested_at=T0)
++        ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
++        for dt in ("prices", "fundamentals"):
++            _record(conn, r1, ids["NFX"], dt, "not_found")
++        for dt in ("reference", "corporate_actions"):
++            _record(conn, r1, ids["NFX"], dt, "written")
++        _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
++        for dt in ("reference", "fundamentals", "corporate_actions"):
++            _record(conn, r1, ids["FLD"], dt, "written")
++        _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
++        _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
++        conn.commit()
++    
++        def read() -> dict[str, bool]:
++            page = read_problems(conn, cursor=None, limit=500)
++            conn.rollback()
++            return {row.symbol: row.retryable for row in page.rows}
++    
++>       assert read() == {"FLD": True, "MIX": True, "NFX": False}
++E       AssertionError: assert {'FLD': True,... 'NFX': False} == {'FLD': True,... 'NFX': False}
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing items:
++E         {'MIX': False} != {'MIX': True}
++E         Use -v to get more diff
++
++tests/integration/test_data_health_problems.py:178: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_problems.py::test_retryable_rule_and_resolution_only_by_write_or_retirement
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 15 passed in 2.60s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 0000000..012a65c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,286 @@
++{
++  "command": "uv run --all-extras pytest tests/unit/test_data_health_sql_is_read_only.py tests/integration/test_data_health_problems.py -x -q",
++  "repo_head": "2626e8cd85506d3e2f170e82748583c059be151a",
++  "tree_patch_sha256": "b8ad97bc57b6d11c16317b10c90a6a14da3e3260f62f47c4b147d26a679b077a",
++  "mutants_sha256": "7f99fc21939d60ce00be0ce194acf7c28a7da3094ddda217c827393ed39f8765",
++  "schema": 1,
++  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-67252b/103eff8a-59a1-4ee7-89ce-7759df97907f/scratchpad/mutants-cycle-2.json",
++  "jobs": 4,
++  "planned": 17,
++  "started": "2026-11-14T16:42:11Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 5.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "d8aec85ad1b55497a7ee3887ed1543cebcc112a867e60c7dcfec32dcd21b912b"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 5.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "d7be9d9c9b8fba1296b38f45cada6a6b7c0c6413afa16074f8e7bc98f15e30c3"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 5.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "4cd0f99813c0c9a3b2838ceb2d2ee8db257a12ce3c46c4beb81e8c1b3265e1a1"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 5.8,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
++      "log_sha256": "26edc6e76c89d56bb8d9ad56da01122416653f8ff4f9e3685251144b68b39916"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/data_health/reader.py:26:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 26,
++      "original": "        cur.execute(PROBLEM_ROWS_SQL, {\"cursor\": cursor, \"limit_plus_one\": limit + 1})",
++      "mutated": "        cur.execute(PROBLEM_ROWS_SQL, {\"cursor\": cursor, \"limit_plus_one\": limit + 2})",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 4.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_26_off-by-one_1.log",
++      "log_sha256": "9faf7830c6dbd9e36cd1127d1c3ffdfa77a6430be861d9016ac1e53d89ce5700"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:44:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 44,
++      "original": "    next_cursor = kept[-1] if len(symbols) > limit else None",
++      "mutated": "    next_cursor = kept[-1] if len(symbols) >= limit else None",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_1.log",
++      "log_sha256": "428318d6c2dc1ab3cd01e314f4f8901d900792d20379c228771ec3a0c39097fa"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:44:off-by-one:2",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 44,
++      "original": "    next_cursor = kept[-1] if len(symbols) > limit else None",
++      "mutated": "    next_cursor = kept[-2] if len(symbols) > limit else None",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_44_off-by-one_2.log",
++      "log_sha256": "6b14b06fb0d33832373ddafd315ea0405b381e059971ebf01e004e727ec3d6ad"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:50:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 50,
++      "original": "                retryable=any(f.outcome == \"failed\" for f in by_symbol[symbol]),",
++      "mutated": "                retryable=any(f.outcome != \"failed\" for f in by_symbol[symbol]),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_50_negate-boolean_1.log",
++      "log_sha256": "b65b135be9d242081d0888a29c954c2b99ca50332153246da36188ce9191e406"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:planted-comment",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "SELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,",
++      "new": "SELECT i.symbol, -- UPDATE\n       s.data_type,\n       s.last_outcome            AS outcome,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_planted-comment.log",
++      "log_sha256": "b0bde74dd6f65de265d60a5cf6b63883aea2c15331f97d704014e4d38d93aefb"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:cursor-ge",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "i2.symbol > %(cursor)s",
++      "new": "i2.symbol >= %(cursor)s",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-ge.log",
++      "log_sha256": "75a5e31f5235005af25b3381e9a8e15c85f66018d998cd4c6d69ce72574fec93"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:limit-literal",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "LIMIT %(limit_plus_one)s",
++      "new": "LIMIT 3",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_limit-literal.log",
++      "log_sha256": "b680bddf19af8a74dccd7289e3bef74838277f624946201e72b3df1aff68a02d"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:cursor-interpolated",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "i2.symbol > %(cursor)s",
++      "new": "i2.symbol > '{cursor}'",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_cursor-interpolated.log",
++      "log_sha256": "9e1c6303bb8868db35ffb9e3adcc76f3f597c3c7d9c9e8e32c472c5178b883f4"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:join-true",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "ON r.run_id = s.last_run_id\n                               AND r.instrument_id = s.instrument_id\n                               AND r.data_type = s.data_type\n WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
++      "new": "ON true\n WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_join-true.log",
++      "log_sha256": "011e2a701d447e597199254afcb1427c856361b02d6f293196e61f4995137454"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:subquery-outcome-failed-only",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "AND s2.last_outcome IN ('failed', 'not_found')",
++      "new": "AND s2.last_outcome IN ('failed')",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-outcome-failed-only.log",
++      "log_sha256": "93db5027c4709d4895f15bf6bbe53e72086869d6306b340c809848d546916ba2"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:subquery-any-lifecycle",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "WHERE i2.lifecycle = 'active'",
++      "new": "WHERE true",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.5,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_subquery-any-lifecycle.log",
++      "log_sha256": "b39d735a72b28ecb7212c2cbf28236af1e54f79c318da921173dabe06af60d54"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:count-not-distinct",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "count(DISTINCT i.instrument_id)",
++      "new": "count(i.instrument_id)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.0,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-not-distinct.log",
++      "log_sha256": "4e3edb25b90fddaeb84796c19ec2cb85cd41b601a5e1bb608eebc94600688201"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:count-no-coalesce",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "COALESCE((array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3], '{}')",
++      "new": "(array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3]",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-no-coalesce.log",
++      "log_sha256": "d28ac2be5f9800f3b525ba09b6c8192c99ff31ec69c25a0028ad10ef347ad3a2"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:outer-outcome-dropped",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "   AND s.last_outcome IN ('failed', 'not_found')\n   AND i.symbol IN (",
++      "new": "   AND i.symbol IN (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_outer-outcome-dropped.log",
++      "log_sha256": "55bf3b7308dc81ff3f56eb5572fa1d92d47bdc8c3d3c42374f2d17b749c11bb5"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:manual:retryable-all",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/reader.py",
++      "old": "retryable=any(",
++      "new": "retryable=all(",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_retryable-all.log",
++      "log_sha256": "57fdf759571f1f6084b4c492b8b6a836e196c854a72717ea2c5bc5e7bfa12487"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:manual:commit-after-fetch",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/reader.py",
++      "old": "rows = cur.fetchall()",
++      "new": "rows = cur.fetchall()\n        conn.commit()",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_reader.py_manual_commit-after-fetch.log",
++      "log_sha256": "519d1483c9e8d8e769d29d4d21d716a845983265c368a1ef4df957bd61804016"
++    },
++    {
++      "id": "src/factorflow/data_health/queries.py:manual:count-any-lifecycle",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "old": "WHERE i.lifecycle = 'active'\n   AND s.last_outcome IN ('failed', 'not_found')\n\"\"\"\n",
++      "new": "WHERE true\n   AND s.last_outcome IN ('failed', 'not_found')\n\"\"\"\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/mutation-cycle-2-results-logs/src_factorflow_data_health_queries.py_manual_count-any-lifecycle.log",
++      "log_sha256": "e2f3d36eae95df3a03406733aa417cacac960ded32b0e62692f7f54907fde74d"
++    }
++  ],
++  "finished": "2026-11-14T16:42:33Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-2-read-problems.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-2-read-problems.log
+new file mode 100644
+index 0000000..8074c10
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S1-evidence/red-cycle-2-read-problems.log
+@@ -0,0 +1,33 @@
++============================= test session starts ==============================
++platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
++rootdir: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2
++configfile: pyproject.toml
++plugins: anyio-4.15.1, hypothesis-6.168.0
++collected 0 items / 2 errors
++
++==================================== ERRORS ====================================
++_______ ERROR collecting tests/unit/test_data_health_sql_is_read_only.py _______
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/tests/unit/test_data_health_sql_is_read_only.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/unit/test_data_health_sql_is_read_only.py:14: in <module>
++    from factorflow.data_health import queries, reader
++E   ImportError: cannot import name 'queries' from 'factorflow.data_health' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/src/factorflow/data_health/__init__.py)
++_______ ERROR collecting tests/integration/test_data_health_problems.py ________
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_data_health_problems.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/integration/test_data_health_problems.py:19: in <module>
++    from factorflow.data_health import queries
++E   ImportError: cannot import name 'queries' from 'factorflow.data_health' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/src/factorflow/data_health/__init__.py)
++=========================== short test summary info ============================
++ERROR tests/unit/test_data_health_sql_is_read_only.py
++ERROR tests/integration/test_data_health_problems.py
++!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
++============================== 2 errors in 0.32s ===============================
+diff --git a/src/factorflow/data_health/__init__.py b/src/factorflow/data_health/__init__.py
+index 32186b4..a94bbd1 100644
+--- a/src/factorflow/data_health/__init__.py
++++ b/src/factorflow/data_health/__init__.py
+@@ -1,4 +1,9 @@
+ """The data-health-reader: read-only reads behind the shell and the Data health screen.
+ 
+-Component design 2.1. ``read_problems`` is exported once ``reader.py`` exists.
++Component design 2.1. Only ``read_problems`` exists so far; ``read_attention``
++and ``read_data_health`` follow in later stories.
+ """
++
++from factorflow.data_health.reader import read_problems
++
++__all__ = ["read_problems"]
+diff --git a/src/factorflow/data_health/queries.py b/src/factorflow/data_health/queries.py
+new file mode 100644
+index 0000000..01b05a7
+--- /dev/null
++++ b/src/factorflow/data_health/queries.py
+@@ -0,0 +1,53 @@
++"""Parameterised reads of the data-health-reader (component design 2.4, DEC-0201).
++
++Every constant is one read and is executed with bound parameters only. The
++column aliases of ``PROBLEM_COUNT_SQL`` are the ``Problems`` field names, so a
++caller maps the row field for field.
++"""
++
++from typing import Final
++
++# A followed stock has a problem when it is active and any of its acquisition
++# rows ended `failed` or `not_found`; each failure's facts come from the result
++# row that outcome was recorded by (DEC-0201). Keyset page by symbol.
++PROBLEM_ROWS_SQL: Final[str] = """
++SELECT i.symbol,
++       s.data_type,
++       s.last_outcome            AS outcome,
++       r.reason,
++       r.attempts,
++       r.completed_at,
++       s.last_run_id             AS run_id
++  FROM instrument i
++  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id
++  JOIN run_instrument_result r  ON r.run_id = s.last_run_id
++                               AND r.instrument_id = s.instrument_id
++                               AND r.data_type = s.data_type
++ WHERE i.lifecycle = 'active'
++   AND s.last_outcome IN ('failed', 'not_found')
++   AND i.symbol IN (
++         SELECT DISTINCT i2.symbol
++           FROM instrument i2
++           JOIN acquisition_state s2 ON s2.instrument_id = i2.instrument_id
++          WHERE i2.lifecycle = 'active'
++            AND s2.last_outcome IN ('failed', 'not_found')
++            AND (%(cursor)s::text IS NULL OR i2.symbol > %(cursor)s)
++          ORDER BY i2.symbol
++          LIMIT %(limit_plus_one)s)
++ ORDER BY i.symbol, s.data_type
++"""
++
++# The same predicate, counted: the rail count, the attention block and
++# `affected_count` are this one set (AC-16).
++PROBLEM_COUNT_SQL: Final[str] = """
++SELECT count(DISTINCT i.instrument_id)                                  AS stock_count,
++       COALESCE((array_agg(DISTINCT i.symbol ORDER BY i.symbol))[1:3], '{}') AS symbols,
++       max(r.completed_at)                                              AS newest_completed_at
++  FROM instrument i
++  JOIN acquisition_state s      ON s.instrument_id = i.instrument_id
++  JOIN run_instrument_result r  ON r.run_id = s.last_run_id
++                               AND r.instrument_id = s.instrument_id
++                               AND r.data_type = s.data_type
++ WHERE i.lifecycle = 'active'
++   AND s.last_outcome IN ('failed', 'not_found')
++"""
+diff --git a/src/factorflow/data_health/reader.py b/src/factorflow/data_health/reader.py
+new file mode 100644
+index 0000000..247cfc8
+--- /dev/null
++++ b/src/factorflow/data_health/reader.py
+@@ -0,0 +1,55 @@
++"""Read-only reads of the data-health-reader (component design 2.4, DEC-0201).
++
++``read_problems`` pages the one problem set by symbol (AC-13, AC-14, AC-16,
++DAC-E2-1 to DAC-E2-3, DAC-E2-S1-1 to DAC-E2-S1-4). Precondition, owned by the
++caller (``data-health-api`` validates both before the call): ``cursor`` is a
++normalised valid symbol or ``None`` and ``limit`` is 1 to 500. The transaction
++belongs to the caller's ``with pool.connection()`` block: nothing here ends it.
++"""
++
++from typing import Literal, cast
++
++import psycopg
++
++from factorflow.data_health.models import Failure, ProblemPage, ProblemRow
++from factorflow.data_health.queries import PROBLEM_ROWS_SQL
++
++
++def read_problems(conn: psycopg.Connection, *, cursor: str | None, limit: int) -> ProblemPage:
++    """One keyset page of followed stocks with a problem, by symbol.
++
++    Fetches ``limit + 1`` stocks: the extra one decides ``next_cursor``, which
++    is the last kept symbol only when a further stock exists, so a full final
++    page carries none. A row is retryable when any of its failures is ``failed``.
++    """
++    with conn.cursor() as cur:
++        cur.execute(PROBLEM_ROWS_SQL, {"cursor": cursor, "limit_plus_one": limit + 1})
++        rows = cur.fetchall()
++
++    by_symbol: dict[str, list[Failure]] = {}
++    for symbol, data_type, outcome, reason, attempts, completed_at, run_id in rows:
++        by_symbol.setdefault(symbol, []).append(
++            Failure(
++                data_type,
++                cast(Literal["failed", "not_found"], outcome),
++                reason,
++                attempts,
++                completed_at,
++                run_id,
++            )
++        )
++
++    symbols = list(by_symbol)
++    kept = symbols[:limit]
++    next_cursor = kept[-1] if len(symbols) > limit else None
++    return ProblemPage(
++        rows=tuple(
++            ProblemRow(
++                symbol,
++                tuple(by_symbol[symbol]),
++                retryable=any(f.outcome == "failed" for f in by_symbol[symbol]),
++            )
++            for symbol in kept
++        ),
++        next_cursor=next_cursor,
++    )
+diff --git a/tests/integration/test_data_health_problems.py b/tests/integration/test_data_health_problems.py
+new file mode 100644
+index 0000000..604756b
+--- /dev/null
++++ b/tests/integration/test_data_health_problems.py
+@@ -0,0 +1,359 @@
++"""Integration tests: read_problems, the one problem set, keyset-paged (CAP-003-E2-S1).
++
++- TC-COMP-040 (DAC-E2-S1-2, DAC-E2-3): keyset pages by symbol, ``limit + 1`` lookahead.
++- TC-COMP-041 (DAC-E2-S1-3, DAC-E2-2, AC-9, AC-14): the retryable rule, and a problem
++  leaves only on a later ``written`` for its data type or on retirement.
++- TC-COMP-042 (DAC-E2-S1-4): ``cursor`` and ``limit`` are bound; the transaction is the caller's.
++- AC-13 / DAC-E2-1 facts come from the matched result; AC-16 count and rows are one set.
++"""
++
++from datetime import UTC, datetime, timedelta
++from typing import Literal
++from uuid import UUID
++
++import psycopg
++import pytest
++from psycopg.rows import dict_row
++from psycopg_pool import ConnectionPool
++
++from factorflow.data_health import queries
++from factorflow.data_health.models import Failure, ProblemRow
++from factorflow.data_health.reader import read_problems
++from factorflow.instruments.service import retire_symbol
++
++pytestmark = pytest.mark.postgres
++
++T0 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
++
++Outcome = Literal["written", "not_found", "failed"]
++
++
++def _instrument(conn: psycopg.Connection, symbol: str) -> int:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO instrument (symbol, lifecycle) VALUES (%s, 'active') "
++            "RETURNING instrument_id",
++            (symbol,),
++        )
++        row = cur.fetchone()
++        assert row is not None
++        return int(row[0])
++
++
++def _run(
++    conn: psycopg.Connection,
++    *,
++    state: str = "partial",
++    requested_at: datetime = T0,
++    ended_at: datetime | None = None,
++) -> UUID:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO acquisition_run (state, requested_at, ended_at, history_depth_years) "
++            "VALUES (%s, %s, %s, 1) RETURNING run_id",
++            (state, requested_at, ended_at if ended_at is not None else requested_at),
++        )
++        row = cur.fetchone()
++        assert row is not None
++        return UUID(str(row[0]))
++
++
++def _record(
++    conn: psycopg.Connection,
++    run_id: UUID,
++    instrument_id: int,
++    data_type: str,
++    outcome: Outcome,
++    *,
++    reason: str | None = None,
++    attempts: int = 1,
++    completed_at: datetime = T0,
++) -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO run_instrument_result "
++            "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
++            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
++            (run_id, instrument_id, data_type, outcome, reason, attempts, completed_at),
++        )
++        cur.execute(
++            "INSERT INTO acquisition_state "
++            "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
++            "VALUES (%s, %s, %s, %s, %s) "
++            "ON CONFLICT (instrument_id, data_type) DO UPDATE SET "
++            "last_acquired_at = EXCLUDED.last_acquired_at, "
++            "last_run_id = EXCLUDED.last_run_id, last_outcome = EXCLUDED.last_outcome",
++            (instrument_id, data_type, completed_at, run_id, outcome),
++        )
++
++
++def _problem_stocks(conn: psycopg.Connection, symbols: list[str]) -> UUID:
++    """One active stock per symbol, each with one ``failed`` prices result."""
++    run = _run(conn)
++    for symbol in symbols:
++        _record(conn, run, _instrument(conn, symbol), "prices", "failed", reason="boom")
++    return run
++
++
++def _page_symbols(page_rows: tuple[ProblemRow, ...]) -> tuple[str, ...]:
++    return tuple(row.symbol for row in page_rows)
++
++
++def _snapshot(conn: psycopg.Connection) -> list[list[tuple[object, ...]]]:
++    tables = (
++        ("instrument", "instrument_id"),
++        ("acquisition_run", "run_id"),
++        ("acquisition_state", "instrument_id, data_type"),
++        ("run_instrument_result", "run_id, instrument_id, data_type"),
++    )
++    out: list[list[tuple[object, ...]]] = []
++    with conn.cursor() as cur:
++        for table, order in tables:
++            cur.execute(f"SELECT * FROM {table} ORDER BY {order}")  # noqa: S608
++            out.append(cur.fetchall())
++    conn.commit()
++    return out
++
++
++# Implements TC-COMP-040
++def test_pages_of_two_over_five_problem_stocks(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
++    conn.commit()
++
++    first = read_problems(conn, cursor=None, limit=2)
++    second = read_problems(conn, cursor=first.next_cursor, limit=2)
++    third = read_problems(conn, cursor=second.next_cursor, limit=2)
++
++    assert _page_symbols(first.rows) == ("AAA", "BBB")
++    assert first.next_cursor == "BBB"
++    assert _page_symbols(second.rows) == ("CCC", "DDD")
++    assert second.next_cursor == "DDD"
++    assert _page_symbols(third.rows) == ("EEE",)
++    assert third.next_cursor is None
++
++
++# Implements TC-COMP-040
++def test_full_final_page_has_no_cursor_and_past_the_end_is_empty(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
++    conn.commit()
++
++    full = read_problems(conn, cursor="BBB", limit=3)
++    beyond = read_problems(conn, cursor="ZZZ", limit=2)
++
++    assert _page_symbols(full.rows) == ("CCC", "DDD", "EEE")
++    assert full.next_cursor is None
++    assert beyond.rows == ()
++    assert beyond.next_cursor is None
++
++
++# Implements TC-COMP-041
++def test_retryable_rule_and_resolution_only_by_write_or_retirement(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    r1 = _run(conn, requested_at=T0)
++    ids = {s: _instrument(conn, s) for s in ("NFX", "FLD", "MIX")}
++    for dt in ("prices", "fundamentals"):
++        _record(conn, r1, ids["NFX"], dt, "not_found")
++    for dt in ("reference", "corporate_actions"):
++        _record(conn, r1, ids["NFX"], dt, "written")
++    _record(conn, r1, ids["FLD"], "prices", "failed", reason="boom")
++    for dt in ("reference", "fundamentals", "corporate_actions"):
++        _record(conn, r1, ids["FLD"], dt, "written")
++    _record(conn, r1, ids["MIX"], "prices", "failed", reason="boom")
++    _record(conn, r1, ids["MIX"], "fundamentals", "not_found")
++    conn.commit()
++
++    def read() -> dict[str, bool]:
++        page = read_problems(conn, cursor=None, limit=500)
++        conn.rollback()
++        return {row.symbol: row.retryable for row in page.rows}
++
++    assert read() == {"FLD": True, "MIX": True, "NFX": False}
++
++    r2 = _run(conn, requested_at=T0 + timedelta(hours=1))
++    _record(conn, r2, ids["NFX"], "reference", "written", completed_at=T0 + timedelta(hours=1))
++    conn.commit()
++    assert set(read()) == {"FLD", "MIX", "NFX"}
++
++    _record(conn, r2, ids["FLD"], "prices", "written", completed_at=T0 + timedelta(hours=1))
++    conn.commit()
++    assert set(read()) == {"MIX", "NFX"}
++
++    retire_symbol(conn, "NFX")
++    conn.commit()
++    assert read() == {"MIX": True}
++    r3 = _run(conn, requested_at=T0 + timedelta(hours=2))
++    _record(
++        conn,
++        r3,
++        ids["MIX"],
++        "prices",
++        "failed",
++        reason="second attempt",
++        completed_at=T0 + timedelta(hours=2),
++    )
++    _run(conn, state="cancelled", requested_at=T0 + timedelta(hours=3))
++    conn.commit()
++    page = read_problems(conn, cursor=None, limit=500)
++    conn.rollback()
++    mix = page.rows[0]
++    prices = next(f for f in mix.failures if f.data_type == "prices")
++    assert [row.symbol for row in page.rows] == ["MIX"]
++    assert prices.run_id == r3
++    assert prices.reason == "second attempt"
++
++
++# Implements TC-COMP-041
++def test_reads_record_nothing(migrated_writer_connection: psycopg.Connection) -> None:
++    conn = migrated_writer_connection
++    _problem_stocks(conn, ["AAA", "BBB"])
++    conn.commit()
++
++    before = _snapshot(conn)
++    read_problems(conn, cursor=None, limit=1)
++    conn.rollback()
++    read_problems(conn, cursor="AAA", limit=1)
++    conn.rollback()
++
++    assert _snapshot(conn) == before
++
++
++# Implements TC-COMP-042
++def test_cursor_is_a_bound_parameter(migrated_writer_connection: psycopg.Connection) -> None:
++    conn = migrated_writer_connection
++    _problem_stocks(conn, ["AAA", "BBB"])
++    conn.commit()
++
++    page = read_problems(conn, cursor="Z' OR '1'='1", limit=2)
++
++    assert page.rows == ()
++    assert page.next_cursor is None
++
++
++# Implements TC-COMP-042
++def test_the_transaction_belongs_to_the_caller(
++    migrated_writer_connection: psycopg.Connection, postgres_connection_string: str
++) -> None:
++    conn = migrated_writer_connection
++    _problem_stocks(conn, ["AAA", "BBB"])
++    conn.commit()
++    assert conn.info.transaction_status == psycopg.pq.TransactionStatus.IDLE
++
++    read_problems(conn, cursor=None, limit=2)
++    assert conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
++    conn.rollback()
++    assert conn.info.transaction_status == psycopg.pq.TransactionStatus.IDLE
++
++    with ConnectionPool(postgres_connection_string, min_size=1, max_size=1) as pool:
++        with pool.connection() as pooled:
++            read_problems(pooled, cursor=None, limit=2)
++            assert pooled.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
++        with pool.connection() as again:
++            assert again.info.transaction_status == psycopg.pq.TransactionStatus.IDLE
++
++
++def test_failure_facts_come_from_the_matched_result(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    t1, t2, t3 = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
++    aaa = _instrument(conn, "AAA")
++    r1 = _run(conn, requested_at=t1)
++    _record(conn, r1, aaa, "prices", "failed", reason="old reason", attempts=1, completed_at=t1)
++    r2 = _run(conn, requested_at=t2)
++    _record(
++        conn, r2, aaa, "prices", "failed", reason="provider timeout", attempts=3, completed_at=t2
++    )
++    _record(conn, r2, aaa, "fundamentals", "not_found", reason=None, attempts=2, completed_at=t3)
++    _record(conn, r2, aaa, "reference", "written", completed_at=t2)
++    _record(conn, r2, aaa, "corporate_actions", "written", completed_at=t2)
++    conn.commit()
++
++    page = read_problems(conn, cursor=None, limit=10)
++
++    assert len(page.rows) == 1
++    assert page.rows[0].failures == (
++        Failure("fundamentals", "not_found", None, 2, t3, r2),
++        Failure("prices", "failed", "provider timeout", 3, t2, r2),
++    )
++
++
++def _t008_store(conn: psycopg.Connection) -> None:
++    run = _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
++    _record(conn, run, _instrument(conn, "ABR"), "prices", "failed", reason="boom")
++    retire_symbol(conn, "ABR")
++    abw = _instrument(conn, "ABW")
++    for dt in ("reference", "prices", "fundamentals", "corporate_actions"):
++        _record(conn, run, abw, dt, "written")
++    conn.commit()
++
++
++def test_retired_and_clean_stocks_take_no_page_slot(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    _t008_store(conn)
++
++    first = read_problems(conn, cursor=None, limit=2)
++    second = read_problems(conn, cursor=first.next_cursor, limit=2)
++    third = read_problems(conn, cursor=second.next_cursor, limit=2)
++
++    assert [_page_symbols(p.rows) for p in (first, second, third)] == [
++        ("AAA", "BBB"),
++        ("CCC", "DDD"),
++        ("EEE",),
++    ]
++    assert [p.next_cursor for p in (first, second, third)] == ["BBB", "DDD", None]
++
++
++def test_the_count_and_the_rows_are_one_set(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    _t008_store(conn)
++    t_new = T0 + timedelta(days=1)
++    bbb_run = _run(conn, requested_at=t_new)
++    with conn.cursor() as cur:
++        cur.execute("SELECT instrument_id FROM instrument WHERE symbol = 'BBB'")
++        row = cur.fetchone()
++        assert row is not None
++    _record(conn, bbb_run, int(row[0]), "fundamentals", "not_found", completed_at=t_new)
++    conn.commit()
++
++    with conn.cursor(row_factory=dict_row) as cur:
++        cur.execute(queries.PROBLEM_COUNT_SQL)
++        counted = cur.fetchone()
++    conn.rollback()
++    assert counted is not None
++    assert counted["stock_count"] == 5
++    assert counted["symbols"] == ["AAA", "BBB", "CCC"]
++    assert counted["newest_completed_at"] == t_new
++
++    paged: set[str] = set()
++    cursor: str | None = None
++    while True:
++        page = read_problems(conn, cursor=cursor, limit=2)
++        conn.rollback()
++        paged.update(row.symbol for row in page.rows)
++        cursor = page.next_cursor
++        if cursor is None:
++            break
++    assert len(paged) == counted["stock_count"]
++
++
++def test_the_count_on_an_empty_store(migrated_writer_connection: psycopg.Connection) -> None:
++    conn = migrated_writer_connection
++
++    with conn.cursor(row_factory=dict_row) as cur:
++        cur.execute(queries.PROBLEM_COUNT_SQL)
++        counted = cur.fetchone()
++    conn.rollback()
++
++    assert counted == {"stock_count": 0, "symbols": [], "newest_completed_at": None}
+diff --git a/tests/unit/test_data_health_models.py b/tests/unit/test_data_health_models.py
+index cb1d82a..591ed6d 100644
+--- a/tests/unit/test_data_health_models.py
++++ b/tests/unit/test_data_health_models.py
+@@ -92,7 +92,7 @@ def test_failure_rejects_assignment() -> None:
+     failure = models.Failure("prices", "failed", "timeout", 3, WHEN, RUN_ID)
+ 
+     with pytest.raises(dataclasses.FrozenInstanceError):
+-        failure.attempts = 4  # type: ignore[misc]
++        failure.reason = "changed"  # type: ignore[misc]
+ 
+ 
+ def test_problem_row_and_page_reject_assignment() -> None:
+diff --git a/tests/unit/test_data_health_sql_is_read_only.py b/tests/unit/test_data_health_sql_is_read_only.py
+new file mode 100644
+index 0000000..c784418
+--- /dev/null
++++ b/tests/unit/test_data_health_sql_is_read_only.py
+@@ -0,0 +1,84 @@
++"""Static guards: the data-health-reader reads only (CAP-003-E2-S1).
++
++- TC-COMP-039 (DAC-E2-S1-1): ``queries.py`` and ``reader.py`` hold no write or
++  DDL token, scanned over the whole text, comments and docstrings included.
++- TC-COMP-042, static half (DAC-E2-S1-4): every statement constant is one
++  ``SELECT``/``WITH`` read with bound parameters only (SEC-INP-002).
++"""
++
++import re
++from pathlib import Path
++
++import pytest
++
++from factorflow.data_health import queries, reader
++
++WRITE_TOKENS = ("INSERT", "UPDATE", "DELETE", "TRUNCATE", "ALTER", "DROP")
++_WRITE_PATTERN = re.compile(r"\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b", re.IGNORECASE)
++_UNBOUND_PERCENT = re.compile(r"%(?!\([a-z_]+\)s)")
++_LIMIT_BOUND = re.compile(r"LIMIT\s+%\(limit_plus_one\)s")
++_FIRST_KEYWORD = re.compile(r"\s*(\w+)")
++
++SOURCES = {
++    "queries.py": Path(queries.__file__),
++    "reader.py": Path(reader.__file__),
++}
++
++
++def write_tokens(text: str) -> list[str]:
++    """Every write or DDL token in text, in source order, upper-cased."""
++    return [match.group(1).upper() for match in _WRITE_PATTERN.finditer(text)]
++
++
++def _statements() -> dict[str, str]:
++    return {
++        name: value
++        for name, value in vars(queries).items()
++        if name.endswith("_SQL") and isinstance(value, str)
++    }
++
++
++# Implements TC-COMP-039
++@pytest.mark.parametrize("name", sorted(SOURCES))
++def test_sources_hold_no_write_or_ddl_token(name: str) -> None:
++    found = write_tokens(SOURCES[name].read_text(encoding="utf-8"))
++
++    assert found == [], f"{name} holds write tokens: {found}"
++
++
++# Implements TC-COMP-039
++@pytest.mark.parametrize("token", WRITE_TOKENS)
++def test_guard_finds_a_planted_token(token: str) -> None:
++    assert write_tokens(f"SELECT 1 FROM instrument; {token} x") == [token]
++
++
++# Implements TC-COMP-039
++def test_guard_scans_comments_and_respects_word_boundaries() -> None:
++    assert write_tokens("SELECT 1 -- update in a comment") == ["UPDATE"]
++    assert write_tokens('"""Never drops a row."""') == []
++    assert write_tokens("updated_at, alternatively") == []
++
++
++# Implements TC-COMP-042
++def test_statement_constants_exist() -> None:
++    assert {"PROBLEM_ROWS_SQL", "PROBLEM_COUNT_SQL"} <= set(_statements())
++
++
++# Implements TC-COMP-042
++@pytest.mark.parametrize("name", sorted(_statements()))
++def test_statements_are_bound_selects(name: str) -> None:
++    text = _statements()[name]
++    first = _FIRST_KEYWORD.match(text)
++
++    assert "{" not in text.replace("'{}'", ""), f"{name} interpolates"
++    assert _UNBOUND_PERCENT.search(text) is None, f"{name} holds an unbound percent"
++    assert first is not None
++    assert first.group(1).upper() in {"SELECT", "WITH"}, f"{name} is not a read"
++
++
++# Implements TC-COMP-042
++def test_problem_rows_binds_cursor_and_limit() -> None:
++    text = queries.PROBLEM_ROWS_SQL
++
++    assert "%(cursor)s" in text
++    assert _LIMIT_BOUND.search(text) is not None

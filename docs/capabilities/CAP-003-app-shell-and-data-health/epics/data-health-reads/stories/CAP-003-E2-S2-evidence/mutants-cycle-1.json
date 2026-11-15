@@ -1,0 +1,259 @@
+{
+ "schema": 1,
+ "repo_head": "39b43c4353a6c0ec994b458b15ba625f184f2626",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/data_health/reader.py:99:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 99,
+   "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
+   "mutated": "    if problems.stock_count > 0 and problems.newest_completed_at is None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:99:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 99,
+   "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
+   "mutated": "    if problems.stock_count >= 0 and problems.newest_completed_at is not None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:99:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 99,
+   "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
+   "mutated": "    if problems.stock_count > 1 and problems.newest_completed_at is not None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:101:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 101,
+   "original": "    if latest_terminal is not None and latest_terminal.state in (\"failed\", \"abandoned\"):",
+   "mutated": "    if latest_terminal is None and latest_terminal.state in (\"failed\", \"abandoned\"):"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:105:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 105,
+   "original": "    if not credential_present:",
+   "mutated": "    if credential_present:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:129:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 129,
+   "original": "    assert followed is not None  # an aggregate over a table always returns one row",
+   "mutated": "    assert followed is None  # an aggregate over a table always returns one row"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:130:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 130,
+   "original": "    assert prices is not None",
+   "mutated": "    assert prices is None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:131:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 131,
+   "original": "    assert problem_row is not None",
+   "mutated": "    assert problem_row is None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:137:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 137,
+   "original": "    if download_row is not None:",
+   "mutated": "    if download_row is None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:145:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 145,
+   "original": "            Progress(done, named if named > 0 else None),",
+   "mutated": "            Progress(done, named if named >= 0 else None),"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:145:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 145,
+   "original": "            Progress(done, named if named > 0 else None),",
+   "mutated": "            Progress(done, named if named > 1 else None),"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:149:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 149,
+   "original": "    if terminal_row is not None:",
+   "mutated": "    if terminal_row is None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:156:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 156,
+   "original": "        prices[0],",
+   "mutated": "        prices[1],"
+  },
+  {
+   "id": "manual:having-ge-3",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 94,
+   "old": "HAVING count(*) = 4",
+   "new": "HAVING count(*) >= 3"
+  },
+  {
+   "id": "manual:having-run-scope",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 92,
+   "old": "WHERE x.run_id = r.run_id",
+   "new": "WHERE true"
+  },
+  {
+   "id": "manual:download-asc",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 96,
+   "old": "ORDER BY r.requested_at DESC, r.run_id DESC",
+   "new": "ORDER BY r.requested_at ASC, r.run_id DESC"
+  },
+  {
+   "id": "manual:download-no-tiebreak",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 96,
+   "old": "ORDER BY r.requested_at DESC, r.run_id DESC",
+   "new": "ORDER BY r.requested_at DESC"
+  },
+  {
+   "id": "manual:terminal-by-requested",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 106,
+   "old": "ORDER BY ended_at DESC, run_id DESC",
+   "new": "ORDER BY requested_at DESC, run_id DESC"
+  },
+  {
+   "id": "manual:terminal-no-tiebreak",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 106,
+   "old": "ORDER BY ended_at DESC, run_id DESC",
+   "new": "ORDER BY ended_at DESC"
+  },
+  {
+   "id": "manual:terminal-no-abandoned",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 105,
+   "old": "'cancelled', 'abandoned')",
+   "new": "'cancelled')"
+  },
+  {
+   "id": "manual:terminal-any-state",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 105,
+   "old": "WHERE state IN ('succeeded', 'partial', 'failed', 'cancelled', 'abandoned')",
+   "new": "WHERE true"
+  },
+  {
+   "id": "manual:followed-all",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 64,
+   "old": " FROM instrument\n WHERE lifecycle = 'active'\n\"\"\"\n\n# Q2",
+   "new": " FROM instrument\n WHERE true\n\"\"\"\n\n# Q2"
+  },
+  {
+   "id": "manual:asof-all-instruments",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 73,
+   "old": "WHERE i.lifecycle = 'active'\n   AND c.data_type = 'prices'",
+   "new": "WHERE true\n   AND c.data_type = 'prices'"
+  },
+  {
+   "id": "manual:asof-any-type",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 74,
+   "old": "AND c.data_type = 'prices'",
+   "new": "AND true"
+  },
+  {
+   "id": "manual:asof-min",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 70,
+   "old": "SELECT max(c.covered_to)",
+   "new": "SELECT min(c.covered_to)"
+  },
+  {
+   "id": "manual:item-cancelled",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 101,
+   "old": "latest_terminal.state in (\"failed\", \"abandoned\")",
+   "new": "latest_terminal.state in (\"failed\", \"abandoned\", \"cancelled\")"
+  },
+  {
+   "id": "manual:credential-true",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 152,
+   "old": "present = credential_present()",
+   "new": "present = True"
+  },
+  {
+   "id": "manual:symbols-list",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 134,
+   "old": "tuple(symbols)",
+   "new": "symbols"
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+......................F
+=================================== FAILURES ===================================
+____________________ test_not_determinable_on_a_real_store _____________________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49376 user=test database=test_6f721a3aaec54c3e8469636afd5d39d4) at 0x10d1c1b20>
+
+    def test_not_determinable_on_a_real_store(migrated_writer_connection: psycopg.Connection) -> None:
+        conn = migrated_writer_connection
+        solo = _instrument(conn, "SOLO")
+        _bars(conn, solo, [D2, D3, D4, D5])
+        _segment(conn, solo, "prices", D2, D5)
+        _segment(conn, solo, "fundamentals", *SEGMENT_FUNDAMENTALS)
+        run = _run(conn, state="succeeded", requested_at=T1, ended_at=T1)
+        _record(conn, run, solo, "prices", "written", completed_at=T1)
+        _record(conn, run, solo, "fundamentals", "written", completed_at=T1)
+        conn.commit()
+    
+        result = read_data_health(conn)
+    
+        assert result.daily_prices == DailyPricesCheck(
+            "not_determinable",
+            0,
+            None,
+            0,
+            D5,
+            GapDetectionState(False, "fewer_than_two_instruments_with_data"),
+            0,
+            (),
+        )
+>       assert result.company_financials == CompanyFinancialsCheck("ok", 0, 0, T1, 0, ())
+E       AssertionError: assert CompanyFinanc...on_symbols=()) == CompanyFinanc...on_symbols=())
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing attributes:
+E         ['status']
+E         
+E         Drill down into differing attribute status:
+E           status: 'exceptions' != 'ok'
+E           - ok
+E           + exceptions
+
+tests/integration/test_data_health_checks.py:390: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_not_determinable_on_a_real_store
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 22 passed in 2.77s

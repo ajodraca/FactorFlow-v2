@@ -407,3 +407,151 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
     expect(screen.getByText("2026-10-15 17:46 CDT")).toHaveClass("font-numeric");
   });
 });
+
+const PARTS = ["Market closed", "prices current to 2026-10-15", "checked 18:52:14 CDT"] as const;
+
+/** The separator elements of a generic line: its child spans whose trimmed text is the middle dot. */
+function separators(line: Element): HTMLElement[] {
+  return Array.from(line.children).filter(
+    (child): child is HTMLElement => child.tagName === "SPAN" && child.textContent?.trim() === "·",
+  );
+}
+
+function collapsed(element: Element): string {
+  return (element.textContent ?? "").replace(/\s+/g, " ").trim();
+}
+
+describe("TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1)", () => {
+  // Implements TC-COMP-033
+  it("holds every part in exactly one paragraph", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AsOfLine parts={[...PARTS] as [string, ...string[]]} />
+      </MemoryRouter>,
+    );
+    const paragraphs = container.querySelectorAll("p");
+    expect(paragraphs).toHaveLength(1);
+    for (const part of PARTS) {
+      expect(
+        within(paragraphs[0] as HTMLElement).getByText(new RegExp(part), { exact: false }),
+      ).toBeInTheDocument();
+    }
+  });
+
+  // Implements TC-COMP-033
+  it("reads as one line joined by middle dots", () => {
+    renderGeneric([...PARTS]);
+    expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
+      "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT",
+    );
+  });
+
+  // Implements TC-COMP-033
+  it("gives each of the two separators the --space-2 padding and keeps the dot readable", () => {
+    renderGeneric([...PARTS]);
+    const seps = separators(screen.getByTestId("as-of-line"));
+    expect(seps).toHaveLength(2);
+    for (const sep of seps) {
+      expect(sep).toHaveClass("inline-block");
+      expect(sep).toHaveClass("px-2");
+      expect(sep).not.toHaveAttribute("aria-hidden");
+    }
+  });
+
+  // Implements TC-COMP-033
+  it("contains no break, block or second paragraph", () => {
+    renderGeneric([...PARTS]);
+    const line = screen.getByTestId("as-of-line");
+    expect(line.querySelector("br, div, p")).toBeNull();
+  });
+
+  // Implements TC-COMP-033
+  it("is a muted extra-small line", () => {
+    renderGeneric([...PARTS]);
+    const line = screen.getByTestId("as-of-line");
+    expect(line).toHaveClass("text-xs");
+    expect(line).toHaveClass("text-muted-foreground");
+  });
+
+  // Implements TC-COMP-033
+  it("shows one part with no separator", () => {
+    renderGeneric(["Market closed"]);
+    const line = screen.getByTestId("as-of-line");
+    expect(collapsed(line)).toBe("Market closed");
+    expect(separators(line)).toHaveLength(0);
+  });
+});
+
+/** The generic form's props, read off the component so no import is added to the delivered header. */
+type GenericProps = Extract<Parameters<typeof AsOfLine>[0], { parts: unknown }>;
+
+function renderGeneric(
+  parts: GenericProps["parts"] | GenericProps["parts"][number][],
+  className?: string,
+): ReturnType<typeof render> {
+  return render(
+    <MemoryRouter>
+      <AsOfLine parts={parts as GenericProps["parts"]} className={className} />
+    </MemoryRouter>,
+  );
+}
+
+describe("AsOfLine generic form: element parts, host classes, non-empty parts", () => {
+  it("keeps element parts as direct children in order with one separator between", () => {
+    renderGeneric([
+      <span key="m" data-testid="part-m">
+        Market closed
+      </span>,
+      <a key="l" href="/data" data-testid="part-l">
+        prices current to 2026-10-15
+      </a>,
+    ]);
+    const line = screen.getByTestId("as-of-line");
+    const children = Array.from(line.children);
+    expect(children.map((c) => c.getAttribute("data-testid"))).toEqual(["part-m", null, "part-l"]);
+    expect(separators(line)).toHaveLength(1);
+    expect(children[1]).toBe(separators(line)[0]);
+  });
+
+  it("adds the host's classes and keeps the pattern's own and the test id", () => {
+    renderGeneric(["Market closed"], "min-h-7");
+    const line = screen.getByTestId("as-of-line");
+    expect(line).toHaveClass("min-h-7");
+    expect(line).toHaveClass("text-xs");
+    expect(line).toHaveClass("text-muted-foreground");
+  });
+
+  it("refuses an empty parts list at the type level", () => {
+    const never = () => (
+      // @ts-expect-error parts must be non-empty
+      <AsOfLine parts={[]} />
+    );
+    expect(never).toBeTypeOf("function");
+  });
+});
+
+describe("TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13)", () => {
+  // Implements TC-COMP-034
+  it("joins its two parts with one separator span and no sort clause", () => {
+    renderLine();
+    const line = screen.getByTestId("as-of-line");
+    expect(separators(line)).toHaveLength(1);
+    const [sep] = separators(line);
+    expect(sep).toHaveClass("inline-block");
+    expect(sep).toHaveClass("px-2");
+    expect(sep.previousSibling?.textContent).toBe("2026-10-15 17:46 CDT");
+    expect(sep.nextSibling?.textContent).toBe("from the download started ");
+  });
+
+  // Implements TC-COMP-034
+  it("adds a second separator immediately before the sort clause", () => {
+    renderLine({ sortLabel: "value" });
+    const line = screen.getByTestId("as-of-line");
+    const seps = separators(line);
+    expect(seps).toHaveLength(2);
+    expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
+    expect(collapsed(line)).toBe(
+      "Scores from 2026-10-15 17:46 CDT · from the download started 2026-10-15 17:30 CDT Complete · sorted by value",
+    );
+  });
+});

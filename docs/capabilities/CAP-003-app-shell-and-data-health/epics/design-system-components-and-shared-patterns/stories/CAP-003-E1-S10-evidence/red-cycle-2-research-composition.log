@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 2 failed) 156ms
+   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > joins its two parts with one separator span and no sort clause 4ms
+     → expected [] to have a length of 1 but got +0
+   × TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause 1ms
+     → expected [] to have a length of 2 but got +0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > joins its two parts with one separator span and no sort clause
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/components/patterns/as-of-line.test.tsx:538:30
+    536|     renderLine();
+    537|     const line = screen.getByTestId("as-of-line");
+    538|     expect(separators(line)).toHaveLength(1);
+       |                              ^
+    539|     const [sep] = separators(line);
+    540|     expect(sep).toHaveClass("inline-block");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-034: the Research as-of line composes AsOfLine (DAC-E1-S10-2, DAC-E1-13) > adds a second separator immediately before the sort clause
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ src/components/patterns/as-of-line.test.tsx:551:18
+    549|     const line = screen.getByTestId("as-of-line");
+    550|     const seps = separators(line);
+    551|     expect(seps).toHaveLength(2);
+       |                  ^
+    552|     expect(seps[1].nextSibling?.textContent).toBe("sorted by value");
+    553|     expect(collapsed(line)).toBe(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 33 passed (35)
+   Start at  09:42:42
+   Duration  1.28s (transform 69ms, setup 61ms, collect 481ms, tests 156ms, environment 289ms, prepare 152ms)
+

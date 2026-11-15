@@ -1,0 +1,30 @@
+.............F
+=================================== FAILURES ===================================
+__________________ test_pages_of_two_over_five_problem_stocks __________________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=64608 user=test database=test_2c4490f5978444bc8c5d413091185eb5) at 0x108f2bce0>
+
+    def test_pages_of_two_over_five_problem_stocks(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        _problem_stocks(conn, ["AAA", "BBB", "CCC", "DDD", "EEE"])
+        conn.commit()
+    
+        first = read_problems(conn, cursor=None, limit=2)
+        second = read_problems(conn, cursor=first.next_cursor, limit=2)
+        third = read_problems(conn, cursor=second.next_cursor, limit=2)
+    
+        assert _page_symbols(first.rows) == ("AAA", "BBB")
+        assert first.next_cursor == "BBB"
+>       assert _page_symbols(second.rows) == ("CCC", "DDD")
+E       AssertionError: assert ('BBB', 'CCC') == ('CCC', 'DDD')
+E         
+E         At index 0 diff: 'BBB' != 'CCC'
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:132: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_problems.py::test_pages_of_two_over_five_problem_stocks
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 passed in 2.10s

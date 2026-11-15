@@ -1,0 +1,25 @@
+........F
+=================================== FAILURES ===================================
+________________ test_not_found_is_a_problem_and_written_is_not ________________
+
+    def test_not_found_is_a_problem_and_written_is_not() -> None:
+        fold = _fold(
+            [_view([_stock("AAA"), _stock("NFD")])],
+            [{"AAA": ("written", T1), "NFD": ("not_found", T2)}],
+        )
+    
+>       assert fold.company_financials() == CompanyFinancialsCheck("exceptions", 0, 1, T1, 1, ("NFD",))
+E       AssertionError: assert CompanyFinanc...bols=('NFD',)) == CompanyFinanc...bols=('NFD',))
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing attributes:
+E         ['as_of']
+E         
+E         Drill down into differing attribute as_of:
+E           as_of: None != datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc)
+
+tests/unit/test_data_health_checks.py:187: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_not_found_is_a_problem_and_written_is_not
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 8 passed in 0.32s

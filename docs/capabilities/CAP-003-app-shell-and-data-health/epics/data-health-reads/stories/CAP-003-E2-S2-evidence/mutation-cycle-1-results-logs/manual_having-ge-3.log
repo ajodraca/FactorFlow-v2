@@ -1,0 +1,66 @@
+.............F
+=================================== FAILURES ===================================
+_ test_progress_counts_complete_instruments_and_total_is_null_before_the_claim _
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49708 user=test database=test_a9cda50a18084e5b97a81c090f1cc5e0) at 0x1094a0fe0>
+
+    def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
+        # An earlier run holds all four results for all 50 instruments, so a count that is
+        # not restricted to the latest run would read 50.
+        r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
+        for iid in ids:
+            for data_type in DATA_TYPES:
+                _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
+        r1 = _run(conn, state="requested", requested_at=_t(2))
+        conn.commit()
+    
+        before = read_attention(conn)
+        conn.rollback()
+    
+        assert before.latest_download is not None
+        assert before.latest_download.run_id == r1
+        assert before.latest_download.progress == Progress(0, None)
+    
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE acquisition_run SET state = 'running', started_at = %s, "
+                "claimed_by = 'test-runner', heartbeat_at = %s, instruments_named = 120 "
+                "WHERE run_id = %s",
+                (_t(3), _t(3), r1),
+            )
+        for n, iid in enumerate(ids[:40], start=1):
+            for data_type in DATA_TYPES:
+                outcome: Outcome = "written"
+                if n <= 10 and data_type == "prices":
+                    outcome = "failed"
+                elif 11 <= n <= 15 and data_type == "fundamentals":
+                    outcome = "skipped"
+                _record(conn, r1, iid, data_type, outcome, completed_at=_t(4))
+        for iid in ids[40:43]:  # three data types only: not complete
+            for data_type in DATA_TYPES[:3]:
+                _record(conn, r1, iid, data_type, "written", completed_at=_t(4))
+        conn.commit()
+    
+        after = read_attention(conn)
+        conn.rollback()
+    
+        assert after.latest_download is not None
+>       assert after.latest_download.progress == Progress(40, 120)
+E       AssertionError: assert Progress(done=43, total=120) == Progress(done=40, total=120)
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing attributes:
+E         ['done']
+E         
+E         Drill down into differing attribute done:
+E           done: 43 != 40
+
+tests/integration/test_data_health_attention.py:219: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_progress_counts_complete_instruments_and_total_is_null_before_the_claim
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 passed in 2.27s

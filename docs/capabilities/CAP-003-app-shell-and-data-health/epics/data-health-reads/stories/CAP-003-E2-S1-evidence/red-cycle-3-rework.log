@@ -1,0 +1,135 @@
+.............F..........FFF                                              [100%]
+=================================== FAILURES ===================================
+__________ test_problem_rows_subquery_orders_symbols_before_the_limit __________
+
+    def test_problem_rows_subquery_orders_symbols_before_the_limit() -> None:
+>       assert _SUBQUERY_ORDERED_BEFORE_LIMIT.search(queries.PROBLEM_ROWS_SQL) is not None
+E       AssertionError: assert None is not None
+E        +  where None = <built-in method search of re.Pattern object at 0x7892940010>('\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY s.data_type, i.symbol\n')
+E        +    where <built-in method search of re.Pattern object at 0x7892940010> = re.compile('SELECT DISTINCT i2\\.symbol.*?ORDER BY i2\\.symbol\\s+LIMIT\\s+%\\(limit_plus_one\\)s', re.DOTALL).search
+E        +    and   '\nSELECT i.symbol,\n       s.data_type,\n       s.last_outcome            AS outcome,\n       r.reason,\n       r.att...sor)s::text IS NULL OR i2.symbol > %(cursor)s)\n          LIMIT %(limit_plus_one)s)\n ORDER BY s.data_type, i.symbol\n' = queries.PROBLEM_ROWS_SQL
+
+tests/unit/test_data_health_sql_is_read_only.py:92: AssertionError
+_______ test_failure_facts_ignore_other_instruments_and_the_state_clock ________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=58042 user=test database=test_38046da6bb6544688211c6cef5bb2566) at 0x10da2a210>
+
+    def test_failure_facts_ignore_other_instruments_and_the_state_clock(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        t_result, t_state, t_other = T0, T0 + timedelta(hours=1), T0 + timedelta(hours=2)
+        run = _run(conn)
+        _record(
+            conn,
+            run,
+            _instrument(conn, "AAA"),
+            "prices",
+            "failed",
+            reason="aaa reason",
+            attempts=2,
+            completed_at=t_result,
+            acquired_at=t_state,
+        )
+        _record(
+            conn,
+            run,
+            _instrument(conn, "BBB"),
+            "prices",
+            "written",
+            reason="bbb note",
+            attempts=5,
+            completed_at=t_other,
+        )
+        conn.commit()
+    
+        page = read_problems(conn, cursor=None, limit=10)
+    
+        assert [row.symbol for row in page.rows] == ["AAA"]
+>       assert page.rows[0].failures == (Failure("prices", "failed", "aaa reason", 2, t_result, run),)
+E       AssertionError: assert (Failure(data...21998a033b'))) == (Failure(data...1998a033b')),)
+E         
+E         At index 0 diff: Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('70e1aba2-eba1-4b78-b84b-4c21998a033b')) != Failure(data_type='prices', outcome='failed', reason='aaa reason', attempts=2, completed_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=UUID('70e1aba2-eba1-4b78-b84b-4c21998a033b'))
+E         Left contains one more item: Failure(data_type='prices', outcome='failed', reason='bbb note', attempts=5, completed_...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/integration/test_data_health_problems.py:402: AssertionError
+_____________ test_paging_follows_symbol_order_not_data_type_order _____________
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=58042 user=test database=test_61dce9fd48954a888d1af01da959ce7f) at 0x10da2af30>
+
+    def test_paging_follows_symbol_order_not_data_type_order(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        run = _run(conn)
+        _record(conn, run, _instrument(conn, "AAA"), "prices", "failed", reason=UNAVAILABLE)
+        _record(conn, run, _instrument(conn, "BBB"), "fundamentals", "not_found")
+        _record(conn, run, _instrument(conn, "CCC"), "corporate_actions", "not_found")
+        conn.commit()
+    
+        first = read_problems(conn, cursor=None, limit=1)
+        conn.rollback()
+        second = read_problems(conn, cursor=first.next_cursor, limit=1)
+        conn.rollback()
+        third = read_problems(conn, cursor=second.next_cursor, limit=1)
+        conn.rollback()
+    
+>       assert [_page_symbols(p.rows) for p in (first, second, third)] == [
+            ("AAA",),
+            ("BBB",),
+            ("CCC",),
+        ]
+E       AssertionError: assert [('BBB',), ('CCC',), ('BBB',)] == [('AAA',), ('BBB',), ('CCC',)]
+E         
+E         At index 0 diff: ('BBB',) != ('AAA',)
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:422: AssertionError
+_____ test_the_newest_completion_time_comes_only_from_the_matched_results ______
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=58042 user=test database=test_0a115741b5484255958795f8ec02b1ff) at 0x10da29c70>
+
+    def test_the_newest_completion_time_comes_only_from_the_matched_results(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        t_new = T0 + timedelta(days=1)
+        t_late = T0 + timedelta(days=2)
+        aaa = _instrument(conn, "AAA")
+        bbb = _instrument(conn, "BBB")
+        old_run = _run(conn, requested_at=T0)
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO run_instrument_result "
+                "(run_id, instrument_id, data_type, outcome, reason, attempts, completed_at) "
+                "VALUES (%s, %s, 'prices', 'failed', %s, 1, %s)",
+                (old_run, aaa, UNAVAILABLE, t_late),
+            )
+        new_run = _run(conn, requested_at=t_new)
+        _record(conn, new_run, aaa, "prices", "failed", reason=UNAVAILABLE, completed_at=t_new)
+        _record(conn, new_run, aaa, "reference", "written", completed_at=t_late)
+        _record(conn, new_run, bbb, "prices", "written", completed_at=t_late)
+        conn.commit()
+    
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(queries.PROBLEM_COUNT_SQL)
+            counted = cur.fetchone()
+        conn.rollback()
+    
+>       assert counted == {"stock_count": 1, "symbols": ["AAA"], "newest_completed_at": t_new}
+E       AssertionError: assert {'stock_count...y='Etc/UTC'))} == {'stock_count...timezone.utc)}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'newest_completed_at': datetime.datetime(2026, 10, 22, 21, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))} != {'newest_completed_at': datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc)}
+E         Use -v to get more diff
+
+tests/integration/test_data_health_problems.py:457: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_sql_is_read_only.py::test_problem_rows_subquery_orders_symbols_before_the_limit
+FAILED tests/integration/test_data_health_problems.py::test_failure_facts_ignore_other_instruments_and_the_state_clock
+FAILED tests/integration/test_data_health_problems.py::test_paging_follows_symbol_order_not_data_type_order
+FAILED tests/integration/test_data_health_problems.py::test_the_newest_completion_time_comes_only_from_the_matched_results
+4 failed, 23 passed in 5.63s

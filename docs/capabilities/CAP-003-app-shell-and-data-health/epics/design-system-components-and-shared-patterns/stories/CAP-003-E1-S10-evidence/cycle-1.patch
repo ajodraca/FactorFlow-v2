@@ -1,0 +1,1396 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..a8dad98
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-1.json
+@@ -0,0 +1,57 @@
++{
++  "schema": 1,
++  "repo_head": "1ba1100559fbe17200604141d57cd33fa3d46ee0",
++  "range": "HEAD..worktree",
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:232:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 232,
++      "original": "            {index > 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
++      "mutated": "            {index >= 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:232:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 232,
++      "original": "            {index > 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
++      "mutated": "            {index > 1 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:separator-spaces",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "const SEPARATOR = \" \u00b7 \";",
++      "new": "const SEPARATOR = \"   \";"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:padding",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "className=\"inline-block px-2\"",
++      "new": "className=\"inline-block px-1\""
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:host-class",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "cn(\"text-xs text-muted-foreground\", props.className)",
++      "new": "cn(\"text-xs text-muted-foreground\")"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:reverse-parts",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{props.parts.map(",
++      "new": "{[...props.parts].reverse().map("
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..6968519
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w0/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (33 tests) 161ms
++
++ Test Files  1 passed (1)
++      Tests  33 passed (33)
++   Start at  09:41:29
++   Duration  1.73s (transform 75ms, setup 67ms, collect 599ms, tests 161ms, environment 259ms, prepare 103ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..3697dc6
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w1/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (33 tests) 159ms
++
++ Test Files  1 passed (1)
++      Tests  33 passed (33)
++   Start at  09:41:29
++   Duration  1.73s (transform 71ms, setup 64ms, collect 599ms, tests 159ms, environment 301ms, prepare 88ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 0000000..2e044e1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (33 tests) 151ms
++
++ Test Files  1 passed (1)
++      Tests  33 passed (33)
++   Start at  09:41:29
++   Duration  1.72s (transform 70ms, setup 64ms, collect 598ms, tests 151ms, environment 256ms, prepare 111ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+new file mode 100644
+index 0000000..8f80ee8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w3/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/patterns/as-of-line.test.tsx (33 tests) 147ms
++
++ Test Files  1 passed (1)
++      Tests  33 passed (33)
++   Start at  09:41:29
++   Duration  1.71s (transform 76ms, setup 64ms, collect 598ms, tests 147ms, environment 338ms, prepare 36ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_1.log
+new file mode 100644
+index 0000000..2820b45
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_1.log
+@@ -0,0 +1,98 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w0/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 4 failed) 170ms
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots 4ms
++     → expected '· Market closed · prices current to 2…' to be 'Market closed · prices current to 202…' // Object.is equality
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable 2ms
++     → expected [ <span …(1)></span>, …(2) ] to have a length of 2 but got 3
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > shows one part with no separator 1ms
++     → expected '· Market closed' to be 'Market closed' // Object.is equality
++   × AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between 1ms
++     → expected [ null, 'part-m', null, 'part-l' ] to deeply equal [ 'part-m', null, 'part-l' ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
++AssertionError: expected '· Market closed · prices current to 2…' to be 'Market closed · prices current to 202…' // Object.is equality
++
++Expected: "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT"
++Received: "· Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:444:57
++    442|   it("reads as one line joined by middle dots", () => {
++    443|     renderGeneric([...PARTS]);
++    444|     expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
++       |                                                         ^
++    445|       "Market closed · prices current to 2026-10-15 · checked 18:52:14…
++    446|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
++AssertionError: expected [ <span …(1)></span>, …(2) ] to have a length of 2 but got 3
++
++- Expected
+++ Received
++
++- 2
+++ 3
++
++ ❯ src/components/patterns/as-of-line.test.tsx:453:18
++    451|     renderGeneric([...PARTS]);
++    452|     const seps = separators(screen.getByTestId("as-of-line"));
++    453|     expect(seps).toHaveLength(2);
++       |                  ^
++    454|     for (const sep of seps) {
++    455|       expect(sep).toHaveClass("inline-block");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > shows one part with no separator
++AssertionError: expected '· Market closed' to be 'Market closed' // Object.is equality
++
++Expected: "Market closed"
++Received: "· Market closed"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:480:29
++    478|     renderGeneric(["Market closed"]);
++    479|     const line = screen.getByTestId("as-of-line");
++    480|     expect(collapsed(line)).toBe("Market closed");
++       |                             ^
++    481|     expect(separators(line)).toHaveLength(0);
++    482|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
++AssertionError: expected [ null, 'part-m', null, 'part-l' ] to deeply equal [ 'part-m', null, 'part-l' ]
++
++- Expected
+++ Received
++
++  Array [
+++   null,
++    "part-m",
++    null,
++    "part-l",
++  ]
++
++ ❯ src/components/patterns/as-of-line.test.tsx:511:64
++    509|     const line = screen.getByTestId("as-of-line");
++    510|     const children = Array.from(line.children);
++    511|     expect(children.map((c) => c.getAttribute("data-testid"))).toEqual…
++       |                                                                ^
++    512|     expect(separators(line)).toHaveLength(1);
++    513|     expect(children[1]).toBe(separators(line)[0]);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 29 passed (33)
++   Start at  09:41:36
++   Duration  1.44s (transform 76ms, setup 37ms, collect 474ms, tests 170ms, environment 183ms, prepare 189ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_2.log
+new file mode 100644
+index 0000000..7f97970
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_2.log
+@@ -0,0 +1,79 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w1/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 3 failed) 169ms
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots 6ms
++     → expected 'Market closedprices current to 2026-1…' to be 'Market closed · prices current to 202…' // Object.is equality
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable 2ms
++     → expected [ <span …(1)></span> ] to have a length of 2 but got 1
++   × AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between 1ms
++     → expected [ 'part-m', 'part-l' ] to deeply equal [ 'part-m', null, 'part-l' ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
++AssertionError: expected 'Market closedprices current to 2026-1…' to be 'Market closed · prices current to 202…' // Object.is equality
++
++Expected: "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT"
++Received: "Market closedprices current to 2026-10-15 · checked 18:52:14 CDT"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:444:57
++    442|   it("reads as one line joined by middle dots", () => {
++    443|     renderGeneric([...PARTS]);
++    444|     expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
++       |                                                         ^
++    445|       "Market closed · prices current to 2026-10-15 · checked 18:52:14…
++    446|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
++AssertionError: expected [ <span …(1)></span> ] to have a length of 2 but got 1
++
++- Expected
+++ Received
++
++- 2
+++ 1
++
++ ❯ src/components/patterns/as-of-line.test.tsx:453:18
++    451|     renderGeneric([...PARTS]);
++    452|     const seps = separators(screen.getByTestId("as-of-line"));
++    453|     expect(seps).toHaveLength(2);
++       |                  ^
++    454|     for (const sep of seps) {
++    455|       expect(sep).toHaveClass("inline-block");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
++AssertionError: expected [ 'part-m', 'part-l' ] to deeply equal [ 'part-m', null, 'part-l' ]
++
++- Expected
+++ Received
++
++  Array [
++    "part-m",
++-   null,
++    "part-l",
++  ]
++
++ ❯ src/components/patterns/as-of-line.test.tsx:511:64
++    509|     const line = screen.getByTestId("as-of-line");
++    510|     const children = Array.from(line.children);
++    511|     expect(children.map((c) => c.getAttribute("data-testid"))).toEqual…
++       |                                                                ^
++    512|     expect(separators(line)).toHaveLength(1);
++    513|     expect(children[1]).toBe(separators(line)[0]);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 30 passed (33)
++   Start at  09:41:36
++   Duration  1.44s (transform 79ms, setup 35ms, collect 479ms, tests 169ms, environment 174ms, prepare 99ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_host-class.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_host-class.log
+new file mode 100644
+index 0000000..5611614
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_host-class.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w0/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 1 failed) 684ms
++   × AsOfLine generic form: element parts, host classes, non-empty parts > adds the host's classes and keeps the pattern's own and the test id 4ms
++     → expect(element).toHaveClass("min-h-7")
++
++Expected the element to have class:
++  min-h-7
++Received:
++  text-xs text-muted-foreground
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > adds the host's classes and keeps the pattern's own and the test id
++Error: expect(element).toHaveClass("min-h-7")
++
++Expected the element to have class:
++  min-h-7
++Received:
++  text-xs text-muted-foreground
++ ❯ src/components/patterns/as-of-line.test.tsx:519:18
++    517|     renderGeneric(["Market closed"], "min-h-7");
++    518|     const line = screen.getByTestId("as-of-line");
++    519|     expect(line).toHaveClass("min-h-7");
++       |                  ^
++    520|     expect(line).toHaveClass("text-xs");
++    521|     expect(line).toHaveClass("text-muted-foreground");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 32 passed (33)
++   Start at  09:41:38
++   Duration  2.33s (transform 197ms, setup 33ms, collect 929ms, tests 684ms, environment 188ms, prepare 144ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_padding.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_padding.log
+new file mode 100644
+index 0000000..a87b669
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_padding.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w3/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 1 failed) 166ms
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable 4ms
++     → expect(element).toHaveClass("px-2")
++
++Expected the element to have class:
++  px-2
++Received:
++  inline-block px-1
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
++Error: expect(element).toHaveClass("px-2")
++
++Expected the element to have class:
++  px-2
++Received:
++  inline-block px-1
++ ❯ src/components/patterns/as-of-line.test.tsx:456:19
++    454|     for (const sep of seps) {
++    455|       expect(sep).toHaveClass("inline-block");
++    456|       expect(sep).toHaveClass("px-2");
++       |                   ^
++    457|       expect(sep).not.toHaveAttribute("aria-hidden");
++    458|     }
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 32 passed (33)
++   Start at  09:41:36
++   Duration  1.44s (transform 76ms, setup 37ms, collect 480ms, tests 166ms, environment 182ms, prepare 180ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_reverse-parts.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_reverse-parts.log
+new file mode 100644
+index 0000000..6de6aac
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_reverse-parts.log
+@@ -0,0 +1,60 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w3/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 2 failed) 477ms
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots 5ms
++     → expected 'checked 18:52:14 CDT · prices current…' to be 'Market closed · prices current to 202…' // Object.is equality
++   × AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between 12ms
++     → expected [ 'part-l', null, 'part-m' ] to deeply equal [ 'part-m', null, 'part-l' ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
++AssertionError: expected 'checked 18:52:14 CDT · prices current…' to be 'Market closed · prices current to 202…' // Object.is equality
++
++Expected: "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT"
++Received: "checked 18:52:14 CDT · prices current to 2026-10-15 · Market closed"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:444:57
++    442|   it("reads as one line joined by middle dots", () => {
++    443|     renderGeneric([...PARTS]);
++    444|     expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
++       |                                                         ^
++    445|       "Market closed · prices current to 2026-10-15 · checked 18:52:14…
++    446|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
++AssertionError: expected [ 'part-l', null, 'part-m' ] to deeply equal [ 'part-m', null, 'part-l' ]
++
++- Expected
+++ Received
++
++  Array [
++-   "part-m",
++-   null,
++    "part-l",
+++   null,
+++   "part-m",
++  ]
++
++ ❯ src/components/patterns/as-of-line.test.tsx:511:64
++    509|     const line = screen.getByTestId("as-of-line");
++    510|     const children = Array.from(line.children);
++    511|     expect(children.map((c) => c.getAttribute("data-testid"))).toEqual…
++       |                                                                ^
++    512|     expect(separators(line)).toHaveLength(1);
++    513|     expect(children[1]).toBe(separators(line)[0]);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 31 passed (33)
++   Start at  09:41:38
++   Duration  2.19s (transform 224ms, setup 40ms, collect 835ms, tests 477ms, environment 191ms, prepare 98ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_separator-spaces.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_separator-spaces.log
+new file mode 100644
+index 0000000..29b195a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_separator-spaces.log
+@@ -0,0 +1,76 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-kcuy0d1y/w2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 3 failed) 166ms
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots 5ms
++     → expected 'Market closed prices current to 2026-…' to be 'Market closed · prices current to 202…' // Object.is equality
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable 3ms
++     → expected [] to have a length of 2 but got +0
++   × AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between 1ms
++     → expected [] to have a length of 1 but got +0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
++AssertionError: expected 'Market closed prices current to 2026-…' to be 'Market closed · prices current to 202…' // Object.is equality
++
++Expected: "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT"
++Received: "Market closed prices current to 2026-10-15 checked 18:52:14 CDT"
++
++ ❯ src/components/patterns/as-of-line.test.tsx:444:57
++    442|   it("reads as one line joined by middle dots", () => {
++    443|     renderGeneric([...PARTS]);
++    444|     expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
++       |                                                         ^
++    445|       "Market closed · prices current to 2026-10-15 · checked 18:52:14…
++    446|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
++AssertionError: expected [] to have a length of 2 but got +0
++
++- Expected
+++ Received
++
++- 2
+++ 0
++
++ ❯ src/components/patterns/as-of-line.test.tsx:453:18
++    451|     renderGeneric([...PARTS]);
++    452|     const seps = separators(screen.getByTestId("as-of-line"));
++    453|     expect(seps).toHaveLength(2);
++       |                  ^
++    454|     for (const sep of seps) {
++    455|       expect(sep).toHaveClass("inline-block");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/components/patterns/as-of-line.test.tsx:512:30
++    510|     const children = Array.from(line.children);
++    511|     expect(children.map((c) => c.getAttribute("data-testid"))).toEqual…
++    512|     expect(separators(line)).toHaveLength(1);
++       |                              ^
++    513|     expect(children[1]).toBe(separators(line)[0]);
++    514|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 30 passed (33)
++   Start at  09:41:36
++   Duration  1.44s (transform 88ms, setup 36ms, collect 479ms, tests 166ms, environment 175ms, prepare 28ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..05aa7af
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,130 @@
++{
++  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/components/patterns/as-of-line.test.tsx && npx tsc --noEmit",
++  "repo_head": "1ba1100559fbe17200604141d57cd33fa3d46ee0",
++  "tree_patch_sha256": "b72670c6c51edc7cbe0aec4f1d5e73120af1e0a32decf92d53f92ea0f6fd899f",
++  "mutants_sha256": "cd9d7881e020557e036f0da585915693a2763e232b93acac41fcf320deba85fd",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 6,
++  "started": "2026-11-14T15:41:28Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 7.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "de10b729626ba581e33707216b330eedc14789b43da6c6b2b4703eab3cd18aee"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 7.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "5545c0b3ba95d8365954b4a4bd39364be45802f3f303e65a4bc885075de7b237"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 7.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "098fcb96867b087c932de134fbe47010e6275fdb7833823cc4d319dd093e0a62"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 7.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "2d5d1e4017e7c0f6c13c8641ddc275bc74f37bb429c7aae4f546044baed7aa48"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:232:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 232,
++      "original": "            {index > 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
++      "mutated": "            {index >= 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_1.log",
++      "log_sha256": "47ae149df436772ccbc105a95402f711699d7429ff147a874ff9a3668cd14c75"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:232:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "line": 232,
++      "original": "            {index > 0 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
++      "mutated": "            {index > 1 ? <span className=\"inline-block px-2\">{SEPARATOR}</span> : null}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_232_off-by-one_2.log",
++      "log_sha256": "d06978b045aeec2bdb6a9cf514e07ad1bf943f0e592c456941bddb29a3237745"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:separator-spaces",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "const SEPARATOR = \" \u00b7 \";",
++      "new": "const SEPARATOR = \"   \";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_separator-spaces.log",
++      "log_sha256": "d8fcb49db4b3a9a0acfdaefd2bedb5aa08e3012b4b86768f6c076238157a94fb"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:padding",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "className=\"inline-block px-2\"",
++      "new": "className=\"inline-block px-1\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_padding.log",
++      "log_sha256": "a5ed4adc4c3843765ae86631ecb0d8a7b56d5784f15e37fe98fe1dd237ca1014"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:host-class",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "cn(\"text-xs text-muted-foreground\", props.className)",
++      "new": "cn(\"text-xs text-muted-foreground\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_host-class.log",
++      "log_sha256": "97a33c01bbd7c2abe7db8cb0de3f0ee63f362bd7707fa944c5dbeac6b0db8829"
++    },
++    {
++      "id": "web/src/components/patterns/as-of-line.tsx:manual:reverse-parts",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/components/patterns/as-of-line.tsx",
++      "old": "{props.parts.map(",
++      "new": "{[...props.parts].reverse().map(",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/mutation-cycle-1-results-logs/web_src_components_patterns_as-of-line.tsx_manual_reverse-parts.log",
++      "log_sha256": "39c2903c804cfee656308e93d2de67c4a4c74ab33bc13bbbf39452fde5e4ecd5"
++    }
++  ],
++  "finished": "2026-11-14T15:41:41Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-1-generic-form.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-1-generic-form.log
+new file mode 100644
+index 0000000..b62e0b8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S10-evidence/red-cycle-1-generic-form.log
+@@ -0,0 +1,476 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > holds every part in exactly one paragraph
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > contains no break, block or second paragraph
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > is a muted extra-small line
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > shows one part with no separator
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > adds the host's classes and keeps the pattern's own and the test id
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of undefined (reading 'runOutcome')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of undefined (reading 'runOutcome')
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:164:31)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <AsOfLine> component:
++
++    at AsOfLine (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/web/src/components/patterns/as-of-line.tsx:134:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ❯ src/components/patterns/as-of-line.test.tsx (33 tests | 8 failed) 162ms
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > holds every part in exactly one paragraph 7ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > contains no break, block or second paragraph 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > is a muted extra-small line 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > shows one part with no separator 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++   × AsOfLine generic form: element parts, host classes, non-empty parts > adds the host's classes and keeps the pattern's own and the test id 1ms
++     → Cannot read properties of undefined (reading 'runOutcome')
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > holds every part in exactly one paragraph
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > reads as one line joined by middle dots
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > gives each of the two separators the --space-2 padding and keeps the dot readable
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > contains no break, block or second paragraph
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > is a muted extra-small line
++ FAIL  src/components/patterns/as-of-line.test.tsx > TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1) > shows one part with no separator
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > keeps element parts as direct children in order with one separator between
++ FAIL  src/components/patterns/as-of-line.test.tsx > AsOfLine generic form: element parts, host classes, non-empty parts > adds the host's classes and keeps the pattern's own and the test id
++TypeError: Cannot read properties of undefined (reading 'runOutcome')
++ ❯ AsOfLine src/components/patterns/as-of-line.tsx:164:31
++    162|   const building = later?.state === "building";
++    163|   const buildingSince = later?.state === "building" ? formatTimestamp(…
++    164|   const outcome = OUTCOME[set.runOutcome];
++       |                               ^
++    165|   return (
++    166|     <p data-testid="as-of-line" className={`${LINE_HEIGHT} text-xs tex…
++ ❯ renderWithHooks ../node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../node_modules/react-dom/cjs/react-dom.development.js:26473:7
++ ❯ recoverFromConcurrentError ../node_modules/react-dom/cjs/react-dom.development.js:25889:20
++ ❯ performSyncWorkOnRoot ../node_modules/react-dom/cjs/react-dom.development.js:26135:20
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
++
++ Test Files  1 failed (1)
++      Tests  8 failed | 25 passed (33)
++   Start at  09:40:10
++   Duration  1.32s (transform 72ms, setup 55ms, collect 514ms, tests 162ms, environment 267ms, prepare 30ms)
++
+diff --git a/web/src/components/patterns/as-of-line.test.tsx b/web/src/components/patterns/as-of-line.test.tsx
+index a4c2d08..b824175 100644
+--- a/web/src/components/patterns/as-of-line.test.tsx
++++ b/web/src/components/patterns/as-of-line.test.tsx
+@@ -407,3 +407,125 @@ describe("as-of line details: badges, checked time, Earlier sets…, the one liv
+     expect(screen.getByText("2026-10-15 17:46 CDT")).toHaveClass("font-numeric");
+   });
+ });
++
++const PARTS = ["Market closed", "prices current to 2026-10-15", "checked 18:52:14 CDT"] as const;
++
++/** The separator elements of a generic line: its child spans whose trimmed text is the middle dot. */
++function separators(line: Element): HTMLElement[] {
++  return Array.from(line.children).filter(
++    (child): child is HTMLElement => child.tagName === "SPAN" && child.textContent?.trim() === "·",
++  );
++}
++
++function collapsed(element: Element): string {
++  return (element.textContent ?? "").replace(/\s+/g, " ").trim();
++}
++
++describe("TC-COMP-033: AsOfLine joins parts with a middle dot in one paragraph (DAC-E1-S10-1)", () => {
++  // Implements TC-COMP-033
++  it("holds every part in exactly one paragraph", () => {
++    const { container } = render(
++      <MemoryRouter>
++        <AsOfLine parts={[...PARTS] as [string, ...string[]]} />
++      </MemoryRouter>,
++    );
++    const paragraphs = container.querySelectorAll("p");
++    expect(paragraphs).toHaveLength(1);
++    for (const part of PARTS) {
++      expect(
++        within(paragraphs[0] as HTMLElement).getByText(new RegExp(part), { exact: false }),
++      ).toBeInTheDocument();
++    }
++  });
++
++  // Implements TC-COMP-033
++  it("reads as one line joined by middle dots", () => {
++    renderGeneric([...PARTS]);
++    expect(collapsed(screen.getByTestId("as-of-line"))).toBe(
++      "Market closed · prices current to 2026-10-15 · checked 18:52:14 CDT",
++    );
++  });
++
++  // Implements TC-COMP-033
++  it("gives each of the two separators the --space-2 padding and keeps the dot readable", () => {
++    renderGeneric([...PARTS]);
++    const seps = separators(screen.getByTestId("as-of-line"));
++    expect(seps).toHaveLength(2);
++    for (const sep of seps) {
++      expect(sep).toHaveClass("inline-block");
++      expect(sep).toHaveClass("px-2");
++      expect(sep).not.toHaveAttribute("aria-hidden");
++    }
++  });
++
++  // Implements TC-COMP-033
++  it("contains no break, block or second paragraph", () => {
++    renderGeneric([...PARTS]);
++    const line = screen.getByTestId("as-of-line");
++    expect(line.querySelector("br, div, p")).toBeNull();
++  });
++
++  // Implements TC-COMP-033
++  it("is a muted extra-small line", () => {
++    renderGeneric([...PARTS]);
++    const line = screen.getByTestId("as-of-line");
++    expect(line).toHaveClass("text-xs");
++    expect(line).toHaveClass("text-muted-foreground");
++  });
++
++  // Implements TC-COMP-033
++  it("shows one part with no separator", () => {
++    renderGeneric(["Market closed"]);
++    const line = screen.getByTestId("as-of-line");
++    expect(collapsed(line)).toBe("Market closed");
++    expect(separators(line)).toHaveLength(0);
++  });
++});
++
++/** The generic form's props, read off the component so no import is added to the delivered header. */
++type GenericProps = Extract<Parameters<typeof AsOfLine>[0], { parts: unknown }>;
++
++function renderGeneric(
++  parts: GenericProps["parts"] | GenericProps["parts"][number][],
++  className?: string,
++): ReturnType<typeof render> {
++  return render(
++    <MemoryRouter>
++      <AsOfLine parts={parts as GenericProps["parts"]} className={className} />
++    </MemoryRouter>,
++  );
++}
++
++describe("AsOfLine generic form: element parts, host classes, non-empty parts", () => {
++  it("keeps element parts as direct children in order with one separator between", () => {
++    renderGeneric([
++      <span key="m" data-testid="part-m">
++        Market closed
++      </span>,
++      <a key="l" href="/data" data-testid="part-l">
++        prices current to 2026-10-15
++      </a>,
++    ]);
++    const line = screen.getByTestId("as-of-line");
++    const children = Array.from(line.children);
++    expect(children.map((c) => c.getAttribute("data-testid"))).toEqual(["part-m", null, "part-l"]);
++    expect(separators(line)).toHaveLength(1);
++    expect(children[1]).toBe(separators(line)[0]);
++  });
++
++  it("adds the host's classes and keeps the pattern's own and the test id", () => {
++    renderGeneric(["Market closed"], "min-h-7");
++    const line = screen.getByTestId("as-of-line");
++    expect(line).toHaveClass("min-h-7");
++    expect(line).toHaveClass("text-xs");
++    expect(line).toHaveClass("text-muted-foreground");
++  });
++
++  it("refuses an empty parts list at the type level", () => {
++    const never = () => (
++      // @ts-expect-error parts must be non-empty
++      <AsOfLine parts={[]} />
++    );
++    expect(never).toBeTypeOf("function");
++  });
++});
+diff --git a/web/src/components/patterns/as-of-line.tsx b/web/src/components/patterns/as-of-line.tsx
+index 070af53..8c5ff1a 100644
+--- a/web/src/components/patterns/as-of-line.tsx
++++ b/web/src/components/patterns/as-of-line.tsx
+@@ -1,8 +1,9 @@
+-import type { JSX } from "react";
++import { Fragment, type JSX, type ReactNode } from "react";
+ import { Link } from "react-router-dom";
+ import type { CurrentSet, LaterSet, RunOutcome } from "../../api/classification-types";
+ import { RESULTS, SCORE_SET, SHELL_ROUTES } from "../../screens/research/copy";
+ import { formatTimestamp } from "../../screens/research/format";
++import { cn } from "../ui/utils";
+ import { StatusBadge, type StatusTier } from "./status-badge";
+ 
+ /**
+@@ -136,10 +137,10 @@ function LiveRegion({
+ }
+ 
+ /**
+- * The line, or `null` with no set (the never-populated body has no line), or
+- * its skeleton while the first read is pending (DEC-0154).
++ * The Research line, or `null` with no set (the never-populated body has no
++ * line), or its skeleton while the first read is pending (DEC-0154).
+  */
+-export function AsOfLine({
++function ResearchAsOfLine({
+   set,
+   later,
+   checkedAt,
+@@ -195,3 +196,45 @@ export function AsOfLine({
+     </p>
+   );
+ }
++
++/**
++ * The generic form's props (component design `ui-components` 2.1; DAC-E1-13;
++ * DEC-0315): the parts of one as-of line, at least one, and the host's own
++ * classes.
++ */
++export interface AsOfLinePartsProps {
++  parts: readonly [ReactNode, ...ReactNode[]];
++  className?: string;
++}
++
++/**
++ * The separator between two parts. The spaces sit inside an `inline-block`: they
++ * keep the word boundaries in the text a screen reader and `textContent` read,
++ * and an inline-block drops collapsible spaces at the start and end of its own
++ * line, so the visible gap is the `--space-2` padding alone.
++ */
++const SEPARATOR = " · ";
++
++/**
++ * The as-of line, one pattern for every surface (blueprint 4.8; AC-26;
++ * DAC-E1-13, DAC-E1-S10-1; DEC-0315). With `parts` it renders them in one `p`
++ * at `--text-xs` `--muted-foreground`, each part after the first preceded by
++ * the middle-dot separator with `--space-2` either side, so a screen reader
++ * reads one line. With the Research props it renders the Research line.
++ */
++export function AsOfLine(props: AsOfLineProps | AsOfLinePartsProps): JSX.Element | null {
++  if ("parts" in props) {
++    return (
++      <p data-testid="as-of-line" className={cn("text-xs text-muted-foreground", props.className)}>
++        {props.parts.map((part, index) => (
++          // biome-ignore lint/suspicious/noArrayIndexKey: parts are positional and never reorder.
++          <Fragment key={index}>
++            {index > 0 ? <span className="inline-block px-2">{SEPARATOR}</span> : null}
++            {part}
++          </Fragment>
++        ))}
++      </p>
++    );
++  }
++  return <ResearchAsOfLine {...props} />;
++}

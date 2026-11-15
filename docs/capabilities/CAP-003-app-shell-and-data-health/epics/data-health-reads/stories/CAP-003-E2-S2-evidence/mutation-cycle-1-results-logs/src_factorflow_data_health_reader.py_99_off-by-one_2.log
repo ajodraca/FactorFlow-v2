@@ -1,0 +1,17 @@
+F
+=================================== FAILURES ===================================
+_______________ test_data_problems_item_follows_the_stock_count ________________
+
+    def test_data_problems_item_follows_the_stock_count() -> None:
+        assert _items(problems=NONE_PROBLEMS) == ()
+>       assert _items(problems=Problems(1, ("AAA",), T1)) == (AttentionItem("data_problems", T1, None),)
+E       AssertionError: assert () == (AttentionIte...run_id=None),)
+E         
+E         Right contains one more item: AttentionItem(kind='data_problems', recorded_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=None)
+E         Use -v to get more diff
+
+tests/unit/test_data_health_items.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.33s

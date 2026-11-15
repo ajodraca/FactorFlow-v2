@@ -1,0 +1,3041 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutants-cycle-1.json
+new file mode 100644
+index 0000000..0005a45
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutants-cycle-1.json
+@@ -0,0 +1,259 @@
++{
++ "schema": 1,
++ "repo_head": "39b43c4353a6c0ec994b458b15ba625f184f2626",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "src/factorflow/data_health/reader.py:99:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 99,
++   "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
++   "mutated": "    if problems.stock_count > 0 and problems.newest_completed_at is None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:99:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 99,
++   "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
++   "mutated": "    if problems.stock_count >= 0 and problems.newest_completed_at is not None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:99:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 99,
++   "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
++   "mutated": "    if problems.stock_count > 1 and problems.newest_completed_at is not None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:101:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 101,
++   "original": "    if latest_terminal is not None and latest_terminal.state in (\"failed\", \"abandoned\"):",
++   "mutated": "    if latest_terminal is None and latest_terminal.state in (\"failed\", \"abandoned\"):"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:105:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 105,
++   "original": "    if not credential_present:",
++   "mutated": "    if credential_present:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:129:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 129,
++   "original": "    assert followed is not None  # an aggregate over a table always returns one row",
++   "mutated": "    assert followed is None  # an aggregate over a table always returns one row"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:130:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 130,
++   "original": "    assert prices is not None",
++   "mutated": "    assert prices is None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:131:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 131,
++   "original": "    assert problem_row is not None",
++   "mutated": "    assert problem_row is None"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:137:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 137,
++   "original": "    if download_row is not None:",
++   "mutated": "    if download_row is None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:145:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 145,
++   "original": "            Progress(done, named if named > 0 else None),",
++   "mutated": "            Progress(done, named if named >= 0 else None),"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:145:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 145,
++   "original": "            Progress(done, named if named > 0 else None),",
++   "mutated": "            Progress(done, named if named > 1 else None),"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:149:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 149,
++   "original": "    if terminal_row is not None:",
++   "mutated": "    if terminal_row is None:"
++  },
++  {
++   "id": "src/factorflow/data_health/reader.py:156:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 156,
++   "original": "        prices[0],",
++   "mutated": "        prices[1],"
++  },
++  {
++   "id": "manual:having-ge-3",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 94,
++   "old": "HAVING count(*) = 4",
++   "new": "HAVING count(*) >= 3"
++  },
++  {
++   "id": "manual:having-run-scope",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 92,
++   "old": "WHERE x.run_id = r.run_id",
++   "new": "WHERE true"
++  },
++  {
++   "id": "manual:download-asc",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 96,
++   "old": "ORDER BY r.requested_at DESC, r.run_id DESC",
++   "new": "ORDER BY r.requested_at ASC, r.run_id DESC"
++  },
++  {
++   "id": "manual:download-no-tiebreak",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 96,
++   "old": "ORDER BY r.requested_at DESC, r.run_id DESC",
++   "new": "ORDER BY r.requested_at DESC"
++  },
++  {
++   "id": "manual:terminal-by-requested",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 106,
++   "old": "ORDER BY ended_at DESC, run_id DESC",
++   "new": "ORDER BY requested_at DESC, run_id DESC"
++  },
++  {
++   "id": "manual:terminal-no-tiebreak",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 106,
++   "old": "ORDER BY ended_at DESC, run_id DESC",
++   "new": "ORDER BY ended_at DESC"
++  },
++  {
++   "id": "manual:terminal-no-abandoned",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 105,
++   "old": "'cancelled', 'abandoned')",
++   "new": "'cancelled')"
++  },
++  {
++   "id": "manual:terminal-any-state",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 105,
++   "old": "WHERE state IN ('succeeded', 'partial', 'failed', 'cancelled', 'abandoned')",
++   "new": "WHERE true"
++  },
++  {
++   "id": "manual:followed-all",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 64,
++   "old": " FROM instrument\n WHERE lifecycle = 'active'\n\"\"\"\n\n# Q2",
++   "new": " FROM instrument\n WHERE true\n\"\"\"\n\n# Q2"
++  },
++  {
++   "id": "manual:asof-all-instruments",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 73,
++   "old": "WHERE i.lifecycle = 'active'\n   AND c.data_type = 'prices'",
++   "new": "WHERE true\n   AND c.data_type = 'prices'"
++  },
++  {
++   "id": "manual:asof-any-type",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 74,
++   "old": "AND c.data_type = 'prices'",
++   "new": "AND true"
++  },
++  {
++   "id": "manual:asof-min",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/queries.py",
++   "line": 70,
++   "old": "SELECT max(c.covered_to)",
++   "new": "SELECT min(c.covered_to)"
++  },
++  {
++   "id": "manual:item-cancelled",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 101,
++   "old": "latest_terminal.state in (\"failed\", \"abandoned\")",
++   "new": "latest_terminal.state in (\"failed\", \"abandoned\", \"cancelled\")"
++  },
++  {
++   "id": "manual:credential-true",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 152,
++   "old": "present = credential_present()",
++   "new": "present = True"
++  },
++  {
++   "id": "manual:symbols-list",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "src/factorflow/data_health/reader.py",
++   "line": 134,
++   "old": "tuple(symbols)",
++   "new": "symbols"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 0000000..54e587e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-7o1yoohe/w0
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-7o1yoohe/w0
++Installed 43 packages in 95ms
++.....................................                                    [100%]
++37 passed in 4.52s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 0000000..5aba6b3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,7 @@
++Using CPython 3.12.14
++Creating virtual environment at: .venv
++   Building factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-7o1yoohe/w1
++      Built factorflow @ file:///private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-7o1yoohe/w1
++Installed 43 packages in 95ms
++.....................................                                    [100%]
++37 passed in 4.51s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-all-instruments.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-all-instruments.log
+new file mode 100644
+index 0000000..8e39e36
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-all-instruments.log
+@@ -0,0 +1,35 @@
++......................F
++=================================== FAILURES ===================================
++______ test_followed_count_and_prices_as_of_count_only_active_instruments ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49888 user=test database=test_7128e647a12f42ad8abdfc4289529b4d) at 0x1093eca10>
++
++    def test_followed_count_and_prices_as_of_count_only_active_instruments(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        ccc = _instrument(conn, "CCC")
++        rrr = _instrument(conn, "RRR", lifecycle="retired")
++        _segment(conn, aaa, "prices", date(2026, 1, 2), date(2026, 10, 20))
++        _segment(conn, aaa, "prices", date(2025, 1, 2), date(2025, 6, 30))
++        _segment(conn, bbb, "prices", date(2026, 3, 2), date(2026, 10, 23))
++        _segment(conn, ccc, "fundamentals", date(2026, 1, 2), date(2026, 11, 2))
++        _segment(conn, rrr, "prices", date(2026, 1, 2), date(2026, 10, 30))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.followed_count == 3
++>       assert attention.prices_as_of == date(2026, 10, 23)
++E       AssertionError: assert datetime.date(2026, 10, 30) == datetime.date(2026, 10, 23)
++E        +  where datetime.date(2026, 10, 30) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 20, 271979, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...ms(stock_count=0, symbols=(), newest_completed_at=None), latest_download=None, latest_terminal_download=None, items=()).prices_as_of
++E        +  and   datetime.date(2026, 10, 23) = date(2026, 10, 23)
++
++tests/integration/test_data_health_attention.py:492: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_followed_count_and_prices_as_of_count_only_active_instruments
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 22 passed in 3.70s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-any-type.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-any-type.log
+new file mode 100644
+index 0000000..caa4b16
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-any-type.log
+@@ -0,0 +1,35 @@
++......................F
++=================================== FAILURES ===================================
++______ test_followed_count_and_prices_as_of_count_only_active_instruments ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49934 user=test database=test_d84a6796b48f4edcb24114f1e1f607c3) at 0x10ca643b0>
++
++    def test_followed_count_and_prices_as_of_count_only_active_instruments(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        ccc = _instrument(conn, "CCC")
++        rrr = _instrument(conn, "RRR", lifecycle="retired")
++        _segment(conn, aaa, "prices", date(2026, 1, 2), date(2026, 10, 20))
++        _segment(conn, aaa, "prices", date(2025, 1, 2), date(2025, 6, 30))
++        _segment(conn, bbb, "prices", date(2026, 3, 2), date(2026, 10, 23))
++        _segment(conn, ccc, "fundamentals", date(2026, 1, 2), date(2026, 11, 2))
++        _segment(conn, rrr, "prices", date(2026, 1, 2), date(2026, 10, 30))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.followed_count == 3
++>       assert attention.prices_as_of == date(2026, 10, 23)
++E       AssertionError: assert datetime.date(2026, 11, 2) == datetime.date(2026, 10, 23)
++E        +  where datetime.date(2026, 11, 2) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 22, 989429, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...ms(stock_count=0, symbols=(), newest_completed_at=None), latest_download=None, latest_terminal_download=None, items=()).prices_as_of
++E        +  and   datetime.date(2026, 10, 23) = date(2026, 10, 23)
++
++tests/integration/test_data_health_attention.py:492: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_followed_count_and_prices_as_of_count_only_active_instruments
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 22 passed in 3.16s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-min.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-min.log
+new file mode 100644
+index 0000000..690db53
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-min.log
+@@ -0,0 +1,35 @@
++......................F
++=================================== FAILURES ===================================
++______ test_followed_count_and_prices_as_of_count_only_active_instruments ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49942 user=test database=test_d0b31dc302b2475f85d3c4eaa057b254) at 0x10b4dc3e0>
++
++    def test_followed_count_and_prices_as_of_count_only_active_instruments(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        ccc = _instrument(conn, "CCC")
++        rrr = _instrument(conn, "RRR", lifecycle="retired")
++        _segment(conn, aaa, "prices", date(2026, 1, 2), date(2026, 10, 20))
++        _segment(conn, aaa, "prices", date(2025, 1, 2), date(2025, 6, 30))
++        _segment(conn, bbb, "prices", date(2026, 3, 2), date(2026, 10, 23))
++        _segment(conn, ccc, "fundamentals", date(2026, 1, 2), date(2026, 11, 2))
++        _segment(conn, rrr, "prices", date(2026, 1, 2), date(2026, 10, 30))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.followed_count == 3
++>       assert attention.prices_as_of == date(2026, 10, 23)
++E       AssertionError: assert datetime.date(2025, 6, 30) == datetime.date(2026, 10, 23)
++E        +  where datetime.date(2025, 6, 30) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 24, 88088, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), foll...ms(stock_count=0, symbols=(), newest_completed_at=None), latest_download=None, latest_terminal_download=None, items=()).prices_as_of
++E        +  and   datetime.date(2026, 10, 23) = date(2026, 10, 23)
++
++tests/integration/test_data_health_attention.py:492: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_followed_count_and_prices_as_of_count_only_active_instruments
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 22 passed in 2.81s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_credential-true.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_credential-true.log
+new file mode 100644
+index 0000000..319fcca
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_credential-true.log
+@@ -0,0 +1,26 @@
++...................F
++=================================== FAILURES ===================================
++_____________ test_credential_missing_item_while_the_key_is_absent _____________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49991 user=test database=test_d75b853f3b2a4fad84d85fd1cca5aeef) at 0x10b776c00>
++monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b776b10>
++
++    def test_credential_missing_item_while_the_key_is_absent(
++        migrated_writer_connection: psycopg.Connection,
++        monkeypatch: pytest.MonkeyPatch,
++    ) -> None:
++        conn = migrated_writer_connection
++        monkeypatch.delenv(KEY, raising=False)
++    
++        absent = read_attention(conn)
++        conn.rollback()
++    
++>       assert absent.credential_present is False
++E       AssertionError: assert True is False
++E        +  where True = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 27, 532308, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...ms(stock_count=0, symbols=(), newest_completed_at=None), latest_download=None, latest_terminal_download=None, items=()).credential_present
++
++tests/integration/test_data_health_attention.py:338: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_credential_missing_item_while_the_key_is_absent
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 19 passed in 2.61s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-asc.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-asc.log
+new file mode 100644
+index 0000000..1f9d48b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-asc.log
+@@ -0,0 +1,34 @@
++.............F
++=================================== FAILURES ===================================
++_ test_progress_counts_complete_instruments_and_total_is_null_before_the_claim _
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49724 user=test database=test_edf2afff3bc641d082e1371646579553) at 0x10cf58dd0>
++
++    def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
++        # An earlier run holds all four results for all 50 instruments, so a count that is
++        # not restricted to the latest run would read 50.
++        r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
++        for iid in ids:
++            for data_type in DATA_TYPES:
++                _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
++        r1 = _run(conn, state="requested", requested_at=_t(2))
++        conn.commit()
++    
++        before = read_attention(conn)
++        conn.rollback()
++    
++        assert before.latest_download is not None
++>       assert before.latest_download.run_id == r1
++E       AssertionError: assert UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074') == UUID('c68ddb37-88f1-4a2d-80bd-98b98e354c67')
++E        +  where UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074') = LatestDownload(run_id=UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074'), state='succeeded', requested_at=datetime.datetime(...atetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=50, total=None)).run_id
++E        +    where LatestDownload(run_id=UUID('7b0aa3ea-2ff5-44df-b5d2-0a488102f074'), state='succeeded', requested_at=datetime.datetime(...atetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=50, total=None)) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 4, 574059, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), foll...ded_at=datetime.datetime(2026, 10, 20, 22, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), failure_reason=None), items=()).latest_download
++
++tests/integration/test_data_health_attention.py:192: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_progress_counts_complete_instruments_and_total_is_null_before_the_claim
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 2.24s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-no-tiebreak.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-no-tiebreak.log
+new file mode 100644
+index 0000000..63ccd02
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-no-tiebreak.log
+@@ -0,0 +1,33 @@
++................................F
++=================================== FAILURES ===================================
++__________ test_tie_on_requested_at_picks_the_run_health_picks[False] __________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49728 user=test database=test_44c7a4677d5d4268a8401a8dc71e1e5d) at 0x108c68f80>
++high_first = False
++
++    @pytest.mark.parametrize("high_first", [True, False])
++    def test_tie_on_requested_at_picks_the_run_health_picks(
++        migrated_writer_connection: psycopg.Connection, high_first: bool
++    ) -> None:
++        conn = migrated_writer_connection
++        for run_id, ended in (
++            ((HIGH, _t(3)), (LOW, _t(2))) if high_first else ((LOW, _t(2)), (HIGH, _t(3)))
++        ):
++            _run(conn, state="failed", requested_at=_t(1), ended_at=ended, run_id=run_id)
++        conn.commit()
++    
++        attention = read_attention(conn)
++        recent = get_most_recent_run(conn)
++        conn.rollback()
++    
++        assert attention.latest_download is not None
++>       assert attention.latest_download.run_id == HIGH
++E       AssertionError: assert UUID('00000000-0000-0000-0000-000000000001') == UUID('00000000-0000-0000-0000-000000000002')
++E        +  where UUID('00000000-0000-0000-0000-000000000001') = LatestDownload(run_id=UUID('00000000-0000-0000-0000-000000000001'), state='failed', requested_at=datetime.datetime(202...datetime.datetime(2026, 10, 20, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=0, total=None)).run_id
++E        +    where LatestDownload(run_id=UUID('00000000-0000-0000-0000-000000000001'), state='failed', requested_at=datetime.datetime(202...datetime.datetime(2026, 10, 20, 23, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=0, total=None)) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 8, 153894, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), foll...e(2026, 10, 21, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('00000000-0000-0000-0000-000000000002')),)).latest_download
++
++tests/integration/test_data_health_attention.py:545: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_tie_on_requested_at_picks_the_run_health_picks[False]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 32 passed in 4.98s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_followed-all.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_followed-all.log
+new file mode 100644
+index 0000000..f9d7f5b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_followed-all.log
+@@ -0,0 +1,33 @@
++......................F
++=================================== FAILURES ===================================
++______ test_followed_count_and_prices_as_of_count_only_active_instruments ______
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49880 user=test database=test_6beaf60d328a43fb98131ea1fd7e9a72) at 0x1098c4560>
++
++    def test_followed_count_and_prices_as_of_count_only_active_instruments(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        aaa = _instrument(conn, "AAA")
++        bbb = _instrument(conn, "BBB")
++        ccc = _instrument(conn, "CCC")
++        rrr = _instrument(conn, "RRR", lifecycle="retired")
++        _segment(conn, aaa, "prices", date(2026, 1, 2), date(2026, 10, 20))
++        _segment(conn, aaa, "prices", date(2025, 1, 2), date(2025, 6, 30))
++        _segment(conn, bbb, "prices", date(2026, 3, 2), date(2026, 10, 23))
++        _segment(conn, ccc, "fundamentals", date(2026, 1, 2), date(2026, 11, 2))
++        _segment(conn, rrr, "prices", date(2026, 1, 2), date(2026, 10, 30))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++>       assert attention.followed_count == 3
++E       AssertionError: assert 4 == 3
++E        +  where 4 = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 18, 938087, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...ms(stock_count=0, symbols=(), newest_completed_at=None), latest_download=None, latest_terminal_download=None, items=()).followed_count
++
++tests/integration/test_data_health_attention.py:491: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_followed_count_and_prices_as_of_count_only_active_instruments
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 22 passed in 3.74s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-ge-3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-ge-3.log
+new file mode 100644
+index 0000000..38343b4
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-ge-3.log
+@@ -0,0 +1,66 @@
++.............F
++=================================== FAILURES ===================================
++_ test_progress_counts_complete_instruments_and_total_is_null_before_the_claim _
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49708 user=test database=test_a9cda50a18084e5b97a81c090f1cc5e0) at 0x1094a0fe0>
++
++    def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
++        # An earlier run holds all four results for all 50 instruments, so a count that is
++        # not restricted to the latest run would read 50.
++        r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
++        for iid in ids:
++            for data_type in DATA_TYPES:
++                _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
++        r1 = _run(conn, state="requested", requested_at=_t(2))
++        conn.commit()
++    
++        before = read_attention(conn)
++        conn.rollback()
++    
++        assert before.latest_download is not None
++        assert before.latest_download.run_id == r1
++        assert before.latest_download.progress == Progress(0, None)
++    
++        with conn.cursor() as cur:
++            cur.execute(
++                "UPDATE acquisition_run SET state = 'running', started_at = %s, "
++                "claimed_by = 'test-runner', heartbeat_at = %s, instruments_named = 120 "
++                "WHERE run_id = %s",
++                (_t(3), _t(3), r1),
++            )
++        for n, iid in enumerate(ids[:40], start=1):
++            for data_type in DATA_TYPES:
++                outcome: Outcome = "written"
++                if n <= 10 and data_type == "prices":
++                    outcome = "failed"
++                elif 11 <= n <= 15 and data_type == "fundamentals":
++                    outcome = "skipped"
++                _record(conn, r1, iid, data_type, outcome, completed_at=_t(4))
++        for iid in ids[40:43]:  # three data types only: not complete
++            for data_type in DATA_TYPES[:3]:
++                _record(conn, r1, iid, data_type, "written", completed_at=_t(4))
++        conn.commit()
++    
++        after = read_attention(conn)
++        conn.rollback()
++    
++        assert after.latest_download is not None
++>       assert after.latest_download.progress == Progress(40, 120)
++E       AssertionError: assert Progress(done=43, total=120) == Progress(done=40, total=120)
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing attributes:
++E         ['done']
++E         
++E         Drill down into differing attribute done:
++E           done: 43 != 40
++
++tests/integration/test_data_health_attention.py:219: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_progress_counts_complete_instruments_and_total_is_null_before_the_claim
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 2.27s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-run-scope.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-run-scope.log
+new file mode 100644
+index 0000000..4d75336
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-run-scope.log
+@@ -0,0 +1,40 @@
++.............F
++=================================== FAILURES ===================================
++_ test_progress_counts_complete_instruments_and_total_is_null_before_the_claim _
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49712 user=test database=test_5cabf7bbef484a50801f7030d5e6d495) at 0x10cf9b500>
++
++    def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
++        # An earlier run holds all four results for all 50 instruments, so a count that is
++        # not restricted to the latest run would read 50.
++        r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
++        for iid in ids:
++            for data_type in DATA_TYPES:
++                _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
++        r1 = _run(conn, state="requested", requested_at=_t(2))
++        conn.commit()
++    
++        before = read_attention(conn)
++        conn.rollback()
++    
++        assert before.latest_download is not None
++        assert before.latest_download.run_id == r1
++>       assert before.latest_download.progress == Progress(0, None)
++E       AssertionError: assert Progress(done=50, total=None) == Progress(done=0, total=None)
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing attributes:
++E         ['done']
++E         
++E         Drill down into differing attribute done:
++E           done: 50 != 0
++
++tests/integration/test_data_health_attention.py:193: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_progress_counts_complete_instruments_and_total_is_null_before_the_claim
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 2.17s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_item-cancelled.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_item-cancelled.log
+new file mode 100644
+index 0000000..af719ed
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_item-cancelled.log
+@@ -0,0 +1,31 @@
++.....F
++=================================== FAILURES ===================================
++__ test_download_not_complete_only_for_failed_and_abandoned[cancelled-False] ___
++
++state = 'cancelled', item = False
++
++    @pytest.mark.parametrize(
++        ("state", "item"),
++        [
++            ("failed", True),
++            ("abandoned", True),
++            ("succeeded", False),
++            ("partial", False),
++            ("cancelled", False),
++        ],
++    )
++    def test_download_not_complete_only_for_failed_and_abandoned(state: str, item: bool) -> None:
++        terminal = LatestTerminalDownload(RUN, state, T2, "reason")
++    
++        expected = (AttentionItem("download_not_complete", T2, RUN),) if item else ()
++>       assert _items(latest_terminal=terminal) == expected
++E       AssertionError: assert (AttentionIte...000000007')),) == ()
++E         
++E         Left contains one more item: AttentionItem(kind='download_not_complete', recorded_at=datetime.datetime(2026, 10, 21, 21, 0, tzinfo=datetime.timezone.utc), run_id=UUID('00000000-0000-0000-0000-000000000007'))
++E         Use -v to get more diff
++
++tests/unit/test_data_health_items.py:66: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_items.py::test_download_not_complete_only_for_failed_and_abandoned[cancelled-False]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 5 passed in 0.35s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_symbols-list.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_symbols-list.log
+new file mode 100644
+index 0000000..9262ceb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_symbols-list.log
+@@ -0,0 +1,31 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49992 user=test database=test_3122cf8bc88d44f48e8da4b763a7cf18) at 0x108e5af90>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++        attention = read_attention(conn)
++    
++        assert attention.followed_count == 0
++        assert attention.prices_as_of is None
++        assert attention.latest_download is None
++        assert attention.latest_terminal_download is None
++>       assert attention.problems == Problems(0, (), None)
++E       AssertionError: assert Problems(stoc...leted_at=None) == Problems(stoc...leted_at=None)
++E         
++E         Omitting 2 identical items, use -vv to show
++E         Differing attributes:
++E         ['symbols']
++E         
++E         Drill down into differing attribute symbols:
++E           symbols: [] != ()
++E           Use -v to get more diff
++
++tests/integration/test_data_health_attention.py:160: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 2.08s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-any-state.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-any-state.log
+new file mode 100644
+index 0000000..58f969d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-any-state.log
+@@ -0,0 +1,45 @@
++...............F
++=================================== FAILURES ===================================
++_______ test_running_download_does_not_displace_the_latest_terminal_one ________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49864 user=test database=test_ed42d791aa1645c89a9006fd7f7e1f3e) at 0x10ce20bc0>
++
++    def test_running_download_does_not_displace_the_latest_terminal_one(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        a = _run(
++            conn,
++            state="partial",
++            requested_at=_t(1),
++            ended_at=_t(2),
++            failure_reason="provider rate limit",
++        )
++        b = _run(conn, state="running", requested_at=_t(3), started_at=_t(3), instruments_named=5)
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.latest_download == LatestDownload(
++            b, "running", _t(3), _t(3), None, Progress(0, 5)
++        )
++>       assert attention.latest_terminal_download == LatestTerminalDownload(
++            a, "partial", _t(2), "provider rate limit"
++        )
++E       AssertionError: assert LatestTermina...e_reason=None) == LatestTermina...r rate limit')
++E         
++E         Differing attributes:
++E         ['run_id', 'state', 'ended_at', 'failure_reason']
++E         
++E         Drill down into differing attribute run_id:
++E           run_id: UUID('fe221f10-2b29-49ed-8ce5-1611b34d464b') != UUID('e612b7cb-5d76-4675-89ba-f2d989db7748')
++E         ...
++E         
++E         ...Full output truncated (10 lines hidden), use '-vv' to show
++
++tests/integration/test_data_health_attention.py:262: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_running_download_does_not_displace_the_latest_terminal_one
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 15 passed in 2.52s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-by-requested.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-by-requested.log
+new file mode 100644
+index 0000000..d789c14
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-by-requested.log
+@@ -0,0 +1,46 @@
++.................F
++=================================== FAILURES ===================================
++____ test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at _____
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49753 user=test database=test_f9e1f33a7ecd4789a6dd3b3257a2f1d6) at 0x10cb225d0>
++
++    def test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        x = _run(
++            conn,
++            state="failed",
++            requested_at=_t(1),
++            started_at=_t(1),
++            ended_at=_t(5),
++            failure_reason="no credential",
++        )
++        # Cancelled while still requested: the two overlap without breaking the single-active index.
++        y = _run(conn, state="cancelled", requested_at=_t(2), ended_at=_t(3))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.latest_download is not None
++        assert attention.latest_download.run_id == y  # greatest requested_at
++>       assert attention.latest_terminal_download == LatestTerminalDownload(
++            x, "failed", _t(5), "no credential"
++        )
++E       AssertionError: assert LatestTermina...e_reason=None) == LatestTermina...o credential')
++E         
++E         Differing attributes:
++E         ['run_id', 'state', 'ended_at', 'failure_reason']
++E         
++E         Drill down into differing attribute run_id:
++E           run_id: UUID('5ce23233-abab-4998-b997-aeae473529e5') != UUID('545bfa46-a53c-4c43-9fce-bda91e9431ed')
++E         ...
++E         
++E         ...Full output truncated (10 lines hidden), use '-vv' to show
++
++tests/integration/test_data_health_attention.py:305: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 17 passed in 3.07s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-abandoned.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-abandoned.log
+new file mode 100644
+index 0000000..d224270
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-abandoned.log
+@@ -0,0 +1,27 @@
++................F
++=================================== FAILURES ===================================
++____________ test_abandoned_latest_terminal_download_gives_the_item ____________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49802 user=test database=test_a8a669d1808940d2adbbda8cd3216770) at 0x108b421e0>
++
++    def test_abandoned_latest_terminal_download_gives_the_item(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        c = _run(conn, state="abandoned", requested_at=_t(1), ended_at=_t(2))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++>       assert attention.latest_terminal_download == LatestTerminalDownload(c, "abandoned", _t(2), None)
++E       AssertionError: assert None == LatestTerminalDownload(run_id=UUID('1db1dab6-f1af-4ab2-a027-9518b30d75c9'), state='abandoned', ended_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), failure_reason=None)
++E        +  where None = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 12, 287573, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...nfo=zoneinfo.ZoneInfo(key='Etc/UTC')), progress=Progress(done=0, total=None)), latest_terminal_download=None, items=()).latest_terminal_download
++E        +  and   LatestTerminalDownload(run_id=UUID('1db1dab6-f1af-4ab2-a027-9518b30d75c9'), state='abandoned', ended_at=datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), failure_reason=None) = LatestTerminalDownload(UUID('1db1dab6-f1af-4ab2-a027-9518b30d75c9'), 'abandoned', datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc), None)
++E        +    where datetime.datetime(2026, 10, 20, 23, 0, tzinfo=datetime.timezone.utc) = _t(2)
++
++tests/integration/test_data_health_attention.py:279: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_abandoned_latest_terminal_download_gives_the_item
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 16 passed in 2.91s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-tiebreak.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-tiebreak.log
+new file mode 100644
+index 0000000..9036c90
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-tiebreak.log
+@@ -0,0 +1,31 @@
++..................................F
++=================================== FAILURES ===================================
++_____________ test_tie_on_ended_at_picks_the_greater_run_id[False] _____________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49798 user=test database=test_4e48d36b6a7a43f1b494a4f6cee7c497) at 0x10c8c37a0>
++high_first = False
++
++    @pytest.mark.parametrize("high_first", [True, False])
++    def test_tie_on_ended_at_picks_the_greater_run_id(
++        migrated_writer_connection: psycopg.Connection, high_first: bool
++    ) -> None:
++        conn = migrated_writer_connection
++        pairs = ((HIGH, _t(1)), (LOW, _t(2))) if high_first else ((LOW, _t(2)), (HIGH, _t(1)))
++        for run_id, requested in pairs:
++            _run(conn, state="failed", requested_at=requested, ended_at=_t(5), run_id=run_id)
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.latest_terminal_download is not None
++>       assert attention.latest_terminal_download.run_id == HIGH
++E       AssertionError: assert UUID('00000000-0000-0000-0000-000000000001') == UUID('00000000-0000-0000-0000-000000000002')
++E        +  where UUID('00000000-0000-0000-0000-000000000001') = LatestTerminalDownload(run_id=UUID('00000000-0000-0000-0000-000000000001'), state='failed', ended_at=datetime.datetime(2026, 10, 21, 2, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), failure_reason=None).run_id
++E        +    where LatestTerminalDownload(run_id=UUID('00000000-0000-0000-0000-000000000001'), state='failed', ended_at=datetime.datetime(2026, 10, 21, 2, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), failure_reason=None) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 14, 379123, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...e(2026, 10, 21, 2, 0, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), run_id=UUID('00000000-0000-0000-0000-000000000001')),)).latest_terminal_download
++
++tests/integration/test_data_health_attention.py:565: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_tie_on_ended_at_picks_the_greater_run_id[False]
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 34 passed in 5.31s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_101_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_101_negate-boolean_1.log
+new file mode 100644
+index 0000000..fecf847
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_101_negate-boolean_1.log
+@@ -0,0 +1,44 @@
++F
++=================================== FAILURES ===================================
++_______________ test_data_problems_item_follows_the_stock_count ________________
++
++    def test_data_problems_item_follows_the_stock_count() -> None:
++>       assert _items(problems=NONE_PROBLEMS) == ()
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++
++tests/unit/test_data_health_items.py:45: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++tests/unit/test_data_health_items.py:34: in _items
++    return reader._attention_items(
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++problems = Problems(stock_count=0, symbols=(), newest_completed_at=None)
++latest_terminal = None, credential_present = True
++checked_at = datetime.datetime(2026, 10, 24, 9, 0, tzinfo=datetime.timezone.utc)
++
++    def _attention_items(
++        *,
++        problems: Problems,
++        latest_terminal: LatestTerminalDownload | None,
++        credential_present: bool,
++        checked_at: datetime,
++    ) -> tuple[AttentionItem, ...]:
++        """The server items of DEC-0203, in component design 2.7's row order.
++    
++        Each exists exactly while its cause holds in the store. ``data_problems``
++        follows the stock count; ``download_not_complete`` only a latest terminal
++        download that is ``failed`` or ``abandoned``; ``credential_missing`` the
++        absence of the key. ``run_id`` is set for ``download_not_complete`` alone.
++        """
++        items: list[AttentionItem] = []
++        if problems.stock_count > 0 and problems.newest_completed_at is not None:
++            items.append(AttentionItem("data_problems", problems.newest_completed_at, None))
++>       if latest_terminal is None and latest_terminal.state in ("failed", "abandoned"):
++                                       ^^^^^^^^^^^^^^^^^^^^^
++E       AttributeError: 'NoneType' object has no attribute 'state'
++
++src/factorflow/data_health/reader.py:101: AttributeError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.34s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_105_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_105_negate-boolean_1.log
+new file mode 100644
+index 0000000..6c19d27
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_105_negate-boolean_1.log
+@@ -0,0 +1,16 @@
++F
++=================================== FAILURES ===================================
++_______________ test_data_problems_item_follows_the_stock_count ________________
++
++    def test_data_problems_item_follows_the_stock_count() -> None:
++>       assert _items(problems=NONE_PROBLEMS) == ()
++E       AssertionError: assert (AttentionIte...run_id=None),) == ()
++E         
++E         Left contains one more item: AttentionItem(kind='credential_missing', recorded_at=datetime.datetime(2026, 10, 24, 9, 0, tzinfo=datetime.timezone.utc), run_id=None)
++E         Use -v to get more diff
++
++tests/unit/test_data_health_items.py:45: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.36s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_129_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_129_negate-boolean_1.log
+new file mode 100644
+index 0000000..b5cef86
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_129_negate-boolean_1.log
+@@ -0,0 +1,45 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49650 user=test database=test_096d4c1bbe524daf94b086abb9627af1) at 0x10b220a40>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++>       attention = read_attention(conn)
++                    ^^^^^^^^^^^^^^^^^^^^
++
++tests/integration/test_data_health_attention.py:154: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=49650 user=test database=test_096d4c1bbe524daf94b086abb9627af1) at 0x10b220a40>
++
++    def read_attention(conn: psycopg.Connection) -> Attention:
++        """The attention aggregate: five statements, one result, nothing written.
++    
++        The latest download and the latest terminal download are two selections, so
++        a running download never displaces the last ended one. The caller owns the
++        transaction; ``checked_at`` is the first statement's ``now()``.
++        """
++        with conn.cursor() as cur:
++            cur.execute(FOLLOWED_COUNT_SQL)
++            followed = cur.fetchone()
++            cur.execute(PRICES_AS_OF_SQL)
++            prices = cur.fetchone()
++            cur.execute(PROBLEM_COUNT_SQL)
++            problem_row = cur.fetchone()
++            cur.execute(LATEST_DOWNLOAD_SQL)
++            download_row = cur.fetchone()
++            cur.execute(LATEST_TERMINAL_SQL)
++            terminal_row = cur.fetchone()
++    
++>       assert followed is None  # an aggregate over a table always returns one row
++               ^^^^^^^^^^^^^^^^
++E       AssertionError
++
++src/factorflow/data_health/reader.py:129: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 1.97s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_130_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_130_negate-boolean_1.log
+new file mode 100644
+index 0000000..e15f667
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_130_negate-boolean_1.log
+@@ -0,0 +1,46 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49656 user=test database=test_7af2b10f340f479aaa441d77728f0571) at 0x10d451490>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++>       attention = read_attention(conn)
++                    ^^^^^^^^^^^^^^^^^^^^
++
++tests/integration/test_data_health_attention.py:154: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=49656 user=test database=test_7af2b10f340f479aaa441d77728f0571) at 0x10d451490>
++
++    def read_attention(conn: psycopg.Connection) -> Attention:
++        """The attention aggregate: five statements, one result, nothing written.
++    
++        The latest download and the latest terminal download are two selections, so
++        a running download never displaces the last ended one. The caller owns the
++        transaction; ``checked_at`` is the first statement's ``now()``.
++        """
++        with conn.cursor() as cur:
++            cur.execute(FOLLOWED_COUNT_SQL)
++            followed = cur.fetchone()
++            cur.execute(PRICES_AS_OF_SQL)
++            prices = cur.fetchone()
++            cur.execute(PROBLEM_COUNT_SQL)
++            problem_row = cur.fetchone()
++            cur.execute(LATEST_DOWNLOAD_SQL)
++            download_row = cur.fetchone()
++            cur.execute(LATEST_TERMINAL_SQL)
++            terminal_row = cur.fetchone()
++    
++        assert followed is not None  # an aggregate over a table always returns one row
++>       assert prices is None
++               ^^^^^^^^^^^^^^
++E       AssertionError
++
++src/factorflow/data_health/reader.py:130: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 1.97s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_131_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_131_negate-boolean_1.log
+new file mode 100644
+index 0000000..b3d120c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_131_negate-boolean_1.log
+@@ -0,0 +1,47 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49664 user=test database=test_641dd4c977734f57a376928429d73808) at 0x10d600bc0>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++>       attention = read_attention(conn)
++                    ^^^^^^^^^^^^^^^^^^^^
++
++tests/integration/test_data_health_attention.py:154: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=49664 user=test database=test_641dd4c977734f57a376928429d73808) at 0x10d600bc0>
++
++    def read_attention(conn: psycopg.Connection) -> Attention:
++        """The attention aggregate: five statements, one result, nothing written.
++    
++        The latest download and the latest terminal download are two selections, so
++        a running download never displaces the last ended one. The caller owns the
++        transaction; ``checked_at`` is the first statement's ``now()``.
++        """
++        with conn.cursor() as cur:
++            cur.execute(FOLLOWED_COUNT_SQL)
++            followed = cur.fetchone()
++            cur.execute(PRICES_AS_OF_SQL)
++            prices = cur.fetchone()
++            cur.execute(PROBLEM_COUNT_SQL)
++            problem_row = cur.fetchone()
++            cur.execute(LATEST_DOWNLOAD_SQL)
++            download_row = cur.fetchone()
++            cur.execute(LATEST_TERMINAL_SQL)
++            terminal_row = cur.fetchone()
++    
++        assert followed is not None  # an aggregate over a table always returns one row
++        assert prices is not None
++>       assert problem_row is None
++               ^^^^^^^^^^^^^^^^^^^
++E       AssertionError
++
++src/factorflow/data_health/reader.py:131: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 2.27s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_137_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_137_negate-boolean_1.log
+new file mode 100644
+index 0000000..0a3f5c2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_137_negate-boolean_1.log
+@@ -0,0 +1,54 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49669 user=test database=test_51e36030a10f4145a8629289ab6e6233) at 0x10c47f950>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++>       attention = read_attention(conn)
++                    ^^^^^^^^^^^^^^^^^^^^
++
++tests/integration/test_data_health_attention.py:154: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=49669 user=test database=test_51e36030a10f4145a8629289ab6e6233) at 0x10c47f950>
++
++    def read_attention(conn: psycopg.Connection) -> Attention:
++        """The attention aggregate: five statements, one result, nothing written.
++    
++        The latest download and the latest terminal download are two selections, so
++        a running download never displaces the last ended one. The caller owns the
++        transaction; ``checked_at`` is the first statement's ``now()``.
++        """
++        with conn.cursor() as cur:
++            cur.execute(FOLLOWED_COUNT_SQL)
++            followed = cur.fetchone()
++            cur.execute(PRICES_AS_OF_SQL)
++            prices = cur.fetchone()
++            cur.execute(PROBLEM_COUNT_SQL)
++            problem_row = cur.fetchone()
++            cur.execute(LATEST_DOWNLOAD_SQL)
++            download_row = cur.fetchone()
++            cur.execute(LATEST_TERMINAL_SQL)
++            terminal_row = cur.fetchone()
++    
++        assert followed is not None  # an aggregate over a table always returns one row
++        assert prices is not None
++        assert problem_row is not None
++        followed_count, checked_at = followed
++        stock_count, symbols, newest_completed_at = problem_row
++        problems = Problems(stock_count, tuple(symbols), newest_completed_at)
++    
++        latest_download: LatestDownload | None = None
++        if download_row is None:
++>           run_id, state, requested_at, started_at, ended_at, named, done = download_row
++            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++E           TypeError: cannot unpack non-iterable NoneType object
++
++src/factorflow/data_health/reader.py:138: TypeError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 2.11s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_1.log
+new file mode 100644
+index 0000000..9368a7d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_1.log
+@@ -0,0 +1,40 @@
++.............F
++=================================== FAILURES ===================================
++_ test_progress_counts_complete_instruments_and_total_is_null_before_the_claim _
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49676 user=test database=test_4143fa7a4ee14a3c9e8e7bd9ff7b02fb) at 0x10b5d5160>
++
++    def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
++        # An earlier run holds all four results for all 50 instruments, so a count that is
++        # not restricted to the latest run would read 50.
++        r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
++        for iid in ids:
++            for data_type in DATA_TYPES:
++                _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
++        r1 = _run(conn, state="requested", requested_at=_t(2))
++        conn.commit()
++    
++        before = read_attention(conn)
++        conn.rollback()
++    
++        assert before.latest_download is not None
++        assert before.latest_download.run_id == r1
++>       assert before.latest_download.progress == Progress(0, None)
++E       AssertionError: assert Progress(done=0, total=0) == Progress(done=0, total=None)
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing attributes:
++E         ['total']
++E         
++E         Drill down into differing attribute total:
++E           total: 0 != None
++
++tests/integration/test_data_health_attention.py:193: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_progress_counts_complete_instruments_and_total_is_null_before_the_claim
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 13 passed in 5.48s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_2.log
+new file mode 100644
+index 0000000..49167af
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_2.log
+@@ -0,0 +1,35 @@
++..............F
++=================================== FAILURES ===================================
++_______________ test_a_single_named_instrument_is_a_total_of_one _______________
++
++migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49683 user=test database=test_e51053f3397a4983ad3927296f0d2b34) at 0x10acd8aa0>
++
++    def test_a_single_named_instrument_is_a_total_of_one(
++        migrated_writer_connection: psycopg.Connection,
++    ) -> None:
++        conn = migrated_writer_connection
++        iid = _instrument(conn, "AAA")
++        run = _run(conn, state="running", requested_at=_t(1), started_at=_t(1), instruments_named=1)
++        for data_type in DATA_TYPES:
++            _record(conn, run, iid, data_type, "written", completed_at=_t(2))
++        conn.commit()
++    
++        attention = read_attention(conn)
++        conn.rollback()
++    
++        assert attention.latest_download is not None
++>       assert attention.latest_download.progress == Progress(1, 1)
++E       AssertionError: assert Progress(done=1, total=None) == Progress(done=1, total=1)
++E         
++E         Omitting 1 identical items, use -vv to show
++E         Differing attributes:
++E         ['total']
++E         
++E         Drill down into differing attribute total:
++E           total: None != 1
++
++tests/integration/test_data_health_attention.py:238: AssertionError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_a_single_named_instrument_is_a_total_of_one
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 14 passed in 5.43s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_149_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_149_negate-boolean_1.log
+new file mode 100644
+index 0000000..9fd4792
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_149_negate-boolean_1.log
+@@ -0,0 +1,66 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49696 user=test database=test_653af99b3d0f4b8aaae17ddd5cb92821) at 0x108a8ab10>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++>       attention = read_attention(conn)
++                    ^^^^^^^^^^^^^^^^^^^^
++
++tests/integration/test_data_health_attention.py:154: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=49696 user=test database=test_653af99b3d0f4b8aaae17ddd5cb92821) at 0x108a8ab10>
++
++    def read_attention(conn: psycopg.Connection) -> Attention:
++        """The attention aggregate: five statements, one result, nothing written.
++    
++        The latest download and the latest terminal download are two selections, so
++        a running download never displaces the last ended one. The caller owns the
++        transaction; ``checked_at`` is the first statement's ``now()``.
++        """
++        with conn.cursor() as cur:
++            cur.execute(FOLLOWED_COUNT_SQL)
++            followed = cur.fetchone()
++            cur.execute(PRICES_AS_OF_SQL)
++            prices = cur.fetchone()
++            cur.execute(PROBLEM_COUNT_SQL)
++            problem_row = cur.fetchone()
++            cur.execute(LATEST_DOWNLOAD_SQL)
++            download_row = cur.fetchone()
++            cur.execute(LATEST_TERMINAL_SQL)
++            terminal_row = cur.fetchone()
++    
++        assert followed is not None  # an aggregate over a table always returns one row
++        assert prices is not None
++        assert problem_row is not None
++        followed_count, checked_at = followed
++        stock_count, symbols, newest_completed_at = problem_row
++        problems = Problems(stock_count, tuple(symbols), newest_completed_at)
++    
++        latest_download: LatestDownload | None = None
++        if download_row is not None:
++            run_id, state, requested_at, started_at, ended_at, named, done = download_row
++            latest_download = LatestDownload(
++                run_id,
++                state,
++                requested_at,
++                started_at,
++                ended_at,
++                Progress(done, named if named > 0 else None),
++            )
++    
++        latest_terminal: LatestTerminalDownload | None = None
++        if terminal_row is None:
++>           latest_terminal = LatestTerminalDownload(*terminal_row)
++                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++E           TypeError: factorflow.data_health.models.LatestTerminalDownload() argument after * must be an iterable, not NoneType
++
++src/factorflow/data_health/reader.py:150: TypeError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 2.20s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_156_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_156_off-by-one_1.log
+new file mode 100644
+index 0000000..0d1aab1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_156_off-by-one_1.log
+@@ -0,0 +1,83 @@
++............F
++=================================== FAILURES ===================================
++____________________ test_empty_store_reads_zero_and_nones _____________________
++
++migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49700 user=test database=test_03d40b5498ee4a2084648cc35a82b2b5) at 0x108ace900>
++
++    def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++        conn = migrated_writer_connection
++    
++>       attention = read_attention(conn)
++                    ^^^^^^^^^^^^^^^^^^^^
++
++tests/integration/test_data_health_attention.py:154: 
++_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
++
++conn = <psycopg.Connection [INTRANS] (host=localhost port=49700 user=test database=test_03d40b5498ee4a2084648cc35a82b2b5) at 0x108ace900>
++
++    def read_attention(conn: psycopg.Connection) -> Attention:
++        """The attention aggregate: five statements, one result, nothing written.
++    
++        The latest download and the latest terminal download are two selections, so
++        a running download never displaces the last ended one. The caller owns the
++        transaction; ``checked_at`` is the first statement's ``now()``.
++        """
++        with conn.cursor() as cur:
++            cur.execute(FOLLOWED_COUNT_SQL)
++            followed = cur.fetchone()
++            cur.execute(PRICES_AS_OF_SQL)
++            prices = cur.fetchone()
++            cur.execute(PROBLEM_COUNT_SQL)
++            problem_row = cur.fetchone()
++            cur.execute(LATEST_DOWNLOAD_SQL)
++            download_row = cur.fetchone()
++            cur.execute(LATEST_TERMINAL_SQL)
++            terminal_row = cur.fetchone()
++    
++        assert followed is not None  # an aggregate over a table always returns one row
++        assert prices is not None
++        assert problem_row is not None
++        followed_count, checked_at = followed
++        stock_count, symbols, newest_completed_at = problem_row
++        problems = Problems(stock_count, tuple(symbols), newest_completed_at)
++    
++        latest_download: LatestDownload | None = None
++        if download_row is not None:
++            run_id, state, requested_at, started_at, ended_at, named, done = download_row
++            latest_download = LatestDownload(
++                run_id,
++                state,
++                requested_at,
++                started_at,
++                ended_at,
++                Progress(done, named if named > 0 else None),
++            )
++    
++        latest_terminal: LatestTerminalDownload | None = None
++        if terminal_row is not None:
++            latest_terminal = LatestTerminalDownload(*terminal_row)
++    
++        present = credential_present()
++        return Attention(
++            checked_at,
++            followed_count,
++>           prices[1],
++            ^^^^^^^^^
++            present,
++            problems,
++            latest_download,
++            latest_terminal,
++            _attention_items(
++                problems=problems,
++                latest_terminal=latest_terminal,
++                credential_present=present,
++                checked_at=checked_at,
++            ),
++        )
++E       IndexError: tuple index out of range
++
++src/factorflow/data_health/reader.py:156: IndexError
++=========================== short test summary info ============================
++FAILED tests/integration/test_data_health_attention.py::test_empty_store_reads_zero_and_nones
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed, 12 passed in 2.04s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_negate-boolean_1.log
+new file mode 100644
+index 0000000..2263831
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_negate-boolean_1.log
+@@ -0,0 +1,17 @@
++F
++=================================== FAILURES ===================================
++_______________ test_data_problems_item_follows_the_stock_count ________________
++
++    def test_data_problems_item_follows_the_stock_count() -> None:
++        assert _items(problems=NONE_PROBLEMS) == ()
++>       assert _items(problems=Problems(1, ("AAA",), T1)) == (AttentionItem("data_problems", T1, None),)
++E       AssertionError: assert () == (AttentionIte...run_id=None),)
++E         
++E         Right contains one more item: AttentionItem(kind='data_problems', recorded_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=None)
++E         Use -v to get more diff
++
++tests/unit/test_data_health_items.py:46: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.34s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_1.log
+new file mode 100644
+index 0000000..b83dfd2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_1.log
+@@ -0,0 +1,19 @@
++F
++=================================== FAILURES ===================================
++_______________ test_data_problems_item_follows_the_stock_count ________________
++
++    def test_data_problems_item_follows_the_stock_count() -> None:
++        assert _items(problems=NONE_PROBLEMS) == ()
++        assert _items(problems=Problems(1, ("AAA",), T1)) == (AttentionItem("data_problems", T1, None),)
++        # The rule is the count, not the timestamp (DAC-E2-8).
++>       assert _items(problems=Problems(0, (), T1)) == ()
++E       AssertionError: assert (AttentionIte...run_id=None),) == ()
++E         
++E         Left contains one more item: AttentionItem(kind='data_problems', recorded_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=None)
++E         Use -v to get more diff
++
++tests/unit/test_data_health_items.py:48: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.34s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_2.log
+new file mode 100644
+index 0000000..712a73a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_2.log
+@@ -0,0 +1,17 @@
++F
++=================================== FAILURES ===================================
++_______________ test_data_problems_item_follows_the_stock_count ________________
++
++    def test_data_problems_item_follows_the_stock_count() -> None:
++        assert _items(problems=NONE_PROBLEMS) == ()
++>       assert _items(problems=Problems(1, ("AAA",), T1)) == (AttentionItem("data_problems", T1, None),)
++E       AssertionError: assert () == (AttentionIte...run_id=None),)
++E         
++E         Right contains one more item: AttentionItem(kind='data_problems', recorded_at=datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc), run_id=None)
++E         Use -v to get more diff
++
++tests/unit/test_data_health_items.py:46: AssertionError
++=========================== short test summary info ============================
++FAILED tests/unit/test_data_health_items.py::test_data_problems_item_follows_the_stock_count
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++1 failed in 0.33s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 0000000..659cba8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,450 @@
++{
++  "command": "uv run --all-extras pytest tests/unit/test_data_health_items.py tests/integration/test_data_health_attention.py -x -q",
++  "repo_head": "39b43c4353a6c0ec994b458b15ba625f184f2626",
++  "tree_patch_sha256": "55a97f4994bcc90bf530ecbe1e107089b9efdc8a31e31db1525cf4ccbf3d6200",
++  "mutants_sha256": "03a4c706155ffdb66ed4ed15d0cd812f30d36474e72a59876d0ea4e7d4a37745",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutants-cycle-1.json",
++  "jobs": 2,
++  "planned": 28,
++  "started": "2026-11-14T18:20:34Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "1946ed96d8e7216e148d1460492201a2587068ca612f2b057522d2785ac72d9c"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "76344efdfb91be848bf63ebde646fd0d84f8e52f8b893de35938f20458b8c963"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "src/factorflow/data_health/reader.py:99:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 99,
++      "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
++      "mutated": "    if problems.stock_count > 0 and problems.newest_completed_at is None:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_negate-boolean_1.log",
++      "log_sha256": "013665c94ea0d7d67b701ad1b8369163454e9b4717aa3abef96b21c3238a2fc3"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:99:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 99,
++      "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
++      "mutated": "    if problems.stock_count >= 0 and problems.newest_completed_at is not None:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_1.log",
++      "log_sha256": "628dfcda5204d4c5c3a68cc2f35364b56fe4b0eed20464613489e422fad9c3a9"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:99:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 99,
++      "original": "    if problems.stock_count > 0 and problems.newest_completed_at is not None:",
++      "mutated": "    if problems.stock_count > 1 and problems.newest_completed_at is not None:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_99_off-by-one_2.log",
++      "log_sha256": "9da1e1ca1f0371946a29e501d4a09e3b7235a7f8278e36f77d5203417ef11c58"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:101:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 101,
++      "original": "    if latest_terminal is not None and latest_terminal.state in (\"failed\", \"abandoned\"):",
++      "mutated": "    if latest_terminal is None and latest_terminal.state in (\"failed\", \"abandoned\"):",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_101_negate-boolean_1.log",
++      "log_sha256": "f11406a9e177997a4fdc9048f29d01b68a13b47cde62097983e587116f246457"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:105:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 105,
++      "original": "    if not credential_present:",
++      "mutated": "    if credential_present:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_105_negate-boolean_1.log",
++      "log_sha256": "dd8e6d10b97bbe5884f774882a7c6a163d7e3c2a919529ee1b95e00004f544b1"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:129:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 129,
++      "original": "    assert followed is not None  # an aggregate over a table always returns one row",
++      "mutated": "    assert followed is None  # an aggregate over a table always returns one row",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_129_negate-boolean_1.log",
++      "log_sha256": "1cf63913cecdb880db48a57bc7b92f611069b15f8ffd8f96e6b6d29b49c5ddf0"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:130:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 130,
++      "original": "    assert prices is not None",
++      "mutated": "    assert prices is None",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_130_negate-boolean_1.log",
++      "log_sha256": "6c7eb68603f435dfbbbb5da2b9d3168d068fb45a86b9bdfd91ea4ee6682fd2c9"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:131:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 131,
++      "original": "    assert problem_row is not None",
++      "mutated": "    assert problem_row is None",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_131_negate-boolean_1.log",
++      "log_sha256": "c9e44fa8d2791de51dd63a5afc2eee3252ecd8d2863423737f18dc8a3937c14e"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:137:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 137,
++      "original": "    if download_row is not None:",
++      "mutated": "    if download_row is None:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_137_negate-boolean_1.log",
++      "log_sha256": "de1c7ab9acb1658c62de18b86372dc5c8a86eacd540bdfcb1acab986d6c41107"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:145:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 145,
++      "original": "            Progress(done, named if named > 0 else None),",
++      "mutated": "            Progress(done, named if named >= 0 else None),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_1.log",
++      "log_sha256": "ab41fef34faf0bb5db233d86e43aafcc285fc80f18652c1aaaa77c485562035b"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:145:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 145,
++      "original": "            Progress(done, named if named > 0 else None),",
++      "mutated": "            Progress(done, named if named > 1 else None),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.6,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_145_off-by-one_2.log",
++      "log_sha256": "bcae2d3b4302141a164c3b10ba1233532171f27a89277887c3212f4c1f3041cf"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:149:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 149,
++      "original": "    if terminal_row is not None:",
++      "mutated": "    if terminal_row is None:",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_149_negate-boolean_1.log",
++      "log_sha256": "90ef71e5e96e93e2f80266c1ae3f89962baffe251e27877a5622789831035f9a"
++    },
++    {
++      "id": "src/factorflow/data_health/reader.py:156:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 156,
++      "original": "        prices[0],",
++      "mutated": "        prices[1],",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/src_factorflow_data_health_reader.py_156_off-by-one_1.log",
++      "log_sha256": "4bc54535f06fb07e0262e81352e14fa1e14cbfad09cf52f98686492ee79f1e35"
++    },
++    {
++      "id": "manual:having-ge-3",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 94,
++      "old": "HAVING count(*) = 4",
++      "new": "HAVING count(*) >= 3",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-ge-3.log",
++      "log_sha256": "274f2f331f9681d087d98c7487ddcc79e30674d2bd31bf14ea323eb4104d48ac"
++    },
++    {
++      "id": "manual:having-run-scope",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 92,
++      "old": "WHERE x.run_id = r.run_id",
++      "new": "WHERE true",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_having-run-scope.log",
++      "log_sha256": "6b407fd3fd4013d9a3210dffe61176ae0ae3874de75193e15445139f1d4f52ec"
++    },
++    {
++      "id": "manual:download-asc",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 96,
++      "old": "ORDER BY r.requested_at DESC, r.run_id DESC",
++      "new": "ORDER BY r.requested_at ASC, r.run_id DESC",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-asc.log",
++      "log_sha256": "6e251c9c8a1a0b2789392b2d701ac533f21b8a34bed80adcc55bae54a8ab7a1b"
++    },
++    {
++      "id": "manual:download-no-tiebreak",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 96,
++      "old": "ORDER BY r.requested_at DESC, r.run_id DESC",
++      "new": "ORDER BY r.requested_at DESC",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_download-no-tiebreak.log",
++      "log_sha256": "aa88a3e9dc0e59eb96090b4546e3ee14dc80cab1782e7f0927f2dfd3095ec542"
++    },
++    {
++      "id": "manual:terminal-by-requested",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 106,
++      "old": "ORDER BY ended_at DESC, run_id DESC",
++      "new": "ORDER BY requested_at DESC, run_id DESC",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-by-requested.log",
++      "log_sha256": "a33f575ab7307a154962e6dac4272668c377b8087f48bc5eb0ccb20e47281d5b"
++    },
++    {
++      "id": "manual:terminal-no-tiebreak",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 106,
++      "old": "ORDER BY ended_at DESC, run_id DESC",
++      "new": "ORDER BY ended_at DESC",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 6.2,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-tiebreak.log",
++      "log_sha256": "3687bf263b0ff26f8eee9a8d54772d50c41c9fabe15114d6c10b8e2cd418453c"
++    },
++    {
++      "id": "manual:terminal-no-abandoned",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 105,
++      "old": "'cancelled', 'abandoned')",
++      "new": "'cancelled')",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-no-abandoned.log",
++      "log_sha256": "26b27ca4d92935b91cdd50e4a52d135f874be96bc467325a9a9373b7aac91396"
++    },
++    {
++      "id": "manual:terminal-any-state",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 105,
++      "old": "WHERE state IN ('succeeded', 'partial', 'failed', 'cancelled', 'abandoned')",
++      "new": "WHERE true",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.4,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_terminal-any-state.log",
++      "log_sha256": "2ad210ae232245290ec20daf9d77515d78169b07b81806d801ddced814963793"
++    },
++    {
++      "id": "manual:followed-all",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 64,
++      "old": " FROM instrument\n WHERE lifecycle = 'active'\n\"\"\"\n\n# Q2",
++      "new": " FROM instrument\n WHERE true\n\"\"\"\n\n# Q2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.6,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_followed-all.log",
++      "log_sha256": "a9e5ea821e18eb1d631df07b56856e908b445d8046690f641c49565b11199c20"
++    },
++    {
++      "id": "manual:asof-all-instruments",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 73,
++      "old": "WHERE i.lifecycle = 'active'\n   AND c.data_type = 'prices'",
++      "new": "WHERE true\n   AND c.data_type = 'prices'",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.6,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-all-instruments.log",
++      "log_sha256": "18fafbf61b36cf0c29ac521c2fee9e2f939ebccae6d4bf64f4151403a22e9436"
++    },
++    {
++      "id": "manual:asof-any-type",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 74,
++      "old": "AND c.data_type = 'prices'",
++      "new": "AND true",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-any-type.log",
++      "log_sha256": "c43b5b3045ae211d7c9d6e7719433cf530f9f598a3275e8a588eee1bfbbf58c2"
++    },
++    {
++      "id": "manual:asof-min",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/queries.py",
++      "line": 70,
++      "old": "SELECT max(c.covered_to)",
++      "new": "SELECT min(c.covered_to)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_asof-min.log",
++      "log_sha256": "f3c45a9fc630bdcb70bcf9599743d12239c453552d6edeb2ffd5de5457817f8e"
++    },
++    {
++      "id": "manual:item-cancelled",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 101,
++      "old": "latest_terminal.state in (\"failed\", \"abandoned\")",
++      "new": "latest_terminal.state in (\"failed\", \"abandoned\", \"cancelled\")",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_item-cancelled.log",
++      "log_sha256": "1b64b20457f1674c95d1e10686d03a1da315ae914570b964f51c37657a08639b"
++    },
++    {
++      "id": "manual:credential-true",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 152,
++      "old": "present = credential_present()",
++      "new": "present = True",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_credential-true.log",
++      "log_sha256": "8d20d57223d7594f66f7f80c2e109b1f11c9b9ef9fb31383dff0f183794e1794"
++    },
++    {
++      "id": "manual:symbols-list",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "src/factorflow/data_health/reader.py",
++      "line": 134,
++      "old": "tuple(symbols)",
++      "new": "symbols",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/mutation-cycle-1-results-logs/manual_symbols-list.log",
++      "log_sha256": "a9ef0c0c4a9d79f6f7a8fc47e4e1db6385c163c3b0655fcce5be96ab1e2ecca8"
++    }
++  ],
++  "finished": "2026-11-14T18:21:28Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/red-cycle-1-attention.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/red-cycle-1-attention.log
+new file mode 100644
+index 0000000..56fb329
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health-reads/stories/CAP-003-E2-S2-evidence/red-cycle-1-attention.log
+@@ -0,0 +1,17 @@
++
++==================================== ERRORS ====================================
++_______ ERROR collecting tests/integration/test_data_health_attention.py _______
++ImportError while importing test module '/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/tests/integration/test_data_health_attention.py'.
++Hint: make sure your test modules/packages have valid Python names.
++Traceback:
++/Users/alvarodejodra/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
++    return _bootstrap._gcd_import(name[level:], package, level)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++tests/integration/test_data_health_attention.py:27: in <module>
++    from factorflow.data_health.reader import read_attention
++E   ImportError: cannot import name 'read_attention' from 'factorflow.data_health.reader' (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-67252b/repos/factorflow-v2/FactorFlow-v2/src/factorflow/data_health/reader.py)
++=========================== short test summary info ============================
++ERROR tests/integration/test_data_health_attention.py
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
++1 error in 0.40s
+diff --git a/src/factorflow/data_health/__init__.py b/src/factorflow/data_health/__init__.py
+index a94bbd1..21c857a 100644
+--- a/src/factorflow/data_health/__init__.py
++++ b/src/factorflow/data_health/__init__.py
+@@ -1,9 +1,9 @@
+ """The data-health-reader: read-only reads behind the shell and the Data health screen.
+ 
+-Component design 2.1. Only ``read_problems`` exists so far; ``read_attention``
+-and ``read_data_health`` follow in later stories.
++Component design 2.1. ``read_problems`` and ``read_attention`` exist so far;
++``read_data_health`` follows in a later story.
+ """
+ 
+-from factorflow.data_health.reader import read_problems
++from factorflow.data_health.reader import read_attention, read_problems
+ 
+-__all__ = ["read_problems"]
++__all__ = ["read_attention", "read_problems"]
+diff --git a/src/factorflow/data_health/queries.py b/src/factorflow/data_health/queries.py
+index 01b05a7..b47d703 100644
+--- a/src/factorflow/data_health/queries.py
++++ b/src/factorflow/data_health/queries.py
+@@ -3,6 +3,10 @@
+ Every constant is one read and is executed with bound parameters only. The
+ column aliases of ``PROBLEM_COUNT_SQL`` are the ``Problems`` field names, so a
+ caller maps the row field for field.
++
++The four attention statements (component design 2.3 and 2.6, DEC-0213 f) take no
++parameters: each is one aggregate read, so the attention read is a fixed set of
++statements whatever the roster size (AC-28).
+ """
+ 
+ from typing import Final
+@@ -51,3 +55,54 @@ SELECT count(DISTINCT i.instrument_id)                                  AS stock
+  WHERE i.lifecycle = 'active'
+    AND s.last_outcome IN ('failed', 'not_found')
+ """
++
++# Q1 of the attention read: the followed count, and `now()` as `checked_at`
++# (the caller's transaction start, component design 2.3).
++FOLLOWED_COUNT_SQL: Final[str] = """
++SELECT count(*) AS followed_count,
++       now()    AS checked_at
++  FROM instrument
++ WHERE lifecycle = 'active'
++"""
++
++# Q2: the latest prices coverage end over active instruments (system design 4.2).
++PRICES_AS_OF_SQL: Final[str] = """
++SELECT max(c.covered_to) AS prices_as_of
++  FROM coverage_segment c
++  JOIN instrument i ON i.instrument_id = c.instrument_id
++ WHERE i.lifecycle = 'active'
++   AND c.data_type = 'prices'
++"""
++
++# Q4: the run with the greatest `requested_at`, with its progress in the same
++# statement. `done` is the instruments holding a result for all four data types
++# in that run; `(run_id, instrument_id, data_type)` is the primary key, so
++# `count(*) = 4` counts data types. The order repeats the Runs list's, so this
++# run and the health strip's most recent run are the same run.
++LATEST_DOWNLOAD_SQL: Final[str] = """
++SELECT r.run_id,
++       r.state,
++       r.requested_at,
++       r.started_at,
++       r.ended_at,
++       r.instruments_named,
++       (SELECT count(*)
++          FROM (SELECT x.instrument_id
++                  FROM run_instrument_result x
++                 WHERE x.run_id = r.run_id
++                 GROUP BY x.instrument_id
++                HAVING count(*) = 4) AS complete) AS done
++  FROM acquisition_run r
++ ORDER BY r.requested_at DESC, r.run_id DESC
++ LIMIT 1
++"""
++
++# Q5: the run with the greatest `ended_at` among the five terminal states, with
++# its recorded state and failure reason. A running download never displaces it.
++LATEST_TERMINAL_SQL: Final[str] = """
++SELECT run_id, state, ended_at, failure_reason
++  FROM acquisition_run
++ WHERE state IN ('succeeded', 'partial', 'failed', 'cancelled', 'abandoned')
++ ORDER BY ended_at DESC, run_id DESC
++ LIMIT 1
++"""
+diff --git a/src/factorflow/data_health/reader.py b/src/factorflow/data_health/reader.py
+index 247cfc8..b1f3457 100644
+--- a/src/factorflow/data_health/reader.py
++++ b/src/factorflow/data_health/reader.py
+@@ -5,14 +5,40 @@ DAC-E2-1 to DAC-E2-3, DAC-E2-S1-1 to DAC-E2-S1-4). Precondition, owned by the
+ caller (``data-health-api`` validates both before the call): ``cursor`` is a
+ normalised valid symbol or ``None`` and ``limit`` is 1 to 500. The transaction
+ belongs to the caller's ``with pool.connection()`` block: nothing here ends it.
++
++``read_attention`` is the cheap aggregate the shell polls (component design 2.3,
++2.6, 2.7 and 5; AC-7, AC-8, AC-9, AC-12, AC-21; DAC-E2-6 to DAC-E2-8,
++DAC-E2-S2-1 to DAC-E2-S2-4): five fixed statements on the caller's connection, no
++call to ``coverage-service``, and the same caller-owned transaction. Its items
++carry no tier and no copy (DEC-0200); the three kinds are DEC-0203's, and the
++progress ``total`` is ``None`` while ``instruments_named`` is 0 (DEC-0213 f).
+ """
+ 
++from datetime import datetime
+ from typing import Literal, cast
+ 
+ import psycopg
+ 
+-from factorflow.data_health.models import Failure, ProblemPage, ProblemRow
+-from factorflow.data_health.queries import PROBLEM_ROWS_SQL
++from factorflow.config.settings import credential_present
++from factorflow.data_health.models import (
++    Attention,
++    AttentionItem,
++    Failure,
++    LatestDownload,
++    LatestTerminalDownload,
++    ProblemPage,
++    ProblemRow,
++    Problems,
++    Progress,
++)
++from factorflow.data_health.queries import (
++    FOLLOWED_COUNT_SQL,
++    LATEST_DOWNLOAD_SQL,
++    LATEST_TERMINAL_SQL,
++    PRICES_AS_OF_SQL,
++    PROBLEM_COUNT_SQL,
++    PROBLEM_ROWS_SQL,
++)
+ 
+ 
+ def read_problems(conn: psycopg.Connection, *, cursor: str | None, limit: int) -> ProblemPage:
+@@ -53,3 +79,89 @@ def read_problems(conn: psycopg.Connection, *, cursor: str | None, limit: int) -
+         ),
+         next_cursor=next_cursor,
+     )
++
++
++def _attention_items(
++    *,
++    problems: Problems,
++    latest_terminal: LatestTerminalDownload | None,
++    credential_present: bool,
++    checked_at: datetime,
++) -> tuple[AttentionItem, ...]:
++    """The server items of DEC-0203, in component design 2.7's row order.
++
++    Each exists exactly while its cause holds in the store. ``data_problems``
++    follows the stock count; ``download_not_complete`` only a latest terminal
++    download that is ``failed`` or ``abandoned``; ``credential_missing`` the
++    absence of the key. ``run_id`` is set for ``download_not_complete`` alone.
++    """
++    items: list[AttentionItem] = []
++    if problems.stock_count > 0 and problems.newest_completed_at is not None:
++        items.append(AttentionItem("data_problems", problems.newest_completed_at, None))
++    if latest_terminal is not None and latest_terminal.state in ("failed", "abandoned"):
++        items.append(
++            AttentionItem("download_not_complete", latest_terminal.ended_at, latest_terminal.run_id)
++        )
++    if not credential_present:
++        items.append(AttentionItem("credential_missing", checked_at, None))
++    return tuple(items)
++
++
++def read_attention(conn: psycopg.Connection) -> Attention:
++    """The attention aggregate: five statements, one result, nothing written.
++
++    The latest download and the latest terminal download are two selections, so
++    a running download never displaces the last ended one. The caller owns the
++    transaction; ``checked_at`` is the first statement's ``now()``.
++    """
++    with conn.cursor() as cur:
++        cur.execute(FOLLOWED_COUNT_SQL)
++        followed = cur.fetchone()
++        cur.execute(PRICES_AS_OF_SQL)
++        prices = cur.fetchone()
++        cur.execute(PROBLEM_COUNT_SQL)
++        problem_row = cur.fetchone()
++        cur.execute(LATEST_DOWNLOAD_SQL)
++        download_row = cur.fetchone()
++        cur.execute(LATEST_TERMINAL_SQL)
++        terminal_row = cur.fetchone()
++
++    assert followed is not None  # an aggregate over a table always returns one row
++    assert prices is not None
++    assert problem_row is not None
++    followed_count, checked_at = followed
++    stock_count, symbols, newest_completed_at = problem_row
++    problems = Problems(stock_count, tuple(symbols), newest_completed_at)
++
++    latest_download: LatestDownload | None = None
++    if download_row is not None:
++        run_id, state, requested_at, started_at, ended_at, named, done = download_row
++        latest_download = LatestDownload(
++            run_id,
++            state,
++            requested_at,
++            started_at,
++            ended_at,
++            Progress(done, named if named > 0 else None),
++        )
++
++    latest_terminal: LatestTerminalDownload | None = None
++    if terminal_row is not None:
++        latest_terminal = LatestTerminalDownload(*terminal_row)
++
++    present = credential_present()
++    return Attention(
++        checked_at,
++        followed_count,
++        prices[0],
++        present,
++        problems,
++        latest_download,
++        latest_terminal,
++        _attention_items(
++            problems=problems,
++            latest_terminal=latest_terminal,
++            credential_present=present,
++            checked_at=checked_at,
++        ),
++    )
+diff --git a/tests/integration/test_data_health_attention.py b/tests/integration/test_data_health_attention.py
+new file mode 100644
+index 0000000..583aded
+--- /dev/null
++++ b/tests/integration/test_data_health_attention.py
+@@ -0,0 +1,670 @@
++"""Integration tests: read_attention, the cheap aggregate the shell polls (CAP-003-E2-S2).
++
++- TC-COMP-043 (DAC-E2-S2-1, AC-8, AC-21): the empty store and ``checked_at`` from the statement.
++- TC-COMP-036 (DAC-E2-6, AC-7): progress ``done`` counts instruments with all four results;
++  ``total`` is ``instruments_named``, null while 0.
++- TC-COMP-044 (DAC-E2-7, DAC-E2-8, DAC-E2-S2-2, AC-9, AC-12, AC-21): latest versus latest
++  terminal download, and the abandoned item.
++- TC-COMP-045 (DAC-E2-S2-3, DAC-E2-8, AC-4): the ``credential_missing`` item.
++- TC-COMP-046 (DAC-E2-S2-4, AC-28): a fixed set of five aggregate statements at any roster size.
++"""
++
++from datetime import UTC, date, datetime, timedelta
++from typing import Any, Literal
++from uuid import UUID
++
++import psycopg
++import pytest
++
++from factorflow.data_health import queries
++from factorflow.data_health.models import (
++    AttentionItem,
++    LatestDownload,
++    LatestTerminalDownload,
++    Problems,
++    Progress,
++)
++from factorflow.data_health.reader import read_attention
++from factorflow.runs.queries import get_most_recent_run
++
++pytestmark = pytest.mark.postgres
++
++SENTINEL = "sk-attention-sentinel-0123456789"
++KEY = "FACTORFLOW_MASSIVE_API_KEY"
++T0 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
++DATA_TYPES = ("reference", "prices", "fundamentals", "corporate_actions")
++TERMINAL = ("succeeded", "partial", "failed", "cancelled", "abandoned")
++
++Outcome = Literal["written", "unchanged", "not_found", "failed", "skipped"]
++
++
++def _t(n: int) -> datetime:
++    """The n-th hour after T0: fixed aware instants, never ``now()``."""
++    return T0 + timedelta(hours=n)
++
++
++@pytest.fixture(autouse=True)
++def _credential_set(monkeypatch: pytest.MonkeyPatch) -> None:
++    """No result depends on the developer's environment; a test removes the key itself."""
++    monkeypatch.setenv(KEY, SENTINEL)
++
++
++def _instrument(conn: psycopg.Connection, symbol: str, *, lifecycle: str = "active") -> int:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO instrument (symbol, lifecycle, retired_at) "
++            "VALUES (%s, %s, CASE WHEN %s = 'retired' THEN now() END) RETURNING instrument_id",
++            (symbol, lifecycle, lifecycle),
++        )
++        row = cur.fetchone()
++        assert row is not None
++        return int(row[0])
++
++
++def _run(
++    conn: psycopg.Connection,
++    *,
++    state: str,
++    requested_at: datetime,
++    started_at: datetime | None = None,
++    ended_at: datetime | None = None,
++    instruments_named: int = 0,
++    failure_reason: str | None = None,
++    run_id: UUID | None = None,
++) -> UUID:
++    active = state in ("running", "cancelling")
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO acquisition_run (run_id, state, requested_at, started_at, ended_at, "
++            "history_depth_years, instruments_named, failure_reason, claimed_by, heartbeat_at) "
++            "VALUES (COALESCE(%s, gen_random_uuid()), %s, %s, %s, %s, 1, %s, %s, %s, %s) "
++            "RETURNING run_id",
++            (
++                run_id,
++                state,
++                requested_at,
++                started_at,
++                ended_at,
++                instruments_named,
++                failure_reason,
++                "test-runner" if active else None,
++                requested_at if active else None,
++            ),
++        )
++        row = cur.fetchone()
++        assert row is not None
++        return UUID(str(row[0]))
++
++
++def _record(
++    conn: psycopg.Connection,
++    run_id: UUID,
++    instrument_id: int,
++    data_type: str,
++    outcome: Outcome,
++    *,
++    completed_at: datetime,
++    reason: str | None = None,
++) -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO run_instrument_result "
++            "(run_id, instrument_id, data_type, outcome, reason, completed_at) "
++            "VALUES (%s, %s, %s, %s, %s, %s)",
++            (run_id, instrument_id, data_type, outcome, reason, completed_at),
++        )
++        if outcome == "skipped":
++            return  # a skipped result leaves acquisition_state untouched
++        stored = "written" if outcome == "unchanged" else outcome
++        cur.execute(
++            "INSERT INTO acquisition_state "
++            "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
++            "VALUES (%s, %s, %s, %s, %s) "
++            "ON CONFLICT (instrument_id, data_type) DO UPDATE SET "
++            "last_acquired_at = EXCLUDED.last_acquired_at, "
++            "last_run_id = EXCLUDED.last_run_id, last_outcome = EXCLUDED.last_outcome",
++            (instrument_id, data_type, completed_at, run_id, stored),
++        )
++
++
++def _segment(
++    conn: psycopg.Connection,
++    instrument_id: int,
++    data_type: str,
++    covered_from: date,
++    covered_to: date,
++) -> None:
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
++            "VALUES (%s, %s, %s, %s)",
++            (instrument_id, data_type, covered_from, covered_to),
++        )
++
++
++def _by_kind(items: tuple[AttentionItem, ...]) -> dict[str, AttentionItem]:
++    """Items keyed by kind: the design fixes no order (RD 2.7)."""
++    return {item.kind: item for item in items}
++
++
++# Implements TC-COMP-043
++def test_empty_store_reads_zero_and_nones(migrated_writer_connection: psycopg.Connection) -> None:
++    conn = migrated_writer_connection
++
++    attention = read_attention(conn)
++
++    assert attention.followed_count == 0
++    assert attention.prices_as_of is None
++    assert attention.latest_download is None
++    assert attention.latest_terminal_download is None
++    assert attention.problems == Problems(0, (), None)
++    assert attention.items == ()
++    assert attention.credential_present is True
++    # checked_at is the statement's now(): the transaction start, still open here.
++    assert attention.checked_at.tzinfo is not None
++    with conn.cursor() as cur:
++        cur.execute("SELECT now()")
++        row = cur.fetchone()
++    assert row is not None
++    assert row[0] == attention.checked_at
++    conn.rollback()
++
++
++# Implements TC-COMP-036
++def test_progress_counts_complete_instruments_and_total_is_null_before_the_claim(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    ids = [_instrument(conn, f"P{n:03d}") for n in range(1, 51)]
++    # An earlier run holds all four results for all 50 instruments, so a count that is
++    # not restricted to the latest run would read 50.
++    r0 = _run(conn, state="succeeded", requested_at=_t(0), ended_at=_t(1))
++    for iid in ids:
++        for data_type in DATA_TYPES:
++            _record(conn, r0, iid, data_type, "written", completed_at=_t(1))
++    r1 = _run(conn, state="requested", requested_at=_t(2))
++    conn.commit()
++
++    before = read_attention(conn)
++    conn.rollback()
++
++    assert before.latest_download is not None
++    assert before.latest_download.run_id == r1
++    assert before.latest_download.progress == Progress(0, None)
++
++    with conn.cursor() as cur:
++        cur.execute(
++            "UPDATE acquisition_run SET state = 'running', started_at = %s, "
++            "claimed_by = 'test-runner', heartbeat_at = %s, instruments_named = 120 "
++            "WHERE run_id = %s",
++            (_t(3), _t(3), r1),
++        )
++    for n, iid in enumerate(ids[:40], start=1):
++        for data_type in DATA_TYPES:
++            outcome: Outcome = "written"
++            if n <= 10 and data_type == "prices":
++                outcome = "failed"
++            elif 11 <= n <= 15 and data_type == "fundamentals":
++                outcome = "skipped"
++            _record(conn, r1, iid, data_type, outcome, completed_at=_t(4))
++    for iid in ids[40:43]:  # three data types only: not complete
++        for data_type in DATA_TYPES[:3]:
++            _record(conn, r1, iid, data_type, "written", completed_at=_t(4))
++    conn.commit()
++
++    after = read_attention(conn)
++    conn.rollback()
++
++    assert after.latest_download is not None
++    assert after.latest_download.progress == Progress(40, 120)
++    assert after.latest_download.progress.done <= (after.latest_download.progress.total or 0)
++
++
++# Implements TC-COMP-036
++def test_a_single_named_instrument_is_a_total_of_one(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    iid = _instrument(conn, "AAA")
++    run = _run(conn, state="running", requested_at=_t(1), started_at=_t(1), instruments_named=1)
++    for data_type in DATA_TYPES:
++        _record(conn, run, iid, data_type, "written", completed_at=_t(2))
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_download is not None
++    assert attention.latest_download.progress == Progress(1, 1)
++
++
++# Implements TC-COMP-044
++def test_running_download_does_not_displace_the_latest_terminal_one(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    a = _run(
++        conn,
++        state="partial",
++        requested_at=_t(1),
++        ended_at=_t(2),
++        failure_reason="provider rate limit",
++    )
++    b = _run(conn, state="running", requested_at=_t(3), started_at=_t(3), instruments_named=5)
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_download == LatestDownload(
++        b, "running", _t(3), _t(3), None, Progress(0, 5)
++    )
++    assert attention.latest_terminal_download == LatestTerminalDownload(
++        a, "partial", _t(2), "provider rate limit"
++    )
++    assert attention.items == ()  # a partial latest terminal download gives no item
++
++
++# Implements TC-COMP-044
++def test_abandoned_latest_terminal_download_gives_the_item(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    c = _run(conn, state="abandoned", requested_at=_t(1), ended_at=_t(2))
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_terminal_download == LatestTerminalDownload(c, "abandoned", _t(2), None)
++    assert attention.items == (AttentionItem("download_not_complete", _t(2), c),)
++
++
++# Implements TC-COMP-044
++def test_latest_terminal_download_is_ordered_by_ended_at_not_requested_at(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    x = _run(
++        conn,
++        state="failed",
++        requested_at=_t(1),
++        started_at=_t(1),
++        ended_at=_t(5),
++        failure_reason="no credential",
++    )
++    # Cancelled while still requested: the two overlap without breaking the single-active index.
++    y = _run(conn, state="cancelled", requested_at=_t(2), ended_at=_t(3))
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_download is not None
++    assert attention.latest_download.run_id == y  # greatest requested_at
++    assert attention.latest_terminal_download == LatestTerminalDownload(
++        x, "failed", _t(5), "no credential"
++    )
++    assert attention.items == (AttentionItem("download_not_complete", _t(5), x),)
++
++
++# Implements TC-COMP-044
++def test_a_store_whose_only_run_is_cancelled_has_no_item(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    _run(conn, state="cancelled", requested_at=_t(1), ended_at=_t(2))
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_terminal_download is not None
++    assert attention.latest_terminal_download.state == "cancelled"
++    assert attention.items == ()
++
++
++# Implements TC-COMP-045
++def test_credential_missing_item_while_the_key_is_absent(
++    migrated_writer_connection: psycopg.Connection,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    conn = migrated_writer_connection
++    monkeypatch.delenv(KEY, raising=False)
++
++    absent = read_attention(conn)
++    conn.rollback()
++
++    assert absent.credential_present is False
++    assert absent.items == (AttentionItem("credential_missing", absent.checked_at, None),)
++
++    monkeypatch.setenv(KEY, SENTINEL)
++    present = read_attention(conn)
++    conn.rollback()
++
++    assert present.credential_present is True
++    assert present.items == ()
++    assert SENTINEL not in repr(present)
++
++
++class _CountingCursor:
++    def __init__(self, cursor: Any, statements: list[str]) -> None:
++        self._cursor = cursor
++        self._statements = statements
++
++    def __enter__(self) -> "_CountingCursor":
++        return self
++
++    def __exit__(self, *exc: object) -> None:
++        self._cursor.close()
++
++    def execute(self, query: str, params: Any = None) -> "_CountingCursor":
++        self._statements.append(query)
++        self._cursor.execute(query, params)
++        return self
++
++    def __getattr__(self, name: str) -> Any:
++        return getattr(self._cursor, name)
++
++
++class _CountingConnection:
++    """Delegates to a real connection and records every statement executed through it."""
++
++    def __init__(self, conn: psycopg.Connection) -> None:
++        self._conn = conn
++        self.statements: list[str] = []
++
++    def cursor(self) -> _CountingCursor:
++        return _CountingCursor(self._conn.cursor(), self.statements)
++
++
++FIVE = [
++    queries.FOLLOWED_COUNT_SQL,
++    queries.PRICES_AS_OF_SQL,
++    queries.PROBLEM_COUNT_SQL,
++    queries.LATEST_DOWNLOAD_SQL,
++    queries.LATEST_TERMINAL_SQL,
++]
++
++
++def _assert_the_five_constants(counting: _CountingConnection) -> None:
++    assert counting.statements == FIVE
++    assert all(s is c for s, c in zip(counting.statements, FIVE, strict=True))
++
++
++# Implements TC-COMP-046
++def test_five_fixed_statements_on_a_small_store(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    a = _instrument(conn, "AAA")
++    _instrument(conn, "BBB")
++    _instrument(conn, "CCC")
++    run = _run(conn, state="running", requested_at=_t(1), started_at=_t(1), instruments_named=3)
++    _record(conn, run, a, "prices", "failed", completed_at=_t(2), reason="[unavailable] x")
++    for data_type in DATA_TYPES:
++        if data_type != "prices":
++            _record(conn, run, a, data_type, "written", completed_at=_t(2))
++    conn.commit()
++    counting = _CountingConnection(conn)
++
++    attention = read_attention(counting)  # type: ignore[arg-type]
++    conn.rollback()
++
++    _assert_the_five_constants(counting)
++    assert attention.followed_count == 3
++    assert attention.problems.stock_count == 1
++
++
++# Implements TC-COMP-046
++def test_the_same_five_statements_at_3000_instruments(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO instrument (symbol, lifecycle) "
++            "SELECT 'S' || lpad(n::text, 4, '0'), 'active' FROM generate_series(1, 3000) AS n"
++        )
++        cur.execute(
++            "INSERT INTO coverage_segment (instrument_id, data_type, covered_from, covered_to) "
++            "SELECT instrument_id, 'prices', '2026-01-02', '2026-10-23' FROM instrument"
++        )
++    run = _run(conn, state="running", requested_at=_t(1), started_at=_t(1), instruments_named=3000)
++    with conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO run_instrument_result "
++            "(run_id, instrument_id, data_type, outcome, reason, completed_at) "
++            "SELECT %s, i.instrument_id, d.data_type, "
++            "       CASE WHEN d.data_type = 'prices' AND i.symbol <= 'S0300' "
++            "            THEN 'failed' ELSE 'written' END, "
++            "       CASE WHEN d.data_type = 'prices' AND i.symbol <= 'S0300' "
++            "            THEN '[unavailable] x' END, "
++            "       %s "
++            "  FROM instrument i "
++            " CROSS JOIN (VALUES ('reference'), ('prices'), ('fundamentals'), "
++            "                    ('corporate_actions')) AS d (data_type) "
++            " WHERE i.symbol <= 'S1500'",
++            (run, _t(2)),
++        )
++        cur.execute(
++            "INSERT INTO acquisition_state "
++            "(instrument_id, data_type, last_acquired_at, last_run_id, last_outcome) "
++            "SELECT instrument_id, data_type, completed_at, run_id, outcome "
++            "  FROM run_instrument_result WHERE run_id = %s",
++            (run,),
++        )
++    conn.commit()
++    counting = _CountingConnection(conn)
++
++    attention = read_attention(counting)  # type: ignore[arg-type]
++    conn.rollback()
++
++    _assert_the_five_constants(counting)
++    assert attention.followed_count == 3000
++    assert attention.prices_as_of == date(2026, 10, 23)
++    assert attention.problems.stock_count == 300
++    assert attention.problems.symbols == ("S0001", "S0002", "S0003")
++    assert attention.latest_download is not None
++    assert attention.latest_download.progress == Progress(1500, 3000)
++
++
++# Implements TC-COMP-043
++def test_followed_count_and_prices_as_of_count_only_active_instruments(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    aaa = _instrument(conn, "AAA")
++    bbb = _instrument(conn, "BBB")
++    ccc = _instrument(conn, "CCC")
++    rrr = _instrument(conn, "RRR", lifecycle="retired")
++    _segment(conn, aaa, "prices", date(2026, 1, 2), date(2026, 10, 20))
++    _segment(conn, aaa, "prices", date(2025, 1, 2), date(2025, 6, 30))
++    _segment(conn, bbb, "prices", date(2026, 3, 2), date(2026, 10, 23))
++    _segment(conn, ccc, "fundamentals", date(2026, 1, 2), date(2026, 11, 2))
++    _segment(conn, rrr, "prices", date(2026, 1, 2), date(2026, 10, 30))
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.followed_count == 3
++    assert attention.prices_as_of == date(2026, 10, 23)
++
++
++def _state_run(state: str) -> dict[str, Any]:
++    if state == "requested":
++        return {"requested_at": _t(1)}
++    if state in ("running", "cancelling"):
++        return {"requested_at": _t(1), "started_at": _t(1)}
++    return {"requested_at": _t(1), "started_at": _t(1), "ended_at": _t(2)}
++
++
++# Implements TC-COMP-044
++@pytest.mark.parametrize("state", [*("requested", "running", "cancelling"), *TERMINAL])
++def test_run_states_are_returned_as_recorded(
++    migrated_writer_connection: psycopg.Connection, state: str
++) -> None:
++    conn = migrated_writer_connection
++    _run(conn, state=state, **_state_run(state))
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_download is not None
++    assert attention.latest_download.state == state
++    if state in TERMINAL:
++        assert attention.latest_terminal_download is not None
++        assert attention.latest_terminal_download.state == state
++    else:
++        assert attention.latest_terminal_download is None
++
++
++LOW = UUID(int=1)
++HIGH = UUID(int=2)
++
++
++# Implements TC-COMP-044
++@pytest.mark.parametrize("high_first", [True, False])
++def test_tie_on_requested_at_picks_the_run_health_picks(
++    migrated_writer_connection: psycopg.Connection, high_first: bool
++) -> None:
++    conn = migrated_writer_connection
++    for run_id, ended in (
++        ((HIGH, _t(3)), (LOW, _t(2))) if high_first else ((LOW, _t(2)), (HIGH, _t(3)))
++    ):
++        _run(conn, state="failed", requested_at=_t(1), ended_at=ended, run_id=run_id)
++    conn.commit()
++
++    attention = read_attention(conn)
++    recent = get_most_recent_run(conn)
++    conn.rollback()
++
++    assert attention.latest_download is not None
++    assert attention.latest_download.run_id == HIGH
++    assert recent is not None
++    assert attention.latest_download.run_id == recent.run_id
++
++
++# Implements TC-COMP-044
++@pytest.mark.parametrize("high_first", [True, False])
++def test_tie_on_ended_at_picks_the_greater_run_id(
++    migrated_writer_connection: psycopg.Connection, high_first: bool
++) -> None:
++    conn = migrated_writer_connection
++    pairs = ((HIGH, _t(1)), (LOW, _t(2))) if high_first else ((LOW, _t(2)), (HIGH, _t(1)))
++    for run_id, requested in pairs:
++        _run(conn, state="failed", requested_at=requested, ended_at=_t(5), run_id=run_id)
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.latest_terminal_download is not None
++    assert attention.latest_terminal_download.run_id == HIGH
++
++
++_TABLES = (
++    ("instrument", "instrument_id"),
++    ("acquisition_run", "run_id"),
++    ("acquisition_state", "instrument_id, data_type"),
++    ("run_instrument_result", "run_id, instrument_id, data_type"),
++)
++
++
++def _snapshot(conn: psycopg.Connection) -> list[list[tuple[object, ...]]]:
++    out: list[list[tuple[object, ...]]] = []
++    with conn.cursor() as cur:
++        for table, order in _TABLES:
++            cur.execute(f"SELECT * FROM {table} ORDER BY {order}")  # noqa: S608
++            out.append(cur.fetchall())
++    conn.commit()
++    return out
++
++
++# Implements TC-COMP-044
++# Implements TC-COMP-045
++def test_items_exist_exactly_while_their_cause_holds(
++    migrated_writer_connection: psycopg.Connection,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    conn = migrated_writer_connection
++    aaa = _instrument(conn, "AAA")
++    f = _run(
++        conn,
++        state="failed",
++        requested_at=_t(3),
++        ended_at=_t(5),
++        failure_reason="provider unavailable",
++    )
++    _record(conn, f, aaa, "prices", "failed", completed_at=_t(4), reason="[unavailable] x")
++    conn.commit()
++
++    # (1) both causes hold, and reading records nothing.
++    before = _snapshot(conn)
++    first = read_attention(conn)
++    conn.rollback()
++    read_attention(conn)
++    conn.rollback()
++    assert _snapshot(conn) == before
++    items = _by_kind(first.items)
++    assert len(first.items) == 2
++    assert items["data_problems"] == AttentionItem("data_problems", _t(4), None)
++    assert items["download_not_complete"] == AttentionItem("download_not_complete", _t(5), f)
++
++    # (2) a running download is not a later ended one: both items stay.
++    h = _run(conn, state="running", requested_at=_t(6), started_at=_t(6))
++    conn.commit()
++    second = read_attention(conn)
++    conn.rollback()
++    assert {i.kind for i in second.items} == {"data_problems", "download_not_complete"}
++
++    # (3) the download ends succeeded after writing the stock's prices: the causes are gone.
++    _record(conn, h, aaa, "prices", "written", completed_at=_t(7))
++    with conn.cursor() as cur:
++        cur.execute(
++            "UPDATE acquisition_run SET state = 'succeeded', ended_at = %s, "
++            "claimed_by = NULL, heartbeat_at = NULL WHERE run_id = %s",
++            (_t(8), h),
++        )
++    conn.commit()
++    third = read_attention(conn)
++    conn.rollback()
++    assert third.items == ()
++    assert third.problems.stock_count == 0
++
++    # (4) the key goes: only the credential item.
++    monkeypatch.delenv(KEY, raising=False)
++    fourth = read_attention(conn)
++    conn.rollback()
++    assert fourth.items == (AttentionItem("credential_missing", fourth.checked_at, None),)
++
++
++# Implements TC-COMP-043
++def test_problem_block_is_mapped_field_for_field(
++    migrated_writer_connection: psycopg.Connection,
++) -> None:
++    conn = migrated_writer_connection
++    run = _run(conn, state="partial", requested_at=_t(0), ended_at=_t(9))
++    for n, (symbol, outcome) in enumerate(
++        (("AAA", "failed"), ("BBB", "not_found"), ("CCC", "failed"), ("DDD", "not_found")), start=1
++    ):
++        _record(
++            conn,
++            run,
++            _instrument(conn, symbol),
++            "prices",
++            outcome,  # type: ignore[arg-type]
++            completed_at=_t(n),
++            reason="[unavailable] x",
++        )
++    retired = _instrument(conn, "ABR", lifecycle="retired")
++    _record(conn, run, retired, "prices", "failed", completed_at=_t(5), reason="[unavailable] x")
++    conn.commit()
++
++    attention = read_attention(conn)
++    conn.rollback()
++
++    assert attention.problems == Problems(4, ("AAA", "BBB", "CCC"), _t(4))
++    assert type(attention.problems.symbols) is tuple
+diff --git a/tests/unit/test_data_health_items.py b/tests/unit/test_data_health_items.py
+new file mode 100644
+index 0000000..e916b6e
+--- /dev/null
++++ b/tests/unit/test_data_health_items.py
+@@ -0,0 +1,118 @@
++"""Unit tests: the attention item rules and the credential guard (CAP-003-E2-S2).
++
++- TC-COMP-044 (edge), TC-COMP-045 (both outcomes): ``_attention_items`` is a pure
++  function of the problem block, the latest terminal download and the credential
++  presence (DAC-E2-8, DAC-E2-S2-2, DAC-E2-S2-3, AC-9). Items carry no tier and no copy.
++- TC-COMP-045 step 2 (DAC-E2-S2-3, AC-4, AGT-PROHIB-001): the reader calls the delivered
++  ``credential_present()`` and never reads the key's value.
++"""
++
++from datetime import UTC, datetime
++from pathlib import Path
++from uuid import UUID
++
++import pytest
++
++import factorflow.config.settings as settings
++from factorflow.data_health import queries, reader
++from factorflow.data_health.models import AttentionItem, LatestTerminalDownload, Problems
++
++T1 = datetime(2026, 10, 20, 21, 0, tzinfo=UTC)
++T2 = datetime(2026, 10, 21, 21, 0, tzinfo=UTC)
++CHECKED = datetime(2026, 10, 24, 9, 0, tzinfo=UTC)
++RUN = UUID(int=7)
++
++NONE_PROBLEMS = Problems(0, (), None)
++
++
++def _items(
++    *,
++    problems: Problems = NONE_PROBLEMS,
++    latest_terminal: LatestTerminalDownload | None = None,
++    credential_present: bool = True,
++) -> tuple[AttentionItem, ...]:
++    return reader._attention_items(
++        problems=problems,
++        latest_terminal=latest_terminal,
++        credential_present=credential_present,
++        checked_at=CHECKED,
++    )
++
++
++# Implements TC-COMP-044
++# Implements TC-COMP-045
++def test_data_problems_item_follows_the_stock_count() -> None:
++    assert _items(problems=NONE_PROBLEMS) == ()
++    assert _items(problems=Problems(1, ("AAA",), T1)) == (AttentionItem("data_problems", T1, None),)
++    # The rule is the count, not the timestamp (DAC-E2-8).
++    assert _items(problems=Problems(0, (), T1)) == ()
++
++
++# Implements TC-COMP-044
++@pytest.mark.parametrize(
++    ("state", "item"),
++    [
++        ("failed", True),
++        ("abandoned", True),
++        ("succeeded", False),
++        ("partial", False),
++        ("cancelled", False),
++    ],
++)
++def test_download_not_complete_only_for_failed_and_abandoned(state: str, item: bool) -> None:
++    terminal = LatestTerminalDownload(RUN, state, T2, "reason")
++
++    expected = (AttentionItem("download_not_complete", T2, RUN),) if item else ()
++    assert _items(latest_terminal=terminal) == expected
++
++
++# Implements TC-COMP-044
++def test_no_terminal_download_gives_no_download_item() -> None:
++    assert _items(latest_terminal=None) == ()
++
++
++# Implements TC-COMP-045
++def test_credential_missing_item_is_stamped_with_checked_at() -> None:
++    assert _items(credential_present=False) == (AttentionItem("credential_missing", CHECKED, None),)
++    assert _items(credential_present=True) == ()
++
++
++# Implements TC-COMP-045
++def test_all_three_causes_give_three_items_and_none_give_none() -> None:
++    items = _items(
++        problems=Problems(2, ("AAA", "BBB"), T1),
++        latest_terminal=LatestTerminalDownload(RUN, "failed", T2, None),
++        credential_present=False,
++    )
++
++    assert len(items) == 3
++    assert {i.kind for i in items} == {
++        "data_problems",
++        "download_not_complete",
++        "credential_missing",
++    }
++    assert _items() == ()
++
++
++# Implements TC-COMP-045
++def test_reader_calls_the_delivered_credential_presence_function() -> None:
++    assert reader.credential_present is settings.credential_present
++
++
++# Implements TC-COMP-045
++@pytest.mark.parametrize("module", [reader, queries], ids=["reader", "queries"])
++def test_module_never_reads_the_key_value(module: object) -> None:
++    path = Path(module.__file__)  # type: ignore[attr-defined]
++    text = path.read_text(encoding="utf-8")
++    forbidden = (
++        "FACTORFLOW_MASSIVE_API_KEY",
++        "os.environ",
++        "getenv",
++        "get_secret_value",
++        "massive_api_key",
++        "Settings(",
++    )
++
++    hits = [token for token in forbidden if token in text]
++
++    assert hits == [], f"{path.name} names {hits}"

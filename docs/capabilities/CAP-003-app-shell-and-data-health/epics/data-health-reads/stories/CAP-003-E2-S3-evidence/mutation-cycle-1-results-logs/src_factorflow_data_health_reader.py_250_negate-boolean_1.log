@@ -1,0 +1,27 @@
+.......F
+=================================== FAILURES ===================================
+________ test_absent_and_failed_is_in_both_counts_and_once_in_the_union ________
+
+    def test_absent_and_failed_is_in_both_counts_and_once_in_the_union() -> None:
+        fold = _fold(
+            [_view([_stock("FLD", fundamentals=Presence.ABSENT)])],
+            [{"FLD": ("failed", T1)}],
+        )
+    
+>       assert fold.company_financials() == CompanyFinancialsCheck(
+            "exceptions", 1, 1, None, 1, ("FLD",)
+        )
+E       AssertionError: assert CompanyFinanc...bols=('FLD',)) == CompanyFinanc...bols=('FLD',))
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing attributes:
+E         ['as_of']
+E         
+E         Drill down into differing attribute as_of:
+E           as_of: datetime.datetime(2026, 10, 20, 21, 0, tzinfo=datetime.timezone.utc) != None
+
+tests/unit/test_data_health_checks.py:175: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_data_health_checks.py::test_absent_and_failed_is_in_both_counts_and_once_in_the_union
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 7 passed in 0.34s

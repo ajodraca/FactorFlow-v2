@@ -1,0 +1,72 @@
+.....................F
+=================================== FAILURES ===================================
+__________ test_a_real_store_with_every_group_and_a_partial_download ___________
+
+migrated_writer_connection = <psycopg.Connection [INTRANS] (host=localhost port=49552 user=test database=test_9b953f15dddb4033afbf1f82d176c56d) at 0x10d237860>
+
+    def test_a_real_store_with_every_group_and_a_partial_download(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        ids = {s: _instrument(conn, s) for s in ("AAA", "BBB", "CCC", "DDD", "EEE")}
+        retired = _instrument(conn, "RET", "retired")
+        run = _run(conn, state="partial", requested_at=T1, ended_at=T3)
+        fundamentals_from, fundamentals_to = SEGMENT_FUNDAMENTALS
+    
+        _bars(conn, ids["AAA"], [D2, D3, D4, D5])
+        _segment(conn, ids["AAA"], "prices", D2, D5)
+        _segment(conn, ids["AAA"], "fundamentals", fundamentals_from, fundamentals_to)
+        _record(conn, run, ids["AAA"], "prices", "written", completed_at=T1)
+        _record(conn, run, ids["AAA"], "fundamentals", "written", completed_at=T1)
+    
+        _bars(conn, ids["BBB"], [D2, D3, D5])
+        _segment(conn, ids["BBB"], "prices", D2, D5)
+        _record(conn, run, ids["BBB"], "prices", "written", completed_at=T1)
+        _record(
+            conn, run, ids["BBB"], "fundamentals", "failed", reason="provider timeout", completed_at=T3
+        )
+    
+        _bars(conn, ids["CCC"], [D2, D3])
+        _segment(conn, ids["CCC"], "prices", D2, D3)
+        _segment(conn, ids["CCC"], "fundamentals", fundamentals_from, fundamentals_to)
+        _record(conn, run, ids["CCC"], "prices", "written", completed_at=T1)
+        _record(conn, run, ids["CCC"], "fundamentals", "written", completed_at=T2)
+    
+        _bars(conn, ids["EEE"], [D2, D3, D4, D5])
+        _segment(conn, ids["EEE"], "prices", D2, D5)
+        _record(conn, run, ids["EEE"], "prices", "written", completed_at=T1)
+        _record(conn, run, ids["EEE"], "fundamentals", "not_found", completed_at=T1)
+    
+        _segment(conn, retired, "prices", D2, date(2024, 1, 8))
+        _record(
+            conn, run, retired, "fundamentals", "failed", reason="provider timeout", completed_at=T3
+        )
+        conn.commit()
+    
+        result = read_data_health(conn)
+    
+        assert result.never_acquired is False
+        assert result.followed_count == 5
+        assert result.daily_prices == DailyPricesCheck(
+            "exceptions", 1, 1, 1, D5, GapDetectionState(True, None), 3, ("BBB", "CCC", "DDD")
+        )
+        assert result.company_financials == CompanyFinancialsCheck(
+            "exceptions", 3, 2, T2, 3, ("BBB", "DDD", "EEE")
+        )
+        assert result.affected_count == 2
+        assert [r.symbol for r in result.problems.rows] == ["BBB", "EEE"]
+        assert result.problems.next_cursor is None
+        assert result.checked_at.tzinfo is not None
+        with conn.cursor() as cur:
+            cur.execute("SELECT now()")
+            row = cur.fetchone()
+        assert row is not None
+>       assert result.checked_at == row[0]
+E       AssertionError: assert datetime.datetime(2026, 11, 14, 19, 45, 38, 375060, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) == datetime.datetime(2026, 11, 14, 19, 45, 38, 379984, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC'))
+E        +  where datetime.datetime(2026, 11, 14, 19, 45, 38, 375060, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')) = DataHealth(checked_at=datetime.datetime(2026, 11, 14, 19, 45, 38, 375060, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), ne...ZoneInfo(key='Etc/UTC')), run_id=UUID('78dfa24e-200a-4f7c-b179-0705ea66603a')),), retryable=False)), next_cursor=None)).checked_at
+
+tests/integration/test_data_health_checks.py:363: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_checks.py::test_a_real_store_with_every_group_and_a_partial_download
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 21 passed in 2.82s

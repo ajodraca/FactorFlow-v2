@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2o8g3yu6/w1/web
+
+stderr | src/components/patterns/as-of-line.test.tsx > TC-COMP-179: the as-of line shows its times in America/Chicago with the run link (DAC-E4-S4-3) > reads Scores from {time} · from the download started {time}, with the start time as the link
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/research/results-pane.test.tsx > TC-COMP-144: the heading shows the server's matchCount > reads 3000 for a first page of 50 rows with more to come
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/components/patterns/as-of-line.test.tsx (35 tests | 1 failed) 193ms
+   × as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set 5ms
+     → expected one min-h class, found none
+ ✓ src/screens/research/results-pane.test.tsx (60 tests) 830ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/as-of-line.test.tsx > as-of line details: badges, checked time, Earlier sets…, the one live region, skeleton (AC-21, DAC-E4-4, DAC-E4-S4-1, DAC-E4-S4-3) > renders the skeleton at the line's own height, and no live region, while loading with no set
+Error: expected one min-h class, found none
+ ❯ heightToken src/components/patterns/as-of-line.test.tsx:95:11
+     93|   const tokens = element.className.match(/\bmin-h-\S+/g) ?? [];
+     94|   if (tokens.length !== 1) {
+     95|     throw new Error(`expected one min-h class, found ${tokens.join(" "…
+       |           ^
+     96|   }
+     97|   return tokens[0];
+ ❯ src/components/patterns/as-of-line.test.tsx:375:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 94 passed (95)
+   Start at  09:44:08
+   Duration  2.87s (transform 326ms, setup 165ms, collect 1.84s, tests 1.02s, environment 789ms, prepare 288ms)
+

@@ -1,0 +1,70 @@
+{
+ "schema": 1,
+ "repo_head": "85c9754937bfca924f94573697045891f8df24ff",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "rv:download-requested-from-started",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 85,
+   "old": "r.state,\n       r.requested_at,",
+   "new": "r.state,\n       r.started_at,",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:download-started-from-requested",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 86,
+   "old": "r.requested_at,\n       r.started_at,",
+   "new": "r.requested_at,\n       r.requested_at,",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:download-ended-null",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 87,
+   "old": "       r.ended_at,",
+   "new": "       NULL::timestamptz,",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:reader-swap-requested-started",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 142,
+   "old": "            requested_at,\n            started_at,\n",
+   "new": "            started_at,\n            requested_at,\n",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:reader-ended-none",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 144,
+   "old": "            ended_at,\n            Progress(",
+   "new": "            None,\n            Progress(",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:credential-item-recorded",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 106,
+   "old": "AttentionItem(\"credential_missing\", checked_at, None)",
+   "new": "AttentionItem(\"credential_missing\", problems.newest_completed_at or checked_at, None)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "rv:export-dropped",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/__init__.py",
+   "line": 7,
+   "old": "from factorflow.data_health.reader import read_attention, read_problems\n\n__all__ = [\"read_attention\", \"read_problems\"]",
+   "new": "from factorflow.data_health.reader import read_problems\n\n__all__ = [\"read_problems\"]",
+   "cycle": "cycle-2"
+  }
+ ]
+}

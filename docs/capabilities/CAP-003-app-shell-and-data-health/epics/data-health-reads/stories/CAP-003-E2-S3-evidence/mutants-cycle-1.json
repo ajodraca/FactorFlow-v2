@@ -1,0 +1,457 @@
+{
+ "schema": 1,
+ "repo_head": "c4e031f8cc1df324da43863c083ac10953056944",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "src/factorflow/data_health/reader.py:186:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 186,
+   "original": "_EXCEPTION_SYMBOLS_KEPT: Final = 5",
+   "mutated": "_EXCEPTION_SYMBOLS_KEPT: Final = 6"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:189:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 189,
+   "original": "_FIRST_PAGE_LIMIT: Final = 50",
+   "mutated": "_FIRST_PAGE_LIMIT: Final = 51"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:198:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 198,
+   "original": "    count: int = 0",
+   "mutated": "    count: int = 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:202:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 202,
+   "original": "        self.count += 1",
+   "mutated": "        self.count += 2"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:203:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 203,
+   "original": "        if len(self.symbols) < _EXCEPTION_SYMBOLS_KEPT:",
+   "mutated": "        if len(self.symbols) <= _EXCEPTION_SYMBOLS_KEPT:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:212:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 212,
+   "original": "    prices_absent: int = 0",
+   "mutated": "    prices_absent: int = 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:213:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 213,
+   "original": "    prices_behind: int = 0",
+   "mutated": "    prices_behind: int = 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:214:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 214,
+   "original": "    prices_gaps: int = 0",
+   "mutated": "    prices_gaps: int = 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:215:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 215,
+   "original": "    gaps_available: bool = True",
+   "mutated": "    gaps_available: bool = False"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:218:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 218,
+   "original": "    financials_absent: int = 0",
+   "mutated": "    financials_absent: int = 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:219:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 219,
+   "original": "    financials_problems: int = 0",
+   "mutated": "    financials_problems: int = 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:226:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 226,
+   "original": "        if not view.gap_detection.available and self.gaps_available:",
+   "mutated": "        if view.gap_detection.available and self.gaps_available:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:227:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 227,
+   "original": "            self.gaps_available = False",
+   "mutated": "            pass"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:227:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 227,
+   "original": "            self.gaps_available = False",
+   "mutated": "            self.gaps_available = True"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:228:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 228,
+   "original": "            self.gaps_reason = view.gap_detection.reason",
+   "mutated": "            pass"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:232:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 232,
+   "original": "                stock.covered_to is not None",
+   "mutated": "                stock.covered_to is None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:233:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 233,
+   "original": "                and self.latest_session is not None",
+   "mutated": "                and self.latest_session is None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:234:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 234,
+   "original": "                and stock.covered_to < self.latest_session",
+   "mutated": "                and stock.covered_to <= self.latest_session"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:236:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 236,
+   "original": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0",
+   "mutated": "            gap = stock.gaps.missing_days is None and stock.gaps.missing_days > 0"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:236:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 236,
+   "original": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0",
+   "mutated": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days >= 0"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:236:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 236,
+   "original": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 0",
+   "mutated": "            gap = stock.gaps.missing_days is not None and stock.gaps.missing_days > 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:250:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 250,
+   "original": "            if outcome == \"written\" and acquired_at is not None:",
+   "mutated": "            if outcome != \"written\" and acquired_at is not None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:250:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 250,
+   "original": "            if outcome == \"written\" and acquired_at is not None:",
+   "mutated": "            if outcome == \"written\" and acquired_at is None:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:251:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 251,
+   "original": "                if self.as_of is None or acquired_at > self.as_of:",
+   "mutated": "                if self.as_of is None or acquired_at >= self.as_of:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:252:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 252,
+   "original": "                    self.as_of = acquired_at",
+   "mutated": "                    pass"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:256:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 256,
+   "original": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:",
+   "mutated": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) >= 0:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:256:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 256,
+   "original": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:",
+   "mutated": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 1) > 0:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:256:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 256,
+   "original": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 0:",
+   "mutated": "        if self.prices_absent + self.prices_behind + (gap_stock_count or 0) > 1:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:258:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 258,
+   "original": "        elif not self.gaps_available:",
+   "mutated": "        elif self.gaps_available:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:274:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 274,
+   "original": "        exceptions = self.financials_absent + self.financials_problems > 0",
+   "mutated": "        exceptions = self.financials_absent + self.financials_problems >= 0"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:274:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 274,
+   "original": "        exceptions = self.financials_absent + self.financials_problems > 0",
+   "mutated": "        exceptions = self.financials_absent + self.financials_problems > 1"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:289:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 289,
+   "original": "    if not symbols:",
+   "mutated": "    if symbols:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:308:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 308,
+   "original": "    assert head is not None  # an aggregate over a table always returns one row",
+   "mutated": "    assert head is None  # an aggregate over a table always returns one row"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:311:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 311,
+   "original": "    view = read_coverage(conn, lifecycle=\"active\", cursor=None, limit=MAX_LIMIT)",
+   "mutated": "    view = read_coverage(conn, lifecycle=\"active\", limit=MAX_LIMIT)"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:314:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 314,
+   "original": "    if not never_acquired:",
+   "mutated": "    if never_acquired:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:315:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 315,
+   "original": "        while True:",
+   "mutated": "        while False:"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:324:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 324,
+   "original": "    assert count_row is not None",
+   "mutated": "    assert count_row is None"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:325:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 325,
+   "original": "    affected_count = count_row[0]",
+   "mutated": "    affected_count = count_row[1]"
+  },
+  {
+   "id": "src/factorflow/data_health/reader.py:327:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 327,
+   "original": "    problems = read_problems(conn, cursor=None, limit=_FIRST_PAGE_LIMIT)",
+   "mutated": "    problems = read_problems(conn, limit=_FIRST_PAGE_LIMIT)"
+  },
+  {
+   "id": "man:head-latest-any-lifecycle",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 121,
+   "old": "WHERE i.lifecycle = 'active'\n           AND cs.data_type = 'prices'",
+   "new": "WHERE cs.data_type = 'prices'",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:head-latest-fundamentals",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 122,
+   "old": "AND cs.data_type = 'prices') AS latest_session",
+   "new": "AND cs.data_type = 'fundamentals') AS latest_session",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:head-followed-any-lifecycle",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 117,
+   "old": "(SELECT count(*) FROM instrument i WHERE i.lifecycle = 'active')",
+   "new": "(SELECT count(*) FROM instrument i)",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:state-prices",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/queries.py",
+   "line": 132,
+   "old": "WHERE s.data_type = 'fundamentals'\n   AND i.symbol",
+   "new": "WHERE s.data_type = 'prices'\n   AND i.symbol",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:unknown-not-absent",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 191,
+   "old": "_UNSEEN = (Presence.ABSENT, Presence.UNKNOWN)",
+   "new": "_UNSEEN = (Presence.ABSENT,)",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:not-found-not-problem",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 245,
+   "old": "outcome in (\"failed\", \"not_found\")",
+   "new": "outcome in (\"failed\",)",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:limit-50",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 311,
+   "old": "cursor=None, limit=MAX_LIMIT)\n    never_acquired",
+   "new": "cursor=None, limit=50)\n    never_acquired",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:cursor-none",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 319,
+   "old": "cursor=view.next_cursor, limit=MAX_LIMIT)",
+   "new": "cursor=None, limit=MAX_LIMIT)",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:lifecycle-none",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 311,
+   "old": "read_coverage(conn, lifecycle=\"active\", cursor=None",
+   "new": "read_coverage(conn, lifecycle=None, cursor=None",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:affected-len",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 325,
+   "old": "affected_count = count_row[0]",
+   "new": "affected_count = len(problems_rows)",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "man:commit-at-end",
+   "operator": "manual",
+   "file": "src/factorflow/data_health/reader.py",
+   "line": 335,
+   "old": "        problems,\n    )",
+   "new": "        problems,\n    ) if conn.commit() is None else None",
+   "cycle": "cycle-1"
+  }
+ ]
+}

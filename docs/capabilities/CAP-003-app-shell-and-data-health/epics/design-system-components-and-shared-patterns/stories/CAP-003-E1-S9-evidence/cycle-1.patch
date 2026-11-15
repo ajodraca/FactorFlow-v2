@@ -1,0 +1,261 @@
+diff --git a/web/src/components/patterns/state-region.test.tsx b/web/src/components/patterns/state-region.test.tsx
+new file mode 100644
+index 0000000..4fb9557
+--- /dev/null
++++ b/web/src/components/patterns/state-region.test.tsx
+@@ -0,0 +1,163 @@
++import { render, screen, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { describe, expect, it, vi } from "vitest";
++import type { ScreenState } from "../../api/types";
++import { StateRegion, type StateRenderers } from "./state-region";
++
++type Row = { name: string };
++
++const FIXTURE = {
++  loading: { kind: "loading" },
++  "empty-never-populated": { kind: "empty-never-populated" },
++  "empty-no-match": { kind: "empty-no-match" },
++  populated: { kind: "populated", data: { name: "AAPL" }, fetchedAt: "2026-10-15T22:30:00Z" },
++  partial: { kind: "partial", data: { name: "MSFT" }, fetchedAt: "2026-10-16T22:30:00Z" },
++  unavailable: { kind: "unavailable", reason: "No trading calendar yet" },
++  error: { kind: "error", message: "the server could not be reached", requestId: "req-7f3a" },
++} satisfies Record<string, ScreenState<Row>>;
++
++const LITERALS = {
++  loading: "Skeleton fixture",
++  "empty-never-populated": "No stocks followed yet.",
++  "empty-no-match": "No stock matches that filter.",
++  populated: "Populated AAPL at 2026-10-15T22:30:00Z",
++  partial: "Partial MSFT at 2026-10-16T22:30:00Z",
++  unavailable: "Unavailable: No trading calendar yet",
++  error: "Couldn't read what needs you: the server could not be reached.",
++} as const;
++
++type RenderedKind = keyof typeof LITERALS;
++const KINDS = Object.keys(LITERALS) as RenderedKind[];
++
++const RENDERERS: StateRenderers<Row> = {
++  loading: () => <p>Skeleton fixture</p>,
++  "empty-never-populated": () => <p>No stocks followed yet.</p>,
++  "empty-no-match": () => <p>No stock matches that filter.</p>,
++  populated: (s) => <p>{`Populated ${s.data.name} at ${s.fetchedAt}`}</p>,
++  partial: (s) => <p>{`Partial ${s.data.name} at ${s.fetchedAt}`}</p>,
++  unavailable: (s) => <p>{`Unavailable: ${s.reason}`}</p>,
++  error: (s) => <p>{`Couldn't read what needs you: ${s.message}.`}</p>,
++  unreachable: { notApplicable: "The shell replaces the main region (AC-23)" },
++};
++
++function region(
++  state: ScreenState<Row>,
++  renderers: StateRenderers<Row> = RENDERERS,
++  onRetry = vi.fn(),
++) {
++  return render(<StateRegion state={state} renderers={renderers} onRetry={onRetry} />);
++}
++
++// Implements TC-COMP-031
++describe("StateRegion (TC-COMP-031)", () => {
++  it.each(KINDS)("renders only the %s renderer's output", (kind) => {
++    region(FIXTURE[kind]);
++    expect(screen.getByText(LITERALS[kind])).toBeInTheDocument();
++    for (const other of KINDS.filter((k) => k !== kind)) {
++      expect(screen.queryByText(LITERALS[other])).toBeNull();
++    }
++  });
++
++  it("never renders never-populated as no-match, or the reverse", () => {
++    const first = region(FIXTURE["empty-never-populated"]);
++    expect(screen.getByText("No stocks followed yet.")).toBeInTheDocument();
++    expect(screen.queryByText("No stock matches that filter.")).toBeNull();
++    first.unmount();
++    region(FIXTURE["empty-no-match"]);
++    expect(screen.getByText("No stock matches that filter.")).toBeInTheDocument();
++    expect(screen.queryByText("No stocks followed yet.")).toBeNull();
++  });
++
++  it("renders the error's operation and reason with Try again wired to the caller's retry", async () => {
++    const retry = vi.fn();
++    const user = userEvent.setup();
++    region(FIXTURE.error, RENDERERS, retry);
++    expect(screen.getByText(LITERALS.error)).toBeInTheDocument();
++    const button = screen.getByRole("button", { name: "Try again" });
++    expect(button).toHaveAttribute("data-variant", "outline");
++    expect(retry).not.toHaveBeenCalled();
++    await user.click(button);
++    expect(retry).toHaveBeenCalledTimes(1);
++  });
++
++  it("leaves unreachable to the shell: nothing rendered, the reason never shown", () => {
++    const { container } = region({ kind: "unreachable" });
++    expect(container).toBeEmptyDOMElement();
++    expect(screen.queryByText("The shell replaces the main region (AC-23)")).toBeNull();
++  });
++});
++
++// Implements TC-COMP-032
++describe("type-level coverage (DAC-E1-S9-2)", () => {
++  it("refuses an omitted renderer without notApplicable, and unreachable renderers; accepts a reason", () => {
++    // @ts-expect-error -- error has neither a renderer nor { notApplicable } (DAC-E1-S9-2)
++    const omitsError: StateRenderers<Row> = {
++      loading: RENDERERS.loading,
++      "empty-never-populated": RENDERERS["empty-never-populated"],
++      "empty-no-match": RENDERERS["empty-no-match"],
++      populated: RENDERERS.populated,
++      partial: RENDERERS.partial,
++      unavailable: RENDERERS.unavailable,
++      unreachable: { notApplicable: "The shell replaces the main region (AC-23)" },
++    };
++    // @ts-expect-error -- unreachable is the shell's; only a reason is accepted (DEC-0313)
++    const rendersUnreachable: StateRenderers<Row> = { ...RENDERERS, unreachable: () => <p>x</p> };
++    const partialNotApplicable: StateRenderers<Row> = {
++      ...RENDERERS,
++      partial: { notApplicable: "Nothing here is filtered" },
++    };
++    expect(omitsError).toBeDefined();
++    expect(rendersUnreachable).toBeDefined();
++    expect(partialNotApplicable).toBeDefined();
++  });
++});
++
++describe("StateRegion wrappers (DEC-0314)", () => {
++  it("marks the loading skeleton busy and nothing else", () => {
++    region(FIXTURE.loading);
++    expect(screen.getByText("Skeleton fixture").closest('[aria-busy="true"]')).not.toBeNull();
++  });
++
++  it("does not mark populated busy", () => {
++    region(FIXTURE.populated);
++    expect(screen.getByText(LITERALS.populated).closest('[aria-busy="true"]')).toBeNull();
++  });
++
++  it("announces the error politely with Try again outside the announcement", () => {
++    region(FIXTURE.error);
++    const status = screen.getByRole("status");
++    expect(status).toHaveTextContent(new RegExp(`^${LITERALS.error}$`));
++    expect(within(status).queryByRole("button")).toBeNull();
++    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
++    expect(screen.queryByRole("alert")).toBeNull();
++  });
++
++  it("never shows the envelope's request id", () => {
++    const { container } = region(FIXTURE.error);
++    expect(container.textContent).not.toContain("req-7f3a");
++  });
++
++  it.each(KINDS.filter((k) => k !== "error"))("offers no Try again for %s", (kind) => {
++    region(FIXTURE[kind]);
++    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
++  });
++
++  it("renders nothing for a kind whose entry is notApplicable, never its reason", () => {
++    const renderers: StateRenderers<Row> = {
++      ...RENDERERS,
++      partial: { notApplicable: "Nothing here is filtered" },
++    };
++    const { container } = region(FIXTURE.partial, renderers);
++    expect(container).toBeEmptyDOMElement();
++    expect(screen.queryByText("Nothing here is filtered")).toBeNull();
++  });
++
++  it("renders nothing for an error whose entry is notApplicable", () => {
++    const renderers: StateRenderers<Row> = {
++      ...RENDERERS,
++      error: { notApplicable: "Nothing to read" },
++    };
++    const { container } = region(FIXTURE.error, renderers);
++    expect(container).toBeEmptyDOMElement();
++  });
++});
+diff --git a/web/src/components/patterns/state-region.tsx b/web/src/components/patterns/state-region.tsx
+new file mode 100644
+index 0000000..09f116a
+--- /dev/null
++++ b/web/src/components/patterns/state-region.tsx
+@@ -0,0 +1,86 @@
++import type { JSX, ReactNode } from "react";
++import type { ScreenState } from "../../api/types";
++import { Button } from "../ui/button";
++
++/**
++ * Renders a data-bearing region's `ScreenState` through one entry per kind
++ * (component design 2.7; DAC-E1-10; AC-24; STD-UI-23). The caller's map names,
++ * for each kind, either a renderer or `{ notApplicable: "reason" }`, so a call
++ * that omits a kind without saying why does not type-check. `empty-never-populated`
++ * and `empty-no-match` dispatch to their own entries and are never conflated.
++ *
++ * `unreachable` is the shell's: it replaces the main region (AC-23), so the map
++ * accepts only a reason for it and `StateRegion` renders nothing. A kind whose
++ * entry is `notApplicable` and which arrives anyway renders nothing; the reason
++ * is a record, never display copy.
++ *
++ * Provisional contract (DEC-0313, DEC-0314): the caller's `error` renderer
++ * supplies the whole three-part sentence; it is wrapped in a polite status
++ * region with **Try again** outside it, wired to `onRetry`. `loading` is the
++ * caller's skeleton marked busy. `StateRegion` never reads `requestId` or any
++ * other field of the state, and every visible string except **Try again** is
++ * the caller's.
++ */
++
++export interface NotApplicable {
++  readonly notApplicable: string;
++}
++
++export type StateKind = ScreenState<unknown>["kind"];
++
++export type StateRenderer<T, K extends StateKind> =
++  | ((state: Extract<ScreenState<T>, { kind: K }>) => ReactNode)
++  | NotApplicable;
++
++export type StateRenderers<T> = {
++  readonly [K in Exclude<StateKind, "unreachable">]: StateRenderer<T, K>;
++} & { readonly unreachable: NotApplicable };
++
++export interface StateRegionProps<T> {
++  state: ScreenState<T>;
++  renderers: StateRenderers<T>;
++  onRetry: () => void;
++}
++
++function renderEntry<S>(entry: ((state: S) => ReactNode) | NotApplicable, state: S): ReactNode {
++  return typeof entry === "function" ? entry(state) : null;
++}
++
++export function StateRegion<T>({
++  state,
++  renderers,
++  onRetry,
++}: StateRegionProps<T>): JSX.Element | null {
++  switch (state.kind) {
++    case "loading":
++      return <div aria-busy="true">{renderEntry(renderers.loading, state)}</div>;
++    case "empty-never-populated":
++      return <>{renderEntry(renderers["empty-never-populated"], state)}</>;
++    case "empty-no-match":
++      return <>{renderEntry(renderers["empty-no-match"], state)}</>;
++    case "populated":
++      return <>{renderEntry(renderers.populated, state)}</>;
++    case "partial":
++      return <>{renderEntry(renderers.partial, state)}</>;
++    case "unavailable":
++      return <>{renderEntry(renderers.unavailable, state)}</>;
++    case "error": {
++      const entry = renderers.error;
++      if (typeof entry !== "function") return null;
++      return (
++        <div className="flex flex-col gap-2">
++          <output>{entry(state)}</output>
++          <Button type="button" variant="outline" className="w-fit" onClick={onRetry}>
++            Try again
++          </Button>
++        </div>
++      );
++    }
++    case "unreachable":
++      return null;
++    default: {
++      const unhandled: never = state;
++      return unhandled;
++    }
++  }
++}

@@ -1,0 +1,35 @@
+......................F
+=================================== FAILURES ===================================
+______ test_followed_count_and_prices_as_of_count_only_active_instruments ______
+
+migrated_writer_connection = <psycopg.Connection [IDLE] (host=localhost port=49888 user=test database=test_7128e647a12f42ad8abdfc4289529b4d) at 0x1093eca10>
+
+    def test_followed_count_and_prices_as_of_count_only_active_instruments(
+        migrated_writer_connection: psycopg.Connection,
+    ) -> None:
+        conn = migrated_writer_connection
+        aaa = _instrument(conn, "AAA")
+        bbb = _instrument(conn, "BBB")
+        ccc = _instrument(conn, "CCC")
+        rrr = _instrument(conn, "RRR", lifecycle="retired")
+        _segment(conn, aaa, "prices", date(2026, 1, 2), date(2026, 10, 20))
+        _segment(conn, aaa, "prices", date(2025, 1, 2), date(2025, 6, 30))
+        _segment(conn, bbb, "prices", date(2026, 3, 2), date(2026, 10, 23))
+        _segment(conn, ccc, "fundamentals", date(2026, 1, 2), date(2026, 11, 2))
+        _segment(conn, rrr, "prices", date(2026, 1, 2), date(2026, 10, 30))
+        conn.commit()
+    
+        attention = read_attention(conn)
+        conn.rollback()
+    
+        assert attention.followed_count == 3
+>       assert attention.prices_as_of == date(2026, 10, 23)
+E       AssertionError: assert datetime.date(2026, 10, 30) == datetime.date(2026, 10, 23)
+E        +  where datetime.date(2026, 10, 30) = Attention(checked_at=datetime.datetime(2026, 11, 14, 18, 21, 20, 271979, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), fol...ms(stock_count=0, symbols=(), newest_completed_at=None), latest_download=None, latest_terminal_download=None, items=()).prices_as_of
+E        +  and   datetime.date(2026, 10, 23) = date(2026, 10, 23)
+
+tests/integration/test_data_health_attention.py:492: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_data_health_attention.py::test_followed_count_and_prices_as_of_count_only_active_instruments
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 22 passed in 3.70s
