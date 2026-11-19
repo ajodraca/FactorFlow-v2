@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-do7shyro/w2/web
+
+ ❯ src/app/shell-client.test.ts (20 tests | 2 failed) 14ms
+   × fetchAttention and fetchDataHealth > fetchAttention requests /api/attention and returns the body 4ms
+     → expected '/api/data-health' to be '/api/attention' // Object.is equality
+   × fetchAttention and fetchDataHealth > fetchAttention requests /api/attention and returns the body 1ms
+     → expected '/api/data-health' to be '/api/attention' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchAttention and fetchDataHealth > fetchAttention requests /api/attention and returns the body
+ FAIL  src/app/shell-client.test.ts > fetchAttention and fetchDataHealth > fetchAttention requests /api/attention and returns the body
+AssertionError: expected '/api/data-health' to be '/api/attention' // Object.is equality
+
+Expected: "/api/attention"
+Received: "/api/data-health"
+
+ ❯ src/app/shell-client.test.ts:384:41
+    382|       await expect(fetchAttention()).resolves.toEqual(fixture);
+    383|       expect(fetchMock).toHaveBeenCalledTimes(1);
+    384|       expect(firstCall(fetchMock).path).toBe("/api/attention");
+       |                                         ^
+    385|     },
+    386|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 18 passed (20)
+   Start at  23:22:53
+   Duration  740ms (transform 31ms, setup 31ms, collect 25ms, tests 14ms, environment 161ms, prepare 163ms)
+

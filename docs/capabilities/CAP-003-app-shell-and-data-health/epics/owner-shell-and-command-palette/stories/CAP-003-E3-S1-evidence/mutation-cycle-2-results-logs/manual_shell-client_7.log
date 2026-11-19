@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-do7shyro/w0/web
+
+ ❯ src/app/shell-client.test.ts (20 tests | 1 failed) 12ms
+   × fetchProblems request encoding > sends no cursor for null, the value data-health-ui holds after the last page 3ms
+     → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > sends no cursor for null, the value data-health-ui holds after the last page
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/app/shell-client.test.ts:278:65
+    276|     const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
+    277|     await fetchProblems(null, 50);
+    278|     expect(firstCall(fetchMock).url.searchParams.has("cursor")).toBe(f…
+       |                                                                 ^
+    279|   });
+    280| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  23:22:54
+   Duration  619ms (transform 29ms, setup 35ms, collect 20ms, tests 12ms, environment 154ms, prepare 27ms)
+

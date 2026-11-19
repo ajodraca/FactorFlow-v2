@@ -1,0 +1,96 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-do7shyro/w0/web
+
+ ❯ src/app/shell-client.test.ts (20 tests | 4 failed) 13ms
+   × TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and no cursor when the cursor is undefined 6ms
+     → expected true to be false // Object.is equality
+   × TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and cursor when the cursor is set 1ms
+     → expected null to be 'KO' // Object.is equality
+   × fetchProblems request encoding > sends no cursor for null, the value data-health-ui holds after the last page 1ms
+     → expected true to be false // Object.is equality
+   × fetchProblems request encoding > sends a cursor with a slash intact and a limit as given 1ms
+     → expected null to be 'BRK/B' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and no cursor when the cursor is undefined
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/app/shell-client.test.ts:254:44
+    252|     expect(path).toBe("/api/data-health/problems");
+    253|     expect(url.searchParams.get("limit")).toBe("50");
+    254|     expect(url.searchParams.has("cursor")).toBe(false);
+       |                                            ^
+    255|   });
+    256| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and cursor when the cursor is set
+AssertionError: expected null to be 'KO' // Object.is equality
+
+- Expected: 
+"KO"
+
++ Received: 
+null
+
+ ❯ src/app/shell-client.test.ts:262:44
+    260|     const { url } = firstCall(fetchMock);
+    261|     expect(url.searchParams.get("limit")).toBe("50");
+    262|     expect(url.searchParams.get("cursor")).toBe("KO");
+       |                                            ^
+    263|   });
+    264| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > sends no cursor for null, the value data-health-ui holds after the last page
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/app/shell-client.test.ts:278:65
+    276|     const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
+    277|     await fetchProblems(null, 50);
+    278|     expect(firstCall(fetchMock).url.searchParams.has("cursor")).toBe(f…
+       |                                                                 ^
+    279|   });
+    280| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > sends a cursor with a slash intact and a limit as given
+AssertionError: expected null to be 'BRK/B' // Object.is equality
+
+- Expected: 
+"BRK/B"
+
++ Received: 
+null
+
+ ❯ src/app/shell-client.test.ts:285:44
+    283|     await fetchProblems("BRK/B", 7);
+    284|     const { url } = firstCall(fetchMock);
+    285|     expect(url.searchParams.get("cursor")).toBe("BRK/B");
+       |                                            ^
+    286|     expect(url.searchParams.get("limit")).toBe("7");
+    287|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 16 passed (20)
+   Start at  23:22:53
+   Duration  740ms (transform 30ms, setup 32ms, collect 27ms, tests 13ms, environment 165ms, prepare 152ms)
+

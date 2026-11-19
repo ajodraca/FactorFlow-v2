@@ -1,0 +1,15 @@
+$ npx vitest run web/src/app/shell-client.test.ts
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > resolves { kind: not_served } on a 404 not_found envelope 2ms
+     → fetchScoreSummary is not a function
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > rejects a 500 with the ApiError, code and request id intact 0ms
+     → fetchScoreSummary is not a function
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > rejects a thrown fetch with ApiUnreachableError, not ApiError 0ms
+     → fetchScoreSummary is not a function
+   × fetchScoreSummary success and other 404s > resolves the served summary unchanged, snake_case, with no kind key 0ms
+     → fetchScoreSummary is not a function
+   × fetchScoreSummary success and other 404s > rejects a 404 whose envelope code is not not_found 0ms
+     → fetchScoreSummary is not a function
+   × fetchScoreSummary success and other 404s > rejects a 404 whose body is not the envelope, with a null code 0ms
+     → fetchScoreSummary is not a function
+$ npx tsc --noEmit
+web/src/app/shell-client.test.ts(3,58): error TS2305: Module '"./shell-client"' has no exported member 'fetchScoreSummary'.

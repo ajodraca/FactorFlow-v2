@@ -1,0 +1,54 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-t410pknl/w0/web
+
+ ❯ src/app/shell-client.test.ts (30 tests | 3 failed) 15ms
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > rejects a 500 with the ApiError, code and request id intact 3ms
+     → expected { kind: 'not_served' } to be an instance of ApiError
+   × fetchScoreSummary success and other 404s > rejects a 404 whose envelope code is not not_found 0ms
+     → expected { kind: 'not_served' } to be an instance of ApiError
+   × fetchScoreSummary success and other 404s > rejects a 404 whose body is not the envelope, with a null code 0ms
+     → expected { kind: 'not_served' } to be an instance of ApiError
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > rejects a 500 with the ApiError, code and request id intact
+AssertionError: expected { kind: 'not_served' } to be an instance of ApiError
+ ❯ src/app/shell-client.test.ts:514:20
+    512|     );
+    513|     const caught = await fetchScoreSummary().catch((error: unknown) =>…
+    514|     expect(caught).toBeInstanceOf(ApiError);
+       |                    ^
+    515|     expect((caught as ApiError).code).toBe("internal_error");
+    516|     expect((caught as ApiError).requestId).toBe("req-500");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchScoreSummary success and other 404s > rejects a 404 whose envelope code is not not_found
+AssertionError: expected { kind: 'not_served' } to be an instance of ApiError
+ ❯ src/app/shell-client.test.ts:548:20
+    546|     );
+    547|     const caught = await fetchScoreSummary().catch((error: unknown) =>…
+    548|     expect(caught).toBeInstanceOf(ApiError);
+       |                    ^
+    549|     expect((caught as ApiError).code).toBe("universe_not_found");
+    550|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchScoreSummary success and other 404s > rejects a 404 whose body is not the envelope, with a null code
+AssertionError: expected { kind: 'not_served' } to be an instance of ApiError
+ ❯ src/app/shell-client.test.ts:555:20
+    553|     stubFetch(new Response("Not Found", { status: 404 }));
+    554|     const caught = await fetchScoreSummary().catch((error: unknown) =>…
+    555|     expect(caught).toBeInstanceOf(ApiError);
+       |                    ^
+    556|     expect((caught as ApiError).code).toBeNull();
+    557|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 27 passed (30)
+   Start at  23:25:32
+   Duration  713ms (transform 31ms, setup 30ms, collect 25ms, tests 15ms, environment 151ms, prepare 129ms)
+

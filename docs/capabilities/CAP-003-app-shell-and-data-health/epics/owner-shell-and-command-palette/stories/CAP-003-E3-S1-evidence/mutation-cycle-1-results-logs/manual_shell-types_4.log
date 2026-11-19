@@ -1,0 +1,16 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-54li_yox/w3/web
+
+ ✓ src/app/shell-client.test.ts (8 tests) 2ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  23:20:22
+   Duration  734ms (transform 15ms, setup 48ms, collect 4ms, tests 2ms, environment 169ms, prepare 120ms)
+
+web/src/app/shell-client.test.ts(168,48): error TS2344: Type 'ScoreSummaryLiteral' does not satisfy the constraint '{ set: { set_id: string; classification_date: string; run_id: string; run_started_at: string; run_outcome: RunOutcome; state: "complete"; started_at: string; ended_at: string; latest_trading_day: string; active_instruments: number; not_current: boolean; } | null; factors: { ...; }; later: { ...; } | null; never_clas...'.
+  Types of property 'stocks_current' are incompatible.
+    Type '{ current_count: number; followed_count: number; } | null' is not assignable to type '{ current_count: "Expected: never, Actual: number"; followed_count: "Expected: never, Actual: number"; }'.
+      Type 'null' is not assignable to type '{ current_count: "Expected: never, Actual: number"; followed_count: "Expected: never, Actual: number"; }'.
+web/src/app/shell-client.test.ts(185,7): error TS2344: Type '{ kind: "loading"; } | { kind: "served"; data: ScoreSummaryLiteral; checkedAt: Date; } | { kind: "not_served"; } | { kind: "error"; error: ApiUnreachableError | ApiError; last: ScoreSummaryLiteral | null; }' does not satisfy the constraint '{ error: never; kind: "loading" | "error" | "served" | "not_served"; data: never; checkedAt: never; last: never; }'.
+  Type '{ kind: "loading"; }' is missing the following properties from type '{ error: never; kind: "loading" | "error" | "served" | "not_served"; data: never; checkedAt: never; last: never; }': error, data, checkedAt, last

@@ -1,0 +1,151 @@
+diff --git a/web/src/app/shell-client.test.ts b/web/src/app/shell-client.test.ts
+index 5c0d15f6..d07917a5 100644
+--- a/web/src/app/shell-client.test.ts
++++ b/web/src/app/shell-client.test.ts
+@@ -1,6 +1,6 @@
+ import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
+ import { ApiError, ApiUnreachableError } from "../api/client";
+-import { fetchAttention, fetchDataHealth, fetchProblems } from "./shell-client";
++import { fetchAttention, fetchDataHealth, fetchProblems, fetchScoreSummary } from "./shell-client";
+ import type {
+   Attention,
+   DataHealth,
+@@ -462,3 +462,97 @@ describe("fetchAttention and fetchDataHealth", () => {
+     await expect(fetchDataHealth()).rejects.toBeInstanceOf(ApiUnreachableError);
+   });
+ });
++
++const summaryFixture = {
++  never_classified: false,
++  set: {
++    set_id: "set-1",
++    classification_date: "2026-10-15",
++    run_id: "6f1c2a0e-0000-4000-8000-000000000004",
++    run_started_at: "2026-10-15T22:00:00+00:00",
++    run_outcome: "succeeded",
++    state: "complete",
++    started_at: "2026-10-15T22:00:05+00:00",
++    ended_at: "2026-10-15T22:10:00+00:00",
++    latest_trading_day: "2026-10-15",
++    active_instruments: 12,
++    not_current: false,
++  },
++  later: null,
++  factors: {
++    value: { qualified_count: 10, ranked: true, min_peer_set_size: 5 },
++    growth: { qualified_count: 9, ranked: true, min_peer_set_size: 5 },
++    momentum: { qualified_count: 0, ranked: false, min_peer_set_size: 5 },
++  },
++  stocks_current: { current_count: 11, followed_count: 12 },
++};
++
++const notFoundEnvelope = {
++  error: {
++    code: "not_found",
++    message: "No resource exists at this path.",
++    resource: "classifications",
++    request_id: "req-404",
++  },
++};
++
++// Implements TC-COMP-066 (DAC-E3-S1-2, AC-24): a summary 404 not_found resolves
++// to not_served; every other failure rejects as delivered.
++describe("TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served", () => {
++  it("resolves { kind: not_served } on a 404 not_found envelope", async () => {
++    const fetchMock = stubFetch(jsonResponse(404, notFoundEnvelope));
++    await expect(fetchScoreSummary()).resolves.toEqual({ kind: "not_served" });
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++    expect(firstCall(fetchMock).path).toBe("/api/classifications/summary");
++  });
++
++  it("rejects a 500 with the ApiError, code and request id intact", async () => {
++    stubFetch(
++      jsonResponse(500, { error: { code: "internal_error", message: "x", request_id: "req-500" } }),
++    );
++    const caught = await fetchScoreSummary().catch((error: unknown) => error);
++    expect(caught).toBeInstanceOf(ApiError);
++    expect((caught as ApiError).code).toBe("internal_error");
++    expect((caught as ApiError).requestId).toBe("req-500");
++  });
++
++  it("rejects a thrown fetch with ApiUnreachableError, not ApiError", async () => {
++    vi.stubGlobal(
++      "fetch",
++      vi.fn(async () => {
++        throw new TypeError("network down");
++      }),
++    );
++    const caught = await fetchScoreSummary().catch((error: unknown) => error);
++    expect(caught).toBeInstanceOf(ApiUnreachableError);
++    expect(caught).not.toBeInstanceOf(ApiError);
++  });
++});
++
++// fetchScoreSummary's success and non-not_found 404 paths (DAC-E3-S1-2, AC-8).
++describe("fetchScoreSummary success and other 404s", () => {
++  it("resolves the served summary unchanged, snake_case, with no kind key", async () => {
++    stubFetch(jsonResponse(200, summaryFixture));
++    const summary = await fetchScoreSummary();
++    expect(summary).toEqual(summaryFixture);
++    expect("kind" in summary).toBe(false);
++  });
++
++  it("rejects a 404 whose envelope code is not not_found", async () => {
++    stubFetch(
++      jsonResponse(404, {
++        error: { code: "universe_not_found", message: "x", request_id: "req-u" },
++      }),
++    );
++    const caught = await fetchScoreSummary().catch((error: unknown) => error);
++    expect(caught).toBeInstanceOf(ApiError);
++    expect((caught as ApiError).code).toBe("universe_not_found");
++  });
++
++  it("rejects a 404 whose body is not the envelope, with a null code", async () => {
++    stubFetch(new Response("Not Found", { status: 404 }));
++    const caught = await fetchScoreSummary().catch((error: unknown) => error);
++    expect(caught).toBeInstanceOf(ApiError);
++    expect((caught as ApiError).code).toBeNull();
++  });
++});
+diff --git a/web/src/app/shell-client.ts b/web/src/app/shell-client.ts
+index 5b285e02..38a5680e 100644
+--- a/web/src/app/shell-client.ts
++++ b/web/src/app/shell-client.ts
+@@ -1,5 +1,5 @@
+-import { requestJson } from "../api/client";
+-import type { Attention, DataHealth, ProblemPage } from "./shell-types";
++import { ApiError, requestJson } from "../api/client";
++import type { Attention, DataHealth, ProblemPage, ScoreState, ScoreSummary } from "./shell-types";
+ 
+ /*
+  * The one fetch module for data-health-api's three routes and the score
+@@ -38,3 +38,28 @@ export function fetchProblems(
+   }
+   return requestJson<ProblemPage>(`/api/data-health/problems?${params}`);
+ }
++
++/**
++ * `GET /api/classifications/summary` (classification-api; DAC-E3-S1-2, AC-8,
++ * AC-24). Resolves the served summary itself, or `{ kind: "not_served" }` while
++ * the route is not deployed.
++ *
++ * The route answers `404 not_found` until it is deployed (system design 4.2;
++ * owner-shell 3), served by `app.py:338-347` for every unmatched `/api` path.
++ * `ApiError` carries the envelope's `code`, not the HTTP status, so the mapping
++ * is `code === "not_found"`. Any other `ApiError`, an `ApiUnreachableError`, and
++ * a `404` without the envelope all reject unchanged. The two results are told
++ * apart by `"kind" in value`: the wire summary has no `kind` key.
++ */
++export async function fetchScoreSummary(): Promise<
++  ScoreSummary | Extract<ScoreState, { kind: "not_served" }>
++> {
++  try {
++    return await requestJson<ScoreSummary>("/api/classifications/summary");
++  } catch (caught) {
++    if (caught instanceof ApiError && caught.code === "not_found") {
++      return { kind: "not_served" };
++    }
++    throw caught;
++  }
++}

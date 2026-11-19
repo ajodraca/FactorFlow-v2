@@ -1,0 +1,76 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-t410pknl/w2/web
+
+ ❯ src/app/shell-client.test.ts (30 tests | 4 failed) 15ms
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > resolves { kind: not_served } on a 404 not_found envelope 3ms
+     → promise rejected "ApiError: No resource exists at this path. { …(3) }" instead of resolving
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > rejects a 500 with the ApiError, code and request id intact 1ms
+     → expected { kind: 'not_served' } to be an instance of ApiError
+   × fetchScoreSummary success and other 404s > rejects a 404 whose envelope code is not not_found 0ms
+     → expected { kind: 'not_served' } to be an instance of ApiError
+   × fetchScoreSummary success and other 404s > rejects a 404 whose body is not the envelope, with a null code 0ms
+     → expected { kind: 'not_served' } to be an instance of ApiError
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > resolves { kind: not_served } on a 404 not_found envelope
+AssertionError: promise rejected "ApiError: No resource exists at this path. { …(3) }" instead of resolving
+ ❯ src/app/shell-client.test.ts:504:37
+    502|   it("resolves { kind: not_served } on a 404 not_found envelope", asyn…
+    503|     const fetchMock = stubFetch(jsonResponse(404, notFoundEnvelope));
+    504|     await expect(fetchScoreSummary()).resolves.toEqual({ kind: "not_se…
+       |                                     ^
+    505|     expect(fetchMock).toHaveBeenCalledTimes(1);
+    506|     expect(firstCall(fetchMock).path).toBe("/api/classifications/summa…
+
+Caused by: ApiError: No resource exists at this path.
+ ❯ toApiError src/api/client.ts:118:10
+ ❯ Module.requestJson src/api/client.ts:168:11
+ ❯ Module.fetchScoreSummary src/app/shell-client.ts:58:12
+ ❯ src/app/shell-client.test.ts:504:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-404', code: 'not_found', state: null }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > rejects a 500 with the ApiError, code and request id intact
+AssertionError: expected { kind: 'not_served' } to be an instance of ApiError
+ ❯ src/app/shell-client.test.ts:514:20
+    512|     );
+    513|     const caught = await fetchScoreSummary().catch((error: unknown) =>…
+    514|     expect(caught).toBeInstanceOf(ApiError);
+       |                    ^
+    515|     expect((caught as ApiError).code).toBe("internal_error");
+    516|     expect((caught as ApiError).requestId).toBe("req-500");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchScoreSummary success and other 404s > rejects a 404 whose envelope code is not not_found
+AssertionError: expected { kind: 'not_served' } to be an instance of ApiError
+ ❯ src/app/shell-client.test.ts:548:20
+    546|     );
+    547|     const caught = await fetchScoreSummary().catch((error: unknown) =>…
+    548|     expect(caught).toBeInstanceOf(ApiError);
+       |                    ^
+    549|     expect((caught as ApiError).code).toBe("universe_not_found");
+    550|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchScoreSummary success and other 404s > rejects a 404 whose body is not the envelope, with a null code
+AssertionError: expected { kind: 'not_served' } to be an instance of ApiError
+ ❯ src/app/shell-client.test.ts:555:20
+    553|     stubFetch(new Response("Not Found", { status: 404 }));
+    554|     const caught = await fetchScoreSummary().catch((error: unknown) =>…
+    555|     expect(caught).toBeInstanceOf(ApiError);
+       |                    ^
+    556|     expect((caught as ApiError).code).toBeNull();
+    557|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 26 passed (30)
+   Start at  23:25:32
+   Duration  725ms (transform 32ms, setup 30ms, collect 28ms, tests 15ms, environment 150ms, prepare 34ms)
+

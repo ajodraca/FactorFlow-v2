@@ -40,7 +40,7 @@ afterEach(() => {
 // Every type below is written out here, from data-health-api section 2.4,
 // system design section 4.2 and `classification_models.py:455-585`, so the
 // assertions compare shell-types.ts against an independent literal rather than
-// against itself. `toEqualTypeOf` (never `toMatchTypeOf`) rejects an added,
+// against itself. `toEqualTypeOf` (not the looser match form) rejects an added,
 // renamed or widened field; `npx tsc --noEmit` enforces it.
 
 type RunStateLiteral =

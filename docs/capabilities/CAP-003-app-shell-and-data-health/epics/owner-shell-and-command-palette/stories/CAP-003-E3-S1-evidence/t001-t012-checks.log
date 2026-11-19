@@ -1,0 +1,15 @@
+# T001 / T012 checks
+$ git diff --exit-code $(git merge-base HEAD origin/main) -- <client files>
+exit=0
+$ git diff --exit-code HEAD -- <client files>
+exit=0
+$ grep -n "^export async function requestJson" web/src/api/client.ts
+154:export async function requestJson<T>(input: string, init?: RequestInit): Promise<T> {
+$ npx vitest run client.coverage client.runs render
+ Test Files  3 passed (3)
+      Tests  29 passed (29)
+$ grep request-path literals outside tests
+web/src/api/classification-client.ts
+web/src/app/shell-client.ts
+$ grep -c toMatchTypeOf
+0
