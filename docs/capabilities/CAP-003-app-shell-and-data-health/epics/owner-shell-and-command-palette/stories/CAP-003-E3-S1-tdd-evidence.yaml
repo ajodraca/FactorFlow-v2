@@ -31,3 +31,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T006, T008, T010]
+    description: >
+      The fetch module (TC-COMP-067, TC-COMP-068, DAC-E3-S1-3, DAC-E3-18): fetchAttention, fetchDataHealth and fetchProblems through requestJson, limit always sent and cursor only when set, no body mapped. The spec-drift review first found T008's nullables and T006's Accept/GET check incomplete; both were added to the tests and the pair of reviews re-run on the final patch.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-2-fetch.log
+    red_log_sha256: 6c850f1a3404d626b35108b9865a2b492eb83db7c3492d1f65861c4fa79afcbe
+    red_evidence: >
+      The test file failed to load (./shell-client did not resolve; tsc TS2307) before shell-client.ts existed.
+    green_evidence: >
+      shell-client.test.ts 24 passed, tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c5a20333caf0ba91a40cd85f465f0891f760c5f5c3916f07445e7d1188069420
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 72073f3b5edcc6609911620b327cbbd5d5871a5a790153c76278e9c34cb82866
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
