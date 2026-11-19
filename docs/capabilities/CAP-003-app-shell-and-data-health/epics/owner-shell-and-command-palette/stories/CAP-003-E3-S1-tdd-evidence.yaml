@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E3-S1 - Shell Types, the One Fetch Module and the requestJson Export.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T004, T005, T009]
+    description: >
+      Wire-shape and state types (TC-COMP-068, DAC-E3-18, DAC-E3-S1-4): Attention, DataHealth, ProblemPage, ScoreSummary, ReadState and ScoreState in shell-types.ts, asserted by toEqualTypeOf against independent literals. ReadState follows owner-shell 2.3's discriminated union (the plan's prose summary describes it differently; the design governs).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-1-types.log
+    red_log_sha256: 92d6565d2d16fa6d5da31041f79731c5d4f79d174fa0f9e8e0b422fc52d23eec
+    red_evidence: >
+      npx tsc --noEmit failed with TS2307 (cannot find ./shell-types) before the module existed; vitest treats the type assertions as no-ops, so tsc is the observer.
+    green_evidence: >
+      tsc --noEmit clean and shell-client.test.ts 8 passed after T009.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: bc1e7e452835d2a754313254a97d6b1a632169c88ad68c7864a18eca9cd274dd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: f8874fe91e54edaa56873962f95a5ee1d331b44ef7d12b9579ae8e339f7b109f
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
