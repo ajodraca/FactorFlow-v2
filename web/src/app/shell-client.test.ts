@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import { ApiError, ApiUnreachableError } from "../api/client";
-import { fetchAttention, fetchDataHealth, fetchProblems } from "./shell-client";
+import { fetchAttention, fetchDataHealth, fetchProblems, fetchScoreSummary } from "./shell-client";
 import type {
   Attention,
   DataHealth,
@@ -460,5 +460,99 @@ describe("fetchAttention and fetchDataHealth", () => {
     );
     await expect(fetchAttention()).rejects.toBeInstanceOf(ApiUnreachableError);
     await expect(fetchDataHealth()).rejects.toBeInstanceOf(ApiUnreachableError);
+  });
+});
+
+const summaryFixture = {
+  never_classified: false,
+  set: {
+    set_id: "set-1",
+    classification_date: "2026-10-15",
+    run_id: "6f1c2a0e-0000-4000-8000-000000000004",
+    run_started_at: "2026-10-15T22:00:00+00:00",
+    run_outcome: "succeeded",
+    state: "complete",
+    started_at: "2026-10-15T22:00:05+00:00",
+    ended_at: "2026-10-15T22:10:00+00:00",
+    latest_trading_day: "2026-10-15",
+    active_instruments: 12,
+    not_current: false,
+  },
+  later: null,
+  factors: {
+    value: { qualified_count: 10, ranked: true, min_peer_set_size: 5 },
+    growth: { qualified_count: 9, ranked: true, min_peer_set_size: 5 },
+    momentum: { qualified_count: 0, ranked: false, min_peer_set_size: 5 },
+  },
+  stocks_current: { current_count: 11, followed_count: 12 },
+};
+
+const notFoundEnvelope = {
+  error: {
+    code: "not_found",
+    message: "No resource exists at this path.",
+    resource: "classifications",
+    request_id: "req-404",
+  },
+};
+
+// Implements TC-COMP-066 (DAC-E3-S1-2, AC-24): a summary 404 not_found resolves
+// to not_served; every other failure rejects as delivered.
+describe("TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served", () => {
+  it("resolves { kind: not_served } on a 404 not_found envelope", async () => {
+    const fetchMock = stubFetch(jsonResponse(404, notFoundEnvelope));
+    await expect(fetchScoreSummary()).resolves.toEqual({ kind: "not_served" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(firstCall(fetchMock).path).toBe("/api/classifications/summary");
+  });
+
+  it("rejects a 500 with the ApiError, code and request id intact", async () => {
+    stubFetch(
+      jsonResponse(500, { error: { code: "internal_error", message: "x", request_id: "req-500" } }),
+    );
+    const caught = await fetchScoreSummary().catch((error: unknown) => error);
+    expect(caught).toBeInstanceOf(ApiError);
+    expect((caught as ApiError).code).toBe("internal_error");
+    expect((caught as ApiError).requestId).toBe("req-500");
+  });
+
+  it("rejects a thrown fetch with ApiUnreachableError, not ApiError", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("network down");
+      }),
+    );
+    const caught = await fetchScoreSummary().catch((error: unknown) => error);
+    expect(caught).toBeInstanceOf(ApiUnreachableError);
+    expect(caught).not.toBeInstanceOf(ApiError);
+  });
+});
+
+// fetchScoreSummary's success and non-not_found 404 paths (DAC-E3-S1-2, AC-8).
+describe("fetchScoreSummary success and other 404s", () => {
+  it("resolves the served summary unchanged, snake_case, with no kind key", async () => {
+    stubFetch(jsonResponse(200, summaryFixture));
+    const summary = await fetchScoreSummary();
+    expect(summary).toEqual(summaryFixture);
+    expect("kind" in summary).toBe(false);
+  });
+
+  it("rejects a 404 whose envelope code is not not_found", async () => {
+    stubFetch(
+      jsonResponse(404, {
+        error: { code: "universe_not_found", message: "x", request_id: "req-u" },
+      }),
+    );
+    const caught = await fetchScoreSummary().catch((error: unknown) => error);
+    expect(caught).toBeInstanceOf(ApiError);
+    expect((caught as ApiError).code).toBe("universe_not_found");
+  });
+
+  it("rejects a 404 whose body is not the envelope, with a null code", async () => {
+    stubFetch(new Response("Not Found", { status: 404 }));
+    const caught = await fetchScoreSummary().catch((error: unknown) => error);
+    expect(caught).toBeInstanceOf(ApiError);
+    expect((caught as ApiError).code).toBeNull();
   });
 });

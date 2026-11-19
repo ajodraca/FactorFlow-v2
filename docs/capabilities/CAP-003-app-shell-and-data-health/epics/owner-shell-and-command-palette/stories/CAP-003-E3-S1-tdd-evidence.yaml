@@ -60,3 +60,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T007, T011]
+    description: >
+      fetchScoreSummary (TC-COMP-066, DAC-E3-S1-2, AC-8): a summary 404 whose envelope code is not_found resolves { kind: not_served }; any other ApiError, an ApiUnreachableError and a 404 without the envelope reject unchanged; success returns the served body unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-3-score-summary.log
+    red_log_sha256: f60ec1a43ba8988176f1ac96e81035f05b8f13069a8e56b588645f185e6b286e
+    red_evidence: >
+      6 failed (fetchScoreSummary is not a function) and tsc TS2305 before fetchScoreSummary existed.
+    green_evidence: >
+      shell-client.test.ts 30 passed, tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d349b20aeeaac37b6d4e771ca8b50dc0669cbb086c06ae0efd8ecf96529a2ba3
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: cd13e9e246c50b4082c511d82a6980944715d95f421e7702315c684a86e113c4
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
