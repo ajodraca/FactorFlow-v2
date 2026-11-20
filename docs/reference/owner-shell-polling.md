@@ -3,7 +3,9 @@
 Three modules CAP-003-E3-S2 added to the owner shell (component design
 `owner-shell` sections 2.1 and 2.4; DAC-E3-5, DAC-E3-16, DAC-E3-S2-1 to
 DAC-E3-S2-4): `layout.ts`, `use-polled-read.ts` and `health.tsx`. No screen
-imports them yet; their only importers are their tests and each other. The
+imports them yet; their only importers are their tests, each other and
+`shell-context.tsx` ([`shell-context.md`](shell-context.md)), which reads
+through `use-polled-read.ts` and `health.tsx`. The
 delivered `status-region.tsx` still renders the status region and keeps its own
 health poll until CAP-003-E3-S6 moves it onto `health.tsx`. The fetch functions
 the shell reads through are in [`shell-client.md`](shell-client.md).
