@@ -1,0 +1,285 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w3/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 6 failed) 74ms
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > fires nothing while hidden, reads at once on visible and resumes the 10 s schedule 15ms
+     → expected "spy" to be called 3 times, but got 2 times
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > starts no second read while one is in flight, whatever asks for it 8ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure 22ms
+     → expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > is loading until the mount read settles, then carries the answer's own instant 3ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'ok', …(2) }
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > asks intervalMs about the last successful answer, or null before one 2ms
+     → expected 1st "intervalByAnswer" call to have been called with [ { fast: false } ]
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > uses a changed read and intervalMs from the next read on, without restarting the poll 2ms
+     → expected "spy" to be called with arguments: [ { fast: false } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   Object {
+-     "fast": false,
+-   },
++   null,
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > fires nothing while hidden, reads at once on visible and resumes the 10 s schedule
+AssertionError: expected "spy" to be called 3 times, but got 2 times
+ ❯ src/app/use-polled-read.test.ts:68:18
+     66|     expect(read).toHaveBeenCalledTimes(2);
+     67|     await advance(1);
+     68|     expect(read).toHaveBeenCalledTimes(3);
+       |                  ^
+     69|   });
+     70| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > starts no second read while one is in flight, whatever asks for it
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/app/use-polled-read.test.ts:82:18
+     80|     await advance(0);
+     81|     await advance(10_000);
+     82|     expect(read).toHaveBeenCalledTimes(2);
+       |                  ^
+     83|     await advance(10_000);
+     84|     expect(read).toHaveBeenCalledTimes(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure
+AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "error": [ApiError: boom],
+    "kind": "error",
+-   "last": Object {
+-     "checkedAt": 2026-09-06T18:30:00.000Z,
+-     "data": Object {
+-       "n": 1,
+-     },
+-   },
++   "last": null,
+  }
+
+ ❯ src/app/use-polled-read.test.ts:183:34
+    181| 
+    182|     await advance(10_000);
+    183|     expect(result.current.state).toEqual({
+       |                                  ^
+    184|       kind: "error",
+    185|       error: apiError,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > is loading until the mount read settles, then carries the answer's own instant
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "checkedAt": 2026-09-06T18:30:00.000Z,
+-   "data": Object {
+-     "fast": false,
+-   },
+-   "kind": "ok",
++   "kind": "loading",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:229:34
+    227|       first.resolve({ fast: false });
+    228|     });
+    229|     expect(result.current.state).toEqual({
+       |                                  ^
+    230|       kind: "ok",
+    231|       data: { fast: false },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > asks intervalMs about the last successful answer, or null before one
+AssertionError: expected 1st "intervalByAnswer" call to have been called with [ { fast: false } ]
+
+- Expected
++ Received
+
+  Array [
+-   Object {
+-     "fast": false,
+-   },
++   null,
+  ]
+
+ ❯ src/app/use-polled-read.test.ts:252:24
+    250|     renderHook(() => usePolledRead(read, intervalMs));
+    251|     await advance(0);
+    252|     expect(intervalMs).toHaveBeenNthCalledWith(1, { fast: false });
+       |                        ^
+    253| 
+    254|     await advance(59_999);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > uses a changed read and intervalMs from the next read on, without restarting the poll
+AssertionError: expected "spy" to be called with arguments: [ { fast: false } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   Object {
+-     "fast": false,
+-   },
++   null,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/app/use-polled-read.test.ts:319:28
+    317|     expect(firstRead).toHaveBeenCalledTimes(1);
+    318|     expect(secondRead).toHaveBeenCalledTimes(1);
+    319|     expect(secondInterval).toHaveBeenCalledWith({ fast: false });
+       |                            ^
+    320|     await advance(5_000);
+    321|     expect(secondRead).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 16 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "fires nothing while hidden, reads at once on visible and resumes the 10 s schedule". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "fires nothing while hidden, reads at once on visible and resumes the 10 s schedule". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "starts no second read while one is in flight, whatever asks for it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "schedules nothing for a read that settles while the page is hidden". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "schedules nothing for a read that settles while the page is hidden". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "removes the visibilitychange listener it added, on unmount". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "makes no further read after unmount". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "reports a failure after a success with the success kept, then keeps it through the next failure". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "is loading until the mount read settles, then carries the answer's own instant". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "asks intervalMs about the last successful answer, or null before one". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "passes null to intervalMs when the first read fails, and reads again at 60 s". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "refresh reads at once and reschedules from that read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "refresh reads at once and reschedules from that read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "refresh reads at once and reschedules from that read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "uses a changed read and intervalMs from the next read on, without restarting the poll". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Unknown Error: undefined
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "uses a changed read and intervalMs from the next read on, without restarting the poll". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 7 passed (13)
+     Errors  16 errors
+   Start at  22:35:35
+   Duration  924ms (transform 82ms, setup 42ms, collect 108ms, tests 74ms, environment 233ms, prepare 274ms)
+

@@ -1,0 +1,148 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w0/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 2 failed) 31ms
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure 6ms
+     → expected { kind: 'ok', data: { n: 1 }, …(1) } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > has no last value when the first read fails 2ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure
+AssertionError: expected { kind: 'ok', data: { n: 1 }, …(1) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: boom],
+-   "kind": "error",
+-   "last": Object {
+    "checkedAt": 2026-09-06T18:30:00.000Z,
+    "data": Object {
+      "n": 1,
+    },
+-   },
++   "kind": "ok",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:183:34
+    181| 
+    182|     await advance(10_000);
+    183|     expect(result.current.state).toEqual({
+       |                                  ^
+    184|       kind: "error",
+    185|       error: apiError,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > has no last value when the first read fails
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiUnreachableError: down],
+-   "kind": "error",
+-   "last": null,
++   "kind": "loading",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:212:34
+    210|     const { result } = renderHook(() => usePolledRead(read, always10s)…
+    211|     await advance(0);
+    212|     expect(result.current.state).toEqual({ kind: "error", error: unrea…
+       |                                  ^
+    213|   });
+    214| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 3 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiError: boom
+ ❯ src/app/use-polled-read.test.ts:171:22
+    169| 
+    170|   it("reports a failure after a success with the success kept, then ke…
+    171|     const apiError = new ApiError("boom", "req-1", { code: "internal_e…
+       |                      ^
+    172|     const unreachable = new ApiUnreachableError("down");
+    173|     const read = vi
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-1', code: 'internal_error', state: null }
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "reports a failure after a success with the success kept, then keeps it through the next failure". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiUnreachableError: down
+ ❯ src/app/use-polled-read.test.ts:208:25
+    206| 
+    207|   it("has no last value when the first read fails", async () => {
+    208|     const unreachable = new ApiUnreachableError("down");
+       |                         ^
+    209|     const read = vi.fn<() => Promise<{ n: number }>>().mockRejectedVal…
+    210|     const { result } = renderHook(() => usePolledRead(read, always10s)…
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "has no last value when the first read fails". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiUnreachableError: down
+ ❯ src/app/use-polled-read.test.ts:268:30
+    266|     const read = vi
+    267|       .fn<() => Promise<Answer>>()
+    268|       .mockRejectedValueOnce(new ApiUnreachableError("down"))
+       |                              ^
+    269|       .mockResolvedValue({ fast: true });
+    270|     const intervalMs = vi.fn(intervalByAnswer);
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "passes null to intervalMs when the first read fails, and reads again at 60 s". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+     Errors  3 errors
+   Start at  22:35:39
+   Duration  691ms (transform 105ms, setup 43ms, collect 55ms, tests 31ms, environment 175ms, prepare 237ms)
+
