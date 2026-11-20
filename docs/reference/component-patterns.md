@@ -29,6 +29,11 @@ imports either yet; their only importers are their tests.
 CAP-003-E1-S7 added `worst-data-tier.ts`, the data verdict and the one tier
 order. No screen imports it yet; its only importer is its test.
 
+CAP-003-E1-S8 added `needs-you.ts`, the one derivation and sort of the *Needs
+you* list, and `needs-you-item.tsx`, the row that shows one item. It also
+exported `TierShape` from `status-badge.tsx`. No screen imports the first two
+yet; their only importers are their tests.
+
 CAP-002-E4-S7 added the two selection controls:
 
 - `selection-tray.tsx`, the tray under the results that counts the checked
@@ -269,8 +274,8 @@ Tests: `worst-data-tier.test.ts` (TC-COMP-026, TC-COMP-001, TC-COMP-027). The
 TC-COMP-027 cases scan every non-test `.ts` and `.tsx` source under `web/src`,
 comments stripped, and fail when a second file declares `TIER_ORDER` or an
 order literal, or names `TIER_ORDER` without importing it from
-`worst-data-tier`; once `needs-you.ts` exists, they also require it to import
-`TIER_ORDER`.
+`worst-data-tier`; `needs-you.ts` exists now, so they also require it to import
+`TIER_ORDER` (`sortAttention` does).
 
 ## The status badge (`status-badge.tsx`)
 
@@ -296,6 +301,68 @@ hollow circle, active a ringed dot, good a filled circle, warning a filled
 triangle, serious a filled diamond, critical a filled square. `StatusTier` is
 kept as an alias of `Tier` for the CAP-002 callers (`as-of-line`,
 `set-history-dialog`, `history-tab`). Tests: `status-badge.test.tsx`.
+
+The shape is drawn by `TierShape({ tier, className? })`, which `status-badge.tsx`
+also exports. It is the one tier-to-shape mapping: `StatusBadge` renders it,
+and so does the *Needs you* row's severity tile, so the two cannot draw a tier
+differently. `className` is merged after the default `h-3 w-3 shrink-0`; the
+tile passes `h-4 w-4`.
+
+## The Needs you list (`needs-you.ts`)
+
+`needs-you.ts` derives the *Needs you* list once, so Home's list and the rail's
+Home chip are the same array. It produces kinds, ISO times, ids and route
+paths, and no user-visible string. It imports `Attention` and `ScoreState` as
+types only from `web/src/app/shell-types.ts`, and every tier comes from
+`tierOf`. It exports `NeedsYouKind` (re-exported from `tiers.ts`),
+`NeedsYouItem`, `deriveNeedsYou` and `sortAttention`.
+
+`NeedsYouItem` is `{ kind, tier, recordedAt, target, runId? }`: `recordedAt` is
+an ISO time, `target` a route path, and `runId` is set only on the three
+download-bound kinds.
+
+**`deriveNeedsYou(attention, scores)`** returns one item per cause that holds:
+
+| Kind | Present when | `target` | `recordedAt` |
+|------|--------------|----------|--------------|
+| `data_problems` | `attention.items` carries it | `/data` | the entry's `recorded_at` |
+| `credential_missing` | `attention.items` carries it | `/settings` | the entry's `recorded_at` |
+| `download_not_complete` | `attention.items` carries it | `/data/downloads/{runId}`, or `/data` when no run id is known | the entry's `recorded_at` |
+| `first_scores` | scores are served, `never_classified` is true and `later.state` is `building` | `/data/downloads/{later.run_id}` | the latest download's `requested_at` when its run is the building set's run, else `later.run_started_at` |
+| `first_download` | `never_classified` is true and the latest download is non-terminal (`requested`, `running`, `cancelling`), with no `first_scores` item; also under a not-served score summary, only while `latest_terminal_download` is null | `/data/downloads/{run_id}` | the latest download's `requested_at` |
+| `score_failed` | scores are served and `later.state` is `failed` | `/data` | `later.ended_at`, else `later.started_at` |
+
+`download_not_complete` takes its run id from the entry, else from
+`latest_terminal_download`, and its tier from `tierOf` with `failed` set when
+that terminal download's state is `failed`. A scores `error` or `loading` state
+yields no score-derived item; the three server kinds stay.
+
+**`sortAttention(items)`** returns a new array ordered by `TIER_ORDER` of the
+item's tier, then `recordedAt` newest first. Equal keys keep their input
+order. Home's chip is the length of `sortAttention(deriveNeedsYou(...))`.
+
+Tests: `needs-you.test.ts` (TC-COMP-002, TC-COMP-028, TC-COMP-029).
+
+## The Needs you row (`needs-you-item.tsx`)
+
+`NeedsYouItemRow({ item, title, body, actionLabel, actionName, markerSize })`
+renders one `<li>`. The caller supplies the copy; the row supplies the layout.
+
+| Prop | Type | Meaning |
+|------|------|---------|
+| `item` | `NeedsYouItem` | the tier, the kind and the link target |
+| `title` | `string` | the row's title, truncated to one line |
+| `body` | `ReactNode` | the row's body |
+| `actionLabel` | `string` | the link's visible text |
+| `actionName` | `string` | the link's accessible name (`aria-label`), which names the item |
+| `markerSize` | `string` | the tile's width and height as a CSS length, so this file holds no layout literal |
+
+The row holds an `aria-hidden` severity tile (`data-slot="severity-tile"`)
+drawing `TierShape` at `h-4 w-4` on the tier's `status-{tier}-muted` background
+with its `status-{tier}` text colour; a `StatusBadge` whose word is
+`labelOf({ of: "item", kind })`; the title; the body; and exactly one action, a
+`Link` to `item.target` styled as `Button` `variant="outline"`. Tests:
+`needs-you-item.test.tsx` (TC-COMP-030).
 
 ## The formatters (`format.ts`)
 
