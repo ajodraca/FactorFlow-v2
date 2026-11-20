@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zjsv85zs/w1/web
+
+ ❯ src/components/token-literals.test.ts (52 tests | 3 failed) 30ms
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: w-[116px] 4ms
+     → expected [ 'web/src/app/planted.tsx: 16px' ] to deeply equal []
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: w-[128px] 1ms
+     → expected [ 'web/src/app/planted.tsx: 28px' ] to deeply equal []
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: p-[2.16px] 0ms
+     → expected [ 'web/src/app/planted.tsx: 16px' ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: w-[116px]
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: p-[2.16px]
+AssertionError: expected [ 'web/src/app/planted.tsx: 16px' ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "web/src/app/planted.tsx: 16px",
++ ]
+
+ ❯ src/components/token-literals.test.ts:359:53
+    357|     "matches whole values only: %s",
+    358|     (source) => {
+    359|       expect(layoutLiteralsIn(PLANTED_APP, source)).toEqual([]);
+       |                                                     ^
+    360|     },
+    361|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: w-[128px]
+AssertionError: expected [ 'web/src/app/planted.tsx: 28px' ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "web/src/app/planted.tsx: 28px",
++ ]
+
+ ❯ src/components/token-literals.test.ts:359:53
+    357|     "matches whole values only: %s",
+    358|     (source) => {
+    359|       expect(layoutLiteralsIn(PLANTED_APP, source)).toEqual([]);
+       |                                                     ^
+    360|     },
+    361|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 49 passed (52)
+   Start at  22:31:30
+   Duration  1.00s (transform 40ms, setup 41ms, collect 31ms, tests 30ms, environment 188ms, prepare 216ms)
+

@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zjsv85zs/w0/web
+
+ ❯ src/components/token-literals.test.ts (52 tests | 1 failed) 31ms
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: 170ch 4ms
+     → expected [ 'web/src/app/planted.tsx: 70ch' ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > matches whole values only: 170ch
+AssertionError: expected [ 'web/src/app/planted.tsx: 70ch' ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "web/src/app/planted.tsx: 70ch",
++ ]
+
+ ❯ src/components/token-literals.test.ts:359:53
+    357|     "matches whole values only: %s",
+    358|     (source) => {
+    359|       expect(layoutLiteralsIn(PLANTED_APP, source)).toEqual([]);
+       |                                                     ^
+    360|     },
+    361|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 51 passed (52)
+   Start at  22:31:30
+   Duration  1000ms (transform 39ms, setup 42ms, collect 31ms, tests 31ms, environment 198ms, prepare 89ms)
+

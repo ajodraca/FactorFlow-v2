@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E3-S2 - layout.ts, usePolledRead and the Health Provider with lastAnsweredAt and the Hidden-Page Pause.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T008, T009]
+    description: >
+      The layout module and the rule (TC-COMP-072, AC-26, DAC-E3-16, DAC-E3-S2-4): layout.ts holds the seven LAYOUT values of owner-shell 2.1; token-literals.test.ts gains the single-writer rule with the exemption for layout.ts and CAP-002's research directory (DEC-0321) and a guard that pins the two delivered research occurrences. The module is a constant object, so the mutation generator found none; the 15 mutants are hand-written (one per LAYOUT value and eight on the rule's regexes and exemption test). The first run left the trailing word boundary of the length regex surviving; cases 16pxs, 208pxx and 70chx were added and the run repeated.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-1-layout.log
+    red_log_sha256: e4f05b6e404a3ecfd23346c99ca75020d6116ddd90890f6cf4ddcdb15d002a10
+    red_evidence: >
+      token-literals.test.ts failed to load (../app/layout did not resolve) before layout.ts existed; t009-planted-red.log shows the planted 208px failing the rule and naming web/src/app/planted.tsx: 208px.
+    green_evidence: >
+      token-literals.test.ts 52 passed after T008 (t009-clean-green.log); biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9404039dd2e4f703b96cce125ab7b8e6f50253ab9dc93082ddaa19f57cf46a7f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 764c5c738e44debad16edc6c251d9b9837853f5469f708a89402abe4d4f4be6e
+      generated: 15
+      killed: 15
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
