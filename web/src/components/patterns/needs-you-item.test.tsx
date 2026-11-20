@@ -82,6 +82,13 @@ describe("NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3)", () => {
     expect(screen.getByText("Provider timeout. Ended 2026-10-15 17:31 CDT.")).toBeInTheDocument();
   });
 
+  it("separates rows with the border, keeps the title on one line and the action from shrinking", () => {
+    render(tree());
+    expect(row()).toHaveClass("border-b", "border-border");
+    expect(screen.getByText("The last download failed")).toHaveClass("truncate");
+    expect(within(row()).getByRole("link")).toHaveClass("shrink-0");
+  });
+
   it("exposes no image role and no tile content to assistive technology", () => {
     render(tree());
     expect(within(row()).queryByRole("img")).toBeNull();
@@ -96,13 +103,13 @@ describe("NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3)", () => {
 });
 
 describe("tile shape and colour per tier (DAC-E1-S8-3, AC-20)", () => {
-  const EXPECTED: Record<Tier, { cls: string; tags: string[] }> = {
-    neutral: { cls: "bg-status-neutral-muted", tags: ["circle"] },
-    active: { cls: "bg-status-active-muted", tags: ["circle", "circle"] },
-    good: { cls: "bg-status-good-muted", tags: ["circle"] },
-    warning: { cls: "bg-status-warning-muted", tags: ["path"] },
-    serious: { cls: "bg-status-serious-muted", tags: ["path"] },
-    critical: { cls: "bg-status-critical-muted", tags: ["rect"] },
+  const EXPECTED: Record<Tier, { cls: string[]; tags: string[] }> = {
+    neutral: { cls: ["bg-status-neutral-muted", "text-status-neutral"], tags: ["circle"] },
+    active: { cls: ["bg-status-active-muted", "text-status-active"], tags: ["circle", "circle"] },
+    good: { cls: ["bg-status-good-muted", "text-status-good"], tags: ["circle"] },
+    warning: { cls: ["bg-status-warning-muted", "text-status-warning"], tags: ["path"] },
+    serious: { cls: ["bg-status-serious-muted", "text-status-serious"], tags: ["path"] },
+    critical: { cls: ["bg-status-critical-muted", "text-status-critical"], tags: ["rect"] },
   };
 
   function tagsOf(svg: Element): string[] {
@@ -112,7 +119,7 @@ describe("tile shape and colour per tier (DAC-E1-S8-3, AC-20)", () => {
   it.each(Object.entries(EXPECTED))("the %s tile", (tier, expected) => {
     render(tree({ ...ITEM, tier: tier as Tier }));
     const severityTile = tile();
-    expect(severityTile).toHaveClass(expected.cls);
+    expect(severityTile).toHaveClass(...expected.cls);
     const tileSvg = severityTile.querySelector("svg");
     const badgeSvg = row().querySelector('[data-variant^="status-"] svg');
     if (!tileSvg || !badgeSvg) throw new Error("missing shape");
@@ -120,6 +127,10 @@ describe("tile shape and colour per tier (DAC-E1-S8-3, AC-20)", () => {
     // The tile and the badge draw one shape per tier, from the one TierShape.
     expect(tagsOf(badgeSvg)).toEqual(expected.tags);
     expect(tileSvg.innerHTML).toBe(badgeSvg.innerHTML);
+    // The tile's shape takes the caller's size, the badge's keeps its own (IR-005).
+    expect(tileSvg).toHaveClass("h-4", "w-4", "shrink-0");
+    expect(tileSvg).not.toHaveClass("h-3", "w-3");
+    expect(badgeSvg).toHaveClass("h-3", "w-3", "shrink-0");
   });
 
   it("the good tile draws a filled circle", () => {

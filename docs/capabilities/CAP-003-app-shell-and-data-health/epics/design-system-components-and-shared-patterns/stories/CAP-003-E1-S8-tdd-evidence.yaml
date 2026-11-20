@@ -91,3 +91,31 @@ cycles:
           disposition: equivalent
           reason: >
             removing aria-hidden from ICON_PROPS renders the same DOM, because lucide-react 1.70.0 adds aria-hidden="true" to an icon with no label by default (renderToStaticMarkup of a bare Circle prints it); the explicit prop is belt and braces and no test can observe the difference
+  - id: cycle-4
+    tasks: [T004, T007, T009, T012, T013]
+    description: >
+      Rework of implementation-review-v1 (IR-001, IR-003, IR-004, IR-005): the stability test also runs equal keys in descending target and kind order, DEC-0320's item run_id precedence and DEC-0203's requested_at recency are pinned with differing fixtures, the row's border, one-line title, action shrink-0 and each tier's shape colour are asserted, and the tile and badge glyph sizes are pinned. Tests only; no production change. IR-002 (tile colours, DEC-0319) is left for the owner.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/red-cycle-4-rework.log
+    red_log_sha256: a3d24a15679afb9b62acc5cea1cc0cb072ece66ccdb35887b4a89b382fb2b704
+    red_evidence: >
+      Against the review's 12 surviving production mutants the new assertions failed one or more tests each (red-cycle-4-rework.log).
+    green_evidence: >
+      The patterns suite passes (15 files, 542 tests); npx tsc --noEmit, biome lint and format are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 1a4a99ddd5329192a79937d4dda910467a942405a8b28987b37b72e2c16953e1
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/mutation-cycle-4-results.json
+      results_sha256: 0b7e3928c98c28e485420a33e63f8156a5b35c5267d7af77eb24bd795c47b9cd
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

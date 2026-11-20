@@ -500,6 +500,38 @@ describe("provisional recency and target rules (DEC-0318, DEC-0320)", () => {
     });
   });
 
+  it("download_not_complete's own run_id wins over the terminal download's (DEC-0320)", () => {
+    const [item] = deriveNeedsYou(
+      attentionWith({
+        items: [{ kind: "download_not_complete", recorded_at: CHECKED_AT, run_id: "run-item-1" }],
+        latest_terminal_download: {
+          run_id: "run-terminal-1",
+          state: "failed",
+          ended_at: CHECKED_AT,
+          failure_reason: null,
+        },
+      }),
+      { kind: "not_served" },
+    );
+    expect(item).toMatchObject({
+      runId: "run-item-1",
+      target: "/data/downloads/run-item-1",
+    });
+  });
+
+  it("first_download's recency is requested_at, not started_at (DEC-0203)", () => {
+    const [item] = deriveNeedsYou(
+      attentionWith({
+        latest_download: {
+          ...download("run-first-1", "running", "2026-10-15T21:58:00+00:00"),
+          started_at: "2026-10-15T22:05:00+00:00",
+        },
+      }),
+      { kind: "not_served" },
+    );
+    expect(item?.recordedAt).toBe("2026-10-15T21:58:00+00:00");
+  });
+
   it("download_not_complete with no run anywhere is kept, serious, and targets /data", () => {
     const [item] = deriveNeedsYou(
       attentionWith({
@@ -562,6 +594,13 @@ describe("sortAttention (TC-COMP-002, DAC-E1-7)", () => {
     expect(sortAttention(input)).toEqual(expected);
     expect(sortAttention(input)).toEqual(expected);
     expect(input).toEqual(before);
+  });
+
+  it("keeps equal keys in input order when that order is descending by target and kind", () => {
+    // Input order is the reverse of an ascending target or kind tiebreak, so only
+    // a stable sort returns it unchanged (IR-001).
+    const input = [warningB, warningA, good, active];
+    expect(sortAttention(input)).toEqual([warningB, warningA, good, active]);
   });
 
   it("returns an empty list for an empty list", () => {
