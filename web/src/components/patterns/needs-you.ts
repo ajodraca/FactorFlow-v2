@@ -1,6 +1,7 @@
 import type { RunState } from "../../api/types";
 import type { Attention, ScoreState } from "../../app/shell-types";
 import { type NeedsYouKind, type Tier, tierOf } from "./tiers";
+import { TIER_ORDER } from "./worst-data-tier";
 
 /**
  * The one place the *Needs you* list is derived (component design `ui-components`
@@ -125,4 +126,18 @@ export function deriveNeedsYou(attention: Attention, scores: ScoreState): NeedsY
   }
 
   return result;
+}
+
+/**
+ * Most severe first, then newest first (design 2.6: critical, serious, warning,
+ * good, neutral, with active sorting with good; DEC-0217; DAC-E1-7). Equal keys
+ * keep their input order, which `Array.prototype.sort` guarantees. The Home chip
+ * and Home's list are `sortAttention(deriveNeedsYou(...))` and its length (AC-16).
+ */
+export function sortAttention(items: readonly NeedsYouItem[]): NeedsYouItem[] {
+  return [...items].sort(
+    (a, b) =>
+      TIER_ORDER[a.tier] - TIER_ORDER[b.tier] ||
+      Date.parse(b.recordedAt) - Date.parse(a.recordedAt),
+  );
 }

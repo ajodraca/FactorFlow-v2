@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ApiError } from "../../api/client";
 import type { RunState } from "../../api/types";
 import type { Attention, LatestDownload, ScoreState, ScoreSummary } from "../../app/shell-types";
-import { type NeedsYouItem, deriveNeedsYou } from "./needs-you";
+import { type NeedsYouItem, deriveNeedsYou, sortAttention } from "./needs-you";
 
 const CHECKED_AT = "2026-10-15T23:00:00+00:00";
 
@@ -532,5 +532,120 @@ describe("provisional recency and target rules (DEC-0318, DEC-0320)", () => {
       ),
     );
     expect(item?.recordedAt).toBe("2026-10-15T22:10:00+00:00");
+  });
+});
+
+function item(
+  kind: NeedsYouItem["kind"],
+  tier: NeedsYouItem["tier"],
+  recordedAt: string,
+  target: string,
+): NeedsYouItem {
+  return { kind, tier, recordedAt, target };
+}
+
+describe("sortAttention (TC-COMP-002, DAC-E1-7)", () => {
+  // Implements TC-COMP-002
+  const neutral = item("first_download", "neutral", "2026-10-15T20:00:00+00:00", "/n");
+  const active = item("first_download", "active", "2026-10-15T21:00:00+00:00", "/a");
+  const good = item("first_scores", "good", "2026-10-15T21:00:00+00:00", "/g");
+  const warningA = item("data_problems", "warning", "2026-10-15T22:00:00+00:00", "/wa");
+  const warningB = item("data_problems", "warning", "2026-10-15T22:00:00+00:00", "/wb");
+  const serious = item("download_not_complete", "serious", "2026-10-15T22:30:00+00:00", "/s");
+  const criticalOld = item("credential_missing", "critical", "2026-10-15T20:30:00+00:00", "/co");
+  const criticalNew = item("score_failed", "critical", "2026-10-15T23:30:00+00:00", "/cn");
+
+  it("orders by tier then newest first, stable for equal keys", () => {
+    const input = [neutral, warningA, criticalOld, active, good, warningB, serious, criticalNew];
+    const before = structuredClone(input);
+    const expected = [criticalNew, criticalOld, serious, warningA, warningB, active, good, neutral];
+    expect(sortAttention(input)).toEqual(expected);
+    expect(sortAttention(input)).toEqual(expected);
+    expect(input).toEqual(before);
+  });
+
+  it("returns an empty list for an empty list", () => {
+    expect(sortAttention([])).toEqual([]);
+  });
+
+  it("the sorted derivation has the same length as the derivation (AC-16)", () => {
+    const attention = attentionWith({
+      items: [
+        { kind: "data_problems", recorded_at: "2026-10-15T22:00:00+00:00", run_id: null },
+        {
+          kind: "download_not_complete",
+          recorded_at: "2026-10-15T22:10:00+00:00",
+          run_id: "run-1",
+        },
+        { kind: "credential_missing", recorded_at: "2026-10-15T22:20:00+00:00", run_id: null },
+      ],
+      latest_download: download("run-1", "running", "2026-10-15T21:00:00+00:00"),
+      latest_terminal_download: null,
+    });
+    const scores = served(
+      summary({
+        never_classified: true,
+        later: later({ state: "failed", ended_at: "2026-10-15T23:00:00+00:00" }),
+      }),
+    );
+    expect(deriveNeedsYou(attention, scores)).toHaveLength(5);
+    expect(sortAttention(deriveNeedsYou(attention, scores))).toHaveLength(5);
+  });
+
+  it("compares instants, not strings", () => {
+    const earlier = item("data_problems", "warning", "2026-10-15T22:00:00-05:00", "/early");
+    const later2 = item("data_problems", "warning", "2026-10-16T01:00:00+00:00", "/late");
+    expect(sortAttention([later2, earlier]).map((i) => i.target)).toEqual(["/early", "/late"]);
+  });
+
+  it("orders the five-kind derivation by severity", () => {
+    const attention = attentionWith({
+      items: [
+        { kind: "data_problems", recorded_at: "2026-10-15T22:00:00+00:00", run_id: null },
+        {
+          kind: "download_not_complete",
+          recorded_at: "2026-10-15T22:10:00+00:00",
+          run_id: "run-1",
+        },
+        { kind: "credential_missing", recorded_at: "2026-10-15T22:20:00+00:00", run_id: null },
+      ],
+      latest_download: download("run-1", "running", "2026-10-15T21:00:00+00:00"),
+      latest_terminal_download: {
+        run_id: "run-1",
+        state: "failed",
+        ended_at: "2026-10-15T22:10:00+00:00",
+        failure_reason: null,
+      },
+    });
+    const scores = served(
+      summary({
+        never_classified: true,
+        later: later({ state: "failed", ended_at: "2026-10-15T23:00:00+00:00" }),
+      }),
+    );
+    expect(sortAttention(deriveNeedsYou(attention, scores)).map((i) => i.kind)).toEqual([
+      "score_failed",
+      "credential_missing",
+      "download_not_complete",
+      "data_problems",
+      "first_download",
+    ]);
+  });
+
+  it("active and good share a rank, so recency decides between them", () => {
+    const activeNew = item("first_download", "active", "2026-10-15T23:00:00+00:00", "/an");
+    const goodOld = item("first_scores", "good", "2026-10-15T20:00:00+00:00", "/go");
+    const goodNew = item("first_scores", "good", "2026-10-15T23:30:00+00:00", "/gn");
+    const activeOld = item("first_download", "active", "2026-10-15T19:00:00+00:00", "/ao");
+    expect(sortAttention([goodOld, activeNew]).map((i) => i.target)).toEqual(["/an", "/go"]);
+    expect(sortAttention([activeOld, goodNew]).map((i) => i.target)).toEqual(["/gn", "/ao"]);
+  });
+
+  it("returns a new array holding the same item objects", () => {
+    const input = [warningA, criticalNew];
+    const output = sortAttention(input);
+    expect(output).not.toBe(input);
+    expect(output[0]).toBe(criticalNew);
+    expect(output[1]).toBe(warningA);
   });
 });
