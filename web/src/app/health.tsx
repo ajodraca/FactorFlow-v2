@@ -26,7 +26,7 @@ import { startPolling } from "./use-polled-read";
  * hidden by the same scheduler `usePolledRead` uses (DAC-E3-5).
  */
 
-/** The cadence component design section 2.3 records for this poll. */
+/** The cadence owner-shell section 2.4 records for this poll. */
 export const HEALTH_POLL_INTERVAL_MS = 30_000;
 
 /**

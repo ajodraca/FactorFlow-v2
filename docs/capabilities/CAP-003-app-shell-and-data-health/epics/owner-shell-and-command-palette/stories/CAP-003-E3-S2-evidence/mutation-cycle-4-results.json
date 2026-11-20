@@ -1,0 +1,114 @@
+{
+  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/use-polled-read.test.ts && npx tsc --noEmit",
+  "repo_head": "caa00352128d0f10c1fc68dfe66e7db2eeb897b1",
+  "tree_patch_sha256": "9bca29f7f83afd74f72efaaef053e59ca12a2478478f5648feaafc3689bf9904",
+  "mutants_sha256": "d58e42f0b70d6068ebe5127cf602013ff65235e93493cd1bc73df55efdec51de",
+  "schema": 1,
+  "mutants_file": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-mutants.json",
+  "jobs": 4,
+  "planned": 5,
+  "started": "2026-11-20T05:24:07Z",
+  "baselines": [
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 9.3,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/baseline-w1.log",
+      "log_sha256": "9c20b45cbcdaf8645a4fd11f16cb25f3f2ac3edcd44c6fe2adea15e6f3a91f16"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 9.3,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/baseline-w2.log",
+      "log_sha256": "4fcac7745308c4c83faebba1c238890cc805dffb408efd764783cd2163219d59"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 9.3,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/baseline-w3.log",
+      "log_sha256": "cd8cf6b0497359ca8a0626ed1e4803c3aea338394bbe29221a0a094b26a931ea"
+    },
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 9.4,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/baseline-w0.log",
+      "log_sha256": "c9de2baeddf4953bc1f2396574f391f8a8611fedf7f7fddafd8a022ad75e7f5e"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "manual:cycle4:1",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/app/use-polled-read.ts",
+      "old": "          throw error;\n",
+      "new": "          return;\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.3,
+      "worker": 0,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/manual_cycle4_1.log",
+      "log_sha256": "3ae56435a5cba0235cb2e1b00990508dbb67bd582a380ebd0e3b7e4fe7a8c7ea"
+    },
+    {
+      "id": "manual:cycle4:2",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/app/use-polled-read.ts",
+      "old": "    } finally {\n      inFlight = false;\n      // The next read",
+      "new": "    } catch (thrown) {\n      inFlight = false;\n      throw thrown;\n    }\n    {\n      inFlight = false;\n      // The next read",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.2,
+      "worker": 1,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/manual_cycle4_2.log",
+      "log_sha256": "fe843b306cf446a3a518c5df3461f0fe0f9438298c09fdab37abbb02659b1e37"
+    },
+    {
+      "id": "manual:cycle4:3",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/app/use-polled-read.ts",
+      "old": "      stopped = true;\n      clearTimeout(timer);\n",
+      "new": "      stopped = true;\n",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.2,
+      "worker": 2,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/manual_cycle4_3.log",
+      "log_sha256": "c4ac2198b59bce2254103e1ae1150f0d8188610d06a0683ad86adfa23e1bc8b2"
+    },
+    {
+      "id": "manual:cycle4:4",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/app/use-polled-read.ts",
+      "old": "    if (stopped || inFlight) {",
+      "new": "    if (inFlight) {",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.2,
+      "worker": 3,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/manual_cycle4_4.log",
+      "log_sha256": "cdff7ed9f0f1757b76984fb4be01dd654850cb2f8372f26508178f78b57ec540"
+    },
+    {
+      "id": "manual:cycle4:5",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/app/use-polled-read.ts",
+      "old": "    handle.current?.refresh();\n  }, []);",
+      "new": "    handle.current?.refresh();\n  }, [state]);",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.5,
+      "worker": 3,
+      "log": "repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results-logs/manual_cycle4_5.log",
+      "log_sha256": "0537294b3d167dd3a9b7a68dbadf69279b881297266b5cd34267356c5d3c6383"
+    }
+  ],
+  "finished": "2026-11-20T05:24:20Z"
+}

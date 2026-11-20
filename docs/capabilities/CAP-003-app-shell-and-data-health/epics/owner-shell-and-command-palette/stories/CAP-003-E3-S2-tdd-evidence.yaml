@@ -93,3 +93,32 @@ cycles:
           disposition: equivalent
           reason: >
             The 24 to 00 midnight mapping in formatTimestamp is copied byte for byte (plan, Equivalent mutant). On this engine (Node v22.19.0) Intl.DateTimeFormat en-CA with hour12 false formats midnight in America/Chicago as formatToParts [{"type":"hour","value":"00"}], so the mapping never fires and a mutant that changes its test cannot be observed.
+
+  - id: cycle-4
+    tasks: [T003, T004, T005, T010, T011]
+    description: >
+      Review rework of CAP-003-E3-S2-implementation-review-v1 (IR-001, IR-002, IR-003, IR-006): tests that kill the five mutants the review left surviving, and the stale section reference in health.tsx's HEALTH_POLL_INTERVAL_MS comment. The tests are a rejection that is neither ApiError nor ApiUnreachableError (rethrown, the state unchanged, the next read still scheduled; observed through an unhandledRejection listener), the timer count before and after unmount, a refresh held across unmount that reads nothing, and a refresh that keeps its identity across answers and re-renders. No production behaviour changes; use-polled-read.ts is untouched. The five mutants are the review's manual:review:1, 2, 3, 4 and 51, re-run here as manual:cycle4:1 to 5.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-4-mutants.log
+    red_log_sha256: 14b271f20ac0dee7545f6544d65f44f2f635eeaa6f12941adaafb4acca3a4ac3
+    red_evidence: >
+      The code under test was already correct, so the new tests cannot fail against it; the RED is their failure against the five mutants the review found surviving. red-cycle-4-mutants.log holds the failing runs; before these tests the same mutants passed (review v1, Mutation run).
+    green_evidence: >
+      use-polled-read.test.ts 16 passed (green-cycle-4-polled-read.log); full Vitest suite 106 files, 2782 tests passed; npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9bca29f7f83afd74f72efaaef053e59ca12a2478478f5648feaafc3689bf9904
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: f557284b8c982ccb7581e3091df4c5359ed872730a353aeaad8ba142c156efa3
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

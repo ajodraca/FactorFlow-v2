@@ -9,6 +9,36 @@ interface Answer {
 
 const FIXED_NOW = new Date("2026-09-06T18:30:00.000Z");
 
+// Taken before any test fakes timers: a rejection reaches `unhandledRejection`
+// only on a real turn of the event loop.
+const realSetImmediate = globalThis.setImmediate;
+
+/**
+ * Runs `body` and returns every rejection it left unhandled. Vitest's own
+ * listeners are set aside meanwhile, since they would fail the run for the
+ * very rejection the test expects.
+ */
+async function surfacedRejections(body: () => Promise<void>): Promise<unknown[]> {
+  const seen: unknown[] = [];
+  const saved = process.listeners("unhandledRejection");
+  process.removeAllListeners("unhandledRejection");
+  process.on("unhandledRejection", (reason) => {
+    seen.push(reason);
+  });
+  try {
+    await body();
+    await new Promise<void>((resolve) => {
+      realSetImmediate(resolve);
+    });
+  } finally {
+    process.removeAllListeners("unhandledRejection");
+    for (const listener of saved) {
+      process.on("unhandledRejection", listener);
+    }
+  }
+  return seen;
+}
+
 /** Sets what `document` reports, without announcing it. */
 function defineVisibility(value: "hidden" | "visible"): void {
   Object.defineProperty(document, "visibilityState", { configurable: true, get: () => value });
@@ -155,11 +185,29 @@ describe("usePolledRead pauses while hidden, reads at once on show, never overla
     const { unmount } = renderHook(() => usePolledRead(read, intervalByAnswer));
     await advance(0);
     expect(read).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(1);
     unmount();
+    expect(vi.getTimerCount()).toBe(0);
     await advance(120_000);
     setVisibility("visible");
     await advance(0);
     expect(read).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("usePolledRead's refresh after unmount (TC-COMP-069 edge case)", () => {
+  it("reads nothing when a refresh held across unmount is called", async () => {
+    const read = vi.fn<() => Promise<Answer>>().mockResolvedValue({ fast: true });
+    const { result, unmount } = renderHook(() => usePolledRead(read, intervalByAnswer));
+    await advance(0);
+    const { refresh } = result.current;
+    unmount();
+    await act(async () => {
+      refresh();
+    });
+    await advance(120_000);
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 
@@ -202,6 +250,36 @@ describe("usePolledRead keeps the previous value in error.last (DAC-E3-S2-2)", (
       data: { n: 2 },
       checkedAt: new Date("2026-09-06T18:30:30.000Z"),
     });
+  });
+
+  it("rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again", async () => {
+    const surprise = new TypeError("programming error");
+    const read = vi
+      .fn<() => Promise<{ n: number }>>()
+      .mockResolvedValueOnce({ n: 1 })
+      .mockRejectedValueOnce(surprise)
+      .mockResolvedValueOnce({ n: 2 });
+    const surfaced = await surfacedRejections(async () => {
+      const { result } = renderHook(() => usePolledRead(read, always10s));
+      await advance(0);
+
+      await advance(10_000);
+      expect(read).toHaveBeenCalledTimes(2);
+      expect(result.current.state).toEqual({
+        kind: "ok",
+        data: { n: 1 },
+        checkedAt: new Date("2026-09-06T18:30:00.000Z"),
+      });
+
+      await advance(10_000);
+      expect(read).toHaveBeenCalledTimes(3);
+      expect(result.current.state).toEqual({
+        kind: "ok",
+        data: { n: 2 },
+        checkedAt: new Date("2026-09-06T18:30:20.000Z"),
+      });
+    });
+    expect(surfaced).toEqual([surprise]);
   });
 
   it("has no last value when the first read fails", async () => {
@@ -295,6 +373,21 @@ describe("usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25)
     expect(read).toHaveBeenCalledTimes(2);
     await advance(1);
     expect(read).toHaveBeenCalledTimes(3);
+  });
+
+  it("returns the same refresh across answers and re-renders", async () => {
+    const read = vi.fn<() => Promise<Answer>>().mockResolvedValue({ fast: false });
+    const { result, rerender } = renderHook(() => usePolledRead(read, intervalByAnswer));
+    const { refresh } = result.current;
+    expect(result.current.state.kind).toBe("loading");
+
+    await advance(0);
+    expect(result.current.state.kind).toBe("ok");
+    expect(result.current.refresh).toBe(refresh);
+
+    await advance(60_000);
+    rerender();
+    expect(result.current.refresh).toBe(refresh);
   });
 
   it("uses a changed read and intervalMs from the next read on, without restarting the poll", async () => {

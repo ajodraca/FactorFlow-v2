@@ -1,0 +1,162 @@
+RED for cycle 4: the new tests against the five mutants the implementation review left surviving (IR-001..IR-003); each run fails.
+
+=== manual_cycle4_1.log ===
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w0/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 118ms
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again 6ms
+     → expected [] to deeply equal [ TypeError: programming error ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again
+AssertionError: expected [] to deeply equal [ TypeError: programming error ]
+
+- Expected
++ Received
+
+- Array [
+-   [TypeError: programming error],
+- ]
++ Array []
+
+ ❯ src/app/use-polled-read.test.ts:282:22
+    280|       });
+    281|     });
+    282|     expect(surfaced).toEqual([surprise]);
+       |                      ^
+    283|   });
+    284| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:16
+   Duration  1.70s (transform 44ms, setup 59ms, collect 101ms, tests 118ms, environment 457ms, prepare 229ms)
+
+
+=== manual_cycle4_2.log ===
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w1/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 35ms
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again 4ms
+     → expected "spy" to be called 3 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again
+AssertionError: expected "spy" to be called 3 times, but got 2 times
+ ❯ src/app/use-polled-read.test.ts:275:20
+    273| 
+    274|       await advance(10_000);
+    275|       expect(read).toHaveBeenCalledTimes(3);
+       |                    ^
+    276|       expect(result.current.state).toEqual({
+    277|         kind: "ok",
+ ❯ surfacedRejections src/app/use-polled-read.test.ts:29:5
+ ❯ src/app/use-polled-read.test.ts:262:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:16
+   Duration  1.66s (transform 48ms, setup 59ms, collect 92ms, tests 35ms, environment 532ms, prepare 273ms)
+
+
+=== manual_cycle4_3.log ===
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w2/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 33ms
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > makes no further read after unmount 4ms
+     → expected 1 to be +0 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > makes no further read after unmount
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/app/use-polled-read.test.ts:190:32
+    188|     expect(vi.getTimerCount()).toBe(1);
+    189|     unmount();
+    190|     expect(vi.getTimerCount()).toBe(0);
+       |                                ^
+    191|     await advance(120_000);
+    192|     setVisibility("visible");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:16
+   Duration  1.61s (transform 50ms, setup 59ms, collect 92ms, tests 33ms, environment 465ms, prepare 262ms)
+
+
+=== manual_cycle4_4.log ===
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w3/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 32ms
+   × usePolledRead's refresh after unmount (TC-COMP-069 edge case) > reads nothing when a refresh held across unmount is called 3ms
+     → expected "spy" to be called 1 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead's refresh after unmount (TC-COMP-069 edge case) > reads nothing when a refresh held across unmount is called
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/use-polled-read.test.ts:209:18
+    207|     });
+    208|     await advance(120_000);
+    209|     expect(read).toHaveBeenCalledTimes(1);
+       |                  ^
+    210|     expect(vi.getTimerCount()).toBe(0);
+    211|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:16
+   Duration  1.66s (transform 48ms, setup 59ms, collect 94ms, tests 32ms, environment 504ms, prepare 80ms)
+
+
+=== manual_cycle4_5.log ===
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w3/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 74ms
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > returns the same refresh across answers and re-renders 4ms
+     → expected [Function] to be [Function] // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > returns the same refresh across answers and re-renders
+AssertionError: expected [Function] to be [Function] // Object.is equality
+
+Compared values have no visual difference.
+
+ ❯ src/app/use-polled-read.test.ts:386:36
+    384|     await advance(0);
+    385|     expect(result.current.state.kind).toBe("ok");
+    386|     expect(result.current.refresh).toBe(refresh);
+       |                                    ^
+    387| 
+    388|     await advance(60_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:19
+   Duration  974ms (transform 119ms, setup 62ms, collect 158ms, tests 74ms, environment 257ms, prepare 116ms)
+
