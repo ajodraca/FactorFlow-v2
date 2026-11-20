@@ -60,3 +60,36 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T006, T007, T011]
+    description: >
+      health.tsx (TC-COMP-071, DAC-E3-5, DAC-E3-S2-3, DEC-0212, DEC-0322): HealthProvider, useHealth, formatTimestamp, UNREACHABLE_MESSAGE, Liveness and HEALTH_POLL_INTERVAL_MS copied from status-region.tsx; HealthState gains lastAnsweredAt, kept while unreachable; the setInterval is replaced by startPolling so the poll pauses while hidden; useHealthRefresh returns the provider's refresh or a stable no-op. The delivered polling, unknown-state and cleanup cases are moved to a probe, with the new hidden-page and refresh cases. The spec-drift review asked for one comment-only addition (the TC-COMP-339 citation), made and re-fingerprinted. The one surviving mutant is equivalent.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-3-health.log
+    red_log_sha256: 4b6dfe94a283c48253089ff4ff5edf7c3bd96a9a1e6e08471ddb1772bec4a155
+    red_evidence: >
+      health.test.tsx failed to load (./health did not resolve) before health.tsx existed.
+    green_evidence: >
+      health.test.tsx 18 passed (green-cycle-3-health.log); tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7451e3367308e8e7ee28bb8aa89ba75db9269725cd09fc81bf555e07a45ecc46
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: 3c9ac75f2086ec5e0d315213e2972f048eaa2da96c9748b6cf79c2db67a94583
+      generated: 13
+      killed: 12
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.923
+      survivors:
+        - id: manual:cycle3:4
+          disposition: equivalent
+          reason: >
+            The 24 to 00 midnight mapping in formatTimestamp is copied byte for byte (plan, Equivalent mutant). On this engine (Node v22.19.0) Intl.DateTimeFormat en-CA with hour12 false formats midnight in America/Chicago as formatToParts [{"type":"hour","value":"00"}], so the mapping never fires and a mutant that changes its test cannot be observed.

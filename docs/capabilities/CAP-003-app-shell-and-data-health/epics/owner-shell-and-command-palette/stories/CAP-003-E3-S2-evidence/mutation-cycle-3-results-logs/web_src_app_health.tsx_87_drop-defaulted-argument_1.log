@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-e7fb_g93/w0/web
+
+ ❯ src/app/health.test.tsx (18 tests | 1 failed) 92ms
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > renders a timestamp in America/Chicago, as delivered 12ms
+     → expected '2026-09-06 01:30:00 America/Chicago' to be '2026-09-06 13:30:00 America/Chicago' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > renders a timestamp in America/Chicago, as delivered
+AssertionError: expected '2026-09-06 01:30:00 America/Chicago' to be '2026-09-06 13:30:00 America/Chicago' // Object.is equality
+
+Expected: "2026-09-06 13:30:00 America/Chicago"
+Received: "2026-09-06 01:30:00 America/Chicago"
+
+ ❯ src/app/health.test.tsx:141:67
+    139| 
+    140|   it("renders a timestamp in America/Chicago, as delivered", () => {
+    141|     expect(formatTimestamp(new Date("2026-09-06T18:30:00.000Z"))).toBe(
+       |                                                                   ^
+    142|       "2026-09-06 13:30:00 America/Chicago",
+    143|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  22:39:19
+   Duration  1.06s (transform 65ms, setup 42ms, collect 98ms, tests 92ms, environment 196ms, prepare 248ms)
+
