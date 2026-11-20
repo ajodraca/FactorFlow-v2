@@ -89,3 +89,13 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+exceptions:
+  - id: EXC-001
+    commits: [9a6513c2046b]
+    reason: >
+      The first retry's stage commit rewords one comment in web/src/app/shell-client.test.ts
+      (`toMatchTypeOf` becomes "the looser match form"). No assertion or production code
+      changes, so no RED/GREEN cycle applies, and a supervised run cannot rewrite the commit.
+    acknowledged_by: Alvaro de Jodra (owner)
+    decision: DEC-0400
