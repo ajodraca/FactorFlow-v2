@@ -1,0 +1,134 @@
+{
+  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/components/patterns/needs-you.test.ts",
+  "repo_head": "3332f3e3a09e6c4b5be6bbf12f08be01646883de",
+  "tree_patch_sha256": "6d4e603bf478d491362df821f90f483e381029eb7e8d0f68dee543dac707401a",
+  "mutants_sha256": "badffa26644676e03c1e02c1210700b58f9bace8a3803bbba61f00f9956a9a60",
+  "schema": 1,
+  "mutants_file": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/mutants-2.json",
+  "jobs": 4,
+  "planned": 6,
+  "started": "2026-11-20T02:40:59Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 2.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/baseline-w0.log",
+      "log_sha256": "05ddf4a3cc5aeb8cd233a61691a80f0f88a762567a5422ef6811ecaf21d68c8f"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 2.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/baseline-w3.log",
+      "log_sha256": "3d0b30242aabfe3d4d54fbfd0298a32138fdb7444cb29e8ad44ecf6187450932"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 2.4,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/baseline-w1.log",
+      "log_sha256": "509869d93e2a6e28a684e047323fca43a48dcfa472ce1d97ba67518270bd0284"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 2.5,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/baseline-w2.log",
+      "log_sha256": "49ce74b1274454140624e70a7120e972208ea9d91a11a855898269137ad247b5"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "web/src/components/patterns/needs-you.ts:manual:localecompare",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/components/patterns/needs-you.ts",
+      "line": 141,
+      "old": "Date.parse(b.recordedAt) - Date.parse(a.recordedAt)",
+      "new": "b.recordedAt.localeCompare(a.recordedAt)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.1,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/web_src_components_patterns_needs-you.ts_manual_localecompare.log",
+      "log_sha256": "cbdf9acc8b29ea66cde23a47a7ebd045f3d4f661e831eb68564fcd1cb1d666e3"
+    },
+    {
+      "id": "web/src/components/patterns/needs-you.ts:manual:tier-reversed",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/components/patterns/needs-you.ts",
+      "line": 140,
+      "old": "TIER_ORDER[a.tier] - TIER_ORDER[b.tier]",
+      "new": "TIER_ORDER[b.tier] - TIER_ORDER[a.tier]",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.1,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/web_src_components_patterns_needs-you.ts_manual_tier-reversed.log",
+      "log_sha256": "0f057c14650337bcc1a721b3fc0428f5f17e0e05e16c21059a6693d15193846a"
+    },
+    {
+      "id": "web/src/components/patterns/needs-you.ts:manual:recency-oldest-first",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/components/patterns/needs-you.ts",
+      "line": 141,
+      "old": "Date.parse(b.recordedAt) - Date.parse(a.recordedAt)",
+      "new": "Date.parse(a.recordedAt) - Date.parse(b.recordedAt)",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.1,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/web_src_components_patterns_needs-you.ts_manual_recency-oldest-first.log",
+      "log_sha256": "587d44be6d3a0d51e985fef6406ffdf5998c9aae0955ee14ba12e8eed699fd76"
+    },
+    {
+      "id": "web/src/components/patterns/needs-you.ts:manual:no-copy",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/components/patterns/needs-you.ts",
+      "line": 138,
+      "old": "[...items].sort(",
+      "new": "(items as NeedsYouItem[]).sort(",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 2.2,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/web_src_components_patterns_needs-you.ts_manual_no-copy.log",
+      "log_sha256": "520d83c732c34d07ae6e48a946b917dca0285a2afd0aaa1efad7d119e1dcd5da"
+    },
+    {
+      "id": "web/src/components/patterns/needs-you.ts:manual:drop-recency",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/components/patterns/needs-you.ts",
+      "line": 140,
+      "old": "TIER_ORDER[a.tier] - TIER_ORDER[b.tier] ||",
+      "new": "TIER_ORDER[a.tier] - TIER_ORDER[b.tier] || 0 &&",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/web_src_components_patterns_needs-you.ts_manual_drop-recency.log",
+      "log_sha256": "a367e507db9ffe73b9d3b667b93438766f9367f088977c90eb9d97007d44ffbc"
+    },
+    {
+      "id": "web/src/components/patterns/needs-you.ts:manual:tiebreak-target",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/components/patterns/needs-you.ts",
+      "line": 141,
+      "old": "Date.parse(b.recordedAt) - Date.parse(a.recordedAt),",
+      "new": "Date.parse(b.recordedAt) - Date.parse(a.recordedAt) || b.target.localeCompare(a.target),",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/ce954222-550a-44de-b2d7-a87c4c6b5268/scratchpad/logs-2/web_src_components_patterns_needs-you.ts_manual_tiebreak-target.log",
+      "log_sha256": "f52c007ce6818c4c8131e481bbf441e5cf53798949c17bcc7d6d0d20f17f37f2"
+    }
+  ],
+  "finished": "2026-11-20T02:41:05Z"
+}
