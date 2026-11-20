@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-posv5y_r/w0/web
+
+ ❯ src/app/shell-client.test.ts (33 tests | 1 failed) 17ms
+   × fetchProblems request encoding > sends an empty-string cursor as given, not as the first page 4ms
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > sends an empty-string cursor as given, not as the first page
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/app/shell-client.test.ts:285:44
+    283|     await fetchProblems("", 50);
+    284|     const { url } = firstCall(fetchMock);
+    285|     expect(url.searchParams.has("cursor")).toBe(true);
+       |                                            ^
+    286|     expect(url.searchParams.get("cursor")).toBe("");
+    287|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 32 passed (33)
+   Start at  19:52:14
+   Duration  1.03s (transform 44ms, setup 39ms, collect 41ms, tests 17ms, environment 202ms, prepare 164ms)
+

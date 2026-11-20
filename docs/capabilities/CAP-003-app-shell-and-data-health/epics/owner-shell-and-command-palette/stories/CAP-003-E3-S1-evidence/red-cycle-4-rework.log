@@ -1,0 +1,55 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/app/shell-client.test.ts (33 tests | 2 failed) 16ms
+   × fetchProblems request encoding > sends an empty-string cursor as given, not as the first page 4ms
+     → expected false to be true // Object.is equality
+   × fetchProblems request encoding > fetchScoreSummary sends GET with Accept: application/json and no method override 1ms
+     → expected 'POST' to be undefined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > sends an empty-string cursor as given, not as the first page
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/app/shell-client.test.ts:285:44
+    283|     await fetchProblems("", 50);
+    284|     const { url } = firstCall(fetchMock);
+    285|     expect(url.searchParams.has("cursor")).toBe(true);
+       |                                            ^
+    286|     expect(url.searchParams.get("cursor")).toBe("");
+    287|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > fetchScoreSummary sends GET with Accept: application/json and no method override
+AssertionError: expected 'POST' to be undefined
+
+- Expected: 
+undefined
+
++ Received: 
+"POST"
+
+ ❯ src/app/shell-client.test.ts:306:26
+    304|     await call();
+    305|     const { init } = firstCall(fetchMock);
+    306|     expect(init?.method).toBeUndefined();
+       |                          ^
+    307|     expect(new Headers(init?.headers).get("Accept")).toBe("application…
+    308|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 31 passed (33)
+   Start at  19:52:34
+   Duration  744ms (transform 40ms, setup 59ms, collect 29ms, tests 16ms, environment 290ms, prepare 33ms)
+
+web/src/app/shell-client.test.ts(573,65): error TS2344: Type 'Attention' does not satisfy the constraint '"Expected: ..., Actual: unknown"'.
