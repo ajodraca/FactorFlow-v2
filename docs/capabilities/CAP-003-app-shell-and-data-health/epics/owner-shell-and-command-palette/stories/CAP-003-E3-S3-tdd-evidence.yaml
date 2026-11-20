@@ -68,3 +68,32 @@ cycles:
           disposition: equivalent
           reason: >
             Removing the early return when the hook is unmounted. The only code it skips is setState, which React 18 drops silently on an unmounted component, and the rethrow of a rejection that is not ApiError or ApiUnreachableError, which cannot occur because requestJson rejects with only those two. The trailing-read guard in the finally block is separate and is killed by the pending-at-unmount test.
+
+  - id: cycle-3
+    tasks: [T001, T005, T008, T013]
+    description: >
+      Review rework of CAP-003-E3-S3-implementation-review-v1 (IR-001, IR-002, IR-003, IR-005): tests that kill the two mutants the review left surviving, and the cadence case made independent of same-tick settle order. A summary read held open with defer shows scores as loading and never as not_served before its first answer (IR-001). A thrown fetch for the aggregate gives an error state with an ApiUnreachableError, last null at first and the last good answer afterwards (IR-002). T001 (c) sequences the terminal attention answer and the summary answer with defer instead of relying on attention settling first (IR-003). The run also covers the plan's two hand-written mutants cycle 1 left out, a planted aggregate read in the provider and an added credential member (IR-005). No production behaviour changes; shell-context.tsx and use-data-health.ts are untouched. The four mutants are the review's manual:loading-to-not-served, manual:unreachable-not-mapped, manual:provider-reads-aggregate and manual:credential-member-added. IR-004 (Decision-Id trailers) is carried on this cycle's commit and the stage commit.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-3-mutants.log
+    red_log_sha256: 2237309cc42b0d4db9bd7ff7dae953ace8ab7751d3970c68ff204ad71baad528
+    red_evidence: >
+      The code under test was already correct, so the new tests cannot fail against it; the RED is their failure against the mutants the review found surviving (and the two it ran that were killed). red-cycle-3-mutants.log holds the failing runs; before these tests the first two mutants passed (review v1, Mutation run).
+    green_evidence: >
+      shell-context.test.tsx 34 and use-data-health.test.tsx 28 passed; full Vitest suite 108 files, 2844 tests passed (green-cycle-3-full-suite.log); npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: dafe650d8e2a5c726965faf728448c063ac4a3783608c6c38cdeb165ba61d045
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 61f7e5d033d2267d73b0d7a40fc89499a6e3939c2bec5c3d7fd6358deb962124
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

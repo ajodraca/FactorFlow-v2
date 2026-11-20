@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
-import { ApiError } from "../api/client";
+import { ApiError, ApiUnreachableError } from "../api/client";
 import type { HealthResponse, RunState } from "../api/types";
 import { HealthProvider } from "./health";
 import { ShellProvider } from "./shell-context";
@@ -88,7 +88,7 @@ const ATTENTION_PATH = "/api/attention";
 const SUMMARY_PATH = "/api/classifications/summary";
 const DATA_HEALTH_PATH = "/api/data-health";
 
-type Answer = { status: number; body: unknown };
+type Answer = { status: number; body: unknown } | "unreachable";
 const queues = new Map<string, Array<Answer | Promise<Answer>>>();
 const standings = new Map<string, Answer>();
 const counts = new Map<string, number>();
@@ -100,6 +100,9 @@ async function router(input: RequestInfo | URL): Promise<Response> {
   const answer = next === undefined ? standings.get(path) : await next;
   if (answer === undefined) {
     throw new Error(`no answer set for ${path}`);
+  }
+  if (answer === "unreachable") {
+    throw new TypeError("network down");
   }
   return new Response(JSON.stringify(answer.body), {
     status: answer.status,
@@ -329,6 +332,30 @@ describe("useDataHealth states, ordering and edges (DAC-E3-19, AC-28)", () => {
     expect(latestDH.state).toEqual({
       kind: "error",
       error: expect.any(ApiError),
+      last: { data: DATA_HEALTH, checkedAt: NOW },
+    });
+  });
+
+  it("maps an unreachable read to an error state, keeping the last good answer (T010, DEC-0324)", async () => {
+    standBase();
+    queues.set(DATA_HEALTH_PATH, ["unreachable"]);
+    render(<Tree />);
+    await advance(0);
+    expect(latestDH.state).toEqual({
+      kind: "error",
+      error: expect.any(ApiUnreachableError),
+      last: null,
+    });
+    answer(DATA_HEALTH_PATH, 200, DATA_HEALTH);
+    act(() => latestDH.retry());
+    await advance(0);
+    expect(latestDH.state).toEqual({ kind: "ok", data: DATA_HEALTH, checkedAt: NOW });
+    queues.set(DATA_HEALTH_PATH, ["unreachable"]);
+    act(() => latestDH.retry());
+    await advance(0);
+    expect(latestDH.state).toEqual({
+      kind: "error",
+      error: expect.any(ApiUnreachableError),
       last: { data: DATA_HEALTH, checkedAt: NOW },
     });
   });

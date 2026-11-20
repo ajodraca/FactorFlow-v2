@@ -1,0 +1,100 @@
+{
+  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/shell-context.test.tsx web/src/app/use-data-health.test.tsx && npx tsc --noEmit",
+  "repo_head": "c815752d0f8a5843be215245de8d4c774bbb9a72",
+  "tree_patch_sha256": "cbc139bd6965bd6c97533f942c68a250d2cd720dbb333b6758727019eae5bcf1",
+  "mutants_sha256": "15a95317e4c75c8dbce4e0f03ac52975d7a98d85771b441931ebd64199448cd5",
+  "schema": 1,
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-3.json",
+  "jobs": 4,
+  "planned": 4,
+  "started": "2026-11-20T07:08:24Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 7.1,
+      "log": "/private/tmp/claude-501/c3logs/baseline-w0.log",
+      "log_sha256": "a4ade4f7da43682f21c2689a61137530209df114c846d86b59875969f706ebf2"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 7.1,
+      "log": "/private/tmp/claude-501/c3logs/baseline-w1.log",
+      "log_sha256": "2669a5f1095488cbe2c00c9ffdc47616713f032508419708fd7bd53a43b9ccf1"
+    },
+    {
+      "worker": 3,
+      "exit_code": 0,
+      "seconds": 7.1,
+      "log": "/private/tmp/claude-501/c3logs/baseline-w3.log",
+      "log_sha256": "5b7701303a1a9225d57e986787c54c29e869dcab0463d776a2a2b606ee692efe"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 7.2,
+      "log": "/private/tmp/claude-501/c3logs/baseline-w2.log",
+      "log_sha256": "cf675a2561192fedc13376ac12b3859b728af018859dd26389fc087a9e3d3b55"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "web/src/app/shell-context.tsx:manual:loading-to-not-served",
+      "operator": "manual",
+      "file": "web/src/app/shell-context.tsx",
+      "old": "if (scoresState.kind === \"loading\") {\n      return { kind: \"loading\" };",
+      "new": "if (scoresState.kind === \"loading\") {\n      return { kind: \"not_served\" };",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 0,
+      "log": "/private/tmp/claude-501/c3logs/web_src_app_shell-context.tsx_manual_loading-to-not-served.log",
+      "log_sha256": "a3143a88a7b662f7bbb877d60086ad8f7f29810632c6a1a4624f9692c323d2c9"
+    },
+    {
+      "id": "web/src/app/use-data-health.ts:manual:unreachable-not-mapped",
+      "operator": "manual",
+      "file": "web/src/app/use-data-health.ts",
+      "old": "error instanceof ApiError || error instanceof ApiUnreachableError",
+      "new": "error instanceof ApiError || (error instanceof ApiUnreachableError && false)",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 1,
+      "log": "/private/tmp/claude-501/c3logs/web_src_app_use-data-health.ts_manual_unreachable-not-mapped.log",
+      "log_sha256": "3eb29a68bf80c62397ccb3b87ebd41aebf17947e7949b8a4cd9a7296ba8ade6e"
+    },
+    {
+      "id": "web/src/app/shell-context.tsx:manual:provider-reads-aggregate",
+      "operator": "manual",
+      "file": "web/src/app/shell-context.tsx",
+      "old": "    const answered = await fetchAttention();\n",
+      "new": "    const answered = await fetchAttention();\n    void fetch(\"/api/data-health\");\n",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.7,
+      "worker": 2,
+      "log": "/private/tmp/claude-501/c3logs/web_src_app_shell-context.tsx_manual_provider-reads-aggregate.log",
+      "log_sha256": "466cf41283f64e0ccd15783b2fc31e3ebfda6e1d09be3eba74448e6887a50028"
+    },
+    {
+      "id": "web/src/app/shell-context.tsx:manual:credential-member-added",
+      "operator": "manual",
+      "file": "web/src/app/shell-context.tsx",
+      "old": "  setTitleDetail(text: string | null): void;\n}",
+      "new": "  setTitleDetail(text: string | null): void;\n  credential?: string | null;\n}",
+      "cycle": "cycle-3",
+      "state": "killed",
+      "exit_code": 2,
+      "seconds": 4.9,
+      "worker": 3,
+      "log": "/private/tmp/claude-501/c3logs/web_src_app_shell-context.tsx_manual_credential-member-added.log",
+      "log_sha256": "bd1f6133cd81c9bb9bcd4948735c2cad219b9ebf87510b00f111047cd1726141"
+    }
+  ],
+  "finished": "2026-11-20T07:08:36Z"
+}

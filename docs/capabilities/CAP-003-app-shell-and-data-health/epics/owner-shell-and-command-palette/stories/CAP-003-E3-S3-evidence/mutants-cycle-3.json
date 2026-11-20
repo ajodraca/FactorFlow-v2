@@ -1,0 +1,39 @@
+{
+ "schema": 1,
+ "repo_head": "c815752d0f8a5843be215245de8d4c774bbb9a72",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/shell-context.tsx:manual:loading-to-not-served",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "if (scoresState.kind === \"loading\") {\n      return { kind: \"loading\" };",
+   "new": "if (scoresState.kind === \"loading\") {\n      return { kind: \"not_served\" };",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:unreachable-not-mapped",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "error instanceof ApiError || error instanceof ApiUnreachableError",
+   "new": "error instanceof ApiError || (error instanceof ApiUnreachableError && false)",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:provider-reads-aggregate",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "    const answered = await fetchAttention();\n",
+   "new": "    const answered = await fetchAttention();\n    void fetch(\"/api/data-health\");\n",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:credential-member-added",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "  setTitleDetail(text: string | null): void;\n}",
+   "new": "  setTitleDetail(text: string | null): void;\n  credential?: string | null;\n}",
+   "cycle": "cycle-3"
+  }
+ ]
+}

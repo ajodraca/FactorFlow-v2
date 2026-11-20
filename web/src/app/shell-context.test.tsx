@@ -282,13 +282,18 @@ describe("ShellProvider cadences (TC-COMP-073, DAC-E3-S3-1, AC-25)", () => {
       await mount();
       await advance(30_000);
       expect(calls(ATTENTION_PATH)).toBe(4);
-      // The read at 30 000 ms is the fourth; make the next answer terminal.
-      standing(ATTENTION_PATH, 200, attentionWith(end));
+      // The read at 40 000 ms answers terminal. Attention answers first, then
+      // the summary, each sequenced with defer so no case relies on same-tick order.
+      const a = defer(ATTENTION_PATH);
+      const s = defer(SUMMARY_PATH);
       await advance(10_000);
       expect(calls(ATTENTION_PATH)).toBe(5);
-      // That fifth answer (at 40 000 ms) was terminal, and the summary read
-      // beside it saw it: both next reads come 60 s after, not 10 s.
       expect(calls(SUMMARY_PATH)).toBe(5);
+      a.resolve(200, attentionWith(end));
+      await advance(0);
+      s.resolve(200, SUMMARY_SET);
+      await advance(0);
+      // Both reads' next delay is 60 s after their own answer.
       await advance(59_999);
       expect(calls(ATTENTION_PATH)).toBe(5);
       expect(calls(SUMMARY_PATH)).toBe(5);
@@ -504,6 +509,18 @@ describe("the score and attention states (TC-COMP-059, DAC-E3-6)", () => {
     expect(latest.scores).toEqual({ kind: "not_served" });
     expect("error" in latest.scores).toBe(false);
     expect("checkedAt" in latest.scores).toBe(false);
+  });
+
+  it("reads loading until the summary's first answer, not not_served", async () => {
+    standing(HEALTH_PATH, 200, HEALTH);
+    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
+    const first = defer(SUMMARY_PATH);
+    render(<Tree />);
+    await advance(0);
+    expect(latest.scores).toEqual({ kind: "loading" });
+    first.resolve(200, SUMMARY_SET);
+    await advance(0);
+    expect(latest.scores).toEqual({ kind: "served", data: SUMMARY_SET, checkedAt: NOW });
   });
 
   it("gives an error for a first-read 500, with no last value", async () => {
