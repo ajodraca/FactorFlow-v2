@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E3-S3 - ShellProvider, useShell and the On-Demand useDataHealth Hook.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T009]
+    description: >
+      The provider (TC-COMP-073, 074, 075, 076, 059, DAC-E3-S3-1 to 4, DAC-E3-6, DAC-E3-18, AC-25, AC-28, AC-8): ShellProvider and useShell with exactly the five members, useTitleDetail on a second private context (DEC-0323), useShell throwing outside a provider (DEC-0326). Attention and summary are two usePolledRead reads whose intervals follow the other read's last success through refs: 60 s idle, 10 s while the download is requested, running or cancelling or the summary's later set is building, 60 s for a not-served summary. T001 case (d) resolves the summary first, because the plan's own cross-read note says one read's change reaches the other only when that other next settles; T001 case (c) puts the terminal answer at the 40 s read, equivalent for the 60 s return. The first spec-drift review found the summary half of case (c) too loose (a bound, not exact spacing); the test was tightened to exact 59 999 and 60 000 ms boundaries, the mutation run repeated and a fresh review pair judged the revised patch. 23 mutants (8 generated, 15 hand-written from the plan's kill lists) were all killed. The second code review left three low findings accepted as warnings: a cast in the SUMMARY_LATER_FAILED fixture, the terminal-return case relying on attention settling before the summary in one tick, and one test title that names only its first half.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-1-shell-context.log
+    red_log_sha256: ddcfac5f8ec9cffa384f81f4ab6eed10cd65ace6742165ba74e68539efe5635e
+    red_evidence: >
+      shell-context.test.tsx failed to load (./shell-context did not resolve) before the module existed.
+    green_evidence: >
+      shell-context.test.tsx 33 passed (green-cycle-1-shell-context.log); tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f74727ab31ec5ff5d2a63976135fca4b5dbe71059e14a1410e5396500b84a983
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 8612089f7443e431324af28dae9576a1c0908f3b7dce0594590d8f3fbbb5b8f4
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
