@@ -1,0 +1,1311 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-2.json
+new file mode 100644
+index 00000000..37d1bc2b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-2.json
+@@ -0,0 +1,258 @@
++{
++ "schema": 1,
++ "repo_head": "075cddaf0405f0a134f69ff731f4b7606e49ff36",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/use-data-health.ts:44:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 44,
++   "original": "  const inFlight = useRef(false);",
++   "mutated": "  const inFlight = useRef(true);"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:45:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 45,
++   "original": "  const pending = useRef(false);",
++   "mutated": "  const pending = useRef(true);"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:46:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 46,
++   "original": "  const mounted = useRef(false);",
++   "mutated": "  const mounted = useRef(true);"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:57:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 57,
++   "original": "      pending.current = true;",
++   "mutated": "      pending.current = false;"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:60:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 60,
++   "original": "    inFlight.current = true;",
++   "mutated": "    inFlight.current = false;"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:62:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 62,
++   "original": "      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };",
++   "mutated": "      let outcome: { ok: false; data: DataHealth } | { ok: false; error: unknown };"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:62:negate-boolean:2",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 62,
++   "original": "      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };",
++   "mutated": "      let outcome: { ok: true; data: DataHealth } | { ok: true; error: unknown };"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:64:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 64,
++   "original": "        outcome = { ok: true, data: await fetchDataHealth() };",
++   "mutated": "        outcome = { ok: false, data: await fetchDataHealth() };"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:66:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 66,
++   "original": "        outcome = { ok: false, error };",
++   "mutated": "        outcome = { ok: true, error };"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:68:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 68,
++   "original": "      if (!mounted.current) {",
++   "mutated": "      if (mounted.current) {"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:80:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 80,
++   "original": "      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {",
++   "mutated": "      if (!(error instanceof ApiError && error instanceof ApiUnreachableError)) {"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:80:negate-boolean:2",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 80,
++   "original": "      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {",
++   "mutated": "      if ((error instanceof ApiError || error instanceof ApiUnreachableError)) {"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:88:drop-field-copy:1",
++   "cycle": "cycle-2",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 88,
++   "original": "            ? { data: previous.data, checkedAt: previous.checkedAt }",
++   "mutated": "            ? { data: nil, checkedAt: previous.checkedAt }"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:94:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 94,
++   "original": "      inFlight.current = false;",
++   "mutated": "      inFlight.current = true;"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:96:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 96,
++   "original": "        pending.current = false;",
++   "mutated": "        pending.current = true;"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:106:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 106,
++   "original": "    mounted.current = true;",
++   "mutated": "    mounted.current = false;"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:109:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 109,
++   "original": "      mounted.current = false;",
++   "mutated": "      mounted.current = true;"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:123:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 123,
++   "original": "    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
++   "mutated": "    if (previous !== undefined || NON_TERMINAL.has(previous) && TERMINAL.has(current)) {"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:123:negate-boolean:2",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/use-data-health.ts",
++   "line": 123,
++   "original": "    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
++   "mutated": "    if (previous !== undefined && NON_TERMINAL.has(previous) || TERMINAL.has(current)) {"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:terminal-drop-outcome",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "\"abandoned\",\n",
++   "new": "\"abandoned_x\",\n"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:cancelling-terminal",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "  \"cancelling\",\n]);\n\n/** The five",
++   "new": "  \"cancelled\",\n]);\n\n/** The five"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:pending-deleted",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "      pending.current = true;\n",
++   "new": "      pending.current = false;\n"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:interval-added",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "    mounted.current = true;\n    void runRef.current();",
++   "new": "    mounted.current = true;\n    setInterval(() => void runRef.current(), 60_000);\n    void runRef.current();"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:previous-never-advances",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "    previousDownloadState.current = current;\n",
++   "new": "    previousDownloadState.current ??= current;\n"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:drop-was-active",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)",
++   "new": "previous !== undefined && TERMINAL.has(current)"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:drop-is-terminal",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)",
++   "new": "previous !== undefined && NON_TERMINAL.has(previous)"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:inflight-guard-off",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "    if (inFlight.current) {\n      pending.current = true;\n      return;\n    }",
++   "new": "    if (false) {\n      pending.current = true;\n      return;\n    }"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:unmounted-guard-off",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "      if (!mounted.current) {\n        return;\n      }",
++   "new": "      if (false) {\n        return;\n      }"
++  },
++  {
++   "id": "web/src/app/use-data-health.ts:manual:last-dropped",
++   "cycle": "cycle-2",
++   "operator": "manual",
++   "file": "web/src/app/use-data-health.ts",
++   "old": "            ? previous.last\n              : null,",
++   "new": "            ? null\n              : null,"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 00000000..b8e5b546
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,469 @@
++{
++  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/use-data-health.test.tsx web/src/app/shell-context.test.tsx && npx tsc --noEmit",
++  "repo_head": "075cddaf0405f0a134f69ff731f4b7606e49ff36",
++  "tree_patch_sha256": "f6859557d71c818501215f1a62c73be6f3ad989734e42cc6ffb627da34c8eb48",
++  "mutants_sha256": "af55c6ce2438567f67d3b3c0274f0d18d84991382db3ca80768f1bf3b79440d9",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-2.json",
++  "jobs": 4,
++  "planned": 29,
++  "started": "2026-11-20T06:34:56Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/baseline-w3.log",
++      "log_sha256": "6fd9ff80302666d728a73de8e3361c56a5e7ae7e6a3c78367d00294bfa99a0c7"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/baseline-w1.log",
++      "log_sha256": "ac5ebb0c4072f00020749c2d93f2b195d279214c68dc455c9a7b54e43cfca3c5"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/baseline-w2.log",
++      "log_sha256": "b6689050d445ea639c05731dbdfe36861adb8ba42204fc0761510e61ea43c9bb"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/baseline-w0.log",
++      "log_sha256": "b49db55ab9711761a8c2a9aef8a39d308372d4d8aaa37b042ef3be3210cc0449"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/use-data-health.ts:44:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 44,
++      "original": "  const inFlight = useRef(false);",
++      "mutated": "  const inFlight = useRef(true);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_44_negate-boolean_1.log",
++      "log_sha256": "b30aebf329c7c5999ccbfd5ca7692eceb3bcf28e9e60a64c3e5aa3464b27849e"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:45:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 45,
++      "original": "  const pending = useRef(false);",
++      "mutated": "  const pending = useRef(true);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_45_negate-boolean_1.log",
++      "log_sha256": "ad562de6f570abb48a79755ecced406e728211cc4df93c9c9917641e063bc3e5"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:46:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 46,
++      "original": "  const mounted = useRef(false);",
++      "mutated": "  const mounted = useRef(true);",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 6.8,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_46_negate-boolean_1.log",
++      "log_sha256": "a648aa7ca2952ebf17d6daa39542dad089284ff210408c062e51bd3fcf28855f"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:57:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 57,
++      "original": "      pending.current = true;",
++      "mutated": "      pending.current = false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_57_negate-boolean_1.log",
++      "log_sha256": "8d09e486cd59794ad25a02ba860d6e1aa979a937ad39ec0813797e6c4d8afeea"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:60:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 60,
++      "original": "    inFlight.current = true;",
++      "mutated": "    inFlight.current = false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_60_negate-boolean_1.log",
++      "log_sha256": "0c9937a5233f80006ff52de0508429c8b01fa581b2e2f9c967732d0c93e188a4"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:62:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 62,
++      "original": "      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };",
++      "mutated": "      let outcome: { ok: false; data: DataHealth } | { ok: false; error: unknown };",
++      "state": "stillborn",
++      "exit_code": 2,
++      "seconds": 6.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_62_negate-boolean_1.log",
++      "log_sha256": "8259e0f94d489abe3eca542223de603803cf03d41f445ccd3e9576750237f1b7"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:62:negate-boolean:2",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 62,
++      "original": "      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };",
++      "mutated": "      let outcome: { ok: true; data: DataHealth } | { ok: true; error: unknown };",
++      "state": "stillborn",
++      "exit_code": 2,
++      "seconds": 6.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_62_negate-boolean_2.log",
++      "log_sha256": "78f0bf33ed2310528ac32ff11b9288f28e835fd5337ed457bf9e93c86365ab8d"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:64:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 64,
++      "original": "        outcome = { ok: true, data: await fetchDataHealth() };",
++      "mutated": "        outcome = { ok: false, data: await fetchDataHealth() };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_64_negate-boolean_1.log",
++      "log_sha256": "361b1f15001b18c75760b162f9f77f988feab13e665aa1db2b53b9304537f53e"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:66:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 66,
++      "original": "        outcome = { ok: false, error };",
++      "mutated": "        outcome = { ok: true, error };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_66_negate-boolean_1.log",
++      "log_sha256": "f7118addf3a434c0b2f841770d57f71c594967ff9b995c90ceba1167871302a6"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:68:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 68,
++      "original": "      if (!mounted.current) {",
++      "mutated": "      if (mounted.current) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_68_negate-boolean_1.log",
++      "log_sha256": "de789bffca6d452e6e5ec4a344c7ba29511c9fb7e7c660bb98973d6719572477"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:80:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 80,
++      "original": "      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {",
++      "mutated": "      if (!(error instanceof ApiError && error instanceof ApiUnreachableError)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_80_negate-boolean_1.log",
++      "log_sha256": "1e516ae3d6ec8d031bf512d880d1bcb9288256d754356fa1dac2d754c0984b9c"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:80:negate-boolean:2",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 80,
++      "original": "      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {",
++      "mutated": "      if ((error instanceof ApiError || error instanceof ApiUnreachableError)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_80_negate-boolean_2.log",
++      "log_sha256": "b95211850fc1a9b505e5c397fb5f3164149eaf6485d3a52fc9a2e9fcc24b2b6a"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:88:drop-field-copy:1",
++      "cycle": "cycle-2",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 88,
++      "original": "            ? { data: previous.data, checkedAt: previous.checkedAt }",
++      "mutated": "            ? { data: nil, checkedAt: previous.checkedAt }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_88_drop-field-copy_1.log",
++      "log_sha256": "226cbe6aeab4a07c3b9809ea5be175758c782a1864ede57ecccd9bf95104b237"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:94:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 94,
++      "original": "      inFlight.current = false;",
++      "mutated": "      inFlight.current = true;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_94_negate-boolean_1.log",
++      "log_sha256": "6b8379878d12c6781418013838f4ef4bb90dc6919e7989817d50c295597e5648"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:96:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 96,
++      "original": "        pending.current = false;",
++      "mutated": "        pending.current = true;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 39.7,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_96_negate-boolean_1.log",
++      "log_sha256": "4c61bef886b9ba23d5ca00007a11aa67e3f5da75cbe7e195b3f699a0dfc332de"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:106:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 106,
++      "original": "    mounted.current = true;",
++      "mutated": "    mounted.current = false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_106_negate-boolean_1.log",
++      "log_sha256": "343055c800bbdc8e110942ad3d17599df4f0f8562b8b1c4b1ccdd4ef4df095f1"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:109:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 109,
++      "original": "      mounted.current = false;",
++      "mutated": "      mounted.current = true;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_109_negate-boolean_1.log",
++      "log_sha256": "86036f0fbc15b816bf5b992167456f4d67f846fe4b7a26731d8a17c730b13642"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:123:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 123,
++      "original": "    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
++      "mutated": "    if (previous !== undefined || NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_123_negate-boolean_1.log",
++      "log_sha256": "91f6466dd7faf836ebaa56844c8bbb150b0da8814f9ec25603e547930da5ebf8"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:123:negate-boolean:2",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/use-data-health.ts",
++      "line": 123,
++      "original": "    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
++      "mutated": "    if (previous !== undefined && NON_TERMINAL.has(previous) || TERMINAL.has(current)) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_123_negate-boolean_2.log",
++      "log_sha256": "f01e96cd0fd7fba84c4a734805a15201da22f98714109ab6d6fe5d0c9b395a4b"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:terminal-drop-outcome",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "\"abandoned\",\n",
++      "new": "\"abandoned_x\",\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_terminal-drop-outcome.log",
++      "log_sha256": "a9f4817e4e78d8a2ebcf2ace81cdafb6d00731dfdb2335e8ee713344eba249ce"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:cancelling-terminal",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "  \"cancelling\",\n]);\n\n/** The five",
++      "new": "  \"cancelled\",\n]);\n\n/** The five",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_cancelling-terminal.log",
++      "log_sha256": "88bb5c6cfe061847e60fa78a3fe886f5c7fc7c1e92a8d9c7bc0fefe19ee1bf86"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:pending-deleted",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "      pending.current = true;\n",
++      "new": "      pending.current = false;\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_pending-deleted.log",
++      "log_sha256": "47ad89243e6924ec7dd4844c0b089b8e8642b47b1066f4ac82cb9f4de9781e78"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:interval-added",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "    mounted.current = true;\n    void runRef.current();",
++      "new": "    mounted.current = true;\n    setInterval(() => void runRef.current(), 60_000);\n    void runRef.current();",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_interval-added.log",
++      "log_sha256": "7252925028cc2210ab95c3118f61aa9d77d6cd91329227c4da0267b4e045c98f"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:previous-never-advances",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "    previousDownloadState.current = current;\n",
++      "new": "    previousDownloadState.current ??= current;\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_previous-never-advances.log",
++      "log_sha256": "5da668864d97ea71ba346e1ca507632e9c7e0a0164ff39b120e177b7529bbd99"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:drop-was-active",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)",
++      "new": "previous !== undefined && TERMINAL.has(current)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_drop-was-active.log",
++      "log_sha256": "c42ecf4c6260754eaf4cf2e6e53b1aa3aaa4b820cea96708d68acf66ce3dacef"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:drop-is-terminal",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)",
++      "new": "previous !== undefined && NON_TERMINAL.has(previous)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_drop-is-terminal.log",
++      "log_sha256": "b69370d4e46939fde6f62480c96766e4d4546d614f2a50cc21e16233a28970bb"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:inflight-guard-off",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "    if (inFlight.current) {\n      pending.current = true;\n      return;\n    }",
++      "new": "    if (false) {\n      pending.current = true;\n      return;\n    }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_inflight-guard-off.log",
++      "log_sha256": "48a3bd5fe8275c8051300c5df3f66211d47bae1222e87991c6c3fc9ad7baf1c7"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:unmounted-guard-off",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "      if (!mounted.current) {\n        return;\n      }",
++      "new": "      if (false) {\n        return;\n      }",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 5.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_unmounted-guard-off.log",
++      "log_sha256": "abac642ec2c99bf46290bfa468216f77549d2f9f89686f7a2c9319a873261113"
++    },
++    {
++      "id": "web/src/app/use-data-health.ts:manual:last-dropped",
++      "cycle": "cycle-2",
++      "operator": "manual",
++      "file": "web/src/app/use-data-health.ts",
++      "old": "            ? previous.last\n              : null,",
++      "new": "            ? null\n              : null,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs2b/web_src_app_use-data-health.ts_manual_last-dropped.log",
++      "log_sha256": "fcb89e9c480f25a8d7093853ecd46164061bdc0cc293f5e01d6dc843cb72afbd"
++    }
++  ],
++  "finished": "2026-11-20T06:35:50Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-2-use-data-health.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-2-use-data-health.log
+new file mode 100644
+index 00000000..e8b0d730
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-2-use-data-health.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/app/use-data-health.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/use-data-health.test.tsx [ src/app/use-data-health.test.tsx ]
++Error: Failed to resolve import "./use-data-health" from "web/src/app/use-data-health.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/use-data-health.test.tsx:11:30
++  8  |  import { HealthProvider } from "./health";
++  9  |  import { ShellProvider } from "./shell-context";
++  10 |  import { useDataHealth } from "./use-data-health";
++     |                                 ^
++  11 |  const NOW = /* @__PURE__ */ new Date("2026-09-06T18:30:00.000Z");
++  12 |  const HEALTH = {
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  00:32:53
++   Duration  425ms (transform 14ms, setup 32ms, collect 0ms, tests 0ms, environment 148ms, prepare 30ms)
++
+diff --git a/web/src/app/use-data-health.test.tsx b/web/src/app/use-data-health.test.tsx
+new file mode 100644
+index 00000000..dea2b093
+--- /dev/null
++++ b/web/src/app/use-data-health.test.tsx
+@@ -0,0 +1,388 @@
++import { readdirSync, readFileSync, statSync } from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import { act, render } from "@testing-library/react";
++import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
++import { ApiError } from "../api/client";
++import type { HealthResponse, RunState } from "../api/types";
++import { HealthProvider } from "./health";
++import { ShellProvider } from "./shell-context";
++import type { Attention, DataHealth, ReadState } from "./shell-types";
++import { useDataHealth } from "./use-data-health";
++
++/*
++ * `useDataHealth()`: one read of `GET /api/data-health` on mount, on `retry()`
++ * and once when the shell's attention read shows the download turning
++ * terminal, never on a timer (CAP-003-E3-S3; DAC-E3-19, AC-28). The helpers
++ * below repeat the shell-context test's harness, since test files share no
++ * module.
++ */
++
++const NOW = new Date("2026-09-06T18:30:00.000Z");
++
++const HEALTH: HealthResponse = {
++  status: "ok",
++  database: "reachable",
++  credential_present: true,
++  schema_version: 4,
++  most_recent_run: null,
++};
++
++const SUMMARY = {
++  never_classified: true,
++  set: null,
++  later: null,
++  factors: {
++    value: { qualified_count: 0, ranked: false, min_peer_set_size: 5 },
++    growth: { qualified_count: 0, ranked: false, min_peer_set_size: 5 },
++    momentum: { qualified_count: 0, ranked: false, min_peer_set_size: 5 },
++  },
++  stocks_current: null,
++};
++
++const ATTENTION_IDLE: Attention = {
++  checked_at: "2026-09-06T18:30:00Z",
++  followed_count: 12,
++  prices_as_of: "2026-09-05",
++  credential_present: true,
++  problems: { stock_count: 3, symbols: ["AAA", "BBB", "CCC"], newest_completed_at: null },
++  latest_download: {
++    run_id: "run-1",
++    state: "succeeded",
++    requested_at: "2026-09-06T17:00:00Z",
++    started_at: "2026-09-06T17:00:05Z",
++    ended_at: "2026-09-06T17:20:00Z",
++    progress: { done: 12, total: 12 },
++  },
++  latest_terminal_download: null,
++  items: [],
++};
++
++function attentionWith(state: RunState): Attention {
++  const base = ATTENTION_IDLE.latest_download;
++  if (base === null) {
++    throw new Error("fixture has a latest download");
++  }
++  return { ...ATTENTION_IDLE, latest_download: { ...base, state } };
++}
++
++const ATTENTION_NO_DOWNLOAD: Attention = { ...ATTENTION_IDLE, latest_download: null };
++
++const DATA_HEALTH: DataHealth = {
++  checked_at: "2026-09-06T18:30:00Z",
++  never_acquired: true,
++  followed_count: 12,
++  affected_count: 0,
++  checks: { daily_prices: null, company_financials: null },
++  problems: { rows: [], next_cursor: null },
++};
++
++const DATA_HEALTH_LATER: DataHealth = { ...DATA_HEALTH, followed_count: 99 };
++
++const INTERNAL_ENVELOPE = {
++  error: { code: "internal_error", message: "x", request_id: "req-500" },
++};
++
++const HEALTH_PATH = "/api/health";
++const ATTENTION_PATH = "/api/attention";
++const SUMMARY_PATH = "/api/classifications/summary";
++const DATA_HEALTH_PATH = "/api/data-health";
++
++type Answer = { status: number; body: unknown };
++const queues = new Map<string, Array<Answer | Promise<Answer>>>();
++const standings = new Map<string, Answer>();
++const counts = new Map<string, number>();
++
++async function router(input: RequestInfo | URL): Promise<Response> {
++  const path = new URL(String(input), "http://localhost").pathname;
++  counts.set(path, (counts.get(path) ?? 0) + 1);
++  const next = queues.get(path)?.shift();
++  const answer = next === undefined ? standings.get(path) : await next;
++  if (answer === undefined) {
++    throw new Error(`no answer set for ${path}`);
++  }
++  return new Response(JSON.stringify(answer.body), {
++    status: answer.status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++function answer(path: string, status: number, body: unknown): void {
++  const queue = queues.get(path) ?? [];
++  queue.push({ status, body });
++  queues.set(path, queue);
++}
++
++function standing(path: string, status: number, body: unknown): void {
++  standings.set(path, { status, body });
++}
++
++function defer(path: string): { resolve(status: number, body: unknown): void } {
++  let settle: (value: Answer) => void = () => undefined;
++  const promise = new Promise<Answer>((resolve) => {
++    settle = resolve;
++  });
++  const queue = queues.get(path) ?? [];
++  queue.push(promise);
++  queues.set(path, queue);
++  return { resolve: (status, body) => settle({ status, body }) };
++}
++
++function calls(path: string): number {
++  return counts.get(path) ?? 0;
++}
++
++async function advance(ms: number): Promise<void> {
++  await act(() => vi.advanceTimersByTimeAsync(ms));
++}
++
++let latestDH: ReturnType<typeof useDataHealth>;
++
++function DataHealthProbe() {
++  latestDH = useDataHealth();
++  return null;
++}
++
++function Tree({ withHook = true }: { withHook?: boolean }) {
++  return (
++    <HealthProvider>
++      <ShellProvider>{withHook ? <DataHealthProbe /> : null}</ShellProvider>
++    </HealthProvider>
++  );
++}
++
++function standBase(attention: Attention = ATTENTION_IDLE): void {
++  standing(HEALTH_PATH, 200, HEALTH);
++  standing(ATTENTION_PATH, 200, attention);
++  standing(SUMMARY_PATH, 200, SUMMARY);
++  standing(DATA_HEALTH_PATH, 200, DATA_HEALTH);
++}
++
++beforeEach(() => {
++  queues.clear();
++  standings.clear();
++  counts.clear();
++  vi.useFakeTimers();
++  vi.setSystemTime(NOW);
++  vi.stubGlobal("fetch", vi.fn(router));
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++  vi.unstubAllGlobals();
++});
++
++describe("useDataHealth reads on demand only (TC-COMP-064, DAC-E3-19, AC-28)", () => {
++  // Implements TC-COMP-064
++  it("reads on mount, on retry and on a terminal transition, and on no timer", async () => {
++    standBase();
++    render(<Tree />);
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(1);
++    expect(latestDH.state).toEqual({ kind: "ok", data: DATA_HEALTH, checkedAt: NOW });
++
++    act(() => latestDH.retry());
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(2);
++
++    // Ten attention answers, all terminal to terminal.
++    await advance(600_000);
++    expect(calls(DATA_HEALTH_PATH)).toBe(2);
++
++    standing(ATTENTION_PATH, 200, attentionWith("running"));
++    await advance(60_000);
++    expect(calls(DATA_HEALTH_PATH)).toBe(2);
++    standing(ATTENTION_PATH, 200, attentionWith("succeeded"));
++    await advance(10_000);
++    expect(calls(DATA_HEALTH_PATH)).toBe(3);
++
++    await advance(180_000);
++    expect(calls(DATA_HEALTH_PATH)).toBe(3);
++  });
++
++  it("is imported by data-health-ui alone", () => {
++    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
++    const files = walk(path.join(root, "web/src")).map((file) => ({
++      path: path.relative(root, file).split(path.sep).join("/"),
++      source: readFileSync(file, "utf-8"),
++    }));
++    expect(files.length).toBeGreaterThan(50);
++    expect(files.map((file) => file.path)).toContain("web/src/app/use-data-health.ts");
++    expect(illegalImporters(files)).toEqual([]);
++  });
++
++  it("flags an importer outside data-health-ui", () => {
++    const planted = {
++      path: "web/src/screens/home/index.tsx",
++      source: 'import { useDataHealth } from "../../app/use-data-health";',
++    };
++    const allowed = {
++      path: "web/src/screens/data-health/index.tsx",
++      source: 'import { useDataHealth } from "../../app/use-data-health";',
++    };
++    expect(illegalImporters([planted, allowed])).toEqual([planted.path]);
++    expect(illegalImporters([allowed])).toEqual([]);
++  });
++});
++
++function walk(dir: string): string[] {
++  return readdirSync(dir).flatMap((name) => {
++    const full = path.join(dir, name);
++    if (statSync(full).isDirectory()) {
++      return walk(full);
++    }
++    return /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name) ? [full] : [];
++  });
++}
++
++/** Files, other than data-health-ui's own, that import `use-data-health`. */
++function illegalImporters(files: { path: string; source: string }[]): string[] {
++  return files
++    .filter((file) => /from\s+["'][^"']*use-data-health["']/.test(file.source))
++    .map((file) => file.path)
++    .filter((file) => !file.startsWith("web/src/screens/data-health/"));
++}
++
++const NON_TERMINAL: RunState[] = ["requested", "running", "cancelling"];
++const TERMINAL: RunState[] = ["succeeded", "partial", "failed", "cancelled", "abandoned"];
++
++describe("useDataHealth states, ordering and edges (DAC-E3-19, AC-28)", () => {
++  it.each(NON_TERMINAL.flatMap((before) => TERMINAL.map((after) => [before, after] as const)))(
++    "reads once when the download goes from %s to %s",
++    async (before, after) => {
++      standBase(attentionWith(before));
++      render(<Tree />);
++      await advance(0);
++      expect(calls(DATA_HEALTH_PATH)).toBe(1);
++      standing(ATTENTION_PATH, 200, attentionWith(after));
++      await advance(10_000);
++      expect(calls(ATTENTION_PATH)).toBe(2);
++      expect(calls(DATA_HEALTH_PATH)).toBe(2);
++    },
++  );
++
++  it.each([
++    ["cancelling to running", attentionWith("cancelling"), attentionWith("running"), 10_000],
++    ["no download to succeeded", ATTENTION_NO_DOWNLOAD, attentionWith("succeeded"), 60_000],
++    ["succeeded to succeeded", attentionWith("succeeded"), attentionWith("succeeded"), 60_000],
++  ])("does not read on %s", async (_name, first, second, cadenceMs) => {
++    standBase(first);
++    render(<Tree />);
++    await advance(0);
++    standing(ATTENTION_PATH, 200, second);
++    await advance(cadenceMs);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(DATA_HEALTH_PATH)).toBe(1);
++  });
++
++  it("compares consecutive successful answers across a failed attention read", async () => {
++    standBase(attentionWith("running"));
++    render(<Tree />);
++    await advance(0);
++    standing(ATTENTION_PATH, 500, INTERNAL_ENVELOPE);
++    await advance(10_000);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(DATA_HEALTH_PATH)).toBe(1);
++    standing(ATTENTION_PATH, 200, attentionWith("succeeded"));
++    await advance(10_000);
++    expect(calls(ATTENTION_PATH)).toBe(3);
++    expect(calls(DATA_HEALTH_PATH)).toBe(2);
++  });
++
++  it("reads once when the hook mounts after the provider has answered", async () => {
++    standBase(attentionWith("running"));
++    const view = render(<Tree withHook={false} />);
++    await advance(0);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    view.rerender(<Tree />);
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(1);
++    standing(ATTENTION_PATH, 200, attentionWith("succeeded"));
++    await advance(10_000);
++    expect(calls(DATA_HEALTH_PATH)).toBe(2);
++  });
++
++  it("keeps the last good answer in error.last", async () => {
++    standBase();
++    answer(DATA_HEALTH_PATH, 500, INTERNAL_ENVELOPE);
++    render(<Tree />);
++    await advance(0);
++    expect(latestDH.state).toEqual({ kind: "error", error: expect.any(ApiError), last: null });
++    if (latestDH.state.kind === "error") {
++      expect((latestDH.state.error as ApiError).code).toBe("internal_error");
++    }
++    answer(DATA_HEALTH_PATH, 200, DATA_HEALTH);
++    act(() => latestDH.retry());
++    await advance(0);
++    expect(latestDH.state).toEqual({ kind: "ok", data: DATA_HEALTH, checkedAt: NOW });
++    answer(DATA_HEALTH_PATH, 500, INTERNAL_ENVELOPE);
++    act(() => latestDH.retry());
++    await advance(0);
++    expect(latestDH.state).toEqual({
++      kind: "error",
++      error: expect.any(ApiError),
++      last: { data: DATA_HEALTH, checkedAt: NOW },
++    });
++    answer(DATA_HEALTH_PATH, 500, INTERNAL_ENVELOPE);
++    act(() => latestDH.retry());
++    await advance(0);
++    expect(latestDH.state).toEqual({
++      kind: "error",
++      error: expect.any(ApiError),
++      last: { data: DATA_HEALTH, checkedAt: NOW },
++    });
++  });
++
++  it("never overlaps two reads and runs one trailing read for any triggers during one", async () => {
++    standBase();
++    const pending = defer(DATA_HEALTH_PATH);
++    answer(DATA_HEALTH_PATH, 200, DATA_HEALTH_LATER);
++    render(<Tree />);
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(1);
++    act(() => latestDH.retry());
++    act(() => latestDH.retry());
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(1);
++    pending.resolve(200, DATA_HEALTH);
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(2);
++    expect(latestDH.state).toEqual({ kind: "ok", data: DATA_HEALTH_LATER, checkedAt: NOW });
++    act(() => latestDH.retry());
++    await advance(0);
++    expect(calls(DATA_HEALTH_PATH)).toBe(3);
++  });
++
++  it("adds no read and no warning when it unmounts with a read in flight", async () => {
++    standBase(attentionWith("running"));
++    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
++    try {
++      const pending = defer(DATA_HEALTH_PATH);
++      const view = render(<Tree />);
++      await advance(0);
++      act(() => latestDH.retry());
++      view.rerender(<Tree withHook={false} />);
++      pending.resolve(200, DATA_HEALTH);
++      standing(ATTENTION_PATH, 200, attentionWith("succeeded"));
++      await advance(10_000);
++      expect(calls(DATA_HEALTH_PATH)).toBe(1);
++      expect(spy).not.toHaveBeenCalled();
++    } finally {
++      spy.mockRestore();
++    }
++  });
++
++  it("returns exactly state and a stable retry", async () => {
++    standBase();
++    render(<Tree />);
++    await advance(0);
++    expect(Object.keys(latestDH).sort()).toEqual(["retry", "state"]);
++    const first = latestDH.retry;
++    await advance(120_000);
++    expect(latestDH.retry).toBe(first);
++    expectTypeOf(useDataHealth).returns.toEqualTypeOf<{
++      state: ReadState<DataHealth>;
++      retry(): void;
++    }>();
++  });
++});
+diff --git a/web/src/app/use-data-health.ts b/web/src/app/use-data-health.ts
+new file mode 100644
+index 00000000..2b2072c1
+--- /dev/null
++++ b/web/src/app/use-data-health.ts
+@@ -0,0 +1,133 @@
++import { useCallback, useEffect, useRef, useState } from "react";
++import { ApiError, ApiUnreachableError } from "../api/client";
++import type { RunState } from "../api/types";
++import { fetchDataHealth } from "./shell-client";
++import { useShell } from "./shell-context";
++import type { DataHealth, ReadState } from "./shell-types";
++
++/*
++ * The data-health aggregate, read on demand only (DAC-E3-19, AC-28; system
++ * design 3.4 note 1). DEC-0219, which had the shell read it, is withdrawn:
++ * this hook is used by `data-health-ui` alone, and nothing else in the shell
++ * reads `GET /api/data-health`. It sets no timer and listens for no
++ * visibility change: its one automatic trigger comes from the shell's
++ * attention answers, which the hidden-page pause already stops.
++ */
++
++/** The download states that are not outcomes (`web/src/api/types.ts`). */
++const NON_TERMINAL: ReadonlySet<RunState | null> = new Set<RunState | null>([
++  "requested",
++  "running",
++  "cancelling",
++]);
++
++/** The five outcomes a download ends in. */
++const TERMINAL: ReadonlySet<RunState | null> = new Set<RunState | null>([
++  "succeeded",
++  "partial",
++  "failed",
++  "cancelled",
++  "abandoned",
++]);
++
++/**
++ * One read of `GET /api/data-health` on mount, one per `retry()`, and one when
++ * the attention read shows `latest_download` turning terminal (DAC-E3-19,
++ * TC-COMP-064). Needs a `ShellProvider` above it (DEC-0326).
++ *
++ * The return type follows `usePolledRead`'s: the state and the one method
++ * (DEC-0324).
++ */
++export function useDataHealth(): { state: ReadState<DataHealth>; retry(): void } {
++  const { attention } = useShell();
++  const [state, setState] = useState<ReadState<DataHealth>>({ kind: "loading" });
++  const inFlight = useRef(false);
++  const pending = useRef(false);
++  const mounted = useRef(false);
++  const previousDownloadState = useRef<RunState | null | undefined>(undefined);
++  const runRef = useRef<() => Promise<void>>(async () => undefined);
++
++  /**
++   * Reads once at a time (DEC-0325). A trigger during a read sets one pending
++   * flag, and exactly one trailing read starts when it settles, so reads never
++   * overlap and any number of triggers during one adds one read.
++   */
++  runRef.current = async (): Promise<void> => {
++    if (inFlight.current) {
++      pending.current = true;
++      return;
++    }
++    inFlight.current = true;
++    try {
++      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };
++      try {
++        outcome = { ok: true, data: await fetchDataHealth() };
++      } catch (error) {
++        outcome = { ok: false, error };
++      }
++      if (!mounted.current) {
++        return;
++      }
++      if (outcome.ok) {
++        const { data } = outcome;
++        setState({ kind: "ok", data, checkedAt: new Date() });
++        return;
++      }
++      const { error } = outcome;
++      // `requestJson` rejects with only these two. Any other value is a
++      // programming error, which surfaces rather than rendering as a stale
++      // read (as `usePolledRead` does).
++      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {
++        throw error;
++      }
++      setState((previous) => ({
++        kind: "error",
++        error,
++        last:
++          previous.kind === "ok"
++            ? { data: previous.data, checkedAt: previous.checkedAt }
++            : previous.kind === "error"
++              ? previous.last
++              : null,
++      }));
++    } finally {
++      inFlight.current = false;
++      if (pending.current) {
++        pending.current = false;
++        if (mounted.current) {
++          void runRef.current();
++        }
++      }
++    }
++  };
++
++  // The one read on mount (DAC-E3-19).
++  useEffect(() => {
++    mounted.current = true;
++    void runRef.current();
++    return () => {
++      mounted.current = false;
++    };
++  }, []);
++
++  // The one read when the download turns terminal. The comparison is between
++  // consecutive successful attention answers: an error never touches the ref
++  // (DAC-E3-19, TC-COMP-064).
++  useEffect(() => {
++    if (attention.kind !== "ok") {
++      return;
++    }
++    const current = attention.data.latest_download?.state ?? null;
++    const previous = previousDownloadState.current;
++    previousDownloadState.current = current;
++    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {
++      void runRef.current();
++    }
++  }, [attention]);
++
++  const retry = useCallback((): void => {
++    void runRef.current();
++  }, []);
++
++  return { state, retry };
++}

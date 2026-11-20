@@ -31,3 +31,40 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T007, T008, T010, T011, T012]
+    description: >
+      The on-demand aggregate hook (TC-COMP-064, DAC-E3-19, AC-28, DEC-0324, DEC-0325): useDataHealth() reads GET /api/data-health once on mount, once per retry() and once when two consecutive successful attention answers show latest_download going from requested, running or cancelling to one of the five outcomes; never on a timer. One read runs at a time, and any number of triggers during it add exactly one trailing read. The test file also holds the static check that only web/src/screens/data-health/ may import the hook, with its planted-record and non-vacuity cases. T011 (scope: the four files plus plan artifacts, every delivered file unchanged, the hook imported by no non-test file) and T012 (full Vitest suite 108 files and 2842 tests, biome lint and format, tsc --noEmit and the build all clean) join this cycle's validation. The first mutation run left two more survivors than now: an error-to-error read that must keep error.last, and a retry pending at unmount that must start no trailing read; both tests were added and the run repeated. Two survivors remain, both equivalent.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-2-use-data-health.log
+    red_log_sha256: f15894687ac80a888d0e8fa2f454f8f560326cd45a9f64af0a5163a3826e6a6c
+    red_evidence: >
+      use-data-health.test.tsx failed to load (./use-data-health did not resolve) before the module existed.
+    green_evidence: >
+      use-data-health.test.tsx 27 passed; full Vitest suite 108 files, 2842 tests passed (green-cycle-2-full-suite.log); npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a36ab300233e55250a641d584acf97972cecc091343db372133e728dd6bf4874
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: 5f26938bfc999f6afc205c4c10a3caad9893282ff602c6de1802cf46cf408222
+      generated: 29
+      killed: 25
+      survived: 2
+      stillborn: 2
+      timeout: 0
+      score: 0.926
+      survivors:
+        - id: web/src/app/use-data-health.ts:46:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            mounted = useRef(true) instead of useRef(false). The mount effect sets mounted.current to true before any read it starts can settle, and the cleanup sets it false, so the initial value is never read.
+        - id: web/src/app/use-data-health.ts:manual:unmounted-guard-off
+          disposition: equivalent
+          reason: >
+            Removing the early return when the hook is unmounted. The only code it skips is setState, which React 18 drops silently on an unmounted component, and the rethrow of a rejection that is not ApiError or ApiUnreachableError, which cannot occur because requestJson rejects with only those two. The trailing-read guard in the finally block is separate and is killed by the pending-at-unmount test.

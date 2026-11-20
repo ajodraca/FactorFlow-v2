@@ -1,0 +1,258 @@
+{
+ "schema": 1,
+ "repo_head": "075cddaf0405f0a134f69ff731f4b7606e49ff36",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/use-data-health.ts:44:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 44,
+   "original": "  const inFlight = useRef(false);",
+   "mutated": "  const inFlight = useRef(true);"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:45:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 45,
+   "original": "  const pending = useRef(false);",
+   "mutated": "  const pending = useRef(true);"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:46:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 46,
+   "original": "  const mounted = useRef(false);",
+   "mutated": "  const mounted = useRef(true);"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:57:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 57,
+   "original": "      pending.current = true;",
+   "mutated": "      pending.current = false;"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:60:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 60,
+   "original": "    inFlight.current = true;",
+   "mutated": "    inFlight.current = false;"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:62:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 62,
+   "original": "      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };",
+   "mutated": "      let outcome: { ok: false; data: DataHealth } | { ok: false; error: unknown };"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:62:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 62,
+   "original": "      let outcome: { ok: true; data: DataHealth } | { ok: false; error: unknown };",
+   "mutated": "      let outcome: { ok: true; data: DataHealth } | { ok: true; error: unknown };"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:64:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 64,
+   "original": "        outcome = { ok: true, data: await fetchDataHealth() };",
+   "mutated": "        outcome = { ok: false, data: await fetchDataHealth() };"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:66:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 66,
+   "original": "        outcome = { ok: false, error };",
+   "mutated": "        outcome = { ok: true, error };"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:68:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 68,
+   "original": "      if (!mounted.current) {",
+   "mutated": "      if (mounted.current) {"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:80:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 80,
+   "original": "      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {",
+   "mutated": "      if (!(error instanceof ApiError && error instanceof ApiUnreachableError)) {"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:80:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 80,
+   "original": "      if (!(error instanceof ApiError || error instanceof ApiUnreachableError)) {",
+   "mutated": "      if ((error instanceof ApiError || error instanceof ApiUnreachableError)) {"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:88:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 88,
+   "original": "            ? { data: previous.data, checkedAt: previous.checkedAt }",
+   "mutated": "            ? { data: nil, checkedAt: previous.checkedAt }"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:94:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 94,
+   "original": "      inFlight.current = false;",
+   "mutated": "      inFlight.current = true;"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:96:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 96,
+   "original": "        pending.current = false;",
+   "mutated": "        pending.current = true;"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:106:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 106,
+   "original": "    mounted.current = true;",
+   "mutated": "    mounted.current = false;"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:109:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 109,
+   "original": "      mounted.current = false;",
+   "mutated": "      mounted.current = true;"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:123:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 123,
+   "original": "    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
+   "mutated": "    if (previous !== undefined || NON_TERMINAL.has(previous) && TERMINAL.has(current)) {"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:123:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/use-data-health.ts",
+   "line": 123,
+   "original": "    if (previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)) {",
+   "mutated": "    if (previous !== undefined && NON_TERMINAL.has(previous) || TERMINAL.has(current)) {"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:terminal-drop-outcome",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "\"abandoned\",\n",
+   "new": "\"abandoned_x\",\n"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:cancelling-terminal",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "  \"cancelling\",\n]);\n\n/** The five",
+   "new": "  \"cancelled\",\n]);\n\n/** The five"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:pending-deleted",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "      pending.current = true;\n",
+   "new": "      pending.current = false;\n"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:interval-added",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "    mounted.current = true;\n    void runRef.current();",
+   "new": "    mounted.current = true;\n    setInterval(() => void runRef.current(), 60_000);\n    void runRef.current();"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:previous-never-advances",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "    previousDownloadState.current = current;\n",
+   "new": "    previousDownloadState.current ??= current;\n"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:drop-was-active",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)",
+   "new": "previous !== undefined && TERMINAL.has(current)"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:drop-is-terminal",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "previous !== undefined && NON_TERMINAL.has(previous) && TERMINAL.has(current)",
+   "new": "previous !== undefined && NON_TERMINAL.has(previous)"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:inflight-guard-off",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "    if (inFlight.current) {\n      pending.current = true;\n      return;\n    }",
+   "new": "    if (false) {\n      pending.current = true;\n      return;\n    }"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:unmounted-guard-off",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "      if (!mounted.current) {\n        return;\n      }",
+   "new": "      if (false) {\n        return;\n      }"
+  },
+  {
+   "id": "web/src/app/use-data-health.ts:manual:last-dropped",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/app/use-data-health.ts",
+   "old": "            ? previous.last\n              : null,",
+   "new": "            ? null\n              : null,"
+  }
+ ]
+}

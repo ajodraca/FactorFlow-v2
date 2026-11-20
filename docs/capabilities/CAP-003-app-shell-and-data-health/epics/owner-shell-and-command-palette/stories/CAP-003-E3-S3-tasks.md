@@ -176,7 +176,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - drop-field-copy on `checkedAt` in the served mapping: (b) asserts the instant.
   - a hand-written mutant that calls `fetchDataHealth` in the provider: (d).
   - negate-boolean on the provider-missing guard: (f).
-- [ ] T007 [P] Implement TC-COMP-064 (useDataHealth reads on mount, retry and terminal transition only) in a new `web/src/app/use-data-health.test.tsx`, with a `// Implements TC-COMP-064` comment.
+- [x] T007 [P] Implement TC-COMP-064 (useDataHealth reads on mount, retry and terminal transition only) in a new `web/src/app/use-data-health.test.tsx`, with a `// Implements TC-COMP-064` comment.
   - **Harness.** Reuse the shared harness by copying its helpers into this file; test files share no module. Render `<HealthProvider><ShellProvider><DataHealthProbe /></ShellProvider></HealthProvider>`, where `DataHealthProbe` assigns `useDataHealth()` to `latestDH`. Add a `DATA_HEALTH` literal typed `DataHealth`, with `checks.daily_prices` and `checks.company_financials` `null`, `never_acquired: true`, and `problems: { rows: [], next_cursor: null }`.
   - **Steps (the TC's).**
     1. Mount: `calls("/api/data-health")` is 1, and `latestDH.state` `toEqual({ kind: "ok", data: DATA_HEALTH, checkedAt: new Date("2026-09-06T18:30:00.000Z") })`.
@@ -194,7 +194,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - negate-boolean on either side of the transition test (`wasActive && isTerminal`: dropping `wasActive` reads on every terminal answer in step 3; dropping `isTerminal` reads on `running`).
   - a hand-written mutant that adds a `setTimeout` or `setInterval` re-read: step 3.
   - swap-case on the allowed directory in the grep helper (`screens/data-health/` to `screens/`): the planted `home` record passes.
-- [ ] T008 [P] Write the `useDataHealth` state, ordering and edge cases in `web/src/app/use-data-health.test.tsx` (DAC-E3-19, AC-28; Open Gaps 2 and 3). This runs sequentially with T007 (one file). Cases:
+- [x] T008 [P] Write the `useDataHealth` state, ordering and edge cases in `web/src/app/use-data-health.test.tsx` (DAC-E3-19, AC-28; Open Gaps 2 and 3). This runs sequentially with T007 (one file). Cases:
   - (a) **Transition set.** `it.each` over the three non-terminal states as "before" and the five terminal states as "after": exactly one aggregate read per pair. `cancelling` to `cancelled` reads, and `cancelling` to `running` does not. `null` to `succeeded` (no download before) does not read, nor does `succeeded` to `succeeded`.
   - (b) **Across a failed attention read.** `running`, then attention `500`, then `succeeded`: one read. The comparison is between consecutive successful answers.
   - (c) **First answer already terminal.** The mount read is the only read (TC-COMP-064 step 3 already covers terminal-to-terminal).
@@ -255,7 +255,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - **Comments.** Comment each rule with its AC, DAC and TC, in the style of `status-region.tsx`. Write no layout value in any comment (CAP-003-E3-S2's layout rule scans non-test sources), no browser storage, and no `dangerouslySetInnerHTML`.
 
   This makes T001–T006 pass.
-- [ ] T010 Create `web/src/app/use-data-health.ts` (depends on T009; T007 and T008 are RED first). Export `useDataHealth(): { state: ReadState<DataHealth>; retry(): void }` (DEC-0324). Its module doc comment cites DAC-E3-19, AC-28, system design §3.4 note 1 and DEC-0219 as withdrawn ("used by `data-health-ui` alone"). It imports `fetchDataHealth` from `"./shell-client"`, `useShell` from `"./shell-context"`, `type { DataHealth, ReadState }` from `"./shell-types"`, `type { RunState }` from `"../api/types"`, and `ApiError` and `ApiUnreachableError` from `"../api/client"`.
+- [x] T010 Create `web/src/app/use-data-health.ts` (depends on T009; T007 and T008 are RED first). Export `useDataHealth(): { state: ReadState<DataHealth>; retry(): void }` (DEC-0324). Its module doc comment cites DAC-E3-19, AC-28, system design §3.4 note 1 and DEC-0219 as withdrawn ("used by `data-health-ui` alone"). It imports `fetchDataHealth` from `"./shell-client"`, `useShell` from `"./shell-context"`, `type { DataHealth, ReadState }` from `"./shell-types"`, `type { RunState }` from `"../api/types"`, and `ApiError` and `ApiUnreachableError` from `"../api/client"`.
   - **State.** It is `useState<ReadState<DataHealth>>({ kind: "loading" })`. On success it is `{ kind: "ok", data, checkedAt: new Date() }`. On failure it is `{ kind: "error", error, last }`, where `last` is `{ data, checkedAt }` from a previous `ok`, the previous `last` from a previous `error`, and `null` otherwise. These are the same rules as CAP-003-E3-S2's `usePolledRead`, written out here because that hook is interval-driven.
   - **Rejections.** A rejection that is not `ApiError` or `ApiUnreachableError` is rethrown, as S2 does.
   - **One read at a time (DEC-0325).**
@@ -282,7 +282,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 **Purpose**: Confirm the change set is exactly the story's, with nothing mounted early.
 
-- [ ] T011 Confirm scope (depends on T009 and T010).
+- [x] T011 Confirm scope (depends on T009 and T010).
   - `git status --short` lists only these:
     - `web/src/app/shell-context.tsx`, `web/src/app/shell-context.test.tsx`, `web/src/app/use-data-health.ts` and `web/src/app/use-data-health.test.tsx`;
     - this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
@@ -298,8 +298,8 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T012 Run `npm run format` (a check). Fix any report with `npx biome format --write` on this story's four files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and re-run T011's checks. Biome's recommended `useExhaustiveDependencies` may flag the ref-held `run` in T010. Satisfy it by holding `run` in a ref read inside the effect, not by suppressing the rule. No behaviour change.
-- [ ] T013 After each TDD cycle in T001–T012 — not once at the end — do the following before the next cycle begins:
+- [x] T012 Run `npm run format` (a check). Fix any report with `npx biome format --write` on this story's four files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and re-run T011's checks. Biome's recommended `useExhaustiveDependencies` may flag the ref-held `run` in T010. Satisfy it by holding `run` in a ref read inside the effect, not by suppressing the rule. No behaviour change.
+- [x] T013 After each TDD cycle in T001–T012 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E3-S3-tdd-evidence.yaml` beside this story with:
