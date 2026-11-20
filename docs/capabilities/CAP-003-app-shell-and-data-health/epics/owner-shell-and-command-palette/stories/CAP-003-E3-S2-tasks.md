@@ -7,7 +7,7 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-06
-updated: 2026-11-06
+updated: 2026-11-20
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -181,7 +181,7 @@ Creates the three owner-shell modules that hold the shell's polling rules and la
 
 **Purpose**: Confirm the change set is exactly the story's, with nothing wired early.
 
-- [ ] T012 Confirm scope (depends on T008–T011). `git status --short` lists only these:
+- [x] T012 Confirm scope (depends on T008–T011). `git status --short` lists only these:
   - `web/src/app/layout.ts`, `web/src/app/use-polled-read.ts`, `web/src/app/use-polled-read.test.ts`, `web/src/app/health.tsx` and `web/src/app/health.test.tsx`;
   - `web/src/components/token-literals.test.ts`;
   - this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
@@ -196,8 +196,8 @@ Creates the three owner-shell modules that hold the shell's polling rules and la
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T013 Run `npm run format` (a check) and fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`. Re-run the Story-Specific grep below. No comment in `use-polled-read.ts`, `health.tsx` or any other non-test source may write a layout value without a space (`1180 px` is fine, `1180px` is not), because the layout rule reads comments too. No behaviour change.
-- [ ] T014 After each TDD cycle in T001–T013 — not once at the end — do the following before the next cycle begins:
+- [x] T013 Run `npm run format` (a check) and fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`. Re-run the Story-Specific grep below. No comment in `use-polled-read.ts`, `health.tsx` or any other non-test source may write a layout value without a space (`1180 px` is fine, `1180px` is not), because the layout rule reads comments too. No behaviour change.
+- [x] T014 After each TDD cycle in T001–T013 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E3-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, and the structured `mutation:` block `scripts/mutation-run.py summary` prints. A cycle with no production change records `mutation: {not_applicable: <reason>}` instead.
