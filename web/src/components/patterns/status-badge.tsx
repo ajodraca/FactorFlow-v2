@@ -1,6 +1,7 @@
 import { Circle, CircleDot, Diamond, Icon, type IconNode, Square, Triangle } from "lucide-react";
 import type { JSX } from "react";
 import { Badge } from "../ui/badge";
+import { cn } from "../ui/utils";
 import type { Tier } from "./tiers";
 
 /**
@@ -25,17 +26,36 @@ const FILLED_CIRCLE: IconNode = [
 const ICON_PROPS = {
   "aria-hidden": "true",
   focusable: "false",
-  className: "h-3 w-3 shrink-0",
 } as const;
 
-const TIER_ICON: Record<Tier, JSX.Element> = {
-  neutral: <Circle {...ICON_PROPS} />,
-  active: <CircleDot {...ICON_PROPS} />,
-  good: <Icon iconNode={FILLED_CIRCLE} {...ICON_PROPS} />,
-  warning: <Triangle fill="currentColor" {...ICON_PROPS} />,
-  serious: <Diamond fill="currentColor" {...ICON_PROPS} />,
-  critical: <Square fill="currentColor" {...ICON_PROPS} />,
-};
+/**
+ * The one tier-to-shape mapping (blueprint section 8; ui-components 10 *Tier
+ * shapes*), used by `StatusBadge` and the *Needs you* severity tile so the two
+ * cannot draw a tier differently (DEC-0319).
+ */
+export function TierShape({
+  tier,
+  className,
+}: {
+  tier: Tier;
+  className?: string;
+}): JSX.Element {
+  const classes = cn("h-3 w-3 shrink-0", className);
+  switch (tier) {
+    case "neutral":
+      return <Circle {...ICON_PROPS} className={classes} />;
+    case "active":
+      return <CircleDot {...ICON_PROPS} className={classes} />;
+    case "good":
+      return <Icon iconNode={FILLED_CIRCLE} {...ICON_PROPS} className={classes} />;
+    case "warning":
+      return <Triangle fill="currentColor" {...ICON_PROPS} className={classes} />;
+    case "serious":
+      return <Diamond fill="currentColor" {...ICON_PROPS} className={classes} />;
+    case "critical":
+      return <Square fill="currentColor" {...ICON_PROPS} className={classes} />;
+  }
+}
 
 export interface StatusBadgeProps {
   tier: Tier;
@@ -50,7 +70,7 @@ export interface StatusBadgeProps {
 export function StatusBadge({ tier, children, title, className }: StatusBadgeProps): JSX.Element {
   return (
     <Badge variant={`status-${tier}` as const} title={title} className={className}>
-      {TIER_ICON[tier]}
+      <TierShape tier={tier} />
       {children}
     </Badge>
   );

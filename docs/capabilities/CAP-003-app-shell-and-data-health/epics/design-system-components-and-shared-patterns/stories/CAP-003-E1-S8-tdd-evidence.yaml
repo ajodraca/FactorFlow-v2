@@ -59,3 +59,35 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-3
+    tasks: [T005, T009, T012, T013]
+    description: >
+      status-badge.tsx exports TierShape, the one tier-to-shape mapping, and StatusBadge renders it with its DOM unchanged. needs-you-item.tsx exports NeedsYouItemRowProps and NeedsYouItemRow (DEC-0319): an li holding an aria-hidden severity tile sized by the caller's markerSize in the tier's muted status pair and shape, the tag badge through StatusBadge with the tag from labelOf, a semibold title, a body and exactly one outline link to item.target whose accessible name is actionName. needs-you-item.test.tsx covers TC-COMP-030 and the per-tier tile shape and colour, with the tile and badge drawing the same shape. Reviews: code review APPROVED (two LOWs accepted: the no-img assertion is weak beside the aria-hidden check; a long title is truncated with no title attribute, outside the DACs) and spec drift none (informational: home-ui 2.5 words the tile as the full status colour, DEC-0319 and T013 specify the muted pair, which the owning design absorbs at its next revision).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/red-cycle-3-row.log
+    red_log_sha256: 077767a5d6428a6916baa14bfd1adcb2d8c4a8b7ba0e284bb2d09d63376bfbf3
+    red_evidence: >
+      needs-you-item.test.tsx failed to resolve ./needs-you-item before the module existed (no tests collected).
+    green_evidence: >
+      The patterns suite passes (15 files, 538 tests) including status-badge.test.tsx unedited; npx tsc --noEmit and biome lint and format are clean on the changed files.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c2d999cea1c27c3bada9e13a248b79fb887d5923de183e488615fa4eb8839c39
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/mutation-cycle-3-results.json
+      results_sha256: a1c45f41dc040b363a198714accebb527e30bbeef8a3ee85f930c9cc13c70b05
+      generated: 13
+      killed: 12
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.923
+      survivors:
+        - id: web/src/components/patterns/status-badge.tsx:manual:shape-not-aria-hidden
+          disposition: equivalent
+          reason: >
+            removing aria-hidden from ICON_PROPS renders the same DOM, because lucide-react 1.70.0 adds aria-hidden="true" to an icon with no label by default (renderToStaticMarkup of a bare Circle prints it); the explicit prop is belt and braces and no test can observe the difference
