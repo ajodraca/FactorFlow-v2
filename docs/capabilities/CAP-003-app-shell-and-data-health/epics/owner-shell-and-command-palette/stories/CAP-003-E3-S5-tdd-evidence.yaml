@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E3-S5 - Command Palette: Stocks, Universes and Pages, Every Item Navigating.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T009, T010]
+    description: >
+      Copy, targets, pages and universes (TC-COMP-082 pure half, DAC-E3-11, DAC-E3-12, DAC-E3-S5-2, DEC-0207, DEC-0331, DEC-0332): copy.ts holds PALETTE_COPY and failureReason; targets.ts holds stockTarget and universeTarget; pages.ts holds palettePages and matchesText; universes.ts holds fetchActiveUniverses. The test file is created with the pure-module cases of T009 and one fetch case for universes.ts; later cycles append the rendering harness and cases. The generator produced 7 mutants and 11 were hand-written from the plan's kill list; the first run left three survivors (the stock target's encoding, and the universes URL and id mapping, which no case exercised), so the stock cases gained symbols that need encoding and a universes fetch case was added, and the run was repeated: 18 mutants, all killed. Both reviews raised only LOW observations: the partial row repeats the cap of 8 in its text, and the universes read has no test of a failed or aborted response, which the palette's error-row cases cover in cycle 3.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-1-copy-targets-pages.log
+    red_log_sha256: 079f6ee17ce3a62a9ca6d3fddc5a5d34099a4a78a4f55ed371dc4a1d37e3e166
+    red_evidence: >
+      command-palette.test.tsx failed to load (./copy, ./pages, ./targets and ./universes did not resolve) before the modules existed.
+    green_evidence: >
+      command-palette.test.tsx 4 passed before the strengthening and 5 after (green-cycle-1-copy-targets-pages.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3c97cc21ddc38905b10c7578f32a2874894036c8e1830c478b0e42c72cc83792
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: 05cf39c08831e831a1a1fc75fe65621449005b55ac267a65e462b844befbaa1a
+      generated: 18
+      killed: 18
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

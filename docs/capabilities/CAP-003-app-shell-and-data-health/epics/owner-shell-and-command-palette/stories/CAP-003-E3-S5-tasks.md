@@ -206,7 +206,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 ### Additional Unit Tests
 
-- [ ] T009 [P] Write the pure-module cases in `web/src/app/command-palette/command-palette.test.tsx`, in `describe("pages, targets and reasons")`. It runs after T008 (same file), and imports `palettePages` and `matchesText` from `./pages`, `stockTarget` and `universeTarget` from `./targets`, and `failureReason` and `PALETTE_COPY` from `./copy`.
+- [x] T009 [P] Write the pure-module cases in `web/src/app/command-palette/command-palette.test.tsx`, in `describe("pages, targets and reasons")`. It runs after T008 (same file), and imports `palettePages` and `matchesText` from `./pages`, `stockTarget` and `universeTarget` from `./targets`, and `failureReason` and `PALETTE_COPY` from `./copy`.
   - (a) **Pages.** With `flags.registered = true`, `palettePages()` `toEqual` the independent literal:
 
     ```text
@@ -251,7 +251,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Write the five non-visual modules, each of which makes its unit cases pass.
 
-- [ ] T010 [P] Create `web/src/app/command-palette/copy.ts`, `targets.ts`, `pages.ts` and `universes.ts`. These depend on T002, T004 and T009 being RED. No file writes a length, hex or colour literal (DAC-E3-S5-4), and no comment writes a unit joined to a number.
+- [x] T010 [P] Create `web/src/app/command-palette/copy.ts`, `targets.ts`, `pages.ts` and `universes.ts`. These depend on T002, T004 and T009 being RED. No file writes a length, hex or colour literal (DAC-E3-S5-4), and no comment writes a unit joined to a number.
   - **`copy.ts`** (command-palette §2.4, §10; UX design §1.1; DAC-E3-12; DEC-0332):
     - `export const PALETTE_COPY` holds:
       - `placeholder: "Jump to a stock or page"`;

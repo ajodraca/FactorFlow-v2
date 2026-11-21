@@ -1,0 +1,28 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
+
+ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 6ms
+   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 2ms
+     → nil is not defined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
+ReferenceError: nil is not defined
+ ❯ src/app/command-palette/pages.ts:18:42
+     16|   const { coverage, followed, downloads } = PALETTE_COPY.dataPages;
+     17|   return [
+     18|     ...DESTINATIONS.map((d) => ({ label: nil, to: d.to, hint: null })),
+       |                                          ^
+     19|     { label: coverage.label, to: "/data/coverage", hint: coverage.hint…
+     20|     { label: followed.label, to: "/data/followed", hint: followed.hint…
+ ❯ Module.palettePages src/app/command-palette/pages.ts:18:21
+ ❯ src/app/command-palette/command-palette.test.tsx:32:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  23:28:57
+   Duration  853ms (transform 49ms, setup 38ms, collect 55ms, tests 6ms, environment 188ms, prepare 189ms)
+
