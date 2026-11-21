@@ -1,0 +1,620 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/green-cycle-4-read-state.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/green-cycle-4-read-state.log
+new file mode 100644
+index 00000000..5787a488
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/green-cycle-4-read-state.log
+@@ -0,0 +1,13 @@
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 136ms
++
++ Test Files  3 passed (3)
++      Tests  178 passed (178)
++   Start at  17:27:53
++   Duration  1.16s (transform 140ms, setup 201ms, collect 277ms, tests 181ms, environment 1.11s, prepare 140ms)
++
++Checked 6 files in 22ms. No fixes applied.
++Checked 6 files in 5ms. No fixes applied.
++TSC-OK
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-4.json
+new file mode 100644
+index 00000000..872c1e71
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-4.json
+@@ -0,0 +1,31 @@
++{
++ "schema": 1,
++ "repo_head": "ba695a5afaa3af0e40ffb138d2f287605c8946e2",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/setup/use-setup-state.ts:manual:swallow-other-error",
++   "operator": "manual",
++   "file": "web/src/screens/setup/use-setup-state.ts",
++   "old": "          throw error;",
++   "new": "          return;",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/screens/setup/use-setup-state.ts:manual:last-from-error-dropped",
++   "operator": "manual",
++   "file": "web/src/screens/setup/use-setup-state.ts",
++   "old": "return previous.kind === \"error\" ? previous.last : null;",
++   "new": "return null;",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/screens/setup/use-setup-state.ts:manual:checked-at-epoch",
++   "operator": "manual",
++   "file": "web/src/screens/setup/use-setup-state.ts",
++   "old": "setState({ kind: \"ok\", data, checkedAt: new Date() });",
++   "new": "setState({ kind: \"ok\", data, checkedAt: new Date(0) });",
++   "cycle": "cycle-4"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..b1bfd09c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log
+@@ -0,0 +1,15 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w0/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 57ms
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 149ms
++
++ Test Files  2 passed (2)
++      Tests  35 passed (35)
++   Start at  17:27:27
++   Duration  1.38s (transform 150ms, setup 154ms, collect 380ms, tests 206ms, environment 973ms, prepare 381ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..6a965c6e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log
+@@ -0,0 +1,15 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 52ms
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 147ms
++
++ Test Files  2 passed (2)
++      Tests  35 passed (35)
++   Start at  17:27:27
++   Duration  1.38s (transform 147ms, setup 157ms, collect 375ms, tests 198ms, environment 644ms, prepare 96ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..4bdaa579
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log
+@@ -0,0 +1,15 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 54ms
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 146ms
++
++ Test Files  2 passed (2)
++      Tests  35 passed (35)
++   Start at  17:27:27
++   Duration  1.38s (transform 141ms, setup 157ms, collect 376ms, tests 199ms, environment 960ms, prepare 99ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_checked-at-epoch.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_checked-at-epoch.log
+new file mode 100644
+index 00000000..8f04dc3a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_checked-at-epoch.log
+@@ -0,0 +1,45 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 83ms
++   × the carried ReadState: other rejections, repeated failures, the answer instant > stamps an answer with the instant it arrived, and a later failure keeps that instant 6ms
++     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 190ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > stamps an answer with the instant it arrived, and a later failure keeps that instant
++AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "checkedAt": 2026-09-06T18:40:00.000Z,
+++   "checkedAt": 1970-01-01T00:00:00.000Z,
++    "data": Object {
++      "updatedAt": "2026-09-06T18:00:00Z",
++      "years": 5,
++    },
++    "kind": "ok",
++  }
++
++ ❯ src/screens/setup/use-setup-state.test.ts:617:30
++    615|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
++    616|     const hook = await mount();
++    617|     expect(hook.state.depth).toEqual({
++       |                              ^
++    618|       kind: "ok",
++    619|       data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" },
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 34 passed (35)
++   Start at  17:27:33
++   Duration  1.37s (transform 129ms, setup 97ms, collect 315ms, tests 273ms, environment 582ms, prepare 368ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_last-from-error-dropped.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_last-from-error-dropped.log
+new file mode 100644
+index 00000000..d8966177
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_last-from-error-dropped.log
+@@ -0,0 +1,48 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 71ms
++   × the carried ReadState: other rejections, repeated failures, the answer instant > keeps the last good answer across two failed re-reads in a row 9ms
++     → expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 178ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > keeps the last good answer across two failed re-reads in a row
++AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "error": [ApiUnreachableError: second],
++    "kind": "error",
++-   "last": Object {
++-     "checkedAt": Any<Date>,
++-     "data": Object {
++-       "updatedAt": "2026-09-06T18:00:00Z",
++-       "years": 5,
++-     },
++-   },
+++   "last": null,
++  }
++
++ ❯ src/screens/setup/use-setup-state.test.ts:602:30
++    600|     vi.mocked(getHistoryDepth).mockRejectedValue(second);
++    601|     await act(async () => hook.state.reread("depth"));
++    602|     expect(hook.state.depth).toEqual({
++       |                              ^
++    603|       kind: "error",
++    604|       error: second,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 34 passed (35)
++   Start at  17:27:33
++   Duration  1.38s (transform 120ms, setup 105ms, collect 339ms, tests 250ms, environment 567ms, prepare 105ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_swallow-other-error.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_swallow-other-error.log
+new file mode 100644
+index 00000000..a44bc05c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_swallow-other-error.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w0/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 85ms
++   × the carried ReadState: other rejections, repeated failures, the answer instant > surfaces a rejection that is neither an ApiError nor an ApiUnreachableError and never settles it as an error 6ms
++     → expected [] to deeply equal [ TypeError: programming error ]
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 181ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > surfaces a rejection that is neither an ApiError nor an ApiUnreachableError and never settles it as an error
++AssertionError: expected [] to deeply equal [ TypeError: programming error ]
++
++- Expected
+++ Received
++
++- Array [
++-   [TypeError: programming error],
++- ]
+++ Array []
++
++ ❯ src/screens/setup/use-setup-state.test.ts:578:22
++    576|       hook = await mount();
++    577|     });
++    578|     expect(surfaced).toEqual([surprise]);
++       |                      ^
++    579|     expect(hook?.state.depth).toEqual({ kind: "loading" });
++    580|     expect(hook?.state.activeCount.kind).toBe("ok");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 34 passed (35)
++   Start at  17:27:33
++   Duration  1.36s (transform 107ms, setup 101ms, collect 309ms, tests 266ms, environment 587ms, prepare 322ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results.json
+new file mode 100644
+index 00000000..4817df7c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results.json
+@@ -0,0 +1,79 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/screens/setup/use-setup-state.test.ts web/src/screens/setup/draft.test.tsx && npx tsc --noEmit",
++  "repo_head": "ba695a5afaa3af0e40ffb138d2f287605c8946e2",
++  "tree_patch_sha256": "a1379421d15e2e0fe2058edfdb95d82fa68f5c47cbdaeaf8a0b113244821c228",
++  "mutants_sha256": "e5c7c587d89a3ecad05bd86e7c778b9441524bc190688817059d2a224d960d19",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-4.json",
++  "jobs": 3,
++  "planned": 3,
++  "started": "2026-11-21T23:27:26Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log",
++      "log_sha256": "418dd4f33e0cbc7e4306ee283b6044a65de02e9008dc0a79f5eb756dc470da8e"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log",
++      "log_sha256": "9e82f6b4afaa1b69dcd59f1dd22f845c80a8524a1ea57c7e63f165bceef4f64a"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log",
++      "log_sha256": "33f44234f35e50ec7c59122ec35eda9789d5c136e8729f2035fa7e2f5b5a16eb"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/setup/use-setup-state.ts:manual:swallow-other-error",
++      "operator": "manual",
++      "file": "web/src/screens/setup/use-setup-state.ts",
++      "old": "          throw error;",
++      "new": "          return;",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_swallow-other-error.log",
++      "log_sha256": "f8660e19bbd0efe0acca8b10c598c5fad9e144883834c7a600e6a817a281fe8d"
++    },
++    {
++      "id": "web/src/screens/setup/use-setup-state.ts:manual:last-from-error-dropped",
++      "operator": "manual",
++      "file": "web/src/screens/setup/use-setup-state.ts",
++      "old": "return previous.kind === \"error\" ? previous.last : null;",
++      "new": "return null;",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_last-from-error-dropped.log",
++      "log_sha256": "1c890dab96f084455e7ca2d56b00a63ae7c52d17462f0cfc0a5f51f96239cd12"
++    },
++    {
++      "id": "web/src/screens/setup/use-setup-state.ts:manual:checked-at-epoch",
++      "operator": "manual",
++      "file": "web/src/screens/setup/use-setup-state.ts",
++      "old": "setState({ kind: \"ok\", data, checkedAt: new Date() });",
++      "new": "setState({ kind: \"ok\", data, checkedAt: new Date(0) });",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_checked-at-epoch.log",
++      "log_sha256": "a6abf95499b95e647215ca9715dc3ccae990a9f3a6a5b85a00d3992eed728ae4"
++    }
++  ],
++  "finished": "2026-11-21T23:27:34Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-4-read-state.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-4-read-state.log
+new file mode 100644
+index 00000000..c39e1a15
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-4-read-state.log
+@@ -0,0 +1,140 @@
++# RED for cycle-4: the three tests run against the production file with each survivor mutant applied (mutation-cycle-4-results-logs); each fails.
++
++## web_src_screens_setup_use-setup-state.ts_manual_checked-at-epoch.log
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 83ms
++   × the carried ReadState: other rejections, repeated failures, the answer instant > stamps an answer with the instant it arrived, and a later failure keeps that instant 6ms
++     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 190ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > stamps an answer with the instant it arrived, and a later failure keeps that instant
++AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "checkedAt": 2026-09-06T18:40:00.000Z,
+++   "checkedAt": 1970-01-01T00:00:00.000Z,
++    "data": Object {
++      "updatedAt": "2026-09-06T18:00:00Z",
++      "years": 5,
++    },
++    "kind": "ok",
++  }
++
++ ❯ src/screens/setup/use-setup-state.test.ts:617:30
++    615|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
++    616|     const hook = await mount();
++    617|     expect(hook.state.depth).toEqual({
++       |                              ^
++    618|       kind: "ok",
++    619|       data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" },
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 34 passed (35)
++   Start at  17:27:33
++   Duration  1.37s (transform 129ms, setup 97ms, collect 315ms, tests 273ms, environment 582ms, prepare 368ms)
++
++
++## web_src_screens_setup_use-setup-state.ts_manual_last-from-error-dropped.log
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 71ms
++   × the carried ReadState: other rejections, repeated failures, the answer instant > keeps the last good answer across two failed re-reads in a row 9ms
++     → expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 178ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > keeps the last good answer across two failed re-reads in a row
++AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "error": [ApiUnreachableError: second],
++    "kind": "error",
++-   "last": Object {
++-     "checkedAt": Any<Date>,
++-     "data": Object {
++-       "updatedAt": "2026-09-06T18:00:00Z",
++-       "years": 5,
++-     },
++-   },
+++   "last": null,
++  }
++
++ ❯ src/screens/setup/use-setup-state.test.ts:602:30
++    600|     vi.mocked(getHistoryDepth).mockRejectedValue(second);
++    601|     await act(async () => hook.state.reread("depth"));
++    602|     expect(hook.state.depth).toEqual({
++       |                              ^
++    603|       kind: "error",
++    604|       error: second,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 34 passed (35)
++   Start at  17:27:33
++   Duration  1.38s (transform 120ms, setup 105ms, collect 339ms, tests 250ms, environment 567ms, prepare 105ms)
++
++
++## web_src_screens_setup_use-setup-state.ts_manual_swallow-other-error.log
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w0/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 85ms
++   × the carried ReadState: other rejections, repeated failures, the answer instant > surfaces a rejection that is neither an ApiError nor an ApiUnreachableError and never settles it as an error 6ms
++     → expected [] to deeply equal [ TypeError: programming error ]
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 181ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > surfaces a rejection that is neither an ApiError nor an ApiUnreachableError and never settles it as an error
++AssertionError: expected [] to deeply equal [ TypeError: programming error ]
++
++- Expected
+++ Received
++
++- Array [
++-   [TypeError: programming error],
++- ]
+++ Array []
++
++ ❯ src/screens/setup/use-setup-state.test.ts:578:22
++    576|       hook = await mount();
++    577|     });
++    578|     expect(surfaced).toEqual([surprise]);
++       |                      ^
++    579|     expect(hook?.state.depth).toEqual({ kind: "loading" });
++    580|     expect(hook?.state.activeCount.kind).toBe("ok");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 34 passed (35)
++   Start at  17:27:33
++   Duration  1.36s (transform 107ms, setup 101ms, collect 309ms, tests 266ms, environment 587ms, prepare 322ms)
++
+diff --git a/web/src/screens/setup/use-setup-state.test.ts b/web/src/screens/setup/use-setup-state.test.ts
+index f977758d..c4dd77b3 100644
+--- a/web/src/screens/setup/use-setup-state.test.ts
++++ b/web/src/screens/setup/use-setup-state.test.ts
+@@ -1,6 +1,6 @@
+ import { act, render } from "@testing-library/react";
+ import { type FunctionComponent, createElement } from "react";
+-import { beforeEach, describe, expect, it, vi } from "vitest";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { ApiError, ApiUnreachableError, getHistoryDepth, listInstruments } from "../../api/client";
+ import type { RunState } from "../../api/types";
+ import type { ShellContextValue } from "../../app/shell-context";
+@@ -530,3 +530,105 @@ describe("reads, re-reads and unknown facts", () => {
+     expect(hook.state.drafts.yearsText).toBe("9");
+   });
+ });
++
++// Taken before any test fakes a clock: a rejection reaches `unhandledRejection`
++// only on a real turn of the event loop.
++const realSetImmediate = globalThis.setImmediate;
++
++/**
++ * Runs `body` and returns every rejection it left unhandled. Vitest's own
++ * listeners are set aside meanwhile, since they would fail the run for the
++ * very rejection the test expects.
++ */
++async function surfacedRejections(body: () => Promise<void>): Promise<unknown[]> {
++  const seen: unknown[] = [];
++  const saved = process.listeners("unhandledRejection");
++  process.removeAllListeners("unhandledRejection");
++  process.on("unhandledRejection", (reason) => {
++    seen.push(reason);
++  });
++  try {
++    await body();
++    await new Promise<void>((resolve) => {
++      realSetImmediate(resolve);
++    });
++  } finally {
++    process.removeAllListeners("unhandledRejection");
++    for (const listener of saved) {
++      process.on("unhandledRejection", listener);
++    }
++  }
++  return seen;
++}
++
++describe("the carried ReadState: other rejections, repeated failures, the answer instant", () => {
++  afterEach(() => {
++    vi.useRealTimers();
++  });
++
++  it("surfaces a rejection that is neither an ApiError nor an ApiUnreachableError and never settles it as an error", async () => {
++    const surprise = new TypeError("programming error");
++    vi.mocked(getHistoryDepth).mockRejectedValue(surprise);
++    count(3);
++    current = shell({ health: HEALTH_OK, attention: attentionOk(null) });
++    let hook: Awaited<ReturnType<typeof mount>> | undefined;
++    const surfaced = await surfacedRejections(async () => {
++      hook = await mount();
++    });
++    expect(surfaced).toEqual([surprise]);
++    expect(hook?.state.depth).toEqual({ kind: "loading" });
++    expect(hook?.state.activeCount.kind).toBe("ok");
++  });
++
++  it("keeps the last good answer across two failed re-reads in a row", async () => {
++    depth(5);
++    count(3);
++    current = shell({ health: HEALTH_OK, attention: attentionOk(null) });
++    const hook = await mount();
++    const answered = { data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" } };
++
++    const first = new ApiUnreachableError("first");
++    vi.mocked(getHistoryDepth).mockRejectedValue(first);
++    await act(async () => hook.state.reread("depth"));
++    expect(hook.state.depth).toEqual({
++      kind: "error",
++      error: first,
++      last: { ...answered, checkedAt: expect.any(Date) },
++    });
++
++    const second = new ApiUnreachableError("second");
++    vi.mocked(getHistoryDepth).mockRejectedValue(second);
++    await act(async () => hook.state.reread("depth"));
++    expect(hook.state.depth).toEqual({
++      kind: "error",
++      error: second,
++      last: { ...answered, checkedAt: expect.any(Date) },
++    });
++  });
++
++  it("stamps an answer with the instant it arrived, and a later failure keeps that instant", async () => {
++    vi.useFakeTimers({ toFake: ["Date"] });
++    const answeredAt = new Date("2026-09-06T18:40:00.000Z");
++    vi.setSystemTime(answeredAt);
++    depth(5);
++    count(3);
++    current = shell({ health: HEALTH_OK, attention: attentionOk(null) });
++    const hook = await mount();
++    expect(hook.state.depth).toEqual({
++      kind: "ok",
++      data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" },
++      checkedAt: answeredAt,
++    });
++    expect(hook.state.activeCount).toEqual({ kind: "ok", data: 3, checkedAt: answeredAt });
++
++    vi.setSystemTime(new Date("2026-09-06T18:45:00.000Z"));
++    const failure = new ApiUnreachableError("down");
++    vi.mocked(getHistoryDepth).mockRejectedValue(failure);
++    await act(async () => hook.state.reread("depth"));
++    expect(hook.state.depth).toEqual({
++      kind: "error",
++      error: failure,
++      last: { data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" }, checkedAt: answeredAt },
++    });
++  });
++});

@@ -97,3 +97,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T005, T009]
+    description: >
+      Review rework for implementation review v1 (IR-001, IR-002): three tests in use-setup-state.test.ts, no production change. A rejection that is neither ApiError nor ApiUnreachableError surfaces as an unhandled rejection and leaves the read loading (T009 "Any other rejection is rethrown"); two failed re-reads in a row keep error.last (T009's carry from a previous error); an ok read's checkedAt is the instant it answered, checked against a faked Date, and a later failure keeps that instant in last. The tests are RED against the three review mutants (swallow-other-error, last-from-error-dropped, checked-at-epoch), whose failing logs are the red log; at HEAD they pass because the production code was already correct. The mutation run over the three review survivors killed all three. Both reviews approved; the code review raised LOW observations only (the surfacedRejections helper is copied from use-polled-read.test.ts, an optional chain in one assertion, and expect.any(Date) in the repeated-failure case beside a test that pins the instant). IR-003 is met by the Decision-Id trailers on this commit (DEC-0341 to DEC-0344); the cycle 2 and 3 commits are not reworded.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-4-read-state.log
+    red_log_sha256: 1750cf53225d173d355348e8d1b448d759216f63be2d364fc6522d3a602fd9b5
+    red_evidence: >
+      With each review mutant applied the new test fails: swallow-other-error leaves no unhandled rejection, last-from-error-dropped loses last, checked-at-epoch stamps the epoch.
+    green_evidence: >
+      The setup suites pass (3 files, 178 tests) with tsc --noEmit, biome lint and biome format clean (green-cycle-4-read-state.log).
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 58948372d1ccc55e843a4a3c49d995299019553c3fa6d57331a6026b37a0bd95
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results.json
+      results_sha256: 1c8a683357fb799a53c028a079c5704f4f2dadcec2caa5d73386e071fb1b4403
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

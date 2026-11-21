@@ -1,0 +1,45 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-f7x_fpfl/w2/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (30 tests | 1 failed) 83ms
+   × the carried ReadState: other rejections, repeated failures, the answer instant > stamps an answer with the instant it arrived, and a later failure keeps that instant 6ms
+     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 190ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > the carried ReadState: other rejections, repeated failures, the answer instant > stamps an answer with the instant it arrived, and a later failure keeps that instant
+AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "checkedAt": 2026-09-06T18:40:00.000Z,
++   "checkedAt": 1970-01-01T00:00:00.000Z,
+    "data": Object {
+      "updatedAt": "2026-09-06T18:00:00Z",
+      "years": 5,
+    },
+    "kind": "ok",
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:617:30
+    615|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    616|     const hook = await mount();
+    617|     expect(hook.state.depth).toEqual({
+       |                              ^
+    618|       kind: "ok",
+    619|       data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 34 passed (35)
+   Start at  17:27:33
+   Duration  1.37s (transform 129ms, setup 97ms, collect 315ms, tests 273ms, environment 582ms, prepare 368ms)
+

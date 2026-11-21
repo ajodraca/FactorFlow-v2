@@ -1,6 +1,6 @@
 import { act, render } from "@testing-library/react";
 import { type FunctionComponent, createElement } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, ApiUnreachableError, getHistoryDepth, listInstruments } from "../../api/client";
 import type { RunState } from "../../api/types";
 import type { ShellContextValue } from "../../app/shell-context";
@@ -528,5 +528,107 @@ describe("reads, re-reads and unknown facts", () => {
 
     act(() => hook.state.setDraft("yearsText", "9"));
     expect(hook.state.drafts.yearsText).toBe("9");
+  });
+});
+
+// Taken before any test fakes a clock: a rejection reaches `unhandledRejection`
+// only on a real turn of the event loop.
+const realSetImmediate = globalThis.setImmediate;
+
+/**
+ * Runs `body` and returns every rejection it left unhandled. Vitest's own
+ * listeners are set aside meanwhile, since they would fail the run for the
+ * very rejection the test expects.
+ */
+async function surfacedRejections(body: () => Promise<void>): Promise<unknown[]> {
+  const seen: unknown[] = [];
+  const saved = process.listeners("unhandledRejection");
+  process.removeAllListeners("unhandledRejection");
+  process.on("unhandledRejection", (reason) => {
+    seen.push(reason);
+  });
+  try {
+    await body();
+    await new Promise<void>((resolve) => {
+      realSetImmediate(resolve);
+    });
+  } finally {
+    process.removeAllListeners("unhandledRejection");
+    for (const listener of saved) {
+      process.on("unhandledRejection", listener);
+    }
+  }
+  return seen;
+}
+
+describe("the carried ReadState: other rejections, repeated failures, the answer instant", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("surfaces a rejection that is neither an ApiError nor an ApiUnreachableError and never settles it as an error", async () => {
+    const surprise = new TypeError("programming error");
+    vi.mocked(getHistoryDepth).mockRejectedValue(surprise);
+    count(3);
+    current = shell({ health: HEALTH_OK, attention: attentionOk(null) });
+    let hook: Awaited<ReturnType<typeof mount>> | undefined;
+    const surfaced = await surfacedRejections(async () => {
+      hook = await mount();
+    });
+    expect(surfaced).toEqual([surprise]);
+    expect(hook?.state.depth).toEqual({ kind: "loading" });
+    expect(hook?.state.activeCount.kind).toBe("ok");
+  });
+
+  it("keeps the last good answer across two failed re-reads in a row", async () => {
+    depth(5);
+    count(3);
+    current = shell({ health: HEALTH_OK, attention: attentionOk(null) });
+    const hook = await mount();
+    const answered = { data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" } };
+
+    const first = new ApiUnreachableError("first");
+    vi.mocked(getHistoryDepth).mockRejectedValue(first);
+    await act(async () => hook.state.reread("depth"));
+    expect(hook.state.depth).toEqual({
+      kind: "error",
+      error: first,
+      last: { ...answered, checkedAt: expect.any(Date) },
+    });
+
+    const second = new ApiUnreachableError("second");
+    vi.mocked(getHistoryDepth).mockRejectedValue(second);
+    await act(async () => hook.state.reread("depth"));
+    expect(hook.state.depth).toEqual({
+      kind: "error",
+      error: second,
+      last: { ...answered, checkedAt: expect.any(Date) },
+    });
+  });
+
+  it("stamps an answer with the instant it arrived, and a later failure keeps that instant", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const answeredAt = new Date("2026-09-06T18:40:00.000Z");
+    vi.setSystemTime(answeredAt);
+    depth(5);
+    count(3);
+    current = shell({ health: HEALTH_OK, attention: attentionOk(null) });
+    const hook = await mount();
+    expect(hook.state.depth).toEqual({
+      kind: "ok",
+      data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" },
+      checkedAt: answeredAt,
+    });
+    expect(hook.state.activeCount).toEqual({ kind: "ok", data: 3, checkedAt: answeredAt });
+
+    vi.setSystemTime(new Date("2026-09-06T18:45:00.000Z"));
+    const failure = new ApiUnreachableError("down");
+    vi.mocked(getHistoryDepth).mockRejectedValue(failure);
+    await act(async () => hook.state.reread("depth"));
+    expect(hook.state.depth).toEqual({
+      kind: "error",
+      error: failure,
+      last: { data: { years: 5, updatedAt: "2026-09-06T18:00:00Z" }, checkedAt: answeredAt },
+    });
   });
 });

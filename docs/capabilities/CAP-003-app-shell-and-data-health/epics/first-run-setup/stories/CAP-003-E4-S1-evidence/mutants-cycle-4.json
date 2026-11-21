@@ -1,0 +1,31 @@
+{
+ "schema": 1,
+ "repo_head": "ba695a5afaa3af0e40ffb138d2f287605c8946e2",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/setup/use-setup-state.ts:manual:swallow-other-error",
+   "operator": "manual",
+   "file": "web/src/screens/setup/use-setup-state.ts",
+   "old": "          throw error;",
+   "new": "          return;",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/setup/use-setup-state.ts:manual:last-from-error-dropped",
+   "operator": "manual",
+   "file": "web/src/screens/setup/use-setup-state.ts",
+   "old": "return previous.kind === \"error\" ? previous.last : null;",
+   "new": "return null;",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/setup/use-setup-state.ts:manual:checked-at-epoch",
+   "operator": "manual",
+   "file": "web/src/screens/setup/use-setup-state.ts",
+   "old": "setState({ kind: \"ok\", data, checkedAt: new Date() });",
+   "new": "setState({ kind: \"ok\", data, checkedAt: new Date(0) });",
+   "cycle": "cycle-4"
+  }
+ ]
+}
