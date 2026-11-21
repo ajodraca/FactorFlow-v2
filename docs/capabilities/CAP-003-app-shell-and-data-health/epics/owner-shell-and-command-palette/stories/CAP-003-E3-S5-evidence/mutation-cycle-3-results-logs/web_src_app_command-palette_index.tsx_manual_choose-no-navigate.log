@@ -1,0 +1,129 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w3/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 28ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 26ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 367ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 6 failed) 4250ms
+   ✓ states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found 395ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 561ms
+   × states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 309ms
+     → expected '/start' to be '/data/coverage' // Object.is equality
+   × states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 299ms
+     → expected '/start' to be '/settings' // Object.is equality
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 287ms
+     → expected '/start' to be '/data/coverage?symbol=KO' // Object.is equality
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (b) registered: one request per opening, filtered locally, a universe goes to its page 51ms
+     → expected '/start' to be '/research/universes/u1' // Object.is equality
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 280ms
+     → expected '/start' to be '/research/stocks/KO' // Object.is equality
+   × close (DAC-E3-S5-3, AC-25) > (c) choosing an item navigates, closes and returns focus 33ms
+     → expected '/start' to be '/settings' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row
+AssertionError: expected '/start' to be '/data/coverage' // Object.is equality
+
+Expected: "/data/coverage"
+Received: "/start"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:304:24
+    302|     expect(errorRow).not.toHaveAttribute("aria-selected", "true");
+    303|     await choose(user, "Coverage");
+    304|     expect(location()).toBe("/data/coverage");
+       |                        ^
+    305|   });
+    306| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable
+AssertionError: expected '/start' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/start"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:343:24
+    341|     expect(optionsIn("Pages")).toEqual(["Settings"]);
+    342|     await choose(user, "Settings");
+    343|     expect(location()).toBe("/settings");
+       |                        ^
+    344|   });
+    345| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage
+AssertionError: expected '/start' to be '/data/coverage?symbol=KO' // Object.is equality
+
+Expected: "/data/coverage?symbol=KO"
+Received: "/start"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:361:24
+    359|     await waitFor(() => expect(optionsIn("Stocks")).toEqual(["KO"]));
+    360|     await choose(user, "KO");
+    361|     expect(location()).toBe("/data/coverage?symbol=KO");
+       |                        ^
+    362|   });
+    363| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (b) registered: one request per opening, filtered locally, a universe goes to its page
+AssertionError: expected '/start' to be '/research/universes/u1' // Object.is equality
+
+Expected: "/research/universes/u1"
+Received: "/start"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:376:24
+    374|     expect(universesCalls).toBe(1);
+    375|     await choose(user, "Large caps");
+    376|     expect(location()).toBe("/research/universes/u1");
+       |                        ^
+    377|     await openPalette(user);
+    378|     await waitFor(() => expect(universesCalls).toBe(2));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page
+AssertionError: expected '/start' to be '/research/stocks/KO' // Object.is equality
+
+Expected: "/research/stocks/KO"
+Received: "/start"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:389:24
+    387|     await waitFor(() => expect(optionsIn("Stocks")).toEqual(["KO"]));
+    388|     await choose(user, "KO");
+    389|     expect(location()).toBe("/research/stocks/KO");
+       |                        ^
+    390|   });
+    391| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > close (DAC-E3-S5-3, AC-25) > (c) choosing an item navigates, closes and returns focus
+AssertionError: expected '/start' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/start"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:416:24
+    414|     await user.keyboard("set");
+    415|     await choose(user, "Settings");
+    416|     expect(location()).toBe("/settings");
+       |                        ^
+    417|     expect(screen.queryByRole("dialog")).toBeNull();
+    418|     expect(opener).toHaveFocus();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  6 failed | 96 passed (102)
+   Start at  23:38:21
+   Duration  5.33s (transform 268ms, setup 176ms, collect 1.32s, tests 4.67s, environment 786ms, prepare 140ms)
+

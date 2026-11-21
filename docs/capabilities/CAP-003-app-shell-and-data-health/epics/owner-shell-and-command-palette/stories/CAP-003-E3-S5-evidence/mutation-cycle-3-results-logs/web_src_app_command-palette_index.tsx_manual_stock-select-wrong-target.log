@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w3/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 28ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 23ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 184ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 2 failed) 4045ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 531ms
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 289ms
+     → expected '/research/universes/KO' to be '/data/coverage?symbol=KO' // Object.is equality
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 285ms
+     → expected '/research/universes/KO' to be '/research/stocks/KO' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage
+AssertionError: expected '/research/universes/KO' to be '/data/coverage?symbol=KO' // Object.is equality
+
+Expected: "/data/coverage?symbol=KO"
+Received: "/research/universes/KO"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:361:24
+    359|     await waitFor(() => expect(optionsIn("Stocks")).toEqual(["KO"]));
+    360|     await choose(user, "KO");
+    361|     expect(location()).toBe("/data/coverage?symbol=KO");
+       |                        ^
+    362|   });
+    363| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page
+AssertionError: expected '/research/universes/KO' to be '/research/stocks/KO' // Object.is equality
+
+Expected: "/research/stocks/KO"
+Received: "/research/universes/KO"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:389:24
+    387|     await waitFor(() => expect(optionsIn("Stocks")).toEqual(["KO"]));
+    388|     await choose(user, "KO");
+    389|     expect(location()).toBe("/research/stocks/KO");
+       |                        ^
+    390|   });
+    391| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 100 passed (102)
+   Start at  23:38:32
+   Duration  4.86s (transform 215ms, setup 155ms, collect 916ms, tests 4.28s, environment 792ms, prepare 126ms)
+

@@ -60,3 +60,36 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T004, T005, T006, T007, T008, T012, T013]
+    description: >
+      The dialog, the CommandDialog prop and the scan widening (TC-COMP-062, TC-COMP-082, TC-COMP-083, TC-COMP-084, TC-COMP-085, TC-COMP-086, DAC-E3-11, DAC-E3-12, DAC-E3-S5-2 to DAC-E3-S5-6, AC-22, AC-24, AC-27, DEC-0330): index.tsx exports CommandPalette, a CommandDialog with filtering off around a body that mounts only while open, so the text and the universes read are per opening; Stocks, Universes (only while registered) and Pages in that order with separators between rendered groups, disabled hint, partial and error rows, CommandEmpty gated on a settled search, and the not-applicable record for the stale, unavailable and one-tier states. command.tsx gains the optional shouldFilter prop, forwarded to the inner Command and defaulting to cmdk's own. command-palette.test.tsx gains the rendering harness and the T002, T004, T005, T006 and T008 cases; token-literals.test.ts appends the palette directory to SCANNED_DIRECTORIES with the T007 cases. The generator produced 24 mutants (all in index.tsx; command.tsx produced none) and 19 were hand-written from the plan's kill list and the survivors of the first run; that run left six survivors (an empty Pages group left standing, a hint span rendered for a null hint or missing for a set one, a separator before the first group, and an undisabled universes error row), so five assertions were added and the run repeated: 43 mutants, 42 killed. The survivor judged equivalent: the page row's value written as its label rather than page: plus its route; page labels are unique and every other row's value is prefixed by its kind, so no two rows can collide. T014's planted-literal check was run on the real file system: 12px in a palette source failed token-literals naming the file, and passed again once the file was deleted. Both reviews approved with LOW observations only: for one commit after the text changes the previous search state is still paired with the new text, so a stale row or the empty state can flash before the hook reports loading (a follow-up for use-stock-search, which cycle 2 shipped); the not-applicable record is asserted as comment text; the group and separator assertions read cmdk's attribute names.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-3-palette.log
+    red_log_sha256: 93838c78bbd7cca66d6800136a6fd960ea260f046b90af4fbd617cedb75dbbc0
+    red_evidence: >
+      command-palette.test.tsx failed to load (./index did not resolve) and token-literals.test.ts case (a) failed on the missing index.tsx before the module existed.
+    green_evidence: >
+      The command-palette suites and web/src/components 909 passed (green-cycle-3-palette.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 061c0141eb88981279e6073f7aa8d3174bd40b39619bdf7567131febaba64e80
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-3-results.json
+      results_sha256: 37b5d07e9feac24fbc5a71227a6067362668fc689f37d8c7b31f940f810929dc
+      generated: 43
+      killed: 42
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.977
+      survivors:
+        - id: web/src/app/command-palette/index.tsx:manual:page-value-collision
+          disposition: equivalent
+          reason: >
+            The page row's value became its label instead of page: plus its route. Page labels are unique (Research, Settings, Coverage, Followed stocks, Downloads), and every stock, universe, hint, partial and error row carries a kind prefix in its own value, so no two rows can share a value and no selection can differ. The contract the tests pin is the one that matters: each chosen row navigates to its own target.
