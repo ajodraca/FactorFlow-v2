@@ -179,9 +179,13 @@ The content has `role="dialog"` and `aria-modal="true"`, not Radix's
 
 ### `Command` and `CommandDialog` (`command.tsx`)
 
-cmdk inside a Radix Dialog. `CommandDialog` (`open`, `onOpenChange`, `children`)
-is labelled *Search FactorFlow* and loops the selection; `loop` is not a caller
-option. Focus returns to the opener on close. Its 560 px width is the one
+cmdk inside a Radix Dialog. `CommandDialog` (`open`, `onOpenChange`, optional
+`shouldFilter`, `children`) is labelled *Search FactorFlow* and loops the
+selection; `loop` is not a caller option. `shouldFilter` is passed to the root
+`Command`: `false` turns cmdk's filtering and re-ordering off, and omitting it
+keeps cmdk's default. Its consumer is the command palette, which filters its
+groups itself ([`command-palette.md`](command-palette.md)). Focus returns to the
+opener on close. Its 560 px width is the one
 length literal the token scan allows, in this file only.
 
 The parts are `Command`, `CommandInput` (with a search icon, ring on focus),
