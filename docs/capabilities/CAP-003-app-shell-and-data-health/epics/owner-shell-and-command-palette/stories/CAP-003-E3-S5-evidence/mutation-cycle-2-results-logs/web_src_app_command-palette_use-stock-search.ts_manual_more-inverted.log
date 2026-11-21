@@ -1,0 +1,95 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w2/web
+
+ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 3 failed) 41ms
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 9ms
+     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 3ms
+     → expected { kind: 'ok', symbols: [ 'KO' ], …(1) } to deeply equal { kind: 'ok', symbols: [ 'KO' ], …(1) }
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) reports more rows when the page has a next cursor 2ms
+     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
+AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "kind": "ok",
+-   "more": false,
++   "more": true,
+    "symbols": Array [
+      "KO",
+      "KOF",
+    ],
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:116:28
+    114| 
+    115|     await settle(calls[1] as { reply: Deferred }, page(["KO", "KOF"]));
+    116|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
+       |                            ^
+    117|     await settle(calls[0] as { reply: Deferred }, page(["KXX"]));
+    118|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
+AssertionError: expected { kind: 'ok', symbols: [ 'KO' ], …(1) } to deeply equal { kind: 'ok', symbols: [ 'KO' ], …(1) }
+
+- Expected
++ Received
+
+  Object {
+    "kind": "ok",
+-   "more": false,
++   "more": true,
+    "symbols": Array [
+      "KO",
+    ],
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:137:28
+    135|     });
+    136|     await settle(calls[1] as { reply: Deferred }, page(["KO"]));
+    137|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO"], more…
+       |                            ^
+    138|   });
+    139| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) reports more rows when the page has a next cursor
+AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "kind": "ok",
+-   "more": true,
++   "more": false,
+    "symbols": Array [
+      "KA",
+      "KB",
+    ],
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:147:28
+    145|     });
+    146|     await settle(calls[0] as { reply: Deferred }, page(["KA", "KB"], "…
+    147|     expect(result.current).toEqual({ kind: "ok", symbols: ["KA", "KB"]…
+       |                            ^
+    148|   });
+    149| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed (8)
+   Start at  23:31:21
+   Duration  838ms (transform 34ms, setup 34ms, collect 60ms, tests 41ms, environment 248ms, prepare 199ms)
+

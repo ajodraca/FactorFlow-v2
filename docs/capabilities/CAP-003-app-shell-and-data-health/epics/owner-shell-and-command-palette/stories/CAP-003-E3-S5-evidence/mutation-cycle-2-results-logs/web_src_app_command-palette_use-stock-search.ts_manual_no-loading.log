@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w0/web
+
+ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 2 failed) 35ms
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 12ms
+     → expected { kind: 'idle' } to deeply equal { kind: 'loading' }
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 2ms
+     → expected { kind: 'idle' } to deeply equal { kind: 'loading' }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
+AssertionError: expected { kind: 'idle' } to deeply equal { kind: 'loading' }
+
+- Expected
++ Received
+
+  Object {
+-   "kind": "loading",
++   "kind": "idle",
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:81:28
+     79|     });
+     80|     expect(calls).toHaveLength(0);
+     81|     expect(result.current).toEqual({ kind: "loading" });
+       |                            ^
+     82|     act(() => {
+     83|       vi.advanceTimersByTime(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
+AssertionError: expected { kind: 'idle' } to deeply equal { kind: 'loading' }
+
+- Expected
++ Received
+
+  Object {
+-   "kind": "loading",
++   "kind": "idle",
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:132:28
+    130|       await vi.advanceTimersByTimeAsync(0);
+    131|     });
+    132|     expect(result.current).toEqual({ kind: "loading" });
+       |                            ^
+    133|     act(() => {
+    134|       vi.advanceTimersByTime(250);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  23:31:21
+   Duration  836ms (transform 33ms, setup 35ms, collect 57ms, tests 35ms, environment 232ms, prepare 26ms)
+

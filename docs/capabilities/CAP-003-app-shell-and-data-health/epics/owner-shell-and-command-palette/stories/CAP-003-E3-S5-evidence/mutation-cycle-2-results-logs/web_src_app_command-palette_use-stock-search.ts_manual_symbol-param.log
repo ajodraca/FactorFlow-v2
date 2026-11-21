@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w3/web
+
+ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 23ms
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 5ms
+     → expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
+AssertionError: expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
+
+Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
+Received: "/api/instruments?symbol=++KO+&lifecycle=active&limit=8"
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:96:27
+     94|     });
+     95|     expect(calls).toHaveLength(1);
+     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
+       |                           ^
+     97|   });
+     98| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  23:31:22
+   Duration  476ms (transform 31ms, setup 45ms, collect 66ms, tests 23ms, environment 168ms, prepare 27ms)
+

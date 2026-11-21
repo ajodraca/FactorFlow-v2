@@ -1,0 +1,125 @@
+# TDD evidence for CAP-003-E3-S5 - Command Palette: Stocks, Universes and Pages, Every Item Navigating.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T009, T010]
+    description: >
+      Copy, targets, pages and universes (TC-COMP-082 pure half, DAC-E3-11, DAC-E3-12, DAC-E3-S5-2, DEC-0207, DEC-0331, DEC-0332): copy.ts holds PALETTE_COPY and failureReason; targets.ts holds stockTarget and universeTarget; pages.ts holds palettePages and matchesText; universes.ts holds fetchActiveUniverses. The test file is created with the pure-module cases of T009 and one fetch case for universes.ts; later cycles append the rendering harness and cases. The generator produced 7 mutants and 11 were hand-written from the plan's kill list; the first run left three survivors (the stock target's encoding, and the universes URL and id mapping, which no case exercised), so the stock cases gained symbols that need encoding and a universes fetch case was added, and the run was repeated: 18 mutants, all killed. Both reviews raised only LOW observations: the partial row repeats the cap of 8 in its text, and the universes read has no test of a failed or aborted response, which the palette's error-row cases cover in cycle 3.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-1-copy-targets-pages.log
+    red_log_sha256: 079f6ee17ce3a62a9ca6d3fddc5a5d34099a4a78a4f55ed371dc4a1d37e3e166
+    red_evidence: >
+      command-palette.test.tsx failed to load (./copy, ./pages, ./targets and ./universes did not resolve) before the modules existed.
+    green_evidence: >
+      command-palette.test.tsx 4 passed before the strengthening and 5 after (green-cycle-1-copy-targets-pages.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3c97cc21ddc38905b10c7578f32a2874894036c8e1830c478b0e42c72cc83792
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: 05cf39c08831e831a1a1fc75fe65621449005b55ac267a65e462b844befbaa1a
+      generated: 18
+      killed: 18
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T011]
+    description: >
+      The stock search (TC-COMP-081, DAC-E3-S5-1, DAC-E3-11, Resolved Conflict 1): use-stock-search.ts holds STOCK_SEARCH_DEBOUNCE_MS, STOCK_SEARCH_LIMIT, StockSearchState and useStockSearch, one effect keyed on the text that sends GET /api/instruments?symbol={prefix}&lifecycle=active&limit=8 through requestJson after 250 ms, and aborts the request in flight on new text, cleared text and unmount. The generator produced two off-by-one mutants and ten were hand-written from the plan's kill list; the first run left one survivor (the untrimmed text sent as the symbol), so a case for padded text was added and the run repeated: 12 mutants, all killed. Both reviews raised only LOW observations: the idle state is set from inside the effect, the test title repeats the 250 ms literal, and the TypeError path is covered in one case.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-2-stock-search.log
+    red_log_sha256: 72611f9433a407d743d9274d0b519ad286d64dc629355d87db46a51b80fd6c71
+    red_evidence: >
+      use-stock-search.test.ts failed to load (./use-stock-search did not resolve) before the module existed.
+    green_evidence: >
+      The command-palette suites 13 passed (green-cycle-2-stock-search.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c0f3e79ea614e496c3ac41cb47bfdfdb74eaf39acc242360388721c956d883f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 0b692da02efe3d26902e19ff64c6934ef8b91a6179d2cf40f4fe7ab750793222
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T004, T005, T006, T007, T008, T012, T013]
+    description: >
+      The dialog, the CommandDialog prop and the scan widening (TC-COMP-062, TC-COMP-082, TC-COMP-083, TC-COMP-084, TC-COMP-085, TC-COMP-086, DAC-E3-11, DAC-E3-12, DAC-E3-S5-2 to DAC-E3-S5-6, AC-22, AC-24, AC-27, DEC-0330): index.tsx exports CommandPalette, a CommandDialog with filtering off around a body that mounts only while open, so the text and the universes read are per opening; Stocks, Universes (only while registered) and Pages in that order with separators between rendered groups, disabled hint, partial and error rows, CommandEmpty gated on a settled search, and the not-applicable record for the stale, unavailable and one-tier states. command.tsx gains the optional shouldFilter prop, forwarded to the inner Command and defaulting to cmdk's own. command-palette.test.tsx gains the rendering harness and the T002, T004, T005, T006 and T008 cases; token-literals.test.ts appends the palette directory to SCANNED_DIRECTORIES with the T007 cases. The generator produced 24 mutants (all in index.tsx; command.tsx produced none) and 19 were hand-written from the plan's kill list and the survivors of the first run; that run left six survivors (an empty Pages group left standing, a hint span rendered for a null hint or missing for a set one, a separator before the first group, and an undisabled universes error row), so five assertions were added and the run repeated: 43 mutants, 42 killed. The survivor judged equivalent: the page row's value written as its label rather than page: plus its route; page labels are unique and every other row's value is prefixed by its kind, so no two rows can collide. T014's planted-literal check was run on the real file system: 12px in a palette source failed token-literals naming the file, and passed again once the file was deleted. Both reviews approved with LOW observations only: for one commit after the text changes the previous search state is still paired with the new text, so a stale row or the empty state can flash before the hook reports loading (a follow-up for use-stock-search, which cycle 2 shipped); the not-applicable record is asserted as comment text; the group and separator assertions read cmdk's attribute names.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-3-palette.log
+    red_log_sha256: 93838c78bbd7cca66d6800136a6fd960ea260f046b90af4fbd617cedb75dbbc0
+    red_evidence: >
+      command-palette.test.tsx failed to load (./index did not resolve) and token-literals.test.ts case (a) failed on the missing index.tsx before the module existed.
+    green_evidence: >
+      The command-palette suites and web/src/components 909 passed (green-cycle-3-palette.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 061c0141eb88981279e6073f7aa8d3174bd40b39619bdf7567131febaba64e80
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-3-results.json
+      results_sha256: 37b5d07e9feac24fbc5a71227a6067362668fc689f37d8c7b31f940f810929dc
+      generated: 43
+      killed: 42
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.977
+      survivors:
+        - id: web/src/app/command-palette/index.tsx:manual:page-value-collision
+          disposition: equivalent
+          reason: >
+            The page row's value became its label instead of page: plus its route. Page labels are unique (Research, Settings, Coverage, Followed stocks, Downloads), and every stock, universe, hint, partial and error row carries a kind prefix in its own value, so no two rows can share a value and no selection can differ. The contract the tests pin is the one that matters: each chosen row navigates to its own target.
+
+  - id: cycle-4
+    kind: rework
+    tasks: [T002, T013]
+    description: >
+      Review-rework of CAP-003-E3-S5-implementation-review-v1 (IR-001 to IR-004), tests only: command-palette.test.tsx gains cases that pin what the review's ten surviving hand-written mutants changed. TC-COMP-062 (a) pins the input placeholder Jump to a stock or page (IR-003); (b) finds Searching… inside cmdk's progressbar, inside the group headed Stocks, and not as an option (IR-004); new (c2) shows the empty state with research routes unregistered and quotes the trimmed text, (c3) shows no empty state while the universes read is pending (IR-001). TC-COMP-082 new (d) closes the palette before the universes read answers and checks the signal aborted, and (e) renders under StrictMode with a fetch that honours its signal and checks no Couldn't read universes row appears (IR-002). The fetch stub now passes the request's signal to the universes handler. The ten mutants (one multi-line, loading-outside-group; loading-as-item keeps CommandLoading referenced so it dies on an assertion, not tsc) are in mutants-cycle-4.json; none of the cycle-3 mutants is rerun here. The review's two equivalent survivors (universes-ok-unguarded, page-value-collision) stay equivalent and are not changed. Both reviews raised only LOW observations, accepted: settle() is a 700 ms real wait, (b) could also assert the Stocks group exists, and the placeholder assertion sits under TC-COMP-062 (a).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-implementation-review-v1-mutation.json
+    red_log_sha256: 1ad18f3f312150be7d0ac034794d401d1d673630f2c58bf42e0c49ef8637bf07
+    red_evidence: >
+      Observed RED is the review's mutation run: with the cycle-3 tests, nine non-equivalent mutants of the story's own lines survived all four green baselines (the review's results file, as red_log).
+    green_evidence: >
+      The command-palette suites, token-literals and command tests 106 passed, and npm run test 2944 passed (green-cycle-4-rework.log); biome lint, biome format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 32b3ef796ef4395fb0d32b8e23c85773b4858f16da7cce5cc0e1c32bf0fcb6d7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results.json
+      results_sha256: d3c5932ea78f50bb98276e6d3eec4f18349d974419b6005a209e1819e2bb4827
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

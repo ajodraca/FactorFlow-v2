@@ -1,0 +1,2507 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-4.patch b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-4.patch
+new file mode 100644
+index 00000000..151342bb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-4.patch
+@@ -0,0 +1,256 @@
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json
++new file mode 100644
++index 00000000..a28f98c0
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json
++@@ -0,0 +1,87 @@
+++{
+++ "schema": 1,
+++ "repo_head": "d90af7b09acaad2e582caf3248655d46e9e07561",
+++ "range": "HEAD..worktree",
+++ "mutants": [
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-loading",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
+++   "new": "{ kind: \"loading\" },",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-off",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
+++   "new": "{ kind: \"off\" },",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:settled-ignores-universes",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": " && universes.kind !== \"loading\";",
+++   "new": ";",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:empty-untrimmed",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "PALETTE_COPY.empty(text.trim())",
+++   "new": "PALETTE_COPY.empty(text)",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:universes-no-abort",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "return () => controller.abort();",
+++   "new": "return () => undefined;",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:universes-error-unguarded",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "if (!controller.signal.aborted) setUniverses({ kind: \"error\", error });",
+++   "new": "setUniverses({ kind: \"error\", error });",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:placeholder-dropped",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "<CommandInput placeholder={PALETTE_COPY.placeholder} value={text}",
+++   "new": "<CommandInput value={text}",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/copy.ts:manual:placeholder-copy",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/copy.ts",
+++   "old": "placeholder: \"Jump to a stock or page\",",
+++   "new": "placeholder: \"Search\",",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:loading-as-item",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "{stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}",
+++   "new": "{stocks.kind === \"loading\" && (void CommandLoading, (<CommandItem disabled value=\"loading:stocks\">{PALETTE_COPY.searching}</CommandItem>))}",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/app/command-palette/index.tsx:manual:loading-outside-group",
+++   "operator": "manual",
+++   "file": "web/src/app/command-palette/index.tsx",
+++   "old": "        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n",
+++   "new": "        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n",
+++   "cycle": "cycle-4"
+++  }
+++ ]
+++}
++\ No newline at end of file
++diff --git a/web/src/app/command-palette/command-palette.test.tsx b/web/src/app/command-palette/command-palette.test.tsx
++index 55de08a6..a42119fe 100644
++--- a/web/src/app/command-palette/command-palette.test.tsx
+++++ b/web/src/app/command-palette/command-palette.test.tsx
++@@ -3,7 +3,7 @@ import path from "node:path";
++ import { fileURLToPath } from "node:url";
++ import { render, screen, waitFor } from "@testing-library/react";
++ import userEvent from "@testing-library/user-event";
++-import { useState } from "react";
+++import { StrictMode, useState } from "react";
++ import { MemoryRouter, useLocation } from "react-router-dom";
++ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++ import { ApiError, ApiUnreachableError } from "../../api/client";
++@@ -100,7 +100,7 @@ function stockPage(symbols: string[], nextCursor: string | null = null) {
++ 
++ type Reply = Response | Promise<Response>;
++ let stocks: (params: URLSearchParams, signal: AbortSignal | undefined) => Reply;
++-let universes: () => Reply;
+++let universes: (signal: AbortSignal | undefined) => Reply;
++ let stocksCalls: number;
++ let universesCalls: number;
++ 
++@@ -133,7 +133,7 @@ beforeEach(() => {
++       if (url.pathname === "/api/universes") {
++         universesCalls += 1;
++         expect(url.search).toBe("?lifecycle=active");
++-        return Promise.resolve(universes());
+++        return Promise.resolve(universes(init?.signal ?? undefined));
++       }
++       return Promise.reject(new TypeError(`unexpected request ${url.pathname}`));
++     }),
++@@ -200,6 +200,21 @@ function optionsIn(heading: string): string[] {
++   return [...group.querySelectorAll('[role="option"]')].map(labelOf);
++ }
++ 
+++/** The group headed `heading`, or null when none is. */
+++function groupHeaded(heading: string): Element | null {
+++  return (
+++    [...document.querySelectorAll("[cmdk-group]")].find(
+++      (g) => g.querySelector("[cmdk-group-heading]")?.textContent === heading,
+++    ) ?? null
+++  );
+++}
+++
+++/** Wait out the stock search's debounce and a settled render after it. */
+++const SETTLE_MS = 700;
+++function settle(): Promise<void> {
+++  return new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+++}
+++
++ /** Arrow down until the row is selected, then Enter. */
++ async function choose(user: ReturnType<typeof userEvent.setup>, label: string) {
++   const option = await waitFor(() => {
++@@ -237,6 +252,7 @@ describe("states (DAC-E3-12, AC-24)", () => {
++     expect(screen.getByText("Data health › Downloads")).toBeInTheDocument();
++     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++     expect(stocksCalls).toBe(0);
+++    expect(screen.getByRole("combobox")).toHaveAttribute("placeholder", "Jump to a stock or page");
++   });
++ 
++   it("(b) shows Searching… while the read is pending, and no empty state", async () => {
++@@ -246,7 +262,11 @@ describe("states (DAC-E3-12, AC-24)", () => {
++     renderPalette();
++     await openPalette(user);
++     await user.keyboard("zz");
++-    expect(await screen.findByText("Searching…")).toBeInTheDocument();
+++    const searching = await screen.findByText("Searching…");
+++    // cmdk's loading row, inside the group headed Stocks, never a selectable option.
+++    expect(searching.closest('[role="progressbar"]')).not.toBeNull();
+++    expect(searching.closest("[cmdk-group]")).toBe(groupHeaded("Stocks"));
+++    expect(optionsIn("Stocks")).toEqual([]);
++     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++     pending.resolve(ok(stockPage([])));
++   });
++@@ -262,6 +282,30 @@ describe("states (DAC-E3-12, AC-24)", () => {
++     expect(headings()).toEqual([]);
++   });
++ 
+++  it("(c2) shows the empty state with research routes unregistered, quoting the trimmed text", async () => {
+++    const user = userEvent.setup();
+++    flags.registered = false;
+++    renderPalette();
+++    await openPalette(user);
+++    await user.keyboard("zz ");
+++    expect(await screen.findByText('No stocks or pages match "zz".')).toBeInTheDocument();
+++    expect(screen.queryByText('No stocks or pages match "zz ".')).toBeNull();
+++  });
+++
+++  it("(c3) shows no empty state while the universes read is pending, and shows it once answered", async () => {
+++    const user = userEvent.setup();
+++    const pending = deferred();
+++    universes = () => pending.promise;
+++    renderPalette();
+++    await openPalette(user);
+++    await user.keyboard("zz");
+++    await waitFor(() => expect(stocksCalls).toBe(1));
+++    await settle();
+++    expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
+++    pending.resolve(ok(UNIVERSES));
+++    expect(await screen.findByText('No stocks or pages match "zz".')).toBeInTheDocument();
+++  });
+++
++   it("(d) shows the partial row when there is a next cursor, and drops it without one", async () => {
++     const user = userEvent.setup();
++     const eight = ["KA", "KB", "KC", "KD", "KE", "KF", "KG", "KH"];
++@@ -388,6 +432,56 @@ describe("universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27)", () => {
++     await choose(user, "KO");
++     expect(location()).toBe("/research/stocks/KO");
++   });
+++
+++  it("(d) closing before the universes read answers aborts it", async () => {
+++    const user = userEvent.setup();
+++    const pending = deferred();
+++    let signal: AbortSignal | undefined;
+++    universes = (s) => {
+++      signal = s;
+++      return pending.promise;
+++    };
+++    renderPalette();
+++    await openPalette(user);
+++    await waitFor(() => expect(universesCalls).toBe(1));
+++    expect(signal?.aborted).toBe(false);
+++    await user.keyboard("{Escape}");
+++    expect(screen.queryByRole("dialog")).toBeNull();
+++    expect(signal?.aborted).toBe(true);
+++    pending.resolve(ok(UNIVERSES));
+++  });
+++
+++  it("(e) under StrictMode an aborted read never shows a universes error", async () => {
+++    const user = userEvent.setup();
+++    const pending = deferred();
+++    const signals: AbortSignal[] = [];
+++    // A fetch that honours its signal, as the browser's does.
+++    universes = (signal) => {
+++      if (signal) signals.push(signal);
+++      return new Promise<Response>((resolve, reject) => {
+++        signal?.addEventListener("abort", () =>
+++          reject(new DOMException("The operation was aborted.", "AbortError")),
+++        );
+++        void pending.promise.then(resolve);
+++      });
+++    };
+++    render(
+++      <StrictMode>
+++        <MemoryRouter initialEntries={["/start"]}>
+++          <Harness />
+++          <LocationProbe />
+++        </MemoryRouter>
+++      </StrictMode>,
+++    );
+++    await openPalette(user);
+++    await waitFor(() => expect(universesCalls).toBe(2));
+++    expect(signals[0]?.aborted).toBe(true);
+++    expect(signals[1]?.aborted).toBe(false);
+++    await settle();
+++    expect(screen.queryByText(/Couldn't read universes/)).toBeNull();
+++    pending.resolve(ok(UNIVERSES));
+++    await waitFor(() => expect(optionsIn("Universes")).toEqual(["Large caps", "Small value"]));
+++  });
++ });
++ 
++ // Implements TC-COMP-083
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-4-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-4-rework.log
+new file mode 100644
+index 00000000..cae04bc3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-4-rework.log
+@@ -0,0 +1,26 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 237ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 83ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 238ms
++ ✓ src/app/command-palette/command-palette.test.tsx (33 tests) 6751ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 991ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 628ms
++   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 343ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 339ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 305ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 311ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 742ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 318ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'partial': no domain term, no status, nothing by colour alone 323ms
++
++ Test Files  4 passed (4)
++      Tests  106 passed (106)
++   Start at  00:25:39
++   Duration  10.90s (transform 747ms, setup 589ms, collect 4.61s, tests 7.31s, environment 2.79s, prepare 3.68s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json
+new file mode 100644
+index 00000000..a28f98c0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json
+@@ -0,0 +1,87 @@
++{
++ "schema": 1,
++ "repo_head": "d90af7b09acaad2e582caf3248655d46e9e07561",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-loading",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
++   "new": "{ kind: \"loading\" },",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-off",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
++   "new": "{ kind: \"off\" },",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:settled-ignores-universes",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": " && universes.kind !== \"loading\";",
++   "new": ";",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:empty-untrimmed",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "PALETTE_COPY.empty(text.trim())",
++   "new": "PALETTE_COPY.empty(text)",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:universes-no-abort",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "return () => controller.abort();",
++   "new": "return () => undefined;",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:universes-error-unguarded",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "if (!controller.signal.aborted) setUniverses({ kind: \"error\", error });",
++   "new": "setUniverses({ kind: \"error\", error });",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:placeholder-dropped",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "<CommandInput placeholder={PALETTE_COPY.placeholder} value={text}",
++   "new": "<CommandInput value={text}",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/copy.ts:manual:placeholder-copy",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/copy.ts",
++   "old": "placeholder: \"Jump to a stock or page\",",
++   "new": "placeholder: \"Search\",",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:loading-as-item",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "{stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}",
++   "new": "{stocks.kind === \"loading\" && (void CommandLoading, (<CommandItem disabled value=\"loading:stocks\">{PALETTE_COPY.searching}</CommandItem>))}",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/app/command-palette/index.tsx:manual:loading-outside-group",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/index.tsx",
++   "old": "        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n",
++   "new": "        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n",
++   "cycle": "cycle-4"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..f13be848
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w0.log
+@@ -0,0 +1,24 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w0/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 90ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 34ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 297ms
++ ✓ src/app/command-palette/command-palette.test.tsx (33 tests) 6858ms
++   ✓ states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found 311ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 987ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 555ms
++   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 315ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 409ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 409ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 833ms
++
++ Test Files  4 passed (4)
++      Tests  106 passed (106)
++   Start at  00:23:38
++   Duration  10.22s (transform 667ms, setup 449ms, collect 2.78s, tests 7.28s, environment 3.42s, prepare 1.83s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..6ec68457
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w1.log
+@@ -0,0 +1,24 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w1/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 118ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 54ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 293ms
++ ✓ src/app/command-palette/command-palette.test.tsx (33 tests) 6778ms
++   ✓ states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found 316ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 989ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 557ms
++   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 307ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 401ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 376ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 747ms
++
++ Test Files  4 passed (4)
++      Tests  106 passed (106)
++   Start at  00:23:38
++   Duration  10.11s (transform 507ms, setup 472ms, collect 2.62s, tests 7.24s, environment 2.53s, prepare 1.22s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..c68e9f8f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w2.log
+@@ -0,0 +1,24 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w2/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 138ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 120ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 276ms
++ ✓ src/app/command-palette/command-palette.test.tsx (33 tests) 6838ms
++   ✓ states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found 316ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 989ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 549ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 422ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 368ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 306ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 740ms
++
++ Test Files  4 passed (4)
++      Tests  106 passed (106)
++   Start at  00:23:38
++   Duration  10.19s (transform 475ms, setup 440ms, collect 2.72s, tests 7.37s, environment 3.98s, prepare 1.56s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..b7763888
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w3.log
+@@ -0,0 +1,24 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w3/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 72ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 105ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 241ms
++ ✓ src/app/command-palette/command-palette.test.tsx (33 tests) 6851ms
++   ✓ states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found 310ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 989ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 563ms
++   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 307ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 423ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 368ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 800ms
++
++ Test Files  4 passed (4)
++      Tests  106 passed (106)
++   Start at  00:23:38
++   Duration  10.21s (transform 437ms, setup 532ms, collect 2.72s, tests 7.27s, environment 4.15s, prepare 1.84s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_copy.ts_manual_placeholder-copy.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_copy.ts_manual_placeholder-copy.log
+new file mode 100644
+index 00000000..74fef382
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_copy.ts_manual_placeholder-copy.log
+@@ -0,0 +1,50 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w3/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 213ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 77ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 318ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6543ms
++   × states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent 138ms
++     → expect(element).toHaveAttribute("placeholder", "Jump to a stock or page") // element.getAttribute("placeholder") === "Jump to a stock or page"
++
++Expected the element to have attribute:
++  placeholder="Jump to a stock or page"
++Received:
++  placeholder="Search"
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 988ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 561ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 302ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 316ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 729ms
++   ✓ groups (DAC-E3-11, AC-22) > (c) has no Actions group and offers nothing that trades 337ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 391ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++Error: expect(element).toHaveAttribute("placeholder", "Jump to a stock or page") // element.getAttribute("placeholder") === "Jump to a stock or page"
++
++Expected the element to have attribute:
++  placeholder="Jump to a stock or page"
++Received:
++  placeholder="Search"
++ ❯ src/app/command-palette/command-palette.test.tsx:255:42
++    253|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++    254|     expect(stocksCalls).toBe(0);
++    255|     expect(screen.getByRole("combobox")).toHaveAttribute("placeholder"…
++       |                                          ^
++    256|   });
++    257| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:24:11
++   Duration  12.19s (transform 917ms, setup 1.00s, collect 4.06s, tests 7.15s, environment 4.54s, prepare 2.11s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_empty-untrimmed.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_empty-untrimmed.log
+new file mode 100644
+index 00000000..6ce0391d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_empty-untrimmed.log
+@@ -0,0 +1,592 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w3/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 118ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 77ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 263ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 8777ms
++   × states (DAC-E3-12, AC-24) > (c2) shows the empty state with research routes unregistered, quoting the trimmed text 1041ms
++     → Unable to find an element with the text: No stocks or pages match "zz".. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"py-5 text-center text-base"[39m
++            [33mcmdk-empty[39m=[32m""[39m
++            [33mrole[39m=[32m"presentation"[39m
++          [36m>[39m
++            [0mNo stocks or pages match "zz ".[0m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"py-5 text-center text-base"[39m
++            [33mcmdk-empty[39m=[32m""[39m
++            [33mrole[39m=[32m"presentation"[39m
++          [36m>[39m
++            [0mNo stocks or pages match "zz ".[0m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 981ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 606ms
++   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 389ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 425ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 422ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 397ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 803ms
++   ✓ close (DAC-E3-S5-3, AC-25) > (a) Esc closes and returns focus to the opener, and (b) nothing typed is kept 375ms
++   ✓ groups (DAC-E3-11, AC-22) > (b) does not re-rank the groups by the text, and (d) shows a stock as its symbol alone 341ms
++   ✓ groups (DAC-E3-11, AC-22) > (c) has no Actions group and offers nothing that trades 376ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'partial': no domain term, no status, nothing by colour alone 372ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 333ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 366ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (c2) shows the empty state with research routes unregistered, quoting the trimmed text
++TestingLibraryElementError: Unable to find an element with the text: No stocks or pages match "zz".. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"py-5 text-center text-base"[39m
++            [33mcmdk-empty[39m=[32m""[39m
++            [33mrole[39m=[32m"presentation"[39m
++          [36m>[39m
++            [0mNo stocks or pages match "zz ".[0m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"py-5 text-center text-base"[39m
++            [33mcmdk-empty[39m=[32m""[39m
++            [33mrole[39m=[32m"presentation"[39m
++          [36m>[39m
++            [0mNo stocks or pages match "zz ".[0m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++ ❯ waitForWrapper ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:163:27
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
++ ❯ src/app/command-palette/command-palette.test.tsx:291:25
++    289|     await openPalette(user);
++    290|     await user.keyboard("zz ");
++    291|     expect(await screen.findByText('No stocks or pages match "zz".')).…
++       |                         ^
++    292|     expect(screen.queryByText('No stocks or pages match "zz ".')).toBe…
++    293|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:23:57
++   Duration  11.46s (transform 470ms, setup 340ms, collect 2.72s, tests 9.23s, environment 2.19s, prepare 1.38s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-as-item.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-as-item.log
+new file mode 100644
+index 00000000..37ff59dc
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-as-item.log
+@@ -0,0 +1,38 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w2/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 108ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 80ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 353ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6413ms
++   × states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state 73ms
++     → expected null not to be null
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 989ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 537ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 722ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 331ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 437ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state
++AssertionError: expected null not to be null
++ ❯ src/app/command-palette/command-palette.test.tsx:267:59
++    265|     const searching = await screen.findByText("Searching…");
++    266|     // cmdk's loading row, inside the group headed Stocks, never a sel…
++    267|     expect(searching.closest('[role="progressbar"]')).not.toBeNull();
++       |                                                           ^
++    268|     expect(searching.closest("[cmdk-group]")).toBe(groupHeaded("Stocks…
++    269|     expect(optionsIn("Stocks")).toEqual([]);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:24:23
++   Duration  8.64s (transform 422ms, setup 326ms, collect 2.56s, tests 6.95s, environment 1.56s, prepare 1.68s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-outside-group.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-outside-group.log
+new file mode 100644
+index 00000000..09ad1783
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-outside-group.log
+@@ -0,0 +1,63 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w1/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 134ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 47ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 365ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6418ms
++   × states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state 73ms
++     → expected null to be <div …(4)>…(2)</div> // Object.is equality
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 987ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 540ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 723ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 331ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 447ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state
++AssertionError: expected null to be <div …(4)>…(2)</div> // Object.is equality
++
++- Expected: 
++<div
++  class="overflow-hidden p-1 text-foreground"
++  cmdk-group=""
++  data-value="Stocks"
++  role="presentation"
++>
++  <div
++    aria-hidden="true"
++    cmdk-group-heading=""
++    id="radix-:rr:"
++  >
++    Stocks
++  </div>
++  <div
++    aria-labelledby="radix-:rr:"
++    cmdk-group-items=""
++    role="group"
++  />
++</div>
++
+++ Received: 
++null
++
++ ❯ src/app/command-palette/command-palette.test.tsx:268:47
++    266|     // cmdk's loading row, inside the group headed Stocks, never a sel…
++    267|     expect(searching.closest('[role="progressbar"]')).not.toBeNull();
++    268|     expect(searching.closest("[cmdk-group]")).toBe(groupHeaded("Stocks…
++       |                                               ^
++    269|     expect(optionsIn("Stocks")).toEqual([]);
++    270|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:24:23
++   Duration  8.37s (transform 372ms, setup 325ms, collect 2.55s, tests 6.96s, environment 1.44s, prepare 450ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_placeholder-dropped.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_placeholder-dropped.log
+new file mode 100644
+index 00000000..677910f0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_placeholder-dropped.log
+@@ -0,0 +1,49 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w0/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 147ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 315ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 314ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6438ms
++   × states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent 168ms
++     → expect(element).toHaveAttribute("placeholder", "Jump to a stock or page") // element.getAttribute("placeholder") === "Jump to a stock or page"
++
++Expected the element to have attribute:
++  placeholder="Jump to a stock or page"
++Received:
++  null
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 984ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 589ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 304ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 302ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 725ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 326ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++Error: expect(element).toHaveAttribute("placeholder", "Jump to a stock or page") // element.getAttribute("placeholder") === "Jump to a stock or page"
++
++Expected the element to have attribute:
++  placeholder="Jump to a stock or page"
++Received:
++  null
++ ❯ src/app/command-palette/command-palette.test.tsx:255:42
++    253|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++    254|     expect(stocksCalls).toBe(0);
++    255|     expect(screen.getByRole("combobox")).toHaveAttribute("placeholder"…
++       |                                          ^
++    256|   });
++    257| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:24:10
++   Duration  12.27s (transform 633ms, setup 1.42s, collect 4.06s, tests 7.21s, environment 3.83s, prepare 5.56s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_settled-ignores-universes.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_settled-ignores-universes.log
+new file mode 100644
+index 00000000..3b00d80a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_settled-ignores-universes.log
+@@ -0,0 +1,55 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w2/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 40ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 71ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 248ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 7540ms
++   × states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 989ms
++     → expected <div …(3)></div> to be null
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 534ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 323ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 428ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 371ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 811ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 372ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'partial': no domain term, no status, nothing by colour alone 352ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 368ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 317ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered
++AssertionError: expected <div …(3)></div> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<div
++  class="py-5 text-center text-base"
++  cmdk-empty=""
++  role="presentation"
++>
++  No stocks or pages match "zz".
++</div>
++
++ ❯ src/app/command-palette/command-palette.test.tsx:304:60
++    302|     await waitFor(() => expect(stocksCalls).toBe(1));
++    303|     await settle();
++    304|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++       |                                                            ^
++    305|     pending.resolve(ok(UNIVERSES));
++    306|     expect(await screen.findByText('No stocks or pages match "zz".')).…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:23:57
++   Duration  10.19s (transform 266ms, setup 609ms, collect 2.46s, tests 7.90s, environment 2.62s, prepare 978ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-error-unguarded.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-error-unguarded.log
+new file mode 100644
+index 00000000..c44f5f89
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-error-unguarded.log
+@@ -0,0 +1,58 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w1/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 373ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 65ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 316ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6420ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 985ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 594ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 303ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 321ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 300ms
++   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 732ms
++     → expected <div …(9)></div> to be null
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 326ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error
++AssertionError: expected <div …(9)></div> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<div
++  aria-disabled="true"
++  aria-selected="false"
++  class="relative flex cursor-default select-none items-center gap-2 rounded px-2 py-2 text-base outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
++  cmdk-item=""
++  data-disabled="true"
++  data-selected="false"
++  data-value="error:universes"
++  id="radix-:r9r:"
++  role="option"
++>
++  Couldn't read universes: FactorFlow is not answering.
++</div>
++
++ ❯ src/app/command-palette/command-palette.test.tsx:481:59
++    479|     expect(signals[1]?.aborted).toBe(false);
++    480|     await settle();
++    481|     expect(screen.queryByText(/Couldn't read universes/)).toBeNull();
++       |                                                           ^
++    482|     pending.resolve(ok(UNIVERSES));
++    483|     await waitFor(() => expect(optionsIn("Universes")).toEqual(["Large…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:24:11
++   Duration  12.08s (transform 649ms, setup 952ms, collect 4.19s, tests 7.17s, environment 5.11s, prepare 3.27s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-loading.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-loading.log
+new file mode 100644
+index 00000000..3081d69d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-loading.log
+@@ -0,0 +1,559 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w0/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 36ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 97ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 328ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 8468ms
++   × states (DAC-E3-12, AC-24) > (c2) shows the empty state with research routes unregistered, quoting the trimmed text 1037ms
++     → Unable to find an element with the text: No stocks or pages match "zz".. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m/>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m/>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 984ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 542ms
++   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 388ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 406ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 395ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 318ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 764ms
++   ✓ groups (DAC-E3-11, AC-22) > (b) does not re-rank the groups by the text, and (d) shows a stock as its symbol alone 587ms
++   ✓ groups (DAC-E3-11, AC-22) > (c) has no Actions group and offers nothing that trades 335ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 307ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 416ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 353ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (c2) shows the empty state with research routes unregistered, quoting the trimmed text
++TestingLibraryElementError: Unable to find an element with the text: No stocks or pages match "zz".. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m/>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mdata-scroll-locked[39m=[32m"1"[39m
++  [33mstyle[39m=[32m"pointer-events: none;"[39m
++[36m>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++  [36m>[39m
++    [36m<button[39m
++      [33mtype[39m=[32m"button"[39m
++    [36m>[39m
++      [0mOpener[0m
++    [36m</button>[39m
++    [36m<div[39m
++      [33mdata-testid[39m=[32m"location"[39m
++    [36m>[39m
++      [0m/start[0m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<div[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mclass[39m=[32m"fixed inset-0 z-50 bg-foreground/40"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++  [36m/>[39m
++  [36m<div[39m
++    [33maria-labelledby[39m=[32m"radix-:r1t:"[39m
++    [33mclass[39m=[32m"fixed left-[50%] top-[50%] z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded border border-border bg-popover p-0"[39m
++    [33mdata-state[39m=[32m"open"[39m
++    [33mid[39m=[32m"radix-:r1s:"[39m
++    [33mrole[39m=[32m"dialog"[39m
++    [33mstyle[39m=[32m"pointer-events: auto;"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m>[39m
++    [36m<h2[39m
++      [33mclass[39m=[32m"sr-only"[39m
++      [33mid[39m=[32m"radix-:r1t:"[39m
++    [36m>[39m
++      [0mSearch FactorFlow[0m
++    [36m</h2>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex h-full w-full flex-col overflow-hidden rounded bg-popover text-popover-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"[39m
++      [33mcmdk-root[39m=[32m""[39m
++      [33mtabindex[39m=[32m"-1"[39m
++    [36m>[39m
++      [36m<label[39m
++        [33mcmdk-label[39m=[32m""[39m
++        [33mfor[39m=[32m"radix-:r21:"[39m
++        [33mid[39m=[32m"radix-:r20:"[39m
++        [33mstyle[39m=[32m"position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"[39m
++      [36m>[39m
++        [0mSearch FactorFlow[0m
++      [36m</label>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-2 border-b border-border px-3 focus-within:ring focus-within:ring-inset focus-within:ring-ring"[39m
++        [33mcmdk-input-wrapper[39m=[32m""[39m
++      [36m>[39m
++        [36m<svg[39m
++          [33maria-hidden[39m=[32m"true"[39m
++          [33mclass[39m=[32m"lucide lucide-search size-4 shrink-0 opacity-50"[39m
++          [33mfill[39m=[32m"none"[39m
++          [33mheight[39m=[32m"24"[39m
++          [33mstroke[39m=[32m"currentColor"[39m
++          [33mstroke-linecap[39m=[32m"round"[39m
++          [33mstroke-linejoin[39m=[32m"round"[39m
++          [33mstroke-width[39m=[32m"2"[39m
++          [33mviewBox[39m=[32m"0 0 24 24"[39m
++          [33mwidth[39m=[32m"24"[39m
++          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++        [36m>[39m
++          [36m<path[39m
++            [33md[39m=[32m"m21 21-4.34-4.34"[39m
++          [36m/>[39m
++          [36m<circle[39m
++            [33mcx[39m=[32m"11"[39m
++            [33mcy[39m=[32m"11"[39m
++            [33mr[39m=[32m"8"[39m
++          [36m/>[39m
++        [36m</svg>[39m
++        [36m<input[39m
++          [33maria-autocomplete[39m=[32m"list"[39m
++          [33maria-controls[39m=[32m"radix-:r1v:"[39m
++          [33maria-expanded[39m=[32m"true"[39m
++          [33maria-labelledby[39m=[32m"radix-:r20:"[39m
++          [33mautocomplete[39m=[32m"off"[39m
++          [33mautocorrect[39m=[32m"off"[39m
++          [33mclass[39m=[32m"flex w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"[39m
++          [33mcmdk-input[39m=[32m""[39m
++          [33mid[39m=[32m"radix-:r21:"[39m
++          [33mplaceholder[39m=[32m"Jump to a stock or page"[39m
++          [33mrole[39m=[32m"combobox"[39m
++          [33mspellcheck[39m=[32m"false"[39m
++          [33mtype[39m=[32m"text"[39m
++          [33mvalue[39m=[32m"zz "[39m
++        [36m/>[39m
++      [36m</div>[39m
++      [36m<div[39m
++        [33maria-label[39m=[32m"Suggestions"[39m
++        [33mclass[39m=[32m"max-h-[calc(var(--row-height)*10)] overflow-y-auto overflow-x-hidden"[39m
++        [33mcmdk-list[39m=[32m""[39m
++        [33mid[39m=[32m"radix-:r1v:"[39m
++        [33mrole[39m=[32m"listbox"[39m
++        [33mtabindex[39m=[32m"-1"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mcmdk-list-sizer[39m=[32m""[39m
++        [36m/>[39m
++      [36m</div>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++  [36m<span[39m
++    [33maria-hidden[39m=[32m"true"[39m
++    [33mdata-aria-hidden[39m=[32m"true"[39m
++    [33mdata-radix-focus-guard[39m=[32m""[39m
++    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
++    [33mtabindex[39m=[32m"0"[39m
++  [36m/>[39m
++[36m</body>[39m
++ ❯ waitForWrapper ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:163:27
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
++ ❯ src/app/command-palette/command-palette.test.tsx:291:25
++    289|     await openPalette(user);
++    290|     await user.keyboard("zz ");
++    291|     expect(await screen.findByText('No stocks or pages match "zz".')).…
++       |                         ^
++    292|     expect(screen.queryByText('No stocks or pages match "zz ".')).toBe…
++    293|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:23:57
++   Duration  11.07s (transform 296ms, setup 497ms, collect 2.67s, tests 8.93s, environment 2.51s, prepare 1.15s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-off.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-off.log
+new file mode 100644
+index 00000000..ad745fd1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-off.log
+@@ -0,0 +1,56 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w1/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 104ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 72ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 248ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 7712ms
++   × states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 987ms
++     → expected <div …(3)></div> to be null
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 536ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 321ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 381ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 421ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 819ms
++   ✓ groups (DAC-E3-11, AC-22) > (c) has no Actions group and offers nothing that trades 321ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 502ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'partial': no domain term, no status, nothing by colour alone 314ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 349ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 310ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered
++AssertionError: expected <div …(3)></div> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<div
++  class="py-5 text-center text-base"
++  cmdk-empty=""
++  role="presentation"
++>
++  No stocks or pages match "zz".
++</div>
++
++ ❯ src/app/command-palette/command-palette.test.tsx:304:60
++    302|     await waitFor(() => expect(stocksCalls).toBe(1));
++    303|     await settle();
++    304|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++       |                                                            ^
++    305|     pending.resolve(ok(UNIVERSES));
++    306|     expect(await screen.findByText('No stocks or pages match "zz".')).…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  1 failed | 105 passed (106)
++   Start at  00:23:57
++   Duration  10.37s (transform 467ms, setup 581ms, collect 2.64s, tests 8.14s, environment 2.36s, prepare 902ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-no-abort.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-no-abort.log
+new file mode 100644
+index 00000000..0d89bec5
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-no-abort.log
+@@ -0,0 +1,67 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w2/web
++
++ ✓ src/components/token-literals.test.ts (55 tests) 233ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 56ms
++stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/components/ui/command.test.tsx (10 tests) 303ms
++ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 2 failed) 5790ms
++   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 985ms
++   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 571ms
++   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 311ms
++   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 312ms
++   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (d) closing before the universes read answers aborts it 82ms
++     → expected false to be true // Object.is equality
++   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 22ms
++     → expected false to be true // Object.is equality
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'partial': no domain term, no status, nothing by colour alone 357ms
++   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 300ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (d) closing before the universes read answers aborts it
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/command-palette.test.tsx:450:29
++    448|     await user.keyboard("{Escape}");
++    449|     expect(screen.queryByRole("dialog")).toBeNull();
++    450|     expect(signal?.aborted).toBe(true);
++       |                             ^
++    451|     pending.resolve(ok(UNIVERSES));
++    452|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/command-palette.test.tsx:478:33
++    476|     await openPalette(user);
++    477|     await waitFor(() => expect(universesCalls).toBe(2));
++    478|     expect(signals[0]?.aborted).toBe(true);
++       |                                 ^
++    479|     expect(signals[1]?.aborted).toBe(false);
++    480|     await settle();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed | 3 passed (4)
++      Tests  2 failed | 104 passed (106)
++   Start at  00:24:11
++   Duration  11.45s (transform 1.15s, setup 942ms, collect 3.69s, tests 6.38s, environment 3.84s, prepare 3.88s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results.json
+new file mode 100644
+index 00000000..1cb10bad
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results.json
+@@ -0,0 +1,184 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/command-palette web/src/components/token-literals.test.ts web/src/components/ui/command.test.tsx && npx tsc --noEmit",
++  "repo_head": "d90af7b09acaad2e582caf3248655d46e9e07561",
++  "tree_patch_sha256": "767cdc9025e8bed9bc3f0a1cc91921d348d05b39e459fdfbfe03df33f546ca95",
++  "mutants_sha256": "933bd675de4b3c48b22fc711df61944ef6c4ea04bf286ad3f242ee0a406d907e",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-4.json",
++  "jobs": 4,
++  "planned": 10,
++  "started": "2026-11-21T06:23:36Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 19.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w0.log",
++      "log_sha256": "ce07d3a46401ea43ef60b752c9640150c27b7186b3458b06282eb0c071df4e69"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 19.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w3.log",
++      "log_sha256": "d7f4dd32307f6c5f32ccba695b4fddd7e815123cbdbeb7be2a592c1d4566b490"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 20.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w1.log",
++      "log_sha256": "002cb1aa2dcef2c6e5e9b3f6285e898fee7a7b3ec572aece847759c4a410b818"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 20.0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/baseline-w2.log",
++      "log_sha256": "91e6cdbf6c70450443bbc87933a3e5b4531810070a9a144adc5973cee8ab0b9e"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-loading",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
++      "new": "{ kind: \"loading\" },",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 11.7,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-loading.log",
++      "log_sha256": "dc3823c31fc5c890600f1670077c61b4dce70f3ac6efc63f9d11c668414ea33d"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-off",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
++      "new": "{ kind: \"off\" },",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 11.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-initial-always-off.log",
++      "log_sha256": "362ce1a4debade98f38d52f1bacc9c3b2a21075fc674cc992e7d696516f84117"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:settled-ignores-universes",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": " && universes.kind !== \"loading\";",
++      "new": ";",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 11.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_settled-ignores-universes.log",
++      "log_sha256": "aff707388bf12a27d7d53a13203ec7b9831fd5606b9a00e510abbfc7ebe82ff1"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:empty-untrimmed",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "PALETTE_COPY.empty(text.trim())",
++      "new": "PALETTE_COPY.empty(text)",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 12.2,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_empty-untrimmed.log",
++      "log_sha256": "669dc34959baf21767534f17b49989a15833eb4de9d4ee0cd861520de2a7b405"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:universes-no-abort",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "return () => controller.abort();",
++      "new": "return () => undefined;",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 14.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-no-abort.log",
++      "log_sha256": "d13a941cd4304cb4595a542df790629d2cafd21daa8df97ef60f6861ef0041bf"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:universes-error-unguarded",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "if (!controller.signal.aborted) setUniverses({ kind: \"error\", error });",
++      "new": "setUniverses({ kind: \"error\", error });",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 15.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_universes-error-unguarded.log",
++      "log_sha256": "3b973b2711128fb540fcda907aa2c28341a62d49e9dbe17de6ffde045a7bccf3"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:placeholder-dropped",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "<CommandInput placeholder={PALETTE_COPY.placeholder} value={text}",
++      "new": "<CommandInput value={text}",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 15.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_placeholder-dropped.log",
++      "log_sha256": "2d30f88dc3ee7ee880dacd627d697d6dc25397d195cf6bcc7c7a378aab35a029"
++    },
++    {
++      "id": "web/src/app/command-palette/copy.ts:manual:placeholder-copy",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/copy.ts",
++      "old": "placeholder: \"Jump to a stock or page\",",
++      "new": "placeholder: \"Search\",",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 14.6,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_copy.ts_manual_placeholder-copy.log",
++      "log_sha256": "cb6306a29799242db3a1c972b1e1499f1f864a395afd9c08636cb970dcd26b05"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:loading-as-item",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "{stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}",
++      "new": "{stocks.kind === \"loading\" && (void CommandLoading, (<CommandItem disabled value=\"loading:stocks\">{PALETTE_COPY.searching}</CommandItem>))}",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 9.6,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-as-item.log",
++      "log_sha256": "f4ef639d66fa19135205e708714c482184e85fe5568ab46cf3c7600cd2fe9ba8"
++    },
++    {
++      "id": "web/src/app/command-palette/index.tsx:manual:loading-outside-group",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/index.tsx",
++      "old": "        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n",
++      "new": "        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 9.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results-logs/web_src_app_command-palette_index.tsx_manual_loading-outside-group.log",
++      "log_sha256": "4c0055060cc4a9e1dcfd6bc3ff6bbec305264efba461ffcbd20e1f1538d98571"
++    }
++  ],
++  "finished": "2026-11-21T06:24:32Z"
++}
+diff --git a/web/src/app/command-palette/command-palette.test.tsx b/web/src/app/command-palette/command-palette.test.tsx
+index 55de08a6..a42119fe 100644
+--- a/web/src/app/command-palette/command-palette.test.tsx
++++ b/web/src/app/command-palette/command-palette.test.tsx
+@@ -3,7 +3,7 @@ import path from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { render, screen, waitFor } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+-import { useState } from "react";
++import { StrictMode, useState } from "react";
+ import { MemoryRouter, useLocation } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { ApiError, ApiUnreachableError } from "../../api/client";
+@@ -100,7 +100,7 @@ function stockPage(symbols: string[], nextCursor: string | null = null) {
+ 
+ type Reply = Response | Promise<Response>;
+ let stocks: (params: URLSearchParams, signal: AbortSignal | undefined) => Reply;
+-let universes: () => Reply;
++let universes: (signal: AbortSignal | undefined) => Reply;
+ let stocksCalls: number;
+ let universesCalls: number;
+ 
+@@ -133,7 +133,7 @@ beforeEach(() => {
+       if (url.pathname === "/api/universes") {
+         universesCalls += 1;
+         expect(url.search).toBe("?lifecycle=active");
+-        return Promise.resolve(universes());
++        return Promise.resolve(universes(init?.signal ?? undefined));
+       }
+       return Promise.reject(new TypeError(`unexpected request ${url.pathname}`));
+     }),
+@@ -200,6 +200,21 @@ function optionsIn(heading: string): string[] {
+   return [...group.querySelectorAll('[role="option"]')].map(labelOf);
+ }
+ 
++/** The group headed `heading`, or null when none is. */
++function groupHeaded(heading: string): Element | null {
++  return (
++    [...document.querySelectorAll("[cmdk-group]")].find(
++      (g) => g.querySelector("[cmdk-group-heading]")?.textContent === heading,
++    ) ?? null
++  );
++}
++
++/** Wait out the stock search's debounce and a settled render after it. */
++const SETTLE_MS = 700;
++function settle(): Promise<void> {
++  return new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
++}
++
+ /** Arrow down until the row is selected, then Enter. */
+ async function choose(user: ReturnType<typeof userEvent.setup>, label: string) {
+   const option = await waitFor(() => {
+@@ -237,6 +252,7 @@ describe("states (DAC-E3-12, AC-24)", () => {
+     expect(screen.getByText("Data health › Downloads")).toBeInTheDocument();
+     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
+     expect(stocksCalls).toBe(0);
++    expect(screen.getByRole("combobox")).toHaveAttribute("placeholder", "Jump to a stock or page");
+   });
+ 
+   it("(b) shows Searching… while the read is pending, and no empty state", async () => {
+@@ -246,7 +262,11 @@ describe("states (DAC-E3-12, AC-24)", () => {
+     renderPalette();
+     await openPalette(user);
+     await user.keyboard("zz");
+-    expect(await screen.findByText("Searching…")).toBeInTheDocument();
++    const searching = await screen.findByText("Searching…");
++    // cmdk's loading row, inside the group headed Stocks, never a selectable option.
++    expect(searching.closest('[role="progressbar"]')).not.toBeNull();
++    expect(searching.closest("[cmdk-group]")).toBe(groupHeaded("Stocks"));
++    expect(optionsIn("Stocks")).toEqual([]);
+     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
+     pending.resolve(ok(stockPage([])));
+   });
+@@ -262,6 +282,30 @@ describe("states (DAC-E3-12, AC-24)", () => {
+     expect(headings()).toEqual([]);
+   });
+ 
++  it("(c2) shows the empty state with research routes unregistered, quoting the trimmed text", async () => {
++    const user = userEvent.setup();
++    flags.registered = false;
++    renderPalette();
++    await openPalette(user);
++    await user.keyboard("zz ");
++    expect(await screen.findByText('No stocks or pages match "zz".')).toBeInTheDocument();
++    expect(screen.queryByText('No stocks or pages match "zz ".')).toBeNull();
++  });
++
++  it("(c3) shows no empty state while the universes read is pending, and shows it once answered", async () => {
++    const user = userEvent.setup();
++    const pending = deferred();
++    universes = () => pending.promise;
++    renderPalette();
++    await openPalette(user);
++    await user.keyboard("zz");
++    await waitFor(() => expect(stocksCalls).toBe(1));
++    await settle();
++    expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
++    pending.resolve(ok(UNIVERSES));
++    expect(await screen.findByText('No stocks or pages match "zz".')).toBeInTheDocument();
++  });
++
+   it("(d) shows the partial row when there is a next cursor, and drops it without one", async () => {
+     const user = userEvent.setup();
+     const eight = ["KA", "KB", "KC", "KD", "KE", "KF", "KG", "KH"];
+@@ -388,6 +432,56 @@ describe("universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27)", () => {
+     await choose(user, "KO");
+     expect(location()).toBe("/research/stocks/KO");
+   });
++
++  it("(d) closing before the universes read answers aborts it", async () => {
++    const user = userEvent.setup();
++    const pending = deferred();
++    let signal: AbortSignal | undefined;
++    universes = (s) => {
++      signal = s;
++      return pending.promise;
++    };
++    renderPalette();
++    await openPalette(user);
++    await waitFor(() => expect(universesCalls).toBe(1));
++    expect(signal?.aborted).toBe(false);
++    await user.keyboard("{Escape}");
++    expect(screen.queryByRole("dialog")).toBeNull();
++    expect(signal?.aborted).toBe(true);
++    pending.resolve(ok(UNIVERSES));
++  });
++
++  it("(e) under StrictMode an aborted read never shows a universes error", async () => {
++    const user = userEvent.setup();
++    const pending = deferred();
++    const signals: AbortSignal[] = [];
++    // A fetch that honours its signal, as the browser's does.
++    universes = (signal) => {
++      if (signal) signals.push(signal);
++      return new Promise<Response>((resolve, reject) => {
++        signal?.addEventListener("abort", () =>
++          reject(new DOMException("The operation was aborted.", "AbortError")),
++        );
++        void pending.promise.then(resolve);
++      });
++    };
++    render(
++      <StrictMode>
++        <MemoryRouter initialEntries={["/start"]}>
++          <Harness />
++          <LocationProbe />
++        </MemoryRouter>
++      </StrictMode>,
++    );
++    await openPalette(user);
++    await waitFor(() => expect(universesCalls).toBe(2));
++    expect(signals[0]?.aborted).toBe(true);
++    expect(signals[1]?.aborted).toBe(false);
++    await settle();
++    expect(screen.queryByText(/Couldn't read universes/)).toBeNull();
++    pending.resolve(ok(UNIVERSES));
++    await waitFor(() => expect(optionsIn("Universes")).toEqual(["Large caps", "Small value"]));
++  });
+ });
+ 
+ // Implements TC-COMP-083

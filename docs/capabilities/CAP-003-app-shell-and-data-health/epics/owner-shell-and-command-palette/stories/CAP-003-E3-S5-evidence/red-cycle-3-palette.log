@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/app/command-palette/command-palette.test.tsx (0 test)
+ ❯ src/components/token-literals.test.ts (55 tests | 1 failed) 24ms
+   × command-palette sources are scanned (TC-COMP-084, DAC-E3-S5-4, AC-26) > (a) scans the directory and finds its six sources but not its tests 3ms
+     → expected [ …(5) ] to include 'web/src/app/command-palette/index.tsx'
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 23ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx [ src/app/command-palette/command-palette.test.tsx ]
+Error: Failed to resolve import "./index" from "web/src/app/command-palette/command-palette.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/command-palette/command-palette.test.tsx:23:39
+  21 |  const __vi_import_8__ = await import('../../api/client')
+  22 |  const __vi_import_9__ = await import('./copy')
+  23 |  const __vi_import_10__ = await import('./index')
+     |                                        ^
+  24 |  const __vi_import_11__ = await import('./pages')
+  25 |  const __vi_import_12__ = await import('./targets')
+ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > command-palette sources are scanned (TC-COMP-084, DAC-E3-S5-4, AC-26) > (a) scans the directory and finds its six sources but not its tests
+AssertionError: expected [ …(5) ] to include 'web/src/app/command-palette/index.tsx'
+ ❯ src/components/token-literals.test.ts:302:21
+    300|       "copy.ts",
+    301|     ]) {
+    302|       expect(files).toContain(`${PALETTE_DIRECTORY}${name}`);
+       |                     ^
+    303|     }
+    304|     expect(isScannedSource(`${PALETTE_DIRECTORY}command-palette.test.t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  1 failed | 62 passed (63)
+   Start at  23:33:41
+   Duration  791ms (transform 109ms, setup 164ms, collect 153ms, tests 47ms, environment 902ms, prepare 455ms)
+

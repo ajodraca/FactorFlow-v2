@@ -10,9 +10,10 @@ import { HealthProvider, StatusRegion, UnreachableState, useHealth } from "./sta
  * removes or replaces this line.
  */
 const DESTINATIONS = [
-  { label: "Coverage", to: "/coverage" },
-  { label: "Instruments", to: "/instruments" },
-  { label: "Runs", to: "/runs" },
+  // CAP-003-E3-S6 replaces this list with `destinations.ts`; the three paths below are the new ones.
+  { label: "Coverage", to: "/data/coverage" },
+  { label: "Instruments", to: "/data/followed" },
+  { label: "Runs", to: "/data/downloads" },
   { label: "Settings", to: "/settings" },
   { label: "Research", to: "/research" },
 ] as const;

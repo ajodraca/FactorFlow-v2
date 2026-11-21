@@ -1,0 +1,41 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w1/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 26ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 27ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 184ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 1 failed) 4008ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 535ms
+   × groups (DAC-E3-11, AC-22) > (a) lists Stocks, Universes and Pages in that order with two separators 18ms
+     → expected  to have a length of 2 but got +0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > groups (DAC-E3-11, AC-22) > (a) lists Stocks, Universes and Pages in that order with two separators
+AssertionError: expected  to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ src/app/command-palette/command-palette.test.tsx:429:59
+    427|     await openPalette(user);
+    428|     await waitFor(() => expect(headings()).toEqual(["Stocks", "Univers…
+    429|     expect(document.querySelectorAll("[cmdk-separator]")).toHaveLength…
+       |                                                           ^
+    430|     // A separator sits between groups, never before the first or afte…
+    431|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 101 passed (102)
+   Start at  23:38:30
+   Duration  4.86s (transform 215ms, setup 143ms, collect 864ms, tests 4.24s, environment 931ms, prepare 164ms)
+

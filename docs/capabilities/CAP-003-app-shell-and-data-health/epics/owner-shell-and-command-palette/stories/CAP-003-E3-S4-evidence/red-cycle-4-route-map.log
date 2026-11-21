@@ -1,0 +1,61 @@
+== run 1: routes.test.tsx against the delivered routes.tsx (static imports) ==
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+(killed at 60 s) the delivered routes.tsx imports ../screens/runs/detail statically, and the test's stub for that module awaits a gate nothing releases, so the file never finishes loading.
+
+== run 2: the same file with the detail gate released at import, to show the assertions ==
+   × Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings 4ms
+   × Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/coverage as stub-coverage 1012ms
+   × Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/followed as stub-instruments 1009ms
+   × Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/downloads as stub-runs 1007ms
+   × Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/downloads/abc as stub-runs/detail 1006ms
+   × Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > routes every SHELL_ROUTES target to a new path, never to not-found 1002ms
+   × Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > registers exactly the sixteen patterns the route table names 2ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > renders one skeleton card until the first health answer 2ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > redirects an empty install to /setup by replace 1005ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > redirects an install with a requested download to /home by replace 1006ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > replaces the entry, so Back does not return to / 1006ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > does not redirect while the product is unreachable 2ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > is not a lock: setup incomplete still opens the registered data and settings routes 1003ms
+   × / — RootRedirect (DAC-E3-1, AC-2) > never redirects on a stale answer 5ms
+   × Routes — an unknown path renders the not-found state inside the frame (DAC-E3-4) > keeps the rail, shows the heading and a Home link, and titles the page 1025ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
+AssertionError: expected Set{ 'coverage', 'instruments', …(8) } to deeply equal Set{}
+ FAIL  src/app/routes.test.tsx > Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/coverage as stub-coverage
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-coverage"]
+ FAIL  src/app/routes.test.tsx > Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/followed as stub-instruments
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-instruments"]
+ FAIL  src/app/routes.test.tsx > Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/downloads as stub-runs
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-runs"]
+ FAIL  src/app/routes.test.tsx > Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > renders /data/downloads/abc as stub-runs/detail
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-runs/detail"]
+ FAIL  src/app/routes.test.tsx > Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > routes every SHELL_ROUTES target to a new path, never to not-found
+AssertionError: expected '/runs/run-1' not to be '/runs/run-1' // Object.is equality
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../node_modules/@testing-library/dom/dist/config.js:47:12
+ FAIL  src/app/routes.test.tsx > Routes — the five delivered screens at their new paths (AC-17, AC-27, DAC-E3-S4-3) > registers exactly the sixteen patterns the route table names
+AssertionError: expected [ '*', '/', '/coverage', …(13) ] to deeply equal [ '*', '/', '/coverage', …(13) ]
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > renders one skeleton card until the first health answer
+TestingLibraryElementError: Unable to find an element by: [data-testid="shell-skeleton"]
+ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > redirects an empty install to /setup by replace
+AssertionError: expected '/coverage' to be '/setup' // Object.is equality
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../node_modules/@testing-library/dom/dist/config.js:47:12
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > redirects an install with a requested download to /home by replace
+AssertionError: expected '/coverage' to be '/home' // Object.is equality
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../node_modules/@testing-library/dom/dist/config.js:47:12
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > replaces the entry, so Back does not return to /
+AssertionError: expected '/coverage' to be '/setup' // Object.is equality
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../node_modules/@testing-library/dom/dist/config.js:47:12
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > does not redirect while the product is unreachable
+AssertionError: expected '/coverage' to be '/' // Object.is equality
+    363|       pending.reject(new ApiUnreachableError("connect ECONNREFUSED"));
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > is not a lock: setup incomplete still opens the registered data and settings routes
+TestingLibraryElementError: Unable to find an element by: [data-testid="stub-coverage"]
+ FAIL  src/app/routes.test.tsx > / — RootRedirect (DAC-E3-1, AC-2) > never redirects on a stale answer
+AssertionError: expected '/coverage' to be '/' // Object.is equality
+ FAIL  src/app/routes.test.tsx > Routes — an unknown path renders the not-found state inside the frame (DAC-E3-4) > keeps the rail, shows the heading and a Home link, and titles the page
+TestingLibraryElementError: Unable to find role="heading" and name "There's no page at this address."
+ Test Files  1 failed (1)
+      Tests  15 failed | 15 passed (30)

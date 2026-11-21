@@ -1,0 +1,159 @@
+# TDD evidence for CAP-003-E3-S4 - Route Map, Destinations, Titles, Legacy Redirects and Not Found.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T006, T007, T010]
+    description: >
+      The legacy redirects (TC-COMP-077, DAC-E3-3, DAC-E3-S4-1, AC-18): legacy-redirects.tsx holds KeepSearch, LegacyRunDetail and the four keyed legacyRoutes, each a Navigate replace with the query kept. T007's two routes.tsx-dependent cases (the legacy paths registered nowhere else, and routes.tsx importing the module once) fail until cycle 4 rewrites routes.tsx, as the plan states; the mutation command excludes those two cases by name. The generator produced no mutants for this JSX, so the nine mutants are hand-written from the plan's kill list (three swapped targets, two dropped searches, two pushes instead of replace, a dropped runId, a dropped route); all nine were killed. Both reviews raised only LOW observations: no encodeURIComponent on runId, hash not kept, regex-based scans.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-1-legacy-redirects.log
+    red_log_sha256: 63d48cb0dcfa2f528d4c4d783f58fdd1befa3a760fabed3fbdfc61b77c48f7b4
+    red_evidence: >
+      legacy-redirects.test.tsx failed to load (./legacy-redirects did not resolve) before the module existed.
+    green_evidence: >
+      legacy-redirects.test.tsx 8 of 10 passed (green-cycle-1-legacy-redirects.log); the two failing cases need routes.tsx and pass in cycle 4. tsc --noEmit clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a11ba806d2525c36642e86e5709c4e213b8f67f8615c4743ca84d39a60da14b4
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 2b7611769def8c1d61c30c87bc35805ede2b85b20c2f315aa288abd783fb0966
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T004, T005, T011]
+    description: >
+      Destinations and titles (TC-COMP-057, TC-COMP-078, DAC-E3-2, DAC-E3-9, DAC-E3-S4-2, DEC-0329): destinations.ts holds the static ordered DESTINATIONS (Research, then Settings) and RESEARCH_REGISTERED derived from it; titles.ts holds CrumbSpec, TitleEntry, Crumb, the 16-entry TITLES table, resolveTitle (matchPath end true, first non-star match, star fallback, param and detail slots) and useTitle over CAP-003-E3-S3's useTitleDetail. T002 is appended to the delivered routes.test.tsx, which cycle 4 rewrites whole; T004 and T005 are the new titles.test.tsx. T004 case (a), the set of registered paths equal to TITLES, fails until cycle 4 rewrites routes.tsx, as the plan states; the mutation command excludes it by name. The generator's one equivalent-looking survivor (end false on the params match, a second matchPath call that the first match already satisfied) was removed by taking the params from the first match, and the run repeated: 4 generated and 10 hand-written mutants, all 14 killed. Both reviews raised only LOW observations: the ancestor-link check cannot see a param or detail spec in a non-last position, the 16-entry count and star-last order are not asserted, and the routes.tsx checks are text matches.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-2-destinations-titles.log
+    red_log_sha256: 8dfaa311d6a6ad3826f1d15e10e61bbce866fc9bc4d3c4f45f27bc7e7d1a396b
+    red_evidence: >
+      routes.test.tsx and titles.test.tsx failed to load (./destinations and ./titles did not resolve) before the modules existed.
+    green_evidence: >
+      routes.test.tsx and titles.test.tsx 46 of 47 passed (green-cycle-2-destinations-titles.log); the one failing case needs routes.tsx and passes in cycle 4. tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: fb6199390eb4be568c02bd7d0cd98789458e3c101ff7a90ade34aa8d1995d09e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: 0181f958f7e95413758d27148b69715b8ea4d4225b91ebe11ba30069021b1ee4
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T008, T012]
+    description: >
+      The not-found state (TC-COMP-080, DAC-E3-4, DAC-E3-S4-4, AC-24): not-found.tsx exports NotFound, a Card variant default around a section role status holding the h1 (tabIndex -1, "There's no page at this address.") and the lead "Check the address, or go to " with a Home link to /home styled from button ghost, plus the constants NOT_FOUND_HEADING and NOT_FOUND_LEAD. T008 is appended to the delivered routes.test.tsx, which cycle 4 rewrites whole. The section's role carries a narrow biome-ignore of useSemanticElements, because DAC-E3-S4-4 fixes a section with role status and the rule would have it be an output element. The cycle also applies biome's import-type fix to legacy-redirects.test.tsx (cycle 1's file), which cycle 1's own lint run missed; no behaviour changes. The generator produced two mutants, both survivors judged equivalent below; five hand-written mutants from the plan's kill list were all killed. Both reviews raised only LOW observations: an import order biome check (not lint) reports in routes.test.tsx, fixed when cycle 4 rewrites that file; the tabIndex value is pinned only through the first-tab-stop case.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-3-not-found.log
+    red_log_sha256: 2f04f5b17a2e52309d3e1cef9eb4a50b494aa1cda7fe4fcf81e972910d479f47
+    red_evidence: >
+      routes.test.tsx failed to load (./not-found did not resolve) before the module existed.
+    green_evidence: >
+      routes.test.tsx 28 passed (green-cycle-3-not-found.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e5ea49356fb8c0cdd16d420c927e6e7fcd87835d7b084801c3e2271b29db09e0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 7ddb8b2fe4cd9236787088f2e8b8ab4c6bd32a558b94073e5500f0efe090f7b9
+      generated: 7
+      killed: 5
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.714
+      survivors:
+        - id: web/src/app/not-found.tsx:24:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The generator changed the story-criterion number in the biome-ignore comment (DAC-E3-S4-4 to DAC-E3-S4-5). A comment has no behaviour, so no test can observe it.
+        - id: web/src/app/not-found.tsx:26:off-by-one:1
+          disposition: equivalent
+          reason: >
+            tabIndex={-1} became tabIndex={-2}. Every negative tabindex makes an element programmatically focusable and takes it out of the tab order, so both values behave the same in a browser and in jsdom. The contract the test pins is the one that matters: the heading is not a tab stop, so the Home link is the first (TC-COMP-080 (c)).
+
+  - id: cycle-4
+    tasks: [T001, T003, T004, T007, T009, T013, T014, T015, T016]
+    description: >
+      The route map and the interim compatibility (TC-COMP-056, 058, 079, DAC-E3-1, DAC-E3-4, DAC-E3-S4-3, AC-2, AC-17, AC-18, AC-27, DEC-0327, DEC-0328): routes.tsx is rewritten as owner-shell 2.6's map for what exists: ten lazy screens (CAP-002's five bindings and Route lines kept), one Suspense with the one shell skeleton as fallback, RootRedirect (skeleton until the first health answer, then replace to /setup or /home), the five delivered screens at /data/coverage, /data/followed, /data/downloads, /data/downloads/:runId and /settings, legacyRoutes and the NotFound catch-all. routes.test.tsx is rewritten whole with the shared harness (ten screen stubs recording loads, a gated run-detail stub, mocked fetchHealth, a location probe), keeping the DESTINATIONS and NotFound describes of cycles 2 and 3 and restoring, after the first review pair, the delivered TC-COMP-195 unreachable cases and the TC-COMP-193 Research-href case the rewrite had dropped. T014: shell.tsx's private rail changes three to values and one comment line; status-region.integration.test.tsx and shell.unreachable.test.tsx take findBy where a lazily loaded screen's text is read (the second was found by the first review pair as a flake, one run in four); copy.test.ts case (f) reads the declared paths from legacy-redirects.tsx too (DEC-0402). The RED run hangs at import against the delivered routes.tsx, because its static import of the gated run-detail module never resolves, so the log also holds the same file with the gate released at import: 15 of 30 cases fail on assertions. 13 hand-written mutants and one generated, all killed after a Suspense-fallback test was added for the one that first survived (fallback null). Full suite 110 files, 2893 tests, biome lint and format, tsc --noEmit and the build all clean, and the build splits the screens into separate chunks. Both reviews of the revised patch raised only LOW observations.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-4-route-map.log
+    red_log_sha256: c98aee4e072942764b0535bc4050295f8a6c83c54640947411fe84f5bc935e64
+    red_evidence: >
+      routes.test.tsx hung loading against the delivered routes.tsx; with the gate released at import, 15 of 30 cases failed (the screens loaded eagerly, /data/* paths unregistered, / went to /coverage, no shell-skeleton).
+    green_evidence: >
+      Full Vitest suite 110 files and 2893 tests passed (green-cycle-4-full-suite.log); npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        DEC-0402 corrects T014(b) and T015's wording (a decision under docs/unattended-mode.md): the plan allowed delivered tests only a findBy substitution, but copy.test.ts case (f) reads routes.tsx for the legacy paths that T007 and T010 move to legacy-redirects.tsx, so it reads both files. The tasks file was amended to say so; no assertion changed and the scope did not widen.
+    diff_sha256: 9ae9ce2cc94f7a73015e0b1691435339b56cfa13507051d42c10bff84c61abd8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-4-results.json
+      results_sha256: 8899a245c122af0ef994d48e4be3fc8936abd7139e76b963e8a3b19b50047df4
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T008, T012, T014]
+    description: >
+      Review rework of implementation review v1 (IR-001, IR-002), tests only, no production change. IR-001: a routes.test.tsx case in the TC-COMP-080 describe focuses the NotFound h1 and asserts it takes focus with a negative tabindex (owner-shell 2.7; any negative value, because -2 is equivalent), and asserts the Home link renders data-variant ghost (owner-shell 10). IR-002: a new shell.rail.test.tsx checks that the rail items at /data/coverage, /data/followed and /data/downloads link to their path and carry aria-current page (T014 (a), DEC-0327). The four mutants the review named are in mutants-cycle-5.json and all four are killed; the RED log is the new tests run against those four mutants (3 failed, the Coverage row already passed). IR-003 is recorded here rather than in the plan: the AC-27 check in the plan's Story-Specific Validation, git diff -U0 web/src/app/routes.tsx | grep '^[-+].*path="/research', prints ten lines because T013's Suspense wrapper re-indents the five /research Route lines one level; with git diff -w it prints nothing, and the routes.test.tsx case compares the trimmed lines, so AC-27 holds. IR-004 (optional) is not addressed: the run-detail static-import mutant is still detected, as a timeout rather than an assertion, and bounding that needs a change to the plan's T001 harness design. The new test file is not in T015's changed-file list; T015's delivered-file diff is unaffected because the file is new.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-5-mutants.log
+    red_log_sha256: 1d9a695bdf5cb8a652f0cfbb25d6dee8cc1d9237ef8ea5657f7595f47c15c2ed
+    red_evidence: >
+      With the four reviewer mutants applied (h1 tabIndex removed, Home link variant outline, rail Instruments to /instruments, rail Runs to /runs) 3 tests failed and 38 passed: the new h1/Home case and the Instruments and Runs rail rows.
+    green_evidence: >
+      routes.test.tsx and shell.rail.test.tsx 41 of 41 passed (green-cycle-5-focused.log); full Vitest suite, npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7cf1e378e59e695d704d30a4a27e0c1f9e882e96047ca0ce967b68e58d38ebe9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results.json
+      results_sha256: 12191568ba87734b5661178c551d2b30d63ec302a0d6127167734392496cc417
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/app/legacy-redirects.test.tsx > Legacy redirects — replace, with the query kept (DAC-E3-S4-1, AC-18) > /runs/abc?x=1 lands on /data/downloads/abc?x=1 by replace, and back does not return to it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/app/legacy-redirects.test.tsx (10 tests | 2 failed) 49ms
+   × Legacy redirects — one module (DAC-E3-3) > registers the legacy paths in legacy-redirects.tsx and nowhere else 20ms
+     → expected [ 'app/legacy-redirects.tsx', …(1) ] to deeply equal [ 'app/legacy-redirects.tsx' ]
+   × Legacy redirects — one module (DAC-E3-3) > is imported by routes.tsx once and by no other non-test source 1ms
+     → expected +0 to be 1 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/legacy-redirects.test.tsx > Legacy redirects — one module (DAC-E3-3) > registers the legacy paths in legacy-redirects.tsx and nowhere else
+AssertionError: expected [ 'app/legacy-redirects.tsx', …(1) ] to deeply equal [ 'app/legacy-redirects.tsx' ]
+
+- Expected
++ Received
+
+  Array [
+    "app/legacy-redirects.tsx",
++   "app/routes.tsx",
+  ]
+
+ ❯ src/app/legacy-redirects.test.tsx:105:22
+    103|       .filter((f) => pattern.test(readFileSync(f, "utf-8")))
+    104|       .map((f) => path.relative(webSrc, f));
+    105|     expect(matching).toEqual([path.join("app", "legacy-redirects.tsx")…
+       |                      ^
+    106|   });
+    107| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/legacy-redirects.test.tsx > Legacy redirects — one module (DAC-E3-3) > is imported by routes.tsx once and by no other non-test source
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/app/legacy-redirects.test.tsx:111:54
+    109|     const importPattern = /from\s+["']\.\/legacy-redirects["']/g;
+    110|     const routes = readFileSync(path.join(here, "routes.tsx"), "utf-8"…
+    111|     expect(routes.match(importPattern)?.length ?? 0).toBe(1);
+       |                                                      ^
+    112|     const importers = sourceFiles(webSrc)
+    113|       .filter((f) => path.basename(f) !== "routes.tsx")
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  21:03:02
+   Duration  518ms (transform 27ms, setup 30ms, collect 80ms, tests 49ms, environment 149ms, prepare 49ms)
+

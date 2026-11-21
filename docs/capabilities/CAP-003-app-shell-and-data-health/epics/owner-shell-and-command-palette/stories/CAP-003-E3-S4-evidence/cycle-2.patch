@@ -1,0 +1,956 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-2-destinations-titles.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-2-destinations-titles.log
+new file mode 100644
+index 00000000..ae274a59
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-2-destinations-titles.log
+@@ -0,0 +1,58 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/app/titles.test.tsx > useTitle() — the detail crumb follows the screen (DAC-E3-9, DEC-0214) > reads the generic noun, then the screen's detail, then the noun again
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/app/titles.test.tsx (22 tests | 1 failed) 35ms
++   × titles.ts — every registered route has a title (DAC-E3-S4-2, DAC-E3-9) > has an entry for every route routes.tsx and legacy-redirects.tsx register, and no other 4ms
++     → expected [ '*', '/', '/coverage', …(9) ] to deeply equal [ '*', '/', '/coverage', …(13) ]
++stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/routes.test.tsx (25 tests) 214ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/titles.test.tsx > titles.ts — every registered route has a title (DAC-E3-S4-2, DAC-E3-9) > has an entry for every route routes.tsx and legacy-redirects.tsx register, and no other
++AssertionError: expected [ '*', '/', '/coverage', …(9) ] to deeply equal [ '*', '/', '/coverage', …(13) ]
++
++- Expected
+++ Received
++
++  Array [
++    "*",
++    "/",
++    "/coverage",
++-   "/data/coverage",
++-   "/data/downloads",
++-   "/data/downloads/:runId",
++-   "/data/followed",
++    "/instruments",
++    "/research",
++    "/research/compare",
++    "/research/stocks/:symbol",
++    "/research/universes",
++    "/research/universes/:universeId",
++    "/runs",
++    "/runs/:runId",
++    "/settings",
++  ]
++
++ ❯ src/app/titles.test.tsx:24:45
++     22|   it("has an entry for every route routes.tsx and legacy-redirects.tsx…
++     23|     const registered = [...pathsIn("routes.tsx"), ...pathsIn("legacy-r…
++     24|     expect([...new Set(registered)].sort()).toEqual(TITLES.map((t) => …
++       |                                             ^
++     25|   });
++     26| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 46 passed (47)
++   Start at  21:07:53
++   Duration  769ms (transform 153ms, setup 65ms, collect 280ms, tests 249ms, environment 306ms, prepare 101ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-2.json
+new file mode 100644
+index 00000000..d60206ad
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-2.json
+@@ -0,0 +1,123 @@
++{
++ "schema": 1,
++ "repo_head": "51ccd4cad069ee45368dc22ce1c3e4d0daa50110",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/titles.ts:74:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/titles.ts",
++   "line": 74,
++   "original": "        : matchPath({ path: candidate.pattern, end: true }, pathname);",
++   "mutated": "        : matchPath({ path: candidate.pattern, end: false }, pathname);"
++  },
++  {
++   "id": "web/src/app/titles.ts:81:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/titles.ts",
++   "line": 81,
++   "original": "  if (entry === undefined || entry.crumbs === null) {",
++   "mutated": "  if (entry === undefined && entry.crumbs === null) {"
++  },
++  {
++   "id": "web/src/app/titles.ts:89:negate-boolean:1",
++   "cycle": "cycle-2",
++   "operator": "negate-boolean",
++   "file": "web/src/app/titles.ts",
++   "line": 89,
++   "original": "      return { label: detail || spec.detail };",
++   "mutated": "      return { label: detail && spec.detail };"
++  },
++  {
++   "id": "web/src/app/titles.ts:91:drop-field-copy:1",
++   "cycle": "cycle-2",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/titles.ts",
++   "line": 91,
++   "original": "    return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };",
++   "mutated": "    return spec.to === undefined ? { label: spec.label } : { label: nil, to: spec.to };"
++  },
++  {
++   "id": "web/src/app/destinations.ts:manual:home-added-early",
++   "operator": "manual",
++   "file": "web/src/app/destinations.ts",
++   "old": "export const DESTINATIONS: readonly Destination[] = [\n",
++   "new": "export const DESTINATIONS: readonly Destination[] = [\n  { group: \"primary\", label: \"Home\", to: \"/home\" },\n",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/destinations.ts:manual:order-swapped",
++   "operator": "manual",
++   "file": "web/src/app/destinations.ts",
++   "old": "  { group: \"primary\", label: \"Research\", to: \"/research\" },\n  { group: \"data\", label: \"Settings\", to: \"/settings\" },\n",
++   "new": "  { group: \"data\", label: \"Settings\", to: \"/settings\" },\n  { group: \"primary\", label: \"Research\", to: \"/research\" },\n",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:ancestor-link-swapped",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "{ label: \"Downloads\", to: \"/data/downloads\" }, { detail: \"Download\" }",
++   "new": "{ label: \"Downloads\", to: \"/data\" }, { detail: \"Download\" }",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:data-health-link-swapped",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "const DATA_HEALTH: CrumbSpec = { label: \"Data health\", to: \"/data\" };",
++   "new": "const DATA_HEALTH: CrumbSpec = { label: \"Data health\", to: \"/data/downloads\" };",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:research-ancestor-link-dropped",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "const RESEARCH: CrumbSpec = { label: \"Research\", to: \"/research\" };",
++   "new": "const RESEARCH: CrumbSpec = { label: \"Research\" };",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:detail-ignored",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "return { label: detail || spec.detail };",
++   "new": "return { label: spec.detail };",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:detail-always-applied",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };",
++   "new": "return { label: detail || spec.label };",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:noun-swapped",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "{ detail: \"Download\" }",
++   "new": "{ detail: \"Universe\" }",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:usetitle-null-detail",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "return resolveTitle(useLocation().pathname, useTitleDetail());",
++   "new": "return resolveTitle(useLocation().pathname, null);",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/titles.ts:manual:usetitle-ignores-router",
++   "operator": "manual",
++   "file": "web/src/app/titles.ts",
++   "old": "return resolveTitle(useLocation().pathname, useTitleDetail());",
++   "new": "return resolveTitle(window.location.pathname, useTitleDetail());",
++   "cycle": "cycle-2"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 00000000..c22f4b8a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,244 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/routes.test.tsx web/src/app/titles.test.tsx -t '^(?!.*has an entry for every route).*$' && npx tsc --noEmit",
++  "repo_head": "51ccd4cad069ee45368dc22ce1c3e4d0daa50110",
++  "tree_patch_sha256": "59f2213f20fce184eb29d4c6d620aa6cede49ee6c6098fc1a6a032a3d048a258",
++  "mutants_sha256": "cb432e67334d9dc9a4c87e70c574603ebdc7af991bf8a7933018025624c3a7b2",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-2.json",
++  "jobs": 4,
++  "planned": 14,
++  "started": "2026-11-21T03:07:27Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "e1475a119164dfce1b9ccea028212186d8ab9460c4a04b1781ee9f5ed3e7aa6e"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "6cff06de7cb583a5eb3ba7a32c07f61137c4c0c8e4b66733638e1e00a5a3e569"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
++      "log_sha256": "7d00c5fe435f3a8601b8a2dbb4b30e94c5d5d4a8f5b2fdb5d785250c90c3c82d"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "befd1001d0a024aee6321dadfc13ceb49283de250e40f7a5872e273d0f4b056e"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/titles.ts:74:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/titles.ts",
++      "line": 74,
++      "original": "        : matchPath({ path: candidate.pattern, end: true }, pathname);",
++      "mutated": "        : matchPath({ path: candidate.pattern, end: false }, pathname);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_74_negate-boolean_1.log",
++      "log_sha256": "93208bfc332cae9b95835a9f5c7659843d4e0abd4b4c0e0ce4e53127fea9a48b"
++    },
++    {
++      "id": "web/src/app/titles.ts:81:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/titles.ts",
++      "line": 81,
++      "original": "  if (entry === undefined || entry.crumbs === null) {",
++      "mutated": "  if (entry === undefined && entry.crumbs === null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_81_negate-boolean_1.log",
++      "log_sha256": "0d1350895a2efdf7438b88f785ed98592354ff0d18ab67192ad48fc13b8fa466"
++    },
++    {
++      "id": "web/src/app/titles.ts:89:negate-boolean:1",
++      "cycle": "cycle-2",
++      "operator": "negate-boolean",
++      "file": "web/src/app/titles.ts",
++      "line": 89,
++      "original": "      return { label: detail || spec.detail };",
++      "mutated": "      return { label: detail && spec.detail };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_89_negate-boolean_1.log",
++      "log_sha256": "e9c3ca4569ca82de1dc2654927f349aeb762a766103c06cb61d1667043a8aca6"
++    },
++    {
++      "id": "web/src/app/titles.ts:91:drop-field-copy:1",
++      "cycle": "cycle-2",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/titles.ts",
++      "line": 91,
++      "original": "    return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };",
++      "mutated": "    return spec.to === undefined ? { label: spec.label } : { label: nil, to: spec.to };",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_91_drop-field-copy_1.log",
++      "log_sha256": "b46a1ea5d3407ce50e4260c74c5c20c3ac6831962ee7b7410c043a63999a9cf1"
++    },
++    {
++      "id": "web/src/app/destinations.ts:manual:home-added-early",
++      "operator": "manual",
++      "file": "web/src/app/destinations.ts",
++      "old": "export const DESTINATIONS: readonly Destination[] = [\n",
++      "new": "export const DESTINATIONS: readonly Destination[] = [\n  { group: \"primary\", label: \"Home\", to: \"/home\" },\n",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_destinations.ts_manual_home-added-early.log",
++      "log_sha256": "a614869c27aac26dd4bc4d4753489b0dcb66431dbd25d77b146ecc6d2a06c8d0"
++    },
++    {
++      "id": "web/src/app/destinations.ts:manual:order-swapped",
++      "operator": "manual",
++      "file": "web/src/app/destinations.ts",
++      "old": "  { group: \"primary\", label: \"Research\", to: \"/research\" },\n  { group: \"data\", label: \"Settings\", to: \"/settings\" },\n",
++      "new": "  { group: \"data\", label: \"Settings\", to: \"/settings\" },\n  { group: \"primary\", label: \"Research\", to: \"/research\" },\n",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_destinations.ts_manual_order-swapped.log",
++      "log_sha256": "37d66c4673be0e6ea604194dc82252e89107db22d53745a699229410430c89e6"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:ancestor-link-swapped",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "{ label: \"Downloads\", to: \"/data/downloads\" }, { detail: \"Download\" }",
++      "new": "{ label: \"Downloads\", to: \"/data\" }, { detail: \"Download\" }",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_ancestor-link-swapped.log",
++      "log_sha256": "56bf1b7cb2fd7ac75a144738287a7d410ade7ed9e466594faa9947c8d551f4cf"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:data-health-link-swapped",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "const DATA_HEALTH: CrumbSpec = { label: \"Data health\", to: \"/data\" };",
++      "new": "const DATA_HEALTH: CrumbSpec = { label: \"Data health\", to: \"/data/downloads\" };",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_data-health-link-swapped.log",
++      "log_sha256": "473ef30b06061b4876a02d7557dccbb4c16899bb34c28b89a50e29e00c67297d"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:research-ancestor-link-dropped",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "const RESEARCH: CrumbSpec = { label: \"Research\", to: \"/research\" };",
++      "new": "const RESEARCH: CrumbSpec = { label: \"Research\" };",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_research-ancestor-link-dropped.log",
++      "log_sha256": "d8ec732f3161cb31818d0427050d7be97d135f29300edb0cc930dd179b6219ad"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:detail-ignored",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "return { label: detail || spec.detail };",
++      "new": "return { label: spec.detail };",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.5,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_detail-ignored.log",
++      "log_sha256": "52f4aebcbae349bddb6471f34ccd0cbf4d6ed9539b8d6148619fa07b461ab364"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:detail-always-applied",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };",
++      "new": "return { label: detail || spec.label };",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.5,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_detail-always-applied.log",
++      "log_sha256": "b40514f89aab1313863a9aa34dd9492205a3d4aa7ce41dc4a9e780884d7dcc72"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:noun-swapped",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "{ detail: \"Download\" }",
++      "new": "{ detail: \"Universe\" }",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_noun-swapped.log",
++      "log_sha256": "48f670910d6faea56407611eafe30eea5d1c8e9fdf1674818f796724dc8faf95"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:usetitle-null-detail",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "return resolveTitle(useLocation().pathname, useTitleDetail());",
++      "new": "return resolveTitle(useLocation().pathname, null);",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_usetitle-null-detail.log",
++      "log_sha256": "5d5acabbf702653c2dc913ca71035b1f0177f332a7933722e24822dfb7d1c4dd"
++    },
++    {
++      "id": "web/src/app/titles.ts:manual:usetitle-ignores-router",
++      "operator": "manual",
++      "file": "web/src/app/titles.ts",
++      "old": "return resolveTitle(useLocation().pathname, useTitleDetail());",
++      "new": "return resolveTitle(window.location.pathname, useTitleDetail());",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results-logs/web_src_app_titles.ts_manual_usetitle-ignores-router.log",
++      "log_sha256": "37929d75ce8f14076cb58a62d33ded4b4cd7dbd800bcf55e78ca950185389f9c"
++    }
++  ],
++  "finished": "2026-11-21T03:07:41Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-2-destinations-titles.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-2-destinations-titles.log
+new file mode 100644
+index 00000000..7973da6c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-2-destinations-titles.log
+@@ -0,0 +1,53 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/app/titles.test.tsx (0 test)
++ ❯ src/app/routes.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/routes.test.tsx [ src/app/routes.test.tsx ]
++Error: Failed to resolve import "./destinations" from "web/src/app/routes.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/routes.test.tsx:80:38
++  78 |  const __vi_import_6__ = await import('react-router-dom')
++  79 |  const __vi_import_7__ = await import('../screens/research/copy')
++  80 |  const __vi_import_8__ = await import('./destinations')
++     |                                       ^
++  81 |  const __vi_import_9__ = await import('./routes')
++  82 |  const __vi_import_10__ = await import('./shell')
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/titles.test.tsx [ src/app/titles.test.tsx ]
++Error: Failed to resolve import "./titles" from "web/src/app/titles.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/titles.test.tsx:11:59
++  9  |  import { HealthProvider } from "./health";
++  10 |  import { ShellProvider, useShell } from "./shell-context";
++  11 |  import { TITLES, resolveTitle, useTitle } from "./titles";
++     |                                                  ^
++  12 |  const here = path.dirname(fileURLToPath(import.meta.url));
++  13 |  function pathsIn(file) {
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  2 failed (2)
++      Tests  no tests
++   Start at  21:06:01
++   Duration  332ms (transform 12ms, setup 62ms, collect 0ms, tests 0ms, environment 285ms, prepare 50ms)
++
+diff --git a/web/src/app/destinations.ts b/web/src/app/destinations.ts
+new file mode 100644
+index 00000000..e65345c6
+--- /dev/null
++++ b/web/src/app/destinations.ts
+@@ -0,0 +1,26 @@
++/**
++ * The owner's destinations, one static ordered list (owner-shell 2.6; DEC-0204;
++ * DAC-E3-2).
++ *
++ * A destination enters this list in the change that registers its screen, so
++ * the list never names a route the router cannot render. Home goes first
++ * (CAP-003-E5-S5) and Data health goes before Settings (CAP-003-E6-S7).
++ */
++export interface Destination {
++  readonly group: "primary" | "data";
++  readonly label: string;
++  readonly to: string;
++  readonly count?: "needs-you" | "problems";
++}
++
++export const DESTINATIONS: readonly Destination[] = [
++  { group: "primary", label: "Research", to: "/research" },
++  { group: "data", label: "Settings", to: "/settings" },
++];
++
++/**
++ * True exactly when Research is in the list. Derived from the static list at
++ * module load, never from the router: the product detects no route at run
++ * time (DEC-0204).
++ */
++export const RESEARCH_REGISTERED: boolean = DESTINATIONS.some((d) => d.to === "/research");
+diff --git a/web/src/app/routes.test.tsx b/web/src/app/routes.test.tsx
+index 6b0f1373..fb047eb5 100644
+--- a/web/src/app/routes.test.tsx
++++ b/web/src/app/routes.test.tsx
+@@ -1,11 +1,21 @@
+-import { readFileSync } from "node:fs";
++import { readFileSync, readdirSync } from "node:fs";
+ import path from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { act, render, screen, waitFor, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { MemoryRouter } from "react-router-dom";
+-import { type MockInstance, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import {
++  type MockInstance,
++  afterEach,
++  beforeEach,
++  describe,
++  expect,
++  expectTypeOf,
++  it,
++  vi,
++} from "vitest";
+ import { SHELL_ROUTES } from "../screens/research/copy";
++import { DESTINATIONS, type Destination, RESEARCH_REGISTERED } from "./destinations";
+ import { AppRoutes } from "./routes";
+ import { Shell } from "./shell";
+ 
+@@ -373,3 +383,60 @@ describe("Routes — the Research rail link targets exactly /research (DAC-E4-6)
+     );
+   });
+ });
++
++// Implements TC-COMP-057
++describe("DESTINATIONS — one static ordered list with RESEARCH_REGISTERED (DAC-E3-2)", () => {
++  const here = path.dirname(fileURLToPath(import.meta.url));
++  const webSrc = path.resolve(here, "..");
++
++  function sourceFiles(dir: string): string[] {
++    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
++      const full = path.join(dir, entry.name);
++      if (entry.isDirectory()) return sourceFiles(full);
++      if (!/\.tsx?$/.test(entry.name) || /\.test\.tsx?$/.test(entry.name)) return [];
++      return [full];
++    });
++  }
++
++  it("is the independent literal list, with Research registered", () => {
++    expect(DESTINATIONS).toEqual([
++      { group: "primary", label: "Research", to: "/research" },
++      { group: "data", label: "Settings", to: "/settings" },
++    ]);
++    expect(RESEARCH_REGISTERED).toBe(true);
++  });
++
++  it("holds a destination exactly when routes.tsx registers its path", () => {
++    const routes = readFileSync(path.join(here, "routes.tsx"), "utf-8");
++    const registered = [...routes.matchAll(/path=["']([^"']+)["']/g)].map((m) => m[1]);
++    expect(RESEARCH_REGISTERED).toBe(DESTINATIONS.some((d) => d.to === "/research"));
++    expect(RESEARCH_REGISTERED).toBe(routes.includes('path="/research"'));
++    for (const destination of DESTINATIONS) {
++      expect(registered).toContain(destination.to);
++    }
++  });
++
++  it("detects routes at no runtime", () => {
++    const files = sourceFiles(webSrc);
++    expect(files.length).toBeGreaterThan(50);
++    const offenders = files
++      .filter((f) =>
++        /\b(matchRoutes|useRoutes|createRoutesFromChildren|createRoutesFromElements)\b|import\.meta\.glob/.test(
++          readFileSync(f, "utf-8"),
++        ),
++      )
++      .map((f) => path.relative(webSrc, f));
++    expect(offenders).toEqual([]);
++  });
++
++  it("exports the list from destinations.ts only", () => {
++    const exporters = sourceFiles(webSrc)
++      .filter((f) => /export\s+const\s+DESTINATIONS\b/.test(readFileSync(f, "utf-8")))
++      .map((f) => path.relative(webSrc, f));
++    expect(exporters).toEqual([path.join("app", "destinations.ts")]);
++  });
++
++  it("types each entry as Destination", () => {
++    expectTypeOf<(typeof DESTINATIONS)[number]>().toEqualTypeOf<Destination>();
++  });
++});
+diff --git a/web/src/app/titles.test.tsx b/web/src/app/titles.test.tsx
+new file mode 100644
+index 00000000..cd135a6e
+--- /dev/null
++++ b/web/src/app/titles.test.tsx
+@@ -0,0 +1,222 @@
++import { readFileSync } from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import { act, render, screen, waitFor } from "@testing-library/react";
++import { useEffect, type JSX } from "react";
++import { MemoryRouter, useNavigate } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import type { HealthResponse } from "../api/types";
++import { HealthProvider } from "./health";
++import { ShellProvider, useShell } from "./shell-context";
++import { type Crumb, TITLES, resolveTitle, useTitle } from "./titles";
++
++const here = path.dirname(fileURLToPath(import.meta.url));
++
++function pathsIn(file: string): string[] {
++  const source = readFileSync(path.join(here, file), "utf-8");
++  return [...source.matchAll(/path=["']([^"']+)["']/g)].map((m) => m[1] as string);
++}
++
++// Implements TC-COMP-078
++describe("titles.ts — every registered route has a title (DAC-E3-S4-2, DAC-E3-9)", () => {
++  it("has an entry for every route routes.tsx and legacy-redirects.tsx register, and no other", () => {
++    const registered = [...pathsIn("routes.tsx"), ...pathsIn("legacy-redirects.tsx")];
++    expect([...new Set(registered)].sort()).toEqual(TITLES.map((t) => t.pattern).sort());
++  });
++
++  const rows: ReadonlyArray<readonly [string, string | null, readonly Crumb[] | null]> = [
++    ["/settings", null, [{ label: "Settings" }]],
++    ["/data/coverage", null, [{ label: "Data health", to: "/data" }, { label: "Coverage" }]],
++    ["/data/followed", null, [{ label: "Data health", to: "/data" }, { label: "Followed stocks" }]],
++    ["/data/downloads", null, [{ label: "Data health", to: "/data" }, { label: "Downloads" }]],
++    [
++      "/data/downloads/abc",
++      null,
++      [
++        { label: "Data health", to: "/data" },
++        { label: "Downloads", to: "/data/downloads" },
++        { label: "Download" },
++      ],
++    ],
++    [
++      "/data/downloads/abc",
++      "Download 2026-10-15 17:31 CDT",
++      [
++        { label: "Data health", to: "/data" },
++        { label: "Downloads", to: "/data/downloads" },
++        { label: "Download 2026-10-15 17:31 CDT" },
++      ],
++    ],
++    ["/no/such/page", null, [{ label: "Page not found" }]],
++    ["/research", null, [{ label: "Research" }]],
++    ["/research/stocks/KO", null, [{ label: "Research", to: "/research" }, { label: "KO" }]],
++    ["/research/compare", null, [{ label: "Research", to: "/research" }, { label: "Compare" }]],
++    ["/research/universes", null, [{ label: "Research", to: "/research" }, { label: "Universes" }]],
++    [
++      "/research/universes/u1",
++      null,
++      [
++        { label: "Research", to: "/research" },
++        { label: "Universes", to: "/research/universes" },
++        { label: "Universe" },
++      ],
++    ],
++    [
++      "/research/universes/u1",
++      "Large caps",
++      [
++        { label: "Research", to: "/research" },
++        { label: "Universes", to: "/research/universes" },
++        { label: "Large caps" },
++      ],
++    ],
++    ["/", null, null],
++    ["/coverage", null, null],
++    ["/instruments", null, null],
++    ["/runs", null, null],
++    ["/runs/abc", null, null],
++  ];
++
++  it.each(rows)("resolves %s with detail %j", (pathname, detail, expected) => {
++    expect(resolveTitle(pathname, detail)).toEqual(expected);
++  });
++
++  it("links every ancestor crumb and leaves the last as text", () => {
++    function check(crumbs: readonly { to?: string }[] | null): void {
++      if (crumbs === null) return;
++      for (const crumb of crumbs.slice(0, -1)) {
++        expect(crumb.to).toBeTypeOf("string");
++      }
++      expect(crumbs.at(-1)?.to).toBeUndefined();
++    }
++    for (const entry of TITLES) {
++      check(
++        entry.crumbs === null
++          ? null
++          : entry.crumbs.map((spec) => ("label" in spec ? spec : { label: "x" })),
++      );
++    }
++    for (const [pathname, detail] of rows.map((r) => [r[0], r[1]] as const)) {
++      check(resolveTitle(pathname, detail));
++    }
++  });
++
++  it("applies the detail only where the route has a detail slot, and never leaves a crumb blank", () => {
++    expect(resolveTitle("/settings", "X")).toEqual([{ label: "Settings" }]);
++    expect(resolveTitle("/data/coverage", "X")).toEqual([
++      { label: "Data health", to: "/data" },
++      { label: "Coverage" },
++    ]);
++    expect(resolveTitle("/data/downloads/abc", "")?.at(-1)).toEqual({ label: "Download" });
++  });
++});
++
++/* ------------------------------------------------------------------ *
++ * useTitle() through the real shell context (DAC-E3-9, DEC-0214).     *
++ * ------------------------------------------------------------------ */
++
++const HEALTH_EMPTY: HealthResponse = {
++  status: "ok",
++  database: "reachable",
++  credential_present: true,
++  schema_version: 4,
++  most_recent_run: null,
++};
++
++const navigateRef: { current: ReturnType<typeof useNavigate> | null } = { current: null };
++
++function TitleProbe(): JSX.Element {
++  const crumbs = useTitle();
++  navigateRef.current = useNavigate();
++  return (
++    <span data-testid="title">
++      {crumbs === null ? "none" : crumbs.map((c) => c.label).join(" › ")}
++    </span>
++  );
++}
++
++/** What a screen does under DEC-0214: set its crumb detail while mounted. */
++function DetailScreen(): null {
++  const { setTitleDetail } = useShell();
++  useEffect(() => {
++    setTitleDetail("Download 2026-10-15 17:31 CDT");
++    return () => setTitleDetail(null);
++  }, [setTitleDetail]);
++  return null;
++}
++
++function Harness({ show }: { show: boolean }): JSX.Element {
++  return (
++    <HealthProvider>
++      <ShellProvider>
++        <MemoryRouter initialEntries={["/data/downloads/abc"]}>
++          <TitleProbe />
++          {show && <DetailScreen />}
++        </MemoryRouter>
++      </ShellProvider>
++    </HealthProvider>
++  );
++}
++
++describe("useTitle() — the detail crumb follows the screen (DAC-E3-9, DEC-0214)", () => {
++  beforeEach(() => {
++    vi.stubGlobal(
++      "fetch",
++      vi.fn(async (input: RequestInfo | URL) => {
++        const url = String(input);
++        if (url.endsWith("/api/health")) {
++          return new Response(JSON.stringify(HEALTH_EMPTY), {
++            status: 200,
++            headers: { "content-type": "application/json" },
++          });
++        }
++        return new Response(
++          JSON.stringify({
++            error: {
++              code: "not_found",
++              message: "No resource exists at this path.",
++              request_id: "req-404",
++            },
++          }),
++          { status: 404, headers: { "content-type": "application/json" } },
++        );
++      }),
++    );
++  });
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it("reads the generic noun, then the screen's detail, then the noun again", async () => {
++    const { rerender, unmount } = render(<Harness show={false} />);
++    expect(screen.getByTestId("title").textContent).toBe("Data health › Downloads › Download");
++
++    rerender(<Harness show />);
++    await waitFor(() =>
++      expect(screen.getByTestId("title").textContent).toBe(
++        "Data health › Downloads › Download 2026-10-15 17:31 CDT",
++      ),
++    );
++
++    rerender(<Harness show={false} />);
++    await waitFor(() =>
++      expect(screen.getByTestId("title").textContent).toBe("Data health › Downloads › Download"),
++    );
++
++    // A mounted probe follows navigation.
++    await act(async () => {
++      navigateRef.current?.("/settings");
++    });
++    expect(screen.getByTestId("title").textContent).toBe("Settings");
++    await act(async () => {
++      navigateRef.current?.("/no/such/page");
++    });
++    expect(screen.getByTestId("title").textContent).toBe("Page not found");
++    await act(async () => {
++      navigateRef.current?.("/coverage");
++    });
++    expect(screen.getByTestId("title").textContent).toBe("none");
++
++    unmount();
++  });
++});
+diff --git a/web/src/app/titles.ts b/web/src/app/titles.ts
+new file mode 100644
+index 00000000..753eb721
+--- /dev/null
++++ b/web/src/app/titles.ts
+@@ -0,0 +1,98 @@
++import { matchPath, useLocation } from "react-router-dom";
++import { useTitleDetail } from "./shell-context";
++
++/**
++ * The static route-to-title table (owner-shell 2.6; DEC-0214, DEC-0329;
++ * DAC-E3-9; UX design 0.3).
++ *
++ * A route enters this table in the change that registers it, as `DESTINATIONS`
++ * does: CAP-003-E4-S6 adds `/setup` (Setup), CAP-003-E5-S5 `/home` (Home) and
++ * CAP-003-E6-S7 `/data` (Data health). The separator between crumbs and its
++ * rendering are the top bar's (CAP-003-E3-S6); this module holds none.
++ */
++
++/** A crumb as the table states it: text, the matched `:symbol`, or the detail slot. */
++export type CrumbSpec =
++  | { readonly label: string; readonly to?: string }
++  | { readonly param: "symbol" }
++  | { readonly detail: string };
++
++/** One route pattern and its crumbs; `null` crumbs mean the route has no title. */
++export interface TitleEntry {
++  readonly pattern: string;
++  readonly crumbs: readonly CrumbSpec[] | null;
++}
++
++/** A crumb as the top bar renders it. */
++export interface Crumb {
++  readonly label: string;
++  readonly to?: string;
++}
++
++const DATA_HEALTH: CrumbSpec = { label: "Data health", to: "/data" };
++const RESEARCH: CrumbSpec = { label: "Research", to: "/research" };
++
++export const TITLES: readonly TitleEntry[] = [
++  { pattern: "/", crumbs: null },
++  { pattern: "/data/coverage", crumbs: [DATA_HEALTH, { label: "Coverage" }] },
++  { pattern: "/data/followed", crumbs: [DATA_HEALTH, { label: "Followed stocks" }] },
++  { pattern: "/data/downloads", crumbs: [DATA_HEALTH, { label: "Downloads" }] },
++  {
++    pattern: "/data/downloads/:runId",
++    crumbs: [DATA_HEALTH, { label: "Downloads", to: "/data/downloads" }, { detail: "Download" }],
++  },
++  { pattern: "/settings", crumbs: [{ label: "Settings" }] },
++  { pattern: "/research", crumbs: [{ label: "Research" }] },
++  { pattern: "/research/stocks/:symbol", crumbs: [RESEARCH, { param: "symbol" }] },
++  { pattern: "/research/compare", crumbs: [RESEARCH, { label: "Compare" }] },
++  { pattern: "/research/universes", crumbs: [RESEARCH, { label: "Universes" }] },
++  {
++    pattern: "/research/universes/:universeId",
++    crumbs: [RESEARCH, { label: "Universes", to: "/research/universes" }, { detail: "Universe" }],
++  },
++  { pattern: "/coverage", crumbs: null },
++  { pattern: "/instruments", crumbs: null },
++  { pattern: "/runs", crumbs: null },
++  { pattern: "/runs/:runId", crumbs: null },
++  { pattern: "*", crumbs: [{ label: "Page not found" }] },
++];
++
++/**
++ * The crumbs for a pathname, or `null` when the route has no title. The
++ * router's own matcher decides which entry applies, so a title never
++ * disagrees with the route that renders; an unmatched path takes the `*`
++ * entry. A detail crumb reads `detail` when it is a non-empty string, else
++ * its generic noun.
++ */
++export function resolveTitle(pathname: string, detail: string | null): readonly Crumb[] | null {
++  let entry = TITLES.find((e) => e.pattern === "*");
++  let params: Readonly<Record<string, string | undefined>> = {};
++  for (const candidate of TITLES) {
++    const matched =
++      candidate.pattern === "*"
++        ? null
++        : matchPath({ path: candidate.pattern, end: true }, pathname);
++    if (matched !== null) {
++      entry = candidate;
++      params = matched.params;
++      break;
++    }
++  }
++  if (entry === undefined || entry.crumbs === null) {
++    return null;
++  }
++  return entry.crumbs.map((spec): Crumb => {
++    if ("param" in spec) {
++      return { label: params[spec.param] ?? "" };
++    }
++    if ("detail" in spec) {
++      return { label: detail || spec.detail };
++    }
++    return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };
++  });
++}
++
++/** The current title: the route's crumbs with the detail a screen set (DEC-0323). */
++export function useTitle(): readonly Crumb[] | null {
++  return resolveTitle(useLocation().pathname, useTitleDetail());
++}

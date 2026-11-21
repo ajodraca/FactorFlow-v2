@@ -1,0 +1,65 @@
+{
+ "schema": 1,
+ "repo_head": "e63a9bf33413d7ca4deab64ceb592320ba19f646",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/not-found.tsx:24:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/not-found.tsx",
+   "line": 24,
+   "original": "      {/* biome-ignore lint/a11y/useSemanticElements: DAC-E3-S4-4 fixes a `section` with role=\"status\"; `output` is a form-result element, not a page-state region. */}",
+   "mutated": "      {/* biome-ignore lint/a11y/useSemanticElements: DAC-E3-S4-5 fixes a `section` with role=\"status\"; `output` is a form-result element, not a page-state region. */}"
+  },
+  {
+   "id": "web/src/app/not-found.tsx:26:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/not-found.tsx",
+   "line": 26,
+   "original": "        <h1 tabIndex={-1} className=\"text-xl font-semibold\">",
+   "mutated": "        <h1 tabIndex={-2} className=\"text-xl font-semibold\">"
+  },
+  {
+   "id": "web/src/app/not-found.tsx:manual:role-removed",
+   "operator": "manual",
+   "file": "web/src/app/not-found.tsx",
+   "old": "<section role=\"status\" className=\"p-5\">",
+   "new": "<section className=\"p-5\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/not-found.tsx:manual:home-target-swapped",
+   "operator": "manual",
+   "file": "web/src/app/not-found.tsx",
+   "old": "<Link to=\"/home\">",
+   "new": "<Link to=\"/\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/not-found.tsx:manual:heading-tabindex-0",
+   "operator": "manual",
+   "file": "web/src/app/not-found.tsx",
+   "old": "<h1 tabIndex={-1}",
+   "new": "<h1 tabIndex={0}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/not-found.tsx:manual:lead-says-runs",
+   "operator": "manual",
+   "file": "web/src/app/not-found.tsx",
+   "old": "\"Check the address, or go to \"",
+   "new": "\"Check the runs, or go to \"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/not-found.tsx:manual:card-variant-changed",
+   "operator": "manual",
+   "file": "web/src/app/not-found.tsx",
+   "old": "<Card variant=\"default\">",
+   "new": "<Card variant=\"metric\">",
+   "cycle": "cycle-3"
+  }
+ ]
+}

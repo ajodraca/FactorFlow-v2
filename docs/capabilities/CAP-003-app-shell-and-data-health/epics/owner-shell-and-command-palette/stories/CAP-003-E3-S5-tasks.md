@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-21
+last_reworked_review: CAP-003-E3-S5-implementation-review-v1.md
+docs_synced_review: CAP-003-E3-S5-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -80,7 +82,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Confirm the hard-dependency deliverables this story imports or extends, and record the green baseline. No package is added (E3 adds no dependency of its own: epic NFR *Security*; DEC-0211 gives `package.json` to `ui-components`).
 
-- [ ] T001 From the repo root, confirm the four hard graph edges are delivered, then run `npm ci` and `npm run test` and record that the suite is green before any change. Stop if any item is missing (traces to DAC-E3-11, DAC-E3-S5-4; prerequisite infrastructure):
+- [x] T001 From the repo root, confirm the four hard graph edges are delivered, then run `npm ci` and `npm run test` and record that the suite is green before any change. Stop if any item is missing (traces to DAC-E3-11, DAC-E3-S5-4; prerequisite infrastructure):
   - CAP-003-E1-S3: `web/src/components/ui/command.tsx` exports `CommandDialog`, `CommandInput`, `CommandList`, `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator` and `CommandLoading`. Its `CommandDialog` labels the dialog *Search FactorFlow*, sets `loop` on the inner cmdk `Command`, records the opener in `onOpenAutoFocus` and refocuses it in `onCloseAutoFocus`. `package.json` lists `cmdk` and `@radix-ui/react-dialog`.
   - CAP-003-E3-S4: `web/src/app/destinations.ts` exports `DESTINATIONS: readonly Destination[]` (at this point `[Research, Settings]`) and `RESEARCH_REGISTERED`.
   - CAP-003-E3-S1: `web/src/api/client.ts` exports `requestJson`, `ApiError` and `ApiUnreachableError`. The export predates CAP-003 (CAP-002-E4-S1), and S1 leaves the file untouched.
@@ -118,7 +120,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-062 (Palette hint, empty, first-8 and per-group error states) in the new `web/src/app/command-palette/command-palette.test.tsx`, with a `// Implements TC-COMP-062` comment, in `describe("states (DAC-E3-12, AC-24)")`. Cases:
+- [x] T002 [P] Implement TC-COMP-062 (Palette hint, empty, first-8 and per-group error states) in the new `web/src/app/command-palette/command-palette.test.tsx`, with a `// Implements TC-COMP-062` comment, in `describe("states (DAC-E3-12, AC-24)")`. Cases:
   - (a) **Hint before typing.** On open, `optionsIn("Stocks")` equals `["Type a symbol to find a followed stock"]`, and that option has `aria-disabled="true"`. `optionsIn("Pages")` equals the literal `["Research", "Settings", "Coverage", "Followed stocks", "Downloads"]`. `queryByText(/No stocks or pages match/)` is null, and `stocks` was called 0 times.
   - (b) **Loading.** `stocks` returns a pending `deferred()`. Type `zz`. `findByText("Searching…")` appears inside the Stocks group, and `queryByText(/No stocks or pages match/)` is still null while the read is pending.
   - (c) **Empty, nothing found.** Resolve it with `stockPage([])`. The dialog shows exactly `No stocks or pages match "zz".`, and `queryAllByRole("option")` is empty. The universes fixture has no name containing `zz`.
@@ -132,7 +134,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
   - negate-boolean on the `next_cursor !== null` test: (d) both halves.
   - swap-case of the two reasons in `failureReason`: (e) and (g).
   - a hand-written mutant that renders `CommandEmpty` while the search is loading: (b).
-- [ ] T003 [P] Implement TC-COMP-081 (Stock search debounces 250 ms and aborts the stale request) in the new `web/src/app/command-palette/use-stock-search.test.ts`, with a `// Implements TC-COMP-081` comment.
+- [x] T003 [P] Implement TC-COMP-081 (Stock search debounces 250 ms and aborts the stale request) in the new `web/src/app/command-palette/use-stock-search.test.ts`, with a `// Implements TC-COMP-081` comment.
   - **Harness.** `vi.useFakeTimers()`. `renderHook(({ text }) => useStockSearch(text), { initialProps: { text: "" } })`. `fetch` is `vi.fn` returning per-call `deferred()` promises, and every call's `[url, init]` is recorded.
   - (a) **Debounce and query.** Rerender `K`. After `advanceTimersByTime(100)`, rerender `KO`. After `advanceTimersByTime(249)`, `fetch` has 0 calls and `result.current` `toEqual({ kind: "loading" })`. After `advanceTimersByTime(1)`, `fetch` has exactly 1 call, and its URL is exactly the literal `"/api/instruments?symbol=KO&lifecycle=active&limit=8"`.
   - (b) **Abort in flight.** Rerender `K` and `advanceTimersByTime(250)`: call 1 is in flight, and `calls[0][1].signal.aborted` is `false`. Rerender `KO` **without** advancing: `calls[0][1].signal.aborted` is `true` at once. `advanceTimersByTime(250)` makes call 2, with `symbol=KO`.
@@ -148,7 +150,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
   - remove-attribute of `signal` in the `requestJson` call: (b)'s `aborted`.
   - negate-boolean on the `signal.aborted` guard: (b)'s late `KXX` and `AbortError`.
   - a hand-written mutant that drops `controller.abort()` from the effect cleanup: (b) and (c).
-- [ ] T004 Implement TC-COMP-082 (Universes group only while research routes are registered) in `web/src/app/command-palette/command-palette.test.tsx`, with a `// Implements TC-COMP-082` comment, in `describe("universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27)")`. It runs after T002 (same file). Cases:
+- [x] T004 Implement TC-COMP-082 (Universes group only while research routes are registered) in `web/src/app/command-palette/command-palette.test.tsx`, with a `// Implements TC-COMP-082` comment, in `describe("universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27)")`. It runs after T002 (same file). Cases:
   - (a) **Not registered.** `flags.registered = false`. Open, then `await waitFor` on the hint row. `universes` was called 0 times, and `headings()` equals `["Stocks", "Pages"]`. Type `KO` against `stockPage(["KO"])`, then `{Enter}` on *KO*: `location` reads exactly `/data/coverage?symbol=KO`.
   - (b) **Registered, once per open.** `flags.registered = true`. Open: `universes` is called exactly once, and `optionsIn("Universes")` equals `["Large caps", "Small value"]`.
     - Type `l`, then `la`, then `large`, each answered `stockPage([])`. `universes` is still called once, and `optionsIn("Universes")` equals `["Large caps"]` (filtered locally).
@@ -161,7 +163,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
   - a hand-written mutant that makes the universes effect depend on `text`: (b)'s count of 1.
   - swap-case of the two stock targets: (a) and (c).
   - a hand-written mutant that drops the local filter: (b)'s `["Large caps"]`.
-- [ ] T005 Implement TC-COMP-083 (Closing the palette restores focus and discards typed text) in `web/src/app/command-palette/command-palette.test.tsx`, with a `// Implements TC-COMP-083` comment, in `describe("close (DAC-E3-S5-3, AC-25)")`. It runs after T004 (same file).
+- [x] T005 Implement TC-COMP-083 (Closing the palette restores focus and discards typed text) in `web/src/app/command-palette/command-palette.test.tsx`, with a `// Implements TC-COMP-083` comment, in `describe("close (DAC-E3-S5-3, AC-25)")`. It runs after T004 (same file).
   - (a) **Esc.** Focus *Opener*, click it, type `KO`, press `{Escape}`. `queryByRole("dialog")` is null, and the *Opener* button `toHaveFocus()`.
   - (b) **Nothing typed is kept.** Click *Opener* again. `getByRole("combobox")` has value `""`, and the Stocks hint row is back.
   - (c) **Choosing an item.** Type `set`, then `{Enter}` on *Settings*. `location` reads `/settings`, `queryByRole("dialog")` is null, and *Opener* `toHaveFocus()`.
@@ -169,14 +171,14 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
   Kills:
   - a hand-written mutant that lifts `useState("")` for the text from the open-only body into `CommandPalette`: (b).
   - remove-attribute of the `onOpenChange(false)` call in the select handler: (c)'s dialog still present.
-- [ ] T006 Write the groups, order and no-trading cases in `web/src/app/command-palette/command-palette.test.tsx` (command-palette §7 *Groups* and *Targets* rows; DAC-E3-11, AC-22), in `describe("groups (DAC-E3-11, AC-22)")`. It runs after T005 (same file).
+- [x] T006 Write the groups, order and no-trading cases in `web/src/app/command-palette/command-palette.test.tsx` (command-palette §7 *Groups* and *Targets* rows; DAC-E3-11, AC-22), in `describe("groups (DAC-E3-11, AC-22)")`. It runs after T005 (same file).
   - (a) **Order before typing.** `headings()` equals `["Stocks", "Universes", "Pages"]`, and there are exactly two `[cmdk-separator]` elements.
   - (b) **Order is not re-ranked by the text.** Type `co`. `stocks` answers `stockPage(["COST"])`, and the universes fixture adds `{ universe_id: "u3", name: "Core holdings", … }`. `headings()` still equals `["Stocks", "Universes", "Pages"]`. `optionsIn("Stocks")` equals `["COST"]`, `optionsIn("Universes")` equals `["Core holdings"]`, and `optionsIn("Pages")` equals `["Coverage"]`.
   - (c) **No Actions group, nothing trades.** Across (a) and (b), no heading matches `/actions/i`. No option text matches `/\b(trade|trading|buy|sell|order|go live|resume|stop)\b/i`.
   - (d) **Stock rows are the symbol alone.** In (b), the *COST* option's `textContent` is exactly `COST`, with no hint (command-palette §3; Resolved Conflict 3).
 
   Kills: a hand-written mutant that removes `shouldFilter={false}` from the `CommandDialog` call. cmdk then ranks groups by score: `page:/data/coverage` outscores `stock:COST` for `co` and moves Pages first, and the disabled rows are filtered away. (b) fails.
-- [ ] T007 [P] Implement TC-COMP-084 (Literal scan widened to `web/src/app/command-palette/`) in `web/src/components/token-literals.test.ts`, with a `// Implements TC-COMP-084` comment (DAC-E3-S5-4: "this story adds `web/src/app/command-palette/` to its scanned directories").
+- [x] T007 [P] Implement TC-COMP-084 (Literal scan widened to `web/src/app/command-palette/`) in `web/src/components/token-literals.test.ts`, with a `// Implements TC-COMP-084` comment (DAC-E3-S5-4: "this story adds `web/src/app/command-palette/` to its scanned directories").
   - Append `"web/src/app/command-palette/"` to the exported `SCANNED_DIRECTORIES`, after the entries already there, without reordering or removing any.
   - Add `describe("command-palette sources (TC-COMP-084)")`:
     - (a) `SCANNED_DIRECTORIES` contains `"web/src/app/command-palette/"`. Walking it with the file's own walker finds at least the six sources `index.tsx`, `use-stock-search.ts`, `universes.ts`, `pages.ts`, `targets.ts` and `copy.ts`, and `isScannedSource` is false for the two test files.
@@ -185,7 +187,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
   - The file's existing case (1) then scans the new directory with every other rule.
 
   Kills: a hand-written mutant that allows `560px` under any `command` path segment: (c). A missing directory entry: (a).
-- [ ] T008 Implement TC-COMP-085 and TC-COMP-086 in `web/src/app/command-palette/command-palette.test.tsx`, with `// Implements TC-COMP-085` and `// Implements TC-COMP-086` comments, in `describe("vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6)")`. It runs after T006 (same file).
+- [x] T008 Implement TC-COMP-085 and TC-COMP-086 in `web/src/app/command-palette/command-palette.test.tsx`, with `// Implements TC-COMP-085` and `// Implements TC-COMP-086` comments, in `describe("vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6)")`. It runs after T006 (same file).
   - **State walk.** Render the palette through the seven states of T002 (a), (b), (c), (d), (e), (f) and (g), plus a registered open with universes listed. At each state, collect from the dialog:
     - its `textContent`;
     - every `aria-label`, `placeholder`, `title` and `aria-valuetext` attribute;
@@ -206,7 +208,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 ### Additional Unit Tests
 
-- [ ] T009 [P] Write the pure-module cases in `web/src/app/command-palette/command-palette.test.tsx`, in `describe("pages, targets and reasons")`. It runs after T008 (same file), and imports `palettePages` and `matchesText` from `./pages`, `stockTarget` and `universeTarget` from `./targets`, and `failureReason` and `PALETTE_COPY` from `./copy`.
+- [x] T009 [P] Write the pure-module cases in `web/src/app/command-palette/command-palette.test.tsx`, in `describe("pages, targets and reasons")`. It runs after T008 (same file), and imports `palettePages` and `matchesText` from `./pages`, `stockTarget` and `universeTarget` from `./targets`, and `failureReason` and `PALETTE_COPY` from `./copy`.
   - (a) **Pages.** With `flags.registered = true`, `palettePages()` `toEqual` the independent literal:
 
     ```text
@@ -251,7 +253,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Write the five non-visual modules, each of which makes its unit cases pass.
 
-- [ ] T010 [P] Create `web/src/app/command-palette/copy.ts`, `targets.ts`, `pages.ts` and `universes.ts`. These depend on T002, T004 and T009 being RED. No file writes a length, hex or colour literal (DAC-E3-S5-4), and no comment writes a unit joined to a number.
+- [x] T010 [P] Create `web/src/app/command-palette/copy.ts`, `targets.ts`, `pages.ts` and `universes.ts`. These depend on T002, T004 and T009 being RED. No file writes a length, hex or colour literal (DAC-E3-S5-4), and no comment writes a unit joined to a number.
   - **`copy.ts`** (command-palette §2.4, §10; UX design §1.1; DAC-E3-12; DEC-0332):
     - `export const PALETTE_COPY` holds:
       - `placeholder: "Jump to a stock or page"`;
@@ -279,7 +281,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
     - No `limit` is sent: the request is the one DAC-E3-11 names (Open Gap 4).
 
   These make T009 pass.
-- [ ] T011 Create `web/src/app/command-palette/use-stock-search.ts`. It depends on T003 being RED. (DAC-E3-S5-1; command-palette §5; epic NFR *Performance*; Resolved Conflict 1.)
+- [x] T011 Create `web/src/app/command-palette/use-stock-search.ts`. It depends on T003 being RED. (DAC-E3-S5-1; command-palette §5; epic NFR *Performance*; Resolved Conflict 1.)
   - `export const STOCK_SEARCH_DEBOUNCE_MS = 250` and `export const STOCK_SEARCH_LIMIT = 8`.
   - `export type StockSearchState = { kind: "idle" } | { kind: "loading" } | { kind: "ok"; symbols: readonly string[]; more: boolean } | { kind: "error"; error: unknown }`.
   - `export function useStockSearch(text: string): StockSearchState` keeps the state in `useState`, with one `useEffect` keyed on `text`:
@@ -300,12 +302,12 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Compose the dialog and its groups on `ui-components`' `command`, opening the one seam the composition needs.
 
-- [ ] T012 Add the optional `shouldFilter` prop to `CommandDialog` in `web/src/components/ui/command.tsx` (DEC-0330; Resolved Conflict 2). It depends on T001 and on T006 being RED.
+- [x] T012 Add the optional `shouldFilter` prop to `CommandDialog` in `web/src/components/ui/command.tsx` (DEC-0330; Resolved Conflict 2). It depends on T001 and on T006 being RED.
   - Widen the props to `{ open, onOpenChange, shouldFilter, children }`, with `shouldFilter?: boolean`, and pass it to the inner `<Command loop label="Search FactorFlow" …>` as `shouldFilter={shouldFilter}`. When it is omitted, cmdk's default filtering stays exactly as CAP-003-E1-S3 shipped it.
   - Nothing else in the file changes: no class, label, `loop`, focus handling or export.
   - CAP-003-E1-S3's `command.test.tsx` (TC-COMP-015), which renders without the prop and asserts that typing `zzz` leaves no option, must stay green unchanged. That is the default-preserving check.
   - Add one doc-comment line naming the prop's consumer, command-palette, and the reason: cmdk's `shouldFilter` exists only on the root `Command`, which `CommandDialog` renders.
-- [ ] T013 Create `web/src/app/command-palette/index.tsx`. It depends on T010, T011 and T012, and on T002 and T004–T008 being RED. (Command-palette §2.2–§2.4, §10; UX design §1.1; DAC-E3-11, DAC-E3-12, DAC-E3-S5-2, DAC-E3-S5-3.)
+- [x] T013 Create `web/src/app/command-palette/index.tsx`. It depends on T010, T011 and T012, and on T002 and T004–T008 being RED. (Command-palette §2.2–§2.4, §10; UX design §1.1; DAC-E3-11, DAC-E3-12, DAC-E3-S5-2, DAC-E3-S5-3.)
   - **Exports.** `export interface CommandPaletteProps { open: boolean; onOpenChange: (open: boolean) => void }` and `export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX.Element`. It returns `<CommandDialog open={open} onOpenChange={onOpenChange} shouldFilter={false}><PaletteBody onClose={() => onOpenChange(false)} /></CommandDialog>`.
   - **`PaletteBody`** (private) mounts only while the dialog is open, because Radix unmounts the content on close. So `const [text, setText] = useState("")` and the universes read are per opening, and nothing typed is kept (DAC-E3-S5-3; command-palette §4).
   - **Hooks.**
@@ -342,8 +344,8 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Validation, the full scan and TDD evidence.
 
-- [ ] T014 Run `web/src/components/token-literals.test.ts` unchanged apart from T007, together with the full suite. Then plant `export const x = "12px";` in a temporary `web/src/app/command-palette/planted.tsx`, confirm `npm run test -- token-literals` fails naming that file, and delete it (TC-COMP-084 step 3 on the real file system). Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to DAC-E3-S5-4, AC-26).
-- [ ] T015 After each TDD cycle in T002–T014, not once at the end, do the following before the next cycle begins. This traces to no AC (INV-TDD-002, TEST-TDD-008).
+- [x] T014 Run `web/src/components/token-literals.test.ts` unchanged apart from T007, together with the full suite. Then plant `export const x = "12px";` in a temporary `web/src/app/command-palette/planted.tsx`, confirm `npm run test -- token-literals` fails naming that file, and delete it (TC-COMP-084 step 3 on the real file system). Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to DAC-E3-S5-4, AC-26).
+- [x] T015 After each TDD cycle in T002–T014, not once at the end, do the following before the next cycle begins. This traces to no AC (INV-TDD-002, TEST-TDD-008).
   - Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `CAP-003-E3-S5-tdd-evidence.yaml` beside this story with:
     - `code_review_verdict` and `spec_drift.drift_detected`;

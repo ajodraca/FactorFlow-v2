@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w2/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 30ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 24ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 194ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 1 failed) 4002ms
+   × states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent 79ms
+     → expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"
+
+Expected the element to have attribute:
+  aria-disabled="true"
+Received:
+  aria-disabled="false"
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 533ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"
+
+Expected the element to have attribute:
+  aria-disabled="true"
+Received:
+  aria-disabled="false"
+ ❯ src/app/command-palette/command-palette.test.tsx:230:7
+    228|     expect(
+    229|       screen.getByText("Type a symbol to find a followed stock").close…
+    230|     ).toHaveAttribute("aria-disabled", "true");
+       |       ^
+    231|     expect(optionsIn("Pages")).toEqual(FIVE_PAGES);
+    232|     // A destination carries no hint; a data page shows its breadcrumb…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 101 passed (102)
+   Start at  23:38:24
+   Duration  4.92s (transform 191ms, setup 145ms, collect 912ms, tests 4.25s, environment 788ms, prepare 182ms)
+

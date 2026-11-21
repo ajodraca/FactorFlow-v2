@@ -1,0 +1,158 @@
+{
+ "schema": 1,
+ "repo_head": "34a300daded1bbc732552b73e4d9da2f99f97197",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/command-palette/pages.ts:18:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 18,
+   "original": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),",
+   "mutated": "    ...DESTINATIONS.map((d) => ({ label: nil, to: d.to, hint: null })),"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:18:drop-field-copy:2",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 18,
+   "original": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),",
+   "mutated": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: nil, hint: null })),"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:19:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 19,
+   "original": "    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },",
+   "mutated": "    { label: nil, to: \"/data/coverage\", hint: coverage.hint },"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:20:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 20,
+   "original": "    { label: followed.label, to: \"/data/followed\", hint: followed.hint },",
+   "mutated": "    { label: nil, to: \"/data/followed\", hint: followed.hint },"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:21:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 21,
+   "original": "    { label: downloads.label, to: \"/data/downloads\", hint: downloads.hint },",
+   "mutated": "    { label: nil, to: \"/data/downloads\", hint: downloads.hint },"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:31:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 31,
+   "original": "  if (needle === \"\") return true;",
+   "mutated": "  if (needle === \"\") return false;"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:32:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/pages.ts",
+   "line": 32,
+   "original": "  return fields.some((field) => field?.toLowerCase().includes(needle) === true);",
+   "mutated": "  return fields.some((field) => field?.toLowerCase().includes(needle) === false);"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:manual:subpage-order",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/pages.ts",
+   "old": "    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },\n    { label: followed.label, to: \"/data/followed\", hint: followed.hint },\n",
+   "new": "    { label: followed.label, to: \"/data/followed\", hint: followed.hint },\n    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },\n",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:manual:startswith",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/pages.ts",
+   "old": ".includes(needle)",
+   "new": ".startsWith(needle)",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/pages.ts:manual:no-trim",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/pages.ts",
+   "old": "text.trim().toLowerCase()",
+   "new": "text.toLowerCase()",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/targets.ts:manual:no-encode-stock",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/targets.ts",
+   "old": "const encoded = encodeURIComponent(symbol);",
+   "new": "const encoded = symbol;",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/targets.ts:manual:no-encode-universe",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/targets.ts",
+   "old": "`/research/universes/${encodeURIComponent(id)}`",
+   "new": "`/research/universes/${id}`",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/targets.ts:manual:swap-stock-target",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/targets.ts",
+   "old": "RESEARCH_REGISTERED ? `/research/stocks/${encoded}` : `/data/coverage?symbol=${encoded}`",
+   "new": "RESEARCH_REGISTERED ? `/data/coverage?symbol=${encoded}` : `/research/stocks/${encoded}`",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/copy.ts:manual:reason-swap",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/copy.ts",
+   "old": "? \"FactorFlow is not answering\"\n    : \"FactorFlow hit an unexpected problem\"",
+   "new": "? \"FactorFlow hit an unexpected problem\"\n    : \"FactorFlow is not answering\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/copy.ts:manual:reason-message",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/copy.ts",
+   "old": "export function failureReason(error: unknown): string {\n",
+   "new": "export function failureReason(error: unknown): string {\n  if (error instanceof Error && !(error instanceof ApiUnreachableError)) return error.message;\n",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/copy.ts:manual:empty-copy",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/copy.ts",
+   "old": "`No stocks or pages match \"${text}\".`",
+   "new": "`No stocks or pages match ${text}.`",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/universes.ts:manual:universes-url",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/universes.ts",
+   "old": "\"/api/universes?lifecycle=active\"",
+   "new": "\"/api/universes?lifecycle=retired\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/command-palette/universes.ts:manual:universes-id",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/universes.ts",
+   "old": "id: u.universe_id",
+   "new": "id: u.name",
+   "cycle": "cycle-1"
+  }
+ ]
+}

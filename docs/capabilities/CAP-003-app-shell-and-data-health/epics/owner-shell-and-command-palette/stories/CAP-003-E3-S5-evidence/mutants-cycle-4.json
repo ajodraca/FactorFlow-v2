@@ -1,0 +1,87 @@
+{
+ "schema": 1,
+ "repo_head": "d90af7b09acaad2e582caf3248655d46e9e07561",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-loading",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
+   "new": "{ kind: \"loading\" },",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universes-initial-always-off",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "RESEARCH_REGISTERED ? { kind: \"loading\" } : { kind: \"off\" },",
+   "new": "{ kind: \"off\" },",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:settled-ignores-universes",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": " && universes.kind !== \"loading\";",
+   "new": ";",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:empty-untrimmed",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "PALETTE_COPY.empty(text.trim())",
+   "new": "PALETTE_COPY.empty(text)",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universes-no-abort",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "return () => controller.abort();",
+   "new": "return () => undefined;",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universes-error-unguarded",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "if (!controller.signal.aborted) setUniverses({ kind: \"error\", error });",
+   "new": "setUniverses({ kind: \"error\", error });",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:placeholder-dropped",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "<CommandInput placeholder={PALETTE_COPY.placeholder} value={text}",
+   "new": "<CommandInput value={text}",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/copy.ts:manual:placeholder-copy",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/copy.ts",
+   "old": "placeholder: \"Jump to a stock or page\",",
+   "new": "placeholder: \"Search\",",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:loading-as-item",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "{stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}",
+   "new": "{stocks.kind === \"loading\" && (void CommandLoading, (<CommandItem disabled value=\"loading:stocks\">{PALETTE_COPY.searching}</CommandItem>))}",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:loading-outside-group",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n",
+   "new": "        {stocks.kind === \"ok\" &&\n          stocks.symbols.map((symbol) => (\n            <CommandItem\n              key={symbol}\n              value={`stock:${symbol}`}\n              onSelect={() => choose(stockTarget(symbol))}\n            >\n              {symbol}\n            </CommandItem>\n          ))}\n        {stocks.kind === \"ok\" && stocks.more && (\n          <CommandItem disabled value=\"partial:stocks\">\n            {PALETTE_COPY.partial}\n          </CommandItem>\n        )}\n        {stocks.kind === \"error\" && (\n          <CommandItem disabled value=\"error:stocks\">\n            {PALETTE_COPY.stocksError(failureReason(stocks.error))}\n          </CommandItem>\n        )}\n      </CommandGroup>,\n    );\n  }\n\n  const universeRows =\n    universes.kind === \"ok\" ? universes.rows.filter((u) => matchesText(text, u.name)) : [];\n  if (universes.kind === \"error\" || universeRows.length > 0) {\n    groups.push(\n      <CommandGroup key=\"universes\" heading={PALETTE_COPY.groups.universes}>\n        {universes.kind === \"error\" && (\n          <CommandItem disabled value=\"error:universes\">\n            {PALETTE_COPY.universesError(failureReason(universes.error))}\n          </CommandItem>\n        )}\n        {universeRows.map((u) => (\n          <CommandItem\n            key={u.id}\n            value={`universe:${u.id}`}\n            onSelect={() => choose(universeTarget(u.id))}\n          >\n            {u.name}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const pages = palettePages().filter((p) => matchesText(text, p.label, p.hint));\n  if (pages.length > 0) {\n    groups.push(\n      <CommandGroup key=\"pages\" heading={PALETTE_COPY.groups.pages}>\n        {pages.map((p) => (\n          <CommandItem key={p.to} value={`page:${p.to}`} onSelect={() => choose(p.to)}>\n            {p.label}\n            {p.hint !== null && (\n              <span className=\"ml-auto text-xs text-muted-foreground\">{p.hint}</span>\n            )}\n          </CommandItem>\n        ))}\n      </CommandGroup>,\n    );\n  }\n\n  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";\n\n  return (\n    <>\n      <CommandInput placeholder={PALETTE_COPY.placeholder} value={text} onValueChange={setText} />\n      <CommandList>\n        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}\n",
+   "cycle": "cycle-4"
+  }
+ ]
+}

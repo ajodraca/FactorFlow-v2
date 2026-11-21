@@ -41,10 +41,17 @@ Command.displayName = "Command";
 interface CommandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /**
+   * Turns cmdk's own filtering and re-ordering off when `false`; the default is
+   * cmdk's. Its consumer is the command palette, which filters its groups
+   * itself: cmdk's `shouldFilter` exists only on the root `Command`, which this
+   * dialog renders (DEC-0330).
+   */
+  shouldFilter?: boolean;
   children: ReactNode;
 }
 
-const CommandDialog = ({ open, onOpenChange, children }: CommandDialogProps) => {
+const CommandDialog = ({ open, onOpenChange, shouldFilter, children }: CommandDialogProps) => {
   // Radix returns focus only to a Trigger, and the palette opens from a key
   // chord and a button, so the opener is recorded and refocused here.
   const opener = useRef<HTMLElement | null>(null);
@@ -67,6 +74,7 @@ const CommandDialog = ({ open, onOpenChange, children }: CommandDialogProps) => 
           <DialogPrimitive.Title className="sr-only">Search FactorFlow</DialogPrimitive.Title>
           <Command
             loop
+            shouldFilter={shouldFilter}
             label="Search FactorFlow"
             className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
           >

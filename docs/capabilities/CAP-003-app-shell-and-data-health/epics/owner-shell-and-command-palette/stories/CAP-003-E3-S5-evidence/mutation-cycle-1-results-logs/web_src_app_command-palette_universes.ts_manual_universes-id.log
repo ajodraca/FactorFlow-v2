@@ -1,0 +1,43 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
+
+ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
+   × pages, targets and reasons > (e) reads the active universes with one GET and maps each row to an id and a name 5ms
+     → expected [ { id: 'Large caps', …(1) }, …(1) ] to deeply equal [ …(2) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (e) reads the active universes with one GET and maps each row to an id and a name
+AssertionError: expected [ { id: 'Large caps', …(1) }, …(1) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+-     "id": "u1",
++     "id": "Large caps",
+      "name": "Large caps",
+    },
+    Object {
+-     "id": "u2",
++     "id": "Small value",
+      "name": "Small value",
+    },
+  ]
+
+ ❯ src/app/command-palette/command-palette.test.tsx:98:18
+     96|     const controller = new AbortController();
+     97|     const rows = await fetchActiveUniverses(controller.signal);
+     98|     expect(rows).toEqual([
+       |                  ^
+     99|       { id: "u1", name: "Large caps" },
+    100|       { id: "u2", name: "Small value" },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  23:29:02
+   Duration  559ms (transform 40ms, setup 32ms, collect 40ms, tests 8ms, environment 162ms, prepare 70ms)
+

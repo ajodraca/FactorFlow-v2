@@ -140,7 +140,10 @@ describe("tailwind.config.js keys (DAC-E1-11)", () => {
 
 /** Repo-root-relative directories the scan reads. Later stories widen it by appending. */
 // biome-ignore lint/suspicious/noExportsInTest: DEC-0296 fixes this export as the scan's interface.
-export const SCANNED_DIRECTORIES: readonly string[] = ["web/src/components/"];
+export const SCANNED_DIRECTORIES: readonly string[] = [
+  "web/src/components/",
+  "web/src/app/command-palette/",
+];
 
 /** The one module that holds approved-specification widths (system design constraint 12). */
 const LAYOUT_MODULE = "web/src/app/layout.ts";
@@ -277,6 +280,41 @@ describe("form family is scanned and clean (TC-COMP-011)", () => {
     expect(literalsIn("web/src/components/ui/textarea.tsx", planted)).toEqual([
       "web/src/components/ui/textarea.tsx: 80px",
     ]);
+  });
+});
+
+// The command palette's sources are scanned too (CAP-003-E3-S5, DAC-E3-S5-4).
+const PALETTE_DIRECTORY = "web/src/app/command-palette/";
+
+// Implements TC-COMP-084
+describe("command-palette sources are scanned (TC-COMP-084, DAC-E3-S5-4, AC-26)", () => {
+  it("(a) scans the directory and finds its six sources but not its tests", () => {
+    expect(SCANNED_DIRECTORIES).toContain(PALETTE_DIRECTORY);
+    const files = scannedFiles().filter((relPath) => relPath.startsWith(PALETTE_DIRECTORY));
+    for (const name of [
+      "index.tsx",
+      "use-stock-search.ts",
+      "universes.ts",
+      "pages.ts",
+      "targets.ts",
+      "copy.ts",
+    ]) {
+      expect(files).toContain(`${PALETTE_DIRECTORY}${name}`);
+    }
+    expect(isScannedSource(`${PALETTE_DIRECTORY}command-palette.test.tsx`)).toBe(false);
+    expect(isScannedSource(`${PALETTE_DIRECTORY}use-stock-search.test.ts`)).toBe(false);
+  });
+
+  it("(b) finds a literal planted in a palette source", () => {
+    const planted = `${PALETTE_DIRECTORY}planted.tsx`;
+    expect(literalsIn(planted, 'const x = "12px";')).toEqual([`${planted}: 12px`]);
+  });
+
+  it("(c) allows the command width only inside the vendored component", () => {
+    expect(literalsIn(`${PALETTE_DIRECTORY}index.tsx`, "max-w-[560px]")).toEqual([
+      `${PALETTE_DIRECTORY}index.tsx: 560px`,
+    ]);
+    expect(literalsIn("web/src/components/ui/command.tsx", "max-w-[560px]")).toEqual([]);
   });
 });
 
