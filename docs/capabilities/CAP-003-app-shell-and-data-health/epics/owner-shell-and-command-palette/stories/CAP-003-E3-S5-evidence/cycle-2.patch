@@ -1,0 +1,1597 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-2-stock-search.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-2-stock-search.log
+new file mode 100644
+index 00000000..f48c7d3b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-2-stock-search.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/app/command-palette/command-palette.test.tsx (5 tests) 4ms
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 22ms
++
++ Test Files  2 passed (2)
++      Tests  13 passed (13)
++   Start at  23:31:10
++   Duration  451ms (transform 56ms, setup 67ms, collect 91ms, tests 26ms, environment 319ms, prepare 100ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-2.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-2.json
+new file mode 100644
+index 00000000..398d2c6f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-2.json
+@@ -0,0 +1,105 @@
++{
++ "schema": 1,
++ "repo_head": "c2efe62967f0c67483b12d4f146165e94ba42723",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:4:off-by-one:1",
++   "cycle": "cycle-2",
++   "operator": "off-by-one",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "line": 4,
++   "original": "export const STOCK_SEARCH_DEBOUNCE_MS = 250;",
++   "mutated": "export const STOCK_SEARCH_DEBOUNCE_MS = 251;"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:5:off-by-one:1",
++   "cycle": "cycle-2",
++   "operator": "off-by-one",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "line": 5,
++   "original": "export const STOCK_SEARCH_LIMIT = 8;",
++   "mutated": "export const STOCK_SEARCH_LIMIT = 9;"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:lifecycle-retired",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "lifecycle: \"active\"",
++   "new": "lifecycle: \"retired\"",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-signal",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "{ signal: controller.signal },",
++   "new": "{},",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-abort-in-cleanup",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "      clearTimeout(timer);\n      controller.abort();\n",
++   "new": "      clearTimeout(timer);\n",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-clear-timeout",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "      clearTimeout(timer);\n      controller.abort();\n",
++   "new": "      controller.abort();\n",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-trim",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "const prefix = text.trim();",
++   "new": "const prefix = text;",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:stale-ok-guard",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "          if (controller.signal.aborted) return;\n          setState({\n            kind: \"ok\"",
++   "new": "          setState({\n            kind: \"ok\"",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:stale-error-guard",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "          if (controller.signal.aborted) return;\n          setState({ kind: \"error\", error });",
++   "new": "          setState({ kind: \"error\", error });",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:more-inverted",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "more: body.next_cursor !== null",
++   "new": "more: body.next_cursor === null",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-loading",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "    setState({ kind: \"loading\" });\n",
++   "new": "",
++   "cycle": "cycle-2"
++  },
++  {
++   "id": "web/src/app/command-palette/use-stock-search.ts:manual:symbol-param",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/use-stock-search.ts",
++   "old": "symbol: prefix,",
++   "new": "symbol: text,",
++   "cycle": "cycle-2"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..4f8821a0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w0.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w0/web
++
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 21ms
++
++ Test Files  1 passed (1)
++      Tests  8 passed (8)
++   Start at  23:31:13
++   Duration  885ms (transform 36ms, setup 37ms, collect 66ms, tests 21ms, environment 191ms, prepare 54ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..5c86f669
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w1.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w1/web
++
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 22ms
++
++ Test Files  1 passed (1)
++      Tests  8 passed (8)
++   Start at  23:31:13
++   Duration  885ms (transform 37ms, setup 38ms, collect 64ms, tests 22ms, environment 182ms, prepare 148ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..1eed2b90
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w2.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w2/web
++
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 21ms
++
++ Test Files  1 passed (1)
++      Tests  8 passed (8)
++   Start at  23:31:13
++   Duration  897ms (transform 37ms, setup 38ms, collect 64ms, tests 21ms, environment 180ms, prepare 80ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..15b77c73
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w3.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w3/web
++
++ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 35ms
++
++ Test Files  1 passed (1)
++      Tests  8 passed (8)
++   Start at  23:31:13
++   Duration  914ms (transform 41ms, setup 41ms, collect 69ms, tests 35ms, environment 180ms, prepare 58ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_4_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_4_off-by-one_1.log
+new file mode 100644
+index 00000000..e0204c30
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_4_off-by-one_1.log
+@@ -0,0 +1,166 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w0/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 8 failed) 25ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 12ms
++     → expected [] to have a length of 1 but got +0
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 2ms
++     → expected [] to have a length of 1 but got +0
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 1ms
++     → expected [] to have a length of 1 but got +0
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 3ms
++     → Cannot read properties of undefined (reading 'reply')
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) reports more rows when the page has a next cursor 1ms
++     → Cannot read properties of undefined (reading 'reply')
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more 1ms
++     → expected [] to have a length of 1 but got +0
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) unmounting aborts the request in flight 1ms
++     → Cannot read properties of undefined (reading 'aborted')
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (d) an unreachable API and an error envelope both end as error, keeping the error 3ms
++     → expected 'loading' to be 'error' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:85:19
++     83|       vi.advanceTimersByTime(1);
++     84|     });
++     85|     expect(calls).toHaveLength(1);
++       |                   ^
++     86|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++     87|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:95:19
++     93|       vi.advanceTimersByTime(250);
++     94|     });
++     95|     expect(calls).toHaveLength(1);
++       |                   ^
++     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++     97|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:105:19
++    103|       vi.advanceTimersByTime(250);
++    104|     });
++    105|     expect(calls).toHaveLength(1);
++       |                   ^
++    106|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(false);
++    107|     rerender({ text: "KO" });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
++TypeError: Cannot read properties of undefined (reading 'reply')
++ ❯ src/app/command-palette/use-stock-search.test.ts:63:10
++     61| async function settle(call: { reply: Deferred }, response: Response) {
++     62|   await act(async () => {
++     63|     call.reply.resolve(response);
++       |          ^
++     64|     await vi.advanceTimersByTimeAsync(0);
++     65|   });
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/act-compat.js:47:24
++ ❯ act ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react/cjs/react.development.js:2512:16
++ ❯ Proxy.<anonymous> ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/act-compat.js:46:25
++ ❯ settle src/app/command-palette/use-stock-search.test.ts:62:9
++ ❯ src/app/command-palette/use-stock-search.test.ts:136:11
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) reports more rows when the page has a next cursor
++TypeError: Cannot read properties of undefined (reading 'reply')
++ ❯ src/app/command-palette/use-stock-search.test.ts:63:10
++     61| async function settle(call: { reply: Deferred }, response: Response) {
++     62|   await act(async () => {
++     63|     call.reply.resolve(response);
++       |          ^
++     64|     await vi.advanceTimersByTimeAsync(0);
++     65|   });
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/act-compat.js:47:24
++ ❯ act ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react/cjs/react.development.js:2512:16
++ ❯ Proxy.<anonymous> ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/act-compat.js:46:25
++ ❯ settle src/app/command-palette/use-stock-search.test.ts:62:9
++ ❯ src/app/command-palette/use-stock-search.test.ts:146:11
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:156:19
++    154|       vi.advanceTimersByTime(250);
++    155|     });
++    156|     expect(calls).toHaveLength(1);
++       |                   ^
++    157|     rerender({ text: "" });
++    158|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) unmounting aborts the request in flight
++TypeError: Cannot read properties of undefined (reading 'aborted')
++ ❯ src/app/command-palette/use-stock-search.test.ts:179:51
++    177|     });
++    178|     unmount();
++    179|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++       |                                                   ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (d) an unreachable API and an error envelope both end as error, keeping the error
++AssertionError: expected 'loading' to be 'error' // Object.is equality
++
++Expected: "error"
++Received: "loading"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:192:33
++    190|       await vi.advanceTimersByTimeAsync(0);
++    191|     });
++    192|     expect(result.current.kind).toBe("error");
++       |                                 ^
++    193|     if (result.current.kind === "error") {
++    194|       expect(result.current.error).toBeInstanceOf(ApiUnreachableError);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
++
++ Test Files  1 failed (1)
++      Tests  8 failed (8)
++   Start at  23:31:19
++   Duration  887ms (transform 33ms, setup 32ms, collect 55ms, tests 25ms, environment 166ms, prepare 28ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_5_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_5_off-by-one_1.log
+new file mode 100644
+index 00000000..a204af3a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_5_off-by-one_1.log
+@@ -0,0 +1,48 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w1/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 2 failed) 27ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 12ms
++     → expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 2ms
++     → expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
++AssertionError: expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
++Received: "/api/instruments?symbol=KO&lifecycle=active&limit=9"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:86:27
++     84|     });
++     85|     expect(calls).toHaveLength(1);
++     86|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++       |                           ^
++     87|   });
++     88| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
++AssertionError: expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
++Received: "/api/instruments?symbol=KO&lifecycle=active&limit=9"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:96:27
++     94|     });
++     95|     expect(calls).toHaveLength(1);
++     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++       |                           ^
++     97|   });
++     98| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 6 passed (8)
++   Start at  23:31:19
++   Duration  879ms (transform 31ms, setup 35ms, collect 60ms, tests 27ms, environment 172ms, prepare 157ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_lifecycle-retired.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_lifecycle-retired.log
+new file mode 100644
+index 00000000..b9d1d5ca
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_lifecycle-retired.log
+@@ -0,0 +1,48 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w2/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 2 failed) 27ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 12ms
++     → expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 2ms
++     → expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
++AssertionError: expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
++Received: "/api/instruments?symbol=KO&lifecycle=retired&limit=8"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:86:27
++     84|     });
++     85|     expect(calls).toHaveLength(1);
++     86|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++       |                           ^
++     87|   });
++     88| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
++AssertionError: expected '/api/instruments?symbol=KO&lifecycle=…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
++Received: "/api/instruments?symbol=KO&lifecycle=retired&limit=8"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:96:27
++     94|     });
++     95|     expect(calls).toHaveLength(1);
++     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++       |                           ^
++     97|   });
++     98| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 6 passed (8)
++   Start at  23:31:19
++   Duration  877ms (transform 33ms, setup 35ms, collect 60ms, tests 27ms, environment 170ms, prepare 120ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_more-inverted.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_more-inverted.log
+new file mode 100644
+index 00000000..022b9ed5
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_more-inverted.log
+@@ -0,0 +1,95 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w2/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 3 failed) 41ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 9ms
++     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 3ms
++     → expected { kind: 'ok', symbols: [ 'KO' ], …(1) } to deeply equal { kind: 'ok', symbols: [ 'KO' ], …(1) }
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) reports more rows when the page has a next cursor 2ms
++     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
++AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "kind": "ok",
++-   "more": false,
+++   "more": true,
++    "symbols": Array [
++      "KO",
++      "KOF",
++    ],
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:116:28
++    114| 
++    115|     await settle(calls[1] as { reply: Deferred }, page(["KO", "KOF"]));
++    116|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
++       |                            ^
++    117|     await settle(calls[0] as { reply: Deferred }, page(["KXX"]));
++    118|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
++AssertionError: expected { kind: 'ok', symbols: [ 'KO' ], …(1) } to deeply equal { kind: 'ok', symbols: [ 'KO' ], …(1) }
++
++- Expected
+++ Received
++
++  Object {
++    "kind": "ok",
++-   "more": false,
+++   "more": true,
++    "symbols": Array [
++      "KO",
++    ],
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:137:28
++    135|     });
++    136|     await settle(calls[1] as { reply: Deferred }, page(["KO"]));
++    137|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO"], more…
++       |                            ^
++    138|   });
++    139| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) reports more rows when the page has a next cursor
++AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'ok', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "kind": "ok",
++-   "more": true,
+++   "more": false,
++    "symbols": Array [
++      "KA",
++      "KB",
++    ],
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:147:28
++    145|     });
++    146|     await settle(calls[0] as { reply: Deferred }, page(["KA", "KB"], "…
++    147|     expect(result.current).toEqual({ kind: "ok", symbols: ["KA", "KB"]…
++       |                            ^
++    148|   });
++    149| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 5 passed (8)
++   Start at  23:31:21
++   Duration  838ms (transform 34ms, setup 34ms, collect 60ms, tests 41ms, environment 248ms, prepare 199ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-abort-in-cleanup.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-abort-in-cleanup.log
+new file mode 100644
+index 00000000..b8f7c105
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-abort-in-cleanup.log
+@@ -0,0 +1,99 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w2/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 4 failed) 27ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 5ms
++     → expected false to be true // Object.is equality
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 3ms
++     → expected { kind: 'error', …(1) } to deeply equal { kind: 'loading' }
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more 2ms
++     → expected false to be true // Object.is equality
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) unmounting aborts the request in flight 1ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:108:60
++    106|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(false);
++    107|     rerender({ text: "KO" });
++    108|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++       |                                                            ^
++    109|     act(() => {
++    110|       vi.advanceTimersByTime(250);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
++AssertionError: expected { kind: 'error', …(1) } to deeply equal { kind: 'loading' }
++
++- Expected
+++ Received
++
++  Object {
++-   "kind": "loading",
+++   "error": [ApiUnreachableError: GET /api/instruments?symbol=K&lifecycle=active&limit=8 could not be reached],
+++   "kind": "error",
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:132:28
++    130|       await vi.advanceTimersByTimeAsync(0);
++    131|     });
++    132|     expect(result.current).toEqual({ kind: "loading" });
++       |                            ^
++    133|     act(() => {
++    134|       vi.advanceTimersByTime(250);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:158:60
++    156|     expect(calls).toHaveLength(1);
++    157|     rerender({ text: "" });
++    158|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++       |                                                            ^
++    159|     expect(result.current).toEqual({ kind: "idle" });
++    160|     act(() => {
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) unmounting aborts the request in flight
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:179:60
++    177|     });
++    178|     unmount();
++    179|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++       |                                                            ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 4 passed (8)
++   Start at  23:31:20
++   Duration  812ms (transform 35ms, setup 34ms, collect 56ms, tests 27ms, environment 212ms, prepare 178ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-clear-timeout.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-clear-timeout.log
+new file mode 100644
+index 00000000..7a65c158
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-clear-timeout.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w3/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 28ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 13ms
++     → expected [ { …(3) } ] to have a length of +0 but got 1
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
++AssertionError: expected [ { …(3) } ] to have a length of +0 but got 1
++
++- Expected
+++ Received
++
++- 0
+++ 1
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:80:19
++     78|       vi.advanceTimersByTime(249);
++     79|     });
++     80|     expect(calls).toHaveLength(0);
++       |                   ^
++     81|     expect(result.current).toEqual({ kind: "loading" });
++     82|     act(() => {
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 7 passed (8)
++   Start at  23:31:20
++   Duration  891ms (transform 35ms, setup 31ms, collect 63ms, tests 28ms, environment 175ms, prepare 29ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-loading.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-loading.log
+new file mode 100644
+index 00000000..7d71c6cc
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-loading.log
+@@ -0,0 +1,58 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w0/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 2 failed) 35ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 12ms
++     → expected { kind: 'idle' } to deeply equal { kind: 'loading' }
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 2ms
++     → expected { kind: 'idle' } to deeply equal { kind: 'loading' }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
++AssertionError: expected { kind: 'idle' } to deeply equal { kind: 'loading' }
++
++- Expected
+++ Received
++
++  Object {
++-   "kind": "loading",
+++   "kind": "idle",
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:81:28
++     79|     });
++     80|     expect(calls).toHaveLength(0);
++     81|     expect(result.current).toEqual({ kind: "loading" });
++       |                            ^
++     82|     act(() => {
++     83|       vi.advanceTimersByTime(1);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
++AssertionError: expected { kind: 'idle' } to deeply equal { kind: 'loading' }
++
++- Expected
+++ Received
++
++  Object {
++-   "kind": "loading",
+++   "kind": "idle",
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:132:28
++    130|       await vi.advanceTimersByTimeAsync(0);
++    131|     });
++    132|     expect(result.current).toEqual({ kind: "loading" });
++       |                            ^
++    133|     act(() => {
++    134|       vi.advanceTimersByTime(250);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 6 passed (8)
++   Start at  23:31:21
++   Duration  836ms (transform 33ms, setup 35ms, collect 57ms, tests 35ms, environment 232ms, prepare 26ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-signal.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-signal.log
+new file mode 100644
+index 00000000..60bd8492
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-signal.log
+@@ -0,0 +1,54 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w3/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 3 failed) 26ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 3ms
++     → Cannot read properties of undefined (reading 'aborted')
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more 2ms
++     → Cannot read properties of undefined (reading 'aborted')
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) unmounting aborts the request in flight 1ms
++     → Cannot read properties of undefined (reading 'aborted')
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
++TypeError: Cannot read properties of undefined (reading 'aborted')
++ ❯ src/app/command-palette/use-stock-search.test.ts:106:51
++    104|     });
++    105|     expect(calls).toHaveLength(1);
++    106|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(false);
++       |                                                   ^
++    107|     rerender({ text: "KO" });
++    108|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more
++TypeError: Cannot read properties of undefined (reading 'aborted')
++ ❯ src/app/command-palette/use-stock-search.test.ts:158:51
++    156|     expect(calls).toHaveLength(1);
++    157|     rerender({ text: "" });
++    158|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++       |                                                   ^
++    159|     expect(result.current).toEqual({ kind: "idle" });
++    160|     act(() => {
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) unmounting aborts the request in flight
++TypeError: Cannot read properties of undefined (reading 'aborted')
++ ❯ src/app/command-palette/use-stock-search.test.ts:179:51
++    177|     });
++    178|     unmount();
++    179|     expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++       |                                                   ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 5 passed (8)
++   Start at  23:31:19
++   Duration  878ms (transform 33ms, setup 34ms, collect 60ms, tests 26ms, environment 175ms, prepare 101ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-trim.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-trim.log
+new file mode 100644
+index 00000000..5b6b27ef
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-trim.log
+@@ -0,0 +1,53 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w0/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 2 failed) 34ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 5ms
++     → expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more 3ms
++     → expected { kind: 'loading' } to deeply equal { kind: 'idle' }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
++AssertionError: expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
++Received: "/api/instruments?symbol=++KO+&lifecycle=active&limit=8"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:96:27
++     94|     });
++     95|     expect(calls).toHaveLength(1);
++     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++       |                           ^
++     97|   });
++     98| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more
++AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'idle' }
++
++- Expected
+++ Received
++
++  Object {
++-   "kind": "idle",
+++   "kind": "loading",
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:165:28
++    163|     expect(calls).toHaveLength(1);
++    164|     rerender({ text: "   " });
++    165|     expect(result.current).toEqual({ kind: "idle" });
++       |                            ^
++    166|     act(() => {
++    167|       vi.advanceTimersByTime(1000);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 6 passed (8)
++   Start at  23:31:20
++   Duration  862ms (transform 34ms, setup 30ms, collect 53ms, tests 34ms, environment 173ms, prepare 33ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-error-guard.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-error-guard.log
+new file mode 100644
+index 00000000..10d7020e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-error-guard.log
+@@ -0,0 +1,36 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w1/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 32ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error 7ms
++     → expected { kind: 'error', …(1) } to deeply equal { kind: 'loading' }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) an aborted request rejecting never becomes an error
++AssertionError: expected { kind: 'error', …(1) } to deeply equal { kind: 'loading' }
++
++- Expected
+++ Received
++
++  Object {
++-   "kind": "loading",
+++   "error": [ApiUnreachableError: GET /api/instruments?symbol=K&lifecycle=active&limit=8 could not be reached],
+++   "kind": "error",
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:132:28
++    130|       await vi.advanceTimersByTimeAsync(0);
++    131|     });
++    132|     expect(result.current).toEqual({ kind: "loading" });
++       |                            ^
++    133|     act(() => {
++    134|       vi.advanceTimersByTime(250);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 7 passed (8)
++   Start at  23:31:21
++   Duration  601ms (transform 35ms, setup 32ms, collect 59ms, tests 32ms, environment 243ms, prepare 30ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-ok-guard.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-ok-guard.log
+new file mode 100644
+index 00000000..f43a1739
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-ok-guard.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w1/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 26ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 7ms
++     → expected { Object (kind, symbols, ...) } to deeply equal { kind: 'ok', …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
++AssertionError: expected { Object (kind, symbols, ...) } to deeply equal { kind: 'ok', …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "kind": "ok",
++    "more": false,
++    "symbols": Array [
++-     "KO",
++-     "KOF",
+++     "KXX",
++    ],
++  }
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:118:28
++    116|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
++    117|     await settle(calls[0] as { reply: Deferred }, page(["KXX"]));
++    118|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
++       |                            ^
++    119|   });
++    120| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 7 passed (8)
++   Start at  23:31:20
++   Duration  826ms (transform 34ms, setup 34ms, collect 53ms, tests 26ms, environment 196ms, prepare 66ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_symbol-param.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_symbol-param.log
+new file mode 100644
+index 00000000..687dd10f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_symbol-param.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w3/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 23ms
++   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 5ms
++     → expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
++AssertionError: expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
++
++Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
++Received: "/api/instruments?symbol=++KO+&lifecycle=active&limit=8"
++
++ ❯ src/app/command-palette/use-stock-search.test.ts:96:27
++     94|     });
++     95|     expect(calls).toHaveLength(1);
++     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
++       |                           ^
++     97|   });
++     98| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 7 passed (8)
++   Start at  23:31:22
++   Duration  476ms (transform 31ms, setup 45ms, collect 66ms, tests 23ms, environment 168ms, prepare 27ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results.json
+new file mode 100644
+index 00000000..5cd74d52
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results.json
+@@ -0,0 +1,214 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/command-palette/use-stock-search.test.ts && npx tsc --noEmit",
++  "repo_head": "c2efe62967f0c67483b12d4f146165e94ba42723",
++  "tree_patch_sha256": "1df02b9b7b3b6820bb14bea43a66aba54a0279036e2c9b37d4249d51c066974b",
++  "mutants_sha256": "d0fa57e140f7ba28207cd026141ae63022c3d219bb3961343bc7ec96f6c9486c",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-2.json",
++  "jobs": 4,
++  "planned": 12,
++  "started": "2026-11-21T05:31:13Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 5.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w3.log",
++      "log_sha256": "26ae82bef2623ae326c277d38f6c22b27454c12310ac702ff8a6f8283b6c63c7"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 5.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w0.log",
++      "log_sha256": "089de6ec8fdba5864d13b2a330f7313d2efc3b9b3385fce12ad348748c081357"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 5.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w1.log",
++      "log_sha256": "60996f2f404eeadc5f17f11daf327a10feb5bb9d41cfa77bd7900d7cb6248f32"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 5.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/baseline-w2.log",
++      "log_sha256": "35282cf0d08093597d381857d085e08d6852661e3346b83192aad9ce9e45eb7d"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:4:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "line": 4,
++      "original": "export const STOCK_SEARCH_DEBOUNCE_MS = 250;",
++      "mutated": "export const STOCK_SEARCH_DEBOUNCE_MS = 251;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_4_off-by-one_1.log",
++      "log_sha256": "d4207896dc4e0ee3484f48fe8b27f57b4864096cac5b1ed57f1ae4053ea6a4bc"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:5:off-by-one:1",
++      "cycle": "cycle-2",
++      "operator": "off-by-one",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "line": 5,
++      "original": "export const STOCK_SEARCH_LIMIT = 8;",
++      "mutated": "export const STOCK_SEARCH_LIMIT = 9;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_5_off-by-one_1.log",
++      "log_sha256": "9a38e515d1a3ad78dd18f68421dd47be8b0ee0f97ad4807bfc4b4926e28c374f"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:lifecycle-retired",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "lifecycle: \"active\"",
++      "new": "lifecycle: \"retired\"",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_lifecycle-retired.log",
++      "log_sha256": "e26b6416d1750706fc288ed52b87d605d94b6e5718d475a800699f28dbe9e258"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-signal",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "{ signal: controller.signal },",
++      "new": "{},",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-signal.log",
++      "log_sha256": "f5c2cb1bef0c42eb750c24dc8b60bffb8b598b043809eaf377f83f0531f93266"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-abort-in-cleanup",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "      clearTimeout(timer);\n      controller.abort();\n",
++      "new": "      clearTimeout(timer);\n",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-abort-in-cleanup.log",
++      "log_sha256": "861714d43304ef11cc4ca349609126296e2676a995696b117cae0c4a1e5b9916"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-clear-timeout",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "      clearTimeout(timer);\n      controller.abort();\n",
++      "new": "      controller.abort();\n",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-clear-timeout.log",
++      "log_sha256": "d01f38e16861769a54f5f0dd3dce8ee916549068ad76d4d119bd26263f9e4515"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-trim",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "const prefix = text.trim();",
++      "new": "const prefix = text;",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-trim.log",
++      "log_sha256": "1fccd28ac80ac9df514a9ab664079d1d669279e36514518f19c3cfe8cc3d2dee"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:stale-ok-guard",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "          if (controller.signal.aborted) return;\n          setState({\n            kind: \"ok\"",
++      "new": "          setState({\n            kind: \"ok\"",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-ok-guard.log",
++      "log_sha256": "bf2c2948a9bd3de6da21ff0d2f10531021ee48c6bc7c0b751efa74bc155875f9"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:stale-error-guard",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "          if (controller.signal.aborted) return;\n          setState({ kind: \"error\", error });",
++      "new": "          setState({ kind: \"error\", error });",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_stale-error-guard.log",
++      "log_sha256": "1a714aa937b7201877d858a0bfce9f7f0c62bb922f9814e12fe47d612360b861"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:more-inverted",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "more: body.next_cursor !== null",
++      "new": "more: body.next_cursor === null",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_more-inverted.log",
++      "log_sha256": "ed1015119557683ab045e56306a108d252c6419f3166776d6c66ceb4c2a7f11e"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-loading",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "    setState({ kind: \"loading\" });\n",
++      "new": "",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_no-loading.log",
++      "log_sha256": "bb78e89d2071b87210e285c23a84482576762b8df88d5c433bbf926179e351f4"
++    },
++    {
++      "id": "web/src/app/command-palette/use-stock-search.ts:manual:symbol-param",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/use-stock-search.ts",
++      "old": "symbol: prefix,",
++      "new": "symbol: text,",
++      "cycle": "cycle-2",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results-logs/web_src_app_command-palette_use-stock-search.ts_manual_symbol-param.log",
++      "log_sha256": "68339bdfcc52274ffac6aac4a8ff7530c38a6e0a0eb2fd506f486cf1092bd785"
++    }
++  ],
++  "finished": "2026-11-21T05:31:22Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-2-stock-search.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-2-stock-search.log
+new file mode 100644
+index 00000000..5257c872
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-2-stock-search.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/app/command-palette/use-stock-search.test.ts (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/use-stock-search.test.ts [ src/app/command-palette/use-stock-search.test.ts ]
++Error: Failed to resolve import "./use-stock-search" from "web/src/app/command-palette/use-stock-search.test.ts". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/command-palette/use-stock-search.test.ts:4:31
++  2  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++  3  |  import { ApiError, ApiUnreachableError } from "../../api/client";
++  4  |  import { useStockSearch } from "./use-stock-search";
++     |                                  ^
++  5  |  function deferred() {
++  6  |    let resolve;
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  23:30:16
++   Duration  829ms (transform 18ms, setup 73ms, collect 0ms, tests 0ms, environment 327ms, prepare 208ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md
+index f4a78778..a23d25ee 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md
+@@ -132,7 +132,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
+   - negate-boolean on the `next_cursor !== null` test: (d) both halves.
+   - swap-case of the two reasons in `failureReason`: (e) and (g).
+   - a hand-written mutant that renders `CommandEmpty` while the search is loading: (b).
+-- [ ] T003 [P] Implement TC-COMP-081 (Stock search debounces 250 ms and aborts the stale request) in the new `web/src/app/command-palette/use-stock-search.test.ts`, with a `// Implements TC-COMP-081` comment.
++- [x] T003 [P] Implement TC-COMP-081 (Stock search debounces 250 ms and aborts the stale request) in the new `web/src/app/command-palette/use-stock-search.test.ts`, with a `// Implements TC-COMP-081` comment.
+   - **Harness.** `vi.useFakeTimers()`. `renderHook(({ text }) => useStockSearch(text), { initialProps: { text: "" } })`. `fetch` is `vi.fn` returning per-call `deferred()` promises, and every call's `[url, init]` is recorded.
+   - (a) **Debounce and query.** Rerender `K`. After `advanceTimersByTime(100)`, rerender `KO`. After `advanceTimersByTime(249)`, `fetch` has 0 calls and `result.current` `toEqual({ kind: "loading" })`. After `advanceTimersByTime(1)`, `fetch` has exactly 1 call, and its URL is exactly the literal `"/api/instruments?symbol=KO&lifecycle=active&limit=8"`.
+   - (b) **Abort in flight.** Rerender `K` and `advanceTimersByTime(250)`: call 1 is in flight, and `calls[0][1].signal.aborted` is `false`. Rerender `KO` **without** advancing: `calls[0][1].signal.aborted` is `true` at once. `advanceTimersByTime(250)` makes call 2, with `symbol=KO`.
+@@ -279,7 +279,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
+     - No `limit` is sent: the request is the one DAC-E3-11 names (Open Gap 4).
+ 
+   These make T009 pass.
+-- [ ] T011 Create `web/src/app/command-palette/use-stock-search.ts`. It depends on T003 being RED. (DAC-E3-S5-1; command-palette §5; epic NFR *Performance*; Resolved Conflict 1.)
++- [x] T011 Create `web/src/app/command-palette/use-stock-search.ts`. It depends on T003 being RED. (DAC-E3-S5-1; command-palette §5; epic NFR *Performance*; Resolved Conflict 1.)
+   - `export const STOCK_SEARCH_DEBOUNCE_MS = 250` and `export const STOCK_SEARCH_LIMIT = 8`.
+   - `export type StockSearchState = { kind: "idle" } | { kind: "loading" } | { kind: "ok"; symbols: readonly string[]; more: boolean } | { kind: "error"; error: unknown }`.
+   - `export function useStockSearch(text: string): StockSearchState` keeps the state in `useState`, with one `useEffect` keyed on `text`:
+diff --git a/web/src/app/command-palette/use-stock-search.test.ts b/web/src/app/command-palette/use-stock-search.test.ts
+new file mode 100644
+index 00000000..adc24e91
+--- /dev/null
++++ b/web/src/app/command-palette/use-stock-search.test.ts
+@@ -0,0 +1,214 @@
++import { act, renderHook } from "@testing-library/react";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError } from "../../api/client";
++import { useStockSearch } from "./use-stock-search";
++
++interface Deferred {
++  promise: Promise<Response>;
++  resolve: (response: Response) => void;
++  reject: (reason: unknown) => void;
++}
++
++function deferred(): Deferred {
++  let resolve!: (response: Response) => void;
++  let reject!: (reason: unknown) => void;
++  const promise = new Promise<Response>((res, rej) => {
++    resolve = res;
++    reject = rej;
++  });
++  return { promise, resolve, reject };
++}
++
++function page(symbols: string[], nextCursor: string | null = null): Response {
++  return new Response(
++    JSON.stringify({
++      instruments: symbols.map((symbol, i) => ({
++        instrument_id: i + 1,
++        symbol,
++        lifecycle: "active",
++      })),
++      active_count: symbols.length,
++      retired_count: 0,
++      next_cursor: nextCursor,
++    }),
++    { status: 200, headers: { "Content-Type": "application/json" } },
++  );
++}
++
++let calls: { url: string; init: RequestInit; reply: Deferred }[];
++
++beforeEach(() => {
++  vi.useFakeTimers();
++  calls = [];
++  vi.stubGlobal(
++    "fetch",
++    vi.fn((url: string, init: RequestInit) => {
++      const reply = deferred();
++      calls.push({ url, init, reply });
++      return reply.promise;
++    }),
++  );
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++function mount() {
++  return renderHook(({ text }) => useStockSearch(text), { initialProps: { text: "" } });
++}
++
++async function settle(call: { reply: Deferred }, response: Response) {
++  await act(async () => {
++    call.reply.resolve(response);
++    await vi.advanceTimersByTimeAsync(0);
++  });
++}
++
++// Implements TC-COMP-081
++describe("stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11)", () => {
++  it("(a) sends one request for the settled text, 250 ms after the last keystroke", () => {
++    const { result, rerender } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(100);
++    });
++    rerender({ text: "KO" });
++    act(() => {
++      vi.advanceTimersByTime(249);
++    });
++    expect(calls).toHaveLength(0);
++    expect(result.current).toEqual({ kind: "loading" });
++    act(() => {
++      vi.advanceTimersByTime(1);
++    });
++    expect(calls).toHaveLength(1);
++    expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=active&limit=8");
++  });
++
++  it("(a) sends the trimmed text, not what was typed around it", () => {
++    const { rerender } = mount();
++    rerender({ text: "  KO " });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    expect(calls).toHaveLength(1);
++    expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=active&limit=8");
++  });
++
++  it("(b) aborts the request in flight at once and never lets a stale answer overwrite", async () => {
++    const { result, rerender } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    expect(calls).toHaveLength(1);
++    expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(false);
++    rerender({ text: "KO" });
++    expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    expect(calls).toHaveLength(2);
++    expect(calls[1]?.url).toContain("symbol=KO&");
++
++    await settle(calls[1] as { reply: Deferred }, page(["KO", "KOF"]));
++    expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"], more: false });
++    await settle(calls[0] as { reply: Deferred }, page(["KXX"]));
++    expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"], more: false });
++  });
++
++  it("(b) an aborted request rejecting never becomes an error", async () => {
++    const { result, rerender } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    rerender({ text: "KO" });
++    await act(async () => {
++      calls[0]?.reply.reject(new DOMException("aborted", "AbortError"));
++      await vi.advanceTimersByTimeAsync(0);
++    });
++    expect(result.current).toEqual({ kind: "loading" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    await settle(calls[1] as { reply: Deferred }, page(["KO"]));
++    expect(result.current).toEqual({ kind: "ok", symbols: ["KO"], more: false });
++  });
++
++  it("(b) reports more rows when the page has a next cursor", async () => {
++    const { result, rerender } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    await settle(calls[0] as { reply: Deferred }, page(["KA", "KB"], "KB"));
++    expect(result.current).toEqual({ kind: "ok", symbols: ["KA", "KB"], more: true });
++  });
++
++  it("(c) clearing the text aborts, goes idle and sends nothing more", () => {
++    const { result, rerender } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    expect(calls).toHaveLength(1);
++    rerender({ text: "" });
++    expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++    expect(result.current).toEqual({ kind: "idle" });
++    act(() => {
++      vi.advanceTimersByTime(1000);
++    });
++    expect(calls).toHaveLength(1);
++    rerender({ text: "   " });
++    expect(result.current).toEqual({ kind: "idle" });
++    act(() => {
++      vi.advanceTimersByTime(1000);
++    });
++    expect(calls).toHaveLength(1);
++  });
++
++  it("(c) unmounting aborts the request in flight", () => {
++    const { rerender, unmount } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    unmount();
++    expect((calls[0]?.init.signal as AbortSignal).aborted).toBe(true);
++  });
++
++  it("(d) an unreachable API and an error envelope both end as error, keeping the error", async () => {
++    const { result, rerender } = mount();
++    rerender({ text: "K" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    await act(async () => {
++      calls[0]?.reply.reject(new TypeError("Failed to fetch"));
++      await vi.advanceTimersByTimeAsync(0);
++    });
++    expect(result.current.kind).toBe("error");
++    if (result.current.kind === "error") {
++      expect(result.current.error).toBeInstanceOf(ApiUnreachableError);
++    }
++
++    rerender({ text: "KO" });
++    act(() => {
++      vi.advanceTimersByTime(250);
++    });
++    await settle(
++      calls[1] as { reply: Deferred },
++      new Response(JSON.stringify({ error: { code: "internal_error", request_id: "req-1" } }), {
++        status: 500,
++        headers: { "Content-Type": "application/json" },
++      }),
++    );
++    expect(result.current.kind).toBe("error");
++    if (result.current.kind === "error") {
++      expect(result.current.error).toBeInstanceOf(ApiError);
++      expect((result.current.error as ApiError).code).toBe("internal_error");
++    }
++  });
++});
+diff --git a/web/src/app/command-palette/use-stock-search.ts b/web/src/app/command-palette/use-stock-search.ts
+new file mode 100644
+index 00000000..aae18eba
+--- /dev/null
++++ b/web/src/app/command-palette/use-stock-search.ts
+@@ -0,0 +1,66 @@
++import { useEffect, useState } from "react";
++import { requestJson } from "../../api/client";
++
++export const STOCK_SEARCH_DEBOUNCE_MS = 250;
++export const STOCK_SEARCH_LIMIT = 8;
++
++export type StockSearchState =
++  | { kind: "idle" }
++  | { kind: "loading" }
++  | { kind: "ok"; symbols: readonly string[]; more: boolean }
++  | { kind: "error"; error: unknown };
++
++/**
++ * The palette's stock search (DAC-E3-S5-1, DAC-E3-11; command-palette 5): one
++ * `GET /api/instruments` for the text that has settled, with a request still in
++ * flight aborted the moment the text changes, clears or the palette closes, so
++ * a stale answer never overwrites a newer one.
++ *
++ * It calls `requestJson` rather than the delivered `listInstruments`, because
++ * `listInstruments` forwards no `signal` and so cannot be aborted (Resolved
++ * Conflict 1). The request is byte-identical to the one it sends.
++ */
++export function useStockSearch(text: string): StockSearchState {
++  const [state, setState] = useState<StockSearchState>({ kind: "idle" });
++
++  useEffect(() => {
++    const prefix = text.trim();
++    if (prefix === "") {
++      setState({ kind: "idle" });
++      return;
++    }
++    setState({ kind: "loading" });
++    const controller = new AbortController();
++    const timer = setTimeout(() => {
++      const query = new URLSearchParams({
++        symbol: prefix,
++        lifecycle: "active",
++        limit: String(STOCK_SEARCH_LIMIT),
++      });
++      requestJson<{ instruments: { symbol: string }[]; next_cursor: string | null }>(
++        `/api/instruments?${query}`,
++        { signal: controller.signal },
++      )
++        .then((body) => {
++          if (controller.signal.aborted) return;
++          setState({
++            kind: "ok",
++            symbols: body.instruments.map((row) => row.symbol),
++            more: body.next_cursor !== null,
++          });
++        })
++        .catch((error: unknown) => {
++          // An aborted request reaches here as ApiUnreachableError, because
++          // requestJson wraps every transport rejection.
++          if (controller.signal.aborted) return;
++          setState({ kind: "error", error });
++        });
++    }, STOCK_SEARCH_DEBOUNCE_MS);
++    return () => {
++      clearTimeout(timer);
++      controller.abort();
++    };
++  }, [text]);
++
++  return state;
++}

@@ -1,0 +1,1562 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-1-copy-targets-pages.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-1-copy-targets-pages.log
+new file mode 100644
+index 00000000..3d17a227
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/green-cycle-1-copy-targets-pages.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/app/command-palette/command-palette.test.tsx (4 tests) 2ms
++
++ Test Files  1 passed (1)
++      Tests  4 passed (4)
++   Start at  23:27:21
++   Duration  370ms (transform 33ms, setup 28ms, collect 28ms, tests 2ms, environment 144ms, prepare 24ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-1.json
+new file mode 100644
+index 00000000..004245ea
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-1.json
+@@ -0,0 +1,158 @@
++{
++ "schema": 1,
++ "repo_head": "34a300daded1bbc732552b73e4d9da2f99f97197",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/command-palette/pages.ts:18:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 18,
++   "original": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),",
++   "mutated": "    ...DESTINATIONS.map((d) => ({ label: nil, to: d.to, hint: null })),"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:18:drop-field-copy:2",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 18,
++   "original": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),",
++   "mutated": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: nil, hint: null })),"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:19:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 19,
++   "original": "    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },",
++   "mutated": "    { label: nil, to: \"/data/coverage\", hint: coverage.hint },"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:20:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 20,
++   "original": "    { label: followed.label, to: \"/data/followed\", hint: followed.hint },",
++   "mutated": "    { label: nil, to: \"/data/followed\", hint: followed.hint },"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:21:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 21,
++   "original": "    { label: downloads.label, to: \"/data/downloads\", hint: downloads.hint },",
++   "mutated": "    { label: nil, to: \"/data/downloads\", hint: downloads.hint },"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:31:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 31,
++   "original": "  if (needle === \"\") return true;",
++   "mutated": "  if (needle === \"\") return false;"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:32:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/command-palette/pages.ts",
++   "line": 32,
++   "original": "  return fields.some((field) => field?.toLowerCase().includes(needle) === true);",
++   "mutated": "  return fields.some((field) => field?.toLowerCase().includes(needle) === false);"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:manual:subpage-order",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/pages.ts",
++   "old": "    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },\n    { label: followed.label, to: \"/data/followed\", hint: followed.hint },\n",
++   "new": "    { label: followed.label, to: \"/data/followed\", hint: followed.hint },\n    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },\n",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:manual:startswith",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/pages.ts",
++   "old": ".includes(needle)",
++   "new": ".startsWith(needle)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/pages.ts:manual:no-trim",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/pages.ts",
++   "old": "text.trim().toLowerCase()",
++   "new": "text.toLowerCase()",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/targets.ts:manual:no-encode-stock",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/targets.ts",
++   "old": "const encoded = encodeURIComponent(symbol);",
++   "new": "const encoded = symbol;",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/targets.ts:manual:no-encode-universe",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/targets.ts",
++   "old": "`/research/universes/${encodeURIComponent(id)}`",
++   "new": "`/research/universes/${id}`",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/targets.ts:manual:swap-stock-target",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/targets.ts",
++   "old": "RESEARCH_REGISTERED ? `/research/stocks/${encoded}` : `/data/coverage?symbol=${encoded}`",
++   "new": "RESEARCH_REGISTERED ? `/data/coverage?symbol=${encoded}` : `/research/stocks/${encoded}`",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/copy.ts:manual:reason-swap",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/copy.ts",
++   "old": "? \"FactorFlow is not answering\"\n    : \"FactorFlow hit an unexpected problem\"",
++   "new": "? \"FactorFlow hit an unexpected problem\"\n    : \"FactorFlow is not answering\"",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/copy.ts:manual:reason-message",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/copy.ts",
++   "old": "export function failureReason(error: unknown): string {\n",
++   "new": "export function failureReason(error: unknown): string {\n  if (error instanceof Error && !(error instanceof ApiUnreachableError)) return error.message;\n",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/copy.ts:manual:empty-copy",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/copy.ts",
++   "old": "`No stocks or pages match \"${text}\".`",
++   "new": "`No stocks or pages match ${text}.`",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/universes.ts:manual:universes-url",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/universes.ts",
++   "old": "\"/api/universes?lifecycle=active\"",
++   "new": "\"/api/universes?lifecycle=retired\"",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/command-palette/universes.ts:manual:universes-id",
++   "operator": "manual",
++   "file": "web/src/app/command-palette/universes.ts",
++   "old": "id: u.universe_id",
++   "new": "id: u.name",
++   "cycle": "cycle-1"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..a3d3c4e1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
++
++ ✓ src/app/command-palette/command-palette.test.tsx (5 tests) 4ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  23:28:50
++   Duration  1.05s (transform 54ms, setup 64ms, collect 61ms, tests 4ms, environment 289ms, prepare 116ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..6bfb3aa0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
++
++ ✓ src/app/command-palette/command-palette.test.tsx (5 tests) 4ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  23:28:50
++   Duration  1.04s (transform 56ms, setup 61ms, collect 63ms, tests 4ms, environment 288ms, prepare 37ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..2ddf0d22
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
++
++ ✓ src/app/command-palette/command-palette.test.tsx (5 tests) 4ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  23:28:50
++   Duration  1.05s (transform 64ms, setup 62ms, collect 66ms, tests 4ms, environment 306ms, prepare 131ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..b99cc49a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+@@ -0,0 +1,10 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w3/web
++
++ ✓ src/app/command-palette/command-palette.test.tsx (5 tests) 4ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  23:28:50
++   Duration  1.04s (transform 55ms, setup 63ms, collect 65ms, tests 4ms, environment 302ms, prepare 89ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_empty-copy.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_empty-copy.log
+new file mode 100644
+index 00000000..5678e033
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_empty-copy.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w3/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (d) words a failure without the error's own message or request id 3ms
++     → expected 'No stocks or pages match zz.' to be 'No stocks or pages match "zz".' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (d) words a failure without the error's own message or request id
++AssertionError: expected 'No stocks or pages match zz.' to be 'No stocks or pages match "zz".' // Object.is equality
++
++Expected: "No stocks or pages match "zz"."
++Received: "No stocks or pages match zz."
++
++ ❯ src/app/command-palette/command-palette.test.tsx:76:38
++     74|     expect(failureReason(apiError)).not.toContain("No resource");
++     75|     expect(failureReason(apiError)).not.toContain("req-9");
++     76|     expect(PALETTE_COPY.empty("zz")).toBe('No stocks or pages match "z…
++       |                                      ^
++     77|     expect(PALETTE_COPY.stocksError("r")).toBe("Couldn't search follow…
++     78|     expect(PALETTE_COPY.universesError("r")).toBe("Couldn't read unive…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:29:01
++   Duration  476ms (transform 53ms, setup 31ms, collect 44ms, tests 7ms, environment 187ms, prepare 39ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-message.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-message.log
+new file mode 100644
+index 00000000..caee6113
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-message.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (d) words a failure without the error's own message or request id 3ms
++     → expected 'No resource exists at this path.' to be 'FactorFlow hit an unexpected problem' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (d) words a failure without the error's own message or request id
++AssertionError: expected 'No resource exists at this path.' to be 'FactorFlow hit an unexpected problem' // Object.is equality
++
++Expected: "FactorFlow hit an unexpected problem"
++Received: "No resource exists at this path."
++
++ ❯ src/app/command-palette/command-palette.test.tsx:72:37
++     70|       code: "not_found",
++     71|     });
++     72|     expect(failureReason(apiError)).toBe("FactorFlow hit an unexpected…
++       |                                     ^
++     73|     expect(failureReason(new Error("boom"))).toBe("FactorFlow hit an u…
++     74|     expect(failureReason(apiError)).not.toContain("No resource");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:29:01
++   Duration  763ms (transform 52ms, setup 39ms, collect 59ms, tests 7ms, environment 308ms, prepare 131ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-swap.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-swap.log
+new file mode 100644
+index 00000000..d35fdab4
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-swap.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
++   × pages, targets and reasons > (d) words a failure without the error's own message or request id 3ms
++     → expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (d) words a failure without the error's own message or request id
++AssertionError: expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
++
++Expected: "FactorFlow is not answering"
++Received: "FactorFlow hit an unexpected problem"
++
++ ❯ src/app/command-palette/command-palette.test.tsx:68:57
++     66| 
++     67|   it("(d) words a failure without the error's own message or request i…
++     68|     expect(failureReason(new ApiUnreachableError("x"))).toBe("FactorFl…
++       |                                                         ^
++     69|     const apiError = new ApiError("No resource exists at this path.", …
++     70|       code: "not_found",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:29:01
++   Duration  823ms (transform 50ms, setup 36ms, collect 47ms, tests 8ms, environment 282ms, prepare 279ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_1.log
+new file mode 100644
+index 00000000..d0a74d4f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_1.log
+@@ -0,0 +1,28 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 6ms
++   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 2ms
++     → nil is not defined
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
++ReferenceError: nil is not defined
++ ❯ src/app/command-palette/pages.ts:18:42
++     16|   const { coverage, followed, downloads } = PALETTE_COPY.dataPages;
++     17|   return [
++     18|     ...DESTINATIONS.map((d) => ({ label: nil, to: d.to, hint: null })),
++       |                                          ^
++     19|     { label: coverage.label, to: "/data/coverage", hint: coverage.hint…
++     20|     { label: followed.label, to: "/data/followed", hint: followed.hint…
++ ❯ Module.palettePages src/app/command-palette/pages.ts:18:21
++ ❯ src/app/command-palette/command-palette.test.tsx:32:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:57
++   Duration  853ms (transform 49ms, setup 38ms, collect 55ms, tests 6ms, environment 188ms, prepare 189ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_2.log
+new file mode 100644
+index 00000000..9d22e3a1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_2.log
+@@ -0,0 +1,28 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 6ms
++   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 3ms
++     → nil is not defined
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
++ReferenceError: nil is not defined
++ ❯ src/app/command-palette/pages.ts:18:55
++     16|   const { coverage, followed, downloads } = PALETTE_COPY.dataPages;
++     17|   return [
++     18|     ...DESTINATIONS.map((d) => ({ label: d.label, to: nil, hint: null …
++       |                                                       ^
++     19|     { label: coverage.label, to: "/data/coverage", hint: coverage.hint…
++     20|     { label: followed.label, to: "/data/followed", hint: followed.hint…
++ ❯ Module.palettePages src/app/command-palette/pages.ts:18:21
++ ❯ src/app/command-palette/command-palette.test.tsx:32:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:57
++   Duration  850ms (transform 51ms, setup 39ms, collect 56ms, tests 6ms, environment 186ms, prepare 96ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_19_drop-field-copy_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_19_drop-field-copy_1.log
+new file mode 100644
+index 00000000..b967564f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_19_drop-field-copy_1.log
+@@ -0,0 +1,27 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 6ms
++   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 3ms
++     → nil is not defined
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
++ReferenceError: nil is not defined
++ ❯ Module.palettePages src/app/command-palette/pages.ts:19:14
++     17|   return [
++     18|     ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null…
++     19|     { label: nil, to: "/data/coverage", hint: coverage.hint },
++       |              ^
++     20|     { label: followed.label, to: "/data/followed", hint: followed.hint…
++     21|     { label: downloads.label, to: "/data/downloads", hint: downloads.h…
++ ❯ src/app/command-palette/command-palette.test.tsx:32:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:57
++   Duration  850ms (transform 45ms, setup 38ms, collect 53ms, tests 6ms, environment 182ms, prepare 291ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_20_drop-field-copy_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_20_drop-field-copy_1.log
+new file mode 100644
+index 00000000..28c4d130
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_20_drop-field-copy_1.log
+@@ -0,0 +1,27 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w3/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 6ms
++   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 3ms
++     → nil is not defined
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
++ReferenceError: nil is not defined
++ ❯ Module.palettePages src/app/command-palette/pages.ts:20:14
++     18|     ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null…
++     19|     { label: coverage.label, to: "/data/coverage", hint: coverage.hint…
++     20|     { label: nil, to: "/data/followed", hint: followed.hint },
++       |              ^
++     21|     { label: downloads.label, to: "/data/downloads", hint: downloads.h…
++     22|   ];
++ ❯ src/app/command-palette/command-palette.test.tsx:32:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:57
++   Duration  853ms (transform 53ms, setup 41ms, collect 54ms, tests 6ms, environment 185ms, prepare 194ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_21_drop-field-copy_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_21_drop-field-copy_1.log
+new file mode 100644
+index 00000000..8b6927be
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_21_drop-field-copy_1.log
+@@ -0,0 +1,27 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 3ms
++     → nil is not defined
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
++ReferenceError: nil is not defined
++ ❯ Module.palettePages src/app/command-palette/pages.ts:21:14
++     19|     { label: coverage.label, to: "/data/coverage", hint: coverage.hint…
++     20|     { label: followed.label, to: "/data/followed", hint: followed.hint…
++     21|     { label: nil, to: "/data/downloads", hint: downloads.hint },
++       |              ^
++     22|   ];
++     23| }
++ ❯ src/app/command-palette/command-palette.test.tsx:32:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:58
++   Duration  848ms (transform 50ms, setup 39ms, collect 54ms, tests 7ms, environment 195ms, prepare 106ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_31_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_31_negate-boolean_1.log
+new file mode 100644
+index 00000000..e9315120
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_31_negate-boolean_1.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w3/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces 3ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/command-palette.test.tsx:49:41
++     47| 
++     48|   it("(b) matches a substring of any field, ignoring case and surround…
++     49|     expect(matchesText("", "Settings")).toBe(true);
++       |                                         ^
++     50|     expect(matchesText("SET", "Settings")).toBe(true);
++     51|     expect(matchesText("  set ", "Settings")).toBe(true);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:58
++   Duration  877ms (transform 50ms, setup 37ms, collect 46ms, tests 7ms, environment 191ms, prepare 178ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_32_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_32_negate-boolean_1.log
+new file mode 100644
+index 00000000..cddec2ce
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_32_negate-boolean_1.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 9ms
++   × pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces 3ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/command-palette.test.tsx:50:44
++     48|   it("(b) matches a substring of any field, ignoring case and surround…
++     49|     expect(matchesText("", "Settings")).toBe(true);
++     50|     expect(matchesText("SET", "Settings")).toBe(true);
++       |                                            ^
++     51|     expect(matchesText("  set ", "Settings")).toBe(true);
++     52|     expect(matchesText("data", "Coverage", "Data health › Coverage")).…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:58
++   Duration  848ms (transform 47ms, setup 35ms, collect 57ms, tests 9ms, environment 199ms, prepare 105ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_no-trim.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_no-trim.log
+new file mode 100644
+index 00000000..e5380b3c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_no-trim.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces 3ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/command-palette.test.tsx:51:47
++     49|     expect(matchesText("", "Settings")).toBe(true);
++     50|     expect(matchesText("SET", "Settings")).toBe(true);
++     51|     expect(matchesText("  set ", "Settings")).toBe(true);
++       |                                               ^
++     52|     expect(matchesText("data", "Coverage", "Data health › Coverage")).…
++     53|     expect(matchesText("xyz", "Coverage", "Data health › Coverage")).t…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:59
++   Duration  828ms (transform 55ms, setup 36ms, collect 55ms, tests 7ms, environment 279ms, prepare 90ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_startswith.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_startswith.log
+new file mode 100644
+index 00000000..451cd51d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_startswith.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces 3ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/app/command-palette/command-palette.test.tsx:54:45
++     52|     expect(matchesText("data", "Coverage", "Data health › Coverage")).…
++     53|     expect(matchesText("xyz", "Coverage", "Data health › Coverage")).t…
++     54|     expect(matchesText("ings", "Settings")).toBe(true);
++       |                                             ^
++     55|     expect(matchesText("xyz", "Settings", null)).toBe(false);
++     56|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:59
++   Duration  822ms (transform 72ms, setup 38ms, collect 45ms, tests 7ms, environment 270ms, prepare 210ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_subpage-order.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_subpage-order.log
+new file mode 100644
+index 00000000..3b1798c8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_subpage-order.log
+@@ -0,0 +1,63 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
++   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 5ms
++     → expected [ { label: 'Research', …(2) }, …(4) ] to deeply equal [ { label: 'Research', …(2) }, …(4) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
++AssertionError: expected [ { label: 'Research', …(2) }, …(4) ] to deeply equal [ { label: 'Research', …(2) }, …(4) ]
++
++- Expected
+++ Received
++
++  Array [
++    Object {
++      "hint": null,
++      "label": "Research",
++      "to": "/research",
++    },
++    Object {
++      "hint": null,
++      "label": "Settings",
++      "to": "/settings",
++    },
++    Object {
++-     "hint": "Data health › Coverage",
++-     "label": "Coverage",
++-     "to": "/data/coverage",
++-   },
++-   Object {
++      "hint": "Data health › Followed stocks",
++      "label": "Followed stocks",
++      "to": "/data/followed",
+++   },
+++   Object {
+++     "hint": "Data health › Coverage",
+++     "label": "Coverage",
+++     "to": "/data/coverage",
++    },
++    Object {
++      "hint": "Data health › Downloads",
++      "label": "Downloads",
++      "to": "/data/downloads",
++    },
++  ]
++
++ ❯ src/app/command-palette/command-palette.test.tsx:32:28
++     30| describe("pages, targets and reasons", () => {
++     31|   it("(a) lists the destinations, then the three data pages, reading D…
++     32|     expect(palettePages()).toEqual([
++       |                            ^
++     33|       { label: "Research", to: "/research", hint: null },
++     34|       { label: "Settings", to: "/settings", hint: null },
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:58
++   Duration  834ms (transform 54ms, setup 36ms, collect 55ms, tests 8ms, environment 199ms, prepare 57ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-stock.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-stock.log
+new file mode 100644
+index 00000000..2a90622d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-stock.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w3/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 6ms
++   × pages, targets and reasons > (c) sends a stock by registration and a universe to its research page 3ms
++     → expected '/research/stocks/A B/C' to be '/research/stocks/A%20B%2FC' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (c) sends a stock by registration and a universe to its research page
++AssertionError: expected '/research/stocks/A B/C' to be '/research/stocks/A%20B%2FC' // Object.is equality
++
++Expected: "/research/stocks/A%20B%2FC"
++Received: "/research/stocks/A B/C"
++
++ ❯ src/app/command-palette/command-palette.test.tsx:60:34
++     58|   it("(c) sends a stock by registration and a universe to its research…
++     59|     expect(stockTarget("BRK.B")).toBe("/research/stocks/BRK.B");
++     60|     expect(stockTarget("A B/C")).toBe("/research/stocks/A%20B%2FC");
++       |                                  ^
++     61|     flags.registered = false;
++     62|     expect(stockTarget("BRK.B")).toBe("/data/coverage?symbol=BRK.B");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:59
++   Duration  891ms (transform 43ms, setup 41ms, collect 39ms, tests 6ms, environment 186ms, prepare 33ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-universe.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-universe.log
+new file mode 100644
+index 00000000..236d157e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-universe.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (c) sends a stock by registration and a universe to its research page 3ms
++     → expected '/research/universes/a/b c' to be '/research/universes/a%2Fb%20c' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (c) sends a stock by registration and a universe to its research page
++AssertionError: expected '/research/universes/a/b c' to be '/research/universes/a%2Fb%20c' // Object.is equality
++
++Expected: "/research/universes/a%2Fb%20c"
++Received: "/research/universes/a/b c"
++
++ ❯ src/app/command-palette/command-palette.test.tsx:64:37
++     62|     expect(stockTarget("BRK.B")).toBe("/data/coverage?symbol=BRK.B");
++     63|     expect(stockTarget("A B&C")).toBe("/data/coverage?symbol=A%20B%26C…
++     64|     expect(universeTarget("a/b c")).toBe("/research/universes/a%2Fb%20…
++       |                                     ^
++     65|   });
++     66| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:28:59
++   Duration  834ms (transform 50ms, setup 35ms, collect 56ms, tests 7ms, environment 272ms, prepare 133ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_swap-stock-target.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_swap-stock-target.log
+new file mode 100644
+index 00000000..6fbcc4d8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_swap-stock-target.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
++   × pages, targets and reasons > (c) sends a stock by registration and a universe to its research page 4ms
++     → expected '/data/coverage?symbol=BRK.B' to be '/research/stocks/BRK.B' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (c) sends a stock by registration and a universe to its research page
++AssertionError: expected '/data/coverage?symbol=BRK.B' to be '/research/stocks/BRK.B' // Object.is equality
++
++Expected: "/research/stocks/BRK.B"
++Received: "/data/coverage?symbol=BRK.B"
++
++ ❯ src/app/command-palette/command-palette.test.tsx:59:34
++     57| 
++     58|   it("(c) sends a stock by registration and a universe to its research…
++     59|     expect(stockTarget("BRK.B")).toBe("/research/stocks/BRK.B");
++       |                                  ^
++     60|     expect(stockTarget("A B/C")).toBe("/research/stocks/A%20B%2FC");
++     61|     flags.registered = false;
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:29:01
++   Duration  846ms (transform 50ms, setup 39ms, collect 50ms, tests 8ms, environment 264ms, prepare 310ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-id.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-id.log
+new file mode 100644
+index 00000000..eed64896
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-id.log
+@@ -0,0 +1,43 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w1/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
++   × pages, targets and reasons > (e) reads the active universes with one GET and maps each row to an id and a name 5ms
++     → expected [ { id: 'Large caps', …(1) }, …(1) ] to deeply equal [ …(2) ]
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (e) reads the active universes with one GET and maps each row to an id and a name
++AssertionError: expected [ { id: 'Large caps', …(1) }, …(1) ] to deeply equal [ …(2) ]
++
++- Expected
+++ Received
++
++  Array [
++    Object {
++-     "id": "u1",
+++     "id": "Large caps",
++      "name": "Large caps",
++    },
++    Object {
++-     "id": "u2",
+++     "id": "Small value",
++      "name": "Small value",
++    },
++  ]
++
++ ❯ src/app/command-palette/command-palette.test.tsx:98:18
++     96|     const controller = new AbortController();
++     97|     const rows = await fetchActiveUniverses(controller.signal);
++     98|     expect(rows).toEqual([
++       |                  ^
++     99|       { id: "u1", name: "Large caps" },
++    100|       { id: "u2", name: "Small value" },
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:29:02
++   Duration  559ms (transform 40ms, setup 32ms, collect 40ms, tests 8ms, environment 162ms, prepare 70ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-url.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-url.log
+new file mode 100644
+index 00000000..a702857a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-url.log
+@@ -0,0 +1,30 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
++   × pages, targets and reasons > (e) reads the active universes with one GET and maps each row to an id and a name 4ms
++     → expected '/api/universes?lifecycle=retired' to be '/api/universes?lifecycle=active' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (e) reads the active universes with one GET and maps each row to an id and a name
++AssertionError: expected '/api/universes?lifecycle=retired' to be '/api/universes?lifecycle=active' // Object.is equality
++
++Expected: "/api/universes?lifecycle=active"
++Received: "/api/universes?lifecycle=retired"
++
++ ❯ src/app/command-palette/command-palette.test.tsx:104:17
++    102|     expect(fetchMock).toHaveBeenCalledTimes(1);
++    103|     const [url, init] = fetchMock.mock.calls[0] as unknown as [string,…
++    104|     expect(url).toBe("/api/universes?lifecycle=active");
++       |                 ^
++    105|     expect(init.signal).toBe(controller.signal);
++    106|     expect(init.method).toBeUndefined();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  23:29:02
++   Duration  575ms (transform 40ms, setup 31ms, collect 39ms, tests 7ms, environment 170ms, prepare 27ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 00000000..fa509e7f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,303 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/command-palette && npx tsc --noEmit",
++  "repo_head": "34a300daded1bbc732552b73e4d9da2f99f97197",
++  "tree_patch_sha256": "b661d563bb00c596b2b346cb69baf902263e9b29fcc2f1a3cbff963ebab597f9",
++  "mutants_sha256": "c92e5d7fc8df6801a6e3c96672524b40a1606fc59af8c936b86e5c821ad3c3d5",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 18,
++  "started": "2026-11-21T05:28:50Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "3ef029a9535ba41da73090479ef633d7a91d792b06d4937e0c2e1f9ed05c1919"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 6.6,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "90b906084e533f617632bf007deada17ed3ab1b7590bc57929a5143e8e425f98"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "f5c0b4907f432f60598189b2405946e5c9e06b65de4daf649270aada29f13e38"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.7,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "fbb09bd5db3f255ab4fcde341404fc3d03023df361976b4caece2f94202040e3"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/command-palette/pages.ts:18:drop-field-copy:1",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 18,
++      "original": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),",
++      "mutated": "    ...DESTINATIONS.map((d) => ({ label: nil, to: d.to, hint: null })),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_1.log",
++      "log_sha256": "8d363fc1da3760b3ebb58393066f890222a06dea96ad0a4d8600d3c7a12684d4"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:18:drop-field-copy:2",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 18,
++      "original": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),",
++      "mutated": "    ...DESTINATIONS.map((d) => ({ label: d.label, to: nil, hint: null })),",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_18_drop-field-copy_2.log",
++      "log_sha256": "9400806cd328c070cda0c29c210805fe869bc20390427a1462138b57add4a66f"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:19:drop-field-copy:1",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 19,
++      "original": "    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },",
++      "mutated": "    { label: nil, to: \"/data/coverage\", hint: coverage.hint },",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_19_drop-field-copy_1.log",
++      "log_sha256": "c7149fde562f3c43cb1d0ec458bd7384e175e650dcaf0f61fcf604a787e7f883"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:20:drop-field-copy:1",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 20,
++      "original": "    { label: followed.label, to: \"/data/followed\", hint: followed.hint },",
++      "mutated": "    { label: nil, to: \"/data/followed\", hint: followed.hint },",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_20_drop-field-copy_1.log",
++      "log_sha256": "4ca02d657aeaa4e1e7829853d899ad456ae0036013312a839ec2976a4c9318f5"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:21:drop-field-copy:1",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 21,
++      "original": "    { label: downloads.label, to: \"/data/downloads\", hint: downloads.hint },",
++      "mutated": "    { label: nil, to: \"/data/downloads\", hint: downloads.hint },",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_21_drop-field-copy_1.log",
++      "log_sha256": "78aeab9ece11aa6ee0dcdab867ee099a17c8e30e2d13643f6ee41804cf5e2164"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:31:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 31,
++      "original": "  if (needle === \"\") return true;",
++      "mutated": "  if (needle === \"\") return false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_31_negate-boolean_1.log",
++      "log_sha256": "0f229327ea9c87ef698f3ab8cc876177a799562d98d4fa550ef622eee8010a0f"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:32:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/command-palette/pages.ts",
++      "line": 32,
++      "original": "  return fields.some((field) => field?.toLowerCase().includes(needle) === true);",
++      "mutated": "  return fields.some((field) => field?.toLowerCase().includes(needle) === false);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_32_negate-boolean_1.log",
++      "log_sha256": "779a7186296f19f87580df28b0e19fe099287ea6a0c4d631c635709f4590fb6f"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:manual:subpage-order",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/pages.ts",
++      "old": "    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },\n    { label: followed.label, to: \"/data/followed\", hint: followed.hint },\n",
++      "new": "    { label: followed.label, to: \"/data/followed\", hint: followed.hint },\n    { label: coverage.label, to: \"/data/coverage\", hint: coverage.hint },\n",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_subpage-order.log",
++      "log_sha256": "7482534cb5bf814c57c3c9bc4e27e344e2060430b3653aff33f7288d5a52bf6d"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:manual:startswith",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/pages.ts",
++      "old": ".includes(needle)",
++      "new": ".startsWith(needle)",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_startswith.log",
++      "log_sha256": "7104a328f13e5fecbe0bb948cb2cffb0ebcacddbb7f65ab1bab5116e6af555db"
++    },
++    {
++      "id": "web/src/app/command-palette/pages.ts:manual:no-trim",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/pages.ts",
++      "old": "text.trim().toLowerCase()",
++      "new": "text.toLowerCase()",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_pages.ts_manual_no-trim.log",
++      "log_sha256": "edc1aa58f9b3c99337427693ce18edbddf32162801927b769ee568c16cab1b1a"
++    },
++    {
++      "id": "web/src/app/command-palette/targets.ts:manual:no-encode-stock",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/targets.ts",
++      "old": "const encoded = encodeURIComponent(symbol);",
++      "new": "const encoded = symbol;",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-stock.log",
++      "log_sha256": "51bccf00b452e30a9f9ecd46f7214aac374637f9c0653f78338d6ac763b4fd2b"
++    },
++    {
++      "id": "web/src/app/command-palette/targets.ts:manual:no-encode-universe",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/targets.ts",
++      "old": "`/research/universes/${encodeURIComponent(id)}`",
++      "new": "`/research/universes/${id}`",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_no-encode-universe.log",
++      "log_sha256": "6d8e241feb4d8c6a06d9ab9ca324641f7d71f8817dfe502a0145c396f55a19ea"
++    },
++    {
++      "id": "web/src/app/command-palette/targets.ts:manual:swap-stock-target",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/targets.ts",
++      "old": "RESEARCH_REGISTERED ? `/research/stocks/${encoded}` : `/data/coverage?symbol=${encoded}`",
++      "new": "RESEARCH_REGISTERED ? `/data/coverage?symbol=${encoded}` : `/research/stocks/${encoded}`",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_targets.ts_manual_swap-stock-target.log",
++      "log_sha256": "5db9b1364da413ab4dbea7426fd356078223206b76cf5f8e8220f5add6606fb2"
++    },
++    {
++      "id": "web/src/app/command-palette/copy.ts:manual:reason-swap",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/copy.ts",
++      "old": "? \"FactorFlow is not answering\"\n    : \"FactorFlow hit an unexpected problem\"",
++      "new": "? \"FactorFlow hit an unexpected problem\"\n    : \"FactorFlow is not answering\"",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-swap.log",
++      "log_sha256": "848ef33949a11a854c0bf810b5cf9109c408bde0e84a42db27cc13cf0222b2f6"
++    },
++    {
++      "id": "web/src/app/command-palette/copy.ts:manual:reason-message",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/copy.ts",
++      "old": "export function failureReason(error: unknown): string {\n",
++      "new": "export function failureReason(error: unknown): string {\n  if (error instanceof Error && !(error instanceof ApiUnreachableError)) return error.message;\n",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_reason-message.log",
++      "log_sha256": "82a05e5622fe50be2754f007e0aaf5809a1ac5f754bb2fdb370c8ccb91c4bcc9"
++    },
++    {
++      "id": "web/src/app/command-palette/copy.ts:manual:empty-copy",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/copy.ts",
++      "old": "`No stocks or pages match \"${text}\".`",
++      "new": "`No stocks or pages match ${text}.`",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_copy.ts_manual_empty-copy.log",
++      "log_sha256": "911bc07065e6bbf11ddf92663827cfbcd8c1fe9ffc240d739f60bf48b250ea42"
++    },
++    {
++      "id": "web/src/app/command-palette/universes.ts:manual:universes-url",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/universes.ts",
++      "old": "\"/api/universes?lifecycle=active\"",
++      "new": "\"/api/universes?lifecycle=retired\"",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-url.log",
++      "log_sha256": "89d3731d62bc1ea5c263a6652c4274db3d72e14d91530754f2af059f533ba724"
++    },
++    {
++      "id": "web/src/app/command-palette/universes.ts:manual:universes-id",
++      "operator": "manual",
++      "file": "web/src/app/command-palette/universes.ts",
++      "old": "id: u.universe_id",
++      "new": "id: u.name",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-1-results-logs/web_src_app_command-palette_universes.ts_manual_universes-id.log",
++      "log_sha256": "e71fcc32827db86816f6b579e027e0c9ea753fbae0a856ea548845a44bcf9465"
++    }
++  ],
++  "finished": "2026-11-21T05:29:03Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-1-copy-targets-pages.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-1-copy-targets-pages.log
+new file mode 100644
+index 00000000..ed7335a7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-1-copy-targets-pages.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/app/command-palette/command-palette.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/command-palette/command-palette.test.tsx [ src/app/command-palette/command-palette.test.tsx ]
++Error: Failed to resolve import "./copy" from "web/src/app/command-palette/command-palette.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/command-palette/command-palette.test.tsx:14:38
++  12 |  }));
++  13 |  const __vi_import_0__ = await import('../../api/client')
++  14 |  const __vi_import_1__ = await import('./copy')
++     |                                       ^
++  15 |  const __vi_import_2__ = await import('./pages')
++  16 |  const __vi_import_3__ = await import('./targets')
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  23:27:05
++   Duration  375ms (transform 12ms, setup 28ms, collect 0ms, tests 0ms, environment 140ms, prepare 24ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md
+index d07d7a16..f4a78778 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-tasks.md
+@@ -206,7 +206,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
+ 
+ ### Additional Unit Tests
+ 
+-- [ ] T009 [P] Write the pure-module cases in `web/src/app/command-palette/command-palette.test.tsx`, in `describe("pages, targets and reasons")`. It runs after T008 (same file), and imports `palettePages` and `matchesText` from `./pages`, `stockTarget` and `universeTarget` from `./targets`, and `failureReason` and `PALETTE_COPY` from `./copy`.
++- [x] T009 [P] Write the pure-module cases in `web/src/app/command-palette/command-palette.test.tsx`, in `describe("pages, targets and reasons")`. It runs after T008 (same file), and imports `palettePages` and `matchesText` from `./pages`, `stockTarget` and `universeTarget` from `./targets`, and `failureReason` and `PALETTE_COPY` from `./copy`.
+   - (a) **Pages.** With `flags.registered = true`, `palettePages()` `toEqual` the independent literal:
+ 
+     ```text
+@@ -251,7 +251,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
+ 
+ **Purpose**: Write the five non-visual modules, each of which makes its unit cases pass.
+ 
+-- [ ] T010 [P] Create `web/src/app/command-palette/copy.ts`, `targets.ts`, `pages.ts` and `universes.ts`. These depend on T002, T004 and T009 being RED. No file writes a length, hex or colour literal (DAC-E3-S5-4), and no comment writes a unit joined to a number.
++- [x] T010 [P] Create `web/src/app/command-palette/copy.ts`, `targets.ts`, `pages.ts` and `universes.ts`. These depend on T002, T004 and T009 being RED. No file writes a length, hex or colour literal (DAC-E3-S5-4), and no comment writes a unit joined to a number.
+   - **`copy.ts`** (command-palette §2.4, §10; UX design §1.1; DAC-E3-12; DEC-0332):
+     - `export const PALETTE_COPY` holds:
+       - `placeholder: "Jump to a stock or page"`;
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5.md
+index 6ab5fa6f..96e1236d 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5.md
+@@ -10,7 +10,7 @@ component: FactorFlow-v2
+ type: feature
+ priority: P1
+ estimate: 5
+-status: planning
++status: in-progress
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-28
+diff --git a/web/src/app/command-palette/command-palette.test.tsx b/web/src/app/command-palette/command-palette.test.tsx
+new file mode 100644
+index 00000000..be08382b
+--- /dev/null
++++ b/web/src/app/command-palette/command-palette.test.tsx
+@@ -0,0 +1,108 @@
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError } from "../../api/client";
++import { PALETTE_COPY, failureReason } from "./copy";
++import { matchesText, palettePages } from "./pages";
++import { stockTarget, universeTarget } from "./targets";
++import { fetchActiveUniverses } from "./universes";
++
++// The registration flag the palette reads from the delivered destinations
++// module. The getters are read live, so each case sets it before it renders.
++const flags = vi.hoisted(() => ({ registered: true }));
++vi.mock("../destinations", () => ({
++  get DESTINATIONS() {
++    return flags.registered
++      ? [
++          { group: "primary", label: "Research", to: "/research" },
++          { group: "data", label: "Settings", to: "/settings" },
++        ]
++      : [{ group: "data", label: "Settings", to: "/settings" }];
++  },
++  get RESEARCH_REGISTERED() {
++    return flags.registered;
++  },
++}));
++
++afterEach(() => {
++  flags.registered = true;
++});
++
++// Implements TC-COMP-082 (pure half: pages and targets)
++describe("pages, targets and reasons", () => {
++  it("(a) lists the destinations, then the three data pages, reading DESTINATIONS at call time", () => {
++    expect(palettePages()).toEqual([
++      { label: "Research", to: "/research", hint: null },
++      { label: "Settings", to: "/settings", hint: null },
++      { label: "Coverage", to: "/data/coverage", hint: "Data health › Coverage" },
++      { label: "Followed stocks", to: "/data/followed", hint: "Data health › Followed stocks" },
++      { label: "Downloads", to: "/data/downloads", hint: "Data health › Downloads" },
++    ]);
++    flags.registered = false;
++    expect(palettePages().map((p) => p.label)).toEqual([
++      "Settings",
++      "Coverage",
++      "Followed stocks",
++      "Downloads",
++    ]);
++  });
++
++  it("(b) matches a substring of any field, ignoring case and surrounding spaces", () => {
++    expect(matchesText("", "Settings")).toBe(true);
++    expect(matchesText("SET", "Settings")).toBe(true);
++    expect(matchesText("  set ", "Settings")).toBe(true);
++    expect(matchesText("data", "Coverage", "Data health › Coverage")).toBe(true);
++    expect(matchesText("xyz", "Coverage", "Data health › Coverage")).toBe(false);
++    expect(matchesText("ings", "Settings")).toBe(true);
++    expect(matchesText("xyz", "Settings", null)).toBe(false);
++  });
++
++  it("(c) sends a stock by registration and a universe to its research page", () => {
++    expect(stockTarget("BRK.B")).toBe("/research/stocks/BRK.B");
++    expect(stockTarget("A B/C")).toBe("/research/stocks/A%20B%2FC");
++    flags.registered = false;
++    expect(stockTarget("BRK.B")).toBe("/data/coverage?symbol=BRK.B");
++    expect(stockTarget("A B&C")).toBe("/data/coverage?symbol=A%20B%26C");
++    expect(universeTarget("a/b c")).toBe("/research/universes/a%2Fb%20c");
++  });
++
++  it("(d) words a failure without the error's own message or request id", () => {
++    expect(failureReason(new ApiUnreachableError("x"))).toBe("FactorFlow is not answering");
++    const apiError = new ApiError("No resource exists at this path.", "req-9", {
++      code: "not_found",
++    });
++    expect(failureReason(apiError)).toBe("FactorFlow hit an unexpected problem");
++    expect(failureReason(new Error("boom"))).toBe("FactorFlow hit an unexpected problem");
++    expect(failureReason(apiError)).not.toContain("No resource");
++    expect(failureReason(apiError)).not.toContain("req-9");
++    expect(PALETTE_COPY.empty("zz")).toBe('No stocks or pages match "zz".');
++    expect(PALETTE_COPY.stocksError("r")).toBe("Couldn't search followed stocks: r.");
++    expect(PALETTE_COPY.universesError("r")).toBe("Couldn't read universes: r.");
++  });
++
++  it("(e) reads the active universes with one GET and maps each row to an id and a name", async () => {
++    const fetchMock = vi.fn(
++      async () =>
++        new Response(
++          JSON.stringify({
++            universes: [
++              { universe_id: "u1", name: "Large caps", lifecycle: "active" },
++              { universe_id: "u2", name: "Small value", lifecycle: "active" },
++            ],
++            next_cursor: null,
++          }),
++          { status: 200, headers: { "Content-Type": "application/json" } },
++        ),
++    );
++    vi.stubGlobal("fetch", fetchMock);
++    const controller = new AbortController();
++    const rows = await fetchActiveUniverses(controller.signal);
++    expect(rows).toEqual([
++      { id: "u1", name: "Large caps" },
++      { id: "u2", name: "Small value" },
++    ]);
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
++    expect(url).toBe("/api/universes?lifecycle=active");
++    expect(init.signal).toBe(controller.signal);
++    expect(init.method).toBeUndefined();
++  });
++});
+diff --git a/web/src/app/command-palette/copy.ts b/web/src/app/command-palette/copy.ts
+new file mode 100644
+index 00000000..86802908
+--- /dev/null
++++ b/web/src/app/command-palette/copy.ts
+@@ -0,0 +1,34 @@
++import { ApiUnreachableError } from "../../api/client";
++
++/**
++ * Every owner-facing string of the command palette (command-palette 2.4 and
++ * 10; UX design 1.1; DAC-E3-12; DAC-E3-S5-5; DEC-0332).
++ *
++ * The dialog's own label, *Search FactorFlow*, is owned by `CommandDialog`.
++ * No string here uses a domain term the owner's labels avoid (DAC-E7-3).
++ */
++export const PALETTE_COPY = {
++  placeholder: "Jump to a stock or page",
++  groups: { stocks: "Stocks", universes: "Universes", pages: "Pages" },
++  stocksHint: "Type a symbol to find a followed stock",
++  searching: "Searching…",
++  partial: "Showing the first 8. Keep typing to narrow.",
++  empty: (text: string): string => `No stocks or pages match "${text}".`,
++  stocksError: (reason: string): string => `Couldn't search followed stocks: ${reason}.`,
++  universesError: (reason: string): string => `Couldn't read universes: ${reason}.`,
++  dataPages: {
++    coverage: { label: "Coverage", hint: "Data health › Coverage" },
++    followed: { label: "Followed stocks", hint: "Data health › Followed stocks" },
++    downloads: { label: "Downloads", hint: "Data health › Downloads" },
++  },
++} as const;
++
++/**
++ * The reason an error row gives (DEC-0332; UX design 0.7). Only an unreachable
++ * API is told apart: the envelope's message and request id are never shown.
++ */
++export function failureReason(error: unknown): string {
++  return error instanceof ApiUnreachableError
++    ? "FactorFlow is not answering"
++    : "FactorFlow hit an unexpected problem";
++}
+diff --git a/web/src/app/command-palette/pages.ts b/web/src/app/command-palette/pages.ts
+new file mode 100644
+index 00000000..2dbc34da
+--- /dev/null
++++ b/web/src/app/command-palette/pages.ts
+@@ -0,0 +1,33 @@
++import { DESTINATIONS } from "../destinations";
++import { PALETTE_COPY } from "./copy";
++
++export interface PalettePage {
++  readonly label: string;
++  readonly to: string;
++  readonly hint: string | null;
++}
++
++/**
++ * The pages the palette offers (command-palette 2.3; DEC-0331): the shipped
++ * destinations in their own order, then the three data pages. `DESTINATIONS` is
++ * read at call time, so a destination another story adds appears here unchanged.
++ */
++export function palettePages(): readonly PalettePage[] {
++  const { coverage, followed, downloads } = PALETTE_COPY.dataPages;
++  return [
++    ...DESTINATIONS.map((d) => ({ label: d.label, to: d.to, hint: null })),
++    { label: coverage.label, to: "/data/coverage", hint: coverage.hint },
++    { label: followed.label, to: "/data/followed", hint: followed.hint },
++    { label: downloads.label, to: "/data/downloads", hint: downloads.hint },
++  ];
++}
++
++/**
++ * The local match (DEC-0331): empty text matches everything, otherwise any
++ * field containing the trimmed text, ignoring case.
++ */
++export function matchesText(text: string, ...fields: readonly (string | null)[]): boolean {
++  const needle = text.trim().toLowerCase();
++  if (needle === "") return true;
++  return fields.some((field) => field?.toLowerCase().includes(needle) === true);
++}
+diff --git a/web/src/app/command-palette/targets.ts b/web/src/app/command-palette/targets.ts
+new file mode 100644
+index 00000000..83aaa830
+--- /dev/null
++++ b/web/src/app/command-palette/targets.ts
+@@ -0,0 +1,16 @@
++import { RESEARCH_REGISTERED } from "../destinations";
++
++/**
++ * Where a chosen stock goes (DEC-0207; AC-27): the Research evidence page when
++ * its routes are registered, otherwise its row in Coverage. The flag is read at
++ * call time.
++ */
++export function stockTarget(symbol: string): string {
++  const encoded = encodeURIComponent(symbol);
++  return RESEARCH_REGISTERED ? `/research/stocks/${encoded}` : `/data/coverage?symbol=${encoded}`;
++}
++
++/** Where a chosen universe goes. Universes are offered only while registered. */
++export function universeTarget(id: string): string {
++  return `/research/universes/${encodeURIComponent(id)}`;
++}
+diff --git a/web/src/app/command-palette/universes.ts b/web/src/app/command-palette/universes.ts
+new file mode 100644
+index 00000000..c579d8ff
+--- /dev/null
++++ b/web/src/app/command-palette/universes.ts
+@@ -0,0 +1,21 @@
++import { requestJson } from "../../api/client";
++
++export interface PaletteUniverse {
++  readonly id: string;
++  readonly name: string;
++}
++
++/**
++ * The active universes, read once per opening and only while research routes
++ * are registered (DAC-E3-11, DAC-E3-S5-2). The request is the one the story
++ * names: no limit is sent, so the route's default page applies.
++ */
++export async function fetchActiveUniverses(
++  signal?: AbortSignal,
++): Promise<readonly PaletteUniverse[]> {
++  const body = await requestJson<{ universes: { universe_id: string; name: string }[] }>(
++    "/api/universes?lifecycle=active",
++    { signal },
++  );
++  return body.universes.map((u) => ({ id: u.universe_id, name: u.name }));
++}

@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w2/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 33ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 24ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 244ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 1 failed) 4065ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 536ms
+   × states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 301ms
+     → expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"
+
+Expected the element to have attribute:
+  aria-disabled="true"
+Received:
+  aria-disabled="false"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row
+Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"
+
+Expected the element to have attribute:
+  aria-disabled="true"
+Received:
+  aria-disabled="false"
+ ❯ src/app/command-palette/command-palette.test.tsx:301:22
+    299|       .getByText("Couldn't search followed stocks: FactorFlow hit an u…
+    300|       .closest('[role="option"]');
+    301|     expect(errorRow).toHaveAttribute("aria-disabled", "true");
+       |                      ^
+    302|     expect(errorRow).not.toHaveAttribute("aria-selected", "true");
+    303|     await choose(user, "Coverage");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 101 passed (102)
+   Start at  23:38:29
+   Duration  4.91s (transform 222ms, setup 180ms, collect 885ms, tests 4.37s, environment 825ms, prepare 252ms)
+

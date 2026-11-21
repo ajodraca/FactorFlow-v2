@@ -1,0 +1,72 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w3/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 24ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 24ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 297ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 2 failed) 3780ms
+   × states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state 74ms
+     → expected <div …(3)></div> to be null
+   × states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found 91ms
+     → expected [ 'Stocks' ] to deeply equal []
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 614ms
+   ✓ states (DAC-E3-12, AC-24) > (e) a failed stock search leaves Pages usable and never selects the error row 336ms
+   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 308ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state
+AssertionError: expected <div …(3)></div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  class="py-5 text-center text-base"
+  cmdk-empty=""
+  role="presentation"
+>
+  No stocks or pages match "zz".
+</div>
+
+ ❯ src/app/command-palette/command-palette.test.tsx:250:60
+    248|     await user.keyboard("zz");
+    249|     expect(await screen.findByText("Searching…")).toBeInTheDocument();
+    250|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
+       |                                                            ^
+    251|     pending.resolve(ok(stockPage([])));
+    252|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (c) shows the empty state when nothing is found
+AssertionError: expected [ 'Stocks' ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "Stocks",
++ ]
+
+ ❯ src/app/command-palette/command-palette.test.tsx:262:24
+    260|     expect(screen.queryAllByRole("option")).toHaveLength(0);
+    261|     // No group is left standing with a heading and no rows.
+    262|     expect(headings()).toEqual([]);
+       |                        ^
+    263|   });
+    264| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 100 passed (102)
+   Start at  23:38:11
+   Duration  4.68s (transform 217ms, setup 144ms, collect 960ms, tests 4.13s, environment 744ms, prepare 138ms)
+

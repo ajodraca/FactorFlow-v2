@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w2/web
+
+ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
+   × pages, targets and reasons > (c) sends a stock by registration and a universe to its research page 4ms
+     → expected '/data/coverage?symbol=BRK.B' to be '/research/stocks/BRK.B' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (c) sends a stock by registration and a universe to its research page
+AssertionError: expected '/data/coverage?symbol=BRK.B' to be '/research/stocks/BRK.B' // Object.is equality
+
+Expected: "/research/stocks/BRK.B"
+Received: "/data/coverage?symbol=BRK.B"
+
+ ❯ src/app/command-palette/command-palette.test.tsx:59:34
+     57| 
+     58|   it("(c) sends a stock by registration and a universe to its research…
+     59|     expect(stockTarget("BRK.B")).toBe("/research/stocks/BRK.B");
+       |                                  ^
+     60|     expect(stockTarget("A B/C")).toBe("/research/stocks/A%20B%2FC");
+     61|     flags.registered = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  23:29:01
+   Duration  846ms (transform 50ms, setup 39ms, collect 50ms, tests 8ms, environment 264ms, prepare 310ms)
+

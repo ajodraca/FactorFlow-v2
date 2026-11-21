@@ -1,0 +1,123 @@
+{
+ "schema": 1,
+ "repo_head": "51ccd4cad069ee45368dc22ce1c3e4d0daa50110",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/titles.ts:74:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/titles.ts",
+   "line": 74,
+   "original": "        : matchPath({ path: candidate.pattern, end: true }, pathname);",
+   "mutated": "        : matchPath({ path: candidate.pattern, end: false }, pathname);"
+  },
+  {
+   "id": "web/src/app/titles.ts:81:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/titles.ts",
+   "line": 81,
+   "original": "  if (entry === undefined || entry.crumbs === null) {",
+   "mutated": "  if (entry === undefined && entry.crumbs === null) {"
+  },
+  {
+   "id": "web/src/app/titles.ts:89:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/app/titles.ts",
+   "line": 89,
+   "original": "      return { label: detail || spec.detail };",
+   "mutated": "      return { label: detail && spec.detail };"
+  },
+  {
+   "id": "web/src/app/titles.ts:91:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/titles.ts",
+   "line": 91,
+   "original": "    return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };",
+   "mutated": "    return spec.to === undefined ? { label: spec.label } : { label: nil, to: spec.to };"
+  },
+  {
+   "id": "web/src/app/destinations.ts:manual:home-added-early",
+   "operator": "manual",
+   "file": "web/src/app/destinations.ts",
+   "old": "export const DESTINATIONS: readonly Destination[] = [\n",
+   "new": "export const DESTINATIONS: readonly Destination[] = [\n  { group: \"primary\", label: \"Home\", to: \"/home\" },\n",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/destinations.ts:manual:order-swapped",
+   "operator": "manual",
+   "file": "web/src/app/destinations.ts",
+   "old": "  { group: \"primary\", label: \"Research\", to: \"/research\" },\n  { group: \"data\", label: \"Settings\", to: \"/settings\" },\n",
+   "new": "  { group: \"data\", label: \"Settings\", to: \"/settings\" },\n  { group: \"primary\", label: \"Research\", to: \"/research\" },\n",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:ancestor-link-swapped",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "{ label: \"Downloads\", to: \"/data/downloads\" }, { detail: \"Download\" }",
+   "new": "{ label: \"Downloads\", to: \"/data\" }, { detail: \"Download\" }",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:data-health-link-swapped",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "const DATA_HEALTH: CrumbSpec = { label: \"Data health\", to: \"/data\" };",
+   "new": "const DATA_HEALTH: CrumbSpec = { label: \"Data health\", to: \"/data/downloads\" };",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:research-ancestor-link-dropped",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "const RESEARCH: CrumbSpec = { label: \"Research\", to: \"/research\" };",
+   "new": "const RESEARCH: CrumbSpec = { label: \"Research\" };",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:detail-ignored",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "return { label: detail || spec.detail };",
+   "new": "return { label: spec.detail };",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:detail-always-applied",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "return spec.to === undefined ? { label: spec.label } : { label: spec.label, to: spec.to };",
+   "new": "return { label: detail || spec.label };",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:noun-swapped",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "{ detail: \"Download\" }",
+   "new": "{ detail: \"Universe\" }",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:usetitle-null-detail",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "return resolveTitle(useLocation().pathname, useTitleDetail());",
+   "new": "return resolveTitle(useLocation().pathname, null);",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/titles.ts:manual:usetitle-ignores-router",
+   "operator": "manual",
+   "file": "web/src/app/titles.ts",
+   "old": "return resolveTitle(useLocation().pathname, useTitleDetail());",
+   "new": "return resolveTitle(window.location.pathname, useTitleDetail());",
+   "cycle": "cycle-2"
+  }
+ ]
+}

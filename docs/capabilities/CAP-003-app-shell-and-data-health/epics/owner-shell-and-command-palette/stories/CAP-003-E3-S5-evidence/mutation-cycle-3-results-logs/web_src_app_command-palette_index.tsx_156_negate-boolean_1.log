@@ -1,0 +1,43 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-vu_y6vi3/w0/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 34ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 22ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 237ms
+ ❯ src/app/command-palette/command-palette.test.tsx (29 tests | 1 failed) 4016ms
+   × states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent 86ms
+     → expected <span …(1)></span> to be null
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 541ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+AssertionError: expected <span …(1)></span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="ml-auto text-xs text-muted-foreground"
+/>
+
+ ❯ src/app/command-palette/command-palette.test.tsx:235:7
+    233|     expect(
+    234|       screen.getByText("Research").closest('[role="option"]')?.querySe…
+    235|     ).toBeNull();
+       |       ^
+    236|     expect(screen.getByText("Data health › Coverage")).toBeInTheDocume…
+    237|     expect(screen.getByText("Data health › Downloads")).toBeInTheDocum…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 101 passed (102)
+   Start at  23:38:06
+   Duration  4.93s (transform 242ms, setup 144ms, collect 971ms, tests 4.31s, environment 834ms, prepare 121ms)
+

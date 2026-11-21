@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w1/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 373ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 65ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 316ms
+ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6420ms
+   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 985ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 594ms
+   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 303ms
+   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 321ms
+   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (c) registered: a stock opens the Research evidence page 300ms
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 732ms
+     → expected <div …(9)></div> to be null
+   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 326ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error
+AssertionError: expected <div …(9)></div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-disabled="true"
+  aria-selected="false"
+  class="relative flex cursor-default select-none items-center gap-2 rounded px-2 py-2 text-base outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+  cmdk-item=""
+  data-disabled="true"
+  data-selected="false"
+  data-value="error:universes"
+  id="radix-:r9r:"
+  role="option"
+>
+  Couldn't read universes: FactorFlow is not answering.
+</div>
+
+ ❯ src/app/command-palette/command-palette.test.tsx:481:59
+    479|     expect(signals[1]?.aborted).toBe(false);
+    480|     await settle();
+    481|     expect(screen.queryByText(/Couldn't read universes/)).toBeNull();
+       |                                                           ^
+    482|     pending.resolve(ok(UNIVERSES));
+    483|     await waitFor(() => expect(optionsIn("Universes")).toEqual(["Large…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 105 passed (106)
+   Start at  00:24:11
+   Duration  12.08s (transform 649ms, setup 952ms, collect 4.19s, tests 7.17s, environment 5.11s, prepare 3.27s)
+

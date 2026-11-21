@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w0/web
+
+ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 2 failed) 34ms
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it 5ms
+     → expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more 3ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'idle' }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends the trimmed text, not what was typed around it
+AssertionError: expected '/api/instruments?symbol=++KO+&lifecyc…' to be '/api/instruments?symbol=KO&lifecycle=…' // Object.is equality
+
+Expected: "/api/instruments?symbol=KO&lifecycle=active&limit=8"
+Received: "/api/instruments?symbol=++KO+&lifecycle=active&limit=8"
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:96:27
+     94|     });
+     95|     expect(calls).toHaveLength(1);
+     96|     expect(calls[0]?.url).toBe("/api/instruments?symbol=KO&lifecycle=a…
+       |                           ^
+     97|   });
+     98| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (c) clearing the text aborts, goes idle and sends nothing more
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'idle' }
+
+- Expected
++ Received
+
+  Object {
+-   "kind": "idle",
++   "kind": "loading",
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:165:28
+    163|     expect(calls).toHaveLength(1);
+    164|     rerender({ text: "   " });
+    165|     expect(result.current).toEqual({ kind: "idle" });
+       |                            ^
+    166|     act(() => {
+    167|       vi.advanceTimersByTime(1000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  23:31:20
+   Duration  862ms (transform 34ms, setup 30ms, collect 53ms, tests 34ms, environment 173ms, prepare 33ms)
+

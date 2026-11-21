@@ -1,0 +1,79 @@
+{
+ "schema": 1,
+ "repo_head": "9d188dac96a44ce1045479e0cb8c2a6951750f64",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:coverage-target-swapped",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "to=\"/data/coverage\"",
+   "new": "to=\"/data/followed\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:instruments-target-swapped",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "to=\"/data/followed\"",
+   "new": "to=\"/data/coverage\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:runs-target-swapped",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "to=\"/data/downloads\" />",
+   "new": "to=\"/data/coverage\" />",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:keepsearch-drops-search",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "return <Navigate to={`${to}${search}`} replace />;",
+   "new": "void search;\n  return <Navigate to={to} replace />;",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:run-detail-drops-search",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "return <Navigate to={`/data/downloads/${runId}${search}`} replace />;",
+   "new": "void search;\n  return <Navigate to={`/data/downloads/${runId}`} replace />;",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:keepsearch-push",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "return <Navigate to={`${to}${search}`} replace />;",
+   "new": "return <Navigate to={`${to}${search}`} />;",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:run-detail-push",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "return <Navigate to={`/data/downloads/${runId}${search}`} replace />;",
+   "new": "return <Navigate to={`/data/downloads/${runId}${search}`} />;",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:run-id-dropped",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "/data/downloads/${runId}${search}",
+   "new": "/data/downloads/${undefined}${search}",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/app/legacy-redirects.tsx:manual:legacy-route-dropped",
+   "operator": "manual",
+   "file": "web/src/app/legacy-redirects.tsx",
+   "old": "  <Route key=\"legacy-runs\" path=\"/runs\" element={<KeepSearch to=\"/data/downloads\" />} />,\n",
+   "new": "",
+   "cycle": "cycle-1"
+  }
+ ]
+}

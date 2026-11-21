@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-21
+last_reworked_review: CAP-003-E3-S4-implementation-review-v1.md
+docs_synced_review: CAP-003-E3-S4-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -102,7 +104,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 ### Mandatory Component Tests
 
-- [ ] T001 [P] Implement TC-COMP-056 (Root renders a skeleton then redirects by most_recent_run) in the rewritten `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-056` comment, in `describe("/ — RootRedirect (DAC-E3-1, AC-2)")`. Cases:
+- [x] T001 [P] Implement TC-COMP-056 (Root renders a skeleton then redirects by most_recent_run) in the rewritten `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-056` comment, in `describe("/ — RootRedirect (DAC-E3-1, AC-2)")`. Cases:
   - (a) **Before the first answer.** `fetchHealth` is a pending `deferHealth()`. `renderAt("/")`: `getAllByTestId("shell-skeleton")` has length exactly 1. That element carries `data-variant="default"` (CAP-003-E1-S1's `Card`), `aria-busy="true"`, and `style.maxWidth` equal to the literal `"1180px"`. `location` reads `/`.
   - (b) **Empty install.** Resolve with `HEALTH_EMPTY`. `location` becomes `/setup`, `nav-type` is `REPLACE`, and no `shell-skeleton` remains. Nothing is asserted about `/setup`'s content (DAC-E3-S4-3; Other Notes, *Registered later*).
   - (c) **A download was requested.** A fresh render resolving with `HEALTH_STARTED`: `location` becomes `/home`, `nav-type` is `REPLACE`.
@@ -117,7 +119,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - remove-attribute on `replace` in the root `Navigate`: (b)'s `nav-type`, and (d).
   - negate-boolean on the `liveness === "answering"` guard: (a) redirects at once, or (e) and (g) redirect on an absent or stale value.
   - a hand-written mutant that renders two skeleton cards: (a)'s length 1.
-- [ ] T002 Implement TC-COMP-057 (DESTINATIONS is one static ordered list with RESEARCH_REGISTERED) in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-057` comment, sequential with T001 (one file).
+- [x] T002 Implement TC-COMP-057 (DESTINATIONS is one static ordered list with RESEARCH_REGISTERED) in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-057` comment, sequential with T001 (one file).
   - **Static list.** `import { DESTINATIONS, RESEARCH_REGISTERED } from "./destinations"`. Assert `DESTINATIONS` `toEqual` the independent literal `[{ group: "primary", label: "Research", to: "/research" }, { group: "data", label: "Settings", to: "/settings" }]`, and `RESEARCH_REGISTERED` `toBe(true)`. CAP-002 has merged in this clone (register D1).
   - **"Present exactly when registered".** Read `routes.tsx` as text with `node:fs` from `import.meta.url`, as the delivered test does. `RESEARCH_REGISTERED` equals `DESTINATIONS.some((d) => d.to === "/research")`, and both equal "`routes.tsx` contains `path="/research"`". Every `DESTINATIONS[i].to` occurs as a `path="…"` in `routes.tsx`, so no destination enters without its screen (TC edge case).
   - **No runtime route detection (TC step 2).** Walk every non-test `.ts`/`.tsx` under `web/src/` and collect files whose source matches `/\b(matchRoutes|useRoutes|createRoutesFromChildren|createRoutesFromElements)\b|import\.meta\.glob/`. Assert `toEqual([])`. The walk visits more than 50 files, so it is not vacuous. `matchPath`, which `titles.ts` uses to read the current URL against its own table, is deliberately not in the list (Other Notes, *Plan checks*).
@@ -128,7 +130,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - swap-case on the entry order (Settings before Research): the literal `toEqual`.
   - negate-boolean on `RESEARCH_REGISTERED`'s derivation: `toBe(true)` and the equality with `routes.tsx`.
   - a hand-written mutant that adds `{ group: "primary", label: "Home", to: "/home" }` before its screen is registered: the literal `toEqual`, and the `path=` check, since `routes.tsx` has no `/home`.
-- [ ] T003 Implement TC-COMP-058 (Unknown path renders the not-found state inside the frame) in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-058` comment.
+- [x] T003 Implement TC-COMP-058 (Unknown path renders the not-found state inside the frame) in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-058` comment.
   - Render the delivered `<Shell />` in `<MemoryRouter initialEntries={["/this-route-does-not-exist"]}>`, with `fetchHealth` resolving `HEALTH_EMPTY`.
   - `getByRole("navigation")` is present (the rail remains).
   - `within(getByRole("main"))` `findByRole("heading", { level: 1, name: "There's no page at this address." })`.
@@ -139,7 +141,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   Kills:
   - swap-case on the catch-all element (an `AppRoutes` `*` that renders a bare `<p>`): the heading query.
   - swap-case on the link target (`"/home"` to `"/"`): the `href`.
-- [ ] T004 [P] Implement TC-COMP-078 (titles.ts gives every registered route a title with linked crumbs) in a new `web/src/app/titles.test.tsx`, with a `// Implements TC-COMP-078` comment. It imports `TITLES`, `resolveTitle` and the `Crumb` type from `./titles`. Cases:
+- [x] T004 [P] Implement TC-COMP-078 (titles.ts gives every registered route a title with linked crumbs) in a new `web/src/app/titles.test.tsx`, with a `// Implements TC-COMP-078` comment. It imports `TITLES`, `resolveTitle` and the `Crumb` type from `./titles`. Cases:
   - (a) **Every registered route has an entry.** Read `routes.tsx` and `legacy-redirects.tsx` as text and collect every `path="…"` with `/path=["']([^"']+)["']/g`. That set `toEqual` the set of `TITLES.map((t) => t.pattern)`. A route without a title, or a title without a route, fails (TC edge case: "An unregistered route: no title entry").
   - (b) **Exact titles.** `it.each` over this independent literal table of `[pathname, detail, expected]`:
 
@@ -172,7 +174,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - drop-field-copy on `detail` in the detail slot (always the noun): (b)'s detail rows.
   - a hand-written mutant that applies the detail to the last crumb of every route: (d).
   - swap-case on the generic noun (`"Download"` ↔ `"Universe"`): (b).
-- [ ] T005 Write the `useTitle()` integration cases in `web/src/app/titles.test.tsx` (DAC-E3-9, DEC-0214; owner-shell §7 *Titles* row), sequential with T004.
+- [x] T005 Write the `useTitle()` integration cases in `web/src/app/titles.test.tsx` (DAC-E3-9, DEC-0214; owner-shell §7 *Titles* row), sequential with T004.
   - **Harness.** `vi.stubGlobal("fetch", …)` with a router: `/api/health` answers `HEALTH_EMPTY` JSON; every other path answers `404` `{"error":{"code":"not_found","message":"No resource exists at this path.","request_id":"req-404"}}`. Render `<HealthProvider><ShellProvider><MemoryRouter initialEntries={["/data/downloads/abc"]}><TitleProbe />{show && <DetailScreen />}</MemoryRouter></ShellProvider></HealthProvider>`.
     - `TitleProbe` renders `useTitle()` as `data-testid="title"`: the crumb labels joined with `" › "`, or `"none"`.
     - `DetailScreen` does what DEC-0214 and DAC-E7-S5-1 (CAP-003-E7-S5's download detail) have screens do: `useEffect(() => { setTitleDetail("Download 2026-10-15 17:31 CDT"); return () => setTitleDetail(null); }, [setTitleDetail])`, with `setTitleDetail` from `useShell()`.
@@ -186,7 +188,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   Kills:
   - a hand-written mutant where `useTitle` passes `null` instead of `useTitleDetail()`: (b).
   - a hand-written mutant where `useTitle` reads a pathname fixed at first render (`useRef(useLocation().pathname)`): (d) when the probe is driven by a `navigate` call after mount.
-- [ ] T006 [P] Implement TC-COMP-077 (Legacy paths redirect with replace and the query kept) in a new `web/src/app/legacy-redirects.test.tsx`, with a `// Implements TC-COMP-077` comment.
+- [x] T006 [P] Implement TC-COMP-077 (Legacy paths redirect with replace and the query kept) in a new `web/src/app/legacy-redirects.test.tsx`, with a `// Implements TC-COMP-077` comment.
   - **Harness.** Render `<MemoryRouter initialEntries={["/start", path]} initialIndex={1}><Routes>{legacyRoutes}<Route path="*" element={<LocationProbe />} /></Routes><LocationProbe /></MemoryRouter>`, with a local `LocationProbe` as in the shared harness (pathname plus search, `useNavigationType()`, and a `navigate` ref). Only `legacy-redirects.tsx` is under test; the screens are not involved.
   - **Cases,** `it.each` over this independent literal table of `[from, to]`:
 
@@ -208,7 +210,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - drop-field-copy on `search` in `KeepSearch` or `LegacyRunDetail`: the query rows.
   - remove-attribute on `replace` in either component: `nav-type` and the back step.
   - drop-field-copy on `runId` (`/data/downloads/undefined`): the first row.
-- [ ] T007 Write the one-module cases in `web/src/app/legacy-redirects.test.tsx` (DAC-E3-3: "from one module whose removal deletes one file and its tests"), sequential with T006.
+- [x] T007 Write the one-module cases in `web/src/app/legacy-redirects.test.tsx` (DAC-E3-3: "from one module whose removal deletes one file and its tests"), sequential with T006.
   - `legacyRoutes` has length 4. Its `props.path` values `toEqual(["/coverage", "/instruments", "/runs", "/runs/:runId"])`, and every element has a distinct `key`.
   - A static walk over non-test `.ts`/`.tsx` under `web/src/` collects files matching `/path=["'](\/coverage|\/instruments|\/runs|\/runs\/:runId)["']/`. The only match is `web/src/app/legacy-redirects.tsx`.
   - `routes.tsx` imports `legacy-redirects` exactly once (`/from\s+["']\.\/legacy-redirects["']/g` has 1 match), and no other non-test source imports it.
@@ -217,7 +219,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - a hand-written mutant that also registers `<Route path="/coverage" …>` in `routes.tsx`: the walk.
   - a dropped legacy route: the length and the `toEqual`.
 
-- [ ] T008 Implement TC-COMP-080 (NotFound is a status card with a keyboard-reachable Home link) as a `describe("NotFound (DAC-E3-S4-4)")` in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-080` comment. It is written before T012, in the same file as T001 and therefore sequential with it, and RED until T012. Render `<MemoryRouter><NotFound /></MemoryRouter>`, imported from `./not-found`.
+- [x] T008 Implement TC-COMP-080 (NotFound is a status card with a keyboard-reachable Home link) as a `describe("NotFound (DAC-E3-S4-4)")` in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-080` comment. It is written before T012, in the same file as T001 and therefore sequential with it, and RED until T012. Render `<MemoryRouter><NotFound /></MemoryRouter>`, imported from `./not-found`.
   - (a) **Structure.** `getByRole("status")` is a `SECTION`, and its `parentElement` carries `data-variant="default"` (CAP-003-E1-S1's `Card`). Within the section:
     - `getByRole("heading", { level: 1 })` has exact text `There's no page at this address.`;
     - `getByRole("link", { name: "Home" })` has `href` `/home`;
@@ -235,7 +237,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 ### Additional Unit Tests
 
-- [ ] T009 Write the route-map cases in `web/src/app/routes.test.tsx` (AC-17, AC-27; owner-shell §2.6 and §5), sequential with T001–T003 and T008 (one file).
+- [x] T009 Write the route-map cases in `web/src/app/routes.test.tsx` (AC-17, AC-27; owner-shell §2.6 and §5), sequential with T001–T003 and T008 (one file).
   - **Implements TC-COMP-079** (routes.test asserts only the routes this story registers). Put the `// Implements TC-COMP-079` comment on this `describe`.
   - (a) **The five delivered screens at their new paths.** `it.each` over the literal rows below: `findByTestId(stub)` renders, `location` stays on the path, and no not-found heading renders. The detail row first calls `releaseDetail()`.
 
@@ -282,12 +284,12 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 **Purpose**: The four new modules, each in its own TDD cycle.
 
-- [ ] T010 Create `web/src/app/legacy-redirects.tsx` (depends on T006 and T007 being RED). Copy owner-shell §2.6's code: `KeepSearch({ to })` (`useLocation().search` appended, `Navigate … replace`), `LegacyRunDetail()` (`useParams().runId`, `useLocation().search`, `Navigate to={`/data/downloads/${runId}${search}`} replace`), and `export const legacyRoutes` with the four keyed `Route` elements.
+- [x] T010 Create `web/src/app/legacy-redirects.tsx` (depends on T006 and T007 being RED). Copy owner-shell §2.6's code: `KeepSearch({ to })` (`useLocation().search` appended, `Navigate … replace`), `LegacyRunDetail()` (`useParams().runId`, `useLocation().search`, `Navigate to={`/data/downloads/${runId}${search}`} replace`), and `export const legacyRoutes` with the four keyed `Route` elements.
   - Imports `type JSX` from `"react"`, and `Navigate`, `Route`, `useLocation` and `useParams` from `"react-router-dom"`.
   - The module doc comment cites AC-18, DAC-E3-3, DAC-E3-S4-1, owner-shell §2.6 and §6, and says the file, its import in `routes.tsx` and `legacy-redirects.test.tsx` are deleted one release after this ships (capability assumption 3).
 
   This makes T006 and T007 pass, except T007's `routes.tsx` import line, which T013 satisfies.
-- [ ] T011 [P] Create `web/src/app/destinations.ts` and `web/src/app/titles.ts` (depend on T002, T004 and T005 being RED).
+- [x] T011 [P] Create `web/src/app/destinations.ts` and `web/src/app/titles.ts` (depend on T002, T004 and T005 being RED).
   - **`destinations.ts`** (DEC-0204; DAC-E3-2; owner-shell §2.6).
     - `export interface Destination { readonly group: "primary" | "data"; readonly label: string; readonly to: string; readonly count?: "needs-you" | "problems" }`.
     - `export const DESTINATIONS: readonly Destination[] = [{ group: "primary", label: "Research", to: "/research" }, { group: "data", label: "Settings", to: "/settings" }]`.
@@ -310,7 +312,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
     - The module comment says a route enters this table in the change that registers it (CAP-003-E4-S6 `/setup` *Setup*, CAP-003-E5-S5 `/home` *Home*, CAP-003-E6-S7 `/data` *Data health*), as `DESTINATIONS` does.
 
   This makes T002, T004 and T005 pass, except T002's `routes.tsx` checks, which T013 satisfies.
-- [ ] T012 [P] Create `web/src/app/not-found.tsx` (depends on T008 being RED; it can run in parallel with T010 and T011).
+- [x] T012 [P] Create `web/src/app/not-found.tsx` (depends on T008 being RED; it can run in parallel with T010 and T011).
   - It exports `NotFound(): JSX.Element`, rendering `<Card variant="default">` around `<section role="status" className="p-5">`.
   - The section holds an `<h1 tabIndex={-1} className="text-xl font-semibold">` with the text `There's no page at this address.`. The `tabIndex` is the focus target owner-shell §2.7 names, which CAP-003-E3-S6 moves focus to.
   - It also holds `<p>Check the address, or go to <Button asChild variant="ghost"><Link to="/home">Home</Link></Button></p>`. The copy is exactly as UX design §0.5 and owner-shell §2.8 write it (Other Notes, *Copy*). The link is styled from `button` `ghost` tokens (owner-shell §10 component mapping).
@@ -319,7 +321,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - Imports: `Card` from `"../components/ui/card"`, `Button` from `"../components/ui/button"`, `Link` from `"react-router-dom"`. No literal length, no colour.
 
   This makes T008 pass, and T003's not-found assertions once T013 lands.
-- [ ] T013 Rewrite `web/src/app/routes.tsx` (depends on T010, T011 and T012; T001, T002, T003 and T009 RED).
+- [x] T013 Rewrite `web/src/app/routes.tsx` (depends on T010, T011 and T012; T001, T002, T003 and T009 RED).
   - **Imports:** `lazy`, `Suspense` and `type JSX` from `"react"`; `Navigate`, `Route` and `Routes` from `"react-router-dom"`; `Card` from `"../components/ui/card"`; `useHealth` from `"./health"`; `LAYOUT` from `"./layout"`; `legacyRoutes` from `"./legacy-redirects"`; `NotFound` from `"./not-found"`.
   - **Lazy screens.** Ten module-level bindings, `const CoverageScreen = lazy(() => import("../screens/coverage"))` and so on. The CAP-002 bindings keep their delivered names (`ResearchScreen`, `StockEvidenceScreen`, `CompareScreen`, `UniversesScreen`, `UniverseDetailScreen`), so their five `Route` lines stay byte for byte (AC-27). Owner-shell §5 and the epic NFR *Performance* ask for code splitting per screen.
   - **`ShellSkeleton()`** (private). One `<Card variant="default" aria-busy="true" data-testid="shell-skeleton" className="w-full animate-pulse" style={{ maxWidth: LAYOUT.contentMaxWidth }}>` holding a `p-5 space-y-3` block of two `h-4 rounded bg-secondary` bars (Other Notes, *Skeleton*). It writes no length literal (DAC-E3-16; CAP-003-E1-S1's literal scan).
@@ -345,24 +347,25 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 **Purpose**: Keep the delivered shell and its tests green between this story and CAP-003-E3-S6's frame rewrite, and confirm the change set.
 
-- [ ] T014 Interim compatibility with the delivered shell (DEC-0327; Open Gap 1; depends on T013).
+- [x] T014 Interim compatibility with the delivered shell (DEC-0327; Open Gap 1; depends on T013).
   - **(a) Rail targets.** In `web/src/app/shell.tsx`'s private delivered `DESTINATIONS`, change only the three legacy `to` values: `"/coverage"` to `"/data/coverage"`, `"/instruments"` to `"/data/followed"`, and `"/runs"` to `"/data/downloads"`. Labels, order, `/settings`, `/research` and every other line stay as delivered. Add one comment line saying CAP-003-E3-S6 replaces this list with `destinations.ts`.
     - This keeps `aria-current="page"` on the current rail item. The delivered `shell.a11y.test.tsx` case *exposes the active destination via aria-current* at `/coverage` passes again, because the redirect lands on `/data/coverage`.
   - **(b) Lazily loaded screens in delivered tests.** Run `npm run test`. A delivered test outside this story's three test files that fails solely because a `React.lazy` screen had not resolved when a synchronous `getBy*` read the routed screen's content gets one change: that query becomes the awaited `findBy*` form, nothing else.
     - The expected instances are `web/src/app/status-region.integration.test.tsx:58` (`getByText("Coverage")`) and the restore case of `web/src/app/shell.unreachable.test.tsx` (`getByText("Coverage")` after recovery).
     - No assertion is removed, weakened or re-targeted. List each edited line in the cycle's TDD evidence.
     - Any other kind of failure is a defect in T010–T013 and is fixed there.
+    - One more delivered-test edit is authorized (DEC-0402): `web/src/screens/research/copy.test.ts` case (f) reads the declared paths from `legacy-redirects.tsx` as well as `routes.tsx`, because T007 and T010 move `/runs`, `/runs/:runId` and `/instruments` there. No assertion changes. The restore case of `web/src/app/shell.unreachable.test.tsx` also takes its `findBy` form.
   - **Confirm.**
     - `npm run test` is fully green.
     - `git diff -- web/src/app/shell.tsx` shows exactly three changed `to` strings plus the one comment line.
     - `git diff --stat` on the two delivered test files shows only the `findBy` substitutions.
-- [ ] T015 Confirm scope (depends on T014).
+- [x] T015 Confirm scope (depends on T014).
   - `git status --short` lists only:
     - the new `web/src/app/destinations.ts`, `titles.ts`, `legacy-redirects.tsx`, `not-found.tsx`, `titles.test.tsx` and `legacy-redirects.test.tsx`;
     - the rewritten `web/src/app/routes.tsx` and `routes.test.tsx`;
-    - T014's `shell.tsx` and delivered-test edits;
+    - T014's `shell.tsx` and delivered-test edits, including `web/src/screens/research/copy.test.ts` (DEC-0402);
     - this story's `-tasks.md`, `-tdd-evidence.yaml` and status line.
-  - `git diff --exit-code -- web/src/main.tsx web/src/screens/ web/src/api/ web/src/components/ web/src/app/health.tsx web/src/app/layout.ts web/src/app/shell-context.tsx web/src/app/status-region.tsx tests/e2e/` exits 0.
+  - `git diff --exit-code -- web/src/main.tsx web/src/screens/ web/src/api/ web/src/components/ web/src/app/health.tsx web/src/app/layout.ts web/src/app/shell-context.tsx web/src/app/status-region.tsx tests/e2e/ ':!web/src/screens/research/copy.test.ts'` exits 0 (the one excluded file is DEC-0402's edit).
   - DAC-E3-S4-3 inspection: `grep -nE '"/(setup|home|data)"' web/src/app/routes.test.tsx` shows only:
     - URL assertions on the `location` probe;
     - the T002 and T009 (d) absence checks;
@@ -378,11 +381,11 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T016 Run `npm run format` (a check). Fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`.
+- [x] T016 Run `npm run format` (a check). Fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`.
   - After `npm run build`, `ls src/factorflow/api/static/assets/*.js | wc -l` is greater than 1: `React.lazy` produced separate chunks. The delivered `build-output.test.tsx` stays green, unchanged.
   - No comment in a non-test source writes a layout value without a space (`1180 px` is fine, `1180px` is not), because CAP-003-E3-S2's layout rule reads comments too.
   - No behaviour change.
-- [ ] T017 After each TDD cycle in T001–T016 — not once at the end — do the following before the next cycle begins:
+- [x] T017 After each TDD cycle in T001–T016 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E3-S4-tdd-evidence.yaml` beside this story with:

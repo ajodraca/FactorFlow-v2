@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w3/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 213ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 77ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 318ms
+ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6543ms
+   × states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent 138ms
+     → expect(element).toHaveAttribute("placeholder", "Jump to a stock or page") // element.getAttribute("placeholder") === "Jump to a stock or page"
+
+Expected the element to have attribute:
+  placeholder="Jump to a stock or page"
+Received:
+  placeholder="Search"
+   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 988ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 561ms
+   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 302ms
+   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 316ms
+   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 729ms
+   ✓ groups (DAC-E3-11, AC-22) > (c) has no Actions group and offers nothing that trades 337ms
+   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'empty': no domain term, no status, nothing by colour alone 391ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+Error: expect(element).toHaveAttribute("placeholder", "Jump to a stock or page") // element.getAttribute("placeholder") === "Jump to a stock or page"
+
+Expected the element to have attribute:
+  placeholder="Jump to a stock or page"
+Received:
+  placeholder="Search"
+ ❯ src/app/command-palette/command-palette.test.tsx:255:42
+    253|     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
+    254|     expect(stocksCalls).toBe(0);
+    255|     expect(screen.getByRole("combobox")).toHaveAttribute("placeholder"…
+       |                                          ^
+    256|   });
+    257| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 105 passed (106)
+   Start at  00:24:11
+   Duration  12.19s (transform 917ms, setup 1.00s, collect 4.06s, tests 7.15s, environment 4.54s, prepare 2.11s)
+

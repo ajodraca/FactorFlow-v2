@@ -1,0 +1,528 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-1-legacy-redirects.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-1-legacy-redirects.log
+new file mode 100644
+index 00000000..6c82ab1f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-1-legacy-redirects.log
+@@ -0,0 +1,60 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/app/legacy-redirects.test.tsx > Legacy redirects — replace, with the query kept (DAC-E3-S4-1, AC-18) > /runs/abc?x=1 lands on /data/downloads/abc?x=1 by replace, and back does not return to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/app/legacy-redirects.test.tsx (10 tests | 2 failed) 49ms
++   × Legacy redirects — one module (DAC-E3-3) > registers the legacy paths in legacy-redirects.tsx and nowhere else 20ms
++     → expected [ 'app/legacy-redirects.tsx', …(1) ] to deeply equal [ 'app/legacy-redirects.tsx' ]
++   × Legacy redirects — one module (DAC-E3-3) > is imported by routes.tsx once and by no other non-test source 1ms
++     → expected +0 to be 1 // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/legacy-redirects.test.tsx > Legacy redirects — one module (DAC-E3-3) > registers the legacy paths in legacy-redirects.tsx and nowhere else
++AssertionError: expected [ 'app/legacy-redirects.tsx', …(1) ] to deeply equal [ 'app/legacy-redirects.tsx' ]
++
++- Expected
+++ Received
++
++  Array [
++    "app/legacy-redirects.tsx",
+++   "app/routes.tsx",
++  ]
++
++ ❯ src/app/legacy-redirects.test.tsx:105:22
++    103|       .filter((f) => pattern.test(readFileSync(f, "utf-8")))
++    104|       .map((f) => path.relative(webSrc, f));
++    105|     expect(matching).toEqual([path.join("app", "legacy-redirects.tsx")…
++       |                      ^
++    106|   });
++    107| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/app/legacy-redirects.test.tsx > Legacy redirects — one module (DAC-E3-3) > is imported by routes.tsx once and by no other non-test source
++AssertionError: expected +0 to be 1 // Object.is equality
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ src/app/legacy-redirects.test.tsx:111:54
++    109|     const importPattern = /from\s+["']\.\/legacy-redirects["']/g;
++    110|     const routes = readFileSync(path.join(here, "routes.tsx"), "utf-8"…
++    111|     expect(routes.match(importPattern)?.length ?? 0).toBe(1);
++       |                                                      ^
++    112|     const importers = sourceFiles(webSrc)
++    113|       .filter((f) => path.basename(f) !== "routes.tsx")
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 8 passed (10)
++   Start at  21:03:02
++   Duration  518ms (transform 27ms, setup 30ms, collect 80ms, tests 49ms, environment 149ms, prepare 49ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-1.json
+new file mode 100644
+index 00000000..e794f5b1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-1.json
+@@ -0,0 +1,79 @@
++{
++ "schema": 1,
++ "repo_head": "9d188dac96a44ce1045479e0cb8c2a6951750f64",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:coverage-target-swapped",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "to=\"/data/coverage\"",
++   "new": "to=\"/data/followed\"",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:instruments-target-swapped",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "to=\"/data/followed\"",
++   "new": "to=\"/data/coverage\"",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:runs-target-swapped",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "to=\"/data/downloads\" />",
++   "new": "to=\"/data/coverage\" />",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:keepsearch-drops-search",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "return <Navigate to={`${to}${search}`} replace />;",
++   "new": "void search;\n  return <Navigate to={to} replace />;",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:run-detail-drops-search",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "return <Navigate to={`/data/downloads/${runId}${search}`} replace />;",
++   "new": "void search;\n  return <Navigate to={`/data/downloads/${runId}`} replace />;",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:keepsearch-push",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "return <Navigate to={`${to}${search}`} replace />;",
++   "new": "return <Navigate to={`${to}${search}`} />;",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:run-detail-push",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "return <Navigate to={`/data/downloads/${runId}${search}`} replace />;",
++   "new": "return <Navigate to={`/data/downloads/${runId}${search}`} />;",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:run-id-dropped",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "/data/downloads/${runId}${search}",
++   "new": "/data/downloads/${undefined}${search}",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/app/legacy-redirects.tsx:manual:legacy-route-dropped",
++   "operator": "manual",
++   "file": "web/src/app/legacy-redirects.tsx",
++   "old": "  <Route key=\"legacy-runs\" path=\"/runs\" element={<KeepSearch to=\"/data/downloads\" />} />,\n",
++   "new": "",
++   "cycle": "cycle-1"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 00000000..51bae58b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,163 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/legacy-redirects.test.tsx -t '^(?!.*(registers the legacy paths|is imported by routes)).*$'",
++  "repo_head": "9d188dac96a44ce1045479e0cb8c2a6951750f64",
++  "tree_patch_sha256": "ad5711aac1e32dde2c7007513273ec442a84c533f08ef4b1a399a61001804a58",
++  "mutants_sha256": "fe5e4a2d34dcef8b6cc1c73948fc320db9b9036547e941ddb727602d36943e0f",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-1.json",
++  "jobs": 3,
++  "planned": 9,
++  "started": "2026-11-21T03:03:52Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 1.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "dc4bda37747f3b798eb60f228449d7a187accf1644908e64d1ed7e521d945f39"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 1.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "c834da2064aa9d6e1bbc9f3a0311b3123cf48e2ef022da706bb68da36f4c23ee"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 1.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "33255890a8d19efabab7d3ba56865ccc2b6db1fbadd05b9a2d1d63b807c3387a"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:coverage-target-swapped",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "to=\"/data/coverage\"",
++      "new": "to=\"/data/followed\"",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_coverage-target-swapped.log",
++      "log_sha256": "0c7042a31fcfdbb7a85c788e7dba008e7fd9f1ddbf0a6e898c8e5eee51fbbdfc"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:instruments-target-swapped",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "to=\"/data/followed\"",
++      "new": "to=\"/data/coverage\"",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_instruments-target-swapped.log",
++      "log_sha256": "3916f30a58674d2fa5c363f160f7423e8626ddb2107c6840e1a7e8468f170fc7"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:runs-target-swapped",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "to=\"/data/downloads\" />",
++      "new": "to=\"/data/coverage\" />",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_runs-target-swapped.log",
++      "log_sha256": "a2385d36f36320665b4bb4ca72d55bd947af7a2a0866b1dd47dd093740000e88"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:keepsearch-drops-search",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "return <Navigate to={`${to}${search}`} replace />;",
++      "new": "void search;\n  return <Navigate to={to} replace />;",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_keepsearch-drops-search.log",
++      "log_sha256": "713354c41267448ad625f4c1eeb8e94e4f9636e2e665b36d5eac9908c5604b14"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:run-detail-drops-search",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "return <Navigate to={`/data/downloads/${runId}${search}`} replace />;",
++      "new": "void search;\n  return <Navigate to={`/data/downloads/${runId}`} replace />;",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_run-detail-drops-search.log",
++      "log_sha256": "f7c2bbaad9e98050de8b7e682074113678156f554158c4f0ff07fe9a18e0cdb2"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:keepsearch-push",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "return <Navigate to={`${to}${search}`} replace />;",
++      "new": "return <Navigate to={`${to}${search}`} />;",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_keepsearch-push.log",
++      "log_sha256": "af23c2f34652169678a2dddee3b8c2dfcedb38b2de3568cb8779ba5a522964de"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:run-detail-push",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "return <Navigate to={`/data/downloads/${runId}${search}`} replace />;",
++      "new": "return <Navigate to={`/data/downloads/${runId}${search}`} />;",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_run-detail-push.log",
++      "log_sha256": "8aa9768f6ca58299bc7ae75257cd86dff3c5c33118b410260c15840acf07d6f0"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:run-id-dropped",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "/data/downloads/${runId}${search}",
++      "new": "/data/downloads/${undefined}${search}",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_run-id-dropped.log",
++      "log_sha256": "e4aa8be151af69f26a7fc709ed3975b00b80768651d6e6b23a86f6e4b40a5f29"
++    },
++    {
++      "id": "web/src/app/legacy-redirects.tsx:manual:legacy-route-dropped",
++      "operator": "manual",
++      "file": "web/src/app/legacy-redirects.tsx",
++      "old": "  <Route key=\"legacy-runs\" path=\"/runs\" element={<KeepSearch to=\"/data/downloads\" />} />,\n",
++      "new": "",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results-logs/web_src_app_legacy-redirects.tsx_manual_legacy-route-dropped.log",
++      "log_sha256": "88dd2ad9d9cc01dbe76bc24fae03be754737f2cd3381982134e0e413b37139b6"
++    }
++  ],
++  "finished": "2026-11-21T03:03:56Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-1-legacy-redirects.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-1-legacy-redirects.log
+new file mode 100644
+index 00000000..d65abab6
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-1-legacy-redirects.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/app/legacy-redirects.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/legacy-redirects.test.tsx [ src/app/legacy-redirects.test.tsx ]
++Error: Failed to resolve import "./legacy-redirects" from "web/src/app/legacy-redirects.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/legacy-redirects.test.tsx:15:29
++  13 |  } from "react-router-dom";
++  14 |  import { describe, expect, it } from "vitest";
++  15 |  import { legacyRoutes } from "./legacy-redirects";
++     |                                ^
++  16 |  const navigateRef = { current: null };
++  17 |  function LocationProbe() {
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  21:02:54
++   Duration  761ms (transform 18ms, setup 61ms, collect 0ms, tests 0ms, environment 323ms, prepare 188ms)
++
+diff --git a/web/src/app/legacy-redirects.test.tsx b/web/src/app/legacy-redirects.test.tsx
+new file mode 100644
+index 00000000..3bda95cb
+--- /dev/null
++++ b/web/src/app/legacy-redirects.test.tsx
+@@ -0,0 +1,120 @@
++import { readFileSync, readdirSync } from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import { act, render, screen } from "@testing-library/react";
++import { type JSX, type ReactElement } from "react";
++import {
++  MemoryRouter,
++  Route,
++  Routes,
++  useLocation,
++  useNavigate,
++  useNavigationType,
++} from "react-router-dom";
++import { describe, expect, it } from "vitest";
++import { legacyRoutes } from "./legacy-redirects";
++
++type Navigate = ReturnType<typeof useNavigate>;
++const navigateRef: { current: Navigate | null } = { current: null };
++
++/** Renders the pathname plus search, the navigation type, and exposes `navigate`. */
++function LocationProbe(): JSX.Element {
++  const location = useLocation();
++  const navigationType = useNavigationType();
++  navigateRef.current = useNavigate();
++  return (
++    <>
++      <span data-testid="location">{location.pathname + location.search}</span>
++      <span data-testid="nav-type">{navigationType}</span>
++    </>
++  );
++}
++
++function renderAt(from: string): void {
++  render(
++    <MemoryRouter initialEntries={["/start", from]} initialIndex={1}>
++      <Routes>
++        {legacyRoutes}
++        <Route path="*" element={<LocationProbe />} />
++      </Routes>
++    </MemoryRouter>,
++  );
++}
++
++const here = path.dirname(fileURLToPath(import.meta.url));
++const webSrc = path.resolve(here, "..");
++
++function sourceFiles(dir: string): string[] {
++  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
++    const full = path.join(dir, entry.name);
++    if (entry.isDirectory()) return sourceFiles(full);
++    if (!/\.tsx?$/.test(entry.name) || /\.test\.tsx?$/.test(entry.name)) return [];
++    return [full];
++  });
++}
++
++// Implements TC-COMP-077
++describe("Legacy redirects — replace, with the query kept (DAC-E3-S4-1, AC-18)", () => {
++  const cases: ReadonlyArray<readonly [string, string]> = [
++    ["/runs/abc?x=1", "/data/downloads/abc?x=1"],
++    ["/coverage", "/data/coverage"],
++    ["/coverage?symbol=KO", "/data/coverage?symbol=KO"],
++    ["/instruments", "/data/followed"],
++    ["/instruments?lifecycle=retired", "/data/followed?lifecycle=retired"],
++    ["/runs", "/data/downloads"],
++    ["/runs?cursor=c1", "/data/downloads?cursor=c1"],
++  ];
++
++  it.each(cases)("%s lands on %s by replace, and back does not return to it", async (from, to) => {
++    renderAt(from);
++    expect(screen.getByTestId("location").textContent).toBe(to);
++    expect(screen.getByTestId("nav-type").textContent).toBe("REPLACE");
++
++    // History did not grow: with a push, back would land on the legacy path,
++    // which would redirect again and read `to`.
++    await act(async () => {
++      navigateRef.current?.(-1);
++    });
++    expect(screen.getByTestId("location").textContent).toBe("/start");
++  });
++});
++
++// DAC-E3-3: from one module whose removal deletes one file and its tests.
++describe("Legacy redirects — one module (DAC-E3-3)", () => {
++  it("exports four keyed routes for the four legacy paths", () => {
++    expect(legacyRoutes).toHaveLength(4);
++    const elements = legacyRoutes as ReactElement<{ path: string }>[];
++    expect(elements.map((e) => e.props.path)).toEqual([
++      "/coverage",
++      "/instruments",
++      "/runs",
++      "/runs/:runId",
++    ]);
++    const keys = elements.map((e) => e.key);
++    expect(keys.every((k) => typeof k === "string" && k.length > 0)).toBe(true);
++    expect(new Set(keys).size).toBe(4);
++  });
++
++  it("registers the legacy paths in legacy-redirects.tsx and nowhere else", () => {
++    const pattern = /path=["'](\/coverage|\/instruments|\/runs|\/runs\/:runId)["']/;
++    const files = sourceFiles(webSrc);
++    expect(files.length).toBeGreaterThan(50);
++    const matching = files
++      .filter((f) => pattern.test(readFileSync(f, "utf-8")))
++      .map((f) => path.relative(webSrc, f));
++    expect(matching).toEqual([path.join("app", "legacy-redirects.tsx")]);
++  });
++
++  it("is imported by routes.tsx once and by no other non-test source", () => {
++    const importPattern = /from\s+["']\.\/legacy-redirects["']/g;
++    const routes = readFileSync(path.join(here, "routes.tsx"), "utf-8");
++    expect(routes.match(importPattern)?.length ?? 0).toBe(1);
++    const importers = sourceFiles(webSrc)
++      .filter((f) => path.basename(f) !== "routes.tsx")
++      .filter((f) =>
++        /["'](?:\.\/|(?:\.\.\/)+app\/)legacy-redirects["']/.test(readFileSync(f, "utf-8")),
++      )
++      .map((f) => path.relative(webSrc, f));
++    expect(importers).toEqual([]);
++  });
++});
+diff --git a/web/src/app/legacy-redirects.tsx b/web/src/app/legacy-redirects.tsx
+new file mode 100644
+index 00000000..0b6327d6
+--- /dev/null
++++ b/web/src/app/legacy-redirects.tsx
+@@ -0,0 +1,37 @@
++import type { JSX } from "react";
++import { Navigate, Route, useLocation, useParams } from "react-router-dom";
++
++/**
++ * The four paths CAP-001 shipped, redirected to their new paths for one
++ * release (AC-18; DAC-E3-3, DAC-E3-S4-1; owner-shell 2.6 and 6).
++ *
++ * Each redirect is a `Navigate ... replace`, so the legacy path never enters
++ * history and Back does not land on it. The query string is kept.
++ *
++ * This file, its import in `routes.tsx` and `legacy-redirects.test.tsx` are
++ * deleted one release after this ships (capability assumption 3).
++ */
++
++/** Redirects to `to`, keeping the current query string. */
++function KeepSearch({ to }: { to: string }): JSX.Element {
++  const { search } = useLocation();
++  return <Navigate to={`${to}${search}`} replace />;
++}
++
++/** `/runs/:runId` becomes `/data/downloads/:runId`, query kept. */
++function LegacyRunDetail(): JSX.Element {
++  const { runId } = useParams();
++  const { search } = useLocation();
++  return <Navigate to={`/data/downloads/${runId}${search}`} replace />;
++}
++
++export const legacyRoutes = [
++  <Route key="legacy-coverage" path="/coverage" element={<KeepSearch to="/data/coverage" />} />,
++  <Route
++    key="legacy-instruments"
++    path="/instruments"
++    element={<KeepSearch to="/data/followed" />}
++  />,
++  <Route key="legacy-runs" path="/runs" element={<KeepSearch to="/data/downloads" />} />,
++  <Route key="legacy-run-detail" path="/runs/:runId" element={<LegacyRunDetail />} />,
++];

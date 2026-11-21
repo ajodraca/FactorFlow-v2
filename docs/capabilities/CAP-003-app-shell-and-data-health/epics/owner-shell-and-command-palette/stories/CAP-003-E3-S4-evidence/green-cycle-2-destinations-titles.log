@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+stderr | src/app/titles.test.tsx > useTitle() — the detail crumb follows the screen (DAC-E3-9, DEC-0214) > reads the generic noun, then the screen's detail, then the noun again
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/app/titles.test.tsx (22 tests | 1 failed) 35ms
+   × titles.ts — every registered route has a title (DAC-E3-S4-2, DAC-E3-9) > has an entry for every route routes.tsx and legacy-redirects.tsx register, and no other 4ms
+     → expected [ '*', '/', '/coverage', …(9) ] to deeply equal [ '*', '/', '/coverage', …(13) ]
+stderr | src/app/routes.test.tsx > Routes — run detail is a child of Runs (DAC-E1-S4-2) > keeps Runs active and adds no rail item beyond the five destinations when a run detail route opens
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/app/routes.test.tsx (25 tests) 214ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/titles.test.tsx > titles.ts — every registered route has a title (DAC-E3-S4-2, DAC-E3-9) > has an entry for every route routes.tsx and legacy-redirects.tsx register, and no other
+AssertionError: expected [ '*', '/', '/coverage', …(9) ] to deeply equal [ '*', '/', '/coverage', …(13) ]
+
+- Expected
++ Received
+
+  Array [
+    "*",
+    "/",
+    "/coverage",
+-   "/data/coverage",
+-   "/data/downloads",
+-   "/data/downloads/:runId",
+-   "/data/followed",
+    "/instruments",
+    "/research",
+    "/research/compare",
+    "/research/stocks/:symbol",
+    "/research/universes",
+    "/research/universes/:universeId",
+    "/runs",
+    "/runs/:runId",
+    "/settings",
+  ]
+
+ ❯ src/app/titles.test.tsx:24:45
+     22|   it("has an entry for every route routes.tsx and legacy-redirects.tsx…
+     23|     const registered = [...pathsIn("routes.tsx"), ...pathsIn("legacy-r…
+     24|     expect([...new Set(registered)].sort()).toEqual(TITLES.map((t) => …
+       |                                             ^
+     25|   });
+     26| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 46 passed (47)
+   Start at  21:07:53
+   Duration  769ms (transform 153ms, setup 65ms, collect 280ms, tests 249ms, environment 306ms, prepare 101ms)
+

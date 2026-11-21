@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
+
+ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 7ms
+   × pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces 3ms
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (b) matches a substring of any field, ignoring case and surrounding spaces
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/app/command-palette/command-palette.test.tsx:51:47
+     49|     expect(matchesText("", "Settings")).toBe(true);
+     50|     expect(matchesText("SET", "Settings")).toBe(true);
+     51|     expect(matchesText("  set ", "Settings")).toBe(true);
+       |                                               ^
+     52|     expect(matchesText("data", "Coverage", "Data health › Coverage")).…
+     53|     expect(matchesText("xyz", "Coverage", "Data health › Coverage")).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  23:28:59
+   Duration  828ms (transform 55ms, setup 36ms, collect 55ms, tests 7ms, environment 279ms, prepare 90ms)
+

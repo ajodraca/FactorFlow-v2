@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1ejqm_lb/w0/web
+
+ ❯ src/app/command-palette/command-palette.test.tsx (5 tests | 1 failed) 8ms
+   × pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time 5ms
+     → expected [ { label: 'Research', …(2) }, …(4) ] to deeply equal [ { label: 'Research', …(2) }, …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > pages, targets and reasons > (a) lists the destinations, then the three data pages, reading DESTINATIONS at call time
+AssertionError: expected [ { label: 'Research', …(2) }, …(4) ] to deeply equal [ { label: 'Research', …(2) }, …(4) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "hint": null,
+      "label": "Research",
+      "to": "/research",
+    },
+    Object {
+      "hint": null,
+      "label": "Settings",
+      "to": "/settings",
+    },
+    Object {
+-     "hint": "Data health › Coverage",
+-     "label": "Coverage",
+-     "to": "/data/coverage",
+-   },
+-   Object {
+      "hint": "Data health › Followed stocks",
+      "label": "Followed stocks",
+      "to": "/data/followed",
++   },
++   Object {
++     "hint": "Data health › Coverage",
++     "label": "Coverage",
++     "to": "/data/coverage",
+    },
+    Object {
+      "hint": "Data health › Downloads",
+      "label": "Downloads",
+      "to": "/data/downloads",
+    },
+  ]
+
+ ❯ src/app/command-palette/command-palette.test.tsx:32:28
+     30| describe("pages, targets and reasons", () => {
+     31|   it("(a) lists the destinations, then the three data pages, reading D…
+     32|     expect(palettePages()).toEqual([
+       |                            ^
+     33|       { label: "Research", to: "/research", hint: null },
+     34|       { label: "Settings", to: "/settings", hint: null },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  23:28:58
+   Duration  834ms (transform 54ms, setup 36ms, collect 55ms, tests 8ms, environment 199ms, prepare 57ms)
+

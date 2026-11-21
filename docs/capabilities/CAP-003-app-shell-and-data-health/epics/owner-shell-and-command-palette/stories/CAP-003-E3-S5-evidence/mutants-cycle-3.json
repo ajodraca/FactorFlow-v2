@@ -1,0 +1,375 @@
+{
+ "schema": 1,
+ "repo_head": "a964c7da346d422ee2b16ab568c83395fb318e43",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/command-palette/index.tsx:47:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 47,
+   "original": "    <CommandDialog open={open} onOpenChange={onOpenChange} shouldFilter={false}>",
+   "mutated": "    <CommandDialog open={open} onOpenChange={onOpenChange} shouldFilter={true}>"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:48:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 48,
+   "original": "      <PaletteBody onClose={() => onOpenChange(false)} />",
+   "mutated": "      <PaletteBody onClose={() => onOpenChange(true)} />"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:74:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 74,
+   "original": "    if (!RESEARCH_REGISTERED) return;",
+   "mutated": "    if (RESEARCH_REGISTERED) return;"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:78:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 78,
+   "original": "        if (!controller.signal.aborted) setUniverses({ kind: \"ok\", rows });",
+   "mutated": "        if (controller.signal.aborted) setUniverses({ kind: \"ok\", rows });"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:81:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 81,
+   "original": "        if (!controller.signal.aborted) setUniverses({ kind: \"error\", error });",
+   "mutated": "        if (controller.signal.aborted) setUniverses({ kind: \"error\", error });"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:93:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 93,
+   "original": "  if (!(stocks.kind === \"ok\" && stocks.symbols.length === 0)) {",
+   "mutated": "  if (!(stocks.kind === \"ok\" || stocks.symbols.length === 0)) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:93:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 93,
+   "original": "  if (!(stocks.kind === \"ok\" && stocks.symbols.length === 0)) {",
+   "mutated": "  if ((stocks.kind === \"ok\" && stocks.symbols.length === 0)) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:93:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 93,
+   "original": "  if (!(stocks.kind === \"ok\" && stocks.symbols.length === 0)) {",
+   "mutated": "  if (!(stocks.kind === \"ok\" && stocks.symbols.length === 1)) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:96:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 96,
+   "original": "        {stocks.kind === \"idle\" && (",
+   "mutated": "        {stocks.kind === \"idle\" || ("
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:101:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 101,
+   "original": "        {stocks.kind === \"loading\" && <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}",
+   "mutated": "        {stocks.kind === \"loading\" || <CommandLoading>{PALETTE_COPY.searching}</CommandLoading>}"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:112:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 112,
+   "original": "        {stocks.kind === \"ok\" && stocks.more && (",
+   "mutated": "        {stocks.kind === \"ok\" || stocks.more && ("
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:112:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 112,
+   "original": "        {stocks.kind === \"ok\" && stocks.more && (",
+   "mutated": "        {stocks.kind === \"ok\" && stocks.more || ("
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:117:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 117,
+   "original": "        {stocks.kind === \"error\" && (",
+   "mutated": "        {stocks.kind === \"error\" || ("
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:128:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 128,
+   "original": "  if (universes.kind === \"error\" || universeRows.length > 0) {",
+   "mutated": "  if (universes.kind === \"error\" && universeRows.length > 0) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:128:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 128,
+   "original": "  if (universes.kind === \"error\" || universeRows.length > 0) {",
+   "mutated": "  if (universes.kind === \"error\" || universeRows.length >= 0) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:128:off-by-one:2",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 128,
+   "original": "  if (universes.kind === \"error\" || universeRows.length > 0) {",
+   "mutated": "  if (universes.kind === \"error\" || universeRows.length > 1) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:131:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 131,
+   "original": "        {universes.kind === \"error\" && (",
+   "mutated": "        {universes.kind === \"error\" || ("
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:150:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 150,
+   "original": "  if (pages.length > 0) {",
+   "mutated": "  if (pages.length >= 0) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:150:off-by-one:2",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 150,
+   "original": "  if (pages.length > 0) {",
+   "mutated": "  if (pages.length > 1) {"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:156:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 156,
+   "original": "            {p.hint !== null && (",
+   "mutated": "            {p.hint !== null || ("
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:165:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 165,
+   "original": "  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";",
+   "mutated": "  const settled = text.trim() !== \"\" || stocks.kind === \"ok\" && universes.kind !== \"loading\";"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:165:negate-boolean:2",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 165,
+   "original": "  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" && universes.kind !== \"loading\";",
+   "mutated": "  const settled = text.trim() !== \"\" && stocks.kind === \"ok\" || universes.kind !== \"loading\";"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:171:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 171,
+   "original": "        {settled && <CommandEmpty>{PALETTE_COPY.empty(text.trim())}</CommandEmpty>}",
+   "mutated": "        {settled || <CommandEmpty>{PALETTE_COPY.empty(text.trim())}</CommandEmpty>}"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:173:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/index.tsx",
+   "line": 173,
+   "original": "          i === 0",
+   "mutated": "          i === 1"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:no-shouldfilter-false",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "onOpenChange={onOpenChange} shouldFilter={false}>",
+   "new": "onOpenChange={onOpenChange}>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universes-deps-text",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "    return () => controller.abort();\n  }, []);",
+   "new": "    return () => controller.abort();\n  }, [text]);",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:empty-without-settled",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "{settled && <CommandEmpty>",
+   "new": "{text.trim() !== \"\" && <CommandEmpty>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:choose-no-close",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "    navigate(to);\n    onClose();",
+   "new": "    navigate(to);",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:choose-no-navigate",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "    navigate(to);\n    onClose();",
+   "new": "    onClose();",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:no-local-universe-filter",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "universes.rows.filter((u) => matchesText(text, u.name))",
+   "new": "universes.rows",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:no-local-page-filter",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "palettePages().filter((p) => matchesText(text, p.label, p.hint))",
+   "new": "palettePages()",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:stock-not-disabled-hint",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "<CommandItem disabled value=\"hint:stocks\">",
+   "new": "<CommandItem value=\"hint:stocks\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:partial-not-disabled",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "<CommandItem disabled value=\"partial:stocks\">",
+   "new": "<CommandItem value=\"partial:stocks\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:error-not-disabled",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "<CommandItem disabled value=\"error:stocks\">",
+   "new": "<CommandItem value=\"error:stocks\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universes-error-not-disabled",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "<CommandItem disabled value=\"error:universes\">",
+   "new": "<CommandItem value=\"error:universes\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:separator-dropped",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "<CommandSeparator key={`separator-${group.key}`} alwaysRender />, group]",
+   "new": "group]",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:stock-select-wrong-target",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "choose(stockTarget(symbol))",
+   "new": "choose(universeTarget(symbol))",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:universe-select-wrong-target",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "choose(universeTarget(u.id))",
+   "new": "choose(stockTarget(u.id))",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:page-value-collision",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "value={`page:${p.to}`}",
+   "new": "value={p.label}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:hint-always",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "{p.hint !== null && (",
+   "new": "{(",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/app/command-palette/index.tsx:manual:copy-universes-error",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/index.tsx",
+   "old": "{PALETTE_COPY.universesError(failureReason(universes.error))}",
+   "new": "{PALETTE_COPY.stocksError(failureReason(universes.error))}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/components/ui/command.tsx:manual:command-prop-dropped",
+   "operator": "manual",
+   "file": "web/src/components/ui/command.tsx",
+   "old": "            shouldFilter={shouldFilter}\n",
+   "new": "",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/components/ui/command.tsx:manual:command-prop-forced-false",
+   "operator": "manual",
+   "file": "web/src/components/ui/command.tsx",
+   "old": "shouldFilter={shouldFilter}",
+   "new": "shouldFilter={false}",
+   "cycle": "cycle-3"
+  }
+ ]
+}

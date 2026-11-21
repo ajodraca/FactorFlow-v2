@@ -1,0 +1,67 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w2/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 233ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 56ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 303ms
+ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 2 failed) 5790ms
+   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 985ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 571ms
+   ✓ states (DAC-E3-12, AC-24) > (g) opens with health unreachable, and Pages stays usable 311ms
+   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (a) not registered: no universes request, no Universes group, a stock goes to Coverage 312ms
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (d) closing before the universes read answers aborts it 82ms
+     → expected false to be true // Object.is equality
+   × universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 22ms
+     → expected false to be true // Object.is equality
+   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'partial': no domain term, no status, nothing by colour alone 357ms
+   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 300ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (d) closing before the universes read answers aborts it
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/app/command-palette/command-palette.test.tsx:450:29
+    448|     await user.keyboard("{Escape}");
+    449|     expect(screen.queryByRole("dialog")).toBeNull();
+    450|     expect(signal?.aborted).toBe(true);
+       |                             ^
+    451|     pending.resolve(ok(UNIVERSES));
+    452|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/app/command-palette/command-palette.test.tsx:478:33
+    476|     await openPalette(user);
+    477|     await waitFor(() => expect(universesCalls).toBe(2));
+    478|     expect(signals[0]?.aborted).toBe(true);
+       |                                 ^
+    479|     expect(signals[1]?.aborted).toBe(false);
+    480|     await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 104 passed (106)
+   Start at  00:24:11
+   Duration  11.45s (transform 1.15s, setup 942ms, collect 3.69s, tests 6.38s, environment 3.84s, prepare 3.88s)
+

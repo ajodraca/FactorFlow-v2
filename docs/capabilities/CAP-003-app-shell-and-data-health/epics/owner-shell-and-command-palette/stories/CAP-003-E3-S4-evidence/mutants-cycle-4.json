@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "repo_head": "283849ef29f0b7ec4503b540feff331e927050e6",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/app/routes.tsx:manual:settings-static-import",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "const SettingsScreen = lazy(() => import(\"../screens/settings\"));",
+      "new": "import SettingsScreen from \"../screens/settings\";",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:run-detail-param-id",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "path=\"/data/downloads/:runId\"",
+      "new": "path=\"/data/downloads/:id\"",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:answering-guard-dropped",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "if (liveness === \"answering\" && health !== null) {",
+      "new": "if (health !== null) {",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:targets-swapped",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "health.most_recent_run === null ? \"/setup\" : \"/home\"",
+      "new": "health.most_recent_run === null ? \"/home\" : \"/setup\"",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:root-push",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "\" : \"/home\"} replace />",
+      "new": "\" : \"/home\"} />",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:followed-renders-coverage",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "path=\"/data/followed\" element={<InstrumentsScreen />}",
+      "new": "path=\"/data/followed\" element={<CoverageScreen />}",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:universe-param-renamed",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "path=\"/research/universes/:universeId\"",
+      "new": "path=\"/research/universes/:id\"",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:legacy-routes-dropped",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "        {legacyRoutes}\n",
+      "new": "",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:catch-all-bare",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "<Route path=\"*\" element={<NotFound />} />",
+      "new": "<Route path=\"*\" element={<p>Not found</p>} />",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:two-skeleton-cards",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "  return <ShellSkeleton />;\n}\n\n/**\n * The route map",
+      "new": "  return (\n    <>\n      <ShellSkeleton />\n      <ShellSkeleton />\n    </>\n  );\n}\n\n/**\n * The route map",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:manual:fallback-null",
+      "operator": "manual",
+      "file": "web/src/app/routes.tsx",
+      "old": "<Suspense fallback={<ShellSkeleton />}>",
+      "new": "<Suspense fallback={null}>",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/shell.tsx:manual:rail-coverage-legacy",
+      "operator": "manual",
+      "file": "web/src/app/shell.tsx",
+      "old": "to: \"/data/coverage\"",
+      "new": "to: \"/coverage\"",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/app/routes.tsx:52:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/app/routes.tsx",
+      "line": 52,
+      "original": "  if (liveness === \"answering\" && health !== null) {",
+      "mutated": "  if (liveness === \"answering\" || health !== null) {"
+    }
+  ]
+}

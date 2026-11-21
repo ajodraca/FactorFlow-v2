@@ -1,0 +1,105 @@
+{
+ "schema": 1,
+ "repo_head": "c2efe62967f0c67483b12d4f146165e94ba42723",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:4:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "line": 4,
+   "original": "export const STOCK_SEARCH_DEBOUNCE_MS = 250;",
+   "mutated": "export const STOCK_SEARCH_DEBOUNCE_MS = 251;"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:5:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "line": 5,
+   "original": "export const STOCK_SEARCH_LIMIT = 8;",
+   "mutated": "export const STOCK_SEARCH_LIMIT = 9;"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:lifecycle-retired",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "lifecycle: \"active\"",
+   "new": "lifecycle: \"retired\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-signal",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "{ signal: controller.signal },",
+   "new": "{},",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-abort-in-cleanup",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "      clearTimeout(timer);\n      controller.abort();\n",
+   "new": "      clearTimeout(timer);\n",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-clear-timeout",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "      clearTimeout(timer);\n      controller.abort();\n",
+   "new": "      controller.abort();\n",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-trim",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "const prefix = text.trim();",
+   "new": "const prefix = text;",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:stale-ok-guard",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "          if (controller.signal.aborted) return;\n          setState({\n            kind: \"ok\"",
+   "new": "          setState({\n            kind: \"ok\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:stale-error-guard",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "          if (controller.signal.aborted) return;\n          setState({ kind: \"error\", error });",
+   "new": "          setState({ kind: \"error\", error });",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:more-inverted",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "more: body.next_cursor !== null",
+   "new": "more: body.next_cursor === null",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:no-loading",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "    setState({ kind: \"loading\" });\n",
+   "new": "",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/app/command-palette/use-stock-search.ts:manual:symbol-param",
+   "operator": "manual",
+   "file": "web/src/app/command-palette/use-stock-search.ts",
+   "old": "symbol: prefix,",
+   "new": "symbol: text,",
+   "cycle": "cycle-2"
+  }
+ ]
+}
