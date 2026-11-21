@@ -80,7 +80,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Confirm the hard-dependency deliverables this story imports or extends, and record the green baseline. No package is added (E3 adds no dependency of its own: epic NFR *Security*; DEC-0211 gives `package.json` to `ui-components`).
 
-- [ ] T001 From the repo root, confirm the four hard graph edges are delivered, then run `npm ci` and `npm run test` and record that the suite is green before any change. Stop if any item is missing (traces to DAC-E3-11, DAC-E3-S5-4; prerequisite infrastructure):
+- [x] T001 From the repo root, confirm the four hard graph edges are delivered, then run `npm ci` and `npm run test` and record that the suite is green before any change. Stop if any item is missing (traces to DAC-E3-11, DAC-E3-S5-4; prerequisite infrastructure):
   - CAP-003-E1-S3: `web/src/components/ui/command.tsx` exports `CommandDialog`, `CommandInput`, `CommandList`, `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator` and `CommandLoading`. Its `CommandDialog` labels the dialog *Search FactorFlow*, sets `loop` on the inner cmdk `Command`, records the opener in `onOpenAutoFocus` and refocuses it in `onCloseAutoFocus`. `package.json` lists `cmdk` and `@radix-ui/react-dialog`.
   - CAP-003-E3-S4: `web/src/app/destinations.ts` exports `DESTINATIONS: readonly Destination[]` (at this point `[Research, Settings]`) and `RESEARCH_REGISTERED`.
   - CAP-003-E3-S1: `web/src/api/client.ts` exports `requestJson`, `ApiError` and `ApiUnreachableError`. The export predates CAP-003 (CAP-002-E4-S1), and S1 leaves the file untouched.
@@ -342,8 +342,8 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
 
 **Purpose**: Validation, the full scan and TDD evidence.
 
-- [ ] T014 Run `web/src/components/token-literals.test.ts` unchanged apart from T007, together with the full suite. Then plant `export const x = "12px";` in a temporary `web/src/app/command-palette/planted.tsx`, confirm `npm run test -- token-literals` fails naming that file, and delete it (TC-COMP-084 step 3 on the real file system). Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to DAC-E3-S5-4, AC-26).
-- [ ] T015 After each TDD cycle in T002–T014, not once at the end, do the following before the next cycle begins. This traces to no AC (INV-TDD-002, TEST-TDD-008).
+- [x] T014 Run `web/src/components/token-literals.test.ts` unchanged apart from T007, together with the full suite. Then plant `export const x = "12px";` in a temporary `web/src/app/command-palette/planted.tsx`, confirm `npm run test -- token-literals` fails naming that file, and delete it (TC-COMP-084 step 3 on the real file system). Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to DAC-E3-S5-4, AC-26).
+- [x] T015 After each TDD cycle in T002–T014, not once at the end, do the following before the next cycle begins. This traces to no AC (INV-TDD-002, TEST-TDD-008).
   - Stage only that cycle's diff. Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `CAP-003-E3-S5-tdd-evidence.yaml` beside this story with:
     - `code_review_verdict` and `spec_drift.drift_detected`;
