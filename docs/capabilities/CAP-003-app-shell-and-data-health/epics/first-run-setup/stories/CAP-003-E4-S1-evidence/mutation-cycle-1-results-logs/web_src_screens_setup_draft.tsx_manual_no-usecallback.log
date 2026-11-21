@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w3/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/draft.test.tsx (5 tests | 1 failed) 161ms
+   × useSetupDrafts > keeps one setter identity across updates 4ms
+     → expected [Function setDraft] to be [Function setDraft] // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > keeps one setter identity across updates
+AssertionError: expected [Function setDraft] to be [Function setDraft] // Object.is equality
+
+Compared values have no visual difference.
+
+ ❯ src/screens/setup/draft.test.tsx:125:37
+    123|     act(() => result.current.setDraft("yearsText", "2"));
+    124|     act(() => result.current.setDraft("yearsText", "3"));
+    125|     expect(result.current.setDraft).toBe(first);
+       |                                     ^
+    126|   });
+    127| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  16:54:33
+   Duration  1.25s (transform 38ms, setup 47ms, collect 112ms, tests 161ms, environment 223ms, prepare 280ms)
+

@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/draft.test.tsx (5 tests | 2 failed) 143ms
+   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 133ms
+     → expected 'x7' to be '7' // Object.is equality
+   × useSetupDrafts > lands two writes made in one tick 3ms
+     → expected { yearsText: 'x', …(3) } to deeply equal { Object (yearsText, source, ...) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+AssertionError: expected 'x7' to be '7' // Object.is equality
+
+Expected: "7"
+Received: "x7"
+
+ ❯ src/screens/setup/draft.test.tsx:81:72
+     79|     await user.click(screen.getByRole("link", { name: "to setup" }));
+     80| 
+     81|     expect((screen.getByLabelText("years") as HTMLInputElement).value)…
+       |                                                                        ^
+     82|     expect((screen.getByLabelText("paste") as HTMLInputElement).checke…
+     83|     expect((screen.getByLabelText("later") as HTMLInputElement).checke…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
+AssertionError: expected { yearsText: 'x', …(3) } to deeply equal { Object (yearsText, source, ...) }
+
+- Expected
++ Received
+
+  Object {
+    "pasted": "KO",
+    "source": "paste",
+    "unposted": Array [],
+-   "yearsText": "",
++   "yearsText": "x",
+  }
+
+ ❯ src/screens/setup/draft.test.tsx:134:35
+    132|       result.current.setDraft("pasted", "KO");
+    133|     });
+    134|     expect(result.current.drafts).toEqual({
+       |                                   ^
+    135|       yearsText: "",
+    136|       source: "paste",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  16:54:35
+   Duration  756ms (transform 28ms, setup 33ms, collect 72ms, tests 143ms, environment 179ms, prepare 140ms)
+

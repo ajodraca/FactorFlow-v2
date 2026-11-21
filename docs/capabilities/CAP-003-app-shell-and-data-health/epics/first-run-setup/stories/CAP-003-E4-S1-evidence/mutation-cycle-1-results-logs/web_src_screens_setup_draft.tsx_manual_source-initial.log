@@ -1,0 +1,68 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w0/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/draft.test.tsx (5 tests | 2 failed) 161ms
+   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 151ms
+     → expected { Object (yearsText, source, ...) } to deeply equal { yearsText: '', source: null, …(2) }
+   × useSetupDrafts > changes one key at a time 2ms
+     → expected { yearsText: '12', …(3) } to deeply equal { yearsText: '12', source: null, …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+AssertionError: expected { Object (yearsText, source, ...) } to deeply equal { yearsText: '', source: null, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "pasted": "",
+-   "source": null,
++   "source": "paste",
+    "unposted": Array [],
+    "yearsText": "",
+  }
+
+ ❯ src/screens/setup/draft.test.tsx:102:20
+    100|       </SetupDraftProvider>,
+    101|     );
+    102|     expect(latest).toEqual({ yearsText: "", source: null, pasted: "", …
+       |                    ^
+    103|   });
+    104| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
+AssertionError: expected { yearsText: '12', …(3) } to deeply equal { yearsText: '12', source: null, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "pasted": "KO",
+-   "source": null,
++   "source": "paste",
+    "unposted": Array [],
+    "yearsText": "12",
+  }
+
+ ❯ src/screens/setup/draft.test.tsx:146:35
+    144|     act(() => result.current.setDraft("pasted", "KO"));
+    145|     act(() => result.current.setDraft("yearsText", "12"));
+    146|     expect(result.current.drafts).toEqual({
+       |                                   ^
+    147|       yearsText: "12",
+    148|       source: null,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  16:54:33
+   Duration  1.14s (transform 40ms, setup 46ms, collect 113ms, tests 161ms, environment 216ms, prepare 129ms)
+

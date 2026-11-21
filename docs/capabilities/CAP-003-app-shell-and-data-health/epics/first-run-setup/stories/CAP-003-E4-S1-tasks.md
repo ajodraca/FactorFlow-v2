@@ -102,7 +102,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 ### Mandatory Component Tests
 
-- [ ] T001 [P] Implement TC-COMP-105 (Drafts survive navigating away and back; nothing in browser storage) in a new `web/src/screens/setup/draft.test.tsx`, with a `// Implements TC-COMP-105` comment.
+- [x] T001 [P] Implement TC-COMP-105 (Drafts survive navigating away and back; nothing in browser storage) in a new `web/src/screens/setup/draft.test.tsx`, with a `// Implements TC-COMP-105` comment.
   - **Harness.** `beforeEach` clears `localStorage` and `sessionStorage` and spies on `Storage.prototype.setItem`. Render `<SetupDraftProvider><MemoryRouter initialEntries={["/setup"]}><Routes>…</Routes></MemoryRouter></SetupDraftProvider>`. The `/setup` route renders a test-local `DraftForm`: an `input` labelled `years` bound to `drafts.yearsText`, two radios labelled `paste` and `later` bound to `drafts.source`, a `textarea` labelled `pasted` bound to `drafts.pasted`, a button `keep unposted` that calls `setDraft("unposted", ["MSFT", "NVDA"])`, an element `data-testid="unposted"` rendering `JSON.stringify(drafts.unposted)`, and a `Link` to `/home`. The `/home` route renders a stub with a `Link` back to `/setup`. Test-local labels are not owner-facing.
   - **Steps (the TC's).**
     1. With `userEvent`, type `7` into `years`, choose `paste`, type `AAPL, MSFT` into `pasted` and press `keep unposted`.
@@ -119,7 +119,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 ### Additional Unit Tests
 
-- [ ] T002 [P] Write the drafts' update and identity cases in `web/src/screens/setup/draft.test.tsx` (DAC-E4-2, AC-3). This runs sequentially with T001 (one file). A probe assigns `useSetupDrafts()` to `latest` and counts its renders. Cases:
+- [x] T002 [P] Write the drafts' update and identity cases in `web/src/screens/setup/draft.test.tsx` (DAC-E4-2, AC-3). This runs sequentially with T001 (one file). A probe assigns `useSetupDrafts()` to `latest` and counts its renders. Cases:
   - (a) **Stable setter.** `latest.setDraft` is the same function (`toBe`) before and after three `setDraft` calls, so a consumer may list it in effect dependencies.
   - (b) **Two writes in one tick both land.** Inside one `act`, call `latest.setDraft("source", "paste")` then `latest.setDraft("pasted", "KO")`. `latest.drafts` `toEqual({ yearsText: "", source: "paste", pasted: "KO", unposted: [] })`.
   - (c) **One key at a time.** After `setDraft("yearsText", "12")`, the other three drafts equal their earlier values.
@@ -214,7 +214,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: The three modules, each in its own TDD cycle.
 
-- [ ] T008 Create `web/src/screens/setup/draft.tsx` (T001 and T002 RED first).
+- [x] T008 Create `web/src/screens/setup/draft.tsx` (T001 and T002 RED first).
   - **Exports.** `interface SetupDrafts` verbatim from setup-ui §2.2 with its comments (`yearsText: string`, `source: "paste" | "later" | null`, `pasted: string`, `unposted: string[]`); `SetupDraftProvider(props: { children: ReactNode }): JSX.Element`; `useSetupDrafts(): { drafts: SetupDrafts; setDraft<K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void }`.
   - **State.** `useState<SetupDrafts>(() => ({ yearsText: "", source: null, pasted: "", unposted: [] }))`, a fresh object per provider, so a remounted provider (a reload) starts empty.
   - **Setter.** `setDraft` is a `useCallback` with an empty dependency list over the functional update `setDrafts((previous) => ({ ...previous, [key]: value }))`.
