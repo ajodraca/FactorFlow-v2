@@ -1,0 +1,59 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-r006kv7r/w0/web
+
+ ❯ src/screens/setup/copy.test.ts (143 tests | 2 failed) 14ms
+   × setup copy is complete and verbatim > STEP_TITLES.4 2ms
+     → expected undefined to be 'Download data' // Object.is equality
+   × setup copy is complete and verbatim > titles exactly four steps, so the paper trading step is absent 1ms
+     → expected [ '1', '2', '3', '5' ] to deeply equal [ '1', '2', '3', '4' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > STEP_TITLES.4
+AssertionError: expected undefined to be 'Download data' // Object.is equality
+
+- Expected: 
+"Download data"
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/copy.test.ts:230:34
+    228| describe("setup copy is complete and verbatim", () => {
+    229|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    230|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    231|   });
+    232| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > titles exactly four steps, so the paper trading step is absent
+AssertionError: expected [ '1', '2', '3', '5' ] to deeply equal [ '1', '2', '3', '4' ]
+
+- Expected
++ Received
+
+  Array [
+    "1",
+    "2",
+    "3",
+-   "4",
++   "5",
+  ]
+
+ ❯ src/screens/setup/copy.test.ts:241:43
+    239| 
+    240|   it("titles exactly four steps, so the paper trading step is absent",…
+    241|     expect(Object.keys(copy.STEP_TITLES)).toEqual(["1", "2", "3", "4"]…
+       |                                           ^
+    242|   });
+    243| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 141 passed (143)
+   Start at  17:04:34
+   Duration  806ms (transform 35ms, setup 43ms, collect 26ms, tests 14ms, environment 180ms, prepare 76ms)
+

@@ -1,0 +1,76 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-r006kv7r/w1/web
+
+ ❯ src/screens/setup/copy.test.ts (143 tests | 3 failed) 17ms
+   × setup copy is free of domain terms > has no domain term in About 10 minutes, then the data download runs on its own. You can leave and come back. 4ms
+     → expected [ /\bruns\b/i ] to deeply equal []
+   × setup copy is free of domain terms > holds none in its own source text, comments included 1ms
+     → expected [ /\bruns\b/i ] to deeply equal []
+   × setup copy is complete and verbatim > SCREEN.subLine 1ms
+     → expected 'About 10 minutes, then the data downl…' to be 'About 10 minutes, then the data downl…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is free of domain terms > has no domain term in About 10 minutes, then the data download runs on its own. You can leave and come back.
+AssertionError: expected [ /\bruns\b/i ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   /\bruns\b/i,
++ ]
+
+ ❯ src/screens/setup/copy.test.ts:91:30
+     89| 
+     90|   it.each(CATALOGUE)("has no domain term in %s", (text) => {
+     91|     expect(violations(text)).toEqual([]);
+       |                              ^
+     92|   });
+     93| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is free of domain terms > holds none in its own source text, comments included
+AssertionError: expected [ /\bruns\b/i ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   /\bruns\b/i,
++ ]
+
+ ❯ src/screens/setup/copy.test.ts:99:32
+     97|       "utf8",
+     98|     );
+     99|     expect(violations(source)).toEqual([]);
+       |                                ^
+    100|   });
+    101| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > SCREEN.subLine
+AssertionError: expected 'About 10 minutes, then the data downl…' to be 'About 10 minutes, then the data downl…' // Object.is equality
+
+Expected: "About 10 minutes, then the data download continues on its own. You can leave and come back."
+Received: "About 10 minutes, then the data download runs on its own. You can leave and come back."
+
+ ❯ src/screens/setup/copy.test.ts:230:34
+    228| describe("setup copy is complete and verbatim", () => {
+    229|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    230|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    231|   });
+    232| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 140 passed (143)
+   Start at  17:04:37
+   Duration  844ms (transform 33ms, setup 38ms, collect 26ms, tests 17ms, environment 172ms, prepare 119ms)
+

@@ -185,7 +185,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - swap-case on the `reread` dispatch (`"depth"` reading the count): (d) and (f) count per function.
   - negate-boolean on the `last` fallback for attention: (g).
 
-- [ ] T006 [P] Implement TC-COMP-107 (Setup copy is free of domain terms; plan limit is copy) in a new `web/src/screens/setup/copy.test.ts`, with a `// Implements TC-COMP-107` comment. The file follows the delivered `web/src/screens/research/copy.test.ts` scanner pattern.
+- [x] T006 [P] Implement TC-COMP-107 (Setup copy is free of domain terms; plan limit is copy) in a new `web/src/screens/setup/copy.test.ts`, with a `// Implements TC-COMP-107` comment. The file follows the delivered `web/src/screens/research/copy.test.ts` scanner pattern.
   - **The catalogue.** `import * as copy from "./copy"` and flatten every export: a string is taken as is, an object recursively, and a function is called with representative arguments (`"AAPL"`, `"12"`, `"2026-10-15 09:30 CDT"`, `"history depth"`; a function of a step number with `1`, `2`, `3` and `4`). Every function result must be a string. `expect(CATALOGUE.length).toBeGreaterThan(60)` keeps the scan non-vacuous.
   - **The source text.** `readFileSync` of `copy.ts`, resolved from `import.meta.url` as `web/src/app/shell.tokens.test.tsx` does. TC step 1 scans the file, so its comments are scanned too.
   - **The terms.** `TERMS` is the DAC-E7-3 list as eight case-insensitive whole-word patterns: `/\binstrument\b/i`, `/\bacquisition\b/i`, `/\bacquire\b/i`, `/\brun\b/i`, `/\bruns\b/i`, `/\bretire\b/i`, `/\bretired\b/i`, `/\bprovider\s+credential\b/i`. `violations(text)` returns the patterns that match.
@@ -200,7 +200,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - drop-field-copy on `planLimitNote`: (d).
   - a hand-written mutant that adds `export const PLAN_LIMIT_YEARS = 5`: (d).
 
-- [ ] T007 [P] Write the copy completeness case in `web/src/screens/setup/copy.test.ts` (setup-ui §10; UX design §1.2; S02 §8; DAC-E4-S1-3), sequential with T006 (one file). One `it.each` table of `[path, arguments, expected]` rows, each `expected` an independent literal copied from the design, asserts the export at `path` (called with `arguments` when it is a function) `toBe` that literal. It holds one row for every string listed under T010, including each template once (for example `["STEP3.counter", ["12", "1", "2"], "12 symbols recognised, 1 duplicates, 2 not recognised"]` and `["STEP4.downloadFor", ["42"], "Download data for 42 stocks"]`). A last case asserts `Object.keys(copy.STEP_TITLES)` `toEqual(["1", "2", "3", "4"])`, so the paper trading step is absent (DAC-E4-11).
+- [x] T007 [P] Write the copy completeness case in `web/src/screens/setup/copy.test.ts` (setup-ui §10; UX design §1.2; S02 §8; DAC-E4-S1-3), sequential with T006 (one file). One `it.each` table of `[path, arguments, expected]` rows, each `expected` an independent literal copied from the design, asserts the export at `path` (called with `arguments` when it is a function) `toBe` that literal. It holds one row for every string listed under T010, including each template once (for example `["STEP3.counter", ["12", "1", "2"], "12 symbols recognised, 1 duplicates, 2 not recognised"]` and `["STEP4.downloadFor", ["42"], "Download data for 42 stocks"]`). A last case asserts `Object.keys(copy.STEP_TITLES)` `toEqual(["1", "2", "3", "4"])`, so the paper trading step is absent (DAC-E4-11).
 
   Kills:
   - drop-field-copy on any entry, or any change to its text: the row for that path.
@@ -247,7 +247,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
   This makes T003–T005 pass.
 
-- [ ] T010 [P] Create `web/src/screens/setup/copy.ts` (T006 and T007 RED first; independent of T008 and T009).
+- [x] T010 [P] Create `web/src/screens/setup/copy.ts` (T006 and T007 RED first; independent of T008 and T009).
   - **Module doc comment.** Every owner-facing string of the setup screen, so the steps and their tests share one source (setup-ui §2.1, §10; UX design §1.2; S02 §8). Wording is verbatim from those sections except the sub-line (DEC-0341). Status labels (*Found*, *Missing*, the download states) come from `labelOf` and *Not determinable* from `NotDeterminable` (ui-components §2.3, §2.5), so they are not repeated here. A string a later setup story needs and no design contains is added by that story with a doc comment saying so, as `web/src/screens/research/copy.ts` does. Template parameters are text already formatted by the caller (`formatCount`, `formatInstant`, `formatClock`, ui-components §2.5), so this module imports nothing. The comments name none of the eight DAC-E7-3 terms, because T006 scans the file.
   - **Exports**, each with its source cited:
     - `SCREEN`: `title` *Get set up*; `subLine` *About 10 minutes, then the data download continues on its own. You can leave and come back.* (DEC-0341); `stepsLabel` *Setup steps*.
@@ -271,7 +271,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: Confirm the change set is exactly the story's, with nothing rendered or mounted early.
 
-- [ ] T011 Confirm scope (depends on T008–T010).
+- [x] T011 Confirm scope (depends on T008–T010).
   - `git status --short` lists only `web/src/screens/setup/draft.tsx`, `draft.test.tsx`, `use-setup-state.ts`, `use-setup-state.test.ts`, `copy.ts` and `copy.test.ts`, plus this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
   - `git diff --exit-code -- web/src/app/ web/src/api/ web/src/components/ web/src/screens/instruments/ web/src/main.tsx` exits 0.
   - `grep -rlE "screens/setup/(draft|use-setup-state|copy)\"" web/src --include='*.ts' --include='*.tsx' | grep -v '/screens/setup/'` prints nothing. CAP-003-E4-S2 to CAP-003-E4-S4 are the first consumers, and CAP-003-E4-S6 mounts `SetupDraftProvider` in `shell.tsx`.
@@ -284,8 +284,8 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T012 Run `npm run format` (a check). Fix any report with `npx biome format --write` on this story's six files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and re-run T011's checks. Biome's recommended `useExhaustiveDependencies` may flag the mount-only effect in T009; satisfy it by reading the read functions through refs inside the effect, not by suppressing the rule. No behaviour change.
-- [ ] T013 After each TDD cycle in T001–T012 — not once at the end — do the following before the next cycle begins:
+- [x] T012 Run `npm run format` (a check). Fix any report with `npx biome format --write` on this story's six files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and re-run T011's checks. Biome's recommended `useExhaustiveDependencies` may flag the mount-only effect in T009; satisfy it by reading the read functions through refs inside the effect, not by suppressing the rule. No behaviour change.
+- [x] T013 After each TDD cycle in T001–T012 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E4-S1-tdd-evidence.yaml` beside this story with:

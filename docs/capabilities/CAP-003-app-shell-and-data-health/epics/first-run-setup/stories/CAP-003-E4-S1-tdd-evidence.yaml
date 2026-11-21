@@ -68,3 +68,32 @@ cycles:
           disposition: equivalent
           reason: >
             The cleanup's false guards only the setState a late answer would make on an unmounted component; React 18 ignores that call silently, so the rendered output, the calls and every value a caller can read are the same with the guard inverted.
+
+  - id: cycle-3
+    tasks: [T006, T007, T010, T011, T012, T013]
+    description: >
+      The copy catalogue (TC-COMP-107, DAC-E4-S1-3, AC-19, DEC-0341): copy.ts holds every owner-facing string of setup-ui 2.3 and 10, UX design 1.2 and S02 section 8 as T010 lists them, with the sub-line reading "continues on its own" (DEC-0341) and STEP1.setVariable built from the KEY_VARIABLE it also exposes; it imports nothing and exports no number or boolean. copy.test.ts holds the scan of the flattened catalogue and of the file's own text for the eight DAC-E7-3 terms as whole words, with planted strings proving the scan flags and near misses proving it does not over-flag, the plan limit stated as copy, one verbatim row for every string with each template once, the four step titles, and a typed stepPosition case for 1 to 4. T011 and T012 join this cycle's validation evidence (validation-cycle-3.log): the change set is the six files and the plan artifacts, the delivered directories are unchanged against the review base, nothing outside screens/setup imports the new modules, no storage or timer name appears in a source, and the full suite (116 files, 3119 tests), lint, format, tsc and build pass. The generator produced 13 mutants (all off-by-one, 4 of them on the StepNumber type) and 13 were hand-written from the plan's kill list. The first run left four survivors, the type-level off-by-ones, which no test type-checked against; a typed stepPosition(1..4) case was added and tsc kills them. The first spec-drift review reported drift: STEP1.setVariable was a literal, not built from KEY_VARIABLE as T010 says; it was fixed, the mutation run repeated (26 mutants, all killed) and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved with LOW observations only: a redundant regex assertion beside the exact plan-limit literal, and the step-number call keyed on the export's name.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-3-copy.log
+    red_log_sha256: 0ec3bd902fa6ad2e4185ffb8001c976c1e0d765883a6b3b428ed0f9ff62fb2b7
+    red_evidence: >
+      copy.test.ts failed to load (./copy did not resolve) before the module existed.
+    green_evidence: >
+      copy.test.ts 142 passed in the first run (green-cycle-3-copy.log) and 143 with the typed stepPosition case added after the first mutation run; validation-cycle-3.log holds the full suite (3119 passed), lint, format, tsc and build, all clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b2df87b23a89c49bcc6b26dd572029571cdc48e5a4ba0d83ec51effa7df345ea
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: 069613434289e10737ca7f9b66c5c779fe041776ad9998b3ad05ae5e82d4103c
+      generated: 26
+      killed: 26
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

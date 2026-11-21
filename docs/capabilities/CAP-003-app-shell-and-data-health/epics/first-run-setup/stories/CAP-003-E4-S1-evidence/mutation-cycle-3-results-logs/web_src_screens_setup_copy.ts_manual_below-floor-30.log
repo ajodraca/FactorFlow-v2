@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-r006kv7r/w2/web
+
+ ❯ src/screens/setup/copy.test.ts (143 tests | 1 failed) 14ms
+   × setup copy is complete and verbatim > STEP3.belowFloor 3ms
+     → expected 'Factor scores need at least 20 stocks…' to be 'Factor scores need at least 30 stocks…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > STEP3.belowFloor
+AssertionError: expected 'Factor scores need at least 20 stocks…' to be 'Factor scores need at least 30 stocks…' // Object.is equality
+
+Expected: "Factor scores need at least 30 stocks with complete data. With 12, no factor can be ranked yet."
+Received: "Factor scores need at least 20 stocks with complete data. With 12, no factor can be ranked yet."
+
+ ❯ src/screens/setup/copy.test.ts:230:34
+    228| describe("setup copy is complete and verbatim", () => {
+    229|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    230|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    231|   });
+    232| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 142 passed (143)
+   Start at  17:04:38
+   Duration  762ms (transform 28ms, setup 39ms, collect 19ms, tests 14ms, environment 176ms, prepare 33ms)
+
