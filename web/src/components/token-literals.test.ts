@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { LAYOUT } from "../app/layout";
 
 // The AC-26 automated check (DAC-E1-12, DAC-E3-16): theme tokens only, no
 // spacing, size or colour literal outside the theme. This file holds the
@@ -275,6 +276,123 @@ describe("form family is scanned and clean (TC-COMP-011)", () => {
     const planted = 'const a = "min-h-[80px]";';
     expect(literalsIn("web/src/components/ui/textarea.tsx", planted)).toEqual([
       "web/src/components/ui/textarea.tsx: 80px",
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The layout rule (DAC-E3-16, DAC-E3-S2-4): the seven approved-specification
+// layout values are written in web/src/app/layout.ts and nowhere else.
+// ---------------------------------------------------------------------------
+
+/** The seven values, written out independently of `LAYOUT`. */
+const LAYOUT_LITERALS = ["208px", "1180px", "260px", "300px", "28px", "16px", "70ch"];
+const LAYOUT_RULE_ROOT = "web/src/";
+/**
+ * The module itself, and CAP-002's research screens as a directory prefix
+ * (capability section 5 leaves them alone; DEC-0321).
+ */
+const LAYOUT_RULE_EXEMPT = ["web/src/app/layout.ts", "web/src/screens/research/"];
+
+const LAYOUT_LENGTH = /(?<![\w.-])(208|1180|260|300|28|16)px\b/g;
+const LAYOUT_MEASURE = /(?<![\w.-])70ch\b/g;
+
+/** Every whole layout value in a source, as `"<relPath>: <value>"`. */
+function layoutLiteralsIn(
+  relPath: string,
+  source: string,
+  exempt: readonly string[] = LAYOUT_RULE_EXEMPT,
+): string[] {
+  if (exempt.some((entry) => relPath === entry || relPath.startsWith(entry))) {
+    return [];
+  }
+  return [...source.matchAll(LAYOUT_LENGTH), ...source.matchAll(LAYOUT_MEASURE)].map(
+    (match) => `${relPath}: ${match[0]}`,
+  );
+}
+
+function sourcesUnder(relDirectory: string): string[] {
+  const walk = (directory: string): string[] =>
+    readdirSync(path.join(REPO_ROOT, directory), { withFileTypes: true }).flatMap((entry) => {
+      const relPath = `${directory.replace(/\/$/, "")}/${entry.name}`;
+      return entry.isDirectory() ? walk(relPath) : isScannedSource(relPath) ? [relPath] : [];
+    });
+  return walk(relDirectory);
+}
+
+const PLANTED_APP = "web/src/app/planted.tsx";
+
+// Implements TC-COMP-072
+describe("layout rule (DAC-E3-16, DAC-E3-S2-4)", () => {
+  it("finds no layout value outside layout.ts and CAP-002's research screens, and scans many sources", () => {
+    const files = sourcesUnder(LAYOUT_RULE_ROOT);
+    expect(files.length).toBeGreaterThan(50);
+    expect(files).toContain("web/src/app/shell.tsx");
+    expect(files).toContain("web/src/screens/research/stocks/index.tsx");
+    const offenders = files.flatMap((relPath) =>
+      layoutLiteralsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8")),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it.each(LAYOUT_LITERALS)("rejects a planted %s", (value) => {
+    expect(layoutLiteralsIn(PLANTED_APP, `const x = "${value}";`)).toEqual([
+      `${PLANTED_APP}: ${value}`,
+    ]);
+  });
+
+  it("exempts layout.ts and the research directory, and no look-alike", () => {
+    const source = 'const a = "max-w-[1180px]";';
+    expect(layoutLiteralsIn("web/src/app/layout.ts", source)).toEqual([]);
+    expect(layoutLiteralsIn("web/src/screens/research/stocks/index.tsx", source)).toEqual([]);
+    expect(layoutLiteralsIn("web/src/screens/home/index.tsx", source)).toEqual([
+      "web/src/screens/home/index.tsx: 1180px",
+    ]);
+    expect(layoutLiteralsIn("web/src/screens/researcher.tsx", source)).toEqual([
+      "web/src/screens/researcher.tsx: 1180px",
+    ]);
+  });
+
+  it.each(["w-[116px]", "w-[128px]", "1280px", "p-[2.16px]", "170ch", "16pxs", "208pxx", "70chx"])(
+    "matches whole values only: %s",
+    (source) => {
+      expect(layoutLiteralsIn(PLANTED_APP, source)).toEqual([]);
+    },
+  );
+
+  it.each(["16 px", "--space-4", "h-4"])("ignores %s", (source) => {
+    expect(layoutLiteralsIn(PLANTED_APP, source)).toEqual([]);
+  });
+
+  it("LAYOUT holds the seven values, in order", () => {
+    expect(LAYOUT).toEqual({
+      railWidth: "208px",
+      contentMaxWidth: "1180px",
+      sideColumnMin: "260px",
+      sideColumnMax: "300px",
+      markerSize: "28px",
+      railIconSize: "16px",
+      explanationMeasure: "70ch",
+    });
+    expect(Object.keys(LAYOUT)).toEqual([
+      "railWidth",
+      "contentMaxWidth",
+      "sideColumnMin",
+      "sideColumnMax",
+      "markerSize",
+      "railIconSize",
+      "explanationMeasure",
+    ]);
+  });
+
+  it("CAP-002's research screens are the only exempt directory", () => {
+    expect(LAYOUT_RULE_EXEMPT).toEqual(["web/src/app/layout.ts", "web/src/screens/research/"]);
+    const offenders = sourcesUnder("web/src/screens/research/").flatMap((relPath) =>
+      layoutLiteralsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8"), []),
+    );
+    expect(offenders).toEqual([
+      "web/src/screens/research/stocks/index.tsx: 1180px",
+      "web/src/screens/research/stocks/index.tsx: 1180px",
     ]);
   });
 });

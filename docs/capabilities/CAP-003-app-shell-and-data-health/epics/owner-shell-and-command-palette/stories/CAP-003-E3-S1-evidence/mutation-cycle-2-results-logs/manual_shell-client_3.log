@@ -1,0 +1,75 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-do7shyro/w3/web
+
+ ❯ src/app/shell-client.test.ts (20 tests | 3 failed) 13ms
+   × TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and no cursor when the cursor is undefined 5ms
+     → expected null to be '50' // Object.is equality
+   × TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and cursor when the cursor is set 1ms
+     → expected null to be '50' // Object.is equality
+   × fetchProblems request encoding > sends a cursor with a slash intact and a limit as given 1ms
+     → expected null to be '7' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and no cursor when the cursor is undefined
+AssertionError: expected null to be '50' // Object.is equality
+
+- Expected: 
+"50"
+
++ Received: 
+null
+
+ ❯ src/app/shell-client.test.ts:253:43
+    251|     const { url, path } = firstCall(fetchMock);
+    252|     expect(path).toBe("/api/data-health/problems");
+    253|     expect(url.searchParams.get("limit")).toBe("50");
+       |                                           ^
+    254|     expect(url.searchParams.has("cursor")).toBe(false);
+    255|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-067 — fetchProblems encodes limit and cursor > sends limit and cursor when the cursor is set
+AssertionError: expected null to be '50' // Object.is equality
+
+- Expected: 
+"50"
+
++ Received: 
+null
+
+ ❯ src/app/shell-client.test.ts:261:43
+    259|     await expect(fetchProblems("KO", 50)).resolves.toEqual(problemPage…
+    260|     const { url } = firstCall(fetchMock);
+    261|     expect(url.searchParams.get("limit")).toBe("50");
+       |                                           ^
+    262|     expect(url.searchParams.get("cursor")).toBe("KO");
+    263|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > sends a cursor with a slash intact and a limit as given
+AssertionError: expected null to be '7' // Object.is equality
+
+- Expected: 
+"7"
+
++ Received: 
+null
+
+ ❯ src/app/shell-client.test.ts:286:43
+    284|     const { url } = firstCall(fetchMock);
+    285|     expect(url.searchParams.get("cursor")).toBe("BRK/B");
+    286|     expect(url.searchParams.get("limit")).toBe("7");
+       |                                           ^
+    287|   });
+    288| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 17 passed (20)
+   Start at  23:22:53
+   Duration  740ms (transform 30ms, setup 32ms, collect 26ms, tests 13ms, environment 165ms, prepare 153ms)
+

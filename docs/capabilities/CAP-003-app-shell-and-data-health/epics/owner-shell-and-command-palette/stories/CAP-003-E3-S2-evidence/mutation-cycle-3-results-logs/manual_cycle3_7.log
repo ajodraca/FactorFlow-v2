@@ -1,0 +1,120 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-e7fb_g93/w2/web
+
+ ❯ src/app/health.test.tsx (18 tests | 6 failed) 62ms
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > sets lastUpdated and lastAnsweredAt to the instant of the first success 18ms
+     → expected 'unknown' to be 'answering' // Object.is equality
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated 4ms
+     → expected 'unknown' to be 'unreachable' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches health on mount and reports answering 2ms
+     → expected 'unknown' to be 'answering' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > reports unreachable when the fetch rejects 2ms
+     → expected 'unknown' to be 'unreachable' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > still reports answering when the answer says the database is unreachable 2ms
+     → expected 'unknown' to be 'answering' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > makes one fetch per cycle for two probes under one provider 2ms
+     → expected 'unknown' to be 'answering' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > sets lastUpdated and lastAnsweredAt to the instant of the first success
+AssertionError: expected 'unknown' to be 'answering' // Object.is equality
+
+Expected: "answering"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:105:49
+    103|     );
+    104|     await advance(0);
+    105|     expect(attribute("probe", "data-liveness")).toBe("answering");
+       |                                                 ^
+    106|     expect(attribute("probe", "data-last-answered")).toBe("2026-09-06T…
+    107|     expect(attribute("probe", "data-last-updated")).toBe("2026-09-06T1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated
+AssertionError: expected 'unknown' to be 'unreachable' // Object.is equality
+
+Expected: "unreachable"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:121:49
+    119|     await advance(0);
+    120|     await advance(30_000);
+    121|     expect(attribute("probe", "data-liveness")).toBe("unreachable");
+       |                                                 ^
+    122|     expect(attribute("probe", "data-last-updated")).toBe("2026-09-06T1…
+    123|     expect(attribute("probe", "data-last-answered")).toBe("2026-09-06T…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches health on mount and reports answering
+AssertionError: expected 'unknown' to be 'answering' // Object.is equality
+
+Expected: "answering"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:168:49
+    166|     await advance(0);
+    167|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+    168|     expect(attribute("probe", "data-liveness")).toBe("answering");
+       |                                                 ^
+    169|   });
+    170| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > reports unreachable when the fetch rejects
+AssertionError: expected 'unknown' to be 'unreachable' // Object.is equality
+
+Expected: "unreachable"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:209:49
+    207|     );
+    208|     await advance(0);
+    209|     expect(attribute("probe", "data-liveness")).toBe("unreachable");
+       |                                                 ^
+    210|   });
+    211| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > still reports answering when the answer says the database is unreachable
+AssertionError: expected 'unknown' to be 'answering' // Object.is equality
+
+Expected: "answering"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:220:49
+    218|     );
+    219|     await advance(0);
+    220|     expect(attribute("probe", "data-liveness")).toBe("answering");
+       |                                                 ^
+    221|     expect(attribute("probe", "data-database")).toBe("unreachable");
+    222|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > makes one fetch per cycle for two probes under one provider
+AssertionError: expected 'unknown' to be 'answering' // Object.is equality
+
+Expected: "answering"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:271:49
+    269|     await advance(30_000);
+    270|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+    271|     expect(attribute("first", "data-liveness")).toBe("answering");
+       |                                                 ^
+    272|     expect(attribute("second", "data-liveness")).toBe("answering");
+    273|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 12 passed (18)
+   Start at  22:39:24
+   Duration  581ms (transform 52ms, setup 32ms, collect 95ms, tests 62ms, environment 172ms, prepare 58ms)
+

@@ -1,0 +1,44 @@
+diff --git a/web/src/app/shell-client.test.ts b/web/src/app/shell-client.test.ts
+index 877b87ec..2a454e6b 100644
+--- a/web/src/app/shell-client.test.ts
++++ b/web/src/app/shell-client.test.ts
+@@ -278,6 +278,14 @@ describe("fetchProblems request encoding", () => {
+     expect(firstCall(fetchMock).url.searchParams.has("cursor")).toBe(false);
+   });
+ 
++  it("sends an empty-string cursor as given, not as the first page", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
++    await fetchProblems("", 50);
++    const { url } = firstCall(fetchMock);
++    expect(url.searchParams.has("cursor")).toBe(true);
++    expect(url.searchParams.get("cursor")).toBe("");
++  });
++
+   it("sends a cursor with a slash intact and a limit as given", async () => {
+     const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
+     await fetchProblems("BRK/B", 7);
+@@ -290,6 +298,7 @@ describe("fetchProblems request encoding", () => {
+     ["fetchAttention", () => fetchAttention()],
+     ["fetchDataHealth", () => fetchDataHealth()],
+     ["fetchProblems", () => fetchProblems(undefined, 50)],
++    ["fetchScoreSummary", () => fetchScoreSummary()],
+   ])("%s sends GET with Accept: application/json and no method override", async (_name, call) => {
+     const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
+     await call();
+@@ -556,3 +565,16 @@ describe("fetchScoreSummary success and other 404s", () => {
+     expect((caught as ApiError).code).toBeNull();
+   });
+ });
++
++// Implements AC-8 "typed reads" (T010, T011, DAC-E3-18): each exported read's
++// declared result type is pinned exactly; `npx tsc --noEmit` is the observer.
++describe("AC-8 — the exported reads declare their result types", () => {
++  it("pins every read's resolved type", () => {
++    expectTypeOf(fetchAttention).returns.resolves.toEqualTypeOf<Attention>();
++    expectTypeOf(fetchDataHealth).returns.resolves.toEqualTypeOf<DataHealth>();
++    expectTypeOf(fetchProblems).returns.resolves.toEqualTypeOf<ProblemPage>();
++    expectTypeOf(fetchScoreSummary).returns.resolves.toEqualTypeOf<
++      ScoreSummary | Extract<ScoreState, { kind: "not_served" }>
++    >();
++  });
++});

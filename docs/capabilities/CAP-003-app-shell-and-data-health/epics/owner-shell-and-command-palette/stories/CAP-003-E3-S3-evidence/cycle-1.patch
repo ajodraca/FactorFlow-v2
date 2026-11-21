@@ -1,0 +1,1476 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-1.json
+new file mode 100644
+index 00000000..5d87ad57
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-1.json
+@@ -0,0 +1,199 @@
++{
++ "schema": 1,
++ "repo_head": "26a1cfc97754302dd74024f258e03a05d54ad81a",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/shell-context.tsx:79:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 79,
++   "original": "    return true;",
++   "mutated": "    return false;"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:81:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 81,
++   "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
++   "mutated": "  return scores !== null || !(\"kind\" in scores) && scores.later?.state === \"building\";"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:81:negate-boolean:2",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 81,
++   "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
++   "mutated": "  return scores !== null && !(\"kind\" in scores) || scores.later?.state === \"building\";"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:81:negate-boolean:3",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 81,
++   "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
++   "mutated": "  return scores !== null && (\"kind\" in scores) && scores.later?.state === \"building\";"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:112:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 112,
++   "original": "    last !== null && \"kind\" in last",
++   "mutated": "    last !== null || \"kind\" in last"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:139:drop-field-copy:1",
++   "cycle": "cycle-1",
++   "operator": "drop-field-copy",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 139,
++   "original": "      error: scoresState.error,",
++   "mutated": "      error: nil,"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:140:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 140,
++   "original": "      last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
++   "mutated": "      last: lastData !== null || !(\"kind\" in lastData) ? lastData : null,"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:140:negate-boolean:2",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/app/shell-context.tsx",
++   "line": 140,
++   "original": "      last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
++   "mutated": "      last: lastData !== null && (\"kind\" in lastData) ? lastData : null,"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:idle-60001",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "IDLE_INTERVAL_MS = 60_000",
++   "new": "IDLE_INTERVAL_MS = 60_001"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:idle-59999",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "IDLE_INTERVAL_MS = 60_000",
++   "new": "IDLE_INTERVAL_MS = 59_999"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:active-10001",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "ACTIVE_INTERVAL_MS = 10_000",
++   "new": "ACTIVE_INTERVAL_MS = 10_001"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:active-9999",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "ACTIVE_INTERVAL_MS = 10_000",
++   "new": "ACTIVE_INTERVAL_MS = 9_999"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:cancelling-cancelled",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "  \"cancelling\",\n",
++   "new": "  \"cancelled\",\n"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:building-failed",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "scores.later?.state === \"building\"",
++   "new": "scores.later?.state === \"failed\""
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:not-served-to-error",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "? { kind: \"not_served\" } : { kind: \"served\"",
++   "new": "? { kind: \"loading\" } : { kind: \"served\""
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:served-kind",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "{ kind: \"served\", data, checkedAt }",
++   "new": "{ kind: \"ok\", data, checkedAt }"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:detail-keeps-previous",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "(text: string | null): void => setDetail(text), [])",
++   "new": "(text: string | null): void => setDetail((previous) => text ?? previous), [])"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:detail-not-stable",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "const setTitleDetail = useCallback((text: string | null): void => setDetail(text), []);",
++   "new": "const setTitleDetail = (text: string | null): void => setDetail(text);"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:refresh-health-to-attention",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "      } else {\n        healthRefresh();",
++   "new": "      } else {\n        attentionRefresh();"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:refresh-scores-to-attention",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "} else if (kind === \"scores\") {\n        scoresRefresh();",
++   "new": "} else if (kind === \"scores\") {\n        attentionRefresh();"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:refresh-not-stable",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "const refresh = useCallback(\n    (kind: \"health\" | \"attention\" | \"scores\"): void => {",
++   "new": "const refresh = ((\n    kind: \"health\" | \"attention\" | \"scores\",\n  ): void => {"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:provider-missing-guard",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "if (value === null) {",
++   "new": "if (value !== null) {"
++  },
++  {
++   "id": "web/src/app/shell-context.tsx:manual:last-null-dropped",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/app/shell-context.tsx",
++   "old": "last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
++   "new": "last: null,"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 00000000..90c3050d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,374 @@
++{
++  "command": "cd {workdir} && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/shell-context.test.tsx && npx tsc --noEmit",
++  "repo_head": "26a1cfc97754302dd74024f258e03a05d54ad81a",
++  "tree_patch_sha256": "a831179ad9798e24edf06395cdbb75468dd4227ff90a2dbeaab7ae04d8d32c29",
++  "mutants_sha256": "32584f84e02daba7f0f76688d5c0eaa1922833c1b513f26039ba70746f69f814",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 23,
++  "started": "2026-11-20T06:30:58Z",
++  "baselines": [
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 6.3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/baseline-w0.log",
++      "log_sha256": "1a0656d768e7b5b5f3b0e71aa0155bcd2476d3bad96ba4aee6dc7b90e840f516"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 6.3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/baseline-w2.log",
++      "log_sha256": "add49c9ad5f2dd2c41d0f296cf8fc834c2f928a6c177861099fed3c4a5fd9dcd"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 6.4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/baseline-w1.log",
++      "log_sha256": "180f86855433724dac086ce1988e619c35321eb9788266799b6bfa7729b6cc53"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 6.4,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/baseline-w3.log",
++      "log_sha256": "fd5fc870ec573c7597cd805c038f9aefe02924c5d494e6f28f2b9306d182d029"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/shell-context.tsx:79:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 79,
++      "original": "    return true;",
++      "mutated": "    return false;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_79_negate-boolean_1.log",
++      "log_sha256": "888ad8fc42ccd477b2f2b87638912b259dd6806e5488570b353dc71e14532621"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:81:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 81,
++      "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
++      "mutated": "  return scores !== null || !(\"kind\" in scores) && scores.later?.state === \"building\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_81_negate-boolean_1.log",
++      "log_sha256": "c141fa8878d9fed0dad69db658e2ea74dee0b1f84209c139c282f98082090550"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:81:negate-boolean:2",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 81,
++      "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
++      "mutated": "  return scores !== null && !(\"kind\" in scores) || scores.later?.state === \"building\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_81_negate-boolean_2.log",
++      "log_sha256": "fc9e9b9eba98482afc9f2e96283456d1fee0d4c38cb18b1934c9c39b43dd23d2"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:81:negate-boolean:3",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 81,
++      "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
++      "mutated": "  return scores !== null && (\"kind\" in scores) && scores.later?.state === \"building\";",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_81_negate-boolean_3.log",
++      "log_sha256": "b4169771bfee72f2a9f58ab1df759d426b2300a3956465d552de31aec79e19e5"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:112:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 112,
++      "original": "    last !== null && \"kind\" in last",
++      "mutated": "    last !== null || \"kind\" in last",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_112_negate-boolean_1.log",
++      "log_sha256": "ad989accbd9045a72737d0fcdcce93acc4ca89dbbacdffad760bd95cf811cba3"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:139:drop-field-copy:1",
++      "cycle": "cycle-1",
++      "operator": "drop-field-copy",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 139,
++      "original": "      error: scoresState.error,",
++      "mutated": "      error: nil,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_139_drop-field-copy_1.log",
++      "log_sha256": "0631c5ad31b1da26bf060b3f17d2f7d0b3fe50dd5d4315d62538d250e25598e4"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:140:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 140,
++      "original": "      last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
++      "mutated": "      last: lastData !== null || !(\"kind\" in lastData) ? lastData : null,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_140_negate-boolean_1.log",
++      "log_sha256": "f089f0e9c12e6e72a4a3af1384b818c9b0cf5fe8c49616e4ca614f753693e53c"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:140:negate-boolean:2",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/app/shell-context.tsx",
++      "line": 140,
++      "original": "      last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
++      "mutated": "      last: lastData !== null && (\"kind\" in lastData) ? lastData : null,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_140_negate-boolean_2.log",
++      "log_sha256": "bd0c26e4e6f9637dcfa3d0ba3feb83052a4addce261c539b03275ec1ca1f5f09"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:idle-60001",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "IDLE_INTERVAL_MS = 60_000",
++      "new": "IDLE_INTERVAL_MS = 60_001",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_idle-60001.log",
++      "log_sha256": "ee9dbba36f2adc784817a2f36ebd0fac85820d3491ad56d165bf7b19c858d773"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:idle-59999",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "IDLE_INTERVAL_MS = 60_000",
++      "new": "IDLE_INTERVAL_MS = 59_999",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_idle-59999.log",
++      "log_sha256": "5aacf845264271fe6a4836abfd2635594917bcdc251c31c691a30f31309c13d7"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:active-10001",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "ACTIVE_INTERVAL_MS = 10_000",
++      "new": "ACTIVE_INTERVAL_MS = 10_001",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_active-10001.log",
++      "log_sha256": "0ebd5142f0d3a4aecc81134aeb33a7bae6952dcf4ee3396f3e51e514051ebf13"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:active-9999",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "ACTIVE_INTERVAL_MS = 10_000",
++      "new": "ACTIVE_INTERVAL_MS = 9_999",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_active-9999.log",
++      "log_sha256": "ea367025fd1cf955e5a7595e2cd5432c0b8b3635dc97aefdee3e118efd2344ed"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:cancelling-cancelled",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "  \"cancelling\",\n",
++      "new": "  \"cancelled\",\n",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_cancelling-cancelled.log",
++      "log_sha256": "a4079af4a35522179bd886316330d4fae68b578c9ec1c03911bc6524669da641"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:building-failed",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "scores.later?.state === \"building\"",
++      "new": "scores.later?.state === \"failed\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_building-failed.log",
++      "log_sha256": "b6a916406940713df6ed4858903505eb059b56663c78d4ee9f9c7d3b120958ae"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:not-served-to-error",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "? { kind: \"not_served\" } : { kind: \"served\"",
++      "new": "? { kind: \"loading\" } : { kind: \"served\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_not-served-to-error.log",
++      "log_sha256": "c7b483cc02aadeb4e99d1899450c78aa64b51f5b58ee5e9706d9fd657aa238a3"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:served-kind",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "{ kind: \"served\", data, checkedAt }",
++      "new": "{ kind: \"ok\", data, checkedAt }",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.4,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_served-kind.log",
++      "log_sha256": "05c54f31cdc3a4945d2287c461a53cf513ea60637d1d93b67b97ae0c4ba1178f"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:detail-keeps-previous",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "(text: string | null): void => setDetail(text), [])",
++      "new": "(text: string | null): void => setDetail((previous) => text ?? previous), [])",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_detail-keeps-previous.log",
++      "log_sha256": "d51bc185b6ce10ff9c3d7f169976e049a340b77057fa564276d45d67c16e5145"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:detail-not-stable",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "const setTitleDetail = useCallback((text: string | null): void => setDetail(text), []);",
++      "new": "const setTitleDetail = (text: string | null): void => setDetail(text);",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_detail-not-stable.log",
++      "log_sha256": "6113e7575d3464b5a036990423c32a8740859e09997353ab87f8b6df1947c51a"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:refresh-health-to-attention",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "      } else {\n        healthRefresh();",
++      "new": "      } else {\n        attentionRefresh();",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_refresh-health-to-attention.log",
++      "log_sha256": "24e61e0c5a24432ce572feedbb4fd6f972ee8b755be7c992fdbaa0ceaa1d3fa3"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:refresh-scores-to-attention",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "} else if (kind === \"scores\") {\n        scoresRefresh();",
++      "new": "} else if (kind === \"scores\") {\n        attentionRefresh();",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.5,
++      "worker": 1,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_refresh-scores-to-attention.log",
++      "log_sha256": "010ed6765ab7643c0cfaef4da698d4ac960cb3fd0403f987478d8838e45f4f55"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:refresh-not-stable",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "const refresh = useCallback(\n    (kind: \"health\" | \"attention\" | \"scores\"): void => {",
++      "new": "const refresh = ((\n    kind: \"health\" | \"attention\" | \"scores\",\n  ): void => {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 3,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_refresh-not-stable.log",
++      "log_sha256": "791ef1fe9d850c16de782320a5ffa99dd43878af7faf43340e905aff93a5e322"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:provider-missing-guard",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "if (value === null) {",
++      "new": "if (value !== null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 2,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_provider-missing-guard.log",
++      "log_sha256": "d063e6bba895512c20f2627ae621403685948fdc87d950ac49331dde22e9e987"
++    },
++    {
++      "id": "web/src/app/shell-context.tsx:manual:last-null-dropped",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/app/shell-context.tsx",
++      "old": "last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
++      "new": "last: null,",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 0,
++      "log": "/private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/768a90fa-a7d7-49ae-bf5e-593eb377c64a/scratchpad/logs1b/web_src_app_shell-context.tsx_manual_last-null-dropped.log",
++      "log_sha256": "0c144cec628da11e5a52a2adf4725cb82d574637d5d7c3159d09e4e8ac5fba7d"
++    }
++  ],
++  "finished": "2026-11-20T06:31:13Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-1-shell-context.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-1-shell-context.log
+new file mode 100644
+index 00000000..6e7ed8f0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-1-shell-context.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/app/shell-context.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/shell-context.test.tsx [ src/app/shell-context.test.tsx ]
++Error: Failed to resolve import "./shell-context" from "web/src/app/shell-context.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/app/shell-context.test.tsx:7:80
++  5  |  import { ApiError, ApiUnreachableError } from "../api/client";
++  6  |  import { HealthProvider } from "./health";
++  7  |  import { ShellProvider, useShell, useTitleDetail } from "./shell-context";
++     |                                                           ^
++  8  |  const NOW = /* @__PURE__ */ new Date("2026-09-06T18:30:00.000Z");
++  9  |  const HEALTH = {
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  00:28:03
++   Duration  765ms (transform 23ms, setup 69ms, collect 0ms, tests 0ms, environment 315ms, prepare 36ms)
++
+diff --git a/web/src/app/shell-context.test.tsx b/web/src/app/shell-context.test.tsx
+new file mode 100644
+index 00000000..ccac4eb4
+--- /dev/null
++++ b/web/src/app/shell-context.test.tsx
+@@ -0,0 +1,650 @@
++import { act, render, renderHook, screen } from "@testing-library/react";
++import { useEffect } from "react";
++import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError } from "../api/client";
++import type { HealthResponse, RunState } from "../api/types";
++import { HealthProvider } from "./health";
++import { type ShellContextValue, ShellProvider, useShell, useTitleDetail } from "./shell-context";
++import type { Attention, ScoreSummary } from "./shell-types";
++
++/*
++ * The shell context: cadences, refresh, the title detail, the context's shape
++ * and the score mapping (CAP-003-E3-S3; owner-shell 2.3, 2.4). Requests go
++ * through the real fetch functions against one fake `fetch`, so the `404`
++ * mapping is exercised end to end.
++ */
++
++const NOW = new Date("2026-09-06T18:30:00.000Z");
++
++const HEALTH: HealthResponse = {
++  status: "ok",
++  database: "reachable",
++  credential_present: true,
++  schema_version: 4,
++  most_recent_run: null,
++};
++
++const ATTENTION_IDLE: Attention = {
++  checked_at: "2026-09-06T18:30:00Z",
++  followed_count: 12,
++  prices_as_of: "2026-09-05",
++  credential_present: true,
++  problems: { stock_count: 3, symbols: ["AAA", "BBB", "CCC"], newest_completed_at: null },
++  latest_download: {
++    run_id: "run-1",
++    state: "succeeded",
++    requested_at: "2026-09-06T17:00:00Z",
++    started_at: "2026-09-06T17:00:05Z",
++    ended_at: "2026-09-06T17:20:00Z",
++    progress: { done: 12, total: 12 },
++  },
++  latest_terminal_download: null,
++  items: [],
++};
++
++function attentionWith(state: RunState): Attention {
++  const base = ATTENTION_IDLE.latest_download;
++  if (base === null) {
++    throw new Error("fixture has a latest download");
++  }
++  return { ...ATTENTION_IDLE, latest_download: { ...base, state } };
++}
++
++const SUMMARY_SET: ScoreSummary = {
++  never_classified: false,
++  set: {
++    set_id: "set-1",
++    classification_date: "2026-09-05",
++    run_id: "crun-1",
++    run_started_at: "2026-09-05T22:00:00Z",
++    run_outcome: "succeeded",
++    state: "complete",
++    started_at: "2026-09-05T22:00:00Z",
++    ended_at: "2026-09-05T22:10:00Z",
++    latest_trading_day: "2026-09-04",
++    active_instruments: 40,
++    not_current: false,
++  },
++  later: null,
++  factors: {
++    value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 },
++    growth: { qualified_count: 28, ranked: true, min_peer_set_size: 5 },
++    momentum: { qualified_count: 35, ranked: true, min_peer_set_size: 5 },
++  },
++  stocks_current: { current_count: 10, followed_count: 12 },
++};
++
++const SUMMARY_BUILDING: ScoreSummary = {
++  ...SUMMARY_SET,
++  later: {
++    set_id: "set-2",
++    state: "building",
++    started_at: "2026-09-06T18:00:00Z",
++    ended_at: null,
++    failure_reason: null,
++    run_id: "crun-2",
++    run_started_at: "2026-09-06T18:00:00Z",
++  },
++};
++
++const SUMMARY_LATER_FAILED: ScoreSummary = {
++  ...SUMMARY_BUILDING,
++  later: {
++    ...(SUMMARY_BUILDING.later as NonNullable<ScoreSummary["later"]>),
++    state: "failed",
++    ended_at: "2026-09-06T18:10:00Z",
++    failure_reason: "x",
++  },
++};
++
++const NOT_FOUND_ENVELOPE = {
++  error: { code: "not_found", message: "No resource exists at this path.", request_id: "req-404" },
++};
++const INTERNAL_ENVELOPE = {
++  error: { code: "internal_error", message: "x", request_id: "req-500" },
++};
++
++const HEALTH_PATH = "/api/health";
++const ATTENTION_PATH = "/api/attention";
++const SUMMARY_PATH = "/api/classifications/summary";
++const DATA_HEALTH_PATH = "/api/data-health";
++
++type Answer = { status: number; body: unknown } | "unreachable";
++const queues = new Map<string, Array<Answer | Promise<Answer>>>();
++const standings = new Map<string, Answer>();
++const counts = new Map<string, number>();
++
++function toResponse(answer: Answer): Response {
++  if (answer === "unreachable") {
++    throw new TypeError("network down");
++  }
++  return new Response(JSON.stringify(answer.body), {
++    status: answer.status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++async function router(input: RequestInfo | URL): Promise<Response> {
++  const path = new URL(String(input), "http://localhost").pathname;
++  counts.set(path, (counts.get(path) ?? 0) + 1);
++  const next = queues.get(path)?.shift();
++  const answer = next === undefined ? standings.get(path) : await next;
++  if (answer === undefined) {
++    throw new Error(`no answer set for ${path}`);
++  }
++  return toResponse(answer);
++}
++
++function answer(path: string, status: number, body: unknown): void {
++  const queue = queues.get(path) ?? [];
++  queue.push({ status, body });
++  queues.set(path, queue);
++}
++
++function standing(path: string, status: number, body: unknown): void {
++  standings.set(path, { status, body });
++}
++
++/** Queues an answer the test settles later. */
++function defer(path: string): { resolve(status: number, body: unknown): void } {
++  let settle: (value: Answer) => void = () => undefined;
++  const promise = new Promise<Answer>((resolve) => {
++    settle = resolve;
++  });
++  const queue = queues.get(path) ?? [];
++  queue.push(promise);
++  queues.set(path, queue);
++  return { resolve: (status, body) => settle({ status, body }) };
++}
++
++function calls(path: string): number {
++  return counts.get(path) ?? 0;
++}
++
++function standIdle(): void {
++  standing(HEALTH_PATH, 200, HEALTH);
++  standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++  standing(SUMMARY_PATH, 200, SUMMARY_SET);
++}
++
++async function advance(ms: number): Promise<void> {
++  await act(() => vi.advanceTimersByTimeAsync(ms));
++}
++
++function defineVisibility(value: "hidden" | "visible"): void {
++  Object.defineProperty(document, "visibilityState", { configurable: true, get: () => value });
++  Object.defineProperty(document, "hidden", { configurable: true, get: () => value === "hidden" });
++}
++
++function setVisibility(value: "hidden" | "visible"): void {
++  defineVisibility(value);
++  document.dispatchEvent(new Event("visibilitychange"));
++}
++
++let latest: ShellContextValue;
++
++function Probe() {
++  latest = useShell();
++  return <p data-testid="title-detail">{String(useTitleDetail())}</p>;
++}
++
++function Tree({ children }: { children?: React.ReactNode }) {
++  return (
++    <HealthProvider>
++      <ShellProvider>
++        <Probe />
++        {children}
++      </ShellProvider>
++    </HealthProvider>
++  );
++}
++
++async function mount() {
++  const view = render(<Tree />);
++  await advance(0);
++  return view;
++}
++
++beforeEach(() => {
++  queues.clear();
++  standings.clear();
++  counts.clear();
++  vi.useFakeTimers();
++  vi.setSystemTime(NOW);
++  vi.stubGlobal("fetch", vi.fn(router));
++  defineVisibility("visible");
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++  vi.unstubAllGlobals();
++  defineVisibility("visible");
++});
++
++const NON_TERMINAL: RunState[] = ["requested", "running", "cancelling"];
++const TERMINAL: RunState[] = ["succeeded", "partial", "failed", "cancelled", "abandoned"];
++
++describe("ShellProvider cadences (TC-COMP-073, DAC-E3-S3-1, AC-25)", () => {
++  // Implements TC-COMP-073
++  it("reads attention and summary every 60 s while idle", async () => {
++    standIdle();
++    await mount();
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    await advance(59_999);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    await advance(1);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(SUMMARY_PATH)).toBe(2);
++    await advance(60_000);
++    expect(calls(ATTENTION_PATH)).toBe(3);
++    expect(calls(SUMMARY_PATH)).toBe(3);
++  });
++
++  it.each(NON_TERMINAL)(
++    "reads both every 10 s while the download is %s",
++    async (state: RunState) => {
++      standing(HEALTH_PATH, 200, HEALTH);
++      standing(ATTENTION_PATH, 200, attentionWith(state));
++      const first = defer(ATTENTION_PATH);
++      const firstSummary = defer(SUMMARY_PATH);
++      standing(SUMMARY_PATH, 200, SUMMARY_SET);
++      render(<Tree />);
++      await advance(0);
++      first.resolve(200, attentionWith(state));
++      await advance(0);
++      firstSummary.resolve(200, SUMMARY_SET);
++      await advance(0);
++      expect(calls(ATTENTION_PATH)).toBe(1);
++      expect(calls(SUMMARY_PATH)).toBe(1);
++      await advance(9_999);
++      expect(calls(ATTENTION_PATH)).toBe(1);
++      expect(calls(SUMMARY_PATH)).toBe(1);
++      await advance(1);
++      expect(calls(ATTENTION_PATH)).toBe(2);
++      expect(calls(SUMMARY_PATH)).toBe(2);
++      await advance(10_000);
++      expect(calls(ATTENTION_PATH)).toBe(3);
++      expect(calls(SUMMARY_PATH)).toBe(3);
++      await advance(10_000);
++      expect(calls(ATTENTION_PATH)).toBe(4);
++      expect(calls(SUMMARY_PATH)).toBe(4);
++    },
++  );
++
++  it.each(TERMINAL)(
++    "returns to 60 s after the next answer once the download is %s",
++    async (end) => {
++      standing(HEALTH_PATH, 200, HEALTH);
++      standing(ATTENTION_PATH, 200, attentionWith("running"));
++      standing(SUMMARY_PATH, 200, SUMMARY_SET);
++      await mount();
++      await advance(30_000);
++      expect(calls(ATTENTION_PATH)).toBe(4);
++      // The read at 30 000 ms is the fourth; make the next answer terminal.
++      standing(ATTENTION_PATH, 200, attentionWith(end));
++      await advance(10_000);
++      expect(calls(ATTENTION_PATH)).toBe(5);
++      // That fifth answer (at 40 000 ms) was terminal, and the summary read
++      // beside it saw it: both next reads come 60 s after, not 10 s.
++      expect(calls(SUMMARY_PATH)).toBe(5);
++      await advance(59_999);
++      expect(calls(ATTENTION_PATH)).toBe(5);
++      expect(calls(SUMMARY_PATH)).toBe(5);
++      await advance(1);
++      expect(calls(ATTENTION_PATH)).toBe(6);
++      expect(calls(SUMMARY_PATH)).toBe(6);
++    },
++  );
++
++  it("reads both every 10 s while the scores are building", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    const a = defer(ATTENTION_PATH);
++    const s = defer(SUMMARY_PATH);
++    standing(SUMMARY_PATH, 200, SUMMARY_BUILDING);
++    render(<Tree />);
++    await advance(0);
++    // The summary answers first, so attention's delay already sees it building.
++    s.resolve(200, SUMMARY_BUILDING);
++    await advance(0);
++    a.resolve(200, ATTENTION_IDLE);
++    await advance(0);
++    await advance(9_999);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    await advance(1);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(SUMMARY_PATH)).toBe(2);
++  });
++
++  it("keeps 60 s for both when the later set failed", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    standing(SUMMARY_PATH, 200, SUMMARY_LATER_FAILED);
++    await mount();
++    await advance(59_999);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    await advance(1);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(SUMMARY_PATH)).toBe(2);
++  });
++
++  it("re-reads a not-served summary on the 60 s cadence while a download runs", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, attentionWith("running"));
++    standing(SUMMARY_PATH, 404, NOT_FOUND_ENVELOPE);
++    await mount();
++    await advance(9_999);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    await advance(1);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    await advance(49_999);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    await advance(1);
++    expect(calls(SUMMARY_PATH)).toBe(2);
++  });
++});
++
++describe("ShellProvider refresh (TC-COMP-074, DAC-E3-S3-2)", () => {
++  // Implements TC-COMP-074
++  it("reads attention at once and reschedules from it", async () => {
++    standIdle();
++    await mount();
++    await advance(20_000);
++    act(() => latest.refresh("attention"));
++    await advance(0);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    expect(calls(HEALTH_PATH)).toBe(1);
++    await advance(40_000);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    await advance(20_000);
++    expect(calls(ATTENTION_PATH)).toBe(3);
++  });
++
++  it("never overlaps two attention reads and reschedules from the resolution", async () => {
++    standIdle();
++    await mount();
++    const pending = defer(ATTENTION_PATH);
++    act(() => latest.refresh("attention"));
++    await advance(0);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    act(() => latest.refresh("attention"));
++    await advance(0);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    pending.resolve(200, ATTENTION_IDLE);
++    await advance(0);
++    await advance(59_999);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    await advance(1);
++    expect(calls(ATTENTION_PATH)).toBe(3);
++  });
++
++  it("refreshes the summary alone", async () => {
++    standIdle();
++    await mount();
++    await advance(20_000);
++    act(() => latest.refresh("scores"));
++    await advance(0);
++    expect(calls(SUMMARY_PATH)).toBe(2);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++  });
++
++  it("refreshes health alone, keeping its 30 s cadence", async () => {
++    standIdle();
++    await mount();
++    await advance(10_000);
++    act(() => latest.refresh("health"));
++    await advance(0);
++    expect(calls(HEALTH_PATH)).toBe(2);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    await advance(29_999);
++    expect(calls(HEALTH_PATH)).toBe(2);
++    await advance(1);
++    expect(calls(HEALTH_PATH)).toBe(3);
++  });
++
++  it("keeps the identity of refresh across answers", async () => {
++    standIdle();
++    await mount();
++    const first = latest.refresh;
++    await advance(60_000);
++    await advance(60_000);
++    expect(latest.refresh).toBe(first);
++  });
++});
++
++function DetailScreen({ onEffect }: { onEffect: () => void }) {
++  const { setTitleDetail } = useShell();
++  useEffect(() => {
++    onEffect();
++    setTitleDetail("Download 2026-10-15 09:30 CDT");
++    return () => setTitleDetail(null);
++  }, [setTitleDetail, onEffect]);
++  return null;
++}
++
++describe("setTitleDetail (TC-COMP-075, DAC-E3-S3-3)", () => {
++  // Implements TC-COMP-075
++  it("holds the detail while the screen is mounted and clears it on unmount", async () => {
++    standIdle();
++    const onEffect = vi.fn();
++    const view = render(
++      <Tree>
++        <DetailScreen onEffect={onEffect} />
++      </Tree>,
++    );
++    await advance(0);
++    expect(screen.getByTestId("title-detail").textContent).toBe("Download 2026-10-15 09:30 CDT");
++    await advance(180_000);
++    expect(screen.getByTestId("title-detail").textContent).toBe("Download 2026-10-15 09:30 CDT");
++    expect(onEffect).toHaveBeenCalledTimes(1);
++    view.rerender(<Tree />);
++    await advance(0);
++    expect(screen.getByTestId("title-detail").textContent).toBe("null");
++  });
++
++  it("starts as null and follows direct calls", async () => {
++    standIdle();
++    await mount();
++    expect(screen.getByTestId("title-detail").textContent).toBe("null");
++    act(() => latest.setTitleDetail("X"));
++    expect(screen.getByTestId("title-detail").textContent).toBe("X");
++    act(() => latest.setTitleDetail(null));
++    expect(screen.getByTestId("title-detail").textContent).toBe("null");
++  });
++});
++
++type DeepKeys<T> = T extends (...args: never[]) => unknown
++  ? never
++  : T extends Date
++    ? never
++    : T extends Array<infer E>
++      ? DeepKeys<E>
++      : T extends object
++        ? { [K in keyof T & string]: K | DeepKeys<T[K]> }[keyof T & string]
++        : never;
++
++describe("credential_present stays a boolean (TC-COMP-076, DAC-E3-S3-4)", () => {
++  // Implements TC-COMP-076
++  it("exposes no credential-bearing key but credential_present, at the type level", () => {
++    expectTypeOf<
++      Extract<
++        DeepKeys<ShellContextValue>,
++        `${string}${"credential" | "secret" | "token" | "password" | "key" | "Key"}${string}`
++      >
++    >().toEqualTypeOf<"credential_present">();
++    expectTypeOf<
++      NonNullable<ShellContextValue["health"]["health"]>["credential_present"]
++    >().toEqualTypeOf<boolean>();
++  });
++
++  it.each([true, false])("passes credential_present %s through as a boolean", async (present) => {
++    standing(HEALTH_PATH, 200, { ...HEALTH, credential_present: present });
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    standing(SUMMARY_PATH, 200, SUMMARY_SET);
++    await mount();
++    expect(typeof latest.health.health?.credential_present).toBe("boolean");
++    expect(latest.health.health?.credential_present).toBe(present);
++    expect(JSON.stringify(latest)).not.toMatch(/"credential(?!_present")/);
++  });
++});
++
++describe("the score and attention states (TC-COMP-059, DAC-E3-6)", () => {
++  // Implements TC-COMP-059
++  it("maps a summary 404 to not_served and any other failure to an error", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    standing(SUMMARY_PATH, 404, NOT_FOUND_ENVELOPE);
++    await mount();
++    expect(latest.scores).toEqual({ kind: "not_served" });
++    expect("error" in latest.scores).toBe(false);
++    expect("checkedAt" in latest.scores).toBe(false);
++  });
++
++  it("gives an error for a first-read 500, with no last value", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    standing(SUMMARY_PATH, 500, INTERNAL_ENVELOPE);
++    await mount();
++    expect(latest.scores).toEqual({ kind: "error", error: expect.any(ApiError), last: null });
++  });
++
++  it("keeps the last served summary when a later read fails, then recovers", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    answer(SUMMARY_PATH, 200, SUMMARY_SET);
++    answer(SUMMARY_PATH, 500, INTERNAL_ENVELOPE);
++    answer(SUMMARY_PATH, 200, SUMMARY_BUILDING);
++    standing(SUMMARY_PATH, 200, SUMMARY_BUILDING);
++    await mount();
++    expect(latest.scores).toEqual({ kind: "served", data: SUMMARY_SET, checkedAt: NOW });
++    await advance(60_000);
++    expect(latest.scores).toEqual({
++      kind: "error",
++      error: expect.any(ApiError),
++      last: SUMMARY_SET,
++    });
++    expect(latest.scores).toMatchObject({ error: { code: "internal_error" } });
++    await advance(60_000);
++    expect(latest.scores).toEqual({
++      kind: "served",
++      data: SUMMARY_BUILDING,
++      checkedAt: new Date(NOW.getTime() + 120_000),
++    });
++  });
++
++  it("has no last value after a not-served answer followed by a failure", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    answer(SUMMARY_PATH, 404, NOT_FOUND_ENVELOPE);
++    standing(SUMMARY_PATH, 500, INTERNAL_ENVELOPE);
++    await mount();
++    await advance(60_000);
++    expect(latest.scores).toEqual({ kind: "error", error: expect.any(ApiError), last: null });
++  });
++
++  it("keeps the last attention answer when a read fails or the network is down", async () => {
++    standing(HEALTH_PATH, 200, HEALTH);
++    standing(SUMMARY_PATH, 200, SUMMARY_SET);
++    answer(ATTENTION_PATH, 200, ATTENTION_IDLE);
++    answer(ATTENTION_PATH, 500, INTERNAL_ENVELOPE);
++    await mount();
++    await advance(60_000);
++    expect(latest.attention).toEqual({
++      kind: "error",
++      error: expect.any(ApiError),
++      last: { data: ATTENTION_IDLE, checkedAt: NOW },
++    });
++    standing(ATTENTION_PATH, 500, INTERNAL_ENVELOPE);
++    queues.set(ATTENTION_PATH, ["unreachable"]);
++    await advance(60_000);
++    expect(latest.attention).toEqual({
++      kind: "error",
++      error: expect.any(ApiUnreachableError),
++      last: { data: ATTENTION_IDLE, checkedAt: NOW },
++    });
++  });
++});
++
++describe("the context's shape, freshness, pause and on-demand reads", () => {
++  it("exposes exactly the five members", async () => {
++    standIdle();
++    await mount();
++    expect(Object.keys(latest).sort()).toEqual([
++      "attention",
++      "health",
++      "refresh",
++      "scores",
++      "setTitleDetail",
++    ]);
++    expectTypeOf<keyof ShellContextValue>().toEqualTypeOf<
++      "health" | "attention" | "scores" | "refresh" | "setTitleDetail"
++    >();
++  });
++
++  it("carries the instant of every answer (AC-25)", async () => {
++    standIdle();
++    await mount();
++    expect(latest.attention).toEqual({ kind: "ok", data: ATTENTION_IDLE, checkedAt: NOW });
++    expect(latest.scores).toEqual({ kind: "served", data: SUMMARY_SET, checkedAt: NOW });
++    expect(latest.health.liveness).toBe("answering");
++    expect(latest.health.lastAnsweredAt).toEqual(NOW);
++    await advance(60_000);
++    const later = new Date("2026-09-06T18:31:00.000Z");
++    expect(latest.attention.kind === "ok" && latest.attention.checkedAt).toEqual(later);
++    expect(latest.scores.kind === "served" && latest.scores.checkedAt).toEqual(later);
++  });
++
++  it("pauses while the page is hidden and reads once when it is visible again", async () => {
++    standIdle();
++    await mount();
++    setVisibility("hidden");
++    await advance(600_000);
++    expect(calls(ATTENTION_PATH)).toBe(1);
++    expect(calls(SUMMARY_PATH)).toBe(1);
++    expect(calls(HEALTH_PATH)).toBe(1);
++    setVisibility("visible");
++    await advance(0);
++    expect(calls(ATTENTION_PATH)).toBe(2);
++    expect(calls(SUMMARY_PATH)).toBe(2);
++    expect(calls(HEALTH_PATH)).toBe(2);
++  });
++
++  it("never reads the data-health aggregate (AC-28)", async () => {
++    standIdle();
++    standing(DATA_HEALTH_PATH, 200, {});
++    await mount();
++    await advance(600_000);
++    standing(ATTENTION_PATH, 200, attentionWith("running"));
++    await advance(60_000);
++    standing(ATTENTION_PATH, 200, attentionWith("succeeded"));
++    await advance(60_000);
++    expect(calls(DATA_HEALTH_PATH)).toBe(0);
++  });
++
++  it("stops every read on unmount", async () => {
++    standIdle();
++    const view = await mount();
++    view.unmount();
++    const before = [HEALTH_PATH, ATTENTION_PATH, SUMMARY_PATH].map(calls);
++    await advance(600_000);
++    expect([HEALTH_PATH, ATTENTION_PATH, SUMMARY_PATH].map(calls)).toEqual(before);
++  });
++
++  it("throws outside a provider, and reads no detail there", () => {
++    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
++    try {
++      expect(() => renderHook(() => useShell())).toThrow(
++        new Error("useShell() must be called inside <ShellProvider>"),
++      );
++    } finally {
++      spy.mockRestore();
++    }
++    expect(renderHook(() => useTitleDetail()).result.current).toBeNull();
++  });
++});
+diff --git a/web/src/app/shell-context.tsx b/web/src/app/shell-context.tsx
+new file mode 100644
+index 00000000..c9355a4f
+--- /dev/null
++++ b/web/src/app/shell-context.tsx
+@@ -0,0 +1,190 @@
++import {
++  type JSX,
++  type ReactNode,
++  createContext,
++  useCallback,
++  useContext,
++  useMemo,
++  useRef,
++  useState,
++} from "react";
++import type { RunState } from "../api/types";
++import { type HealthState, useHealth, useHealthRefresh } from "./health";
++import { fetchAttention, fetchScoreSummary } from "./shell-client";
++import type { Attention, ReadState, ScoreState, ScoreSummary } from "./shell-types";
++import { usePolledRead } from "./use-polled-read";
++
++/*
++ * The one context every screen reads the shell's shared reads through
++ * (component design owner-shell 2.3, 2.4; CAP-003-E3-S3). Three intervals
++ * serve the whole interface and none is opened per screen (epic NFR
++ * *Cadences*): health's 30 s poll belongs to `health.tsx`, and the two reads
++ * below run on `usePolledRead`, which owns the scheduling, the hidden-page
++ * pause and the no-overlap rule (DAC-E3-5). Nothing here sets a timer.
++ */
++
++/** Attention and summary while nothing is running (owner-shell 2.4; DAC-E3-S3-1). */
++const IDLE_INTERVAL_MS = 60_000;
++
++/**
++ * Attention and summary while a download is not terminal or the scores are
++ * building (owner-shell 2.4; epic NFR *Cadences*; system design constraint 8).
++ */
++const ACTIVE_INTERVAL_MS = 10_000;
++
++/** The download states that are not outcomes (`web/src/api/types.ts`). */
++const NON_TERMINAL: ReadonlySet<RunState | undefined> = new Set<RunState>([
++  "requested",
++  "running",
++  "cancelling",
++]);
++
++type NotServed = Extract<ScoreState, { kind: "not_served" }>;
++type SummaryAnswer = ScoreSummary | NotServed;
++
++/**
++ * What the shell offers a screen (owner-shell 2.3; DAC-E3-18). `health` is
++ * the delivered health state, passed through, so `credential_present` stays
++ * the boolean it is and no member holds a credential value (DAC-E3-S3-4,
++ * AC-4).
++ */
++export interface ShellContextValue {
++  /** The health poll's state, with the instant of the last answer (AC-23). */
++  health: HealthState;
++  /** `GET /api/attention`, polled (AC-16, AC-25). */
++  attention: ReadState<Attention>;
++  /** The score summary, polled; `not_served` until its route is deployed (DAC-E3-6). */
++  scores: ScoreState;
++  /** Re-reads one kind at once and keeps its cadence (DAC-E3-S3-2). */
++  refresh(kind: "health" | "attention" | "scores"): void;
++  /** Sets the top-bar crumb's detail text, or clears it with `null` (DAC-E3-S3-3). */
++  setTitleDetail(text: string | null): void;
++}
++
++const ShellContext = createContext<ShellContextValue | null>(null);
++
++/**
++ * The held title detail, in a context of its own so a crumb change does not
++ * re-render every `useShell()` consumer, and so `ShellContextValue` keeps
++ * exactly the five members DAC-E3-18 names (DEC-0323).
++ */
++const TitleDetailContext = createContext<string | null>(null);
++
++/**
++ * True while the download is not terminal or the scores are building: the
++ * joint condition for the 10 s cadence (owner-shell 2.4; DAC-E3-S3-1).
++ */
++function active(attention: Attention | null, scores: SummaryAnswer | null): boolean {
++  if (NON_TERMINAL.has(attention?.latest_download?.state)) {
++    return true;
++  }
++  return scores !== null && !("kind" in scores) && scores.later?.state === "building";
++}
++
++/**
++ * Polls attention and the score summary once for the whole interface and
++ * supplies them, with health and the title detail, to every screen beneath
++ * it. It never reads `GET /api/data-health` (AC-28; DAC-E3-19).
++ */
++export function ShellProvider({ children }: { children: ReactNode }): JSX.Element {
++  // Each read's last success, set before `usePolledRead` computes the next
++  // delay, so neither interval depends on React's render timing.
++  const attentionLast = useRef<Attention | null>(null);
++  const scoresLast = useRef<SummaryAnswer | null>(null);
++
++  const attentionRead = useCallback(async (): Promise<Attention> => {
++    const answered = await fetchAttention();
++    attentionLast.current = answered;
++    return answered;
++  }, []);
++  const scoresRead = useCallback(async (): Promise<SummaryAnswer> => {
++    const answered = await fetchScoreSummary();
++    scoresLast.current = answered;
++    return answered;
++  }, []);
++
++  const attentionPoll = usePolledRead<Attention>(attentionRead, (last) =>
++    active(last, scoresLast.current) ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS,
++  );
++  const scoresPoll = usePolledRead<SummaryAnswer>(scoresRead, (last) =>
++    // A not-served summary has no `later` to build and a download does not
++    // deploy its route: it is re-read on the 60 s cadence (DAC-E3-6).
++    last !== null && "kind" in last
++      ? IDLE_INTERVAL_MS
++      : active(attentionLast.current, last)
++        ? ACTIVE_INTERVAL_MS
++        : IDLE_INTERVAL_MS,
++  );
++
++  const health = useHealth();
++  const healthRefresh = useHealthRefresh();
++  const attentionRefresh = attentionPoll.refresh;
++  const scoresRefresh = scoresPoll.refresh;
++
++  // The summary route answers 404 until it is deployed: that is `not_served`,
++  // not an error (DAC-E3-6). A last success that was not served is not a
++  // `ScoreSummary`, so it maps to `null`.
++  const scoresState = scoresPoll.state;
++  const scores = useMemo<ScoreState>(() => {
++    if (scoresState.kind === "loading") {
++      return { kind: "loading" };
++    }
++    if (scoresState.kind === "ok") {
++      const { data, checkedAt } = scoresState;
++      return "kind" in data ? { kind: "not_served" } : { kind: "served", data, checkedAt };
++    }
++    const lastData = scoresState.last?.data ?? null;
++    return {
++      kind: "error",
++      error: scoresState.error,
++      last: lastData !== null && !("kind" in lastData) ? lastData : null,
++    };
++  }, [scoresState]);
++
++  const refresh = useCallback(
++    (kind: "health" | "attention" | "scores"): void => {
++      if (kind === "attention") {
++        attentionRefresh();
++      } else if (kind === "scores") {
++        scoresRefresh();
++      } else {
++        healthRefresh();
++      }
++    },
++    [attentionRefresh, scoresRefresh, healthRefresh],
++  );
++
++  const [detail, setDetail] = useState<string | null>(null);
++  const setTitleDetail = useCallback((text: string | null): void => setDetail(text), []);
++
++  const attention = attentionPoll.state;
++  const value = useMemo<ShellContextValue>(
++    () => ({ health, attention, scores, refresh, setTitleDetail }),
++    [health, attention, scores, refresh, setTitleDetail],
++  );
++
++  return (
++    <ShellContext.Provider value={value}>
++      <TitleDetailContext.Provider value={detail}>{children}</TitleDetailContext.Provider>
++    </ShellContext.Provider>
++  );
++}
++
++/**
++ * The shell's shared reads. Throws outside a `ShellProvider`: a per-consumer
++ * fallback poll would open intervals per screen, which the epic NFR forbids,
++ * and a frozen default would leave a screen loading with no sign why
++ * (DEC-0326).
++ */
++export function useShell(): ShellContextValue {
++  const value = useContext(ShellContext);
++  if (value === null) {
++    throw new Error("useShell() must be called inside <ShellProvider>");
++  }
++  return value;
++}
++
++/** The crumb detail a screen set, or `null` until one is set (DEC-0214, DEC-0323). */
++export function useTitleDetail(): string | null {
++  return useContext(TitleDetailContext);
++}

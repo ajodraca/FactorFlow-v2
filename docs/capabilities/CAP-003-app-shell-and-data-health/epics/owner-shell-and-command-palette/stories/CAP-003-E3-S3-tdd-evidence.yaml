@@ -1,0 +1,99 @@
+# TDD evidence for CAP-003-E3-S3 - ShellProvider, useShell and the On-Demand useDataHealth Hook.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T004, T005, T006, T009]
+    description: >
+      The provider (TC-COMP-073, 074, 075, 076, 059, DAC-E3-S3-1 to 4, DAC-E3-6, DAC-E3-18, AC-25, AC-28, AC-8): ShellProvider and useShell with exactly the five members, useTitleDetail on a second private context (DEC-0323), useShell throwing outside a provider (DEC-0326). Attention and summary are two usePolledRead reads whose intervals follow the other read's last success through refs: 60 s idle, 10 s while the download is requested, running or cancelling or the summary's later set is building, 60 s for a not-served summary. T001 case (d) resolves the summary first, because the plan's own cross-read note says one read's change reaches the other only when that other next settles; T001 case (c) puts the terminal answer at the 40 s read, equivalent for the 60 s return. The first spec-drift review found the summary half of case (c) too loose (a bound, not exact spacing); the test was tightened to exact 59 999 and 60 000 ms boundaries, the mutation run repeated and a fresh review pair judged the revised patch. 23 mutants (8 generated, 15 hand-written from the plan's kill lists) were all killed. The second code review left three low findings accepted as warnings: a cast in the SUMMARY_LATER_FAILED fixture, the terminal-return case relying on attention settling before the summary in one tick, and one test title that names only its first half.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-1-shell-context.log
+    red_log_sha256: ddcfac5f8ec9cffa384f81f4ab6eed10cd65ace6742165ba74e68539efe5635e
+    red_evidence: >
+      shell-context.test.tsx failed to load (./shell-context did not resolve) before the module existed.
+    green_evidence: >
+      shell-context.test.tsx 33 passed (green-cycle-1-shell-context.log); tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f74727ab31ec5ff5d2a63976135fca4b5dbe71059e14a1410e5396500b84a983
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 8612089f7443e431324af28dae9576a1c0908f3b7dce0594590d8f3fbbb5b8f4
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T007, T008, T010, T011, T012]
+    description: >
+      The on-demand aggregate hook (TC-COMP-064, DAC-E3-19, AC-28, DEC-0324, DEC-0325): useDataHealth() reads GET /api/data-health once on mount, once per retry() and once when two consecutive successful attention answers show latest_download going from requested, running or cancelling to one of the five outcomes; never on a timer. One read runs at a time, and any number of triggers during it add exactly one trailing read. The test file also holds the static check that only web/src/screens/data-health/ may import the hook, with its planted-record and non-vacuity cases. T011 (scope: the four files plus plan artifacts, every delivered file unchanged, the hook imported by no non-test file) and T012 (full Vitest suite 108 files and 2842 tests, biome lint and format, tsc --noEmit and the build all clean) join this cycle's validation. The first mutation run left two more survivors than now: an error-to-error read that must keep error.last, and a retry pending at unmount that must start no trailing read; both tests were added and the run repeated. Two survivors remain, both equivalent.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-2-use-data-health.log
+    red_log_sha256: f15894687ac80a888d0e8fa2f454f8f560326cd45a9f64af0a5163a3826e6a6c
+    red_evidence: >
+      use-data-health.test.tsx failed to load (./use-data-health did not resolve) before the module existed.
+    green_evidence: >
+      use-data-health.test.tsx 27 passed; full Vitest suite 108 files, 2842 tests passed (green-cycle-2-full-suite.log); npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a36ab300233e55250a641d584acf97972cecc091343db372133e728dd6bf4874
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: 5f26938bfc999f6afc205c4c10a3caad9893282ff602c6de1802cf46cf408222
+      generated: 29
+      killed: 25
+      survived: 2
+      stillborn: 2
+      timeout: 0
+      score: 0.926
+      survivors:
+        - id: web/src/app/use-data-health.ts:46:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            mounted = useRef(true) instead of useRef(false). The mount effect sets mounted.current to true before any read it starts can settle, and the cleanup sets it false, so the initial value is never read.
+        - id: web/src/app/use-data-health.ts:manual:unmounted-guard-off
+          disposition: equivalent
+          reason: >
+            Removing the early return when the hook is unmounted. The only code it skips is setState, which React 18 drops silently on an unmounted component, and the rethrow of a rejection that is not ApiError or ApiUnreachableError, which cannot occur because requestJson rejects with only those two. The trailing-read guard in the finally block is separate and is killed by the pending-at-unmount test.
+
+  - id: cycle-3
+    tasks: [T001, T005, T008, T013]
+    description: >
+      Review rework of CAP-003-E3-S3-implementation-review-v1 (IR-001, IR-002, IR-003, IR-005): tests that kill the two mutants the review left surviving, and the cadence case made independent of same-tick settle order. A summary read held open with defer shows scores as loading and never as not_served before its first answer (IR-001). A thrown fetch for the aggregate gives an error state with an ApiUnreachableError, last null at first and the last good answer afterwards (IR-002). T001 (c) sequences the terminal attention answer and the summary answer with defer instead of relying on attention settling first (IR-003). The run also covers the plan's two hand-written mutants cycle 1 left out, a planted aggregate read in the provider and an added credential member (IR-005). No production behaviour changes; shell-context.tsx and use-data-health.ts are untouched. The four mutants are the review's manual:loading-to-not-served, manual:unreachable-not-mapped, manual:provider-reads-aggregate and manual:credential-member-added. IR-004 (Decision-Id trailers) is carried on this cycle's commit and the stage commit.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/red-cycle-3-mutants.log
+    red_log_sha256: 2237309cc42b0d4db9bd7ff7dae953ace8ab7751d3970c68ff204ad71baad528
+    red_evidence: >
+      The code under test was already correct, so the new tests cannot fail against it; the RED is their failure against the mutants the review found surviving (and the two it ran that were killed). red-cycle-3-mutants.log holds the failing runs; before these tests the first two mutants passed (review v1, Mutation run).
+    green_evidence: >
+      shell-context.test.tsx 34 and use-data-health.test.tsx 28 passed; full Vitest suite 108 files, 2844 tests passed (green-cycle-3-full-suite.log); npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: dafe650d8e2a5c726965faf728448c063ac4a3783608c6c38cdeb165ba61d045
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 61f7e5d033d2267d73b0d7a40fc89499a6e3939c2bec5c3d7fd6358deb962124
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

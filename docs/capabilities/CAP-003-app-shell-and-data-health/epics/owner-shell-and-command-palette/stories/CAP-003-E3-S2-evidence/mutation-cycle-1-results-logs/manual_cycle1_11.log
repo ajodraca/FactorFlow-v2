@@ -1,0 +1,59 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zjsv85zs/w3/web
+
+ ❯ src/components/token-literals.test.ts (52 tests | 2 failed) 30ms
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > exempts layout.ts and the research directory, and no look-alike 4ms
+     → expected [] to deeply equal [ Array(1) ]
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > CAP-002's research screens are the only exempt directory 1ms
+     → expected [ 'web/src/app/layout.ts', …(1) ] to deeply equal [ 'web/src/app/layout.ts', …(1) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > exempts layout.ts and the research directory, and no look-alike
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- Array [
+-   "web/src/screens/researcher.tsx: 1180px",
+- ]
++ Array []
+
+ ❯ src/components/token-literals.test.ts:351:72
+    349|       "web/src/screens/home/index.tsx: 1180px",
+    350|     ]);
+    351|     expect(layoutLiteralsIn("web/src/screens/researcher.tsx", source))…
+       |                                                                        ^
+    352|       "web/src/screens/researcher.tsx: 1180px",
+    353|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > CAP-002's research screens are the only exempt directory
+AssertionError: expected [ 'web/src/app/layout.ts', …(1) ] to deeply equal [ 'web/src/app/layout.ts', …(1) ]
+
+- Expected
++ Received
+
+  Array [
+    "web/src/app/layout.ts",
+-   "web/src/screens/research/",
++   "web/src/screens/research",
+  ]
+
+ ❯ src/components/token-literals.test.ts:389:32
+    387| 
+    388|   it("CAP-002's research screens are the only exempt directory", () =>…
+    389|     expect(LAYOUT_RULE_EXEMPT).toEqual(["web/src/app/layout.ts", "web/…
+       |                                ^
+    390|     const offenders = sourcesUnder("web/src/screens/research/").flatMa…
+    391|       layoutLiteralsIn(relPath, readFileSync(path.join(REPO_ROOT, relP…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 50 passed (52)
+   Start at  22:31:30
+   Duration  1.00s (transform 37ms, setup 37ms, collect 31ms, tests 30ms, environment 193ms, prepare 328ms)
+

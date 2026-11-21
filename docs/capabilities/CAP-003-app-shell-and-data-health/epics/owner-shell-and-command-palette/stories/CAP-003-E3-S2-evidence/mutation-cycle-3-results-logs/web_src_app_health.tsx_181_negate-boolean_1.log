@@ -1,0 +1,210 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-e7fb_g93/w3/web
+
+ ❯ src/app/health.test.tsx (18 tests | 13 failed) 48ms
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > sets lastUpdated and lastAnsweredAt to the instant of the first success 15ms
+     → expected 'unknown' to be 'answering' // Object.is equality
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated 2ms
+     → expected 'unknown' to be 'unreachable' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches health on mount and reports answering 1ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > polls again every 30 seconds while mounted 2ms
+     → expected "spy" to be called 2 times, but got 0 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > does not poll faster than 30 seconds 1ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > reports unreachable when the fetch rejects 3ms
+     → expected 'unknown' to be 'unreachable' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > still reports answering when the answer says the database is unreachable 1ms
+     → expected 'unknown' to be 'answering' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches nothing after unmount, however far the timers advance 1ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > opens one poll across re-renders of the provider 3ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > makes one fetch per cycle for two probes under one provider 1ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > pauses while the page is hidden and reads at once when it is visible 1ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × useHealthRefresh (DEC-0322) > reads at once inside a provider and keeps the 30 s cadence from that read 1ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × useHealthRefresh (DEC-0322) > adds no fetch while one is pending 1ms
+     → expected "spy" to be called 2 times, but got 0 times
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > sets lastUpdated and lastAnsweredAt to the instant of the first success
+AssertionError: expected 'unknown' to be 'answering' // Object.is equality
+
+Expected: "answering"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:105:49
+    103|     );
+    104|     await advance(0);
+    105|     expect(attribute("probe", "data-liveness")).toBe("answering");
+       |                                                 ^
+    106|     expect(attribute("probe", "data-last-answered")).toBe("2026-09-06T…
+    107|     expect(attribute("probe", "data-last-updated")).toBe("2026-09-06T1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated
+AssertionError: expected 'unknown' to be 'unreachable' // Object.is equality
+
+Expected: "unreachable"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:121:49
+    119|     await advance(0);
+    120|     await advance(30_000);
+    121|     expect(attribute("probe", "data-liveness")).toBe("unreachable");
+       |                                                 ^
+    122|     expect(attribute("probe", "data-last-updated")).toBe("2026-09-06T1…
+    123|     expect(attribute("probe", "data-last-answered")).toBe("2026-09-06T…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches health on mount and reports answering
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:167:29
+    165|     );
+    166|     await advance(0);
+    167|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    168|     expect(attribute("probe", "data-liveness")).toBe("answering");
+    169|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > polls again every 30 seconds while mounted
+AssertionError: expected "spy" to be called 2 times, but got 0 times
+ ❯ src/app/health.test.tsx:180:29
+    178|     await advance(0);
+    179|     await advance(30_000);
+    180|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+       |                             ^
+    181|     await advance(30_000);
+    182|     expect(fetchHealthMock).toHaveBeenCalledTimes(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > does not poll faster than 30 seconds
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:194:29
+    192|     await advance(0);
+    193|     await advance(29_000);
+    194|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    195|     await advance(999);
+    196|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > reports unreachable when the fetch rejects
+AssertionError: expected 'unknown' to be 'unreachable' // Object.is equality
+
+Expected: "unreachable"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:209:49
+    207|     );
+    208|     await advance(0);
+    209|     expect(attribute("probe", "data-liveness")).toBe("unreachable");
+       |                                                 ^
+    210|   });
+    211| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > still reports answering when the answer says the database is unreachable
+AssertionError: expected 'unknown' to be 'answering' // Object.is equality
+
+Expected: "answering"
+Received: "unknown"
+
+ ❯ src/app/health.test.tsx:220:49
+    218|     );
+    219|     await advance(0);
+    220|     expect(attribute("probe", "data-liveness")).toBe("answering");
+       |                                                 ^
+    221|     expect(attribute("probe", "data-database")).toBe("unreachable");
+    222|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches nothing after unmount, however far the timers advance
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:232:29
+    230|     );
+    231|     await advance(0);
+    232|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    233|     unmount();
+    234|     await advance(300_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > opens one poll across re-renders of the provider
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:254:29
+    252|     }
+    253|     await advance(0);
+    254|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    255|     await advance(30_000);
+    256|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > makes one fetch per cycle for two probes under one provider
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:268:29
+    266|     );
+    267|     await advance(0);
+    268|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    269|     await advance(30_000);
+    270|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > pauses while the page is hidden and reads at once when it is visible
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:296:29
+    294|     setVisibility("hidden");
+    295|     await advance(90_000);
+    296|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    297|     setVisibility("visible");
+    298|     await advance(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+ FAIL  src/app/health.test.tsx > useHealthRefresh (DEC-0322) > reads at once inside a provider and keeps the 30 s cadence from that read
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/app/health.test.tsx:316:29
+    314|     await advance(0);
+    315|     await advance(10_000);
+    316|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    317| 
+    318|     await act(async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
+ FAIL  src/app/health.test.tsx > useHealthRefresh (DEC-0322) > adds no fetch while one is pending
+AssertionError: expected "spy" to be called 2 times, but got 0 times
+ ❯ src/app/health.test.tsx:339:29
+    337|     await advance(0);
+    338|     await advance(30_000);
+    339|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+       |                             ^
+    340|     await act(async () => {
+    341|       grabbed.refresh();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
+
+ Test Files  1 failed (1)
+      Tests  13 failed | 5 passed (18)
+   Start at  22:39:21
+   Duration  1.01s (transform 64ms, setup 45ms, collect 98ms, tests 48ms, environment 186ms, prepare 189ms)
+

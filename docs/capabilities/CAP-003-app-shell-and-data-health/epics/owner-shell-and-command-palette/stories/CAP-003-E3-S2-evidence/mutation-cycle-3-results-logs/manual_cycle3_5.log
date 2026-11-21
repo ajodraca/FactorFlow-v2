@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-e7fb_g93/w1/web
+
+ ❯ src/app/health.test.tsx (18 tests | 1 failed) 46ms
+   × useHealthRefresh (DEC-0322) > returns a stable function that makes no fetch outside a provider 3ms
+     → grabbed.refresh is not a function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/health.test.tsx > useHealthRefresh (DEC-0322) > returns a stable function that makes no fetch outside a provider
+TypeError: grabbed.refresh is not a function
+ ❯ src/app/health.test.tsx:353:15
+    351|     expect(grabbed.refresh).toBe(first);
+    352|     await act(async () => {
+    353|       grabbed.refresh();
+       |               ^
+    354|     });
+    355|     await advance(60_000);
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/act-compat.js:47:24
+ ❯ act ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react/cjs/react.development.js:2512:16
+ ❯ Proxy.<anonymous> ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/act-compat.js:46:25
+ ❯ src/app/health.test.tsx:352:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  22:39:22
+   Duration  1.04s (transform 77ms, setup 42ms, collect 109ms, tests 46ms, environment 215ms, prepare 183ms)
+

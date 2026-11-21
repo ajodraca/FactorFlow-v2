@@ -1,0 +1,130 @@
+# TDD evidence for CAP-003-E3-S1 - Shell Types, the One Fetch Module and the requestJson Export.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T004, T005, T009]
+    description: >
+      Wire-shape and state types (TC-COMP-068, DAC-E3-18, DAC-E3-S1-4): Attention, DataHealth, ProblemPage, ScoreSummary, ReadState and ScoreState in shell-types.ts, asserted by toEqualTypeOf against independent literals. ReadState follows owner-shell 2.3's discriminated union (the plan's prose summary describes it differently; the design governs).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-1-types.log
+    red_log_sha256: 92d6565d2d16fa6d5da31041f79731c5d4f79d174fa0f9e8e0b422fc52d23eec
+    red_evidence: >
+      npx tsc --noEmit failed with TS2307 (cannot find ./shell-types) before the module existed; vitest treats the type assertions as no-ops, so tsc is the observer.
+    green_evidence: >
+      tsc --noEmit clean and shell-client.test.ts 8 passed after T009.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: bc1e7e452835d2a754313254a97d6b1a632169c88ad68c7864a18eca9cd274dd
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: f8874fe91e54edaa56873962f95a5ee1d331b44ef7d12b9579ae8e339f7b109f
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T006, T008, T010]
+    description: >
+      The fetch module (TC-COMP-067, TC-COMP-068, DAC-E3-S1-3, DAC-E3-18): fetchAttention, fetchDataHealth and fetchProblems through requestJson, limit always sent and cursor only when set, no body mapped. The spec-drift review first found T008's nullables and T006's Accept/GET check incomplete; both were added to the tests and the pair of reviews re-run on the final patch.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-2-fetch.log
+    red_log_sha256: 6c850f1a3404d626b35108b9865a2b492eb83db7c3492d1f65861c4fa79afcbe
+    red_evidence: >
+      The test file failed to load (./shell-client did not resolve; tsc TS2307) before shell-client.ts existed.
+    green_evidence: >
+      shell-client.test.ts 24 passed, tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c5a20333caf0ba91a40cd85f465f0891f760c5f5c3916f07445e7d1188069420
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 72073f3b5edcc6609911620b327cbbd5d5871a5a790153c76278e9c34cb82866
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T007, T011]
+    description: >
+      fetchScoreSummary (TC-COMP-066, DAC-E3-S1-2, AC-8): a summary 404 whose envelope code is not_found resolves { kind: not_served }; any other ApiError, an ApiUnreachableError and a 404 without the envelope reject unchanged; success returns the served body unchanged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-3-score-summary.log
+    red_log_sha256: f60ec1a43ba8988176f1ac96e81035f05b8f13069a8e56b588645f185e6b286e
+    red_evidence: >
+      6 failed (fetchScoreSummary is not a function) and tsc TS2305 before fetchScoreSummary existed.
+    green_evidence: >
+      shell-client.test.ts 30 passed, tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d349b20aeeaac37b6d4e771ca8b50dc0669cbb086c06ae0efd8ecf96529a2ba3
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: cd13e9e246c50b4082c511d82a6980944715d95f421e7702315c684a86e113c4
+      generated: 7
+      killed: 7
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T006, T007, T008]
+    description: >
+      Rework of implementation-review-v1 (IR-001, IR-002, IR-003): the Accept/GET request check covers fetchScoreSummary, each exported read's resolved type is pinned with expectTypeOf, and an empty-string cursor is sent as given. Tests only; no production change.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/red-cycle-4-rework.log
+    red_log_sha256: f6591bff5d418fc6e1f56324feb5bc2c3a76dcc59e3b346b5dfcdc446643b57f
+    red_evidence: >
+      Against the review's surviving production mutants (fetchAttention result erased, summary sent as POST, if (cursor)), vitest failed 2 tests and tsc reported TS2344 on the new type assertion.
+    green_evidence: >
+      shell-client.test.ts 33 passed, tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f577f0f2d9e1fa70394bd3d5fc7b22856dfb387a28ef6be6d1f11662b3b98148
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S1-evidence/mutation-cycle-4-results.json
+      results_sha256: e5b0b30c289c5a414733ad6eaa1729353f52b0e7e0405156ba02fd71745a9995
+      generated: 8
+      killed: 8
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+exceptions:
+  - id: EXC-001
+    commits: [9a6513c2046b]
+    reason: >
+      The first retry's stage commit rewords one comment in web/src/app/shell-client.test.ts
+      (`toMatchTypeOf` becomes "the looser match form"). No assertion or production code
+      changes, so no RED/GREEN cycle applies, and a supervised run cannot rewrite the commit.
+    acknowledged_by: Alvaro de Jodra (owner)
+    decision: DEC-0400

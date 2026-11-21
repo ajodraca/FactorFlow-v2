@@ -1,0 +1,338 @@
+diff --git a/web/src/app/shell-client.test.ts b/web/src/app/shell-client.test.ts
+index 052822e1..5c0d15f6 100644
+--- a/web/src/app/shell-client.test.ts
++++ b/web/src/app/shell-client.test.ts
+@@ -1,5 +1,6 @@
+-import { describe, expectTypeOf, it } from "vitest";
+-import type { ApiError, ApiUnreachableError } from "../api/client";
++import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError } from "../api/client";
++import { fetchAttention, fetchDataHealth, fetchProblems } from "./shell-client";
+ import type {
+   Attention,
+   DataHealth,
+@@ -9,6 +10,33 @@ import type {
+   ScoreSummary,
+ } from "./shell-types";
+ 
++function jsonResponse(status: number, body: unknown): Response {
++  return new Response(JSON.stringify(body), {
++    status,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++function stubFetch(response: Response): ReturnType<typeof vi.fn> {
++  const fetchMock = vi.fn(async () => response.clone());
++  vi.stubGlobal("fetch", fetchMock);
++  return fetchMock;
++}
++
++/** The URL and init the stub's first call received. */
++function firstCall(fetchMock: ReturnType<typeof vi.fn>): {
++  url: URL;
++  path: string;
++  init: RequestInit | undefined;
++} {
++  const [input, init] = fetchMock.mock.calls[0] as [string, RequestInit | undefined];
++  return { url: new URL(input, "http://localhost"), path: input.split("?")[0] ?? "", init };
++}
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++});
++
+ // Every type below is written out here, from data-health-api section 2.4,
+ // system design section 4.2 and `classification_models.py:455-585`, so the
+ // assertions compare shell-types.ts against an independent literal rather than
+@@ -193,3 +221,244 @@ describe("shell-types mirror the other wire shapes", () => {
+     >();
+   });
+ });
++
++const problemPageFixture = {
++  rows: [
++    {
++      symbol: "KO",
++      failures: [
++        {
++          data_type: "prices",
++          outcome: "failed",
++          reason: "provider timeout",
++          attempts: 3,
++          completed_at: "2026-10-15T22:31:00+00:00",
++          run_id: "6f1c2a0e-0000-4000-8000-000000000001",
++        },
++      ],
++      retryable: true,
++    },
++  ],
++  next_cursor: "KO",
++};
++
++// Implements TC-COMP-067 (DAC-E3-S1-3, AC-13): fetchProblems sends `limit`
++// and, only when set, `cursor`; `next_cursor` is returned as served.
++describe("TC-COMP-067 — fetchProblems encodes limit and cursor", () => {
++  it("sends limit and no cursor when the cursor is undefined", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
++    await expect(fetchProblems(undefined, 50)).resolves.toEqual(problemPageFixture);
++    const { url, path } = firstCall(fetchMock);
++    expect(path).toBe("/api/data-health/problems");
++    expect(url.searchParams.get("limit")).toBe("50");
++    expect(url.searchParams.has("cursor")).toBe(false);
++  });
++
++  it("sends limit and cursor when the cursor is set", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
++    await expect(fetchProblems("KO", 50)).resolves.toEqual(problemPageFixture);
++    const { url } = firstCall(fetchMock);
++    expect(url.searchParams.get("limit")).toBe("50");
++    expect(url.searchParams.get("cursor")).toBe("KO");
++  });
++
++  it("keeps a null next_cursor null", async () => {
++    const lastPage = { ...problemPageFixture, next_cursor: null };
++    stubFetch(jsonResponse(200, lastPage));
++    const page = await fetchProblems(undefined, 50);
++    expect(page.next_cursor).toBeNull();
++  });
++});
++
++// Request-encoding edge cases (DAC-E3-S1-3, DAC-E3-18).
++describe("fetchProblems request encoding", () => {
++  it("sends no cursor for null, the value data-health-ui holds after the last page", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
++    await fetchProblems(null, 50);
++    expect(firstCall(fetchMock).url.searchParams.has("cursor")).toBe(false);
++  });
++
++  it("sends a cursor with a slash intact and a limit as given", async () => {
++    const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
++    await fetchProblems("BRK/B", 7);
++    const { url } = firstCall(fetchMock);
++    expect(url.searchParams.get("cursor")).toBe("BRK/B");
++    expect(url.searchParams.get("limit")).toBe("7");
++  });
++
++  it.each([
++    ["fetchAttention", () => fetchAttention()],
++    ["fetchDataHealth", () => fetchDataHealth()],
++    ["fetchProblems", () => fetchProblems(undefined, 50)],
++  ])("%s sends GET with Accept: application/json and no method override", async (_name, call) => {
++    const fetchMock = stubFetch(jsonResponse(200, problemPageFixture));
++    await call();
++    const { init } = firstCall(fetchMock);
++    expect(init?.method).toBeUndefined();
++    expect(new Headers(init?.headers).get("Accept")).toBe("application/json");
++  });
++});
++
++const attentionFixtures = [
++  {
++    checked_at: "2026-10-15T22:40:00+00:00",
++    followed_count: 12,
++    prices_as_of: "2026-10-15",
++    credential_present: true,
++    problems: {
++      stock_count: 2,
++      symbols: ["KO", "BRK/B"],
++      newest_completed_at: "2026-10-15T22:31:00+00:00",
++    },
++    latest_download: {
++      run_id: "6f1c2a0e-0000-4000-8000-000000000002",
++      state: "running",
++      requested_at: "2026-10-15T22:30:00+00:00",
++      started_at: "2026-10-15T22:30:05+00:00",
++      ended_at: null,
++      progress: { done: 4, total: 12 },
++    },
++    latest_terminal_download: {
++      run_id: "6f1c2a0e-0000-4000-8000-000000000001",
++      state: "partial",
++      ended_at: "2026-10-14T22:31:00+00:00",
++      failure_reason: "provider timeout",
++    },
++    items: [
++      { kind: "data_problems", recorded_at: "2026-10-15T22:31:00+00:00", run_id: null },
++      {
++        kind: "download_not_complete",
++        recorded_at: "2026-10-14T22:31:00+00:00",
++        run_id: "6f1c2a0e-0000-4000-8000-000000000001",
++      },
++    ],
++  },
++  {
++    checked_at: "2026-10-15T22:41:00+00:00",
++    followed_count: 0,
++    prices_as_of: null,
++    credential_present: false,
++    problems: { stock_count: 0, symbols: [], newest_completed_at: null },
++    latest_download: null,
++    latest_terminal_download: null,
++    items: [],
++  },
++  {
++    checked_at: "2026-10-15T22:42:00+00:00",
++    followed_count: 3,
++    prices_as_of: "2026-10-14",
++    credential_present: true,
++    problems: { stock_count: 0, symbols: [], newest_completed_at: null },
++    latest_download: {
++      run_id: "6f1c2a0e-0000-4000-8000-000000000003",
++      state: "requested",
++      requested_at: "2026-10-15T22:42:00+00:00",
++      started_at: null,
++      ended_at: null,
++      progress: { done: 0, total: null },
++    },
++    latest_terminal_download: null,
++    items: [],
++  },
++];
++
++const dataHealthFixtures = [
++  {
++    checked_at: "2026-10-15T22:40:00+00:00",
++    never_acquired: false,
++    followed_count: 12,
++    affected_count: 2,
++    checks: {
++      daily_prices: {
++        status: "exceptions",
++        absent_count: 1,
++        gap_stock_count: 3,
++        behind_count: 2,
++        latest_session: "2026-10-15",
++        gap_detection: { available: true, reason: null },
++        exception_count: 1,
++        exception_symbols: ["KO"],
++      },
++      company_financials: {
++        status: "ok",
++        absent_count: 0,
++        problem_count: 0,
++        as_of: "2026-09-30",
++        exception_count: 0,
++        exception_symbols: [],
++      },
++    },
++    problems: problemPageFixture,
++  },
++  {
++    checked_at: "2026-10-15T22:41:00+00:00",
++    never_acquired: true,
++    followed_count: 0,
++    affected_count: 0,
++    checks: { daily_prices: null, company_financials: null },
++    problems: { rows: [], next_cursor: null },
++  },
++  {
++    checked_at: "2026-10-15T22:42:00+00:00",
++    never_acquired: false,
++    followed_count: 3,
++    affected_count: 0,
++    checks: {
++      daily_prices: {
++        status: "not_determinable",
++        absent_count: 0,
++        gap_stock_count: null,
++        behind_count: 0,
++        latest_session: null,
++        gap_detection: { available: false, reason: "no trading calendar" },
++        exception_count: 0,
++        exception_symbols: [],
++      },
++      company_financials: null,
++    },
++    problems: { rows: [], next_cursor: null },
++  },
++];
++
++// Implements TC-COMP-068 (AC-8, AC-16, DAC-E3-18): each read requests its exact
++// path and resolves the served body unchanged, nullables populated and null.
++describe("fetchAttention and fetchDataHealth", () => {
++  it.each(attentionFixtures)(
++    "fetchAttention requests /api/attention and returns the body",
++    async (fixture) => {
++      const fetchMock = stubFetch(jsonResponse(200, fixture));
++      await expect(fetchAttention()).resolves.toEqual(fixture);
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      expect(firstCall(fetchMock).path).toBe("/api/attention");
++    },
++  );
++
++  it.each(dataHealthFixtures)(
++    "fetchDataHealth requests /api/data-health and returns the body",
++    async (fixture) => {
++      const fetchMock = stubFetch(jsonResponse(200, fixture));
++      await expect(fetchDataHealth()).resolves.toEqual(fixture);
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      expect(firstCall(fetchMock).path).toBe("/api/data-health");
++    },
++  );
++
++  it("rejects a 500 envelope with ApiError", async () => {
++    stubFetch(
++      jsonResponse(500, { error: { code: "internal_error", message: "x", request_id: "req-500" } }),
++    );
++    await expect(fetchAttention()).rejects.toBeInstanceOf(ApiError);
++    await expect(fetchDataHealth()).rejects.toBeInstanceOf(ApiError);
++  });
++
++  it("rejects a thrown fetch with ApiUnreachableError", async () => {
++    vi.stubGlobal(
++      "fetch",
++      vi.fn(async () => {
++        throw new TypeError("network down");
++      }),
++    );
++    await expect(fetchAttention()).rejects.toBeInstanceOf(ApiUnreachableError);
++    await expect(fetchDataHealth()).rejects.toBeInstanceOf(ApiUnreachableError);
++  });
++});
+diff --git a/web/src/app/shell-client.ts b/web/src/app/shell-client.ts
+new file mode 100644
+index 00000000..5b285e02
+--- /dev/null
++++ b/web/src/app/shell-client.ts
+@@ -0,0 +1,40 @@
++import { requestJson } from "../api/client";
++import type { Attention, DataHealth, ProblemPage } from "./shell-types";
++
++/*
++ * The one fetch module for data-health-api's three routes and the score
++ * summary (CAP-003-E3-S1; owner-shell 2.1, 2.3; DAC-E3-18). Every read goes
++ * through the delivered `requestJson`, so a transport failure is an
++ * `ApiUnreachableError` and a non-2xx status an `ApiError`, as delivered. No
++ * body is mapped, cast field by field or re-keyed: the wire shape is the type.
++ */
++
++/** `GET /api/attention` (data-health-api 2.3; AC-8, AC-16). */
++export function fetchAttention(): Promise<Attention> {
++  return requestJson<Attention>("/api/attention");
++}
++
++/** `GET /api/data-health` (data-health-api 2.3; DAC-E3-18). */
++export function fetchDataHealth(): Promise<DataHealth> {
++  return requestJson<DataHealth>("/api/data-health");
++}
++
++/**
++ * `GET /api/data-health/problems` (data-health-api 2.3; DAC-E3-S1-3).
++ *
++ * `limit` is sent as given and never clamped or defaulted here: the server owns
++ * its bound and refuses out-of-range values. `cursor` is sent only when set, so
++ * `null` (data-health-ui's value after the last page) and `undefined` both ask
++ * for the first page.
++ */
++export function fetchProblems(
++  cursor: string | null | undefined,
++  limit: number,
++): Promise<ProblemPage> {
++  const params = new URLSearchParams();
++  params.append("limit", String(limit));
++  if (cursor != null) {
++    params.append("cursor", cursor);
++  }
++  return requestJson<ProblemPage>(`/api/data-health/problems?${params}`);
++}

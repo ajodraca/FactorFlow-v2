@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-t410pknl/w1/web
+
+ ❯ src/app/shell-client.test.ts (30 tests | 1 failed) 14ms
+   × TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > resolves { kind: not_served } on a 404 not_found envelope 4ms
+     → promise rejected "ApiError: No resource exists at this path. { …(3) }" instead of resolving
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > TC-COMP-066 — fetchScoreSummary maps 404 not_found to not_served > resolves { kind: not_served } on a 404 not_found envelope
+AssertionError: promise rejected "ApiError: No resource exists at this path. { …(3) }" instead of resolving
+ ❯ src/app/shell-client.test.ts:504:37
+    502|   it("resolves { kind: not_served } on a 404 not_found envelope", asyn…
+    503|     const fetchMock = stubFetch(jsonResponse(404, notFoundEnvelope));
+    504|     await expect(fetchScoreSummary()).resolves.toEqual({ kind: "not_se…
+       |                                     ^
+    505|     expect(fetchMock).toHaveBeenCalledTimes(1);
+    506|     expect(firstCall(fetchMock).path).toBe("/api/classifications/summa…
+
+Caused by: ApiError: No resource exists at this path.
+ ❯ toApiError src/api/client.ts:118:10
+ ❯ Module.requestJson src/api/client.ts:168:11
+ ❯ Module.fetchScoreSummary src/app/shell-client.ts:58:12
+ ❯ src/app/shell-client.test.ts:504:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-404', code: 'not_found', state: null }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 29 passed (30)
+   Start at  23:25:32
+   Duration  723ms (transform 32ms, setup 31ms, collect 27ms, tests 14ms, environment 151ms, prepare 69ms)
+

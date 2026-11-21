@@ -1,0 +1,110 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/patterns/needs-you.test.ts (40 tests | 7 failed) 9ms
+   × sortAttention (TC-COMP-002, DAC-E1-7) > orders by tier then newest first, stable for equal keys 2ms
+     → sortAttention is not a function
+   × sortAttention (TC-COMP-002, DAC-E1-7) > returns an empty list for an empty list 0ms
+     → sortAttention is not a function
+   × sortAttention (TC-COMP-002, DAC-E1-7) > the sorted derivation has the same length as the derivation (AC-16) 0ms
+     → sortAttention is not a function
+   × sortAttention (TC-COMP-002, DAC-E1-7) > compares instants, not strings 0ms
+     → sortAttention is not a function
+   × sortAttention (TC-COMP-002, DAC-E1-7) > orders the five-kind derivation by severity 0ms
+     → sortAttention is not a function
+   × sortAttention (TC-COMP-002, DAC-E1-7) > active and good share a rank, so recency decides between them 0ms
+     → sortAttention is not a function
+   × sortAttention (TC-COMP-002, DAC-E1-7) > returns a new array holding the same item objects 0ms
+     → sortAttention is not a function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > orders by tier then newest first, stable for equal keys
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:562:12
+    560|     const before = structuredClone(input);
+    561|     const expected = [criticalNew, criticalOld, serious, warningA, war…
+    562|     expect(sortAttention(input)).toEqual(expected);
+       |            ^
+    563|     expect(sortAttention(input)).toEqual(expected);
+    564|     expect(input).toEqual(before);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > returns an empty list for an empty list
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:568:12
+    566| 
+    567|   it("returns an empty list for an empty list", () => {
+    568|     expect(sortAttention([])).toEqual([]);
+       |            ^
+    569|   });
+    570| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > the sorted derivation has the same length as the derivation (AC-16)
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:592:12
+    590|     );
+    591|     expect(deriveNeedsYou(attention, scores)).toHaveLength(5);
+    592|     expect(sortAttention(deriveNeedsYou(attention, scores))).toHaveLen…
+       |            ^
+    593|   });
+    594| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > compares instants, not strings
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:598:12
+    596|     const earlier = item("data_problems", "warning", "2026-10-15T22:00…
+    597|     const later2 = item("data_problems", "warning", "2026-10-16T01:00:…
+    598|     expect(sortAttention([later2, earlier]).map((i) => i.target)).toEq…
+       |            ^
+    599|   });
+    600| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > orders the five-kind derivation by severity
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:626:12
+    624|       }),
+    625|     );
+    626|     expect(sortAttention(deriveNeedsYou(attention, scores)).map((i) =>…
+       |            ^
+    627|       "score_failed",
+    628|       "credential_missing",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > active and good share a rank, so recency decides between them
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:640:12
+    638|     const goodNew = item("first_scores", "good", "2026-10-15T23:30:00+…
+    639|     const activeOld = item("first_download", "active", "2026-10-15T19:…
+    640|     expect(sortAttention([goodOld, activeNew]).map((i) => i.target)).t…
+       |            ^
+    641|     expect(sortAttention([activeOld, goodNew]).map((i) => i.target)).t…
+    642|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > returns a new array holding the same item objects
+TypeError: sortAttention is not a function
+ ❯ src/components/patterns/needs-you.test.ts:646:20
+    644|   it("returns a new array holding the same item objects", () => {
+    645|     const input = [warningA, criticalNew];
+    646|     const output = sortAttention(input);
+       |                    ^
+    647|     expect(output).not.toBe(input);
+    648|     expect(output[0]).toBe(criticalNew);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 33 passed (40)
+   Start at  20:40:27
+   Duration  439ms (transform 37ms, setup 29ms, collect 33ms, tests 9ms, environment 152ms, prepare 25ms)
+

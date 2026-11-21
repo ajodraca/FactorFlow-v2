@@ -1,0 +1,128 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-e7fb_g93/w2/web
+
+ ❯ src/app/health.test.tsx (18 tests | 8 failed) 48ms
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated 6ms
+     → expected 'answering' to be 'unreachable' // Object.is equality
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches health on mount and reports answering 2ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > polls again every 30 seconds while mounted 3ms
+     → expected "spy" to be called 2 times, but got 4 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > does not poll faster than 30 seconds 1ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches nothing after unmount, however far the timers advance 3ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > opens one poll across re-renders of the provider 1ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > makes one fetch per cycle for two probes under one provider 1ms
+     → expected "spy" to be called 1 times, but got 3 times
+   × HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > pauses while the page is hidden and reads at once when it is visible 1ms
+     → expected "spy" to be called 1 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated
+AssertionError: expected 'answering' to be 'unreachable' // Object.is equality
+
+Expected: "unreachable"
+Received: "answering"
+
+ ❯ src/app/health.test.tsx:121:49
+    119|     await advance(0);
+    120|     await advance(30_000);
+    121|     expect(attribute("probe", "data-liveness")).toBe("unreachable");
+       |                                                 ^
+    122|     expect(attribute("probe", "data-last-updated")).toBe("2026-09-06T1…
+    123|     expect(attribute("probe", "data-last-answered")).toBe("2026-09-06T…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches health on mount and reports answering
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/health.test.tsx:167:29
+    165|     );
+    166|     await advance(0);
+    167|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    168|     expect(attribute("probe", "data-liveness")).toBe("answering");
+    169|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > polls again every 30 seconds while mounted
+AssertionError: expected "spy" to be called 2 times, but got 4 times
+ ❯ src/app/health.test.tsx:180:29
+    178|     await advance(0);
+    179|     await advance(30_000);
+    180|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+       |                             ^
+    181|     await advance(30_000);
+    182|     expect(fetchHealthMock).toHaveBeenCalledTimes(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > does not poll faster than 30 seconds
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/health.test.tsx:194:29
+    192|     await advance(0);
+    193|     await advance(29_000);
+    194|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    195|     await advance(999);
+    196|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > fetches nothing after unmount, however far the timers advance
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/health.test.tsx:232:29
+    230|     );
+    231|     await advance(0);
+    232|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    233|     unmount();
+    234|     await advance(300_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > opens one poll across re-renders of the provider
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/health.test.tsx:254:29
+    252|     }
+    253|     await advance(0);
+    254|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    255|     await advance(30_000);
+    256|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > makes one fetch per cycle for two probes under one provider
+AssertionError: expected "spy" to be called 1 times, but got 3 times
+ ❯ src/app/health.test.tsx:268:29
+    266|     );
+    267|     await advance(0);
+    268|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    269|     await advance(30_000);
+    270|     expect(fetchHealthMock).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider polling, unknown state and cleanup (TC-COMP-304, TC-COMP-018) > pauses while the page is hidden and reads at once when it is visible
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/health.test.tsx:296:29
+    294|     setVisibility("hidden");
+    295|     await advance(90_000);
+    296|     expect(fetchHealthMock).toHaveBeenCalledTimes(1);
+       |                             ^
+    297|     setVisibility("visible");
+    298|     await advance(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 10 passed (18)
+   Start at  22:39:22
+   Duration  1.01s (transform 65ms, setup 39ms, collect 110ms, tests 48ms, environment 213ms, prepare 127ms)
+

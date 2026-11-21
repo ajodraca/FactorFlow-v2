@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w3/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 32ms
+   × usePolledRead's refresh after unmount (TC-COMP-069 edge case) > reads nothing when a refresh held across unmount is called 3ms
+     → expected "spy" to be called 1 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead's refresh after unmount (TC-COMP-069 edge case) > reads nothing when a refresh held across unmount is called
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/app/use-polled-read.test.ts:209:18
+    207|     });
+    208|     await advance(120_000);
+    209|     expect(read).toHaveBeenCalledTimes(1);
+       |                  ^
+    210|     expect(vi.getTimerCount()).toBe(0);
+    211|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:16
+   Duration  1.66s (transform 48ms, setup 59ms, collect 94ms, tests 32ms, environment 504ms, prepare 80ms)
+

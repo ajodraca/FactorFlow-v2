@@ -1,0 +1,191 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w3/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 7 failed) 33ms
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > fires nothing while hidden, reads at once on visible and resumes the 10 s schedule 11ms
+     → expected "spy" to be called 3 times, but got 2 times
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > starts no second read while one is in flight, whatever asks for it 2ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure 3ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > has no last value when the first read fails 3ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > is loading until the mount read settles, then carries the answer's own instant 2ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'ok', …(2) }
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > asks intervalMs about the last successful answer, or null before one 1ms
+     → expected 1st "intervalByAnswer" call to have been called with [ { fast: false } ]
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > uses a changed read and intervalMs from the next read on, without restarting the poll 2ms
+     → expected "spy" to be called with arguments: [ { fast: false } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   Object {
+-     "fast": false,
+-   },
++   null,
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > fires nothing while hidden, reads at once on visible and resumes the 10 s schedule
+AssertionError: expected "spy" to be called 3 times, but got 2 times
+ ❯ src/app/use-polled-read.test.ts:68:18
+     66|     expect(read).toHaveBeenCalledTimes(2);
+     67|     await advance(1);
+     68|     expect(read).toHaveBeenCalledTimes(3);
+       |                  ^
+     69|   });
+     70| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > starts no second read while one is in flight, whatever asks for it
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/app/use-polled-read.test.ts:82:18
+     80|     await advance(0);
+     81|     await advance(10_000);
+     82|     expect(read).toHaveBeenCalledTimes(2);
+       |                  ^
+     83|     await advance(10_000);
+     84|     expect(read).toHaveBeenCalledTimes(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: boom],
+-   "kind": "error",
+-   "last": Object {
+-     "checkedAt": 2026-09-06T18:30:00.000Z,
+-     "data": Object {
+-       "n": 1,
+-     },
+-   },
++   "kind": "loading",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:183:34
+    181| 
+    182|     await advance(10_000);
+    183|     expect(result.current.state).toEqual({
+       |                                  ^
+    184|       kind: "error",
+    185|       error: apiError,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > has no last value when the first read fails
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiUnreachableError: down],
+-   "kind": "error",
+-   "last": null,
++   "kind": "loading",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:212:34
+    210|     const { result } = renderHook(() => usePolledRead(read, always10s)…
+    211|     await advance(0);
+    212|     expect(result.current.state).toEqual({ kind: "error", error: unrea…
+       |                                  ^
+    213|   });
+    214| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > is loading until the mount read settles, then carries the answer's own instant
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "checkedAt": 2026-09-06T18:30:00.000Z,
+-   "data": Object {
+-     "fast": false,
+-   },
+-   "kind": "ok",
++   "kind": "loading",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:229:34
+    227|       first.resolve({ fast: false });
+    228|     });
+    229|     expect(result.current.state).toEqual({
+       |                                  ^
+    230|       kind: "ok",
+    231|       data: { fast: false },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > asks intervalMs about the last successful answer, or null before one
+AssertionError: expected 1st "intervalByAnswer" call to have been called with [ { fast: false } ]
+
+- Expected
++ Received
+
+  Array [
+-   Object {
+-     "fast": false,
+-   },
++   null,
+  ]
+
+ ❯ src/app/use-polled-read.test.ts:252:24
+    250|     renderHook(() => usePolledRead(read, intervalMs));
+    251|     await advance(0);
+    252|     expect(intervalMs).toHaveBeenNthCalledWith(1, { fast: false });
+       |                        ^
+    253| 
+    254|     await advance(59_999);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > uses a changed read and intervalMs from the next read on, without restarting the poll
+AssertionError: expected "spy" to be called with arguments: [ { fast: false } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   Object {
+-     "fast": false,
+-   },
++   null,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/app/use-polled-read.test.ts:319:28
+    317|     expect(firstRead).toHaveBeenCalledTimes(1);
+    318|     expect(secondRead).toHaveBeenCalledTimes(1);
+    319|     expect(secondInterval).toHaveBeenCalledWith({ fast: false });
+       |                            ^
+    320|     await advance(5_000);
+    321|     expect(secondRead).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 6 passed (13)
+   Start at  22:35:37
+   Duration  765ms (transform 83ms, setup 38ms, collect 63ms, tests 33ms, environment 196ms, prepare 222ms)
+
