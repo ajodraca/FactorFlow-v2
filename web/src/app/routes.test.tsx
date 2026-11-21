@@ -1,11 +1,21 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { type MockInstance, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  type MockInstance,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+  vi,
+} from "vitest";
 import { SHELL_ROUTES } from "../screens/research/copy";
+import { DESTINATIONS, type Destination, RESEARCH_REGISTERED } from "./destinations";
 import { AppRoutes } from "./routes";
 import { Shell } from "./shell";
 
@@ -371,5 +381,62 @@ describe("Routes — the Research rail link targets exactly /research (DAC-E4-6)
       "href",
       "/research",
     );
+  });
+});
+
+// Implements TC-COMP-057
+describe("DESTINATIONS — one static ordered list with RESEARCH_REGISTERED (DAC-E3-2)", () => {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const webSrc = path.resolve(here, "..");
+
+  function sourceFiles(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) return sourceFiles(full);
+      if (!/\.tsx?$/.test(entry.name) || /\.test\.tsx?$/.test(entry.name)) return [];
+      return [full];
+    });
+  }
+
+  it("is the independent literal list, with Research registered", () => {
+    expect(DESTINATIONS).toEqual([
+      { group: "primary", label: "Research", to: "/research" },
+      { group: "data", label: "Settings", to: "/settings" },
+    ]);
+    expect(RESEARCH_REGISTERED).toBe(true);
+  });
+
+  it("holds a destination exactly when routes.tsx registers its path", () => {
+    const routes = readFileSync(path.join(here, "routes.tsx"), "utf-8");
+    const registered = [...routes.matchAll(/path=["']([^"']+)["']/g)].map((m) => m[1]);
+    expect(RESEARCH_REGISTERED).toBe(DESTINATIONS.some((d) => d.to === "/research"));
+    expect(RESEARCH_REGISTERED).toBe(routes.includes('path="/research"'));
+    for (const destination of DESTINATIONS) {
+      expect(registered).toContain(destination.to);
+    }
+  });
+
+  it("detects routes at no runtime", () => {
+    const files = sourceFiles(webSrc);
+    expect(files.length).toBeGreaterThan(50);
+    const offenders = files
+      .filter((f) =>
+        /\b(matchRoutes|useRoutes|createRoutesFromChildren|createRoutesFromElements)\b|import\.meta\.glob/.test(
+          readFileSync(f, "utf-8"),
+        ),
+      )
+      .map((f) => path.relative(webSrc, f));
+    expect(offenders).toEqual([]);
+  });
+
+  it("exports the list from destinations.ts only", () => {
+    const exporters = sourceFiles(webSrc)
+      .filter((f) => /export\s+const\s+DESTINATIONS\b/.test(readFileSync(f, "utf-8")))
+      .map((f) => path.relative(webSrc, f));
+    expect(exporters).toEqual([path.join("app", "destinations.ts")]);
+  });
+
+  it("types each entry as Destination", () => {
+    expectTypeOf<(typeof DESTINATIONS)[number]>().toEqualTypeOf<Destination>();
   });
 });

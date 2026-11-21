@@ -31,3 +31,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T004, T005, T011]
+    description: >
+      Destinations and titles (TC-COMP-057, TC-COMP-078, DAC-E3-2, DAC-E3-9, DAC-E3-S4-2, DEC-0329): destinations.ts holds the static ordered DESTINATIONS (Research, then Settings) and RESEARCH_REGISTERED derived from it; titles.ts holds CrumbSpec, TitleEntry, Crumb, the 16-entry TITLES table, resolveTitle (matchPath end true, first non-star match, star fallback, param and detail slots) and useTitle over CAP-003-E3-S3's useTitleDetail. T002 is appended to the delivered routes.test.tsx, which cycle 4 rewrites whole; T004 and T005 are the new titles.test.tsx. T004 case (a), the set of registered paths equal to TITLES, fails until cycle 4 rewrites routes.tsx, as the plan states; the mutation command excludes it by name. The generator's one equivalent-looking survivor (end false on the params match, a second matchPath call that the first match already satisfied) was removed by taking the params from the first match, and the run repeated: 4 generated and 10 hand-written mutants, all 14 killed. Both reviews raised only LOW observations: the ancestor-link check cannot see a param or detail spec in a non-last position, the 16-entry count and star-last order are not asserted, and the routes.tsx checks are text matches.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-2-destinations-titles.log
+    red_log_sha256: 8dfaa311d6a6ad3826f1d15e10e61bbce866fc9bc4d3c4f45f27bc7e7d1a396b
+    red_evidence: >
+      routes.test.tsx and titles.test.tsx failed to load (./destinations and ./titles did not resolve) before the modules existed.
+    green_evidence: >
+      routes.test.tsx and titles.test.tsx 46 of 47 passed (green-cycle-2-destinations-titles.log); the one failing case needs routes.tsx and passes in cycle 4. tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: fb6199390eb4be568c02bd7d0cd98789458e3c101ff7a90ade34aa8d1995d09e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: 0181f958f7e95413758d27148b69715b8ea4d4225b91ebe11ba30069021b1ee4
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

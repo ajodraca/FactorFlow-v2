@@ -117,7 +117,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - remove-attribute on `replace` in the root `Navigate`: (b)'s `nav-type`, and (d).
   - negate-boolean on the `liveness === "answering"` guard: (a) redirects at once, or (e) and (g) redirect on an absent or stale value.
   - a hand-written mutant that renders two skeleton cards: (a)'s length 1.
-- [ ] T002 Implement TC-COMP-057 (DESTINATIONS is one static ordered list with RESEARCH_REGISTERED) in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-057` comment, sequential with T001 (one file).
+- [x] T002 Implement TC-COMP-057 (DESTINATIONS is one static ordered list with RESEARCH_REGISTERED) in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-057` comment, sequential with T001 (one file).
   - **Static list.** `import { DESTINATIONS, RESEARCH_REGISTERED } from "./destinations"`. Assert `DESTINATIONS` `toEqual` the independent literal `[{ group: "primary", label: "Research", to: "/research" }, { group: "data", label: "Settings", to: "/settings" }]`, and `RESEARCH_REGISTERED` `toBe(true)`. CAP-002 has merged in this clone (register D1).
   - **"Present exactly when registered".** Read `routes.tsx` as text with `node:fs` from `import.meta.url`, as the delivered test does. `RESEARCH_REGISTERED` equals `DESTINATIONS.some((d) => d.to === "/research")`, and both equal "`routes.tsx` contains `path="/research"`". Every `DESTINATIONS[i].to` occurs as a `path="…"` in `routes.tsx`, so no destination enters without its screen (TC edge case).
   - **No runtime route detection (TC step 2).** Walk every non-test `.ts`/`.tsx` under `web/src/` and collect files whose source matches `/\b(matchRoutes|useRoutes|createRoutesFromChildren|createRoutesFromElements)\b|import\.meta\.glob/`. Assert `toEqual([])`. The walk visits more than 50 files, so it is not vacuous. `matchPath`, which `titles.ts` uses to read the current URL against its own table, is deliberately not in the list (Other Notes, *Plan checks*).
@@ -172,7 +172,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - drop-field-copy on `detail` in the detail slot (always the noun): (b)'s detail rows.
   - a hand-written mutant that applies the detail to the last crumb of every route: (d).
   - swap-case on the generic noun (`"Download"` ↔ `"Universe"`): (b).
-- [ ] T005 Write the `useTitle()` integration cases in `web/src/app/titles.test.tsx` (DAC-E3-9, DEC-0214; owner-shell §7 *Titles* row), sequential with T004.
+- [x] T005 Write the `useTitle()` integration cases in `web/src/app/titles.test.tsx` (DAC-E3-9, DEC-0214; owner-shell §7 *Titles* row), sequential with T004.
   - **Harness.** `vi.stubGlobal("fetch", …)` with a router: `/api/health` answers `HEALTH_EMPTY` JSON; every other path answers `404` `{"error":{"code":"not_found","message":"No resource exists at this path.","request_id":"req-404"}}`. Render `<HealthProvider><ShellProvider><MemoryRouter initialEntries={["/data/downloads/abc"]}><TitleProbe />{show && <DetailScreen />}</MemoryRouter></ShellProvider></HealthProvider>`.
     - `TitleProbe` renders `useTitle()` as `data-testid="title"`: the crumb labels joined with `" › "`, or `"none"`.
     - `DetailScreen` does what DEC-0214 and DAC-E7-S5-1 (CAP-003-E7-S5's download detail) have screens do: `useEffect(() => { setTitleDetail("Download 2026-10-15 17:31 CDT"); return () => setTitleDetail(null); }, [setTitleDetail])`, with `setTitleDetail` from `useShell()`.
@@ -287,7 +287,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - The module doc comment cites AC-18, DAC-E3-3, DAC-E3-S4-1, owner-shell §2.6 and §6, and says the file, its import in `routes.tsx` and `legacy-redirects.test.tsx` are deleted one release after this ships (capability assumption 3).
 
   This makes T006 and T007 pass, except T007's `routes.tsx` import line, which T013 satisfies.
-- [ ] T011 [P] Create `web/src/app/destinations.ts` and `web/src/app/titles.ts` (depend on T002, T004 and T005 being RED).
+- [x] T011 [P] Create `web/src/app/destinations.ts` and `web/src/app/titles.ts` (depend on T002, T004 and T005 being RED).
   - **`destinations.ts`** (DEC-0204; DAC-E3-2; owner-shell §2.6).
     - `export interface Destination { readonly group: "primary" | "data"; readonly label: string; readonly to: string; readonly count?: "needs-you" | "problems" }`.
     - `export const DESTINATIONS: readonly Destination[] = [{ group: "primary", label: "Research", to: "/research" }, { group: "data", label: "Settings", to: "/settings" }]`.
