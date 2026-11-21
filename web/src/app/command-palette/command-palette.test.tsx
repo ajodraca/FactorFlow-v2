@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { StrictMode, useState } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, ApiUnreachableError } from "../../api/client";
@@ -100,7 +100,7 @@ function stockPage(symbols: string[], nextCursor: string | null = null) {
 
 type Reply = Response | Promise<Response>;
 let stocks: (params: URLSearchParams, signal: AbortSignal | undefined) => Reply;
-let universes: () => Reply;
+let universes: (signal: AbortSignal | undefined) => Reply;
 let stocksCalls: number;
 let universesCalls: number;
 
@@ -133,7 +133,7 @@ beforeEach(() => {
       if (url.pathname === "/api/universes") {
         universesCalls += 1;
         expect(url.search).toBe("?lifecycle=active");
-        return Promise.resolve(universes());
+        return Promise.resolve(universes(init?.signal ?? undefined));
       }
       return Promise.reject(new TypeError(`unexpected request ${url.pathname}`));
     }),
@@ -200,6 +200,21 @@ function optionsIn(heading: string): string[] {
   return [...group.querySelectorAll('[role="option"]')].map(labelOf);
 }
 
+/** The group headed `heading`, or null when none is. */
+function groupHeaded(heading: string): Element | null {
+  return (
+    [...document.querySelectorAll("[cmdk-group]")].find(
+      (g) => g.querySelector("[cmdk-group-heading]")?.textContent === heading,
+    ) ?? null
+  );
+}
+
+/** Wait out the stock search's debounce and a settled render after it. */
+const SETTLE_MS = 700;
+function settle(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+}
+
 /** Arrow down until the row is selected, then Enter. */
 async function choose(user: ReturnType<typeof userEvent.setup>, label: string) {
   const option = await waitFor(() => {
@@ -237,6 +252,7 @@ describe("states (DAC-E3-12, AC-24)", () => {
     expect(screen.getByText("Data health › Downloads")).toBeInTheDocument();
     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
     expect(stocksCalls).toBe(0);
+    expect(screen.getByRole("combobox")).toHaveAttribute("placeholder", "Jump to a stock or page");
   });
 
   it("(b) shows Searching… while the read is pending, and no empty state", async () => {
@@ -246,7 +262,11 @@ describe("states (DAC-E3-12, AC-24)", () => {
     renderPalette();
     await openPalette(user);
     await user.keyboard("zz");
-    expect(await screen.findByText("Searching…")).toBeInTheDocument();
+    const searching = await screen.findByText("Searching…");
+    // cmdk's loading row, inside the group headed Stocks, never a selectable option.
+    expect(searching.closest('[role="progressbar"]')).not.toBeNull();
+    expect(searching.closest("[cmdk-group]")).toBe(groupHeaded("Stocks"));
+    expect(optionsIn("Stocks")).toEqual([]);
     expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
     pending.resolve(ok(stockPage([])));
   });
@@ -260,6 +280,30 @@ describe("states (DAC-E3-12, AC-24)", () => {
     expect(screen.queryAllByRole("option")).toHaveLength(0);
     // No group is left standing with a heading and no rows.
     expect(headings()).toEqual([]);
+  });
+
+  it("(c2) shows the empty state with research routes unregistered, quoting the trimmed text", async () => {
+    const user = userEvent.setup();
+    flags.registered = false;
+    renderPalette();
+    await openPalette(user);
+    await user.keyboard("zz ");
+    expect(await screen.findByText('No stocks or pages match "zz".')).toBeInTheDocument();
+    expect(screen.queryByText('No stocks or pages match "zz ".')).toBeNull();
+  });
+
+  it("(c3) shows no empty state while the universes read is pending, and shows it once answered", async () => {
+    const user = userEvent.setup();
+    const pending = deferred();
+    universes = () => pending.promise;
+    renderPalette();
+    await openPalette(user);
+    await user.keyboard("zz");
+    await waitFor(() => expect(stocksCalls).toBe(1));
+    await settle();
+    expect(screen.queryByText(/No stocks or pages match/)).toBeNull();
+    pending.resolve(ok(UNIVERSES));
+    expect(await screen.findByText('No stocks or pages match "zz".')).toBeInTheDocument();
   });
 
   it("(d) shows the partial row when there is a next cursor, and drops it without one", async () => {
@@ -387,6 +431,56 @@ describe("universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27)", () => {
     await waitFor(() => expect(optionsIn("Stocks")).toEqual(["KO"]));
     await choose(user, "KO");
     expect(location()).toBe("/research/stocks/KO");
+  });
+
+  it("(d) closing before the universes read answers aborts it", async () => {
+    const user = userEvent.setup();
+    const pending = deferred();
+    let signal: AbortSignal | undefined;
+    universes = (s) => {
+      signal = s;
+      return pending.promise;
+    };
+    renderPalette();
+    await openPalette(user);
+    await waitFor(() => expect(universesCalls).toBe(1));
+    expect(signal?.aborted).toBe(false);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(signal?.aborted).toBe(true);
+    pending.resolve(ok(UNIVERSES));
+  });
+
+  it("(e) under StrictMode an aborted read never shows a universes error", async () => {
+    const user = userEvent.setup();
+    const pending = deferred();
+    const signals: AbortSignal[] = [];
+    // A fetch that honours its signal, as the browser's does.
+    universes = (signal) => {
+      if (signal) signals.push(signal);
+      return new Promise<Response>((resolve, reject) => {
+        signal?.addEventListener("abort", () =>
+          reject(new DOMException("The operation was aborted.", "AbortError")),
+        );
+        void pending.promise.then(resolve);
+      });
+    };
+    render(
+      <StrictMode>
+        <MemoryRouter initialEntries={["/start"]}>
+          <Harness />
+          <LocationProbe />
+        </MemoryRouter>
+      </StrictMode>,
+    );
+    await openPalette(user);
+    await waitFor(() => expect(universesCalls).toBe(2));
+    expect(signals[0]?.aborted).toBe(true);
+    expect(signals[1]?.aborted).toBe(false);
+    await settle();
+    expect(screen.queryByText(/Couldn't read universes/)).toBeNull();
+    pending.resolve(ok(UNIVERSES));
+    await waitFor(() => expect(optionsIn("Universes")).toEqual(["Large caps", "Small value"]));
   });
 });
 

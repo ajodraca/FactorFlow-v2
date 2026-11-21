@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-idm5yg20/w2/web
+
+ ✓ src/components/token-literals.test.ts (55 tests) 108ms
+ ✓ src/app/command-palette/use-stock-search.test.ts (8 tests) 80ms
+stderr | src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (a) shows the hint row before typing, with the five pages and no search sent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ui/command.test.tsx (10 tests) 353ms
+ ❯ src/app/command-palette/command-palette.test.tsx (33 tests | 1 failed) 6413ms
+   × states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state 73ms
+     → expected null not to be null
+   ✓ states (DAC-E3-12, AC-24) > (c3) shows no empty state while the universes read is pending, and shows it once answered 989ms
+   ✓ states (DAC-E3-12, AC-24) > (d) shows the partial row when there is a next cursor, and drops it without one 537ms
+   ✓ universes and targets (DAC-E3-S5-2, DAC-E3-11, AC-27) > (e) under StrictMode an aborted read never shows a universes error 722ms
+   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'stocks error': no domain term, no status, nothing by colour alone 331ms
+   ✓ vocabulary and status (DAC-E3-S5-5, DAC-E3-S5-6) > 'unreachable': no domain term, no status, nothing by colour alone 437ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/command-palette.test.tsx > states (DAC-E3-12, AC-24) > (b) shows Searching… while the read is pending, and no empty state
+AssertionError: expected null not to be null
+ ❯ src/app/command-palette/command-palette.test.tsx:267:59
+    265|     const searching = await screen.findByText("Searching…");
+    266|     // cmdk's loading row, inside the group headed Stocks, never a sel…
+    267|     expect(searching.closest('[role="progressbar"]')).not.toBeNull();
+       |                                                           ^
+    268|     expect(searching.closest("[cmdk-group]")).toBe(groupHeaded("Stocks…
+    269|     expect(optionsIn("Stocks")).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 105 passed (106)
+   Start at  00:24:23
+   Duration  8.64s (transform 422ms, setup 326ms, collect 2.56s, tests 6.95s, environment 1.56s, prepare 1.68s)
+

@@ -93,3 +93,33 @@ cycles:
           disposition: equivalent
           reason: >
             The page row's value became its label instead of page: plus its route. Page labels are unique (Research, Settings, Coverage, Followed stocks, Downloads), and every stock, universe, hint, partial and error row carries a kind prefix in its own value, so no two rows can share a value and no selection can differ. The contract the tests pin is the one that matters: each chosen row navigates to its own target.
+
+  - id: cycle-4
+    kind: rework
+    tasks: [T002, T013]
+    description: >
+      Review-rework of CAP-003-E3-S5-implementation-review-v1 (IR-001 to IR-004), tests only: command-palette.test.tsx gains cases that pin what the review's ten surviving hand-written mutants changed. TC-COMP-062 (a) pins the input placeholder Jump to a stock or page (IR-003); (b) finds Searching… inside cmdk's progressbar, inside the group headed Stocks, and not as an option (IR-004); new (c2) shows the empty state with research routes unregistered and quotes the trimmed text, (c3) shows no empty state while the universes read is pending (IR-001). TC-COMP-082 new (d) closes the palette before the universes read answers and checks the signal aborted, and (e) renders under StrictMode with a fetch that honours its signal and checks no Couldn't read universes row appears (IR-002). The fetch stub now passes the request's signal to the universes handler. The ten mutants (one multi-line, loading-outside-group; loading-as-item keeps CommandLoading referenced so it dies on an assertion, not tsc) are in mutants-cycle-4.json; none of the cycle-3 mutants is rerun here. The review's two equivalent survivors (universes-ok-unguarded, page-value-collision) stay equivalent and are not changed. Both reviews raised only LOW observations, accepted: settle() is a 700 ms real wait, (b) could also assert the Stocks group exists, and the placeholder assertion sits under TC-COMP-062 (a).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-implementation-review-v1-mutation.json
+    red_log_sha256: 1ad18f3f312150be7d0ac034794d401d1d673630f2c58bf42e0c49ef8637bf07
+    red_evidence: >
+      Observed RED is the review's mutation run: with the cycle-3 tests, nine non-equivalent mutants of the story's own lines survived all four green baselines (the review's results file, as red_log).
+    green_evidence: >
+      The command-palette suites, token-literals and command tests 106 passed, and npm run test 2944 passed (green-cycle-4-rework.log); biome lint, biome format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 32b3ef796ef4395fb0d32b8e23c85773b4858f16da7cce5cc0e1c32bf0fcb6d7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-4-results.json
+      results_sha256: d3c5932ea78f50bb98276e6d3eec4f18349d974419b6005a209e1819e2bb4827
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
