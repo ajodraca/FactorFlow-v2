@@ -1,0 +1,282 @@
+diff --git a/web/src/components/patterns/needs-you-item.test.tsx b/web/src/components/patterns/needs-you-item.test.tsx
+new file mode 100644
+index 00000000..79398fb8
+--- /dev/null
++++ b/web/src/components/patterns/needs-you-item.test.tsx
+@@ -0,0 +1,134 @@
++import { render, screen, within } from "@testing-library/react";
++import type { JSX } from "react";
++import { MemoryRouter } from "react-router-dom";
++import { describe, expect, it } from "vitest";
++import { NeedsYouItemRow } from "./needs-you-item";
++import type { NeedsYouItem } from "./needs-you";
++import type { Tier } from "./tiers";
++
++const ITEM: NeedsYouItem = {
++  kind: "download_not_complete",
++  tier: "critical",
++  recordedAt: "2026-10-15T22:31:00+00:00",
++  target: "/data/downloads/run-failed-1",
++  runId: "run-failed-1",
++};
++
++function tree(item: NeedsYouItem = ITEM): JSX.Element {
++  return (
++    <MemoryRouter>
++      <ul>
++        <NeedsYouItemRow
++          item={item}
++          title="The last download failed"
++          body="Provider timeout. Ended 2026-10-15 17:31 CDT."
++          actionLabel="See download"
++          actionName="See the download that failed"
++          markerSize="var(--space-6)"
++        />
++      </ul>
++    </MemoryRouter>
++  );
++}
++
++function row(): HTMLElement {
++  return screen.getByRole("listitem");
++}
++
++function tile(): HTMLElement {
++  const element = row().querySelector<HTMLElement>('[data-slot="severity-tile"]');
++  if (!element) throw new Error("no severity tile rendered");
++  return element;
++}
++
++describe("NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3)", () => {
++  // Implements TC-COMP-030
++  it("renders a list item whose severity tile is hidden, sized by the caller and coloured by tier", () => {
++    render(tree());
++    const severityTile = tile();
++    expect(severityTile).toHaveAttribute("aria-hidden", "true");
++    expect(severityTile.style.width).toBe("var(--space-6)");
++    expect(severityTile.style.height).toBe("var(--space-6)");
++    expect(severityTile).toHaveClass("bg-status-critical-muted", "text-status-critical");
++    const icons = severityTile.querySelectorAll("svg");
++    expect(icons).toHaveLength(1);
++    expect(Array.from(icons[0].children).map((child) => child.tagName.toLowerCase())).toEqual([
++      "rect",
++    ]);
++  });
++
++  it("carries the tier in words through exactly one status badge", () => {
++    render(tree());
++    const badges = row().querySelectorAll('[data-variant^="status-"]');
++    expect(badges).toHaveLength(1);
++    expect(badges[0]).toHaveAttribute("data-variant", "status-critical");
++    expect(badges[0].textContent).toBe("Download");
++    expect(badges[0].querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(1);
++  });
++
++  it("offers one outline link to the item's target, named for the item", () => {
++    render(tree());
++    const links = within(row()).getAllByRole("link");
++    expect(links).toHaveLength(1);
++    expect(links[0]).toHaveAccessibleName("See the download that failed");
++    expect(links[0].textContent).toBe("See download");
++    expect(links[0]).toHaveAttribute("data-variant", "outline");
++    expect(links[0]).toHaveAttribute("href", "/data/downloads/run-failed-1");
++  });
++
++  it("shows the title in semibold and the body", () => {
++    render(tree());
++    expect(screen.getByText("The last download failed")).toHaveClass("font-semibold");
++    expect(screen.getByText("Provider timeout. Ended 2026-10-15 17:31 CDT.")).toBeInTheDocument();
++  });
++
++  it("exposes no image role and no tile content to assistive technology", () => {
++    render(tree());
++    expect(within(row()).queryByRole("img")).toBeNull();
++  });
++
++  it("links to the item's target, whatever the kind", () => {
++    render(
++      tree({ kind: "credential_missing", tier: "critical", recordedAt: "x", target: "/settings" }),
++    );
++    expect(within(row()).getByRole("link")).toHaveAttribute("href", "/settings");
++  });
++});
++
++describe("tile shape and colour per tier (DAC-E1-S8-3, AC-20)", () => {
++  const EXPECTED: Record<Tier, { cls: string; tags: string[] }> = {
++    neutral: { cls: "bg-status-neutral-muted", tags: ["circle"] },
++    active: { cls: "bg-status-active-muted", tags: ["circle", "circle"] },
++    good: { cls: "bg-status-good-muted", tags: ["circle"] },
++    warning: { cls: "bg-status-warning-muted", tags: ["path"] },
++    serious: { cls: "bg-status-serious-muted", tags: ["path"] },
++    critical: { cls: "bg-status-critical-muted", tags: ["rect"] },
++  };
++
++  function tagsOf(svg: Element): string[] {
++    return Array.from(svg.children).map((child) => child.tagName.toLowerCase());
++  }
++
++  it.each(Object.entries(EXPECTED))("the %s tile", (tier, expected) => {
++    render(tree({ ...ITEM, tier: tier as Tier }));
++    const severityTile = tile();
++    expect(severityTile).toHaveClass(expected.cls);
++    const tileSvg = severityTile.querySelector("svg");
++    const badgeSvg = row().querySelector('[data-variant^="status-"] svg');
++    if (!tileSvg || !badgeSvg) throw new Error("missing shape");
++    expect(tagsOf(tileSvg)).toEqual(expected.tags);
++    // The tile and the badge draw one shape per tier, from the one TierShape.
++    expect(tagsOf(badgeSvg)).toEqual(expected.tags);
++    expect(tileSvg.innerHTML).toBe(badgeSvg.innerHTML);
++  });
++
++  it("the good tile draws a filled circle", () => {
++    render(tree({ ...ITEM, tier: "good" }));
++    expect(tile().querySelector("svg circle")).toHaveAttribute("fill", "currentColor");
++  });
++
++  it("serious draws a diamond", () => {
++    render(tree({ ...ITEM, tier: "serious" }));
++    expect(tile().querySelector("svg")).toHaveClass("lucide-diamond");
++  });
++});
+diff --git a/web/src/components/patterns/needs-you-item.tsx b/web/src/components/patterns/needs-you-item.tsx
+new file mode 100644
+index 00000000..23c3e9cf
+--- /dev/null
++++ b/web/src/components/patterns/needs-you-item.tsx
+@@ -0,0 +1,69 @@
++import type { JSX, ReactNode } from "react";
++import { Link } from "react-router-dom";
++import { Button } from "../ui/button";
++import { cn } from "../ui/utils";
++import type { NeedsYouItem } from "./needs-you";
++import { StatusBadge, TierShape } from "./status-badge";
++import { type Tier, labelOf } from "./tiers";
++
++/**
++ * One *Needs you* row (blueprint 4.1; UX design 1.3; `home-ui` 2.5 and 10;
++ * DAC-E1-S8-3; DEC-0319): a hidden severity tile in the tier's status pair and
++ * shape, the tag badge through `StatusBadge`, a title, a body and exactly one
++ * link styled `button` `outline`. The copy is the caller's; the tag comes from
++ * `labelOf`, and the link always goes to the derivation's `target`. The caller
++ * passes the tile's size (`LAYOUT.markerSize`), so this layer carries no layout
++ * literal.
++ */
++export interface NeedsYouItemRowProps {
++  item: NeedsYouItem;
++  title: string;
++  body: ReactNode;
++  /** The link's visible text. */
++  actionLabel: string;
++  /** The link's accessible name, which names the item. */
++  actionName: string;
++  /** The tile's width and height, as a CSS length. */
++  markerSize: string;
++}
++
++const TILE_CLASSES: Record<Tier, string> = {
++  neutral: "bg-status-neutral-muted text-status-neutral",
++  active: "bg-status-active-muted text-status-active",
++  good: "bg-status-good-muted text-status-good",
++  warning: "bg-status-warning-muted text-status-warning",
++  serious: "bg-status-serious-muted text-status-serious",
++  critical: "bg-status-critical-muted text-status-critical",
++};
++
++export function NeedsYouItemRow({
++  item,
++  title,
++  body,
++  actionLabel,
++  actionName,
++  markerSize,
++}: NeedsYouItemRowProps): JSX.Element {
++  return (
++    <li className="flex items-start gap-3 border-b border-border py-3 last:border-b-0">
++      <span
++        aria-hidden="true"
++        data-slot="severity-tile"
++        style={{ width: markerSize, height: markerSize }}
++        className={cn("flex shrink-0 items-center justify-center rounded", TILE_CLASSES[item.tier])}
++      >
++        <TierShape tier={item.tier} className="h-4 w-4" />
++      </span>
++      <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
++        <StatusBadge tier={item.tier}>{labelOf({ of: "item", kind: item.kind })}</StatusBadge>
++        <p className="truncate font-semibold">{title}</p>
++        <p>{body}</p>
++      </div>
++      <Button asChild variant="outline" className="shrink-0">
++        <Link to={item.target} aria-label={actionName}>
++          {actionLabel}
++        </Link>
++      </Button>
++    </li>
++  );
++}
+diff --git a/web/src/components/patterns/status-badge.tsx b/web/src/components/patterns/status-badge.tsx
+index ff6a80e5..50464716 100644
+--- a/web/src/components/patterns/status-badge.tsx
++++ b/web/src/components/patterns/status-badge.tsx
+@@ -1,6 +1,7 @@
+ import { Circle, CircleDot, Diamond, Icon, type IconNode, Square, Triangle } from "lucide-react";
+ import type { JSX } from "react";
+ import { Badge } from "../ui/badge";
++import { cn } from "../ui/utils";
+ import type { Tier } from "./tiers";
+ 
+ /**
+@@ -25,17 +26,36 @@ const FILLED_CIRCLE: IconNode = [
+ const ICON_PROPS = {
+   "aria-hidden": "true",
+   focusable: "false",
+-  className: "h-3 w-3 shrink-0",
+ } as const;
+ 
+-const TIER_ICON: Record<Tier, JSX.Element> = {
+-  neutral: <Circle {...ICON_PROPS} />,
+-  active: <CircleDot {...ICON_PROPS} />,
+-  good: <Icon iconNode={FILLED_CIRCLE} {...ICON_PROPS} />,
+-  warning: <Triangle fill="currentColor" {...ICON_PROPS} />,
+-  serious: <Diamond fill="currentColor" {...ICON_PROPS} />,
+-  critical: <Square fill="currentColor" {...ICON_PROPS} />,
+-};
++/**
++ * The one tier-to-shape mapping (blueprint section 8; ui-components 10 *Tier
++ * shapes*), used by `StatusBadge` and the *Needs you* severity tile so the two
++ * cannot draw a tier differently (DEC-0319).
++ */
++export function TierShape({
++  tier,
++  className,
++}: {
++  tier: Tier;
++  className?: string;
++}): JSX.Element {
++  const classes = cn("h-3 w-3 shrink-0", className);
++  switch (tier) {
++    case "neutral":
++      return <Circle {...ICON_PROPS} className={classes} />;
++    case "active":
++      return <CircleDot {...ICON_PROPS} className={classes} />;
++    case "good":
++      return <Icon iconNode={FILLED_CIRCLE} {...ICON_PROPS} className={classes} />;
++    case "warning":
++      return <Triangle fill="currentColor" {...ICON_PROPS} className={classes} />;
++    case "serious":
++      return <Diamond fill="currentColor" {...ICON_PROPS} className={classes} />;
++    case "critical":
++      return <Square fill="currentColor" {...ICON_PROPS} className={classes} />;
++  }
++}
+ 
+ export interface StatusBadgeProps {
+   tier: Tier;
+@@ -50,7 +70,7 @@ export interface StatusBadgeProps {
+ export function StatusBadge({ tier, children, title, className }: StatusBadgeProps): JSX.Element {
+   return (
+     <Badge variant={`status-${tier}` as const} title={title} className={className}>
+-      {TIER_ICON[tier]}
++      <TierShape tier={tier} />
+       {children}
+     </Badge>
+   );

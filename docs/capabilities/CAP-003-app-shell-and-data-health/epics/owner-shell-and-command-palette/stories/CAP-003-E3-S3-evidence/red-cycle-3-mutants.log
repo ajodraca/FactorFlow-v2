@@ -1,0 +1,182 @@
+=== baseline-w0.log
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2mof0sh_/w0/web
+
+ ✓ src/app/use-data-health.test.tsx (28 tests) 119ms
+ ✓ src/app/shell-context.test.tsx (34 tests) 167ms
+
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+   Start at  01:08:25
+   Duration  1.78s (transform 217ms, setup 166ms, collect 422ms, tests 286ms, environment 555ms, prepare 103ms)
+
+=== baseline-w1.log
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2mof0sh_/w1/web
+
+ ✓ src/app/use-data-health.test.tsx (28 tests) 119ms
+ ✓ src/app/shell-context.test.tsx (34 tests) 164ms
+
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+   Start at  01:08:25
+   Duration  1.77s (transform 194ms, setup 169ms, collect 415ms, tests 283ms, environment 595ms, prepare 111ms)
+
+=== baseline-w2.log
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2mof0sh_/w2/web
+
+ ✓ src/app/use-data-health.test.tsx (28 tests) 114ms
+ ✓ src/app/shell-context.test.tsx (34 tests) 169ms
+
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+   Start at  01:08:25
+   Duration  1.79s (transform 242ms, setup 156ms, collect 425ms, tests 283ms, environment 1.41s, prepare 308ms)
+
+=== baseline-w3.log
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2mof0sh_/w3/web
+
+ ✓ src/app/use-data-health.test.tsx (28 tests) 117ms
+ ✓ src/app/shell-context.test.tsx (34 tests) 167ms
+
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+   Start at  01:08:25
+   Duration  1.78s (transform 248ms, setup 174ms, collect 406ms, tests 285ms, environment 1.44s, prepare 286ms)
+
+=== web_src_app_shell-context.tsx_manual_credential-member-added.log
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2mof0sh_/w3/web
+
+ ✓ src/app/use-data-health.test.tsx (28 tests) 112ms
+ ✓ src/app/shell-context.test.tsx (34 tests) 185ms
+
+ Test Files  2 passed (2)
+      Tests  62 passed (62)
+   Start at  01:08:31
+   Duration  1.10s (transform 109ms, setup 96ms, collect 280ms, tests 297ms, environment 574ms, prepare 139ms)
+
+web/src/app/shell-context.test.tsx(485,23): error TS2344: Type '"credential_present"' does not satisfy the constraint '"Expected: literal string: credential_present, Actual: literal string: credential"'.
+web/src/app/shell-context.test.tsx(603,7): error TS2344: Type '"health" | "scores" | "refresh" | "attention" | "setTitleDetail"' does not satisfy the constraint '"Expected: literal string: health, Actual: literal string: credential" | "Expected: literal string: scores, Actual: literal string: credential" | "Expected: literal string: refresh, Actual: literal string: credential" | "Expected: literal string: attention, Actual: literal string: credential" | "Expected: literal st...'.
+  Type '"health"' is not assignable to type '"Expected: literal string: health, Actual: literal string: credential" | "Expected: literal string: scores, Actual: literal string: credential" | "Expected: literal string: refresh, Actual: literal string: credential" | "Expected: literal string: attention, Actual: literal string: credential" | "Expected: literal st...'.
+=== web_src_app_shell-context.tsx_manual_loading-to-not-served.log
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-2mof0sh_/w0/web
+
+ ✓ src/app/use-data-health.test.tsx (28 tests) 122ms
+ ❯ src/app/shell-context.test.tsx (34 tests | 1 failed) 186ms
+   × the score and attention states (TC-COMP-059, DAC-E3-6) > reads loading until the summary's first answer, not not_served 7ms
+     → expected { kind: 'not_served' } to deeply equal { kind: 'loading' }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-context.test.tsx > the score and attention states (TC-COMP-059, DAC-E3-6) > reads loading until the summary's first answer, not not_served
+AssertionError: expected { kind: 'not_served' } to deeply equal { kind: 'loading' }
+
+- Expected
++ Received
+
+  Object {
+-   "kind": "loading",
++   "kind": "not_served",
+  }
+
+ ❯ src/app/shell-context.test.tsx:520:27
+    518|     render(<Tree />);
+    519|     await advance(0);
+    520|     expect(latest.scores).toEqual({ kind: "loading" });
+       |                           ^
+    521|     first.resolve(200, SUMMARY_SET);
+    522|     await advance(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 61 passed (62)
+   Start at  01:08:31
+   Duration  1.12s (transform 137ms, setup 120ms, collect 296ms, tests 308ms, environment 503ms, prepare 150ms)
+
+=== web_src_app_shell-context.tsx_manual_provider-reads-aggregate.log
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/app/use-data-health.test.tsx:369:37
+    367|     render(<Tree />);
+    368|     await advance(0);
+    369|     expect(calls(DATA_HEALTH_PATH)).toBe(1);
+       |                                     ^
+    370|     act(() => latestDH.retry());
+    371|     act(() => latestDH.retry());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/24]⎯
+
+ FAIL  src/app/use-data-health.test.tsx > useDataHealth states, ordering and edges (DAC-E3-19, AC-28) > adds no read and no warning when it unmounts with a read in flight
+AssertionError: expected 3 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 3
+
+ ❯ src/app/use-data-health.test.tsx:395:39
+    393|       standing(ATTENTION_PATH, 200, attentionWith("succeeded"));
+    394|       await advance(10_000);
+    395|       expect(calls(DATA_HEALTH_PATH)).toBe(1);
+       |                                       ^
+    396|       expect(spy).not.toHaveBeenCalled();
+    397|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/24]⎯
+
+ Test Files  2 failed (2)
+      Tests  24 failed | 38 passed (62)
+   Start at  01:08:31
+   Duration  1.12s (transform 114ms, setup 118ms, collect 280ms, tests 276ms, environment 455ms, prepare 312ms)
+
+=== web_src_app_use-data-health.ts_manual_unreachable-not-mapped.log
+    342|     render(<Tree />);
+    343|     await advance(0);
+    344|     expect(latestDH.state).toEqual({
+       |                            ^
+    345|       kind: "error",
+    346|       error: expect.any(ApiUnreachableError),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiUnreachableError: GET /api/data-health could not be reached
+ ❯ Module.requestJson src/api/client.ts:162:11
+    160|     });
+    161|   } catch (cause) {
+    162|     throw new ApiUnreachableError(`${init?.method ?? "GET"} ${input} c…
+       |           ^
+    163|       cause,
+    164|     });
+ ❯ Object.runRef.current src/app/use-data-health.ts:64:37
+
+This error originated in "src/app/use-data-health.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "maps an unreachable read to an error state, keeping the last good answer (T010, DEC-0324)". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+Caused by: TypeError: network down
+ ❯ router src/app/use-data-health.test.tsx:105:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 61 passed (62)
+     Errors  1 error
+   Start at  01:08:31
+   Duration  1.14s (transform 140ms, setup 120ms, collect 294ms, tests 330ms, environment 489ms, prepare 206ms)
+

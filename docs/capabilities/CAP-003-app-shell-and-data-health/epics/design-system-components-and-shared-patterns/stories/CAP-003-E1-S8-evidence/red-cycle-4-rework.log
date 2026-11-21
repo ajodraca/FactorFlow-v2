@@ -1,0 +1,94 @@
+# RED for cycle 4 (tests-only rework of implementation-review-v1): the new assertions run against the review's 12 surviving production mutants; each fails.
+
+=== web_src_components_patterns_needs-you-item.tsx_manual_review-action-shrink-dropped.log
+   × NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3) > separates rows with the border, keeps the title on one line and the action from shrinking 118ms
+     → expect(element).toHaveClass("shrink-0")
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you-item.test.tsx > NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3) > separates rows with the border, keeps the title on one line and the action from shrinking
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you-item.tsx_manual_review-row-border-dropped.log
+   × NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3) > separates rows with the border, keeps the title on one line and the action from shrinking 42ms
+     → expect(element).toHaveClass("border-b border-border")
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you-item.test.tsx > NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3) > separates rows with the border, keeps the title on one line and the action from shrinking
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you-item.tsx_manual_review-tile-neutral-shape-colour-dropped.log
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the neutral tile 6ms
+     → expect(element).toHaveClass("bg-status-neutral-muted text-status-neutral")
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you-item.test.tsx > tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the neutral tile
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you-item.tsx_manual_review-tile-shape-size-dropped.log
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the neutral tile 10ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the active tile 27ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the good tile 10ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the warning tile 42ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+
+=== web_src_components_patterns_needs-you-item.tsx_manual_review-tile-warning-shape-colour.log
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the warning tile 8ms
+     → expect(element).toHaveClass("bg-status-warning-muted text-status-warning")
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you-item.test.tsx > tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the warning tile
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you-item.tsx_manual_review-title-not-truncated.log
+   × NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3) > separates rows with the border, keeps the title on one line and the action from shrinking 13ms
+     → expect(element).toHaveClass("truncate")
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you-item.test.tsx > NeedsYouItemRow (TC-COMP-030, DAC-E1-S8-3) > separates rows with the border, keeps the title on one line and the action from shrinking
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you.ts_manual_review-dnc-runid-precedence.log
+   × provisional recency and target rules (DEC-0318, DEC-0320) > download_not_complete's own run_id wins over the terminal download's (DEC-0320) 10ms
+     → expected { kind: 'download_not_complete', …(4) } to match object { runId: 'run-item-1', …(1) }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you.test.ts > provisional recency and target rules (DEC-0318, DEC-0320) > download_not_complete's own run_id wins over the terminal download's (DEC-0320)
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you.ts_manual_review-first-download-recency-started.log
+   × provisional recency and target rules (DEC-0318, DEC-0320) > first_download's recency is requested_at, not started_at (DEC-0203) 42ms
+     → expected '2026-10-15T22:05:00+00:00' to be '2026-10-15T21:58:00+00:00' // Object.is equality
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you.test.ts > provisional recency and target rules (DEC-0318, DEC-0320) > first_download's recency is requested_at, not started_at (DEC-0203)
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you.ts_manual_review-sort-tiebreak-kind.log
+   × sortAttention (TC-COMP-002, DAC-E1-7) > keeps equal keys in input order when that order is descending by target and kind 32ms
+     → expected [ …(4) ] to deeply equal [ …(4) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > keeps equal keys in input order when that order is descending by target and kind
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_needs-you.ts_manual_review-sort-tiebreak-target-asc.log
+   × sortAttention (TC-COMP-002, DAC-E1-7) > keeps equal keys in input order when that order is descending by target and kind 7ms
+     → expected [ …(4) ] to deeply equal [ …(4) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/components/patterns/needs-you.test.ts > sortAttention (TC-COMP-002, DAC-E1-7) > keeps equal keys in input order when that order is descending by target and kind
+      Tests  1 failed | 541 passed (542)
+
+=== web_src_components_patterns_status-badge.tsx_manual_review-shape-class-ignored.log
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the neutral tile 44ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the active tile 23ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the good tile 20ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the warning tile 39ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+
+=== web_src_components_patterns_status-badge.tsx_manual_review-shape-class-order.log
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the neutral tile 6ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the active tile 58ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the good tile 25ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")
+   × tile shape and colour per tier (DAC-E1-S8-3, AC-20) > the warning tile 4ms
+     → expect(element).toHaveClass("h-4 w-4 shrink-0")

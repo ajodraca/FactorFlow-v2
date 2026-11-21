@@ -1,0 +1,199 @@
+{
+ "schema": 1,
+ "repo_head": "26a1cfc97754302dd74024f258e03a05d54ad81a",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/app/shell-context.tsx:79:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 79,
+   "original": "    return true;",
+   "mutated": "    return false;"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:81:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 81,
+   "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
+   "mutated": "  return scores !== null || !(\"kind\" in scores) && scores.later?.state === \"building\";"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:81:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 81,
+   "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
+   "mutated": "  return scores !== null && !(\"kind\" in scores) || scores.later?.state === \"building\";"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:81:negate-boolean:3",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 81,
+   "original": "  return scores !== null && !(\"kind\" in scores) && scores.later?.state === \"building\";",
+   "mutated": "  return scores !== null && (\"kind\" in scores) && scores.later?.state === \"building\";"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:112:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 112,
+   "original": "    last !== null && \"kind\" in last",
+   "mutated": "    last !== null || \"kind\" in last"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:139:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 139,
+   "original": "      error: scoresState.error,",
+   "mutated": "      error: nil,"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:140:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 140,
+   "original": "      last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
+   "mutated": "      last: lastData !== null || !(\"kind\" in lastData) ? lastData : null,"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:140:negate-boolean:2",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/app/shell-context.tsx",
+   "line": 140,
+   "original": "      last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
+   "mutated": "      last: lastData !== null && (\"kind\" in lastData) ? lastData : null,"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:idle-60001",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "IDLE_INTERVAL_MS = 60_000",
+   "new": "IDLE_INTERVAL_MS = 60_001"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:idle-59999",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "IDLE_INTERVAL_MS = 60_000",
+   "new": "IDLE_INTERVAL_MS = 59_999"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:active-10001",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "ACTIVE_INTERVAL_MS = 10_000",
+   "new": "ACTIVE_INTERVAL_MS = 10_001"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:active-9999",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "ACTIVE_INTERVAL_MS = 10_000",
+   "new": "ACTIVE_INTERVAL_MS = 9_999"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:cancelling-cancelled",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "  \"cancelling\",\n",
+   "new": "  \"cancelled\",\n"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:building-failed",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "scores.later?.state === \"building\"",
+   "new": "scores.later?.state === \"failed\""
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:not-served-to-error",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "? { kind: \"not_served\" } : { kind: \"served\"",
+   "new": "? { kind: \"loading\" } : { kind: \"served\""
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:served-kind",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "{ kind: \"served\", data, checkedAt }",
+   "new": "{ kind: \"ok\", data, checkedAt }"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:detail-keeps-previous",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "(text: string | null): void => setDetail(text), [])",
+   "new": "(text: string | null): void => setDetail((previous) => text ?? previous), [])"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:detail-not-stable",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "const setTitleDetail = useCallback((text: string | null): void => setDetail(text), []);",
+   "new": "const setTitleDetail = (text: string | null): void => setDetail(text);"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:refresh-health-to-attention",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "      } else {\n        healthRefresh();",
+   "new": "      } else {\n        attentionRefresh();"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:refresh-scores-to-attention",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "} else if (kind === \"scores\") {\n        scoresRefresh();",
+   "new": "} else if (kind === \"scores\") {\n        attentionRefresh();"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:refresh-not-stable",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "const refresh = useCallback(\n    (kind: \"health\" | \"attention\" | \"scores\"): void => {",
+   "new": "const refresh = ((\n    kind: \"health\" | \"attention\" | \"scores\",\n  ): void => {"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:provider-missing-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "if (value === null) {",
+   "new": "if (value !== null) {"
+  },
+  {
+   "id": "web/src/app/shell-context.tsx:manual:last-null-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/app/shell-context.tsx",
+   "old": "last: lastData !== null && !(\"kind\" in lastData) ? lastData : null,",
+   "new": "last: null,"
+  }
+ ]
+}

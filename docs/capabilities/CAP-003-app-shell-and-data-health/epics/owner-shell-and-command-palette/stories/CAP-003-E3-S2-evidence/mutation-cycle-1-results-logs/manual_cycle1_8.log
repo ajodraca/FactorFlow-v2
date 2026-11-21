@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zjsv85zs/w3/web
+
+ ❯ src/components/token-literals.test.ts (52 tests | 1 failed) 28ms
+   × layout rule (DAC-E3-16, DAC-E3-S2-4) > rejects a planted 16px 4ms
+     → expected [] to deeply equal [ 'web/src/app/planted.tsx: 16px' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > layout rule (DAC-E3-16, DAC-E3-S2-4) > rejects a planted 16px
+AssertionError: expected [] to deeply equal [ 'web/src/app/planted.tsx: 16px' ]
+
+- Expected
++ Received
+
+- Array [
+-   "web/src/app/planted.tsx: 16px",
+- ]
++ Array []
+
+ ❯ src/components/token-literals.test.ts:339:68
+    337| 
+    338|   it.each(LAYOUT_LITERALS)("rejects a planted %s", (value) => {
+    339|     expect(layoutLiteralsIn(PLANTED_APP, `const x = "${value}";`)).toE…
+       |                                                                    ^
+    340|       `${PLANTED_APP}: ${value}`,
+    341|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 51 passed (52)
+   Start at  22:31:29
+   Duration  1.01s (transform 35ms, setup 36ms, collect 32ms, tests 28ms, environment 196ms, prepare 164ms)
+

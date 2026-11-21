@@ -1,0 +1,121 @@
+# TDD evidence for CAP-003-E1-S8 - Needs You Derivation and Sort: needs-you.ts and the Item Row.
+# Each cycle commit carries its own entry (commit_hash: stage); the cycle's evidence artifacts (patch, logs, mutation results) follow in a docs-only commit naming the story.
+# Mutation runs use a command that links the repo's node_modules into each clone (the clones carry none); the plan's tsc step is not part of the per-cycle mutation command, tsc and the full suite run in the Final Step.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T003, T006, T007, T010]
+    description: >
+      needs-you.ts exports NeedsYouKind (re-exported from tiers.ts), NeedsYouItem and deriveNeedsYou: the three server items map one to one, first_download, first_scores and score_failed are composed from the served summary, first_download under a 404 summary only while latest_terminal_download is null, loading and error add nothing, every tier from tierOf, no user-visible string. DEC-0318 (first_scores run and recency) and DEC-0320 (download_not_complete without a run id, score_failed recency) are applied. needs-you.test.ts covers TC-COMP-028, TC-COMP-029 and the cause-boundary and provisional-rule cases with independent literals (33 tests). Reviews: code review APPROVED (three LOWs accepted: no exhaustiveness default on the server-item switch, no test with differing run ids on a download_not_complete item, no test of a building set with a null latest_download) and spec drift none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/red-cycle-1-derivation.log
+    red_log_sha256: c021e9fb4863d088ce43d6765013e88b2ee95eea5392d3dc0b68744b12404a8e
+    red_evidence: >
+      needs-you.test.ts failed to resolve ./needs-you before the module existed (no tests collected).
+    green_evidence: >
+      needs-you.test.ts 33 tests pass; npx tsc --noEmit and biome lint and format are clean on the changed files.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c6da3acba7f0fea8a1a9a86ea433e7e77aec3babd49c1586f48f4456610e6acf
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/mutation-cycle-1-results.json
+      results_sha256: 3d84dd7a5dedf7c4138ab199c6369a6a370587add2b4e1d42f531a4f7b045202
+      generated: 16
+      killed: 16
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    tasks: [T004, T008, T011]
+    description: >
+      needs-you.ts adds sortAttention, which orders by the imported TIER_ORDER (ascending rank, most severe first) then by newest instant first, stable for equal keys, on a copy of its input; the module declares no order of its own and imports TIER_ORDER in the form TC-COMP-027 scans for. needs-you.test.ts adds TC-COMP-002 and the sort and count edges (scrambled input, stability, empty list, instants not strings, active and good sharing a rank, a new array of the same objects, and the five-kind derivation sorted, with the length both callers read). Reviews: code review APPROVED (two LOWs accepted: an unparseable recordedAt yields NaN, which the types exclude; one count assertion depends on the derivation) and spec drift none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/red-cycle-2-sort.log
+    red_log_sha256: d0bb18c60079bfa0d02802f5bfcf500307eda6b2971c43ae9eabc841a6e23c0f
+    red_evidence: >
+      Seven needs-you.test.ts tests failed with "sortAttention is not a function" before the function existed.
+    green_evidence: >
+      needs-you.test.ts 40 tests and worst-data-tier.test.ts 54 tests pass, TC-COMP-027 (c) now running; npx tsc --noEmit and biome lint and format are clean on the changed files.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 85beaad124b44049051c5d2d2b8f9e04d570b2fe37c783834418917a6b994ff2
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/mutation-cycle-2-results.json
+      results_sha256: 47c4484e56e130d7d8e0248d43f00440fd212cb11fbbbb3a9a6ed3779818a531
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-3
+    tasks: [T005, T009, T012, T013]
+    description: >
+      status-badge.tsx exports TierShape, the one tier-to-shape mapping, and StatusBadge renders it with its DOM unchanged. needs-you-item.tsx exports NeedsYouItemRowProps and NeedsYouItemRow (DEC-0319): an li holding an aria-hidden severity tile sized by the caller's markerSize in the tier's muted status pair and shape, the tag badge through StatusBadge with the tag from labelOf, a semibold title, a body and exactly one outline link to item.target whose accessible name is actionName. needs-you-item.test.tsx covers TC-COMP-030 and the per-tier tile shape and colour, with the tile and badge drawing the same shape. Reviews: code review APPROVED (two LOWs accepted: the no-img assertion is weak beside the aria-hidden check; a long title is truncated with no title attribute, outside the DACs) and spec drift none (informational: home-ui 2.5 words the tile as the full status colour, DEC-0319 and T013 specify the muted pair, which the owning design absorbs at its next revision).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/red-cycle-3-row.log
+    red_log_sha256: 077767a5d6428a6916baa14bfd1adcb2d8c4a8b7ba0e284bb2d09d63376bfbf3
+    red_evidence: >
+      needs-you-item.test.tsx failed to resolve ./needs-you-item before the module existed (no tests collected).
+    green_evidence: >
+      The patterns suite passes (15 files, 538 tests) including status-badge.test.tsx unedited; npx tsc --noEmit and biome lint and format are clean on the changed files.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c2d999cea1c27c3bada9e13a248b79fb887d5923de183e488615fa4eb8839c39
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/mutation-cycle-3-results.json
+      results_sha256: a1c45f41dc040b363a198714accebb527e30bbeef8a3ee85f930c9cc13c70b05
+      generated: 13
+      killed: 12
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.923
+      survivors:
+        - id: web/src/components/patterns/status-badge.tsx:manual:shape-not-aria-hidden
+          disposition: equivalent
+          reason: >
+            removing aria-hidden from ICON_PROPS renders the same DOM, because lucide-react 1.70.0 adds aria-hidden="true" to an icon with no label by default (renderToStaticMarkup of a bare Circle prints it); the explicit prop is belt and braces and no test can observe the difference
+  - id: cycle-4
+    tasks: [T004, T007, T009, T012, T013]
+    description: >
+      Rework of implementation-review-v1 (IR-001, IR-003, IR-004, IR-005): the stability test also runs equal keys in descending target and kind order, DEC-0320's item run_id precedence and DEC-0203's requested_at recency are pinned with differing fixtures, the row's border, one-line title, action shrink-0 and each tier's shape colour are asserted, and the tile and badge glyph sizes are pinned. Tests only; no production change. IR-002 (tile colours, DEC-0319) is left for the owner.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/red-cycle-4-rework.log
+    red_log_sha256: a3d24a15679afb9b62acc5cea1cc0cb072ece66ccdb35887b4a89b382fb2b704
+    red_evidence: >
+      Against the review's 12 surviving production mutants the new assertions failed one or more tests each (red-cycle-4-rework.log).
+    green_evidence: >
+      The patterns suite passes (15 files, 542 tests); npx tsc --noEmit, biome lint and format are clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 1a4a99ddd5329192a79937d4dda910467a942405a8b28987b37b72e2c16953e1
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/design-system-components-and-shared-patterns/stories/CAP-003-E1-S8-evidence/mutation-cycle-4-results.json
+      results_sha256: 0b7e3928c98c28e485420a33e63f8156a5b35c5267d7af77eb24bd795c47b9cd
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

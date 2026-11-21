@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-posv5y_r/w0/web
+
+ ❯ src/app/shell-client.test.ts (33 tests | 1 failed) 21ms
+   × fetchProblems request encoding > fetchScoreSummary sends GET with Accept: application/json and no method override 4ms
+     → expected 'POST' to be undefined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/shell-client.test.ts > fetchProblems request encoding > fetchScoreSummary sends GET with Accept: application/json and no method override
+AssertionError: expected 'POST' to be undefined
+
+- Expected: 
+undefined
+
++ Received: 
+"POST"
+
+ ❯ src/app/shell-client.test.ts:306:26
+    304|     await call();
+    305|     const { init } = firstCall(fetchMock);
+    306|     expect(init?.method).toBeUndefined();
+       |                          ^
+    307|     expect(new Headers(init?.headers).get("Accept")).toBe("application…
+    308|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 32 passed (33)
+   Start at  19:52:16
+   Duration  642ms (transform 55ms, setup 47ms, collect 58ms, tests 21ms, environment 188ms, prepare 102ms)
+

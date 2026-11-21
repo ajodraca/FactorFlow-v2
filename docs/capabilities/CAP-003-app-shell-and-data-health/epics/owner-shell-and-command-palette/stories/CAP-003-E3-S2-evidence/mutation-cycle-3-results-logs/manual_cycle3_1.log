@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-e7fb_g93/w1/web
+
+ ❯ src/app/health.test.tsx (18 tests | 1 failed) 48ms
+   × HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated 6ms
+     → expected '2026-09-06T18:30:30.000Z' to be '2026-09-06T18:30:00.000Z' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/health.test.tsx > HealthProvider records lastAnsweredAt and keeps the delivered rendering (DAC-E3-S2-3) > keeps lastAnsweredAt and the last health while unreachable, and moves lastUpdated
+AssertionError: expected '2026-09-06T18:30:30.000Z' to be '2026-09-06T18:30:00.000Z' // Object.is equality
+
+Expected: "2026-09-06T18:30:00.000Z"
+Received: "2026-09-06T18:30:30.000Z"
+
+ ❯ src/app/health.test.tsx:123:54
+    121|     expect(attribute("probe", "data-liveness")).toBe("unreachable");
+    122|     expect(attribute("probe", "data-last-updated")).toBe("2026-09-06T1…
+    123|     expect(attribute("probe", "data-last-answered")).toBe("2026-09-06T…
+       |                                                      ^
+    124|     expect(attribute("probe", "data-database")).toBe("reachable");
+    125|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  22:39:21
+   Duration  967ms (transform 71ms, setup 32ms, collect 117ms, tests 48ms, environment 192ms, prepare 236ms)
+

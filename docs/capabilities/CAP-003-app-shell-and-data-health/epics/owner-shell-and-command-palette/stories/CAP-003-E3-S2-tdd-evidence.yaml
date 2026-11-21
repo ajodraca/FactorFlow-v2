@@ -1,0 +1,124 @@
+# TDD evidence for CAP-003-E3-S2 - layout.ts, usePolledRead and the Health Provider with lastAnsweredAt and the Hidden-Page Pause.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T002, T008, T009]
+    description: >
+      The layout module and the rule (TC-COMP-072, AC-26, DAC-E3-16, DAC-E3-S2-4): layout.ts holds the seven LAYOUT values of owner-shell 2.1; token-literals.test.ts gains the single-writer rule with the exemption for layout.ts and CAP-002's research directory (DEC-0321) and a guard that pins the two delivered research occurrences. The module is a constant object, so the mutation generator found none; the 15 mutants are hand-written (one per LAYOUT value and eight on the rule's regexes and exemption test). The first run left the trailing word boundary of the length regex surviving; cases 16pxs, 208pxx and 70chx were added and the run repeated.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-1-layout.log
+    red_log_sha256: e4f05b6e404a3ecfd23346c99ca75020d6116ddd90890f6cf4ddcdb15d002a10
+    red_evidence: >
+      token-literals.test.ts failed to load (../app/layout did not resolve) before layout.ts existed; t009-planted-red.log shows the planted 208px failing the rule and naming web/src/app/planted.tsx: 208px.
+    green_evidence: >
+      token-literals.test.ts 52 passed after T008 (t009-clean-green.log); biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9404039dd2e4f703b96cce125ab7b8e6f50253ab9dc93082ddaa19f57cf46a7f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 764c5c738e44debad16edc6c251d9b9837853f5469f708a89402abe4d4f4be6e
+      generated: 15
+      killed: 15
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T004, T005, T010]
+    description: >
+      startPolling and usePolledRead (TC-COMP-069, TC-COMP-070, DAC-E3-5, DAC-E3-S2-1, DAC-E3-S2-2, AC-25): read on mount, a setTimeout chain from the last answer, cleared while hidden and read at once on visible, no overlap of two reads, checkedAt on every answer, the previous value kept in error.last. Three tests beyond the plan were added after the first mutation run left three survivors (a read that settles while hidden, a read that settles after unmount, removal of the visibilitychange listener); the run was repeated. The rethrow of a non-Api rejection has no test, as the plan lists none.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-2-polled-read.log
+    red_log_sha256: e0ae54ace3d4157d846b1725cbc2c7ae3eea381061941fd30e162118c24d864b
+    red_evidence: >
+      use-polled-read.test.ts failed to load (./use-polled-read did not resolve) before the module existed.
+    green_evidence: >
+      use-polled-read.test.ts 13 passed (green-cycle-2-polled-read.log); tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f4d7729ffb05da505424ebd82912d52d5fc9c0dbb87b1830a5dd2f3cb05a5c52
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: ef33c01b233a2ebd6ce83829af819dca6b6f2ed411517a79a2a016092d89a71b
+      generated: 19
+      killed: 19
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T006, T007, T011]
+    description: >
+      health.tsx (TC-COMP-071, DAC-E3-5, DAC-E3-S2-3, DEC-0212, DEC-0322): HealthProvider, useHealth, formatTimestamp, UNREACHABLE_MESSAGE, Liveness and HEALTH_POLL_INTERVAL_MS copied from status-region.tsx; HealthState gains lastAnsweredAt, kept while unreachable; the setInterval is replaced by startPolling so the poll pauses while hidden; useHealthRefresh returns the provider's refresh or a stable no-op. The delivered polling, unknown-state and cleanup cases are moved to a probe, with the new hidden-page and refresh cases. The spec-drift review asked for one comment-only addition (the TC-COMP-339 citation), made and re-fingerprinted. The one surviving mutant is equivalent.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-3-health.log
+    red_log_sha256: 4b6dfe94a283c48253089ff4ff5edf7c3bd96a9a1e6e08471ddb1772bec4a155
+    red_evidence: >
+      health.test.tsx failed to load (./health did not resolve) before health.tsx existed.
+    green_evidence: >
+      health.test.tsx 18 passed (green-cycle-3-health.log); tsc --noEmit clean, biome lint and format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7451e3367308e8e7ee28bb8aa89ba75db9269725cd09fc81bf555e07a45ecc46
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: 3c9ac75f2086ec5e0d315213e2972f048eaa2da96c9748b6cf79c2db67a94583
+      generated: 13
+      killed: 12
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.923
+      survivors:
+        - id: manual:cycle3:4
+          disposition: equivalent
+          reason: >
+            The 24 to 00 midnight mapping in formatTimestamp is copied byte for byte (plan, Equivalent mutant). On this engine (Node v22.19.0) Intl.DateTimeFormat en-CA with hour12 false formats midnight in America/Chicago as formatToParts [{"type":"hour","value":"00"}], so the mapping never fires and a mutant that changes its test cannot be observed.
+
+  - id: cycle-4
+    tasks: [T003, T004, T005, T010, T011]
+    description: >
+      Review rework of CAP-003-E3-S2-implementation-review-v1 (IR-001, IR-002, IR-003, IR-006): tests that kill the five mutants the review left surviving, and the stale section reference in health.tsx's HEALTH_POLL_INTERVAL_MS comment. The tests are a rejection that is neither ApiError nor ApiUnreachableError (rethrown, the state unchanged, the next read still scheduled; observed through an unhandledRejection listener), the timer count before and after unmount, a refresh held across unmount that reads nothing, and a refresh that keeps its identity across answers and re-renders. No production behaviour changes; use-polled-read.ts is untouched. The five mutants are the review's manual:review:1, 2, 3, 4 and 51, re-run here as manual:cycle4:1 to 5.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/red-cycle-4-mutants.log
+    red_log_sha256: 14b271f20ac0dee7545f6544d65f44f2f635eeaa6f12941adaafb4acca3a4ac3
+    red_evidence: >
+      The code under test was already correct, so the new tests cannot fail against it; the RED is their failure against the five mutants the review found surviving. red-cycle-4-mutants.log holds the failing runs; before these tests the same mutants passed (review v1, Mutation run).
+    green_evidence: >
+      use-polled-read.test.ts 16 passed (green-cycle-4-polled-read.log); full Vitest suite 106 files, 2782 tests passed; npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9bca29f7f83afd74f72efaaef053e59ca12a2478478f5648feaafc3689bf9904
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: f557284b8c982ccb7581e3091df4c5359ed872730a353aeaad8ba142c156efa3
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

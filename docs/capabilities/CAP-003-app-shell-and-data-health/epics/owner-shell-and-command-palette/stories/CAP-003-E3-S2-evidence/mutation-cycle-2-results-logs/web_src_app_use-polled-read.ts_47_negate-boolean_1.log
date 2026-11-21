@@ -1,0 +1,111 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w2/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 3 failed) 40ms
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure 6ms
+     → expected { kind: 'ok', data: undefined, …(1) } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > has no last value when the first read fails 6ms
+     → expected { kind: 'ok', data: undefined, …(1) } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > passes null to intervalMs when the first read fails, and reads again at 60 s 2ms
+     → expected "intervalByAnswer" to be called with arguments: [ null ]
+
+Received: 
+
+  1st intervalByAnswer call:
+
+  Array [
+-   null,
++   undefined,
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure
+AssertionError: expected { kind: 'ok', data: undefined, …(1) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: boom],
+-   "kind": "error",
+-   "last": Object {
+-     "checkedAt": 2026-09-06T18:30:00.000Z,
+-     "data": Object {
+-       "n": 1,
+-     },
+-   },
++   "checkedAt": 2026-09-06T18:30:10.000Z,
++   "data": undefined,
++   "kind": "ok",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:183:34
+    181| 
+    182|     await advance(10_000);
+    183|     expect(result.current.state).toEqual({
+       |                                  ^
+    184|       kind: "error",
+    185|       error: apiError,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > has no last value when the first read fails
+AssertionError: expected { kind: 'ok', data: undefined, …(1) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiUnreachableError: down],
+-   "kind": "error",
+-   "last": null,
++   "checkedAt": 2026-09-06T18:30:00.000Z,
++   "data": undefined,
++   "kind": "ok",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:212:34
+    210|     const { result } = renderHook(() => usePolledRead(read, always10s)…
+    211|     await advance(0);
+    212|     expect(result.current.state).toEqual({ kind: "error", error: unrea…
+       |                                  ^
+    213|   });
+    214| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > passes null to intervalMs when the first read fails, and reads again at 60 s
+AssertionError: expected "intervalByAnswer" to be called with arguments: [ null ]
+
+Received: 
+
+  1st intervalByAnswer call:
+
+  Array [
+-   null,
++   undefined,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/app/use-polled-read.test.ts:273:24
+    271|     renderHook(() => usePolledRead(read, intervalMs));
+    272|     await advance(0);
+    273|     expect(intervalMs).toHaveBeenCalledWith(null);
+       |                        ^
+    274|     await advance(59_999);
+    275|     expect(read).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 10 passed (13)
+   Start at  22:35:35
+   Duration  791ms (transform 66ms, setup 57ms, collect 89ms, tests 40ms, environment 232ms, prepare 160ms)
+

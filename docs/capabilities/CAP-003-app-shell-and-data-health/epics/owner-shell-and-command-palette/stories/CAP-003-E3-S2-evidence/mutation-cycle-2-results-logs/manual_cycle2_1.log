@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w2/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 1 failed) 29ms
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > removes the visibilitychange listener it added, on unmount 4ms
+     → expected "removeEventListener" to be called with arguments: [ 'visibilitychange', …(1) ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > removes the visibilitychange listener it added, on unmount
+AssertionError: expected "removeEventListener" to be called with arguments: [ 'visibilitychange', …(1) ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+ ❯ src/app/use-polled-read.test.ts:148:20
+    146|     expect(remove).not.toHaveBeenCalledWith("visibilitychange", expect…
+    147|     unmount();
+    148|     expect(remove).toHaveBeenCalledWith("visibilitychange", added[0]?.…
+       |                    ^
+    149|     add.mockRestore();
+    150|     remove.mockRestore();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  22:35:40
+   Duration  758ms (transform 36ms, setup 40ms, collect 59ms, tests 29ms, environment 159ms, prepare 61ms)
+

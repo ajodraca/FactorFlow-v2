@@ -1,0 +1,445 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w2/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 2 failed) 35ms
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure 5ms
+     → expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+   × usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > is loading until the mount read settles, then carries the answer's own instant 2ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'ok', …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > reports a failure after a success with the success kept, then keeps it through the next failure
+AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "error": [ApiError: boom],
+    "kind": "error",
+-   "last": Object {
+-     "checkedAt": 2026-09-06T18:30:00.000Z,
+-     "data": Object {
+-       "n": 1,
+-     },
+-   },
++   "last": null,
+  }
+
+ ❯ src/app/use-polled-read.test.ts:183:34
+    181| 
+    182|     await advance(10_000);
+    183|     expect(result.current.state).toEqual({
+       |                                  ^
+    184|       kind: "error",
+    185|       error: apiError,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead mount, checkedAt, interval and refresh (DAC-E3-5, AC-25) > is loading until the mount read settles, then carries the answer's own instant
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "checkedAt": 2026-09-06T18:30:00.000Z,
+-   "data": Object {
+-     "fast": false,
+-   },
+-   "kind": "ok",
++   "kind": "loading",
+  }
+
+ ❯ src/app/use-polled-read.test.ts:229:34
+    227|       first.resolve({ fast: false });
+    228|     });
+    229|     expect(result.current.state).toEqual({
+       |                                  ^
+    230|       kind: "ok",
+    231|       data: { fast: false },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 23 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+ ❯ processTicksAndRejections ../node:internal/process/task_queues:105:5
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "fires nothing while hidden, reads at once on visible and resumes the 10 s schedule". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "fires nothing while hidden, reads at once on visible and resumes the 10 s schedule". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "fires nothing while hidden, reads at once on visible and resumes the 10 s schedule". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "starts no second read while one is in flight, whatever asks for it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "starts no second read while one is in flight, whatever asks for it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "starts no second read while one is in flight, whatever asks for it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "starts no second read while one is in flight, whatever asks for it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "schedules nothing for a read that settles while the page is hidden". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "schedules nothing for a read that settles while the page is hidden". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "removes the visibilitychange listener it added, on unmount". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "makes no further read after unmount". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "reports a failure after a success with the success kept, then keeps it through the next failure". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "is loading until the mount read settles, then carries the answer's own instant". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "asks intervalMs about the last successful answer, or null before one". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "asks intervalMs about the last successful answer, or null before one". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "asks intervalMs about the last successful answer, or null before one". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "passes null to intervalMs when the first read fails, and reads again at 60 s". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "refresh reads at once and reschedules from that read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "refresh reads at once and reschedules from that read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "refresh reads at once and reschedules from that read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "uses a changed read and intervalMs from the next read on, without restarting the poll". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "uses a changed read and intervalMs from the next read on, without restarting the poll". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: nil is not defined
+ ❯ src/app/use-polled-read.ts:120:40
+    118|         if (outcome.ok) {
+    119|           lastData.current = outcome.data;
+    120|           setState({ kind: "ok", data: nil, checkedAt });
+       |                                        ^
+    121|           return;
+    122|         }
+ ❯ run src/app/use-polled-read.ts:50:9
+
+This error originated in "src/app/use-polled-read.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "uses a changed read and intervalMs from the next read on, without restarting the poll". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+     Errors  23 errors
+   Start at  22:35:39
+   Duration  801ms (transform 35ms, setup 35ms, collect 59ms, tests 35ms, environment 383ms, prepare 98ms)
+

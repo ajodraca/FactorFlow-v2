@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tfopkkp_/w3/web
+
+ ❯ src/app/use-polled-read.test.ts (13 tests | 1 failed) 30ms
+   × usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > neither reads nor schedules for a read that settles after unmount 4ms
+     → expected "spy" to be called 1 times, but got 13 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead pauses while hidden, reads at once on show, never overlaps (DAC-E3-S2-1) > neither reads nor schedules for a read that settles after unmount
+AssertionError: expected "spy" to be called 1 times, but got 13 times
+ ❯ src/app/use-polled-read.test.ts:134:18
+    132|     });
+    133|     await advance(120_000);
+    134|     expect(read).toHaveBeenCalledTimes(1);
+       |                  ^
+    135|     expect(intervalMs).not.toHaveBeenCalled();
+    136|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  22:35:39
+   Duration  906ms (transform 35ms, setup 33ms, collect 63ms, tests 30ms, environment 401ms, prepare 211ms)
+

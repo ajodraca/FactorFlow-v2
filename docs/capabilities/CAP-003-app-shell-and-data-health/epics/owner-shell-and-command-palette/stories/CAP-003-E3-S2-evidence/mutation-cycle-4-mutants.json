@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "repo_head": "caa00352128d0f10c1fc68dfe66e7db2eeb897b1",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:cycle4:1",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/app/use-polled-read.ts",
+   "old": "          throw error;\n",
+   "new": "          return;\n"
+  },
+  {
+   "id": "manual:cycle4:2",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/app/use-polled-read.ts",
+   "old": "    } finally {\n      inFlight = false;\n      // The next read",
+   "new": "    } catch (thrown) {\n      inFlight = false;\n      throw thrown;\n    }\n    {\n      inFlight = false;\n      // The next read"
+  },
+  {
+   "id": "manual:cycle4:3",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/app/use-polled-read.ts",
+   "old": "      stopped = true;\n      clearTimeout(timer);\n",
+   "new": "      stopped = true;\n"
+  },
+  {
+   "id": "manual:cycle4:4",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/app/use-polled-read.ts",
+   "old": "    if (stopped || inFlight) {",
+   "new": "    if (inFlight) {"
+  },
+  {
+   "id": "manual:cycle4:5",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/app/use-polled-read.ts",
+   "old": "    handle.current?.refresh();\n  }, []);",
+   "new": "    handle.current?.refresh();\n  }, [state]);"
+  }
+ ]
+}

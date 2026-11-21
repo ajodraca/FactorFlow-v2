@@ -1,0 +1,28 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-krca_2ct/w1/web
+
+ ❯ src/app/use-polled-read.test.ts (16 tests | 1 failed) 35ms
+   × usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again 4ms
+     → expected "spy" to be called 3 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/use-polled-read.test.ts > usePolledRead keeps the previous value in error.last (DAC-E3-S2-2) > rethrows a rejection that is neither an ApiError nor an ApiUnreachableError, and still reads again
+AssertionError: expected "spy" to be called 3 times, but got 2 times
+ ❯ src/app/use-polled-read.test.ts:275:20
+    273| 
+    274|       await advance(10_000);
+    275|       expect(read).toHaveBeenCalledTimes(3);
+       |                    ^
+    276|       expect(result.current.state).toEqual({
+    277|         kind: "ok",
+ ❯ surfacedRejections src/app/use-polled-read.test.ts:29:5
+ ❯ src/app/use-polled-read.test.ts:262:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:24:16
+   Duration  1.66s (transform 48ms, setup 59ms, collect 92ms, tests 35ms, environment 532ms, prepare 273ms)
+
