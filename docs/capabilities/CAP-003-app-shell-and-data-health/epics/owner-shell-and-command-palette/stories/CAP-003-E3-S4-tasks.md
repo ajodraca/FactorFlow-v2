@@ -186,7 +186,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   Kills:
   - a hand-written mutant where `useTitle` passes `null` instead of `useTitleDetail()`: (b).
   - a hand-written mutant where `useTitle` reads a pathname fixed at first render (`useRef(useLocation().pathname)`): (d) when the probe is driven by a `navigate` call after mount.
-- [ ] T006 [P] Implement TC-COMP-077 (Legacy paths redirect with replace and the query kept) in a new `web/src/app/legacy-redirects.test.tsx`, with a `// Implements TC-COMP-077` comment.
+- [x] T006 [P] Implement TC-COMP-077 (Legacy paths redirect with replace and the query kept) in a new `web/src/app/legacy-redirects.test.tsx`, with a `// Implements TC-COMP-077` comment.
   - **Harness.** Render `<MemoryRouter initialEntries={["/start", path]} initialIndex={1}><Routes>{legacyRoutes}<Route path="*" element={<LocationProbe />} /></Routes><LocationProbe /></MemoryRouter>`, with a local `LocationProbe` as in the shared harness (pathname plus search, `useNavigationType()`, and a `navigate` ref). Only `legacy-redirects.tsx` is under test; the screens are not involved.
   - **Cases,** `it.each` over this independent literal table of `[from, to]`:
 
@@ -282,7 +282,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
 
 **Purpose**: The four new modules, each in its own TDD cycle.
 
-- [ ] T010 Create `web/src/app/legacy-redirects.tsx` (depends on T006 and T007 being RED). Copy owner-shell §2.6's code: `KeepSearch({ to })` (`useLocation().search` appended, `Navigate … replace`), `LegacyRunDetail()` (`useParams().runId`, `useLocation().search`, `Navigate to={`/data/downloads/${runId}${search}`} replace`), and `export const legacyRoutes` with the four keyed `Route` elements.
+- [x] T010 Create `web/src/app/legacy-redirects.tsx` (depends on T006 and T007 being RED). Copy owner-shell §2.6's code: `KeepSearch({ to })` (`useLocation().search` appended, `Navigate … replace`), `LegacyRunDetail()` (`useParams().runId`, `useLocation().search`, `Navigate to={`/data/downloads/${runId}${search}`} replace`), and `export const legacyRoutes` with the four keyed `Route` elements.
   - Imports `type JSX` from `"react"`, and `Navigate`, `Route`, `useLocation` and `useParams` from `"react-router-dom"`.
   - The module doc comment cites AC-18, DAC-E3-3, DAC-E3-S4-1, owner-shell §2.6 and §6, and says the file, its import in `routes.tsx` and `legacy-redirects.test.tsx` are deleted one release after this ships (capability assumption 3).
 

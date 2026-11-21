@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E3-S4 - Route Map, Destinations, Titles, Legacy Redirects and Not Found.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T006, T007, T010]
+    description: >
+      The legacy redirects (TC-COMP-077, DAC-E3-3, DAC-E3-S4-1, AC-18): legacy-redirects.tsx holds KeepSearch, LegacyRunDetail and the four keyed legacyRoutes, each a Navigate replace with the query kept. T007's two routes.tsx-dependent cases (the legacy paths registered nowhere else, and routes.tsx importing the module once) fail until cycle 4 rewrites routes.tsx, as the plan states; the mutation command excludes those two cases by name. The generator produced no mutants for this JSX, so the nine mutants are hand-written from the plan's kill list (three swapped targets, two dropped searches, two pushes instead of replace, a dropped runId, a dropped route); all nine were killed. Both reviews raised only LOW observations: no encodeURIComponent on runId, hash not kept, regex-based scans.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-1-legacy-redirects.log
+    red_log_sha256: 63d48cb0dcfa2f528d4c4d783f58fdd1befa3a760fabed3fbdfc61b77c48f7b4
+    red_evidence: >
+      legacy-redirects.test.tsx failed to load (./legacy-redirects did not resolve) before the module existed.
+    green_evidence: >
+      legacy-redirects.test.tsx 8 of 10 passed (green-cycle-1-legacy-redirects.log); the two failing cases need routes.tsx and pass in cycle 4. tsc --noEmit clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: a11ba806d2525c36642e86e5709c4e213b8f67f8615c4743ca84d39a60da14b4
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 2b7611769def8c1d61c30c87bc35805ede2b85b20c2f315aa288abd783fb0966
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
