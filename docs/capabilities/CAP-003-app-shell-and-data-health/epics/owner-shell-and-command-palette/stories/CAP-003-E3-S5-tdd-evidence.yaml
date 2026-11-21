@@ -31,3 +31,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T011]
+    description: >
+      The stock search (TC-COMP-081, DAC-E3-S5-1, DAC-E3-11, Resolved Conflict 1): use-stock-search.ts holds STOCK_SEARCH_DEBOUNCE_MS, STOCK_SEARCH_LIMIT, StockSearchState and useStockSearch, one effect keyed on the text that sends GET /api/instruments?symbol={prefix}&lifecycle=active&limit=8 through requestJson after 250 ms, and aborts the request in flight on new text, cleared text and unmount. The generator produced two off-by-one mutants and ten were hand-written from the plan's kill list; the first run left one survivor (the untrimmed text sent as the symbol), so a case for padded text was added and the run repeated: 12 mutants, all killed. Both reviews raised only LOW observations: the idle state is set from inside the effect, the test title repeats the 250 ms literal, and the TypeError path is covered in one case.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/red-cycle-2-stock-search.log
+    red_log_sha256: 72611f9433a407d743d9274d0b519ad286d64dc629355d87db46a51b80fd6c71
+    red_evidence: >
+      use-stock-search.test.ts failed to load (./use-stock-search did not resolve) before the module existed.
+    green_evidence: >
+      The command-palette suites 13 passed (green-cycle-2-stock-search.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c0f3e79ea614e496c3ac41cb47bfdfdb74eaf39acc242360388721c956d883f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S5-evidence/mutation-cycle-2-results.json
+      results_sha256: 0b692da02efe3d26902e19ff64c6934ef8b91a6179d2cf40f4fe7ab750793222
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

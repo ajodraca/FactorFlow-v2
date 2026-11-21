@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w3/web
+
+ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 28ms
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke 13ms
+     → expected [ { …(3) } ] to have a length of +0 but got 1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (a) sends one request for the settled text, 250 ms after the last keystroke
+AssertionError: expected [ { …(3) } ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:80:19
+     78|       vi.advanceTimersByTime(249);
+     79|     });
+     80|     expect(calls).toHaveLength(0);
+       |                   ^
+     81|     expect(result.current).toEqual({ kind: "loading" });
+     82|     act(() => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  23:31:20
+   Duration  891ms (transform 35ms, setup 31ms, collect 63ms, tests 28ms, environment 175ms, prepare 29ms)
+

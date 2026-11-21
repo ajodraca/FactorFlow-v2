@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yt2hwf47/w1/web
+
+ ❯ src/app/command-palette/use-stock-search.test.ts (8 tests | 1 failed) 26ms
+   × stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite 7ms
+     → expected { Object (kind, symbols, ...) } to deeply equal { kind: 'ok', …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/command-palette/use-stock-search.test.ts > stock search debounces 250 ms and aborts the stale request (DAC-E3-S5-1, DAC-E3-11) > (b) aborts the request in flight at once and never lets a stale answer overwrite
+AssertionError: expected { Object (kind, symbols, ...) } to deeply equal { kind: 'ok', …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "kind": "ok",
+    "more": false,
+    "symbols": Array [
+-     "KO",
+-     "KOF",
++     "KXX",
+    ],
+  }
+
+ ❯ src/app/command-palette/use-stock-search.test.ts:118:28
+    116|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
+    117|     await settle(calls[0] as { reply: Deferred }, page(["KXX"]));
+    118|     expect(result.current).toEqual({ kind: "ok", symbols: ["KO", "KOF"…
+       |                            ^
+    119|   });
+    120| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  23:31:20
+   Duration  826ms (transform 34ms, setup 34ms, collect 53ms, tests 26ms, environment 196ms, prepare 66ms)
+

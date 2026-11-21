@@ -132,7 +132,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
   - negate-boolean on the `next_cursor !== null` test: (d) both halves.
   - swap-case of the two reasons in `failureReason`: (e) and (g).
   - a hand-written mutant that renders `CommandEmpty` while the search is loading: (b).
-- [ ] T003 [P] Implement TC-COMP-081 (Stock search debounces 250 ms and aborts the stale request) in the new `web/src/app/command-palette/use-stock-search.test.ts`, with a `// Implements TC-COMP-081` comment.
+- [x] T003 [P] Implement TC-COMP-081 (Stock search debounces 250 ms and aborts the stale request) in the new `web/src/app/command-palette/use-stock-search.test.ts`, with a `// Implements TC-COMP-081` comment.
   - **Harness.** `vi.useFakeTimers()`. `renderHook(({ text }) => useStockSearch(text), { initialProps: { text: "" } })`. `fetch` is `vi.fn` returning per-call `deferred()` promises, and every call's `[url, init]` is recorded.
   - (a) **Debounce and query.** Rerender `K`. After `advanceTimersByTime(100)`, rerender `KO`. After `advanceTimersByTime(249)`, `fetch` has 0 calls and `result.current` `toEqual({ kind: "loading" })`. After `advanceTimersByTime(1)`, `fetch` has exactly 1 call, and its URL is exactly the literal `"/api/instruments?symbol=KO&lifecycle=active&limit=8"`.
   - (b) **Abort in flight.** Rerender `K` and `advanceTimersByTime(250)`: call 1 is in flight, and `calls[0][1].signal.aborted` is `false`. Rerender `KO` **without** advancing: `calls[0][1].signal.aborted` is `true` at once. `advanceTimersByTime(250)` makes call 2, with `symbol=KO`.
@@ -279,7 +279,7 @@ TC-COMP-088 (the listener and opener) is CAP-003-E3-S6's. TC-INT-041 to TC-INT-0
     - No `limit` is sent: the request is the one DAC-E3-11 names (Open Gap 4).
 
   These make T009 pass.
-- [ ] T011 Create `web/src/app/command-palette/use-stock-search.ts`. It depends on T003 being RED. (DAC-E3-S5-1; command-palette §5; epic NFR *Performance*; Resolved Conflict 1.)
+- [x] T011 Create `web/src/app/command-palette/use-stock-search.ts`. It depends on T003 being RED. (DAC-E3-S5-1; command-palette §5; epic NFR *Performance*; Resolved Conflict 1.)
   - `export const STOCK_SEARCH_DEBOUNCE_MS = 250` and `export const STOCK_SEARCH_LIMIT = 8`.
   - `export type StockSearchState = { kind: "idle" } | { kind: "loading" } | { kind: "ok"; symbols: readonly string[]; more: boolean } | { kind: "error"; error: unknown }`.
   - `export function useStockSearch(text: string): StockSearchState` keeps the state in `useState`, with one `useEffect` keyed on `text`:
