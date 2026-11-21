@@ -55,7 +55,7 @@ describe("StatusRegion — the three health response shapes, end to end (T020)",
     expect(screen.getByTestId("run-outcome")).toHaveAttribute("data-outcome", "none");
     expect(screen.queryByTestId("credential-state")).toBeNull();
     // The routed screen renders: the API answered.
-    expect(within(screen.getByRole("main")).getByText("Coverage")).toBeInTheDocument();
+    expect(await within(screen.getByRole("main")).findByText("Coverage")).toBeInTheDocument();
     expect(globalThis.fetch).toHaveBeenCalledWith("/api/health", expect.anything());
   });
 

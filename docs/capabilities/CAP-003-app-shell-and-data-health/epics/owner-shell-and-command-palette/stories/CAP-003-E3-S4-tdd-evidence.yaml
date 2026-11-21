@@ -97,3 +97,34 @@ cycles:
           disposition: equivalent
           reason: >
             tabIndex={-1} became tabIndex={-2}. Every negative tabindex makes an element programmatically focusable and takes it out of the tab order, so both values behave the same in a browser and in jsdom. The contract the test pins is the one that matters: the heading is not a tab stop, so the Home link is the first (TC-COMP-080 (c)).
+
+  - id: cycle-4
+    tasks: [T001, T003, T004, T007, T009, T013, T014, T015, T016]
+    description: >
+      The route map and the interim compatibility (TC-COMP-056, 058, 079, DAC-E3-1, DAC-E3-4, DAC-E3-S4-3, AC-2, AC-17, AC-18, AC-27, DEC-0327, DEC-0328): routes.tsx is rewritten as owner-shell 2.6's map for what exists: ten lazy screens (CAP-002's five bindings and Route lines kept), one Suspense with the one shell skeleton as fallback, RootRedirect (skeleton until the first health answer, then replace to /setup or /home), the five delivered screens at /data/coverage, /data/followed, /data/downloads, /data/downloads/:runId and /settings, legacyRoutes and the NotFound catch-all. routes.test.tsx is rewritten whole with the shared harness (ten screen stubs recording loads, a gated run-detail stub, mocked fetchHealth, a location probe), keeping the DESTINATIONS and NotFound describes of cycles 2 and 3 and restoring, after the first review pair, the delivered TC-COMP-195 unreachable cases and the TC-COMP-193 Research-href case the rewrite had dropped. T014: shell.tsx's private rail changes three to values and one comment line; status-region.integration.test.tsx and shell.unreachable.test.tsx take findBy where a lazily loaded screen's text is read (the second was found by the first review pair as a flake, one run in four); copy.test.ts case (f) reads the declared paths from legacy-redirects.tsx too (DEC-0402). The RED run hangs at import against the delivered routes.tsx, because its static import of the gated run-detail module never resolves, so the log also holds the same file with the gate released at import: 15 of 30 cases fail on assertions. 13 hand-written mutants and one generated, all killed after a Suspense-fallback test was added for the one that first survived (fallback null). Full suite 110 files, 2893 tests, biome lint and format, tsc --noEmit and the build all clean, and the build splits the screens into separate chunks. Both reviews of the revised patch raised only LOW observations.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-4-route-map.log
+    red_log_sha256: c98aee4e072942764b0535bc4050295f8a6c83c54640947411fe84f5bc935e64
+    red_evidence: >
+      routes.test.tsx hung loading against the delivered routes.tsx; with the gate released at import, 15 of 30 cases failed (the screens loaded eagerly, /data/* paths unregistered, / went to /coverage, no shell-skeleton).
+    green_evidence: >
+      Full Vitest suite 110 files and 2893 tests passed (green-cycle-4-full-suite.log); npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        DEC-0402 corrects T014(b) and T015's wording (a decision under docs/unattended-mode.md): the plan allowed delivered tests only a findBy substitution, but copy.test.ts case (f) reads routes.tsx for the legacy paths that T007 and T010 move to legacy-redirects.tsx, so it reads both files. The tasks file was amended to say so; no assertion changed and the scope did not widen.
+    diff_sha256: 9ae9ce2cc94f7a73015e0b1691435339b56cfa13507051d42c10bff84c61abd8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-4-results.json
+      results_sha256: 8899a245c122af0ef994d48e4be3fc8936abd7139e76b963e8a3b19b50047df4
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

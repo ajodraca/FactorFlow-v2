@@ -672,8 +672,12 @@ describe("copy.ts completeness and keying", () => {
       "app",
       "routes.tsx",
     );
-    const declared = [...readFileSync(routesPath, "utf-8").matchAll(/path="([^"]+)"/g)].map(
-      (match) => match[1] as string,
+    // The legacy paths are registered by legacy-redirects.tsx (DEC-0402).
+    const legacyPath = path.join(path.dirname(routesPath), "legacy-redirects.tsx");
+    const declared = [routesPath, legacyPath].flatMap((file) =>
+      [...readFileSync(file, "utf-8").matchAll(/path="([^"]+)"/g)].map(
+        (match) => match[1] as string,
+      ),
     );
     // The catch-all renders Not found; a link resolving only to it does not exist.
     const destinations = declared.filter((route) => route !== "*");

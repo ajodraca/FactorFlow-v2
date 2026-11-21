@@ -124,6 +124,7 @@ describe("Shell — unreachable state replaces the main region on every route (A
     });
 
     await waitFor(() => expect(within(main).queryByTestId("unreachable-state")).toBeNull());
-    expect(within(main).getByText("Coverage")).toBeInTheDocument();
+    // The routed screen loads lazily, so it renders after its chunk resolves.
+    expect(await within(main).findByText("Coverage")).toBeInTheDocument();
   });
 });
