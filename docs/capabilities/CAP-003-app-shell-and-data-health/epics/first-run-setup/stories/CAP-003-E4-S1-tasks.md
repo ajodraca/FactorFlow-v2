@@ -132,7 +132,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 ### Mandatory Component Tests
 
-- [ ] T003 Implement TC-COMP-098 (Step done flags follow server facts; current is the first not done) in a new `web/src/screens/setup/use-setup-state.test.ts`, with a `// Implements TC-COMP-098` comment, using the shared harness. Cases:
+- [x] T003 Implement TC-COMP-098 (Step done flags follow server facts; current is the first not done) in a new `web/src/screens/setup/use-setup-state.test.ts`, with a `// Implements TC-COMP-098` comment, using the shared harness. Cases:
   - (a) **The TC's four steps, cumulative.** Each row sets the shell and the reads, mounts, flushes and asserts `done` `toEqual` the literal and `current` `toBe` the number:
     1. Nothing answered (`HEALTH_UNKNOWN`, `ATTENTION_LOADING`, `depth(null)`, `count(0)`): `{ 1: false, 2: false, 3: false, 4: false }`, current `1`.
     2. Health resolved only (`HEALTH_OK`, `attentionOk(null)`, `depth(null)`, `count(0)`): `{ 1: true, 2: false, 3: false, 4: false }`, current `2`.
@@ -153,7 +153,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - swap-case on a step's fact (step 3 read from the depth, step 2 from the count): (c).
   - hand-written mutants in Other Notes: `lastAnsweredAt !== null` → `liveness === "answering"` ((d)); the current rule written as the step after the last done step ((c)); the all-done current `4` → `1` ((a) row 5); the `goTo` override kept in `SetupDraftProvider` instead of the hook ((f)).
 
-- [ ] T004 Implement TC-COMP-106 (Failed depth read carries its error; step 4 blocked at zero stocks) in `web/src/screens/setup/use-setup-state.test.ts`, with a `// Implements TC-COMP-106` comment, sequential with T003 (one file). Cases:
+- [x] T004 Implement TC-COMP-106 (Failed depth read carries its error; step 4 blocked at zero stocks) in `web/src/screens/setup/use-setup-state.test.ts`, with a `// Implements TC-COMP-106` comment, sequential with T003 (one file). Cases:
   - (a) **Depth read fails.** `getHistoryDepth` rejects with `const failure = new ApiError("History depth could not be read.", "req-1", { code: "internal_error" })`, with `HEALTH_OK`, `count(3)`, `attentionOk(null)`. `done[2]` is `false`, current is `2`, and `result.current.depth` `toEqual({ kind: "error", error: failure, last: null })` with `error` `toBe(failure)`, so the step can render *Couldn't read history depth: {reason}* from it. `result.current.activeCount` is `{ kind: "ok", data: 3, checkedAt: expect.any(Date) }`: the failure stays in step 2 (DAC-E4-13).
   - (b) **Transport failure.** The same with `new ApiUnreachableError("x")`: `depth.kind` is `"error"` and `error` is that instance.
   - (c) **`step4` blocked at zero.** `count(0)`, `depth(5)`, `HEALTH_OK`, `attentionOk(null)`, then `goTo(4)` (the *Add later* path): current `4`, `step4` `"blocked"`. With `count(1)` instead: `step4` `"ready"`.
@@ -166,7 +166,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 ### Additional Unit Tests
 
-- [ ] T005 Write the read, re-read and failure-flag cases in `web/src/screens/setup/use-setup-state.test.ts` (DAC-E4-1, DAC-E4-13, DAC-E4-S1-2; DEC-0342, DEC-0344; setup-ui §5 and §11), sequential with T003 and T004. Cases:
+- [x] T005 Write the read, re-read and failure-flag cases in `web/src/screens/setup/use-setup-state.test.ts` (DAC-E4-1, DAC-E4-13, DAC-E4-S1-2; DEC-0342, DEC-0344; setup-ui §5 and §11), sequential with T003 and T004. Cases:
   - (a) **Exactly the two reads, with the exact query.** One mount calls `getHistoryDepth` once with no argument and `listInstruments` once with exactly `{ lifecycle: "active", limit: 1 }` (`toHaveBeenCalledWith`, which compares the whole object).
   - (b) **No interval.** With `vi.useFakeTimers()`, advance 600 000 ms after mount: still one call each (setup-ui §5, *this screen opens no interval*).
   - (c) **`loading`.** `true` while either read is pending (`deferred()`), while `attention.kind` is `"loading"`, or while `health.liveness` is `"unknown"`; `false` once all four have settled, including when a read settled as an error.
@@ -223,7 +223,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
   This makes T001 and T002 pass.
 
-- [ ] T009 Create `web/src/screens/setup/use-setup-state.ts` (depends on T008; T003–T005 RED first).
+- [x] T009 Create `web/src/screens/setup/use-setup-state.ts` (depends on T008; T003–T005 RED first).
   - **Imports.** `useCallback`, `useEffect`, `useMemo`, `useRef`, `useState` from `"react"`; `getHistoryDepth`, `listInstruments`, `ApiError`, `ApiUnreachableError` from `"../../api/client"`; `type { HistoryDepth }` from `"../../api/types"`; `useShell` from `"../../app/shell-context"`; `type { ReadState }` from `"../../app/shell-types"`; `useSetupDrafts` and `type SetupDrafts` from `"./draft"`.
   - **Exports.** `type StepId = 1 | 2 | 3 | 4` and `interface SetupState` with setup-ui §2.2's six members verbatim (`current`, `done`, `step4`, `drafts`, `goTo`, `setDraft`) plus four additive members, each commented with DEC-0342:
     - `depth: ReadState<HistoryDepth>`, the history-depth read;

@@ -1,0 +1,101 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w1/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 4 failed) 41ms
+   × step done flags follow server facts; current is the first not done > keeps step 4 not done after Add later (AC-2) 4ms
+     → expected 3 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo 1ms
+     → expected 2 to be 1 // Object.is equality
+   × step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts 1ms
+     → expected 4 to be 2 // Object.is equality
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > blocks step 4 only while the followed count is a known 0 1ms
+     → expected 3 to be 4 // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 138ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > keeps step 4 not done after Add later (AC-2)
+AssertionError: expected 3 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 3
+
+ ❯ src/screens/setup/use-setup-state.test.ts:260:32
+    258|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    259|     act(() => hook.state.goTo(4));
+    260|     expect(hook.state.current).toBe(4);
+       |                                ^
+    261|     expect(hook.state.done[4]).toBe(false);
+    262|     expect(hook.state.done[3]).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/screens/setup/use-setup-state.test.ts:271:32
+    269|     expect(hook.state.current).toBe(2);
+    270|     act(() => hook.state.goTo(1));
+    271|     expect(hook.state.current).toBe(1);
+       |                                ^
+    272|     act(() => hook.state.setDraft("pasted", "AAPL"));
+    273| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts
+AssertionError: expected 4 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 4
+
+ ❯ src/screens/setup/use-setup-state.test.ts:290:32
+    288|     const draftsBefore = hook.state.drafts;
+    289|     act(() => hook.state.goTo(2));
+    290|     expect(hook.state.current).toBe(2);
+       |                                ^
+    291|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: fa…
+    292|     expect(hook.state.drafts).toBe(draftsBefore);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > blocks step 4 only while the followed count is a known 0
+AssertionError: expected 3 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 3
+
+ ❯ src/screens/setup/use-setup-state.test.ts:333:32
+    331|     let hook = await mount();
+    332|     act(() => hook.state.goTo(4));
+    333|     expect(hook.state.current).toBe(4);
+       |                                ^
+    334|     expect(hook.state.step4).toBe("blocked");
+    335| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 28 passed (32)
+   Start at  16:58:34
+   Duration  939ms (transform 86ms, setup 74ms, collect 194ms, tests 179ms, environment 398ms, prepare 385ms)
+

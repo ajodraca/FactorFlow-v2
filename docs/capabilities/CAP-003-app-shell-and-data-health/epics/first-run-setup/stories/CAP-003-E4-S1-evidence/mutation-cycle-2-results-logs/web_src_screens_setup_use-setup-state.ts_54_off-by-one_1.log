@@ -1,0 +1,89 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w0/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 2 failed) 66ms
+   × reads, re-reads and unknown facts > makes exactly the two reads, with the exact query 8ms
+     → expected "spy" to be called with arguments: [ { lifecycle: 'active', limit: 1 } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+    Object {
+      "lifecycle": "active",
+-     "limit": 1,
++     "limit": 2,
+    },
+  ]
+
+
+Number of calls: 1
+
+   × reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4 2ms
+     → expected last "spy" call to have been called with [ { lifecycle: 'active', limit: 1 } ]
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 163ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > makes exactly the two reads, with the exact query
+AssertionError: expected "spy" to be called with arguments: [ { lifecycle: 'active', limit: 1 } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+    Object {
+      "lifecycle": "active",
+-     "limit": 1,
++     "limit": 2,
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/setup/use-setup-state.test.ts:352:40
+    350|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledWith();
+    351|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(1);
+    352|     expect(vi.mocked(listInstruments)).toHaveBeenCalledWith({ lifecycl…
+       |                                        ^
+    353|   });
+    354| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4
+AssertionError: expected last "spy" call to have been called with [ { lifecycle: 'active', limit: 1 } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "lifecycle": "active",
+-     "limit": 1,
++     "limit": 2,
+    },
+  ]
+
+ ❯ src/screens/setup/use-setup-state.test.ts:471:40
+    469|     await act(async () => hook.state.reread("activeCount"));
+    470|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
+    471|     expect(vi.mocked(listInstruments)).toHaveBeenLastCalledWith({ life…
+       |                                        ^
+    472|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(1);
+    473|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 30 passed (32)
+   Start at  16:58:20
+   Duration  1.18s (transform 158ms, setup 90ms, collect 258ms, tests 229ms, environment 511ms, prepare 621ms)
+

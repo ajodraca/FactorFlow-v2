@@ -31,3 +31,40 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T004, T005, T009]
+    description: >
+      The step state (TC-COMP-098, TC-COMP-106, DAC-E4-1, DAC-E4-S1-2, DAC-E4-13, AC-2, AC-21, DEC-0342, DEC-0343, DEC-0344): use-setup-state.ts holds StepId, SetupState and useSetupState, which reads GET /api/settings/history-depth and GET /api/instruments?lifecycle=active&limit=1 once on mount into two ReadStates, takes health and attention from useShell(), derives each done flag from its fact, the current step as the first not done (4 when all are), step4 blocked only on a known count of 0, and keeps the goTo override in the hook so a new visit re-derives. use-setup-state.test.ts holds the cumulative four-step walk, the eight download states, the null depth, first-not-done, step 1 after an outage, Add later, re-derivation on a new visit, done steps revisited, the failed-read cases, the exact queries, no interval, loading, Try again, a re-read that keeps its value, a failed count, a failed attention poll and the member shape. The generator produced 27 mutants and 16 were hand-written from the plan's kill list; the first run left three survivors, one of them the count boundary (a single followed stock), so a case for one stock was added and the run repeated: 43 mutants, 41 killed. The two survivors are judged equivalent: useRef(true) to false is overwritten by the mount effect, which runs before any read can settle; and the cleanup's mounted.current = false to true only lets a late answer call setState on an unmounted component, which React 18 ignores without a warning, so nothing observable differs. Both reviews approved. The code review raised one MEDIUM, that overlapping re-reads have no sequence guard and could resolve out of order; the task plan's Other Notes records this as accepted for this story (no overlap guard on re-reads, a re-read being user-triggered or following a save), so it is a follow-up for the story that needs one, not rework. The rest were LOW: the rethrow of a non-API error is unpinned by a test, and the mounted guard is untested beyond the equivalent mutants.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-2-step-state.log
+    red_log_sha256: 31e65451d3048793b57bfb9a01fe59731fbb4412e42810483744299d6a4a5bf8
+    red_evidence: >
+      use-setup-state.test.ts failed to load (./use-setup-state did not resolve) before the module existed.
+    green_evidence: >
+      use-setup-state.test.ts 26 passed in the first run (green-cycle-2-step-state.log) and 27 with the single-stock case added after the first mutation run; the setup suites 32 passed; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: ffbf35e1141a36df3d3af422031df8f90d8d79fe5f01caca69acce43b72a4770
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 488bde6c9cbbdd5721c20e7a89e81da74681d4cf0e83545064d3e16a14852403
+      generated: 43
+      killed: 41
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.953
+      survivors:
+        - id: web/src/screens/setup/use-setup-state.ts:71:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The initial value of the mounted ref is overwritten by the mount effect, which sets it to true and is declared before the effect that starts the reads, so no read can settle while it holds the initial value; no observable behaviour depends on it.
+        - id: web/src/screens/setup/use-setup-state.ts:76:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The cleanup's false guards only the setState a late answer would make on an unmounted component; React 18 ignores that call silently, so the rendered output, the calls and every value a caller can read are the same with the guard inverted.

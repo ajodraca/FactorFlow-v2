@@ -1,0 +1,158 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w2/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 12 failed) 43ms
+   × step done flags follow server facts; current is the first not done > walks the four steps cumulatively 12ms
+     → expected { '1': false, '2': false, …(2) } to deeply equal { '1': false, '2': false, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested 2ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is running 2ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling 1ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded 2ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial 1ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed 2ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled 1ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned 2ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > keeps step 4 not done after Add later (AC-2) 1ms
+     → expected undefined to be false // Object.is equality
+   × step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts 1ms
+     → expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × reads, re-reads and unknown facts > keeps step 4 done through a failed attention poll that follows an answer 0ms
+     → expected undefined to be true // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 135ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > walks the four steps cumulatively
+AssertionError: expected { '1': false, '2': false, …(2) } to deeply equal { '1': false, '2': false, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "1": false,
+    "2": false,
+    "3": false,
+-   "4": false,
++   "5": false,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:178:29
+    176|     count(0);
+    177|     let hook = await stepsFor({ health: HEALTH_UNKNOWN, attention: ATT…
+    178|     expect(hook.state.done).toEqual({ 1: false, 2: false, 3: false, 4:…
+       |                             ^
+    179|     expect(hook.state.current).toBe(1);
+    180| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is running
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned
+AssertionError: expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "1": true,
+    "2": true,
+    "3": true,
+-   "4": true,
++   "5": true,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:215:29
+    213|       attention: attentionOk(downloadIn(state)),
+    214|     });
+    215|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: tr…
+       |                             ^
+    216|     expect(hook.state.current).toBe(4);
+    217|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > keeps step 4 not done after Add later (AC-2)
+AssertionError: expected undefined to be false // Object.is equality
+
+- Expected: 
+false
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/use-setup-state.test.ts:261:32
+    259|     act(() => hook.state.goTo(4));
+    260|     expect(hook.state.current).toBe(4);
+    261|     expect(hook.state.done[4]).toBe(false);
+       |                                ^
+    262|     expect(hook.state.done[3]).toBe(false);
+    263|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts
+AssertionError: expected { '1': true, '2': true, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "1": true,
+    "2": true,
+    "3": true,
+-   "4": false,
++   "5": false,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:291:29
+    289|     act(() => hook.state.goTo(2));
+    290|     expect(hook.state.current).toBe(2);
+    291|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: fa…
+       |                             ^
+    292|     expect(hook.state.drafts).toBe(draftsBefore);
+    293|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > keeps step 4 done through a failed attention poll that follows an answer
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/use-setup-state.test.ts:493:43
+    491|       },
+    492|     });
+    493|     expect((await mount()).state.done[4]).toBe(true);
+       |                                           ^
+    494| 
+    495|     current = shell({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  12 failed | 20 passed (32)
+   Start at  16:58:27
+   Duration  893ms (transform 81ms, setup 89ms, collect 183ms, tests 178ms, environment 472ms, prepare 329ms)
+

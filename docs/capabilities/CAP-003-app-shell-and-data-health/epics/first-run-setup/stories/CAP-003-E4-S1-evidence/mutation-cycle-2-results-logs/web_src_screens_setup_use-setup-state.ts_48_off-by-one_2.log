@@ -1,0 +1,122 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w1/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 5 failed) 47ms
+   × step done flags follow server facts; current is the first not done > walks the four steps cumulatively 14ms
+     → expected 3 to be 2 // Object.is equality
+   × step done flags follow server facts; current is the first not done > leaves step 2 not done when the depth is null 1ms
+     → expected 4 to be 2 // Object.is equality
+   × step done flags follow server facts; current is the first not done > takes the first step not done, not the step after the last done 1ms
+     → expected 4 to be 2 // Object.is equality
+   × step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo 1ms
+     → expected 3 to be 2 // Object.is equality
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step 1ms
+     → expected 4 to be 2 // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 149ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > walks the four steps cumulatively
+AssertionError: expected 3 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 3
+
+ ❯ src/screens/setup/use-setup-state.test.ts:184:32
+    182|     hook = await stepsFor({ health: HEALTH_OK, attention: attentionOk(…
+    183|     expect(hook.state.done).toEqual({ 1: true, 2: false, 3: false, 4: …
+    184|     expect(hook.state.current).toBe(2);
+       |                                ^
+    185| 
+    186|     // Row 3: add years.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > leaves step 2 not done when the depth is null
+AssertionError: expected 4 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 4
+
+ ❯ src/screens/setup/use-setup-state.test.ts:227:32
+    225|     });
+    226|     expect(hook.state.done[2]).toBe(false);
+    227|     expect(hook.state.current).toBe(2);
+       |                                ^
+    228|   });
+    229| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > takes the first step not done, not the step after the last done
+AssertionError: expected 4 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 4
+
+ ❯ src/screens/setup/use-setup-state.test.ts:235:32
+    233|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    234|     expect(hook.state.done[3]).toBe(true);
+    235|     expect(hook.state.current).toBe(2);
+       |                                ^
+    236|   });
+    237| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo
+AssertionError: expected 3 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 3
+
+ ❯ src/screens/setup/use-setup-state.test.ts:269:32
+    267|     count(0);
+    268|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    269|     expect(hook.state.current).toBe(2);
+       |                                ^
+    270|     act(() => hook.state.goTo(1));
+    271|     expect(hook.state.current).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step
+AssertionError: expected 4 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 4
+
+ ❯ src/screens/setup/use-setup-state.test.ts:307:32
+    305|     const hook = await mount();
+    306|     expect(hook.state.done[2]).toBe(false);
+    307|     expect(hook.state.current).toBe(2);
+       |                                ^
+    308|     expect(hook.state.depth).toEqual({ kind: "error", error: failure, …
+    309|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 27 passed (32)
+   Start at  16:58:18
+   Duration  1.16s (transform 99ms, setup 98ms, collect 265ms, tests 196ms, environment 525ms, prepare 207ms)
+

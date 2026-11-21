@@ -1,0 +1,59 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w0/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 8 failed) 55ms
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested 6ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is running 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded 2ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial 2ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned 1ms
+     → expected 5 to be 4 // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 144ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is running
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned
+AssertionError: expected 5 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 5
+
+ ❯ src/screens/setup/use-setup-state.test.ts:216:32
+    214|     });
+    215|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: tr…
+    216|     expect(hook.state.current).toBe(4);
+       |                                ^
+    217|   });
+    218| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 24 passed (32)
+   Start at  16:58:28
+   Duration  1.08s (transform 166ms, setup 236ms, collect 215ms, tests 199ms, environment 638ms, prepare 190ms)
+
