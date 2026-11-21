@@ -60,3 +60,40 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T008, T012]
+    description: >
+      The not-found state (TC-COMP-080, DAC-E3-4, DAC-E3-S4-4, AC-24): not-found.tsx exports NotFound, a Card variant default around a section role status holding the h1 (tabIndex -1, "There's no page at this address.") and the lead "Check the address, or go to " with a Home link to /home styled from button ghost, plus the constants NOT_FOUND_HEADING and NOT_FOUND_LEAD. T008 is appended to the delivered routes.test.tsx, which cycle 4 rewrites whole. The section's role carries a narrow biome-ignore of useSemanticElements, because DAC-E3-S4-4 fixes a section with role status and the rule would have it be an output element. The cycle also applies biome's import-type fix to legacy-redirects.test.tsx (cycle 1's file), which cycle 1's own lint run missed; no behaviour changes. The generator produced two mutants, both survivors judged equivalent below; five hand-written mutants from the plan's kill list were all killed. Both reviews raised only LOW observations: an import order biome check (not lint) reports in routes.test.tsx, fixed when cycle 4 rewrites that file; the tabIndex value is pinned only through the first-tab-stop case.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-3-not-found.log
+    red_log_sha256: 2f04f5b17a2e52309d3e1cef9eb4a50b494aa1cda7fe4fcf81e972910d479f47
+    red_evidence: >
+      routes.test.tsx failed to load (./not-found did not resolve) before the module existed.
+    green_evidence: >
+      routes.test.tsx 28 passed (green-cycle-3-not-found.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e5ea49356fb8c0cdd16d420c927e6e7fcd87835d7b084801c3e2271b29db09e0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 7ddb8b2fe4cd9236787088f2e8b8ab4c6bd32a558b94073e5500f0efe090f7b9
+      generated: 7
+      killed: 5
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.714
+      survivors:
+        - id: web/src/app/not-found.tsx:24:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The generator changed the story-criterion number in the biome-ignore comment (DAC-E3-S4-4 to DAC-E3-S4-5). A comment has no behaviour, so no test can observe it.
+        - id: web/src/app/not-found.tsx:26:off-by-one:1
+          disposition: equivalent
+          reason: >
+            tabIndex={-1} became tabIndex={-2}. Every negative tabindex makes an element programmatically focusable and takes it out of the tab order, so both values behave the same in a browser and in jsdom. The contract the test pins is the one that matters: the heading is not a tab stop, so the Home link is the first (TC-COMP-080 (c)).

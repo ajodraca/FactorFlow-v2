@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { act, render, screen } from "@testing-library/react";
-import { type JSX, type ReactElement } from "react";
+import type { JSX, ReactElement } from "react";
 import {
   MemoryRouter,
   Route,

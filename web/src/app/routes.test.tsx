@@ -2,8 +2,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
+import type { JSX } from "react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import {
   type MockInstance,
   afterEach,
@@ -16,6 +17,7 @@ import {
 } from "vitest";
 import { SHELL_ROUTES } from "../screens/research/copy";
 import { DESTINATIONS, type Destination, RESEARCH_REGISTERED } from "./destinations";
+import { NotFound } from "./not-found";
 import { AppRoutes } from "./routes";
 import { Shell } from "./shell";
 
@@ -438,5 +440,69 @@ describe("DESTINATIONS — one static ordered list with RESEARCH_REGISTERED (DAC
 
   it("types each entry as Destination", () => {
     expectTypeOf<(typeof DESTINATIONS)[number]>().toEqualTypeOf<Destination>();
+  });
+});
+
+// Implements TC-COMP-080
+describe("NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4)", () => {
+  /** The DAC-E7-3 terms the owner's words avoid (UX design 0.5). */
+  function forbiddenTerms(text: string): string[] {
+    return (
+      text.match(
+        /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/gi,
+      ) ?? []
+    );
+  }
+
+  function Probe(): JSX.Element {
+    return <span data-testid="location">{useLocation().pathname}</span>;
+  }
+
+  it("is a card holding a status section with the heading, the lead and the Home link", () => {
+    render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    );
+    const section = screen.getByRole("status");
+    expect(section.tagName).toBe("SECTION");
+    expect(section.parentElement).toHaveAttribute("data-variant", "default");
+    expect(within(section).getByRole("heading", { level: 1 }).textContent).toBe(
+      "There's no page at this address.",
+    );
+    expect(within(section).getByRole("link", { name: "Home" })).toHaveAttribute("href", "/home");
+    expect(section.textContent).toBe(
+      "There's no page at this address.Check the address, or go to Home",
+    );
+  });
+
+  it("uses none of the DAC-E7-3 terms in its text or accessible names", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    );
+    expect(forbiddenTerms(container.textContent ?? "")).toEqual([]);
+    const names = [...container.querySelectorAll("[aria-label]")].map(
+      (el) => el.getAttribute("aria-label") ?? "",
+    );
+    names.push(...screen.getAllByRole("link").map((link) => link.textContent ?? ""));
+    expect(forbiddenTerms(names.join(" "))).toEqual([]);
+    // Non-vacuity: the helper finds a planted term.
+    expect(forbiddenTerms("No run at this address")).toEqual(["run"]);
+  });
+
+  it("puts the first tab stop on the Home link, and Enter follows it", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <NotFound />
+        <Probe />
+      </MemoryRouter>,
+    );
+    await user.tab();
+    expect(screen.getByRole("link", { name: "Home" })).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByTestId("location").textContent).toBe("/home");
   });
 });

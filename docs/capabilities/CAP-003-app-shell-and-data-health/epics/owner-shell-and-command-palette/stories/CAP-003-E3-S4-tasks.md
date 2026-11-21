@@ -217,7 +217,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
   - a hand-written mutant that also registers `<Route path="/coverage" …>` in `routes.tsx`: the walk.
   - a dropped legacy route: the length and the `toEqual`.
 
-- [ ] T008 Implement TC-COMP-080 (NotFound is a status card with a keyboard-reachable Home link) as a `describe("NotFound (DAC-E3-S4-4)")` in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-080` comment. It is written before T012, in the same file as T001 and therefore sequential with it, and RED until T012. Render `<MemoryRouter><NotFound /></MemoryRouter>`, imported from `./not-found`.
+- [x] T008 Implement TC-COMP-080 (NotFound is a status card with a keyboard-reachable Home link) as a `describe("NotFound (DAC-E3-S4-4)")` in `web/src/app/routes.test.tsx`, with a `// Implements TC-COMP-080` comment. It is written before T012, in the same file as T001 and therefore sequential with it, and RED until T012. Render `<MemoryRouter><NotFound /></MemoryRouter>`, imported from `./not-found`.
   - (a) **Structure.** `getByRole("status")` is a `SECTION`, and its `parentElement` carries `data-variant="default"` (CAP-003-E1-S1's `Card`). Within the section:
     - `getByRole("heading", { level: 1 })` has exact text `There's no page at this address.`;
     - `getByRole("link", { name: "Home" })` has `href` `/home`;
@@ -310,7 +310,7 @@ Mapped test cases (`tests/component/owner-shell-tests.md`; `tests/coverage-matri
     - The module comment says a route enters this table in the change that registers it (CAP-003-E4-S6 `/setup` *Setup*, CAP-003-E5-S5 `/home` *Home*, CAP-003-E6-S7 `/data` *Data health*), as `DESTINATIONS` does.
 
   This makes T002, T004 and T005 pass, except T002's `routes.tsx` checks, which T013 satisfies.
-- [ ] T012 [P] Create `web/src/app/not-found.tsx` (depends on T008 being RED; it can run in parallel with T010 and T011).
+- [x] T012 [P] Create `web/src/app/not-found.tsx` (depends on T008 being RED; it can run in parallel with T010 and T011).
   - It exports `NotFound(): JSX.Element`, rendering `<Card variant="default">` around `<section role="status" className="p-5">`.
   - The section holds an `<h1 tabIndex={-1} className="text-xl font-semibold">` with the text `There's no page at this address.`. The `tabIndex` is the focus target owner-shell §2.7 names, which CAP-003-E3-S6 moves focus to.
   - It also holds `<p>Check the address, or go to <Button asChild variant="ghost"><Link to="/home">Home</Link></Button></p>`. The copy is exactly as UX design §0.5 and owner-shell §2.8 write it (Other Notes, *Copy*). The link is styled from `button` `ghost` tokens (owner-shell §10 component mapping).
