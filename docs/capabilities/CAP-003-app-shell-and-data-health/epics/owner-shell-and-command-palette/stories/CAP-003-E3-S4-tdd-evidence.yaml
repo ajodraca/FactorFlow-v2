@@ -128,3 +128,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-5
+    tasks: [T008, T012, T014]
+    description: >
+      Review rework of implementation review v1 (IR-001, IR-002), tests only, no production change. IR-001: a routes.test.tsx case in the TC-COMP-080 describe focuses the NotFound h1 and asserts it takes focus with a negative tabindex (owner-shell 2.7; any negative value, because -2 is equivalent), and asserts the Home link renders data-variant ghost (owner-shell 10). IR-002: a new shell.rail.test.tsx checks that the rail items at /data/coverage, /data/followed and /data/downloads link to their path and carry aria-current page (T014 (a), DEC-0327). The four mutants the review named are in mutants-cycle-5.json and all four are killed; the RED log is the new tests run against those four mutants (3 failed, the Coverage row already passed). IR-003 is recorded here rather than in the plan: the AC-27 check in the plan's Story-Specific Validation, git diff -U0 web/src/app/routes.tsx | grep '^[-+].*path="/research', prints ten lines because T013's Suspense wrapper re-indents the five /research Route lines one level; with git diff -w it prints nothing, and the routes.test.tsx case compares the trimmed lines, so AC-27 holds. IR-004 (optional) is not addressed: the run-detail static-import mutant is still detected, as a timeout rather than an assertion, and bounding that needs a change to the plan's T001 harness design. The new test file is not in T015's changed-file list; T015's delivered-file diff is unaffected because the file is new.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-5-mutants.log
+    red_log_sha256: 1d9a695bdf5cb8a652f0cfbb25d6dee8cc1d9237ef8ea5657f7595f47c15c2ed
+    red_evidence: >
+      With the four reviewer mutants applied (h1 tabIndex removed, Home link variant outline, rail Instruments to /instruments, rail Runs to /runs) 3 tests failed and 38 passed: the new h1/Home case and the Instruments and Runs rail rows.
+    green_evidence: >
+      routes.test.tsx and shell.rail.test.tsx 41 of 41 passed (green-cycle-5-focused.log); full Vitest suite, npm run lint, npm run format, tsc --noEmit and npm run build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7cf1e378e59e695d704d30a4a27e0c1f9e882e96047ca0ce967b68e58d38ebe9
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results.json
+      results_sha256: 12191568ba87734b5661178c551d2b30d63ec302a0d6127167734392496cc417
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,45 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w1/web
+
+stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/app/shell.rail.test.tsx (3 tests) 99ms
+ ❯ src/app/routes.test.tsx (38 tests | 1 failed) 416ms
+   × NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001) 6ms
+     → expect(element).toHaveAttribute("data-variant", "ghost") // element.getAttribute("data-variant") === "ghost"
+
+Expected the element to have attribute:
+  data-variant="ghost"
+Received:
+  data-variant="outline"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/routes.test.tsx > NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)
+Error: expect(element).toHaveAttribute("data-variant", "ghost") // element.getAttribute("data-variant") === "ghost"
+
+Expected the element to have attribute:
+  data-variant="ghost"
+Received:
+  data-variant="outline"
+ ❯ src/app/routes.test.tsx:574:56
+    572|     expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
+    573|     // Owner-shell 10: the Home link is the `button` `ghost` variant.
+    574|     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute…
+       |                                                        ^
+    575|   });
+    576| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 40 passed (41)
+   Start at  22:10:25
+   Duration  1.85s (transform 538ms, setup 219ms, collect 715ms, tests 515ms, environment 564ms, prepare 414ms)
+

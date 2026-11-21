@@ -1,0 +1,109 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w0/web
+
+stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/app/shell.rail.test.tsx (3 tests) 132ms
+ ❯ src/app/routes.test.tsx (38 tests | 1 failed) 429ms
+   × NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001) 9ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h1
+  class="text-xl font-semibold"
+>
+  There's no page at this address.
+</h1>
+Received element with focus:
+  <body>
+  <div>
+    <div
+      class="rounded border border-border bg-card text-card-foreground"
+      data-variant="default"
+    >
+      <section
+        class="p-5"
+        role="status"
+      >
+        <h1
+          class="text-xl font-semibold"
+        >
+          There's no page at this address.
+        </h1>
+        <p>
+          Check the address, or go to·
+          <a
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
+            data-variant="ghost"
+            href="/home"
+          >
+            Home
+          </a>
+        </p>
+      </section>
+    </div>
+  </div>
+</body>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/routes.test.tsx > NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h1
+  class="text-xl font-semibold"
+>
+  There's no page at this address.
+</h1>
+Received element with focus:
+  <body>
+  <div>
+    <div
+      class="rounded border border-border bg-card text-card-foreground"
+      data-variant="default"
+    >
+      <section
+        class="p-5"
+        role="status"
+      >
+        <h1
+          class="text-xl font-semibold"
+        >
+          There's no page at this address.
+        </h1>
+        <p>
+          Check the address, or go to·
+          <a
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
+            data-variant="ghost"
+            href="/home"
+          >
+            Home
+          </a>
+        </p>
+      </section>
+    </div>
+  </div>
+</body>
+ ❯ src/app/routes.test.tsx:571:21
+    569|     const heading = screen.getByRole("heading", { level: 1 });
+    570|     heading.focus();
+    571|     expect(heading).toHaveFocus();
+       |                     ^
+    572|     expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
+    573|     // Owner-shell 10: the Home link is the `button` `ghost` variant.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 40 passed (41)
+   Start at  22:10:25
+   Duration  1.92s (transform 478ms, setup 119ms, collect 1.01s, tests 561ms, environment 557ms, prepare 83ms)
+

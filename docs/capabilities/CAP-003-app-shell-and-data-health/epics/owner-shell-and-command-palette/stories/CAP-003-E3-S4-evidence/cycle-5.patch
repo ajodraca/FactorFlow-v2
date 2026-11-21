@@ -1,0 +1,767 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-5-focused.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-5-focused.log
+new file mode 100644
+index 00000000..27ac29c8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/green-cycle-5-focused.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 79ms
++ ✓ src/app/routes.test.tsx (38 tests) 224ms
++
++ Test Files  2 passed (2)
++      Tests  41 passed (41)
++   Start at  22:10:43
++   Duration  1.09s (transform 187ms, setup 120ms, collect 299ms, tests 302ms, environment 607ms, prepare 349ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-5.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-5.json
+new file mode 100644
+index 00000000..fcabd333
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-5.json
+@@ -0,0 +1,39 @@
++{
++ "schema": 1,
++ "repo_head": "67ab7c7d5def585881f1540883a6fb22389bc219",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/app/not-found.tsx:manual:heading-tabindex-removed",
++   "operator": "manual",
++   "file": "web/src/app/not-found.tsx",
++   "old": "<h1 tabIndex={-1} className",
++   "new": "<h1 className",
++   "cycle": "cycle-5"
++  },
++  {
++   "id": "web/src/app/not-found.tsx:manual:home-link-variant-outline",
++   "operator": "manual",
++   "file": "web/src/app/not-found.tsx",
++   "old": "variant=\"ghost\"",
++   "new": "variant=\"outline\"",
++   "cycle": "cycle-5"
++  },
++  {
++   "id": "web/src/app/shell.tsx:manual:rail-followed-legacy",
++   "operator": "manual",
++   "file": "web/src/app/shell.tsx",
++   "old": "to: \"/data/followed\"",
++   "new": "to: \"/instruments\"",
++   "cycle": "cycle-5"
++  },
++  {
++   "id": "web/src/app/shell.tsx:manual:rail-downloads-legacy",
++   "operator": "manual",
++   "file": "web/src/app/shell.tsx",
++   "old": "to: \"/data/downloads\"",
++   "new": "to: \"/runs\"",
++   "cycle": "cycle-5"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..d8f16779
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w0.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w0/web
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 114ms
++ ✓ src/app/routes.test.tsx (38 tests) 315ms
++
++ Test Files  2 passed (2)
++      Tests  41 passed (41)
++   Start at  22:10:22
++   Duration  2.71s (transform 259ms, setup 186ms, collect 478ms, tests 428ms, environment 2.17s, prepare 1.07s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..a78a1a44
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w1.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w1/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 116ms
++ ✓ src/app/routes.test.tsx (38 tests) 271ms
++
++ Test Files  2 passed (2)
++      Tests  41 passed (41)
++   Start at  22:10:22
++   Duration  2.69s (transform 311ms, setup 190ms, collect 509ms, tests 387ms, environment 2.12s, prepare 411ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..5c27edcd
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w2.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w2/web
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 110ms
++ ✓ src/app/routes.test.tsx (38 tests) 313ms
++
++ Test Files  2 passed (2)
++      Tests  41 passed (41)
++   Start at  22:10:22
++   Duration  2.72s (transform 706ms, setup 160ms, collect 491ms, tests 423ms, environment 2.22s, prepare 1.12s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..ab3d2984
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w3.log
+@@ -0,0 +1,19 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w3/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 108ms
++ ✓ src/app/routes.test.tsx (38 tests) 291ms
++
++ Test Files  2 passed (2)
++      Tests  41 passed (41)
++   Start at  22:10:22
++   Duration  2.70s (transform 301ms, setup 169ms, collect 490ms, tests 399ms, environment 2.10s, prepare 1.13s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_heading-tabindex-removed.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_heading-tabindex-removed.log
+new file mode 100644
+index 00000000..b2d7625b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_heading-tabindex-removed.log
+@@ -0,0 +1,109 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w0/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 132ms
++ ❯ src/app/routes.test.tsx (38 tests | 1 failed) 429ms
++   × NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001) 9ms
++     → expect(element).toHaveFocus()
++
++Expected element with focus:
++  <h1
++  class="text-xl font-semibold"
++>
++  There's no page at this address.
++</h1>
++Received element with focus:
++  <body>
++  <div>
++    <div
++      class="rounded border border-border bg-card text-card-foreground"
++      data-variant="default"
++    >
++      <section
++        class="p-5"
++        role="status"
++      >
++        <h1
++          class="text-xl font-semibold"
++        >
++          There's no page at this address.
++        </h1>
++        <p>
++          Check the address, or go to·
++          <a
++            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++            data-variant="ghost"
++            href="/home"
++          >
++            Home
++          </a>
++        </p>
++      </section>
++    </div>
++  </div>
++</body>
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/routes.test.tsx > NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)
++Error: expect(element).toHaveFocus()
++
++Expected element with focus:
++  <h1
++  class="text-xl font-semibold"
++>
++  There's no page at this address.
++</h1>
++Received element with focus:
++  <body>
++  <div>
++    <div
++      class="rounded border border-border bg-card text-card-foreground"
++      data-variant="default"
++    >
++      <section
++        class="p-5"
++        role="status"
++      >
++        <h1
++          class="text-xl font-semibold"
++        >
++          There's no page at this address.
++        </h1>
++        <p>
++          Check the address, or go to·
++          <a
++            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++            data-variant="ghost"
++            href="/home"
++          >
++            Home
++          </a>
++        </p>
++      </section>
++    </div>
++  </div>
++</body>
++ ❯ src/app/routes.test.tsx:571:21
++    569|     const heading = screen.getByRole("heading", { level: 1 });
++    570|     heading.focus();
++    571|     expect(heading).toHaveFocus();
++       |                     ^
++    572|     expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
++    573|     // Owner-shell 10: the Home link is the `button` `ghost` variant.
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 40 passed (41)
++   Start at  22:10:25
++   Duration  1.92s (transform 478ms, setup 119ms, collect 1.01s, tests 561ms, environment 557ms, prepare 83ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_home-link-variant-outline.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_home-link-variant-outline.log
+new file mode 100644
+index 00000000..35353168
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_home-link-variant-outline.log
+@@ -0,0 +1,45 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w1/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/app/shell.rail.test.tsx (3 tests) 99ms
++ ❯ src/app/routes.test.tsx (38 tests | 1 failed) 416ms
++   × NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001) 6ms
++     → expect(element).toHaveAttribute("data-variant", "ghost") // element.getAttribute("data-variant") === "ghost"
++
++Expected the element to have attribute:
++  data-variant="ghost"
++Received:
++  data-variant="outline"
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/routes.test.tsx > NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)
++Error: expect(element).toHaveAttribute("data-variant", "ghost") // element.getAttribute("data-variant") === "ghost"
++
++Expected the element to have attribute:
++  data-variant="ghost"
++Received:
++  data-variant="outline"
++ ❯ src/app/routes.test.tsx:574:56
++    572|     expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
++    573|     // Owner-shell 10: the Home link is the `button` `ghost` variant.
++    574|     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute…
++       |                                                        ^
++    575|   });
++    576| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 40 passed (41)
++   Start at  22:10:25
++   Duration  1.85s (transform 538ms, setup 219ms, collect 715ms, tests 515ms, environment 564ms, prepare 414ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-downloads-legacy.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-downloads-legacy.log
+new file mode 100644
+index 00000000..ef32bd40
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-downloads-legacy.log
+@@ -0,0 +1,45 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w3/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/app/shell.rail.test.tsx (3 tests | 1 failed) 162ms
++   × Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/downloads the Runs rail item is current and links to it 60ms
++     → expect(element).toHaveAttribute("href", "/data/downloads") // element.getAttribute("href") === "/data/downloads"
++
++Expected the element to have attribute:
++  href="/data/downloads"
++Received:
++  href="/runs"
++ ✓ src/app/routes.test.tsx (38 tests) 481ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/downloads the Runs rail item is current and links to it
++Error: expect(element).toHaveAttribute("href", "/data/downloads") // element.getAttribute("href") === "/data/downloads"
++
++Expected the element to have attribute:
++  href="/data/downloads"
++Received:
++  href="/runs"
++ ❯ src/app/shell.rail.test.tsx:23:18
++     21|     );
++     22|     const item = within(screen.getByRole("navigation")).getByText(labe…
++     23|     expect(item).toHaveAttribute("href", path);
++       |                  ^
++     24|     expect(item).toHaveAttribute("aria-current", "page");
++     25|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 40 passed (41)
++   Start at  22:10:25
++   Duration  1.91s (transform 498ms, setup 150ms, collect 847ms, tests 642ms, environment 566ms, prepare 216ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-followed-legacy.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-followed-legacy.log
+new file mode 100644
+index 00000000..00ae282d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-followed-legacy.log
+@@ -0,0 +1,45 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tdr4f8_m/w2/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/app/shell.rail.test.tsx (3 tests | 1 failed) 92ms
++   × Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/followed the Instruments rail item is current and links to it 16ms
++     → expect(element).toHaveAttribute("href", "/data/followed") // element.getAttribute("href") === "/data/followed"
++
++Expected the element to have attribute:
++  href="/data/followed"
++Received:
++  href="/instruments"
++ ✓ src/app/routes.test.tsx (38 tests) 437ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/followed the Instruments rail item is current and links to it
++Error: expect(element).toHaveAttribute("href", "/data/followed") // element.getAttribute("href") === "/data/followed"
++
++Expected the element to have attribute:
++  href="/data/followed"
++Received:
++  href="/instruments"
++ ❯ src/app/shell.rail.test.tsx:23:18
++     21|     );
++     22|     const item = within(screen.getByRole("navigation")).getByText(labe…
++     23|     expect(item).toHaveAttribute("href", path);
++       |                  ^
++     24|     expect(item).toHaveAttribute("aria-current", "page");
++     25|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 40 passed (41)
++   Start at  22:10:25
++   Duration  1.82s (transform 305ms, setup 118ms, collect 787ms, tests 529ms, environment 610ms, prepare 219ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results.json
+new file mode 100644
+index 00000000..5b3f568e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results.json
+@@ -0,0 +1,100 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/app/shell.rail.test.tsx web/src/app/routes.test.tsx",
++  "repo_head": "67ab7c7d5def585881f1540883a6fb22389bc219",
++  "tree_patch_sha256": "4fcdc7b0b7cfae291a3c482ed47519c1188ff9bae71a90047c9ede90c755d2a4",
++  "mutants_sha256": "5f9213ce99cf4e6e21be14f80d5c0ec2547003cb3ee97db3c24feb9d68d703b5",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutants-cycle-5.json",
++  "jobs": 4,
++  "planned": 4,
++  "started": "2026-11-21T04:10:21Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 3.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w3.log",
++      "log_sha256": "6e1b973f617b63e9dec4618a60437eea3e38987067c10eb49359deccc5c00248"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 3.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w2.log",
++      "log_sha256": "d31e4cb282b90e215bbb41f47e92d94a6ac453eedda0bf7c02f1a261cda5b9e6"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 3.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w1.log",
++      "log_sha256": "2e08da2149226ad7f64610b57e200ad1b9d7df65ec85bf887e6b7e32e18a24e3"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 3.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/baseline-w0.log",
++      "log_sha256": "c9c3d813caaf1b96fb87d98c0762620d756ecd04a97b939496a08ca85e59e3ac"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/app/not-found.tsx:manual:heading-tabindex-removed",
++      "operator": "manual",
++      "file": "web/src/app/not-found.tsx",
++      "old": "<h1 tabIndex={-1} className",
++      "new": "<h1 className",
++      "cycle": "cycle-5",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_heading-tabindex-removed.log",
++      "log_sha256": "95df2384b592289ba705cd2781d60efe91b92484273a2af029ebfbe75c395b3f"
++    },
++    {
++      "id": "web/src/app/not-found.tsx:manual:home-link-variant-outline",
++      "operator": "manual",
++      "file": "web/src/app/not-found.tsx",
++      "old": "variant=\"ghost\"",
++      "new": "variant=\"outline\"",
++      "cycle": "cycle-5",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_not-found.tsx_manual_home-link-variant-outline.log",
++      "log_sha256": "e32c75f02b2fe3ad2c14d4257c5d7df209d4719b6551d7e4008ec4dd3411bd22"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:rail-followed-legacy",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "to: \"/data/followed\"",
++      "new": "to: \"/instruments\"",
++      "cycle": "cycle-5",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-followed-legacy.log",
++      "log_sha256": "10ca30b864d84a745ddb40b6354a5d5222f2f0bace910411169584851072d6c4"
++    },
++    {
++      "id": "web/src/app/shell.tsx:manual:rail-downloads-legacy",
++      "operator": "manual",
++      "file": "web/src/app/shell.tsx",
++      "old": "to: \"/data/downloads\"",
++      "new": "to: \"/runs\"",
++      "cycle": "cycle-5",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.4,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/mutation-cycle-5-results-logs/web_src_app_shell.tsx_manual_rail-downloads-legacy.log",
++      "log_sha256": "eaf2e0fcc8899625af1b108730bd346c1077668cf5262a140ff4d815880cab5e"
++    }
++  ],
++  "finished": "2026-11-21T04:10:27Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-5-mutants.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-5-mutants.log
+new file mode 100644
+index 00000000..8e97cbec
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/owner-shell-and-command-palette/stories/CAP-003-E3-S4-evidence/red-cycle-5-mutants.log
+@@ -0,0 +1,157 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/coverage the Coverage rail item is current and links to it
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/app/routes.test.tsx > Routes — each screen loads as its route renders (owner-shell 5) > loads no screen module when routes.tsx is imported, and only Settings at /settings
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/app/shell.rail.test.tsx (3 tests | 2 failed) 89ms
++   × Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/followed the Instruments rail item is current and links to it 14ms
++     → expect(element).toHaveAttribute("href", "/data/followed") // element.getAttribute("href") === "/data/followed"
++
++Expected the element to have attribute:
++  href="/data/followed"
++Received:
++  href="/instruments"
++   × Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/downloads the Runs rail item is current and links to it 9ms
++     → expect(element).toHaveAttribute("href", "/data/downloads") // element.getAttribute("href") === "/data/downloads"
++
++Expected the element to have attribute:
++  href="/data/downloads"
++Received:
++  href="/runs"
++ ❯ src/app/routes.test.tsx (38 tests | 1 failed) 258ms
++   × NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001) 6ms
++     → expect(element).toHaveFocus()
++
++Expected element with focus:
++  <h1
++  class="text-xl font-semibold"
++>
++  There's no page at this address.
++</h1>
++Received element with focus:
++  <body>
++  <div>
++    <div
++      class="rounded border border-border bg-card text-card-foreground"
++      data-variant="default"
++    >
++      <section
++        class="p-5"
++        role="status"
++      >
++        <h1
++          class="text-xl font-semibold"
++        >
++          There's no page at this address.
++        </h1>
++        <p>
++          Check the address, or go to·
++          <a
++            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
++            data-variant="outline"
++            href="/home"
++          >
++            Home
++          </a>
++        </p>
++      </section>
++    </div>
++  </div>
++</body>
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/app/routes.test.tsx > NotFound — a status card with a keyboard-reachable Home link (DAC-E3-S4-4) > makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)
++Error: expect(element).toHaveFocus()
++
++Expected element with focus:
++  <h1
++  class="text-xl font-semibold"
++>
++  There's no page at this address.
++</h1>
++Received element with focus:
++  <body>
++  <div>
++    <div
++      class="rounded border border-border bg-card text-card-foreground"
++      data-variant="default"
++    >
++      <section
++        class="p-5"
++        role="status"
++      >
++        <h1
++          class="text-xl font-semibold"
++        >
++          There's no page at this address.
++        </h1>
++        <p>
++          Check the address, or go to·
++          <a
++            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
++            data-variant="outline"
++            href="/home"
++          >
++            Home
++          </a>
++        </p>
++      </section>
++    </div>
++  </div>
++</body>
++ ❯ src/app/routes.test.tsx:571:21
++    569|     const heading = screen.getByRole("heading", { level: 1 });
++    570|     heading.focus();
++    571|     expect(heading).toHaveFocus();
++       |                     ^
++    572|     expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
++    573|     // Owner-shell 10: the Home link is the `button` `ghost` variant.
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/followed the Instruments rail item is current and links to it
++Error: expect(element).toHaveAttribute("href", "/data/followed") // element.getAttribute("href") === "/data/followed"
++
++Expected the element to have attribute:
++  href="/data/followed"
++Received:
++  href="/instruments"
++ ❯ src/app/shell.rail.test.tsx:23:18
++     21|     );
++     22|     const item = within(screen.getByRole("navigation")).getByText(labe…
++     23|     expect(item).toHaveAttribute("href", path);
++       |                  ^
++     24|     expect(item).toHaveAttribute("aria-current", "page");
++     25|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/app/shell.rail.test.tsx > Shell rail — interim retargets keep aria-current (T014 (a)) > at /data/downloads the Runs rail item is current and links to it
++Error: expect(element).toHaveAttribute("href", "/data/downloads") // element.getAttribute("href") === "/data/downloads"
++
++Expected the element to have attribute:
++  href="/data/downloads"
++Received:
++  href="/runs"
++ ❯ src/app/shell.rail.test.tsx:23:18
++     21|     );
++     22|     const item = within(screen.getByRole("navigation")).getByText(labe…
++     23|     expect(item).toHaveAttribute("href", path);
++       |                  ^
++     24|     expect(item).toHaveAttribute("aria-current", "page");
++     25|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  2 failed (2)
++      Tests  3 failed | 38 passed (41)
++   Start at  22:10:39
++   Duration  2.08s (transform 362ms, setup 749ms, collect 622ms, tests 347ms, environment 1.35s, prepare 217ms)
++
+diff --git a/web/src/app/routes.test.tsx b/web/src/app/routes.test.tsx
+index 94630eed..2642b155 100644
+--- a/web/src/app/routes.test.tsx
++++ b/web/src/app/routes.test.tsx
+@@ -558,6 +558,22 @@ describe("NotFound — a status card with a keyboard-reachable Home link (DAC-E3
+     expect(forbiddenTerms("No run at this address")).toEqual(["run"]);
+   });
+ 
++  it("makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)", () => {
++    render(
++      <MemoryRouter>
++        <NotFound />
++      </MemoryRouter>,
++    );
++    // Owner-shell 2.7: CAP-003-E3-S6 moves focus to the h1 on a route change,
++    // which only works while the h1 is focusable by script.
++    const heading = screen.getByRole("heading", { level: 1 });
++    heading.focus();
++    expect(heading).toHaveFocus();
++    expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
++    // Owner-shell 10: the Home link is the `button` `ghost` variant.
++    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("data-variant", "ghost");
++  });
++
+   it("puts the first tab stop on the Home link, and Enter follows it", async () => {
+     const user = userEvent.setup();
+     render(
+diff --git a/web/src/app/shell.rail.test.tsx b/web/src/app/shell.rail.test.tsx
+new file mode 100644
+index 00000000..40ae309f
+--- /dev/null
++++ b/web/src/app/shell.rail.test.tsx
+@@ -0,0 +1,26 @@
++import { render, screen, waitFor, within } from "@testing-library/react";
++import { MemoryRouter } from "react-router-dom";
++import { describe, expect, it } from "vitest";
++import { Shell } from "./shell";
++
++// T014 (a), DEC-0327: the delivered rail targets the new paths, so
++// `aria-current="page"` stays on the current item (AC-25, STD-UI-24).
++describe("Shell rail — interim retargets keep aria-current (T014 (a))", () => {
++  it.each([
++    ["/data/coverage", "Coverage"],
++    ["/data/followed", "Instruments"],
++    ["/data/downloads", "Runs"],
++  ])("at %s the %s rail item is current and links to it", async (path, label) => {
++    render(
++      <MemoryRouter initialEntries={[path]}>
++        <Shell />
++      </MemoryRouter>,
++    );
++    await waitFor(() =>
++      expect(screen.getByTestId("liveness-state")).toHaveAttribute("data-liveness", "answering"),
++    );
++    const item = within(screen.getByRole("navigation")).getByText(label).closest("a");
++    expect(item).toHaveAttribute("href", path);
++    expect(item).toHaveAttribute("aria-current", "page");
++  });
++});

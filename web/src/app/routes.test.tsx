@@ -558,6 +558,22 @@ describe("NotFound — a status card with a keyboard-reachable Home link (DAC-E3
     expect(forbiddenTerms("No run at this address")).toEqual(["run"]);
   });
 
+  it("makes the heading a programmatic focus target, and the Home link a ghost button (IR-001)", () => {
+    render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    );
+    // Owner-shell 2.7: CAP-003-E3-S6 moves focus to the h1 on a route change,
+    // which only works while the h1 is focusable by script.
+    const heading = screen.getByRole("heading", { level: 1 });
+    heading.focus();
+    expect(heading).toHaveFocus();
+    expect(heading.getAttribute("tabindex")).toMatch(/^-\d+$/);
+    // Owner-shell 10: the Home link is the `button` `ghost` variant.
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("data-variant", "ghost");
+  });
+
   it("puts the first tab stop on the Home link, and Enter follows it", async () => {
     const user = userEvent.setup();
     render(
