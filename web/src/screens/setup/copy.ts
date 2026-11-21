@@ -84,6 +84,8 @@ export const STEP2 = {
   planLimitNote:
     "Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.",
   rangeError: "History depth must be a whole number of years from 1 to 50.",
+  /** CAP-003-E4-S2 adds this; no design gives its wording (DEC-0346). */
+  saveFailed: (reason: string): string => `Couldn't save history depth: ${reason}`,
 };
 
 /** Step 3, the followed stocks (setup-ui 2.3, 10; S02 section 8; DAC-E4-5). */
@@ -142,4 +144,8 @@ export const READ_ERRORS = {
   subjects: { depth: "history depth", followed: "the followed list" },
   readFailed: (subject: string, reason: string): string => `Couldn't read ${subject}: ${reason}`,
   tryAgain: "Try again",
+  /** CAP-003-E4-S2 adds this; no design gives its wording (DEC-0345). */
+  notAnswering: "FactorFlow is not answering",
+  /** CAP-003-E4-S2 adds this; no design gives its wording (DEC-0345). */
+  unexpected: "FactorFlow hit an unexpected problem",
 };

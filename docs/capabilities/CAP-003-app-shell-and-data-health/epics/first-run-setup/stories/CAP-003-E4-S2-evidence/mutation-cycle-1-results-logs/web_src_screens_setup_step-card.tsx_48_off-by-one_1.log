@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w3/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 32ms
+ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 114ms
+   × StepCard > (a) is a section labelled by its h2, which is focusable by script 40ms
+     → expected '-2' to be '-1' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (a) is a section labelled by its h2, which is focusable by script
+AssertionError: expected '-2' to be '-1' // Object.is equality
+
+Expected: "-1"
+Received: "-2"
+
+ ❯ src/screens/setup/step-card.test.tsx:29:47
+     27|     expect(heading?.id).toBe(STEP_HEADING_ID);
+     28|     expect(STEP_HEADING_ID).toBe("setup-step-heading");
+     29|     expect(heading?.getAttribute("tabindex")).toBe("-1");
+       |                                               ^
+     30|     expect(screen.getByText("Step 2 of 4")).toBeTruthy();
+     31|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 155 passed (156)
+   Start at  17:57:49
+   Duration  3.54s (transform 210ms, setup 666ms, collect 544ms, tests 146ms, environment 3.39s, prepare 297ms)
+

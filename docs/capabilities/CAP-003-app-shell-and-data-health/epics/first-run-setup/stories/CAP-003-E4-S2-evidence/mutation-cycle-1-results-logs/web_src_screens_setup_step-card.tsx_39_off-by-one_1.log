@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 10ms
+ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 124ms
+   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 10ms
+     → expected <button …(2)></button> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
+AssertionError: expected <button …(2)></button> to be null
+
+- Expected: 
+null
+
++ Received: 
+<button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
+  data-variant="ghost"
+>
+  ← Back: undefined
+</button>
+
+ ❯ src/screens/setup/step-card.test.tsx:57:60
+     55|   it("(c) leaves out Back on step 1 and Continue and Next without a ha…
+     56|     const { rerender } = render(<StepCard step={1} question="Q" onBack…
+     57|     expect(screen.queryByRole("button", { name: /Back/ })).toBeNull();
+       |                                                            ^
+     58|     rerender(<StepCard step={4} question="Q" onBack={vi.fn()} />);
+     59|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 155 passed (156)
+   Start at  17:57:22
+   Duration  3.52s (transform 167ms, setup 882ms, collect 572ms, tests 134ms, environment 2.31s, prepare 591ms)
+

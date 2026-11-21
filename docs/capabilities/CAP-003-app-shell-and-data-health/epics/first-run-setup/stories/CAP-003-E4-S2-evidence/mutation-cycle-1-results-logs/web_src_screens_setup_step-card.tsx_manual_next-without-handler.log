@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
+ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 112ms
+   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 13ms
+     → expected <button …(2)></button> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
+AssertionError: expected <button …(2)></button> to be null
+
+- Expected: 
+null
+
++ Received: 
+<button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
+  data-variant="default"
+>
+  Continue
+</button>
+
+ ❯ src/screens/setup/step-card.test.tsx:68:64
+     66|     // Without a handler a middle step shows no hint either.
+     67|     rerender(<StepCard step={2} question="Q" />);
+     68|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
+       |                                                                ^
+     69|     expect(screen.queryByText(/^Next:/)).toBeNull();
+     70|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 155 passed (156)
+   Start at  17:57:56
+   Duration  2.18s (transform 139ms, setup 388ms, collect 300ms, tests 123ms, environment 974ms, prepare 700ms)
+

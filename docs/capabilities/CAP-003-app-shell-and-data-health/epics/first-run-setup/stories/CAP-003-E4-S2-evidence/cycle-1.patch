@@ -1,0 +1,2579 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/green-cycle-1-step-card.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/green-cycle-1-step-card.log
+new file mode 100644
+index 00000000..cd1764d1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/green-cycle-1-step-card.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 27ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 90ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:58:14
++   Duration  2.66s (transform 131ms, setup 183ms, collect 247ms, tests 117ms, environment 2.43s, prepare 1.47s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutants-cycle-1.json
+new file mode 100644
+index 00000000..ac4be841
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutants-cycle-1.json
+@@ -0,0 +1,191 @@
++{
++ "schema": 1,
++ "repo_head": "2c6ffa7456c619c9afb96d8c48a19bfa64dbf7dc",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 39,
++   "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++   "mutated": "  const previousTitle = step >= 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 39,
++   "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++   "mutated": "  const previousTitle = step > 2 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:3",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 39,
++   "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++   "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 2) as 1 | 2 | 3] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:4",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 39,
++   "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++   "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 2 | 2 | 3] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:5",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 39,
++   "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++   "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 3 | 3] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:6",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 39,
++   "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++   "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 4] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 40,
++   "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++   "mutated": "  const nextTitle = step <= 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 40,
++   "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++   "mutated": "  const nextTitle = step < 5 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:3",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 40,
++   "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++   "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 2) as 2 | 3 | 4] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:4",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 40,
++   "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++   "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 3 | 3 | 4] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:5",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 40,
++   "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++   "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 4 | 4] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:6",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 40,
++   "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++   "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 5] : null;"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:45:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 45,
++   "original": "        {/* A plain h2, not CardTitle: the step question is larger than a card heading (setup-ui 10). */}",
++   "mutated": "        {/* A plain h2, not CardTitle: the step question is larger than a card heading (setup-ui 11). */}"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:48:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 48,
++   "original": "          tabIndex={-1}",
++   "mutated": "          tabIndex={-2}"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:59:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 59,
++   "original": "          {previousTitle !== null && onBack !== undefined ? (",
++   "mutated": "          {previousTitle !== null || onBack !== undefined ? ("
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:66:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "line": 66,
++   "original": "          {onContinue !== undefined && nextTitle !== null ? (",
++   "mutated": "          {onContinue !== undefined || nextTitle !== null ? ("
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:manual:drop-previous-update",
++   "operator": "manual",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "old": "      previous.current = current;\n",
++   "new": "",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:manual:swap-reason",
++   "operator": "manual",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "old": "error instanceof ApiUnreachableError ? READ_ERRORS.notAnswering : READ_ERRORS.unexpected",
++   "new": "error instanceof ApiUnreachableError ? READ_ERRORS.unexpected : READ_ERRORS.notAnswering",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:manual:focus-on-mount",
++   "operator": "manual",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "old": "if (previous.current !== current) {",
++   "new": "if (true) {",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:manual:render-message",
++   "operator": "manual",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "old": "READ_ERRORS.readFailed(subject, failureReason(error))",
++   "new": "READ_ERRORS.readFailed(subject, error.message)",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/step-card.tsx:manual:next-without-handler",
++   "operator": "manual",
++   "file": "web/src/screens/setup/step-card.tsx",
++   "old": "onContinue !== undefined && nextTitle !== null",
++   "new": "nextTitle !== null",
++   "cycle": "cycle-1"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..395fcfbb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 15ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 139ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:07
++   Duration  3.81s (transform 284ms, setup 912ms, collect 664ms, tests 154ms, environment 3.18s, prepare 483ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..4671d659
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w1/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 12ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 151ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:07
++   Duration  3.81s (transform 211ms, setup 914ms, collect 659ms, tests 162ms, environment 3.15s, prepare 228ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..fea4f250
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 14ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 144ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:07
++   Duration  3.82s (transform 247ms, setup 912ms, collect 662ms, tests 158ms, environment 3.18s, prepare 296ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..3c906909
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w3/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 13ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 161ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:07
++   Duration  3.83s (transform 236ms, setup 911ms, collect 663ms, tests 174ms, environment 3.20s, prepare 301ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_1.log
+new file mode 100644
+index 00000000..d24bd26c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_1.log
+@@ -0,0 +1,39 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 10ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 124ms
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 10ms
++     → expected <button …(2)></button> to be null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++AssertionError: expected <button …(2)></button> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<button
++  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++  data-variant="ghost"
++>
++  ← Back: undefined
++</button>
++
++ ❯ src/screens/setup/step-card.test.tsx:57:60
++     55|   it("(c) leaves out Back on step 1 and Continue and Next without a ha…
++     56|     const { rerender } = render(<StepCard step={1} question="Q" onBack…
++     57|     expect(screen.queryByRole("button", { name: /Back/ })).toBeNull();
++       |                                                            ^
++     58|     rerender(<StepCard step={4} question="Q" onBack={vi.fn()} />);
++     59|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:22
++   Duration  3.52s (transform 167ms, setup 882ms, collect 572ms, tests 134ms, environment 2.31s, prepare 591ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_2.log
+new file mode 100644
+index 00000000..a583f67c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_2.log
+@@ -0,0 +1,201 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w1/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 10ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 110ms
++   × StepCard > (b) names the previous and next steps in the footer 30ms
++     → Unable to find an accessible element with the role "button" and name "← Back: Market data"
++
++Here are the accessible roles:
++
++  region:
++
++  Name "Q":
++  [36m<section[39m
++    [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  paragraph:
++
++  Name "":
++  [36m<p[39m
++    [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  heading:
++
++  Name "Q":
++  [36m<h2[39m
++    [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++    [33mid[39m=[32m"setup-step-heading"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  button:
++
++  Name "Continue":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++    [33mdata-variant[39m=[32m"default"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 2 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<span />[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"flex items-center gap-3"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++            [36m>[39m
++              [0mNext: Stocks to follow[0m
++            [36m</span>[39m
++            [36m<button[39m
++              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++              [33mdata-variant[39m=[32m"default"[39m
++            [36m>[39m
++              [0mContinue[0m
++            [36m</button>[39m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (b) names the previous and next steps in the footer
++TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "← Back: Market data"
++
++Here are the accessible roles:
++
++  region:
++
++  Name "Q":
++  [36m<section[39m
++    [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  paragraph:
++
++  Name "":
++  [36m<p[39m
++    [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  heading:
++
++  Name "Q":
++  [36m<h2[39m
++    [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++    [33mid[39m=[32m"setup-step-heading"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  button:
++
++  Name "Continue":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++    [33mdata-variant[39m=[32m"default"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 2 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<span />[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"flex items-center gap-3"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++            [36m>[39m
++              [0mNext: Stocks to follow[0m
++            [36m</span>[39m
++            [36m<button[39m
++              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++              [33mdata-variant[39m=[32m"default"[39m
++            [36m>[39m
++              [0mContinue[0m
++            [36m</button>[39m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/setup/step-card.test.tsx:40:25
++     38|       <StepCard step={2} question="Q" onBack={onBack} onContinue={onCo…
++     39|     );
++     40|     const back = screen.getByRole("button", { name: "← Back: Market da…
++       |                         ^
++     41|     expect(back.getAttribute("data-variant")).toBe("ghost");
++     42|     await user.click(back);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:22
++   Duration  3.50s (transform 164ms, setup 886ms, collect 566ms, tests 120ms, environment 2.08s, prepare 236ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_3.log
+new file mode 100644
+index 00000000..e6ff059d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_3.log
+@@ -0,0 +1,391 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 2 failed) 111ms
++   × StepCard > (b) names the previous and next steps in the footer 30ms
++     → Unable to find an accessible element with the role "button" and name "← Back: Market data"
++
++Here are the accessible roles:
++
++  region:
++
++  Name "Q":
++  [36m<section[39m
++    [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  paragraph:
++
++  Name "":
++  [36m<p[39m
++    [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  heading:
++
++  Name "Q":
++  [36m<h2[39m
++    [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++    [33mid[39m=[32m"setup-step-heading"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  button:
++
++  Name "← Back: undefined":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++    [33mdata-variant[39m=[32m"ghost"[39m
++  [36m/>[39m
++
++  Name "Continue":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++    [33mdata-variant[39m=[32m"default"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 2 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<button[39m
++            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++            [33mdata-variant[39m=[32m"ghost"[39m
++          [36m>[39m
++            [0m← Back: undefined[0m
++          [36m</button>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"flex items-center gap-3"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++            [36m>[39m
++              [0mNext: Stocks to follow[0m
++            [36m</span>[39m
++            [36m<button[39m
++              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++              [33mdata-variant[39m=[32m"default"[39m
++            [36m>[39m
++              [0mContinue[0m
++            [36m</button>[39m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 12ms
++     → Unable to find an accessible element with the role "button" and name "← Back: Stocks to follow"
++
++Here are the accessible roles:
++
++  region:
++
++  Name "Q":
++  [36m<section[39m
++    [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  paragraph:
++
++  Name "":
++  [36m<p[39m
++    [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  heading:
++
++  Name "Q":
++  [36m<h2[39m
++    [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++    [33mid[39m=[32m"setup-step-heading"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  button:
++
++  Name "← Back: How far back":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++    [33mdata-variant[39m=[32m"ghost"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 4 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<button[39m
++            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++            [33mdata-variant[39m=[32m"ghost"[39m
++          [36m>[39m
++            [0m← Back: How far back[0m
++          [36m</button>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (b) names the previous and next steps in the footer
++TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "← Back: Market data"
++
++Here are the accessible roles:
++
++  region:
++
++  Name "Q":
++  [36m<section[39m
++    [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  paragraph:
++
++  Name "":
++  [36m<p[39m
++    [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  heading:
++
++  Name "Q":
++  [36m<h2[39m
++    [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++    [33mid[39m=[32m"setup-step-heading"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  button:
++
++  Name "← Back: undefined":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++    [33mdata-variant[39m=[32m"ghost"[39m
++  [36m/>[39m
++
++  Name "Continue":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++    [33mdata-variant[39m=[32m"default"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 2 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<button[39m
++            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++            [33mdata-variant[39m=[32m"ghost"[39m
++          [36m>[39m
++            [0m← Back: undefined[0m
++          [36m</button>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"flex items-center gap-3"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++            [36m>[39m
++              [0mNext: Stocks to follow[0m
++            [36m</span>[39m
++            [36m<button[39m
++              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++              [33mdata-variant[39m=[32m"default"[39m
++            [36m>[39m
++              [0mContinue[0m
++            [36m</button>[39m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/setup/step-card.test.tsx:40:25
++     38|       <StepCard step={2} question="Q" onBack={onBack} onContinue={onCo…
++     39|     );
++     40|     const back = screen.getByRole("button", { name: "← Back: Market da…
++       |                         ^
++     41|     expect(back.getAttribute("data-variant")).toBe("ghost");
++     42|     await user.click(back);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "← Back: Stocks to follow"
++
++Here are the accessible roles:
++
++  region:
++
++  Name "Q":
++  [36m<section[39m
++    [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  paragraph:
++
++  Name "":
++  [36m<p[39m
++    [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  heading:
++
++  Name "Q":
++  [36m<h2[39m
++    [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++    [33mid[39m=[32m"setup-step-heading"[39m
++    [33mtabindex[39m=[32m"-1"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++  button:
++
++  Name "← Back: How far back":
++  [36m<button[39m
++    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++    [33mdata-variant[39m=[32m"ghost"[39m
++  [36m/>[39m
++
++  --------------------------------------------------
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 4 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<button[39m
++            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++            [33mdata-variant[39m=[32m"ghost"[39m
++          [36m>[39m
++            [0m← Back: How far back[0m
++          [36m</button>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/setup/step-card.test.tsx:61:19
++     59|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++     60|     expect(screen.queryByText(/^Next:/)).toBeNull();
++     61|     expect(screen.getByRole("button", { name: "← Back: Stocks to follo…
++       |                   ^
++     62|     // Past the last step there is nothing to continue to, even with a…
++     63|     rerender(<StepCard step={4} question="Q" onContinue={vi.fn()} />);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  2 failed | 154 passed (156)
++   Start at  17:57:22
++   Duration  3.50s (transform 151ms, setup 881ms, collect 568ms, tests 122ms, environment 2.50s, prepare 397ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_4.log
+new file mode 100644
+index 00000000..ad01d2c2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_4.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w3/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 10ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 107ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:22
++   Duration  3.50s (transform 171ms, setup 884ms, collect 575ms, tests 117ms, environment 2.29s, prepare 599ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_5.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_5.log
+new file mode 100644
+index 00000000..6f145b36
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_5.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w1/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 93ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:27
++   Duration  2.38s (transform 159ms, setup 490ms, collect 482ms, tests 104ms, environment 1.23s, prepare 678ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_6.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_6.log
+new file mode 100644
+index 00000000..0c65f015
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_6.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 99ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:27
++   Duration  2.28s (transform 130ms, setup 456ms, collect 520ms, tests 110ms, environment 1.27s, prepare 309ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_1.log
+new file mode 100644
+index 00000000..ce0babce
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_1.log
+@@ -0,0 +1,39 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 10ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 101ms
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 9ms
++     → expected <button …(2)></button> to be null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++AssertionError: expected <button …(2)></button> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<button
++  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++  data-variant="default"
++>
++  Continue
++</button>
++
++ ❯ src/screens/setup/step-card.test.tsx:64:64
++     62|     // Past the last step there is nothing to continue to, even with a…
++     63|     rerender(<StepCard step={4} question="Q" onContinue={vi.fn()} />);
++     64|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++       |                                                                ^
++     65|     expect(screen.queryByText(/^Next:/)).toBeNull();
++     66|     // Without a handler a middle step shows no hint either.
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:27
++   Duration  2.38s (transform 170ms, setup 514ms, collect 521ms, tests 111ms, environment 1.21s, prepare 766ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_2.log
+new file mode 100644
+index 00000000..8af33740
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_2.log
+@@ -0,0 +1,39 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 16ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 281ms
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 25ms
++     → expected <button …(2)></button> to be null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++AssertionError: expected <button …(2)></button> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<button
++  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++  data-variant="default"
++>
++  Continue
++</button>
++
++ ❯ src/screens/setup/step-card.test.tsx:64:64
++     62|     // Past the last step there is nothing to continue to, even with a…
++     63|     rerender(<StepCard step={4} question="Q" onContinue={vi.fn()} />);
++     64|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++       |                                                                ^
++     65|     expect(screen.queryByText(/^Next:/)).toBeNull();
++     66|     // Without a handler a middle step shows no hint either.
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:30
++   Duration  1.34s (transform 146ms, setup 137ms, collect 271ms, tests 297ms, environment 587ms, prepare 343ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_3.log
+new file mode 100644
+index 00000000..9ba270d9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_3.log
+@@ -0,0 +1,135 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 13ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 212ms
++   × StepCard > (b) names the previous and next steps in the footer 63ms
++     → Unable to find an element with the text: Next: Stocks to follow. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 2 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<button[39m
++            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++            [33mdata-variant[39m=[32m"ghost"[39m
++          [36m>[39m
++            [0m← Back: Market data[0m
++          [36m</button>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"flex items-center gap-3"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++            [36m>[39m
++              [0mNext: Download data[0m
++            [36m</span>[39m
++            [36m<button[39m
++              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++              [33mdata-variant[39m=[32m"default"[39m
++            [36m>[39m
++              [0mContinue[0m
++            [36m</button>[39m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (b) names the previous and next steps in the footer
++TestingLibraryElementError: Unable to find an element with the text: Next: Stocks to follow. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<section[39m
++      [33maria-labelledby[39m=[32m"setup-step-heading"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
++        [33mdata-variant[39m=[32m"default"[39m
++      [36m>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++        [36m>[39m
++          [0mStep 2 of 4[0m
++        [36m</p>[39m
++        [36m<h2[39m
++          [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
++          [33mid[39m=[32m"setup-step-heading"[39m
++          [33mtabindex[39m=[32m"-1"[39m
++        [36m>[39m
++          [0mQ[0m
++        [36m</h2>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex items-center justify-between gap-4"[39m
++        [36m>[39m
++          [36m<button[39m
++            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++            [33mdata-variant[39m=[32m"ghost"[39m
++          [36m>[39m
++            [0m← Back: Market data[0m
++          [36m</button>[39m
++          [36m<div[39m
++            [33mclass[39m=[32m"flex items-center gap-3"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
++            [36m>[39m
++              [0mNext: Download data[0m
++            [36m</span>[39m
++            [36m<button[39m
++              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"[39m
++              [33mdata-variant[39m=[32m"default"[39m
++            [36m>[39m
++              [0mContinue[0m
++            [36m</button>[39m
++          [36m</div>[39m
++        [36m</div>[39m
++      [36m</div>[39m
++    [36m</section>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/setup/step-card.test.tsx:44:19
++     42|     await user.click(back);
++     43|     expect(onBack).toHaveBeenCalledTimes(1);
++     44|     expect(screen.getByText("Next: Stocks to follow")).toBeTruthy();
++       |                   ^
++     45|     const next = screen.getByRole("button", { name: "Continue" });
++     46|     expect(next.getAttribute("data-variant")).toBe("default");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:33
++   Duration  2.70s (transform 128ms, setup 1.44s, collect 752ms, tests 225ms, environment 1.04s, prepare 319ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_4.log
+new file mode 100644
+index 00000000..84c7c3d1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_4.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w3/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 13ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 122ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:35
++   Duration  987ms (transform 105ms, setup 103ms, collect 255ms, tests 135ms, environment 406ms, prepare 307ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_5.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_5.log
+new file mode 100644
+index 00000000..2971e4e5
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_5.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 85ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:36
++   Duration  893ms (transform 85ms, setup 116ms, collect 146ms, tests 96ms, environment 478ms, prepare 295ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_6.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_6.log
+new file mode 100644
+index 00000000..bc70b9ce
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_6.log
+@@ -0,0 +1,13 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w1/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 131ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:37
++   Duration  948ms (transform 106ms, setup 84ms, collect 205ms, tests 142ms, environment 429ms, prepare 61ms)
++
++web/src/screens/setup/step-card.tsx(40,32): error TS7053: Element implicitly has an 'any' type because expression of type '2 | 3 | 5' can't be used to index type '{ 1: string; 2: string; 3: string; 4: string; }'.
++  Property '5' does not exist on type '{ 1: string; 2: string; 3: string; 4: string; }'.
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_45_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_45_off-by-one_1.log
+new file mode 100644
+index 00000000..3b90cc78
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_45_off-by-one_1.log
+@@ -0,0 +1,11 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 20ms
++ ✓ src/screens/setup/step-card.test.tsx (7 tests) 131ms
++
++ Test Files  2 passed (2)
++      Tests  156 passed (156)
++   Start at  17:57:37
++   Duration  948ms (transform 107ms, setup 89ms, collect 196ms, tests 151ms, environment 436ms, prepare 207ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_48_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_48_off-by-one_1.log
+new file mode 100644
+index 00000000..a50bfc54
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_48_off-by-one_1.log
+@@ -0,0 +1,31 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w3/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 32ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 114ms
++   × StepCard > (a) is a section labelled by its h2, which is focusable by script 40ms
++     → expected '-2' to be '-1' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (a) is a section labelled by its h2, which is focusable by script
++AssertionError: expected '-2' to be '-1' // Object.is equality
++
++Expected: "-1"
++Received: "-2"
++
++ ❯ src/screens/setup/step-card.test.tsx:29:47
++     27|     expect(heading?.id).toBe(STEP_HEADING_ID);
++     28|     expect(STEP_HEADING_ID).toBe("setup-step-heading");
++     29|     expect(heading?.getAttribute("tabindex")).toBe("-1");
++       |                                               ^
++     30|     expect(screen.getByText("Step 2 of 4")).toBeTruthy();
++     31|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:49
++   Duration  3.54s (transform 210ms, setup 666ms, collect 544ms, tests 146ms, environment 3.39s, prepare 297ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_59_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_59_negate-boolean_1.log
+new file mode 100644
+index 00000000..d1f9b9c4
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_59_negate-boolean_1.log
+@@ -0,0 +1,39 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 17ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 117ms
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 12ms
++     → expected <button …(2)></button> to be null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++AssertionError: expected <button …(2)></button> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<button
++  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++  data-variant="ghost"
++>
++  ← Back: null
++</button>
++
++ ❯ src/screens/setup/step-card.test.tsx:57:60
++     55|   it("(c) leaves out Back on step 1 and Continue and Next without a ha…
++     56|     const { rerender } = render(<StepCard step={1} question="Q" onBack…
++     57|     expect(screen.queryByRole("button", { name: /Back/ })).toBeNull();
++       |                                                            ^
++     58|     rerender(<StepCard step={4} question="Q" onBack={vi.fn()} />);
++     59|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:49
++   Duration  3.55s (transform 225ms, setup 664ms, collect 545ms, tests 134ms, environment 3.39s, prepare 314ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_66_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_66_negate-boolean_1.log
+new file mode 100644
+index 00000000..30b93697
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_66_negate-boolean_1.log
+@@ -0,0 +1,39 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 19ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 116ms
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 16ms
++     → expected <button …(2)></button> to be null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++AssertionError: expected <button …(2)></button> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<button
++  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++  data-variant="default"
++>
++  Continue
++</button>
++
++ ❯ src/screens/setup/step-card.test.tsx:64:64
++     62|     // Past the last step there is nothing to continue to, even with a…
++     63|     rerender(<StepCard step={4} question="Q" onContinue={vi.fn()} />);
++     64|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++       |                                                                ^
++     65|     expect(screen.queryByText(/^Next:/)).toBeNull();
++     66|     // Without a handler a middle step shows no hint either.
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:49
++   Duration  3.54s (transform 219ms, setup 664ms, collect 541ms, tests 135ms, environment 3.40s, prepare 328ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_drop-previous-update.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_drop-previous-update.log
+new file mode 100644
+index 00000000..01460171
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_drop-previous-update.log
+@@ -0,0 +1,62 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w1/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 19ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 117ms
++   × StepCard > (e) moves focus to the heading only when the step changes 12ms
++     → expected <body><div>…(1)</div></body> to be <h2 id="setup-step-heading" …(2)></h2> // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (e) moves focus to the heading only when the step changes
++AssertionError: expected <body><div>…(1)</div></body> to be <h2 id="setup-step-heading" …(2)></h2> // Object.is equality
++
++- Expected
+++ Received
++
+++ <body>
+++   <div>
+++     <section
+++       aria-labelledby="setup-step-heading"
+++     >
+++       <div
+++         class="rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"
+++         data-variant="default"
+++       >
+++         <p
+++           class="text-xs text-muted-foreground"
+++         >
+++           Step 1 of 4
+++         </p>
++          <h2
++            class="text-xl font-semibold text-foreground focus-visible:outline-none"
++            id="setup-step-heading"
++            tabindex="-1"
++          >
++            Q1
++          </h2>
+++         <div
+++           class="flex items-center justify-between gap-4"
+++         >
+++           <span />
+++         </div>
+++       </div>
+++     </section>
+++   </div>
+++ </body>
++
++ ❯ src/screens/setup/step-card.test.tsx:95:36
++     93|     outside.remove();
++     94|     rerender(<Host step={1} />);
++     95|     expect(document.activeElement).toBe(screen.getByText("Q1"));
++       |                                    ^
++     96|   });
++     97| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:49
++   Duration  3.55s (transform 214ms, setup 675ms, collect 541ms, tests 136ms, environment 3.39s, prepare 310ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_focus-on-mount.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_focus-on-mount.log
+new file mode 100644
+index 00000000..c0ba2153
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_focus-on-mount.log
+@@ -0,0 +1,62 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w3/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 26ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 104ms
++   × StepCard > (e) moves focus to the heading only when the step changes 7ms
++     → expected <h2 id="setup-step-heading" …(2)></h2> to be <body><div>…(1)</div></body> // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (e) moves focus to the heading only when the step changes
++AssertionError: expected <h2 id="setup-step-heading" …(2)></h2> to be <body><div>…(1)</div></body> // Object.is equality
++
++- Expected
+++ Received
++
++- <body>
++-   <div>
++-     <section
++-       aria-labelledby="setup-step-heading"
++-     >
++-       <div
++-         class="rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"
++-         data-variant="default"
++-       >
++-         <p
++-           class="text-xs text-muted-foreground"
++-         >
++-           Step 1 of 4
++-         </p>
++  <h2
++    class="text-xl font-semibold text-foreground focus-visible:outline-none"
++    id="setup-step-heading"
++    tabindex="-1"
++  >
++    Q1
++  </h2>
++-         <div
++-           class="flex items-center justify-between gap-4"
++-         >
++-           <span />
++-         </div>
++-       </div>
++-     </section>
++-   </div>
++- </body>
++
++ ❯ src/screens/setup/step-card.test.tsx:85:36
++     83|   it("(e) moves focus to the heading only when the step changes", () =…
++     84|     const { rerender } = render(<Host step={1} />);
++     85|     expect(document.activeElement).toBe(document.body);
++       |                                    ^
++     86|     rerender(<Host step={2} />);
++     87|     expect(document.activeElement).toBe(screen.getByText("Q2"));
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:56
++   Duration  2.17s (transform 155ms, setup 384ms, collect 306ms, tests 130ms, environment 1.02s, prepare 799ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_next-without-handler.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_next-without-handler.log
+new file mode 100644
+index 00000000..ffe81b8d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_next-without-handler.log
+@@ -0,0 +1,39 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w0/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 11ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 112ms
++   × StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler 13ms
++     → expected <button …(2)></button> to be null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (c) leaves out Back on step 1 and Continue and Next without a handler
++AssertionError: expected <button …(2)></button> to be null
++
++- Expected: 
++null
++
+++ Received: 
++<button
++  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++  data-variant="default"
++>
++  Continue
++</button>
++
++ ❯ src/screens/setup/step-card.test.tsx:68:64
++     66|     // Without a handler a middle step shows no hint either.
++     67|     rerender(<StepCard step={2} question="Q" />);
++     68|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
++       |                                                                ^
++     69|     expect(screen.queryByText(/^Next:/)).toBeNull();
++     70|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:56
++   Duration  2.18s (transform 139ms, setup 388ms, collect 300ms, tests 123ms, environment 974ms, prepare 700ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_render-message.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_render-message.log
+new file mode 100644
+index 00000000..98318829
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_render-message.log
+@@ -0,0 +1,73 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w2/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 14ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 1 failed) 90ms
++   × StepCard > (g) renders a failed read with its reason and Try again 4ms
++     → Unable to find an element with the text: Couldn't read history depth: FactorFlow is not answering. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex flex-wrap items-center gap-3"[39m
++    [36m>[39m
++      [36m<p[39m
++        [33mclass[39m=[32m"text-destructive"[39m
++      [36m>[39m
++        [0mCouldn't read history depth: x[0m
++      [36m</p>[39m
++      [36m<button[39m
++        [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"[39m
++        [33mdata-variant[39m=[32m"outline"[39m
++      [36m>[39m
++        [0mTry again[0m
++      [36m</button>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++[36m</body>[39m
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (g) renders a failed read with its reason and Try again
++TestingLibraryElementError: Unable to find an element with the text: Couldn't read history depth: FactorFlow is not answering. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex flex-wrap items-center gap-3"[39m
++    [36m>[39m
++      [36m<p[39m
++        [33mclass[39m=[32m"text-destructive"[39m
++      [36m>[39m
++        [0mCouldn't read history depth: x[0m
++      [36m</p>[39m
++      [36m<button[39m
++        [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"[39m
++        [33mdata-variant[39m=[32m"outline"[39m
++      [36m>[39m
++        [0mTry again[0m
++      [36m</button>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/setup/step-card.test.tsx:128:14
++    126|     );
++    127|     expect(
++    128|       screen.getByText("Couldn't read history depth: FactorFlow is not…
++       |              ^
++    129|     ).toBeTruthy();
++    130|     await user.click(screen.getByRole("button", { name: "Try again" })…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  1 failed | 155 passed (156)
++   Start at  17:57:56
++   Duration  2.15s (transform 145ms, setup 381ms, collect 306ms, tests 105ms, environment 1.02s, prepare 663ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_swap-reason.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_swap-reason.log
+new file mode 100644
+index 00000000..0f4c4ace
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_swap-reason.log
+@@ -0,0 +1,91 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-yvs7ixxx/w1/web
++
++ ✓ src/screens/setup/copy.test.ts (149 tests) 18ms
++ ❯ src/screens/setup/step-card.test.tsx (7 tests | 2 failed) 91ms
++   × StepCard > (f) gives a reason that never carries the error's own text 4ms
++     → expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
++   × StepCard > (g) renders a failed read with its reason and Try again 3ms
++     → Unable to find an element with the text: Couldn't read history depth: FactorFlow is not answering. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex flex-wrap items-center gap-3"[39m
++    [36m>[39m
++      [36m<p[39m
++        [33mclass[39m=[32m"text-destructive"[39m
++      [36m>[39m
++        [0mCouldn't read history depth: FactorFlow hit an unexpected problem[0m
++      [36m</p>[39m
++      [36m<button[39m
++        [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"[39m
++        [33mdata-variant[39m=[32m"outline"[39m
++      [36m>[39m
++        [0mTry again[0m
++      [36m</button>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++[36m</body>[39m
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (f) gives a reason that never carries the error's own text
++AssertionError: expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
++
++Expected: "FactorFlow is not answering"
++Received: "FactorFlow hit an unexpected problem"
++
++ ❯ src/screens/setup/step-card.test.tsx:102:40
++    100|       "GET /api/settings/history-depth could not be reached",
++    101|     );
++    102|     expect(failureReason(unreachable)).toBe("FactorFlow is not answeri…
++       |                                        ^
++    103|     const coded = new ApiError("an active instrument with this symbol …
++    104|       code: "internal_error",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx > StepCard > (g) renders a failed read with its reason and Try again
++TestingLibraryElementError: Unable to find an element with the text: Couldn't read history depth: FactorFlow is not answering. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body>[39m
++  [36m<div>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex flex-wrap items-center gap-3"[39m
++    [36m>[39m
++      [36m<p[39m
++        [33mclass[39m=[32m"text-destructive"[39m
++      [36m>[39m
++        [0mCouldn't read history depth: FactorFlow hit an unexpected problem[0m
++      [36m</p>[39m
++      [36m<button[39m
++        [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"[39m
++        [33mdata-variant[39m=[32m"outline"[39m
++      [36m>[39m
++        [0mTry again[0m
++      [36m</button>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/setup/step-card.test.tsx:128:14
++    126|     );
++    127|     expect(
++    128|       screen.getByText("Couldn't read history depth: FactorFlow is not…
++       |              ^
++    129|     ).toBeTruthy();
++    130|     await user.click(screen.getByRole("button", { name: "Try again" })…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed | 1 passed (2)
++      Tests  2 failed | 154 passed (156)
++   Start at  17:57:56
++   Duration  2.15s (transform 150ms, setup 384ms, collect 303ms, tests 109ms, environment 1.02s, prepare 761ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 00000000..631bc9f2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,354 @@
++{
++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run src/screens/setup/step-card.test.tsx src/screens/setup/copy.test.ts && npx tsc --noEmit",
++  "repo_head": "2c6ffa7456c619c9afb96d8c48a19bfa64dbf7dc",
++  "tree_patch_sha256": "5b420dfe8e8488aab27374010056a525bea41611569faf005c96da5e6356efcc",
++  "mutants_sha256": "cc28396f3151f26bdf84508fa86dcff1be0f882b35085f0cf6fd88ac23a0798b",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 21,
++  "started": "2026-11-21T23:57:04Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 14.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "e740815df7d3364cdb31088a295dbc94125894891b7c8d639a280aa258a78f50"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 14.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "fa2ae75a6fb6ac0098b0d9c7bea7871477efc50a50855d33e98d4022b61101ae"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 14.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "69ba19398786c097068e893f5fc25f8a110789b44ca8839f2e2b0efb59023fd1"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 14.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "8c06b20b2c1eaa3dda0a62b6f908a83d143624c52c0abbbae04d35eea2856c9d"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 39,
++      "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "mutated": "  const previousTitle = step >= 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.2,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_1.log",
++      "log_sha256": "f28ea5ea1de4fe56f653b53b0b72288145139d882e098588f417843df0b551eb"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 39,
++      "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "mutated": "  const previousTitle = step > 2 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_2.log",
++      "log_sha256": "506468e397e4a6b94178960b857fc5d5e33008911ef647567c560afaaed52a38"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:3",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 39,
++      "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 2) as 1 | 2 | 3] : null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 7.2,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_3.log",
++      "log_sha256": "2e05852c7eb218f502988dff9e8051ce2179137823a3d69037a766403dfced5b"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:4",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 39,
++      "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 2 | 2 | 3] : null;",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 15.6,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_4.log",
++      "log_sha256": "48d21fbe8378c256ab077c30ed02b0c10dd6d936c299afb7293edc1d89f42823"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:5",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 39,
++      "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 3 | 3] : null;",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 10.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_5.log",
++      "log_sha256": "70c5370913bb665f07cbfb2b6c183974bb395227a543fd0d021039b468290968"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:39:off-by-one:6",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 39,
++      "original": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;",
++      "mutated": "  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 4] : null;",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 10.8,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_39_off-by-one_6.log",
++      "log_sha256": "aa46fa1433f90437b3a4bfa2606cdde4eb90612292f03b081f3e4f49eaba0309"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 40,
++      "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "mutated": "  const nextTitle = step <= 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_1.log",
++      "log_sha256": "5296345a85ae40e3d6576b4053722fd8f174e024d6494f346e1be41d71073900"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 40,
++      "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "mutated": "  const nextTitle = step < 5 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.6,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_2.log",
++      "log_sha256": "e6618f47f91e1ec008da4820961b9aee9aa6f9567bd0a3feb0341388147a0db7"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:3",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 40,
++      "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 2) as 2 | 3 | 4] : null;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.6,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_3.log",
++      "log_sha256": "f3be9608f5ac073c1e19f8de99168ba16c87fb7d9ea2309146068bf2fb87e2df"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:4",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 40,
++      "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 3 | 3 | 4] : null;",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 10.5,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_4.log",
++      "log_sha256": "adc57e313cc589ff0e366a859315bc3451ae4638996a98fc884577e106e9da8a"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:5",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 40,
++      "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 4 | 4] : null;",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 9.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_5.log",
++      "log_sha256": "225f37538fbf84aca0cea925bff57e16ea05c5d5d2cce68006df84bf6d548822"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:40:off-by-one:6",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 40,
++      "original": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;",
++      "mutated": "  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 5] : null;",
++      "state": "killed",
++      "exit_code": 2,
++      "seconds": 8.7,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_40_off-by-one_6.log",
++      "log_sha256": "f8c48d6f016cfa0d66b8fef6523d3673ee6a9e60dd0c73c071c32f9591a094e4"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:45:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 45,
++      "original": "        {/* A plain h2, not CardTitle: the step question is larger than a card heading (setup-ui 10). */}",
++      "mutated": "        {/* A plain h2, not CardTitle: the step question is larger than a card heading (setup-ui 11). */}",
++      "state": "survived",
++      "exit_code": 0,
++      "seconds": 8.6,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_45_off-by-one_1.log",
++      "log_sha256": "1fe19e5f138b3092ed78b0e19c1ee63f6a406e2966a456bcec52961c2dcbec38"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:48:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 48,
++      "original": "          tabIndex={-1}",
++      "mutated": "          tabIndex={-2}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 9.1,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_48_off-by-one_1.log",
++      "log_sha256": "4b854819646d51cd9d17448525a739d90116749638ce496956291dcbccdb4e05"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:59:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 59,
++      "original": "          {previousTitle !== null && onBack !== undefined ? (",
++      "mutated": "          {previousTitle !== null || onBack !== undefined ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 9.1,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_59_negate-boolean_1.log",
++      "log_sha256": "8cf1fa505abc0d39fd57cdbd2ac70f0b98870a7871b6ac566a4ab1a09cfb753c"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:66:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "line": 66,
++      "original": "          {onContinue !== undefined && nextTitle !== null ? (",
++      "mutated": "          {onContinue !== undefined || nextTitle !== null ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 8.7,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_66_negate-boolean_1.log",
++      "log_sha256": "31e561523aecb5ad227a1e2f149199164a83f1598f4eaace10c0d1037c2c939a"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:manual:drop-previous-update",
++      "operator": "manual",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "old": "      previous.current = current;\n",
++      "new": "",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 8.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_drop-previous-update.log",
++      "log_sha256": "92aed630863084e78a44fdd334bb835f11e80b20051b0f6255189e446ee05d5b"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:manual:swap-reason",
++      "operator": "manual",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "old": "error instanceof ApiUnreachableError ? READ_ERRORS.notAnswering : READ_ERRORS.unexpected",
++      "new": "error instanceof ApiUnreachableError ? READ_ERRORS.unexpected : READ_ERRORS.notAnswering",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_swap-reason.log",
++      "log_sha256": "c0a9b3fafa9839f638c87940e3e8802ac17b2202c604e721cd555c622721ae41"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:manual:focus-on-mount",
++      "operator": "manual",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "old": "if (previous.current !== current) {",
++      "new": "if (true) {",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_focus-on-mount.log",
++      "log_sha256": "2c6f908b4f0b6f469e683275cdf3aff5af8b18db000206dabecd0925fb00d738"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:manual:render-message",
++      "operator": "manual",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "old": "READ_ERRORS.readFailed(subject, failureReason(error))",
++      "new": "READ_ERRORS.readFailed(subject, error.message)",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_render-message.log",
++      "log_sha256": "e5e92d8271c36913c18b388bc57a8c53e2d1779916d4d7f8fec845248354cd79"
++    },
++    {
++      "id": "web/src/screens/setup/step-card.tsx:manual:next-without-handler",
++      "operator": "manual",
++      "file": "web/src/screens/setup/step-card.tsx",
++      "old": "onContinue !== undefined && nextTitle !== null",
++      "new": "nextTitle !== null",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_step-card.tsx_manual_next-without-handler.log",
++      "log_sha256": "6ae4ebb1c0498ac66e5b78cc5fa8f5527f57e060f5cd85f3b65c0064a16a1f96"
++    }
++  ],
++  "finished": "2026-11-21T23:57:58Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-1-step-card.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-1-step-card.log
+new file mode 100644
+index 00000000..2b54ad13
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-1-step-card.log
+@@ -0,0 +1,98 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/setup/step-card.test.tsx (0 test)
++ ❯ src/screens/setup/copy.test.ts (146 tests | 3 failed) 14ms
++   × setup copy is complete and verbatim > READ_ERRORS.notAnswering 3ms
++     → expected undefined to be 'FactorFlow is not answering' // Object.is equality
++   × setup copy is complete and verbatim > READ_ERRORS.unexpected 0ms
++     → expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
++   × setup copy is complete and verbatim > STEP2.saveFailed 1ms
++     → expected undefined to be 'Couldn\'t save history depth: FactorF…' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/step-card.test.tsx [ src/screens/setup/step-card.test.tsx ]
++Error: Failed to resolve import "./step-card" from "web/src/screens/setup/step-card.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/setup/step-card.test.tsx:12:7
++  11 |    failureReason,
++  12 |    useStepHeadingFocus
++  13 |  } from "./step-card";
++     |          ^
++  14 |  function Host({ step }) {
++  15 |    useStepHeadingFocus(step);
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > READ_ERRORS.notAnswering
++AssertionError: expected undefined to be 'FactorFlow is not answering' // Object.is equality
++
++- Expected: 
++"FactorFlow is not answering"
++
+++ Received: 
++undefined
++
++ ❯ src/screens/setup/copy.test.ts:237:34
++    235| describe("setup copy is complete and verbatim", () => {
++    236|   it.each(ROWS)("%s", (dotted, args, expected) => {
++    237|     expect(textAt(dotted, args)).toBe(expected);
++       |                                  ^
++    238|   });
++    239| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > READ_ERRORS.unexpected
++AssertionError: expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
++
++- Expected: 
++"FactorFlow hit an unexpected problem"
++
+++ Received: 
++undefined
++
++ ❯ src/screens/setup/copy.test.ts:237:34
++    235| describe("setup copy is complete and verbatim", () => {
++    236|   it.each(ROWS)("%s", (dotted, args, expected) => {
++    237|     expect(textAt(dotted, args)).toBe(expected);
++       |                                  ^
++    238|   });
++    239| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++
++ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > STEP2.saveFailed
++AssertionError: expected undefined to be 'Couldn\'t save history depth: FactorF…' // Object.is equality
++
++- Expected: 
++"Couldn't save history depth: FactorFlow is not answering"
++
+++ Received: 
++undefined
++
++ ❯ src/screens/setup/copy.test.ts:237:34
++    235| describe("setup copy is complete and verbatim", () => {
++    236|   it.each(ROWS)("%s", (dotted, args, expected) => {
++    237|     expect(textAt(dotted, args)).toBe(expected);
++       |                                  ^
++    238|   });
++    239| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++
++ Test Files  2 failed (2)
++      Tests  3 failed | 143 passed (146)
++   Start at  17:53:56
++   Duration  1.44s (transform 99ms, setup 860ms, collect 46ms, tests 14ms, environment 901ms, prepare 438ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-tasks.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-tasks.md
+index d012cea8..1f5ed1a1 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-tasks.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-tasks.md
+@@ -177,7 +177,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
+ 
+ ### Additional Unit Tests
+ 
+-- [ ] T008 [P] Write the step card contract in a new `web/src/screens/setup/step-card.test.tsx` (AC-25, DAC-E4-13; setup-ui §10; UX design §1.2 step card; DEC-0350, DEC-0345). Cases:
++- [x] T008 [P] Write the step card contract in a new `web/src/screens/setup/step-card.test.tsx` (AC-25, DAC-E4-13; setup-ui §10; UX design §1.2 step card; DEC-0350, DEC-0345). Cases:
+   - (a) **Section and heading.** `<StepCard step={2} question="How far back should history go?" />` renders `getByRole("region", { name: "How far back should history go?" })`. The `h2` has `id` `STEP_HEADING_ID` (`"setup-step-heading"`) and `tabIndex` `-1`. The text *Step 2 of 4* is present.
+   - (b) **Footer.** With `onBack` and `onContinue` spies: `getByRole("button", { name: "← Back: Market data" })` has `data-variant="ghost"` and calls `onBack` once; the text *Next: Stocks to follow* is present; `getByRole("button", { name: "Continue" })` has `data-variant="default"` and calls `onContinue` once. For step 3 the labels are *← Back: How far back* and *Next: Download data*.
+   - (c) **Absent controls.** Step 1 with `onBack` given renders no Back button. With no `onContinue`, neither **Continue** nor a *Next:* hint renders (step 4's card).
+@@ -194,7 +194,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
+   - a hand-written mutant that drops the hook's `previous.current = current` update: (e)'s return to step 1.
+   - swap-case of the two reasons in `failureReason`: (f).
+ 
+-- [ ] T009 [P] Add rows for this story's three new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal (DEC-0345, DEC-0346): `["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"]`, `["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"]` and `["STEP2.saveFailed", ["FactorFlow is not answering"], "Couldn't save history depth: FactorFlow is not answering"]`. CAP-003-E4-S1's T006 scan of every export and of the file's text then covers them unchanged. Kills: drop-field-copy on any of the three: its row.
++- [x] T009 [P] Add rows for this story's three new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal (DEC-0345, DEC-0346): `["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"]`, `["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"]` and `["STEP2.saveFailed", ["FactorFlow is not answering"], "Couldn't save history depth: FactorFlow is not answering"]`. CAP-003-E4-S1's T006 scan of every export and of the file's text then covers them unchanged. Kills: drop-field-copy on any of the three: its row.
+ 
+ - [ ] T010 [P] Write the step list contract in a new `web/src/screens/setup/step-list.test.tsx` (AC-25, DAC-E4-1 rendering half, DAC-E4-S2-1; setup-ui §10; UX design §1.2; DEC-0348, DEC-0349, DEC-0350). Render `<StepList state={stateWith(…)} />` with the shell mocked. Cases:
+   - (a) **Structure.** `getByRole("navigation", { name: "Setup steps" })` holds one `list` of four `listitem`s whose titles are, in order, *Market data*, *How far back*, *Stocks to follow*, *Download data* (DAC-E4-11's four steps).
+@@ -253,13 +253,13 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
+ 
+ **Purpose**: The three copy strings and the four modules, each in its own TDD cycle. Every module's comments cite AC, DAC and TC in the style of the delivered `status-region.tsx`, and none writes a length, a colour, a layout value or one of the eight DAC-E7-3 terms (write "28 px" with a space where a comment needs it).
+ 
+-- [ ] T013 Add three strings to `web/src/screens/setup/copy.ts` (CAP-003-E4-S1's catalogue; T009 RED first), each with a doc comment saying this story adds it and no design gives its wording, as `copy.ts`'s module comment provides:
++- [x] T013 Add three strings to `web/src/screens/setup/copy.ts` (CAP-003-E4-S1's catalogue; T009 RED first), each with a doc comment saying this story adds it and no design gives its wording, as `copy.ts`'s module comment provides:
+   - `READ_ERRORS.notAnswering` *FactorFlow is not answering* and `READ_ERRORS.unexpected` *FactorFlow hit an unexpected problem* (DEC-0345);
+   - `STEP2.saveFailed(reason: string)` → `Couldn't save history depth: ${reason}` (DEC-0346).
+ 
+   `copy.ts` keeps importing nothing and exporting no number or boolean. Makes T009 pass.
+ 
+-- [ ] T014 Create `web/src/screens/setup/step-card.tsx` (depends on T013; T008 RED first), to DEC-0350.
++- [x] T014 Create `web/src/screens/setup/step-card.tsx` (depends on T013; T008 RED first), to DEC-0350.
+   - **Imports.** `type ReactNode`, `useEffect`, `useRef` from `"react"`; `ApiUnreachableError` and `type ApiError` from `"../../api/client"`; `Button` from `"../../components/ui/button"`; `Card` from `"../../components/ui/card"`; `LAYOUT` from `"../../app/layout"`; `type StepId` from `"./use-setup-state"`; `STEP_TITLES`, `stepPosition`, `backLabel`, `nextHint`, `CONTINUE`, `READ_ERRORS` from `"./copy"`.
+   - **`STEP_HEADING_ID`** `= "setup-step-heading"`: one step card renders at a time, so one id serves the heading, its `aria-labelledby` and the done-step links' `href`.
+   - **`StepCard(props: StepCardProps): JSX.Element`** with `interface StepCardProps { step: StepId; question: string; explanation?: ReactNode; note?: ReactNode; onBack?: () => void; onContinue?: () => void; children?: ReactNode }`. Renders `<section aria-labelledby={STEP_HEADING_ID}>` around `<Card variant="default" className="flex flex-col gap-5 p-4">` holding, in order:
+diff --git a/web/src/screens/setup/copy.test.ts b/web/src/screens/setup/copy.test.ts
+index eb0cc33f..0dfd6294 100644
+--- a/web/src/screens/setup/copy.test.ts
++++ b/web/src/screens/setup/copy.test.ts
+@@ -223,6 +223,13 @@ const ROWS: [string, string[], string][] = [
+     "Couldn't read history depth: the server said no",
+   ],
+   ["READ_ERRORS.tryAgain", [], "Try again"],
++  ["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"],
++  ["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"],
++  [
++    "STEP2.saveFailed",
++    ["FactorFlow is not answering"],
++    "Couldn't save history depth: FactorFlow is not answering",
++  ],
+ ];
+ 
+ describe("setup copy is complete and verbatim", () => {
+diff --git a/web/src/screens/setup/copy.ts b/web/src/screens/setup/copy.ts
+index b24b2f3e..6a2f70cc 100644
+--- a/web/src/screens/setup/copy.ts
++++ b/web/src/screens/setup/copy.ts
+@@ -84,6 +84,8 @@ export const STEP2 = {
+   planLimitNote:
+     "Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.",
+   rangeError: "History depth must be a whole number of years from 1 to 50.",
++  /** CAP-003-E4-S2 adds this; no design gives its wording (DEC-0346). */
++  saveFailed: (reason: string): string => `Couldn't save history depth: ${reason}`,
+ };
+ 
+ /** Step 3, the followed stocks (setup-ui 2.3, 10; S02 section 8; DAC-E4-5). */
+@@ -142,4 +144,8 @@ export const READ_ERRORS = {
+   subjects: { depth: "history depth", followed: "the followed list" },
+   readFailed: (subject: string, reason: string): string => `Couldn't read ${subject}: ${reason}`,
+   tryAgain: "Try again",
++  /** CAP-003-E4-S2 adds this; no design gives its wording (DEC-0345). */
++  notAnswering: "FactorFlow is not answering",
++  /** CAP-003-E4-S2 adds this; no design gives its wording (DEC-0345). */
++  unexpected: "FactorFlow hit an unexpected problem",
+ };
+diff --git a/web/src/screens/setup/step-card.test.tsx b/web/src/screens/setup/step-card.test.tsx
+new file mode 100644
+index 00000000..c646ebfa
+--- /dev/null
++++ b/web/src/screens/setup/step-card.test.tsx
+@@ -0,0 +1,133 @@
++import { render, screen } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { describe, expect, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError } from "../../api/client";
++import { READ_ERRORS } from "./copy";
++import {
++  STEP_HEADING_ID,
++  StepCard,
++  StepReadError,
++  failureReason,
++  useStepHeadingFocus,
++} from "./step-card";
++import type { StepId } from "./use-setup-state";
++
++// Implements the step card contract (CAP-003-E4-S2 T008; AC-25, DAC-E4-13; setup-ui 10; DEC-0350, DEC-0345)
++
++function Host({ step }: { step: StepId }) {
++  useStepHeadingFocus(step);
++  return <StepCard step={step} question={`Q${step}`} />;
++}
++
++describe("StepCard", () => {
++  it("(a) is a section labelled by its h2, which is focusable by script", () => {
++    render(<StepCard step={2} question="How far back should history go?" />);
++    const region = screen.getByRole("region", { name: "How far back should history go?" });
++    const heading = region.querySelector("h2");
++    expect(heading?.id).toBe(STEP_HEADING_ID);
++    expect(STEP_HEADING_ID).toBe("setup-step-heading");
++    expect(heading?.getAttribute("tabindex")).toBe("-1");
++    expect(screen.getByText("Step 2 of 4")).toBeTruthy();
++  });
++
++  it("(b) names the previous and next steps in the footer", async () => {
++    const user = userEvent.setup();
++    const onBack = vi.fn();
++    const onContinue = vi.fn();
++    const { rerender } = render(
++      <StepCard step={2} question="Q" onBack={onBack} onContinue={onContinue} />,
++    );
++    const back = screen.getByRole("button", { name: "← Back: Market data" });
++    expect(back.getAttribute("data-variant")).toBe("ghost");
++    await user.click(back);
++    expect(onBack).toHaveBeenCalledTimes(1);
++    expect(screen.getByText("Next: Stocks to follow")).toBeTruthy();
++    const next = screen.getByRole("button", { name: "Continue" });
++    expect(next.getAttribute("data-variant")).toBe("default");
++    await user.click(next);
++    expect(onContinue).toHaveBeenCalledTimes(1);
++
++    rerender(<StepCard step={3} question="Q" onBack={onBack} onContinue={onContinue} />);
++    expect(screen.getByRole("button", { name: "← Back: How far back" })).toBeTruthy();
++    expect(screen.getByText("Next: Download data")).toBeTruthy();
++  });
++
++  it("(c) leaves out Back on step 1 and Continue and Next without a handler", () => {
++    const { rerender } = render(<StepCard step={1} question="Q" onBack={vi.fn()} />);
++    expect(screen.queryByRole("button", { name: /Back/ })).toBeNull();
++    rerender(<StepCard step={4} question="Q" onBack={vi.fn()} />);
++    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
++    expect(screen.queryByText(/^Next:/)).toBeNull();
++    expect(screen.getByRole("button", { name: "← Back: Stocks to follow" })).toBeTruthy();
++    // Past the last step there is nothing to continue to, even with a handler.
++    rerender(<StepCard step={4} question="Q" onContinue={vi.fn()} />);
++    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
++    expect(screen.queryByText(/^Next:/)).toBeNull();
++    // Without a handler a middle step shows no hint either.
++    rerender(<StepCard step={2} question="Q" />);
++    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
++    expect(screen.queryByText(/^Next:/)).toBeNull();
++  });
++
++  it("(d) renders the explanation at its measure and the note as an info note", () => {
++    const { rerender } = render(<StepCard step={2} question="Q" explanation="E" note="N" />);
++    expect(screen.getByText("E").style.maxWidth).toBe("70ch");
++    const note = screen.getByText("N");
++    expect(note.classList.contains("bg-muted")).toBe(true);
++    expect(note.classList.contains("text-xs")).toBe(true);
++    rerender(<StepCard step={2} question="Q" />);
++    expect(screen.queryByText("E")).toBeNull();
++    expect(screen.queryByText("N")).toBeNull();
++  });
++
++  it("(e) moves focus to the heading only when the step changes", () => {
++    const { rerender } = render(<Host step={1} />);
++    expect(document.activeElement).toBe(document.body);
++    rerender(<Host step={2} />);
++    expect(document.activeElement).toBe(screen.getByText("Q2"));
++    const outside = document.createElement("button");
++    document.body.appendChild(outside);
++    outside.focus();
++    rerender(<Host step={2} />);
++    expect(document.activeElement).toBe(outside);
++    outside.remove();
++    rerender(<Host step={1} />);
++    expect(document.activeElement).toBe(screen.getByText("Q1"));
++  });
++
++  it("(f) gives a reason that never carries the error's own text", () => {
++    const unreachable = new ApiUnreachableError(
++      "GET /api/settings/history-depth could not be reached",
++    );
++    expect(failureReason(unreachable)).toBe("FactorFlow is not answering");
++    const coded = new ApiError("an active instrument with this symbol already exists", "req-9", {
++      code: "internal_error",
++    });
++    expect(failureReason(coded)).toBe("FactorFlow hit an unexpected problem");
++    const uncoded = new ApiError("an active instrument with this symbol already exists", "req-9", {
++      code: null,
++    });
++    expect(failureReason(uncoded)).toBe("FactorFlow hit an unexpected problem");
++    for (const reason of [failureReason(unreachable), failureReason(coded)]) {
++      expect(reason).not.toContain("instrument");
++      expect(reason).not.toContain("req-9");
++    }
++  });
++
++  it("(g) renders a failed read with its reason and Try again", async () => {
++    const user = userEvent.setup();
++    const onRetry = vi.fn();
++    render(
++      <StepReadError
++        subject={READ_ERRORS.subjects.depth}
++        error={new ApiUnreachableError("x")}
++        onRetry={onRetry}
++      />,
++    );
++    expect(
++      screen.getByText("Couldn't read history depth: FactorFlow is not answering"),
++    ).toBeTruthy();
++    await user.click(screen.getByRole("button", { name: "Try again" }));
++    expect(onRetry).toHaveBeenCalledTimes(1);
++  });
++});
+diff --git a/web/src/screens/setup/step-card.tsx b/web/src/screens/setup/step-card.tsx
+new file mode 100644
+index 00000000..94d56a70
+--- /dev/null
++++ b/web/src/screens/setup/step-card.tsx
+@@ -0,0 +1,124 @@
++import { type JSX, type ReactNode, useEffect, useRef } from "react";
++import { LAYOUT } from "../../app/layout";
++import { type ApiError, ApiUnreachableError } from "../../api/client";
++import { Button } from "../../components/ui/button";
++import { Card } from "../../components/ui/card";
++import { CONTINUE, READ_ERRORS, STEP_TITLES, backLabel, nextHint, stepPosition } from "./copy";
++import type { StepId } from "./use-setup-state";
++
++/*
++ * The step card and its focus and read-failure helpers (CAP-003-E4-S2;
++ * component design setup-ui 10; AC-25, DAC-E4-13; DEC-0345, DEC-0350). One
++ * step card renders at a time, so one id serves the heading, its
++ * `aria-labelledby` and the done-step links' `href`.
++ */
++
++/** The step card heading's id. */
++export const STEP_HEADING_ID = "setup-step-heading";
++
++export interface StepCardProps {
++  step: StepId;
++  question: string;
++  explanation?: ReactNode;
++  note?: ReactNode;
++  onBack?: () => void;
++  onContinue?: () => void;
++  children?: ReactNode;
++}
++
++/** The step card: position, question, explanation, controls, info note and footer (AC-25). */
++export function StepCard({
++  step,
++  question,
++  explanation,
++  note,
++  onBack,
++  onContinue,
++  children,
++}: StepCardProps): JSX.Element {
++  const previousTitle = step > 1 ? STEP_TITLES[(step - 1) as 1 | 2 | 3] : null;
++  const nextTitle = step < 4 ? STEP_TITLES[(step + 1) as 2 | 3 | 4] : null;
++  return (
++    <section aria-labelledby={STEP_HEADING_ID}>
++      <Card variant="default" className="flex flex-col gap-5 p-4">
++        <p className="text-xs text-muted-foreground">{stepPosition(step)}</p>
++        {/* A plain h2, not CardTitle: the step question is larger than a card heading (setup-ui 10). */}
++        <h2
++          id={STEP_HEADING_ID}
++          tabIndex={-1}
++          className="text-xl font-semibold text-foreground focus-visible:outline-none"
++        >
++          {question}
++        </h2>
++        {explanation !== undefined ? (
++          <p style={{ maxWidth: LAYOUT.explanationMeasure }}>{explanation}</p>
++        ) : null}
++        {children}
++        {note !== undefined ? <p className="rounded bg-muted p-3 text-xs">{note}</p> : null}
++        <div className="flex items-center justify-between gap-4">
++          {previousTitle !== null && onBack !== undefined ? (
++            <Button variant="ghost" onClick={onBack}>
++              {backLabel(previousTitle)}
++            </Button>
++          ) : (
++            <span />
++          )}
++          {onContinue !== undefined && nextTitle !== null ? (
++            <div className="flex items-center gap-3">
++              <span className="text-xs text-muted-foreground">{nextHint(nextTitle)}</span>
++              <Button variant="default" onClick={onContinue}>
++                {CONTINUE}
++              </Button>
++            </div>
++          ) : null}
++        </div>
++      </Card>
++    </section>
++  );
++}
++
++/**
++ * Moves focus to the step card's heading when the step changes, never on the
++ * first render, so the shell's focus on the screen's heading on entry stands
++ * (owner-shell 2.7; DAC-E4-S6-2). It lives in the persistent screen because
++ * each step renders its own card and a step change remounts it. The setup
++ * screen calls it once.
++ */
++export function useStepHeadingFocus(current: StepId): void {
++  const previous = useRef(current);
++  useEffect(() => {
++    if (previous.current !== current) {
++      document.getElementById(STEP_HEADING_ID)?.focus();
++      previous.current = current;
++    }
++  }, [current]);
++}
++
++/**
++ * The reason a failed read or save shows. It never reads the error's message
++ * or request id: the delivered messages name domain terms that owner-facing
++ * text keeps out (AC-19; DEC-0345).
++ */
++export function failureReason(error: ApiError | ApiUnreachableError): string {
++  return error instanceof ApiUnreachableError ? READ_ERRORS.notAnswering : READ_ERRORS.unexpected;
++}
++
++/** A failed read in its own step, with a recovery (DAC-E4-13). */
++export function StepReadError({
++  subject,
++  error,
++  onRetry,
++}: {
++  subject: string;
++  error: ApiError | ApiUnreachableError;
++  onRetry: () => void;
++}): JSX.Element {
++  return (
++    <div className="flex flex-wrap items-center gap-3">
++      <p className="text-destructive">{READ_ERRORS.readFailed(subject, failureReason(error))}</p>
++      <Button variant="outline" onClick={onRetry}>
++        {READ_ERRORS.tryAgain}
++      </Button>
++    </div>
++  );
++}

@@ -223,6 +223,13 @@ const ROWS: [string, string[], string][] = [
     "Couldn't read history depth: the server said no",
   ],
   ["READ_ERRORS.tryAgain", [], "Try again"],
+  ["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"],
+  ["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"],
+  [
+    "STEP2.saveFailed",
+    ["FactorFlow is not answering"],
+    "Couldn't save history depth: FactorFlow is not answering",
+  ],
 ];
 
 describe("setup copy is complete and verbatim", () => {

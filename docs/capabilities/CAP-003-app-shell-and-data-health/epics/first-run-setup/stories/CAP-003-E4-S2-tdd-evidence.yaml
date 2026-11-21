@@ -1,0 +1,57 @@
+# TDD evidence for CAP-003-E4-S2 - Setup Steps 1 and 2: the Step List, the Step Card, Market Data Key Presence and History Depth.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T008, T009, T013, T014]
+    description: >
+      The copy strings and the step card (DAC-E4-13, AC-25, DEC-0345, DEC-0346, DEC-0350): copy.ts gains READ_ERRORS.notAnswering, READ_ERRORS.unexpected and STEP2.saveFailed; step-card.tsx holds STEP_HEADING_ID, StepCard (section labelled by its h2, position line, explanation at the layout measure, note, Back and Next/Continue footer), useStepHeadingFocus (moves focus only on a change of step, never on first render), failureReason (fixed reasons, never the error's message or request id) and StepReadError. step-card.test.tsx holds cases (a) to (g) and copy.test.ts the three new rows. The generator produced 16 mutants and 5 were hand-written; the first run left 9 survivors, two of them real gaps (a Next hint or Continue rendered past the last step, and a Next hint without a handler), so cases for step 4 with a handler and a middle step without one were added and the run repeated: 21 mutants, 15 killed. The six survivors are judged equivalent: five rewrite a literal inside a type-only cast (as 1 | 2 | 3), which is erased before the code runs, and one rewrites a number inside a comment. Both reviews approved and the spec-drift review found no drift. The code review raised one MEDIUM, that StepReadError's message carries no live region so a failed retry is not announced; the plan fixes the markup and the delivered read errors elsewhere are static, so it is a follow-up for the design, not rework. The rest were LOW.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-1-step-card.log
+    red_log_sha256: 65d5bbc379ad100b7631c40606df5404df4329512e6336536174398c2e84b52e
+    red_evidence: >
+      step-card.test.tsx failed to load (./step-card did not resolve) and three copy rows failed because the strings were missing.
+    green_evidence: >
+      step-card.test.tsx and copy.test.ts 156 passed (green-cycle-1-step-card.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 73a95ea9f82f713955d81ecab840745ce32a6b0cd124b88a1da93b3f30e1df67
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 0f0ba8ba48369729e10603fae0ce7995b9519598c665e01cc8a2606a22a59d7a
+      generated: 21
+      killed: 15
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 0.714
+      survivors:
+        - id: web/src/screens/setup/step-card.tsx:39:off-by-one:4
+          disposition: equivalent
+          reason: >
+            Rewrites a literal inside the type-only cast (as 1 | 2 | 3); the cast is erased at build time and the value of step - 1 is unchanged, so no behaviour differs.
+        - id: web/src/screens/setup/step-card.tsx:39:off-by-one:5
+          disposition: equivalent
+          reason: >
+            Rewrites a literal inside the type-only cast (as 1 | 2 | 3); erased at build time, no behaviour differs.
+        - id: web/src/screens/setup/step-card.tsx:39:off-by-one:6
+          disposition: equivalent
+          reason: >
+            Rewrites a literal inside the type-only cast (as 1 | 2 | 3); erased at build time, no behaviour differs.
+        - id: web/src/screens/setup/step-card.tsx:40:off-by-one:4
+          disposition: equivalent
+          reason: >
+            Rewrites a literal inside the type-only cast (as 2 | 3 | 4); erased at build time, no behaviour differs.
+        - id: web/src/screens/setup/step-card.tsx:40:off-by-one:5
+          disposition: equivalent
+          reason: >
+            Rewrites a literal inside the type-only cast (as 2 | 3 | 4); erased at build time, no behaviour differs.
+        - id: web/src/screens/setup/step-card.tsx:45:off-by-one:1
+          disposition: equivalent
+          reason: >
+            Rewrites the number in a source comment; comments are not executed.
