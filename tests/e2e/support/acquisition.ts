@@ -149,7 +149,7 @@ export async function addInstruments(page: Page, symbols: string[]): Promise<voi
 export async function startRun(page: Page): Promise<string> {
   await page.goto("/runs");
   await page.getByRole("button", { name: "Start acquisition run" }).click();
-  await expect(page).toHaveURL(/\/runs\/[0-9a-f-]{36}$/);
+  await expect(page).toHaveURL(/\/data\/downloads\/[0-9a-f-]{36}$/);
   return new URL(page.url()).pathname.split("/").pop() as string;
 }
 

@@ -51,7 +51,7 @@ test("TC-E2E-002: a first acquisition against an unavailable provider reports ea
 
   await page.goto("/runs");
   await page.getByRole("link", { name: runId }).click();
-  await expect(page).toHaveURL(new RegExp(`/runs/${runId}$`));
+  await expect(page).toHaveURL(new RegExp(`/data/downloads/${runId}$`));
   await expect(summaryOutcome(page)).toHaveText(/^(Failed|Partial)$/);
 
   for (const symbol of ["DFA", "DFB"]) {
@@ -103,8 +103,8 @@ test("TC-E2E-005: a failed acquisition is diagnosed, its cause corrected, and a 
 
   await setProviderMode("ok");
   await page.getByRole("button", { name: "Re-run acquisition" }).click();
-  await expect(page).not.toHaveURL(new RegExp(`/runs/${failedRun}$`));
-  await expect(page).toHaveURL(/\/runs\/[0-9a-f-]{36}$/);
+  await expect(page).not.toHaveURL(new RegExp(`/data/downloads/${failedRun}$`));
+  await expect(page).toHaveURL(/\/data\/downloads\/[0-9a-f-]{36}$/);
   await expect(summaryOutcome(page)).toHaveText("Succeeded", { timeout: 20_000 });
 
   await page.goto("/coverage");

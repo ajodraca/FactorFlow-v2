@@ -40,7 +40,7 @@ test("a queued run cancels at once with its own copy and no started time (AC-26)
 
   await page.goto("/runs");
   await page.getByRole("button", { name: "Start acquisition run" }).click();
-  await expect(page).toHaveURL(/\/runs\/[0-9a-f-]{36}$/);
+  await expect(page).toHaveURL(/\/data\/downloads\/[0-9a-f-]{36}$/);
 
   await page.getByRole("button", { name: "Cancel run" }).click();
   await expect(page.getByRole("dialog").getByRole("heading")).toHaveText("Cancel this queued run?");
