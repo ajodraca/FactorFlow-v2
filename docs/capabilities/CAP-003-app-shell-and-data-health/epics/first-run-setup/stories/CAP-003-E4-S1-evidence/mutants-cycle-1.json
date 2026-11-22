@@ -1,0 +1,89 @@
+{
+ "schema": 1,
+ "repo_head": "ede6a769705b6ff8a46ba35f79d23e2684f79f0d",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/setup/draft.tsx:48:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "web/src/screens/setup/draft.tsx",
+   "line": 48,
+   "original": "    pasted: \"\",",
+   "mutated": "    "
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:49:drop-defaulted-argument:1",
+   "cycle": "cycle-1",
+   "operator": "drop-defaulted-argument",
+   "file": "web/src/screens/setup/draft.tsx",
+   "line": 49,
+   "original": "    unposted: [],",
+   "mutated": "    "
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:stale-closure",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "setDrafts((previous) => ({ ...previous, [key]: value }));",
+   "new": "setDrafts({ ...drafts, [key]: value });",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:session-write",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "setDrafts((previous) => ({ ...previous, [key]: value }));",
+   "new": "sessionStorage.setItem(\"d\", \"x\");\n      setDrafts((previous) => ({ ...previous, [key]: value }));",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:no-usecallback",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => ({ ...previous, [key]: value }));\n    },\n    [],\n  );",
+   "new": "const setDraft = <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n    setDrafts((previous) => ({ ...previous, [key]: value }));\n  };",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:all-to-years",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "({ ...previous, [key]: value })",
+   "new": "({ ...previous, yearsText: value as string })",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:source-initial",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "source: null,",
+   "new": "source: \"paste\",",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:guard-negate",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "if (value === null) {",
+   "new": "if (value !== null) {",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:years-initial",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "yearsText: \"\",\n    source",
+   "new": "yearsText: \"x\",\n    source",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/setup/draft.tsx:manual:session-roundtrip",
+   "operator": "manual",
+   "file": "web/src/screens/setup/draft.tsx",
+   "old": "  const [drafts, setDrafts] = useState<SetupDrafts>(() => ({\n    yearsText: \"\",\n    source: null,\n    pasted: \"\",\n    unposted: [],\n  }));\n\n  // A functional update, so two writes in one tick both land; an empty\n  // dependency list, so a consumer may list the setter in its own.\n  const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => ({ ...previous, [key]: value }));\n    },\n    [],\n  );",
+   "new": "  const [drafts, setDrafts] = useState<SetupDrafts>(() =>\n    JSON.parse(\n      sessionStorage.getItem(\"d\") ??\n        '{\"yearsText\":\"\",\"source\":null,\"pasted\":\"\",\"unposted\":[]}',\n    ),\n  );\n  const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => {\n        const next = { ...previous, [key]: value };\n        sessionStorage.setItem(\"d\", JSON.stringify(next));\n        return next;\n      });\n    },\n    [],\n  );",
+   "cycle": "cycle-1"
+  }
+ ]
+}

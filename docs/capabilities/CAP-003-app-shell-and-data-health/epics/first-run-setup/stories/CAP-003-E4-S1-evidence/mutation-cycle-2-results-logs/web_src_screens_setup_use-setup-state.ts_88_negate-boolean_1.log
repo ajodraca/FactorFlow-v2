@@ -1,0 +1,307 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w3/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 6 failed) 66ms
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step 8ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a transport failure the same way 2ms
+     → expected 'loading' to be 'error' // Object.is equality
+   × reads, re-reads and unknown facts > reports loading while any of the four facts is pending, and not once all settled 7ms
+     → expected true to be false // Object.is equality
+   × reads, re-reads and unknown facts > re-reads on Try again without touching the other read 1ms
+     → expected 'loading' to be 'error' // Object.is equality
+   × reads, re-reads and unknown facts > keeps the value while a re-read is in flight, then carries the last answer into the error 2ms
+     → expected { kind: 'ok', …(2) } to deeply equal { kind: 'error', …(2) }
+   × reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4 1ms
+     → expected 'loading' to be 'error' // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 165ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: History depth could not be read.],
+-   "kind": "error",
+-   "last": null,
++   "kind": "loading",
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:308:30
+    306|     expect(hook.state.done[2]).toBe(false);
+    307|     expect(hook.state.current).toBe(2);
+    308|     expect(hook.state.depth).toEqual({ kind: "error", error: failure, …
+       |                              ^
+    309|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+    310|     expect(hook.state.activeCount).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a transport failure the same way
+AssertionError: expected 'loading' to be 'error' // Object.is equality
+
+Expected: "error"
+Received: "loading"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:323:35
+    321|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    322|     const hook = await mount();
+    323|     expect(hook.state.depth.kind).toBe("error");
+       |                                   ^
+    324|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+    325|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > reports loading while any of the four facts is pending, and not once all settled
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/screens/setup/use-setup-state.test.ts:402:43
+    400|     vi.mocked(getHistoryDepth).mockRejectedValue(new ApiUnreachableErr…
+    401|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    402|     expect((await mount()).state.loading).toBe(false);
+       |                                           ^
+    403|   });
+    404| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > re-reads on Try again without touching the other read
+AssertionError: expected 'loading' to be 'error' // Object.is equality
+
+Expected: "error"
+Received: "loading"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:413:35
+    411|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    412|     const hook = await mount();
+    413|     expect(hook.state.depth.kind).toBe("error");
+       |                                   ^
+    414| 
+    415|     vi.mocked(getHistoryDepth).mockResolvedValue({ years: 8, updatedAt…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > keeps the value while a re-read is in flight, then carries the last answer into the error
+AssertionError: expected { kind: 'ok', …(2) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: History depth could not be read.],
+-   "kind": "error",
+-   "last": Object {
+    "checkedAt": 2026-11-21T22:58:22.734Z,
+    "data": Object {
+      "updatedAt": "2026-09-06T18:00:00Z",
+      "years": 5,
+    },
+-   },
++   "kind": "ok",
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:445:30
+    443|     });
+    444|     await act(async () => pending.reject(failure));
+    445|     expect(hook.state.depth).toEqual({
+       |                              ^
+    446|       kind: "error",
+    447|       error: failure,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4
+AssertionError: expected 'loading' to be 'error' // Object.is equality
+
+Expected: "error"
+Received: "loading"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:466:41
+    464|     expect(hook.state.done[3]).toBe(false);
+    465|     expect(hook.state.current).toBe(3);
+    466|     expect(hook.state.activeCount.kind).toBe("error");
+       |                                         ^
+    467|     expect(hook.state.step4).toBe("ready");
+    468| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 6 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiError: History depth could not be read.
+ ❯ src/screens/setup/use-setup-state.test.ts:299:21
+    297| describe("a failed depth read carries its error; step 4 is blocked at …
+    298|   it("carries a depth read's ApiError for the step to render, and no o…
+    299|     const failure = new ApiError("History depth could not be read.", "…
+       |                     ^
+    300|       code: "internal_error",
+    301|     });
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-1', code: 'internal_error', state: null }
+This error originated in "src/screens/setup/use-setup-state.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "carries a depth read's ApiError for the step to render, and no other step". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiUnreachableError: x
+ ❯ src/screens/setup/use-setup-state.test.ts:318:21
+    316| 
+    317|   it("carries a transport failure the same way", async () => {
+    318|     const failure = new ApiUnreachableError("x");
+       |                     ^
+    319|     vi.mocked(getHistoryDepth).mockRejectedValue(failure);
+    320|     count(3);
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+This error originated in "src/screens/setup/use-setup-state.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "carries a transport failure the same way". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiUnreachableError: x
+ ❯ src/screens/setup/use-setup-state.test.ts:400:50
+    398| 
+    399|     // A read that settled as an error is settled.
+    400|     vi.mocked(getHistoryDepth).mockRejectedValue(new ApiUnreachableErr…
+       |                                                  ^
+    401|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    402|     expect((await mount()).state.loading).toBe(false);
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:5
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:11
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+ ❯ withEnv ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5
+ ❯ run ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3
+
+This error originated in "src/screens/setup/use-setup-state.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "reports loading while any of the four facts is pending, and not once all settled". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiError: History depth could not be read.
+ ❯ src/screens/setup/use-setup-state.test.ts:406:21
+    404| 
+    405|   it("re-reads on Try again without touching the other read", async ()…
+    406|     const failure = new ApiError("History depth could not be read.", "…
+       |                     ^
+    407|       code: "internal_error",
+    408|     });
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-1', code: 'internal_error', state: null }
+This error originated in "src/screens/setup/use-setup-state.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "re-reads on Try again without touching the other read". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiError: History depth could not be read.
+ ❯ src/screens/setup/use-setup-state.test.ts:441:21
+    439|     expect(hook.state.done[2]).toBe(true);
+    440| 
+    441|     const failure = new ApiError("History depth could not be read.", "…
+       |                     ^
+    442|       code: "internal_error",
+    443|     });
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:5
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:11
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+ ❯ withEnv ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5
+ ❯ run ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-2', code: 'internal_error', state: null }
+This error originated in "src/screens/setup/use-setup-state.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "keeps the value while a re-read is in flight, then carries the last answer into the error". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ApiError: The followed list could not be read.
+ ❯ src/screens/setup/use-setup-state.test.ts:457:21
+    455| 
+    456|   it("treats a failed count as not done but does not block step 4", as…
+    457|     const failure = new ApiError("The followed list could not be read.…
+       |                     ^
+    458|       code: "internal_error",
+    459|     });
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@vitest/runner/dist/index.js:1271:3
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { requestId: 'req-3', code: 'internal_error', state: null }
+This error originated in "src/screens/setup/use-setup-state.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "treats a failed count as not done but does not block step 4". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  6 failed | 26 passed (32)
+     Errors  6 errors
+   Start at  16:58:21
+   Duration  1.06s (transform 103ms, setup 106ms, collect 247ms, tests 231ms, environment 482ms, prepare 278ms)
+

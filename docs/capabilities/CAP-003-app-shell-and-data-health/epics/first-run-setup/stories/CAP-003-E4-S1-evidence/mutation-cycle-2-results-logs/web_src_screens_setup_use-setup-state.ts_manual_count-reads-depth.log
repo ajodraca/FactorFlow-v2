@@ -1,0 +1,114 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w2/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 6 failed) 40ms
+   × step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo 4ms
+     → expected "spy" to be called 2 times, but got 4 times
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step 4ms
+     → expected { kind: 'error', …(2) } to deeply equal { kind: 'ok', data: 3, …(1) }
+   × reads, re-reads and unknown facts > makes exactly the two reads, with the exact query 1ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × reads, re-reads and unknown facts > opens no interval 1ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × reads, re-reads and unknown facts > re-reads on Try again without touching the other read 1ms
+     → expected "spy" to be called 2 times, but got 3 times
+   × reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4 1ms
+     → expected "spy" to be called 1 times, but got 3 times
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 139ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo
+AssertionError: expected "spy" to be called 2 times, but got 4 times
+ ❯ src/screens/setup/use-setup-state.test.ts:276:40
+    274|     depth(10);
+    275|     await hook.visit();
+    276|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(2);
+       |                                        ^
+    277|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
+    278|     expect(hook.state.done[2]).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step
+AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'ok', data: 3, …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "checkedAt": Any<Date>,
+-   "data": 3,
+-   "kind": "ok",
++   "error": [ApiError: History depth could not be read.],
++   "kind": "error",
++   "last": null,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:310:36
+    308|     expect(hook.state.depth).toEqual({ kind: "error", error: failure, …
+    309|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+    310|     expect(hook.state.activeCount).toEqual({
+       |                                    ^
+    311|       kind: "ok",
+    312|       data: 3,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > makes exactly the two reads, with the exact query
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/setup/use-setup-state.test.ts:349:40
+    347|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    348|     await mount();
+    349|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(1);
+       |                                        ^
+    350|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledWith();
+    351|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > opens no interval
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/setup/use-setup-state.test.ts:365:42
+    363|         await vi.advanceTimersByTimeAsync(600_000);
+    364|       });
+    365|       expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(1);
+       |                                          ^
+    366|       expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(1);
+    367|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > re-reads on Try again without touching the other read
+AssertionError: expected "spy" to be called 2 times, but got 3 times
+ ❯ src/screens/setup/use-setup-state.test.ts:417:40
+    415|     vi.mocked(getHistoryDepth).mockResolvedValue({ years: 8, updatedAt…
+    416|     await act(async () => hook.state.reread("depth"));
+    417|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(2);
+       |                                        ^
+    418|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(1);
+    419|     expect(hook.state.depth).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4
+AssertionError: expected "spy" to be called 1 times, but got 3 times
+ ❯ src/screens/setup/use-setup-state.test.ts:472:40
+    470|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
+    471|     expect(vi.mocked(listInstruments)).toHaveBeenLastCalledWith({ life…
+    472|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(1);
+       |                                        ^
+    473|   });
+    474| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  6 failed | 26 passed (32)
+   Start at  16:58:35
+   Duration  751ms (transform 61ms, setup 84ms, collect 171ms, tests 179ms, environment 373ms, prepare 262ms)
+

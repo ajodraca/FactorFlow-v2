@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-r006kv7r/w0/web
+
+ ❯ src/screens/setup/copy.test.ts (143 tests | 2 failed) 15ms
+   × setup copy is complete and verbatim > stepPosition 3ms
+     → expected 'Step 2 of 5' to be 'Step 2 of 4' // Object.is equality
+   × setup copy is complete and verbatim > numbers each of the four steps out of four 0ms
+     → expected 'Step 1 of 5' to be 'Step 1 of 4' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > stepPosition
+AssertionError: expected 'Step 2 of 5' to be 'Step 2 of 4' // Object.is equality
+
+Expected: "Step 2 of 4"
+Received: "Step 2 of 5"
+
+ ❯ src/screens/setup/copy.test.ts:230:34
+    228| describe("setup copy is complete and verbatim", () => {
+    229|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    230|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    231|   });
+    232| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > numbers each of the four steps out of four
+AssertionError: expected 'Step 1 of 5' to be 'Step 1 of 4' // Object.is equality
+
+Expected: "Step 1 of 4"
+Received: "Step 1 of 5"
+
+ ❯ src/screens/setup/copy.test.ts:234:34
+    232| 
+    233|   it("numbers each of the four steps out of four", () => {
+    234|     expect(copy.stepPosition(1)).toBe("Step 1 of 4");
+       |                                  ^
+    235|     expect(copy.stepPosition(2)).toBe("Step 2 of 4");
+    236|     expect(copy.stepPosition(3)).toBe("Step 3 of 4");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 141 passed (143)
+   Start at  17:04:36
+   Duration  742ms (transform 42ms, setup 37ms, collect 39ms, tests 15ms, environment 175ms, prepare 84ms)
+

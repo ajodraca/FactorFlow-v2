@@ -1,0 +1,1669 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/green-cycle-1-drafts.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/green-cycle-1-drafts.log
+new file mode 100644
+index 00000000..2d713a7c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/green-cycle-1-drafts.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 157ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  16:52:36
++   Duration  1.02s (transform 34ms, setup 68ms, collect 134ms, tests 157ms, environment 345ms, prepare 150ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-1.json
+new file mode 100644
+index 00000000..7439573d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-1.json
+@@ -0,0 +1,89 @@
++{
++ "schema": 1,
++ "repo_head": "ede6a769705b6ff8a46ba35f79d23e2684f79f0d",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/setup/draft.tsx:48:drop-defaulted-argument:1",
++   "cycle": "cycle-1",
++   "operator": "drop-defaulted-argument",
++   "file": "web/src/screens/setup/draft.tsx",
++   "line": 48,
++   "original": "    pasted: \"\",",
++   "mutated": "    "
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:49:drop-defaulted-argument:1",
++   "cycle": "cycle-1",
++   "operator": "drop-defaulted-argument",
++   "file": "web/src/screens/setup/draft.tsx",
++   "line": 49,
++   "original": "    unposted: [],",
++   "mutated": "    "
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:stale-closure",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "setDrafts((previous) => ({ ...previous, [key]: value }));",
++   "new": "setDrafts({ ...drafts, [key]: value });",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:session-write",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "setDrafts((previous) => ({ ...previous, [key]: value }));",
++   "new": "sessionStorage.setItem(\"d\", \"x\");\n      setDrafts((previous) => ({ ...previous, [key]: value }));",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:no-usecallback",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => ({ ...previous, [key]: value }));\n    },\n    [],\n  );",
++   "new": "const setDraft = <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n    setDrafts((previous) => ({ ...previous, [key]: value }));\n  };",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:all-to-years",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "({ ...previous, [key]: value })",
++   "new": "({ ...previous, yearsText: value as string })",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:source-initial",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "source: null,",
++   "new": "source: \"paste\",",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:guard-negate",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "if (value === null) {",
++   "new": "if (value !== null) {",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:years-initial",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "yearsText: \"\",\n    source",
++   "new": "yearsText: \"x\",\n    source",
++   "cycle": "cycle-1"
++  },
++  {
++   "id": "web/src/screens/setup/draft.tsx:manual:session-roundtrip",
++   "operator": "manual",
++   "file": "web/src/screens/setup/draft.tsx",
++   "old": "  const [drafts, setDrafts] = useState<SetupDrafts>(() => ({\n    yearsText: \"\",\n    source: null,\n    pasted: \"\",\n    unposted: [],\n  }));\n\n  // A functional update, so two writes in one tick both land; an empty\n  // dependency list, so a consumer may list the setter in its own.\n  const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => ({ ...previous, [key]: value }));\n    },\n    [],\n  );",
++   "new": "  const [drafts, setDrafts] = useState<SetupDrafts>(() =>\n    JSON.parse(\n      sessionStorage.getItem(\"d\") ??\n        '{\"yearsText\":\"\",\"source\":null,\"pasted\":\"\",\"unposted\":[]}',\n    ),\n  );\n  const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => {\n        const next = { ...previous, [key]: value };\n        sessionStorage.setItem(\"d\", JSON.stringify(next));\n        return next;\n      });\n    },\n    [],\n  );",
++   "cycle": "cycle-1"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..a8191d83
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w0/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 175ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  16:54:23
++   Duration  1.78s (transform 42ms, setup 75ms, collect 144ms, tests 175ms, environment 541ms, prepare 376ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..7207933a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 184ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  16:54:23
++   Duration  1.80s (transform 53ms, setup 76ms, collect 144ms, tests 184ms, environment 534ms, prepare 305ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..abe119e1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 177ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  16:54:23
++   Duration  1.78s (transform 52ms, setup 77ms, collect 142ms, tests 177ms, environment 499ms, prepare 71ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..107f47da
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w3/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/setup/draft.test.tsx (5 tests) 175ms
++
++ Test Files  1 passed (1)
++      Tests  5 passed (5)
++   Start at  16:54:23
++   Duration  1.80s (transform 45ms, setup 75ms, collect 144ms, tests 175ms, environment 537ms, prepare 290ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_48_drop-defaulted-argument_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_48_drop-defaulted-argument_1.log
+new file mode 100644
+index 00000000..320e72c0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_48_drop-defaulted-argument_1.log
+@@ -0,0 +1,41 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w0/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 1 failed) 172ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 160ms
++     → expected { yearsText: '', source: null, …(1) } to deeply equal { yearsText: '', source: null, …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected { yearsText: '', source: null, …(1) } to deeply equal { yearsText: '', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "pasted": "",
++    "source": null,
++    "unposted": Array [],
++    "yearsText": "",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:102:20
++    100|       </SetupDraftProvider>,
++    101|     );
++    102|     expect(latest).toEqual({ yearsText: "", source: null, pasted: "", …
++       |                    ^
++    103|   });
++    104| });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  16:54:31
++   Duration  1.53s (transform 49ms, setup 54ms, collect 121ms, tests 172ms, environment 271ms, prepare 166ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_49_drop-defaulted-argument_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_49_drop-defaulted-argument_1.log
+new file mode 100644
+index 00000000..ed57bd19
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_49_drop-defaulted-argument_1.log
+@@ -0,0 +1,91 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 3 failed) 170ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 156ms
++     → expected { yearsText: '', source: null, …(1) } to deeply equal { yearsText: '', source: null, …(2) }
++   × useSetupDrafts > lands two writes made in one tick 1ms
++     → expected { Object (yearsText, source, ...) } to deeply equal { Object (yearsText, source, ...) }
++   × useSetupDrafts > changes one key at a time 3ms
++     → expected { yearsText: '12', source: null, …(1) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected { yearsText: '', source: null, …(1) } to deeply equal { yearsText: '', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "",
++    "source": null,
++-   "unposted": Array [],
++    "yearsText": "",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:102:20
++    100|       </SetupDraftProvider>,
++    101|     );
++    102|     expect(latest).toEqual({ yearsText: "", source: null, pasted: "", …
++       |                    ^
++    103|   });
++    104| });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++AssertionError: expected { Object (yearsText, source, ...) } to deeply equal { Object (yearsText, source, ...) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++    "source": "paste",
++-   "unposted": Array [],
++    "yearsText": "",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:134:35
++    132|       result.current.setDraft("pasted", "KO");
++    133|     });
++    134|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    135|       yearsText: "",
++    136|       source: "paste",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++AssertionError: expected { yearsText: '12', source: null, …(1) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++    "source": null,
++-   "unposted": Array [],
++    "yearsText": "12",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:146:35
++    144|     act(() => result.current.setDraft("pasted", "KO"));
++    145|     act(() => result.current.setDraft("yearsText", "12"));
++    146|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    147|       yearsText: "12",
++    148|       source: null,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 2 passed (5)
++   Start at  16:54:31
++   Duration  1.49s (transform 49ms, setup 56ms, collect 119ms, tests 170ms, environment 280ms, prepare 170ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_all-to-years.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_all-to-years.log
+new file mode 100644
+index 00000000..2a02fd6d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_all-to-years.log
+@@ -0,0 +1,88 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 3 failed) 159ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 145ms
++     → expected 'MSFT,NVDA' to be '7' // Object.is equality
++   × useSetupDrafts > lands two writes made in one tick 2ms
++     → expected { yearsText: 'KO', source: null, …(2) } to deeply equal { Object (yearsText, source, ...) }
++   × useSetupDrafts > changes one key at a time 1ms
++     → expected { yearsText: '12', source: null, …(2) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected 'MSFT,NVDA' to be '7' // Object.is equality
++
++Expected: "7"
++Received: "MSFT,NVDA"
++
++ ❯ src/screens/setup/draft.test.tsx:81:72
++     79|     await user.click(screen.getByRole("link", { name: "to setup" }));
++     80| 
++     81|     expect((screen.getByLabelText("years") as HTMLInputElement).value)…
++       |                                                                        ^
++     82|     expect((screen.getByLabelText("paste") as HTMLInputElement).checke…
++     83|     expect((screen.getByLabelText("later") as HTMLInputElement).checke…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++AssertionError: expected { yearsText: 'KO', source: null, …(2) } to deeply equal { Object (yearsText, source, ...) }
++
++- Expected
+++ Received
++
++  Object {
++-   "pasted": "KO",
++-   "source": "paste",
+++   "pasted": "",
+++   "source": null,
++    "unposted": Array [],
++-   "yearsText": "",
+++   "yearsText": "KO",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:134:35
++    132|       result.current.setDraft("pasted", "KO");
++    133|     });
++    134|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    135|       yearsText: "",
++    136|       source: "paste",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++AssertionError: expected { yearsText: '12', source: null, …(2) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "pasted": "KO",
+++   "pasted": "",
++    "source": null,
++    "unposted": Array [],
++    "yearsText": "12",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:146:35
++    144|     act(() => result.current.setDraft("pasted", "KO"));
++    145|     act(() => result.current.setDraft("yearsText", "12"));
++    146|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    147|       yearsText: "12",
++    148|       source: null,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 2 passed (5)
++   Start at  16:54:33
++   Duration  1.19s (transform 34ms, setup 41ms, collect 102ms, tests 159ms, environment 252ms, prepare 246ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_guard-negate.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_guard-negate.log
+new file mode 100644
+index 00000000..d860e4e1
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_guard-negate.log
+@@ -0,0 +1,293 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at DraftForm (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:10:32)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at DraftForm (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:10:32)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <DraftForm> component:
++
++    at DraftForm (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:14:54)
++    at RenderedRoute (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:535:7)
++    at Routes (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++    at SetupDraftProvider (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:6:31)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/screens/setup/draft.test.tsx > useSetupDrafts > keeps one setter identity across updates
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at __vite_ssr_import_1__.renderHook.wrapper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:112:16)
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at __vite_ssr_import_1__.renderHook.wrapper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:112:16)
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++The above error occurred in the <TestComponent> component:
++
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:337:5)
++    at SetupDraftProvider (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:6:31)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at __vite_ssr_import_1__.renderHook.wrapper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:112:16)
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at __vite_ssr_import_1__.renderHook.wrapper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:112:16)
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++The above error occurred in the <TestComponent> component:
++
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:337:5)
++    at SetupDraftProvider (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:6:31)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at __vite_ssr_import_1__.renderHook.wrapper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:112:16)
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++Error: Uncaught [Error: useSetupDrafts() must be called inside <SetupDraftProvider>]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++    at Module.useSetupDrafts (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:69:11)
++    at __vite_ssr_import_1__.renderHook.wrapper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.test.tsx:112:16)
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++The above error occurred in the <TestComponent> component:
++
++    at TestComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:337:5)
++    at SetupDraftProvider (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web/src/screens/setup/draft.tsx:6:31)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 5 failed) 29ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 19ms
++     → useSetupDrafts() must be called inside <SetupDraftProvider>
++   × useSetupDrafts > keeps one setter identity across updates 2ms
++     → useSetupDrafts() must be called inside <SetupDraftProvider>
++   × useSetupDrafts > lands two writes made in one tick 2ms
++     → useSetupDrafts() must be called inside <SetupDraftProvider>
++   × useSetupDrafts > changes one key at a time 1ms
++     → useSetupDrafts() must be called inside <SetupDraftProvider>
++   × useSetupDrafts > throws naming the provider when none is above it 3ms
++     → expected [Function] to throw an error
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++ ❯ Module.useSetupDrafts src/screens/setup/draft.tsx:69:11
++     67|   const value = useContext(SetupDraftsContext);
++     68|   if (value !== null) {
++     69|     throw new Error("useSetupDrafts() must be called inside <SetupDraf…
++       |           ^
++     70|   }
++     71|   return value;
++ ❯ DraftForm src/screens/setup/draft.test.tsx:10:32
++ ❯ renderWithHooks ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26473:7
++ ❯ recoverFromConcurrentError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:25889:20
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > keeps one setter identity across updates
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++Error: useSetupDrafts() must be called inside <SetupDraftProvider>
++ ❯ Module.useSetupDrafts src/screens/setup/draft.tsx:69:11
++     67|   const value = useContext(SetupDraftsContext);
++     68|   if (value !== null) {
++     69|     throw new Error("useSetupDrafts() must be called inside <SetupDraf…
++       |           ^
++     70|   }
++     71|   return value;
++ ❯ renderHook.wrapper src/screens/setup/draft.test.tsx:112:16
++ ❯ TestComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/react/dist/pure.js:339:27
++ ❯ renderWithHooks ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26473:7
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > throws naming the provider when none is above it
++AssertionError: expected [Function] to throw an error
++
++- Expected: 
++null
++
+++ Received: 
++undefined
++
++ ❯ src/screens/setup/draft.test.tsx:156:54
++    154|   it("throws naming the provider when none is above it", () => {
++    155|     const quiet = vi.spyOn(console, "error").mockImplementation(() => …
++    156|     expect(() => renderHook(() => useSetupDrafts())).toThrow(/SetupDra…
++       |                                                      ^
++    157|     quiet.mockRestore();
++    158|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ Test Files  1 failed (1)
++      Tests  5 failed (5)
++   Start at  16:54:33
++   Duration  1.02s (transform 37ms, setup 56ms, collect 92ms, tests 29ms, environment 230ms, prepare 147ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_no-usecallback.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_no-usecallback.log
+new file mode 100644
+index 00000000..4296eb94
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_no-usecallback.log
+@@ -0,0 +1,33 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w3/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 1 failed) 161ms
++   × useSetupDrafts > keeps one setter identity across updates 4ms
++     → expected [Function setDraft] to be [Function setDraft] // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > keeps one setter identity across updates
++AssertionError: expected [Function setDraft] to be [Function setDraft] // Object.is equality
++
++Compared values have no visual difference.
++
++ ❯ src/screens/setup/draft.test.tsx:125:37
++    123|     act(() => result.current.setDraft("yearsText", "2"));
++    124|     act(() => result.current.setDraft("yearsText", "3"));
++    125|     expect(result.current.setDraft).toBe(first);
++       |                                     ^
++    126|   });
++    127| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  16:54:33
++   Duration  1.25s (transform 38ms, setup 47ms, collect 112ms, tests 161ms, environment 223ms, prepare 280ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-roundtrip.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-roundtrip.log
+new file mode 100644
+index 00000000..d28f5a1f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-roundtrip.log
+@@ -0,0 +1,97 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w1/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 3 failed) 146ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 135ms
++     → expected 1 to be +0 // Object.is equality
++   × useSetupDrafts > lands two writes made in one tick 2ms
++     → expected { yearsText: '3', …(3) } to deeply equal { Object (yearsText, source, ...) }
++   × useSetupDrafts > changes one key at a time 2ms
++     → expected { yearsText: '12', …(3) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected 1 to be +0 // Object.is equality
++
++- Expected
+++ Received
++
++- 0
+++ 1
++
++ ❯ src/screens/setup/draft.test.tsx:87:35
++     85|     expect(screen.getByTestId("unposted").textContent).toBe('["MSFT","…
++     86|     expect(localStorage.length).toBe(0);
++     87|     expect(sessionStorage.length).toBe(0);
++       |                                   ^
++     88|     expect(Storage.prototype.setItem).not.toHaveBeenCalled();
++     89| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++AssertionError: expected { yearsText: '3', …(3) } to deeply equal { Object (yearsText, source, ...) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++    "source": "paste",
++-   "unposted": Array [],
++-   "yearsText": "",
+++   "unposted": Array [
+++     "MSFT",
+++     "NVDA",
+++   ],
+++   "yearsText": "3",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:134:35
++    132|       result.current.setDraft("pasted", "KO");
++    133|     });
++    134|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    135|       yearsText: "",
++    136|       source: "paste",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++AssertionError: expected { yearsText: '12', …(3) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++-   "source": null,
++-   "unposted": Array [],
+++   "source": "paste",
+++   "unposted": Array [
+++     "MSFT",
+++     "NVDA",
+++   ],
++    "yearsText": "12",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:146:35
++    144|     act(() => result.current.setDraft("pasted", "KO"));
++    145|     act(() => result.current.setDraft("yearsText", "12"));
++    146|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    147|       yearsText: "12",
++    148|       source: null,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 2 passed (5)
++   Start at  16:54:35
++   Duration  767ms (transform 30ms, setup 34ms, collect 72ms, tests 146ms, environment 171ms, prepare 76ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-write.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-write.log
+new file mode 100644
+index 00000000..41ba0349
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-write.log
+@@ -0,0 +1,37 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w3/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 1 failed) 164ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 155ms
++     → expected 1 to be +0 // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected 1 to be +0 // Object.is equality
++
++- Expected
+++ Received
++
++- 0
+++ 1
++
++ ❯ src/screens/setup/draft.test.tsx:87:35
++     85|     expect(screen.getByTestId("unposted").textContent).toBe('["MSFT","…
++     86|     expect(localStorage.length).toBe(0);
++     87|     expect(sessionStorage.length).toBe(0);
++       |                                   ^
++     88|     expect(Storage.prototype.setItem).not.toHaveBeenCalled();
++     89| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 4 passed (5)
++   Start at  16:54:31
++   Duration  1.48s (transform 42ms, setup 54ms, collect 120ms, tests 164ms, environment 285ms, prepare 279ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_source-initial.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_source-initial.log
+new file mode 100644
+index 00000000..7db5ad58
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_source-initial.log
+@@ -0,0 +1,68 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w0/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 2 failed) 161ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 151ms
++     → expected { Object (yearsText, source, ...) } to deeply equal { yearsText: '', source: null, …(2) }
++   × useSetupDrafts > changes one key at a time 2ms
++     → expected { yearsText: '12', …(3) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected { Object (yearsText, source, ...) } to deeply equal { yearsText: '', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "",
++-   "source": null,
+++   "source": "paste",
++    "unposted": Array [],
++    "yearsText": "",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:102:20
++    100|       </SetupDraftProvider>,
++    101|     );
++    102|     expect(latest).toEqual({ yearsText: "", source: null, pasted: "", …
++       |                    ^
++    103|   });
++    104| });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++AssertionError: expected { yearsText: '12', …(3) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++-   "source": null,
+++   "source": "paste",
++    "unposted": Array [],
++    "yearsText": "12",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:146:35
++    144|     act(() => result.current.setDraft("pasted", "KO"));
++    145|     act(() => result.current.setDraft("yearsText", "12"));
++    146|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    147|       yearsText: "12",
++    148|       source: null,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 3 passed (5)
++   Start at  16:54:33
++   Duration  1.14s (transform 40ms, setup 46ms, collect 113ms, tests 161ms, environment 216ms, prepare 129ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_stale-closure.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_stale-closure.log
+new file mode 100644
+index 00000000..35c7ae34
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_stale-closure.log
+@@ -0,0 +1,88 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 3 failed) 162ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 149ms
++     → expected '' to be '7' // Object.is equality
++   × useSetupDrafts > lands two writes made in one tick 2ms
++     → expected { yearsText: '', source: null, …(2) } to deeply equal { Object (yearsText, source, ...) }
++   × useSetupDrafts > changes one key at a time 2ms
++     → expected { yearsText: '12', source: null, …(2) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected '' to be '7' // Object.is equality
++
++- Expected
+++ Received
++
++- 7
++
++ ❯ src/screens/setup/draft.test.tsx:81:72
++     79|     await user.click(screen.getByRole("link", { name: "to setup" }));
++     80| 
++     81|     expect((screen.getByLabelText("years") as HTMLInputElement).value)…
++       |                                                                        ^
++     82|     expect((screen.getByLabelText("paste") as HTMLInputElement).checke…
++     83|     expect((screen.getByLabelText("later") as HTMLInputElement).checke…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++AssertionError: expected { yearsText: '', source: null, …(2) } to deeply equal { Object (yearsText, source, ...) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++-   "source": "paste",
+++   "source": null,
++    "unposted": Array [],
++    "yearsText": "",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:134:35
++    132|       result.current.setDraft("pasted", "KO");
++    133|     });
++    134|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    135|       yearsText: "",
++    136|       source: "paste",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > changes one key at a time
++AssertionError: expected { yearsText: '12', source: null, …(2) } to deeply equal { yearsText: '12', source: null, …(2) }
++
++- Expected
+++ Received
++
++  Object {
++-   "pasted": "KO",
+++   "pasted": "",
++    "source": null,
++    "unposted": Array [],
++    "yearsText": "12",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:146:35
++    144|     act(() => result.current.setDraft("pasted", "KO"));
++    145|     act(() => result.current.setDraft("yearsText", "12"));
++    146|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    147|       yearsText: "12",
++    148|       source: null,
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 2 passed (5)
++   Start at  16:54:31
++   Duration  1.48s (transform 44ms, setup 47ms, collect 119ms, tests 162ms, environment 264ms, prepare 43ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_years-initial.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_years-initial.log
+new file mode 100644
+index 00000000..9d7d3704
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_years-initial.log
+@@ -0,0 +1,60 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xrmdtm_4/w2/web
++
++stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/setup/draft.test.tsx (5 tests | 2 failed) 143ms
++   × SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 133ms
++     → expected 'x7' to be '7' // Object.is equality
++   × useSetupDrafts > lands two writes made in one tick 3ms
++     → expected { yearsText: 'x', …(3) } to deeply equal { Object (yearsText, source, ...) }
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
++AssertionError: expected 'x7' to be '7' // Object.is equality
++
++Expected: "7"
++Received: "x7"
++
++ ❯ src/screens/setup/draft.test.tsx:81:72
++     79|     await user.click(screen.getByRole("link", { name: "to setup" }));
++     80| 
++     81|     expect((screen.getByLabelText("years") as HTMLInputElement).value)…
++       |                                                                        ^
++     82|     expect((screen.getByLabelText("paste") as HTMLInputElement).checke…
++     83|     expect((screen.getByLabelText("later") as HTMLInputElement).checke…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/setup/draft.test.tsx > useSetupDrafts > lands two writes made in one tick
++AssertionError: expected { yearsText: 'x', …(3) } to deeply equal { Object (yearsText, source, ...) }
++
++- Expected
+++ Received
++
++  Object {
++    "pasted": "KO",
++    "source": "paste",
++    "unposted": Array [],
++-   "yearsText": "",
+++   "yearsText": "x",
++  }
++
++ ❯ src/screens/setup/draft.test.tsx:134:35
++    132|       result.current.setDraft("pasted", "KO");
++    133|     });
++    134|     expect(result.current.drafts).toEqual({
++       |                                   ^
++    135|       yearsText: "",
++    136|       source: "paste",
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 3 passed (5)
++   Start at  16:54:35
++   Duration  756ms (transform 28ms, setup 33ms, collect 72ms, tests 143ms, environment 179ms, prepare 140ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 00000000..959a9b4d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,186 @@
++{
++  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/screens/setup/draft.test.tsx && npx tsc --noEmit",
++  "repo_head": "ede6a769705b6ff8a46ba35f79d23e2684f79f0d",
++  "tree_patch_sha256": "7bed57060b55e73b2d66e91631a6ae92e28ee7ea8178e3d7f18dce7110d277a9",
++  "mutants_sha256": "250054b6c8049edf3b931588321d6042a03aa0b13dae5cc1fe8a26e6ccd0aab2",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 10,
++  "started": "2026-11-21T22:54:23Z",
++  "baselines": [
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 7.8,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "ab1988ff10fc1bb437352abee99d957e67f5bb62c3797761e21a19d15cca921f"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 7.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "ec309dd4d7fa2a052c9d3eb9310704a13380fcb1165997a2e5126b5fa93e76f6"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 7.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "5b814ca76b5ede4faaade3ba7f20646092d36f119ccaa506ccf7782b86d58974"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 7.9,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "43e90324ef7185203856a0b1ae979018ef1126bb4a45f16fe4b45ae6319b3967"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/setup/draft.tsx:48:drop-defaulted-argument:1",
++      "cycle": "cycle-1",
++      "operator": "drop-defaulted-argument",
++      "file": "web/src/screens/setup/draft.tsx",
++      "line": 48,
++      "original": "    pasted: \"\",",
++      "mutated": "    ",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_48_drop-defaulted-argument_1.log",
++      "log_sha256": "acd8765837bddf9eae2c1a09433c590901875c251a709931d36e48819b3e88a9"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:49:drop-defaulted-argument:1",
++      "cycle": "cycle-1",
++      "operator": "drop-defaulted-argument",
++      "file": "web/src/screens/setup/draft.tsx",
++      "line": 49,
++      "original": "    unposted: [],",
++      "mutated": "    ",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_49_drop-defaulted-argument_1.log",
++      "log_sha256": "5684cafc7d80b5ed0cfe40fbd28a4c341c6359c2cf4bb1933948ca1532f47991"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:stale-closure",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "setDrafts((previous) => ({ ...previous, [key]: value }));",
++      "new": "setDrafts({ ...drafts, [key]: value });",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_stale-closure.log",
++      "log_sha256": "2544ec2fab2b6f4b19ac13d606a62881f8a8b656e4a30b85c00e157a574417cd"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:session-write",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "setDrafts((previous) => ({ ...previous, [key]: value }));",
++      "new": "sessionStorage.setItem(\"d\", \"x\");\n      setDrafts((previous) => ({ ...previous, [key]: value }));",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.0,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-write.log",
++      "log_sha256": "17a26d2bb22f104bb36eee246a2233941031386b73c04155a5620a60ad3d6327"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:no-usecallback",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => ({ ...previous, [key]: value }));\n    },\n    [],\n  );",
++      "new": "const setDraft = <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n    setDrafts((previous) => ({ ...previous, [key]: value }));\n  };",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.8,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_no-usecallback.log",
++      "log_sha256": "ec2fe489eddb8f46a550472ecbab3f0630a6a9723ea84c99dca49699e925a122"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:all-to-years",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "({ ...previous, [key]: value })",
++      "new": "({ ...previous, yearsText: value as string })",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_all-to-years.log",
++      "log_sha256": "33b4ae9f9d13a639f00f6da80b234bdca31fd654c826773e8a092c0ac0851daa"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:source-initial",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "source: null,",
++      "new": "source: \"paste\",",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.7,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_source-initial.log",
++      "log_sha256": "b4c9644c89fc32bcd0675a0454028994858a5680551c783263b8d64db1b3a724"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:guard-negate",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "if (value === null) {",
++      "new": "if (value !== null) {",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.6,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_guard-negate.log",
++      "log_sha256": "eefcfffbfdc9eb99b89fbaed2a604880a9ea86e880b7adff0df5a3a05a070064"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:years-initial",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "yearsText: \"\",\n    source",
++      "new": "yearsText: \"x\",\n    source",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_years-initial.log",
++      "log_sha256": "c714c4a98982c298edd35db8b0631f1319307457e157fd6cef16ff693c647948"
++    },
++    {
++      "id": "web/src/screens/setup/draft.tsx:manual:session-roundtrip",
++      "operator": "manual",
++      "file": "web/src/screens/setup/draft.tsx",
++      "old": "  const [drafts, setDrafts] = useState<SetupDrafts>(() => ({\n    yearsText: \"\",\n    source: null,\n    pasted: \"\",\n    unposted: [],\n  }));\n\n  // A functional update, so two writes in one tick both land; an empty\n  // dependency list, so a consumer may list the setter in its own.\n  const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => ({ ...previous, [key]: value }));\n    },\n    [],\n  );",
++      "new": "  const [drafts, setDrafts] = useState<SetupDrafts>(() =>\n    JSON.parse(\n      sessionStorage.getItem(\"d\") ??\n        '{\"yearsText\":\"\",\"source\":null,\"pasted\":\"\",\"unposted\":[]}',\n    ),\n  );\n  const setDraft = useCallback(\n    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {\n      setDrafts((previous) => {\n        const next = { ...previous, [key]: value };\n        sessionStorage.setItem(\"d\", JSON.stringify(next));\n        return next;\n      });\n    },\n    [],\n  );",
++      "cycle": "cycle-1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_setup_draft.tsx_manual_session-roundtrip.log",
++      "log_sha256": "d1138159ad2c2a7520d3714ce1fe52fd22eb625acdb9c2f3c078e6bc13e85ce1"
++    }
++  ],
++  "finished": "2026-11-21T22:54:36Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-1-drafts.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-1-drafts.log
+new file mode 100644
+index 00000000..e57185c6
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/red-cycle-1-drafts.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/setup/draft.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/setup/draft.test.tsx [ src/screens/setup/draft.test.tsx ]
++Error: Failed to resolve import "./draft" from "web/src/screens/setup/draft.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/setup/draft.test.tsx:6:69
++  4  |  import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
++  5  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++  6  |  import { SetupDraftProvider, useSetupDrafts } from "./draft";
++     |                                                      ^
++  7  |  function DraftForm() {
++  8  |    const { drafts, setDraft } = useSetupDrafts();
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  16:52:25
++   Duration  500ms (transform 16ms, setup 36ms, collect 0ms, tests 0ms, environment 172ms, prepare 111ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-tasks.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-tasks.md
+index 2f11c190..0a452c50 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-tasks.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-tasks.md
+@@ -102,7 +102,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
+ 
+ ### Mandatory Component Tests
+ 
+-- [ ] T001 [P] Implement TC-COMP-105 (Drafts survive navigating away and back; nothing in browser storage) in a new `web/src/screens/setup/draft.test.tsx`, with a `// Implements TC-COMP-105` comment.
++- [x] T001 [P] Implement TC-COMP-105 (Drafts survive navigating away and back; nothing in browser storage) in a new `web/src/screens/setup/draft.test.tsx`, with a `// Implements TC-COMP-105` comment.
+   - **Harness.** `beforeEach` clears `localStorage` and `sessionStorage` and spies on `Storage.prototype.setItem`. Render `<SetupDraftProvider><MemoryRouter initialEntries={["/setup"]}><Routes>…</Routes></MemoryRouter></SetupDraftProvider>`. The `/setup` route renders a test-local `DraftForm`: an `input` labelled `years` bound to `drafts.yearsText`, two radios labelled `paste` and `later` bound to `drafts.source`, a `textarea` labelled `pasted` bound to `drafts.pasted`, a button `keep unposted` that calls `setDraft("unposted", ["MSFT", "NVDA"])`, an element `data-testid="unposted"` rendering `JSON.stringify(drafts.unposted)`, and a `Link` to `/home`. The `/home` route renders a stub with a `Link` back to `/setup`. Test-local labels are not owner-facing.
+   - **Steps (the TC's).**
+     1. With `userEvent`, type `7` into `years`, choose `paste`, type `AAPL, MSFT` into `pasted` and press `keep unposted`.
+@@ -119,7 +119,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
+ 
+ ### Additional Unit Tests
+ 
+-- [ ] T002 [P] Write the drafts' update and identity cases in `web/src/screens/setup/draft.test.tsx` (DAC-E4-2, AC-3). This runs sequentially with T001 (one file). A probe assigns `useSetupDrafts()` to `latest` and counts its renders. Cases:
++- [x] T002 [P] Write the drafts' update and identity cases in `web/src/screens/setup/draft.test.tsx` (DAC-E4-2, AC-3). This runs sequentially with T001 (one file). A probe assigns `useSetupDrafts()` to `latest` and counts its renders. Cases:
+   - (a) **Stable setter.** `latest.setDraft` is the same function (`toBe`) before and after three `setDraft` calls, so a consumer may list it in effect dependencies.
+   - (b) **Two writes in one tick both land.** Inside one `act`, call `latest.setDraft("source", "paste")` then `latest.setDraft("pasted", "KO")`. `latest.drafts` `toEqual({ yearsText: "", source: "paste", pasted: "KO", unposted: [] })`.
+   - (c) **One key at a time.** After `setDraft("yearsText", "12")`, the other three drafts equal their earlier values.
+@@ -214,7 +214,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
+ 
+ **Purpose**: The three modules, each in its own TDD cycle.
+ 
+-- [ ] T008 Create `web/src/screens/setup/draft.tsx` (T001 and T002 RED first).
++- [x] T008 Create `web/src/screens/setup/draft.tsx` (T001 and T002 RED first).
+   - **Exports.** `interface SetupDrafts` verbatim from setup-ui §2.2 with its comments (`yearsText: string`, `source: "paste" | "later" | null`, `pasted: string`, `unposted: string[]`); `SetupDraftProvider(props: { children: ReactNode }): JSX.Element`; `useSetupDrafts(): { drafts: SetupDrafts; setDraft<K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void }`.
+   - **State.** `useState<SetupDrafts>(() => ({ yearsText: "", source: null, pasted: "", unposted: [] }))`, a fresh object per provider, so a remounted provider (a reload) starts empty.
+   - **Setter.** `setDraft` is a `useCallback` with an empty dependency list over the functional update `setDrafts((previous) => ({ ...previous, [key]: value }))`.
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1.md
+index b4f12d9c..1f993aa0 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1.md
+@@ -10,7 +10,7 @@ component: FactorFlow-v2
+ type: feature
+ priority: P1
+ estimate: 3
+-status: planning
++status: in-progress
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-10-28
+diff --git a/web/src/screens/setup/draft.test.tsx b/web/src/screens/setup/draft.test.tsx
+new file mode 100644
+index 00000000..7a53ea1c
+--- /dev/null
++++ b/web/src/screens/setup/draft.test.tsx
+@@ -0,0 +1,159 @@
++import { act, render, renderHook, screen } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import type { JSX } from "react";
++import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { SetupDraftProvider, type SetupDrafts, useSetupDrafts } from "./draft";
++
++/** A test-local form bound to the drafts; its labels are not owner-facing. */
++function DraftForm(): JSX.Element {
++  const { drafts, setDraft } = useSetupDrafts();
++  return (
++    <div>
++      <label>
++        years
++        <input value={drafts.yearsText} onChange={(e) => setDraft("yearsText", e.target.value)} />
++      </label>
++      <label>
++        paste
++        <input
++          type="radio"
++          name="source"
++          checked={drafts.source === "paste"}
++          onChange={() => setDraft("source", "paste")}
++        />
++      </label>
++      <label>
++        later
++        <input
++          type="radio"
++          name="source"
++          checked={drafts.source === "later"}
++          onChange={() => setDraft("source", "later")}
++        />
++      </label>
++      <label>
++        pasted
++        <textarea value={drafts.pasted} onChange={(e) => setDraft("pasted", e.target.value)} />
++      </label>
++      <button type="button" onClick={() => setDraft("unposted", ["MSFT", "NVDA"])}>
++        keep unposted
++      </button>
++      <div data-testid="unposted">{JSON.stringify(drafts.unposted)}</div>
++      <Link to="/home">to home</Link>
++    </div>
++  );
++}
++
++// Implements TC-COMP-105
++describe("SetupDraftProvider above a route change", () => {
++  beforeEach(() => {
++    localStorage.clear();
++    sessionStorage.clear();
++    vi.spyOn(Storage.prototype, "setItem");
++  });
++  afterEach(() => {
++    vi.restoreAllMocks();
++  });
++
++  it("keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage", async () => {
++    const user = userEvent.setup();
++    const view = render(
++      <SetupDraftProvider>
++        <MemoryRouter initialEntries={["/setup"]}>
++          <Routes>
++            <Route path="/setup" element={<DraftForm />} />
++            <Route path="/home" element={<Link to="/setup">to setup</Link>} />
++          </Routes>
++        </MemoryRouter>
++      </SetupDraftProvider>,
++    );
++
++    await user.type(screen.getByLabelText("years"), "7");
++    await user.click(screen.getByLabelText("paste"));
++    await user.type(screen.getByLabelText("pasted"), "AAPL, MSFT");
++    await user.click(screen.getByRole("button", { name: "keep unposted" }));
++
++    await user.click(screen.getByRole("link", { name: "to home" }));
++    expect(screen.queryByLabelText("years")).toBeNull();
++    await user.click(screen.getByRole("link", { name: "to setup" }));
++
++    expect((screen.getByLabelText("years") as HTMLInputElement).value).toBe("7");
++    expect((screen.getByLabelText("paste") as HTMLInputElement).checked).toBe(true);
++    expect((screen.getByLabelText("later") as HTMLInputElement).checked).toBe(false);
++    expect((screen.getByLabelText("pasted") as HTMLTextAreaElement).value).toBe("AAPL, MSFT");
++    expect(screen.getByTestId("unposted").textContent).toBe('["MSFT","NVDA"]');
++    expect(localStorage.length).toBe(0);
++    expect(sessionStorage.length).toBe(0);
++    expect(Storage.prototype.setItem).not.toHaveBeenCalled();
++
++    // A freshly mounted provider starts empty (DAC-E4-2).
++    view.unmount();
++    let latest: SetupDrafts | undefined;
++    function Probe(): JSX.Element {
++      latest = useSetupDrafts().drafts;
++      return <span />;
++    }
++    render(
++      <SetupDraftProvider>
++        <Probe />
++      </SetupDraftProvider>,
++    );
++    expect(latest).toEqual({ yearsText: "", source: null, pasted: "", unposted: [] });
++  });
++});
++
++describe("useSetupDrafts", () => {
++  function setup() {
++    const renders = { count: 0 };
++    const result = renderHook(
++      () => {
++        renders.count += 1;
++        return useSetupDrafts();
++      },
++      { wrapper: SetupDraftProvider },
++    );
++    return { ...result, renders };
++  }
++
++  it("keeps one setter identity across updates", () => {
++    const { result } = setup();
++    const first = result.current.setDraft;
++    act(() => result.current.setDraft("yearsText", "1"));
++    act(() => result.current.setDraft("yearsText", "2"));
++    act(() => result.current.setDraft("yearsText", "3"));
++    expect(result.current.setDraft).toBe(first);
++  });
++
++  it("lands two writes made in one tick", () => {
++    const { result } = setup();
++    act(() => {
++      result.current.setDraft("source", "paste");
++      result.current.setDraft("pasted", "KO");
++    });
++    expect(result.current.drafts).toEqual({
++      yearsText: "",
++      source: "paste",
++      pasted: "KO",
++      unposted: [],
++    });
++  });
++
++  it("changes one key at a time", () => {
++    const { result } = setup();
++    act(() => result.current.setDraft("pasted", "KO"));
++    act(() => result.current.setDraft("yearsText", "12"));
++    expect(result.current.drafts).toEqual({
++      yearsText: "12",
++      source: null,
++      pasted: "KO",
++      unposted: [],
++    });
++  });
++
++  it("throws naming the provider when none is above it", () => {
++    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
++    expect(() => renderHook(() => useSetupDrafts())).toThrow(/SetupDraftProvider/);
++    quiet.mockRestore();
++  });
++});
+diff --git a/web/src/screens/setup/draft.tsx b/web/src/screens/setup/draft.tsx
+new file mode 100644
+index 00000000..d8673329
+--- /dev/null
++++ b/web/src/screens/setup/draft.tsx
+@@ -0,0 +1,72 @@
++import {
++  type JSX,
++  type ReactNode,
++  createContext,
++  useCallback,
++  useContext,
++  useMemo,
++  useState,
++} from "react";
++
++/*
++ * The setup screen's drafts (CAP-003-E4-S1; component design setup-ui 2.2
++ * and 3; system design 4.4; DEC-0202 as the owner amended it). The four
++ * values the owner enters are held in React state only, so they survive a
++ * route change while this provider sits above the route, and a provider
++ * mounted afresh (a reload) starts empty (DAC-E4-2, DAC-E4-S1-1). Nothing is
++ * written to any browser store.
++ *
++ * The shell mounts the provider inside `ShellProvider` and outside the main
++ * region's route map (CAP-003-E4-S6); this story mounts nothing.
++ */
++
++/** Everything the owner has typed or chosen in setup and not yet saved (setup-ui 2.2). */
++export interface SetupDrafts {
++  /** Step 2's field text, kept as typed. */
++  yearsText: string;
++  /** Step 3's radio choice; `null` until one is made. */
++  source: "paste" | "later" | null;
++  /** Step 3's pasted text, kept as typed. */
++  pasted: string;
++  /** Symbols step 3 could not post, kept for the owner to correct. */
++  unposted: string[];
++}
++
++interface SetupDraftsValue {
++  drafts: SetupDrafts;
++  /** Changes one draft and leaves the other three as they are (AC-3). */
++  setDraft<K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void;
++}
++
++const SetupDraftsContext = createContext<SetupDraftsValue | null>(null);
++
++/** Holds the four drafts for the session above the `/setup` route (DAC-E4-2). */
++export function SetupDraftProvider({ children }: { children: ReactNode }): JSX.Element {
++  const [drafts, setDrafts] = useState<SetupDrafts>(() => ({
++    yearsText: "",
++    source: null,
++    pasted: "",
++    unposted: [],
++  }));
++
++  // A functional update, so two writes in one tick both land; an empty
++  // dependency list, so a consumer may list the setter in its own.
++  const setDraft = useCallback(
++    <K extends keyof SetupDrafts>(key: K, value: SetupDrafts[K]): void => {
++      setDrafts((previous) => ({ ...previous, [key]: value }));
++    },
++    [],
++  );
++
++  const value = useMemo(() => ({ drafts, setDraft }), [drafts, setDraft]);
++  return <SetupDraftsContext.Provider value={value}>{children}</SetupDraftsContext.Provider>;
++}
++
++/** Reads and writes the setup drafts; throws outside `SetupDraftProvider`. */
++export function useSetupDrafts(): SetupDraftsValue {
++  const value = useContext(SetupDraftsContext);
++  if (value === null) {
++    throw new Error("useSetupDrafts() must be called inside <SetupDraftProvider>");
++  }
++  return value;
++}

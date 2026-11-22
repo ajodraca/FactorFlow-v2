@@ -1,0 +1,314 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w2/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 20 failed) 46ms
+   × step done flags follow server facts; current is the first not done > walks the four steps cumulatively 13ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested 2ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is running 2ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling 1ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded 1ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial 1ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed 3ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled 1ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned 1ms
+     → expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+   × step done flags follow server facts; current is the first not done > takes the first step not done, not the step after the last done 1ms
+     → expected false to be true // Object.is equality
+   × step done flags follow server facts; current is the first not done > counts a single followed stock as step 3 done 1ms
+     → expected false to be true // Object.is equality
+   × step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo 1ms
+     → expected false to be true // Object.is equality
+   × step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts 1ms
+     → expected 2 to be 4 // Object.is equality
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step 1ms
+     → expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a transport failure the same way 1ms
+     → expected 'loading' to be 'error' // Object.is equality
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > blocks step 4 only while the followed count is a known 0 1ms
+     → expected 'ready' to be 'blocked' // Object.is equality
+   × reads, re-reads and unknown facts > reports loading while any of the four facts is pending, and not once all settled 1ms
+     → expected true to be false // Object.is equality
+   × reads, re-reads and unknown facts > re-reads on Try again without touching the other read 1ms
+     → expected 'loading' to be 'error' // Object.is equality
+   × reads, re-reads and unknown facts > keeps the value while a re-read is in flight, then carries the last answer into the error 1ms
+     → expected 'loading' to be 'ok' // Object.is equality
+   × reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4 1ms
+     → expected 2 to be 3 // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 151ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 20 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > walks the four steps cumulatively
+AssertionError: expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "1": true,
+-   "2": true,
++   "2": false,
+    "3": false,
+    "4": false,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:189:29
+    187|     depth(5);
+    188|     hook = await stepsFor({ health: HEALTH_OK, attention: attentionOk(…
+    189|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: false, 4: f…
+       |                             ^
+    190|     expect(hook.state.current).toBe(3);
+    191| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is running
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned
+AssertionError: expected { '1': true, '2': false, …(2) } to deeply equal { '1': true, '2': true, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "1": true,
+-   "2": true,
+-   "3": true,
++   "2": false,
++   "3": false,
+    "4": true,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:215:29
+    213|       attention: attentionOk(downloadIn(state)),
+    214|     });
+    215|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: tr…
+       |                             ^
+    216|     expect(hook.state.current).toBe(4);
+    217|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > takes the first step not done, not the step after the last done
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/screens/setup/use-setup-state.test.ts:234:32
+    232|     count(12);
+    233|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    234|     expect(hook.state.done[3]).toBe(true);
+       |                                ^
+    235|     expect(hook.state.current).toBe(2);
+    236|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > counts a single followed stock as step 3 done
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/screens/setup/use-setup-state.test.ts:242:32
+    240|     count(1);
+    241|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    242|     expect(hook.state.done[3]).toBe(true);
+       |                                ^
+    243|     expect(hook.state.current).toBe(4);
+    244|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > re-derives on every visit and drops the in-session goTo
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/screens/setup/use-setup-state.test.ts:278:32
+    276|     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(2);
+    277|     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
+    278|     expect(hook.state.done[2]).toBe(true);
+       |                                ^
+    279|     expect(hook.state.current).toBe(3);
+    280|     expect(hook.state.drafts.pasted).toBe("AAPL");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts
+AssertionError: expected 2 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 2
+
+ ❯ src/screens/setup/use-setup-state.test.ts:287:32
+    285|     count(12);
+    286|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    287|     expect(hook.state.current).toBe(4);
+       |                                ^
+    288|     const draftsBefore = hook.state.drafts;
+    289|     act(() => hook.state.goTo(2));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step
+AssertionError: expected { kind: 'loading' } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: History depth could not be read.],
+-   "kind": "error",
+-   "last": null,
++   "kind": "loading",
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:308:30
+    306|     expect(hook.state.done[2]).toBe(false);
+    307|     expect(hook.state.current).toBe(2);
+    308|     expect(hook.state.depth).toEqual({ kind: "error", error: failure, …
+       |                              ^
+    309|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+    310|     expect(hook.state.activeCount).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a transport failure the same way
+AssertionError: expected 'loading' to be 'error' // Object.is equality
+
+Expected: "error"
+Received: "loading"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:323:35
+    321|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    322|     const hook = await mount();
+    323|     expect(hook.state.depth.kind).toBe("error");
+       |                                   ^
+    324|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+    325|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > blocks step 4 only while the followed count is a known 0
+AssertionError: expected 'ready' to be 'blocked' // Object.is equality
+
+Expected: "blocked"
+Received: "ready"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:334:30
+    332|     act(() => hook.state.goTo(4));
+    333|     expect(hook.state.current).toBe(4);
+    334|     expect(hook.state.step4).toBe("blocked");
+       |                              ^
+    335| 
+    336|     count(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > reports loading while any of the four facts is pending, and not once all settled
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/screens/setup/use-setup-state.test.ts:380:32
+    378|     expect(hook.state.loading).toBe(true);
+    379|     await act(async () => pendingDepth.resolve({ years: 5, updatedAt: …
+    380|     expect(hook.state.loading).toBe(false);
+       |                                ^
+    381| 
+    382|     const pendingCount = deferred<Awaited<ReturnType<typeof listInstru…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > re-reads on Try again without touching the other read
+AssertionError: expected 'loading' to be 'error' // Object.is equality
+
+Expected: "error"
+Received: "loading"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:413:35
+    411|     current = shell({ health: HEALTH_OK, attention: attentionOk(null) …
+    412|     const hook = await mount();
+    413|     expect(hook.state.depth.kind).toBe("error");
+       |                                   ^
+    414| 
+    415|     vi.mocked(getHistoryDepth).mockResolvedValue({ years: 8, updatedAt…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > keeps the value while a re-read is in flight, then carries the last answer into the error
+AssertionError: expected 'loading' to be 'ok' // Object.is equality
+
+Expected: "ok"
+Received: "loading"
+
+ ❯ src/screens/setup/use-setup-state.test.ts:438:35
+    436|     vi.mocked(getHistoryDepth).mockReturnValue(pending.promise);
+    437|     act(() => hook.state.reread("depth"));
+    438|     expect(hook.state.depth.kind).toBe("ok");
+       |                                   ^
+    439|     expect(hook.state.done[2]).toBe(true);
+    440| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > treats a failed count as not done but does not block step 4
+AssertionError: expected 2 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ src/screens/setup/use-setup-state.test.ts:465:32
+    463|     const hook = await mount();
+    464|     expect(hook.state.done[3]).toBe(false);
+    465|     expect(hook.state.current).toBe(3);
+       |                                ^
+    466|     expect(hook.state.activeCount.kind).toBe("error");
+    467|     expect(hook.state.step4).toBe("ready");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  20 failed | 12 passed (32)
+   Start at  16:58:20
+   Duration  1.04s (transform 109ms, setup 106ms, collect 213ms, tests 197ms, environment 511ms, prepare 288ms)
+

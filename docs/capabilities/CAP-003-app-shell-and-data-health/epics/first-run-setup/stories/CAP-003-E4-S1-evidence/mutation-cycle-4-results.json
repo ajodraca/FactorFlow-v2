@@ -1,0 +1,79 @@
+{
+  "command": "cd '{workdir}' && ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run web/src/screens/setup/use-setup-state.test.ts web/src/screens/setup/draft.test.tsx && npx tsc --noEmit",
+  "repo_head": "ba695a5afaa3af0e40ffb138d2f287605c8946e2",
+  "tree_patch_sha256": "a1379421d15e2e0fe2058edfdb95d82fa68f5c47cbdaeaf8a0b113244821c228",
+  "mutants_sha256": "e5c7c587d89a3ecad05bd86e7c778b9441524bc190688817059d2a224d960d19",
+  "schema": 1,
+  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutants-cycle-4.json",
+  "jobs": 3,
+  "planned": 3,
+  "started": "2026-11-21T23:27:26Z",
+  "baselines": [
+    {
+      "worker": 0,
+      "exit_code": 0,
+      "seconds": 6.5,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log",
+      "log_sha256": "418dd4f33e0cbc7e4306ee283b6044a65de02e9008dc0a79f5eb756dc470da8e"
+    },
+    {
+      "worker": 1,
+      "exit_code": 0,
+      "seconds": 6.6,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log",
+      "log_sha256": "9e82f6b4afaa1b69dcd59f1dd22f845c80a8524a1ea57c7e63f165bceef4f64a"
+    },
+    {
+      "worker": 2,
+      "exit_code": 0,
+      "seconds": 6.6,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log",
+      "log_sha256": "33f44234f35e50ec7c59122ec35eda9789d5c136e8729f2035fa7e2f5b5a16eb"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "web/src/screens/setup/use-setup-state.ts:manual:swallow-other-error",
+      "operator": "manual",
+      "file": "web/src/screens/setup/use-setup-state.ts",
+      "old": "          throw error;",
+      "new": "          return;",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.8,
+      "worker": 0,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_swallow-other-error.log",
+      "log_sha256": "f8660e19bbd0efe0acca8b10c598c5fad9e144883834c7a600e6a817a281fe8d"
+    },
+    {
+      "id": "web/src/screens/setup/use-setup-state.ts:manual:last-from-error-dropped",
+      "operator": "manual",
+      "file": "web/src/screens/setup/use-setup-state.ts",
+      "old": "return previous.kind === \"error\" ? previous.last : null;",
+      "new": "return null;",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.9,
+      "worker": 1,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_last-from-error-dropped.log",
+      "log_sha256": "1c890dab96f084455e7ca2d56b00a63ae7c52d17462f0cfc0a5f51f96239cd12"
+    },
+    {
+      "id": "web/src/screens/setup/use-setup-state.ts:manual:checked-at-epoch",
+      "operator": "manual",
+      "file": "web/src/screens/setup/use-setup-state.ts",
+      "old": "setState({ kind: \"ok\", data, checkedAt: new Date() });",
+      "new": "setState({ kind: \"ok\", data, checkedAt: new Date(0) });",
+      "cycle": "cycle-4",
+      "state": "killed",
+      "exit_code": 1,
+      "seconds": 1.8,
+      "worker": 2,
+      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_setup_use-setup-state.ts_manual_checked-at-epoch.log",
+      "log_sha256": "a6abf95499b95e647215ca9715dc3ccae990a9f3a6a5b85a00d3992eed728ae4"
+    }
+  ],
+  "finished": "2026-11-21T23:27:34Z"
+}

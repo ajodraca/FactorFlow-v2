@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w3/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 1 failed) 44ms
+   × step done flags follow server facts; current is the first not done > reads step 1 as done once health has answered, even when now unreachable 5ms
+     → expected false to be true // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 142ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > reads step 1 as done once health has answered, even when now unreachable
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/screens/setup/use-setup-state.test.ts:250:32
+    248|     count(0);
+    249|     let hook = await stepsFor({ health: HEALTH_UNREACHABLE_AFTER_ANSWE…
+    250|     expect(hook.state.done[1]).toBe(true);
+       |                                ^
+    251|     hook = await stepsFor({ health: HEALTH_UNREACHABLE_NEVER });
+    252|     expect(hook.state.done[1]).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 31 passed (32)
+   Start at  16:58:29
+   Duration  765ms (transform 78ms, setup 77ms, collect 166ms, tests 186ms, environment 390ms, prepare 307ms)
+

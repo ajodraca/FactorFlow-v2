@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-r006kv7r/w3/web
+
+ ❯ src/screens/setup/copy.test.ts (144 tests | 1 failed) 14ms
+   × setup copy is complete and verbatim > titles exactly four steps, so the paper trading step is absent 3ms
+     → expected [ '1', '2', '3', '4', '5' ] to deeply equal [ '1', '2', '3', '4' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > titles exactly four steps, so the paper trading step is absent
+AssertionError: expected [ '1', '2', '3', '4', '5' ] to deeply equal [ '1', '2', '3', '4' ]
+
+- Expected
++ Received
+
+  Array [
+    "1",
+    "2",
+    "3",
+    "4",
++   "5",
+  ]
+
+ ❯ src/screens/setup/copy.test.ts:241:43
+    239| 
+    240|   it("titles exactly four steps, so the paper trading step is absent",…
+    241|     expect(Object.keys(copy.STEP_TITLES)).toEqual(["1", "2", "3", "4"]…
+       |                                           ^
+    242|   });
+    243| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 143 passed (144)
+   Start at  17:04:39
+   Duration  811ms (transform 31ms, setup 33ms, collect 29ms, tests 14ms, environment 161ms, prepare 32ms)
+

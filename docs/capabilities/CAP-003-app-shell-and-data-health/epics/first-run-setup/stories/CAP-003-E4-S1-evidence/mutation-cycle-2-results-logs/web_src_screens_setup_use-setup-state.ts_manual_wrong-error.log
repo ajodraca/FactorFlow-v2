@@ -1,0 +1,102 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w0/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 3 failed) 44ms
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step 5ms
+     → expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+   × a failed depth read carries its error; step 4 is blocked at zero stocks > carries a transport failure the same way 1ms
+     → expected ApiUnreachableError: x to be ApiUnreachableError: x // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: ApiUnreachableError: x
+Received: serializes to the same string
+
+   × reads, re-reads and unknown facts > keeps the value while a re-read is in flight, then carries the last answer into the error 1ms
+     → expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 135ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a depth read's ApiError for the step to render, and no other step
+AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: History depth could not be read.],
++   "error": [ApiUnreachableError: x],
+    "kind": "error",
+    "last": null,
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:308:30
+    306|     expect(hook.state.done[2]).toBe(false);
+    307|     expect(hook.state.current).toBe(2);
+    308|     expect(hook.state.depth).toEqual({ kind: "error", error: failure, …
+       |                              ^
+    309|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+    310|     expect(hook.state.activeCount).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > a failed depth read carries its error; step 4 is blocked at zero stocks > carries a transport failure the same way
+AssertionError: expected ApiUnreachableError: x to be ApiUnreachableError: x // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: ApiUnreachableError: x
+Received: serializes to the same string
+
+
+Compared values have no visual difference.
+
+ ❯ src/screens/setup/use-setup-state.test.ts:324:73
+    322|     const hook = await mount();
+    323|     expect(hook.state.depth.kind).toBe("error");
+    324|     expect(hook.state.depth.kind === "error" && hook.state.depth.error…
+       |                                                                         ^
+    325|   });
+    326| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > reads, re-reads and unknown facts > keeps the value while a re-read is in flight, then carries the last answer into the error
+AssertionError: expected { kind: 'error', …(2) } to deeply equal { kind: 'error', …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "error": [ApiError: History depth could not be read.],
++   "error": [ApiUnreachableError: x],
+    "kind": "error",
+    "last": Object {
+      "checkedAt": 2026-11-21T22:58:35.814Z,
+      "data": Object {
+        "updatedAt": "2026-09-06T18:00:00Z",
+        "years": 5,
+      },
+    },
+  }
+
+ ❯ src/screens/setup/use-setup-state.test.ts:445:30
+    443|     });
+    444|     await act(async () => pending.reject(failure));
+    445|     expect(hook.state.depth).toEqual({
+       |                              ^
+    446|       kind: "error",
+    447|       error: failure,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 29 passed (32)
+   Start at  16:58:34
+   Duration  937ms (transform 88ms, setup 81ms, collect 192ms, tests 179ms, environment 378ms, prepare 423ms)
+

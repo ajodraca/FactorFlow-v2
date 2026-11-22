@@ -1,0 +1,122 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qi304qmw/w2/web
+
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/setup/use-setup-state.test.ts (27 tests | 11 failed) 50ms
+   × step done flags follow server facts; current is the first not done > walks the four steps cumulatively 15ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested 2ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is running 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > counts a single followed stock as step 3 done 1ms
+     → expected 5 to be 4 // Object.is equality
+   × step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts 1ms
+     → expected 5 to be 4 // Object.is equality
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 155ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > walks the four steps cumulatively
+AssertionError: expected 5 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 5
+
+ ❯ src/screens/setup/use-setup-state.test.ts:196:32
+    194|     hook = await stepsFor({ health: HEALTH_OK, attention: attentionOk(…
+    195|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: fa…
+    196|     expect(hook.state.current).toBe(4);
+       |                                ^
+    197|   });
+    198| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is requested
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is running
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelling
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is succeeded
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is partial
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is failed
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is cancelled
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > marks step 4 done once a download is abandoned
+AssertionError: expected 5 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 5
+
+ ❯ src/screens/setup/use-setup-state.test.ts:216:32
+    214|     });
+    215|     expect(hook.state.done).toEqual({ 1: true, 2: true, 3: true, 4: tr…
+    216|     expect(hook.state.current).toBe(4);
+       |                                ^
+    217|   });
+    218| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > counts a single followed stock as step 3 done
+AssertionError: expected 5 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 5
+
+ ❯ src/screens/setup/use-setup-state.test.ts:243:32
+    241|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    242|     expect(hook.state.done[3]).toBe(true);
+    243|     expect(hook.state.current).toBe(4);
+       |                                ^
+    244|   });
+    245| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  src/screens/setup/use-setup-state.test.ts > step done flags follow server facts; current is the first not done > lets a done step be revisited without touching done or drafts
+AssertionError: expected 5 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 5
+
+ ❯ src/screens/setup/use-setup-state.test.ts:287:32
+    285|     count(12);
+    286|     const hook = await stepsFor({ health: HEALTH_OK, attention: attent…
+    287|     expect(hook.state.current).toBe(4);
+       |                                ^
+    288|     const draftsBefore = hook.state.drafts;
+    289|     act(() => hook.state.goTo(2));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  11 failed | 21 passed (32)
+   Start at  16:58:18
+   Duration  1.07s (transform 79ms, setup 98ms, collect 215ms, tests 205ms, environment 514ms, prepare 308ms)
+
