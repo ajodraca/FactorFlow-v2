@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ApiError, ApiUnreachableError, startAcquisitionRun } from "../../api/client";
 import type { RunState } from "../../api/types";
 import { useShell } from "../../app/shell-context";
-import type { Attention, LatestDownload } from "../../app/shell-types";
+import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
 import { formatClock, formatCount, formatInstant } from "../../components/patterns/format";
 import { Absent, NotDeterminable } from "../../components/patterns/presence";
 import { StatusBadge } from "../../components/patterns/status-badge";
@@ -43,11 +43,9 @@ type Shown = Pick<LatestDownload, "state" | "progress"> & {
 
 type Outcome = { kind: "refused"; step: 2 | 3 } | { kind: "failed"; reason: string } | null;
 
-function latestOf(
-  attention: { kind: string } & Partial<{ data: Attention; last: { data: Attention } | null }>,
-): LatestDownload | null {
+function latestOf(attention: ReadState<Attention>): LatestDownload | null {
   if (attention.kind === "ok") {
-    return attention.data?.latest_download ?? null;
+    return attention.data.latest_download;
   }
   return attention.kind === "error" ? (attention.last?.data.latest_download ?? null) : null;
 }
@@ -55,6 +53,7 @@ function latestOf(
 export function StepDownload({ state }: { state: SetupState }) {
   const { attention, refresh } = useShell();
   const [ours, setOurs] = useState<{ runId: string; queuedBehind: string | null } | null>(null);
+  const [named, setNamed] = useState(false);
   const [outcome, setOutcome] = useState<Outcome>(null);
   const starting = useRef(false);
   const reasonId = useId();
@@ -71,6 +70,7 @@ export function StepDownload({ state }: { state: SetupState }) {
     try {
       const result = await startAcquisitionRun();
       setOurs({ runId: result.runId, queuedBehind: result.queuedBehind });
+      setNamed(false);
       refresh("health");
       if (result.queuedBehind === null) {
         refresh("attention");
@@ -134,7 +134,13 @@ export function StepDownload({ state }: { state: SetupState }) {
   })();
 
   const latest = latestOf(attention);
-  const shown: Shown | null = ours !== null && latest?.run_id !== ours.runId ? PENDING : latest;
+  // The pending view lasts only until attention first names this visit's
+  // download (DEC-0356); a later download is then shown as itself.
+  const namesOurs = ours !== null && latest?.run_id === ours.runId;
+  if (namesOurs && !named) {
+    setNamed(true);
+  }
+  const shown: Shown | null = ours !== null && !named && !namesOurs ? PENDING : latest;
 
   return (
     <StepCard step={4} question={question} onBack={() => state.goTo(3)}>
@@ -232,7 +238,10 @@ export function StepDownload({ state }: { state: SetupState }) {
                 {STEP4.started(formatInstant((shown.started_at ?? shown.requested_at) as string))}
               </span>
               {attention.kind === "ok" ? (
-                <span>{STEP4.checked(formatClock(attention.checkedAt))}</span>
+                <>
+                  {" "}
+                  <span>{STEP4.checked(formatClock(attention.checkedAt))}</span>
+                </>
               ) : null}
             </p>
           ) : null}

@@ -93,3 +93,36 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T009, T011, T017]
+    description: >
+      Rework of adversarial review v1 (IR-001 to IR-005, IR-007). IR-001: the progress line puts a space between the Started and checked spans, so its text reads Started {time} checked {time} and carries no trailing boundary when checked is absent; two tests pin the whole line's text. IR-002: the TC-COMP-122 loading row asserts the busy element holds the default card with its three skeleton bars. IR-003: a test accepts a 202 while attention is loading and asserts the pending view and no unreadable line. IR-004: StepDownload latches the pending view with a named flag set when attention first names this visit's download and reset on each start, so a later download is shown as itself (DEC-0356 until); a test pins an ok read naming r-2, then r-3 running, then r-3 ended. IR-005: the vacuous parseBulkSymbols assertion and its import are removed; the other plan assertions it lists are left for the owner. IR-007: latestOf takes ReadState<Attention>. IR-006 is addressed by this cycle's run using --stillborn-pattern 'error TS[0-9]+'; cycles 2 and 3 keep their recorded results, which the review recounted as 51 of 52 killed. The run: the generator produced 10 mutants and 5 were hand-written (the reviewer's two survivors, the dropped boundary, the unlatched view, the latch never set); 14 killed, 1 survived as equivalent. Both reviews approved.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-4-rework.log
+    red_log_sha256: 379aa31e0f37a87075d170982c47e78160b976b70e5dc67c3489cdd0c1caf8fc
+    red_evidence: >
+      The IR-001 whole-line test and the IR-004 latch test failed against the unfixed step-download.tsx; the IR-003 and IR-002 tests pin behaviour the code already had and fail only against the reviewer's mutants, which the mutation run shows.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 542 passed, in green-cycle-4-rework.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e4bb047f741caef8bb39a8e1764ae5d60226ee41add97e1745010c1b6c844725
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-4-results.json
+      results_sha256: 88d90ee3563a9036d5779f08f828cfc610647efe227aaa4d9a1dfe9b832593ea
+      generated: 15
+      killed: 14
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.933
+      survivors:
+        - id: web/src/screens/setup/step-download.tsx:56:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The named flag starts true instead of false, but it is read only while ours is set, and every path that sets ours calls setNamed(false) in the same handler first, so the initial value is never observed.

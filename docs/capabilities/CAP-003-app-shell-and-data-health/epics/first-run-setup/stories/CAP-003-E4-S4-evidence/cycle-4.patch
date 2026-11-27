@@ -1,0 +1,185 @@
+diff --git a/web/src/screens/setup/setup.test.tsx b/web/src/screens/setup/setup.test.tsx
+index 3c251ec4..50f1ae0f 100644
+--- a/web/src/screens/setup/setup.test.tsx
++++ b/web/src/screens/setup/setup.test.tsx
+@@ -16,7 +16,6 @@ import {
+ } from "../../api/client";
+ import { type ShellContextValue, useShell } from "../../app/shell-context";
+ import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
+-import { parseBulkSymbols } from "../instruments/parse-bulk-symbols";
+ import { SCREEN } from "./copy";
+ import { SetupDraftProvider } from "./draft";
+ import SetupScreen, { cardRenderers, screenStateOf } from "./index";
+@@ -294,7 +293,11 @@ describe("TC-COMP-122: each step's eight states render or are recorded not appli
+     vi.mocked(getHistoryDepth).mockReturnValue(deferred<never>().promise);
+     vi.mocked(listInstruments).mockReturnValue(deferred<never>().promise);
+     const { container } = renderScreen();
+-    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
++    const busy = container.querySelector('[aria-busy="true"]');
++    expect(busy).not.toBeNull();
++    const card = busy?.querySelector('[data-variant="default"]');
++    expect(card).not.toBeNull();
++    expect(card?.querySelectorAll(".animate-pulse, [class*='animate-pulse']")).toHaveLength(3);
+     expect(screen.queryByRole("region")).toBeNull();
+     expect(screen.queryByRole("navigation", { name: "Setup steps" })).toBeNull();
+     expect(screen.getByRole("heading", { level: 1, name: "Get set up" })).toBeInTheDocument();
+@@ -628,6 +631,5 @@ describe("the screen's own cases", () => {
+     await heading("Download data for 3 stocks");
+     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(2);
+     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
+-    expect(vi.mocked(parseBulkSymbols)).toBeDefined();
+   });
+ });
+diff --git a/web/src/screens/setup/step-download.test.tsx b/web/src/screens/setup/step-download.test.tsx
+index b4783354..a1f5b6ad 100644
+--- a/web/src/screens/setup/step-download.test.tsx
++++ b/web/src/screens/setup/step-download.test.tsx
+@@ -944,3 +944,78 @@ describe("step 4's own cases", () => {
+     expect(refresh).not.toHaveBeenCalled();
+   });
+ });
++
++describe("CAP-003-E4-S4 review v1 rework (IR-001, IR-003, IR-004)", () => {
++  it("IR-001: the progress line reads Started and checked with a boundary between them", async () => {
++    vi.mocked(startAcquisitionRun).mockResolvedValue(accepted(null));
++    const view = renderStep();
++    await userEvent.click(startButton());
++    await settle();
++    setShell({ attention: ok(download()) });
++    view.again();
++    const line = screen.getByText("Started 2026-10-15 09:30 CDT").parentElement;
++    expect(line?.textContent).toBe("Started 2026-10-15 09:30 CDT checked 09:31:12 CDT");
++  });
++
++  it("IR-001: the Started text stands alone, with no trailing boundary, when checked is absent", () => {
++    setShell({
++      attention: failing({
++        data: { ...ATTENTION_BASE, latest_download: download() },
++        checkedAt: CHECKED_AT,
++      }),
++    });
++    renderStep();
++    const line = screen.getByText("Started 2026-10-15 09:30 CDT").parentElement;
++    expect(line?.textContent).toBe("Started 2026-10-15 09:30 CDT");
++  });
++
++  it("IR-003: a 202 while attention is still loading shows the pending view, not the unreadable line", async () => {
++    vi.mocked(startAcquisitionRun).mockResolvedValue(accepted(null));
++    setShell({ attention: { kind: "loading" } });
++    renderStep();
++    await userEvent.click(startButton());
++    await settle();
++    expect(
++      screen.getByText("Queued", { selector: '[data-variant="status-neutral"]' }),
++    ).toBeInTheDocument();
++    expect(screen.getByRole("progressbar", { name: "Queued" })).toHaveAttribute(
++      "data-variant",
++      "indeterminate",
++    );
++    expect(screen.getByText("You can leave; this keeps running.")).toBeInTheDocument();
++    expect(screen.queryByText("Progress can't be read right now")).toBeNull();
++  });
++
++  it("IR-004: once attention has named this download, a later one is shown as itself, never as Queued", async () => {
++    vi.mocked(startAcquisitionRun).mockResolvedValue(accepted(null));
++    const view = renderStep();
++    await userEvent.click(startButton());
++    await settle();
++
++    setShell({ attention: ok(download({ run_id: "r-2" })) });
++    view.again();
++    expect(screen.getByRole("progressbar", { name: "812 of 1,236 stocks" })).toBeInTheDocument();
++
++    setShell({
++      attention: ok(
++        download({ run_id: "r-3", state: "running", progress: { done: 5, total: 10 } }),
++      ),
++    });
++    view.again();
++    expect(screen.getByRole("progressbar", { name: "5 of 10 stocks" })).toHaveAttribute(
++      "data-variant",
++      "determinate",
++    );
++    expect(screen.queryByRole("progressbar", { name: "Queued" })).toBeNull();
++
++    setShell({
++      attention: ok(
++        download({ run_id: "r-3", state: "succeeded", ended_at: "2026-10-15T15:00:00Z" }),
++      ),
++    });
++    view.again();
++    expect(screen.queryByRole("progressbar")).toBeNull();
++    expect(screen.queryByText("Queued")).toBeNull();
++    expect(screen.queryByText("You can leave; this keeps running.")).toBeNull();
++  });
++});
+diff --git a/web/src/screens/setup/step-download.tsx b/web/src/screens/setup/step-download.tsx
+index ef8f873d..8071fb4a 100644
+--- a/web/src/screens/setup/step-download.tsx
++++ b/web/src/screens/setup/step-download.tsx
+@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
+ import { ApiError, ApiUnreachableError, startAcquisitionRun } from "../../api/client";
+ import type { RunState } from "../../api/types";
+ import { useShell } from "../../app/shell-context";
+-import type { Attention, LatestDownload } from "../../app/shell-types";
++import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
+ import { formatClock, formatCount, formatInstant } from "../../components/patterns/format";
+ import { Absent, NotDeterminable } from "../../components/patterns/presence";
+ import { StatusBadge } from "../../components/patterns/status-badge";
+@@ -43,11 +43,9 @@ type Shown = Pick<LatestDownload, "state" | "progress"> & {
+ 
+ type Outcome = { kind: "refused"; step: 2 | 3 } | { kind: "failed"; reason: string } | null;
+ 
+-function latestOf(
+-  attention: { kind: string } & Partial<{ data: Attention; last: { data: Attention } | null }>,
+-): LatestDownload | null {
++function latestOf(attention: ReadState<Attention>): LatestDownload | null {
+   if (attention.kind === "ok") {
+-    return attention.data?.latest_download ?? null;
++    return attention.data.latest_download;
+   }
+   return attention.kind === "error" ? (attention.last?.data.latest_download ?? null) : null;
+ }
+@@ -55,6 +53,7 @@ function latestOf(
+ export function StepDownload({ state }: { state: SetupState }) {
+   const { attention, refresh } = useShell();
+   const [ours, setOurs] = useState<{ runId: string; queuedBehind: string | null } | null>(null);
++  const [named, setNamed] = useState(false);
+   const [outcome, setOutcome] = useState<Outcome>(null);
+   const starting = useRef(false);
+   const reasonId = useId();
+@@ -71,6 +70,7 @@ export function StepDownload({ state }: { state: SetupState }) {
+     try {
+       const result = await startAcquisitionRun();
+       setOurs({ runId: result.runId, queuedBehind: result.queuedBehind });
++      setNamed(false);
+       refresh("health");
+       if (result.queuedBehind === null) {
+         refresh("attention");
+@@ -134,7 +134,13 @@ export function StepDownload({ state }: { state: SetupState }) {
+   })();
+ 
+   const latest = latestOf(attention);
+-  const shown: Shown | null = ours !== null && latest?.run_id !== ours.runId ? PENDING : latest;
++  // The pending view lasts only until attention first names this visit's
++  // download (DEC-0356); a later download is then shown as itself.
++  const namesOurs = ours !== null && latest?.run_id === ours.runId;
++  if (namesOurs && !named) {
++    setNamed(true);
++  }
++  const shown: Shown | null = ours !== null && !named && !namesOurs ? PENDING : latest;
+ 
+   return (
+     <StepCard step={4} question={question} onBack={() => state.goTo(3)}>
+@@ -232,7 +238,10 @@ export function StepDownload({ state }: { state: SetupState }) {
+                 {STEP4.started(formatInstant((shown.started_at ?? shown.requested_at) as string))}
+               </span>
+               {attention.kind === "ok" ? (
+-                <span>{STEP4.checked(formatClock(attention.checkedAt))}</span>
++                <>
++                  {" "}
++                  <span>{STEP4.checked(formatClock(attention.checkedAt))}</span>
++                </>
+               ) : null}
+             </p>
+           ) : null}

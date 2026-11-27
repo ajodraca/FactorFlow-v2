@@ -16,7 +16,6 @@ import {
 } from "../../api/client";
 import { type ShellContextValue, useShell } from "../../app/shell-context";
 import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
-import { parseBulkSymbols } from "../instruments/parse-bulk-symbols";
 import { SCREEN } from "./copy";
 import { SetupDraftProvider } from "./draft";
 import SetupScreen, { cardRenderers, screenStateOf } from "./index";
@@ -294,7 +293,11 @@ describe("TC-COMP-122: each step's eight states render or are recorded not appli
     vi.mocked(getHistoryDepth).mockReturnValue(deferred<never>().promise);
     vi.mocked(listInstruments).mockReturnValue(deferred<never>().promise);
     const { container } = renderScreen();
-    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    const busy = container.querySelector('[aria-busy="true"]');
+    expect(busy).not.toBeNull();
+    const card = busy?.querySelector('[data-variant="default"]');
+    expect(card).not.toBeNull();
+    expect(card?.querySelectorAll(".animate-pulse, [class*='animate-pulse']")).toHaveLength(3);
     expect(screen.queryByRole("region")).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Setup steps" })).toBeNull();
     expect(screen.getByRole("heading", { level: 1, name: "Get set up" })).toBeInTheDocument();
@@ -628,6 +631,5 @@ describe("the screen's own cases", () => {
     await heading("Download data for 3 stocks");
     expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(2);
     expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
-    expect(vi.mocked(parseBulkSymbols)).toBeDefined();
   });
 });

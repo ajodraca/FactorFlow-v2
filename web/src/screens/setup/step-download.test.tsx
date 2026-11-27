@@ -944,3 +944,78 @@ describe("step 4's own cases", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 });
+
+describe("CAP-003-E4-S4 review v1 rework (IR-001, IR-003, IR-004)", () => {
+  it("IR-001: the progress line reads Started and checked with a boundary between them", async () => {
+    vi.mocked(startAcquisitionRun).mockResolvedValue(accepted(null));
+    const view = renderStep();
+    await userEvent.click(startButton());
+    await settle();
+    setShell({ attention: ok(download()) });
+    view.again();
+    const line = screen.getByText("Started 2026-10-15 09:30 CDT").parentElement;
+    expect(line?.textContent).toBe("Started 2026-10-15 09:30 CDT checked 09:31:12 CDT");
+  });
+
+  it("IR-001: the Started text stands alone, with no trailing boundary, when checked is absent", () => {
+    setShell({
+      attention: failing({
+        data: { ...ATTENTION_BASE, latest_download: download() },
+        checkedAt: CHECKED_AT,
+      }),
+    });
+    renderStep();
+    const line = screen.getByText("Started 2026-10-15 09:30 CDT").parentElement;
+    expect(line?.textContent).toBe("Started 2026-10-15 09:30 CDT");
+  });
+
+  it("IR-003: a 202 while attention is still loading shows the pending view, not the unreadable line", async () => {
+    vi.mocked(startAcquisitionRun).mockResolvedValue(accepted(null));
+    setShell({ attention: { kind: "loading" } });
+    renderStep();
+    await userEvent.click(startButton());
+    await settle();
+    expect(
+      screen.getByText("Queued", { selector: '[data-variant="status-neutral"]' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "Queued" })).toHaveAttribute(
+      "data-variant",
+      "indeterminate",
+    );
+    expect(screen.getByText("You can leave; this keeps running.")).toBeInTheDocument();
+    expect(screen.queryByText("Progress can't be read right now")).toBeNull();
+  });
+
+  it("IR-004: once attention has named this download, a later one is shown as itself, never as Queued", async () => {
+    vi.mocked(startAcquisitionRun).mockResolvedValue(accepted(null));
+    const view = renderStep();
+    await userEvent.click(startButton());
+    await settle();
+
+    setShell({ attention: ok(download({ run_id: "r-2" })) });
+    view.again();
+    expect(screen.getByRole("progressbar", { name: "812 of 1,236 stocks" })).toBeInTheDocument();
+
+    setShell({
+      attention: ok(
+        download({ run_id: "r-3", state: "running", progress: { done: 5, total: 10 } }),
+      ),
+    });
+    view.again();
+    expect(screen.getByRole("progressbar", { name: "5 of 10 stocks" })).toHaveAttribute(
+      "data-variant",
+      "determinate",
+    );
+    expect(screen.queryByRole("progressbar", { name: "Queued" })).toBeNull();
+
+    setShell({
+      attention: ok(
+        download({ run_id: "r-3", state: "succeeded", ended_at: "2026-10-15T15:00:00Z" }),
+      ),
+    });
+    view.again();
+    expect(screen.queryByRole("progressbar")).toBeNull();
+    expect(screen.queryByText("Queued")).toBeNull();
+    expect(screen.queryByText("You can leave; this keeps running.")).toBeNull();
+  });
+});

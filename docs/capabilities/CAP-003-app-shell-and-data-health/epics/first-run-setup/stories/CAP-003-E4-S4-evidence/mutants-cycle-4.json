@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "repo_head": "07cef4ac038ef1d028fa8170246e98399ee153dc",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/setup/step-download.tsx:56:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 56,
+      "original": "  const [named, setNamed] = useState(false);",
+      "mutated": "  const [named, setNamed] = useState(true);"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:73:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 73,
+      "original": "      setNamed(false);",
+      "mutated": "      setNamed(true);"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:139:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 139,
+      "original": "  const namesOurs = ours !== null && latest?.run_id === ours.runId;",
+      "mutated": "  const namesOurs = ours !== null || latest?.run_id === ours.runId;"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:140:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 140,
+      "original": "  if (namesOurs && !named) {",
+      "mutated": "  if (namesOurs || !named) {"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:140:negate-boolean:2",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 140,
+      "original": "  if (namesOurs && !named) {",
+      "mutated": "  if (namesOurs && named) {"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:141:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 141,
+      "original": "    setNamed(true);",
+      "mutated": "    setNamed(false);"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:143:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 143,
+      "original": "  const shown: Shown | null = ours !== null && !named && !namesOurs ? PENDING : latest;",
+      "mutated": "  const shown: Shown | null = ours !== null || !named && !namesOurs ? PENDING : latest;"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:143:negate-boolean:2",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 143,
+      "original": "  const shown: Shown | null = ours !== null && !named && !namesOurs ? PENDING : latest;",
+      "mutated": "  const shown: Shown | null = ours !== null && !named || !namesOurs ? PENDING : latest;"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:143:negate-boolean:3",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 143,
+      "original": "  const shown: Shown | null = ours !== null && !named && !namesOurs ? PENDING : latest;",
+      "mutated": "  const shown: Shown | null = ours !== null && named && !namesOurs ? PENDING : latest;"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:143:negate-boolean:4",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "line": 143,
+      "original": "  const shown: Shown | null = ours !== null && !named && !namesOurs ? PENDING : latest;",
+      "mutated": "  const shown: Shown | null = ours !== null && !named && namesOurs ? PENDING : latest;"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:manual:error-shows-on-loading",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "old": "{attention.kind === \"error\" ? (\n            <p aria-live",
+      "new": "{attention.kind !== \"ok\" ? (\n            <p aria-live",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:manual:boundary-dropped",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "old": "                  {\" \"}\n",
+      "new": "",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:manual:never-latched",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "old": "ours !== null && !named && !namesOurs ? PENDING",
+      "new": "ours !== null && !namesOurs ? PENDING",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-download.tsx:manual:latch-never-set",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-download.tsx",
+      "old": "  if (namesOurs && !named) {\n    setNamed(true);\n  }\n",
+      "new": "",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/index.tsx:manual:loading-skeleton-never",
+      "operator": "manual",
+      "file": "web/src/screens/setup/index.tsx",
+      "old": "loading: () => <CardSkeleton />",
+      "new": "loading: () => (Math.random() > 2 ? <CardSkeleton /> : null)",
+      "cycle": "cycle-4"
+    }
+  ]
+}
