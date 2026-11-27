@@ -1,0 +1,70 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0cwwzpw9/w0/web
+
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (28 tests | 3 failed) 83ms
+   × HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted 36ms
+     → expected 'Market closed · prices current to 202…' to be 'Market closed · prices current to 202…' // Object.is equality
+   × HomeHeader: freshness, failure, loading, tick and composition > (a) shows checked from the read, not the client's clock (AC-25) 1ms
+     → expected 'Market closed · prices current to 202…' to contain 'checked 17:52:10 CDT'
+   × HomeHeader: freshness, failure, loading, tick and composition > (d) says prices are not downloaded when there is no price date 1ms
+     → expected 'Market closed · prices not downloaded…' to be 'Market closed · prices not downloaded…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+AssertionError: expected 'Market closed · prices current to 202…' to be 'Market closed · prices current to 202…' // Object.is equality
+
+Expected: "Market closed · prices current to 2026-10-14 · checked 17:52:10 CDT"
+Received: "Market closed · prices current to 2026-10-14 · checked 17:53:41 CDT"
+
+ ❯ src/screens/home/header.test.tsx:81:24
+     79|     renderAt(OUTSIDE, OK);
+     80|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+     81|     expect(lineText()).toBe("Market closed · prices current to 2026-10…
+       |                        ^
+     82|   });
+     83| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (a) shows checked from the read, not the client's clock (AC-25)
+AssertionError: expected 'Market closed · prices current to 202…' to contain 'checked 17:52:10 CDT'
+
+Expected: "checked 17:52:10 CDT"
+Received: "Market closed · prices current to 2026-10-14 · checked 17:53:41 CDT"
+
+ ❯ src/screens/home/header.test.tsx:255:24
+    253|   it("(a) shows checked from the read, not the client's clock (AC-25)"…
+    254|     renderAt(OUTSIDE, OK);
+    255|     expect(lineText()).toContain("checked 17:52:10 CDT");
+       |                        ^
+    256|     expect(lineText()).not.toContain("17:53:41");
+    257|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (d) says prices are not downloaded when there is no price date
+AssertionError: expected 'Market closed · prices not downloaded…' to be 'Market closed · prices not downloaded…' // Object.is equality
+
+Expected: "Market closed · prices not downloaded yet · checked 17:52:10 CDT"
+Received: "Market closed · prices not downloaded yet · checked 17:53:41 CDT"
+
+ ❯ src/screens/home/header.test.tsx:284:24
+    282|   it("(d) says prices are not downloaded when there is no price date",…
+    283|     renderAt(OUTSIDE, OK_NO_PRICES);
+    284|     expect(lineText()).toBe("Market closed · prices not downloaded yet…
+       |                        ^
+    285|   });
+    286| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 25 passed (28)
+   Start at  16:11:15
+   Duration  1.09s (transform 77ms, setup 32ms, collect 337ms, tests 83ms, environment 164ms, prepare 32ms)
+
