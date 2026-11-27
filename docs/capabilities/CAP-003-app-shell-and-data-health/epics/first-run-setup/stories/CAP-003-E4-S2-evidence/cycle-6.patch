@@ -1,0 +1,60 @@
+diff --git a/web/src/screens/setup/step-card.test.tsx b/web/src/screens/setup/step-card.test.tsx
+index 39188f5d..ed4cfcd9 100644
+--- a/web/src/screens/setup/step-card.test.tsx
++++ b/web/src/screens/setup/step-card.test.tsx
+@@ -34,6 +34,38 @@ describe("StepCard section and heading", () => {
+   });
+ });
+ 
++describe("StepCard design tokens (setup-ui 10; UX design 1.2)", () => {
++  it("is a default card with --space-4 inside and --space-5 between regions", () => {
++    render(<StepCard step={2} question="Q" />);
++    const card = screen.getByRole("region").firstElementChild as HTMLElement;
++    expect(card).toHaveAttribute("data-variant", "default");
++    expect(card).toHaveClass("gap-5");
++    expect(card).toHaveClass("p-4");
++  });
++
++  it("sets the position line at text-xs muted and the question at text-xl", () => {
++    render(<StepCard step={2} question="Q" />);
++    const position = screen.getByText("Step 2 of 4");
++    expect(position).toHaveClass("text-xs");
++    expect(position).toHaveClass("text-muted-foreground");
++    expect(screen.getByRole("heading", { level: 2 })).toHaveClass("text-xl");
++  });
++
++  it("puts Back first and the Next hint with Continue last, the hint at text-xs", () => {
++    render(<StepCard step={2} question="Q" onBack={vi.fn()} onContinue={vi.fn()} />);
++    const back = screen.getByRole("button", { name: "← Back: Market data" });
++    const footer = back.parentElement as HTMLElement;
++    expect(footer).toHaveClass("justify-between");
++    expect(footer.firstElementChild).toBe(back);
++    const group = footer.lastElementChild as HTMLElement;
++    expect(group).not.toBe(back);
++    const hint = screen.getByText("Next: Stocks to follow");
++    expect(group).toContainElement(hint);
++    expect(group).toContainElement(screen.getByRole("button", { name: "Continue" }));
++    expect(hint).toHaveClass("text-xs");
++  });
++});
++
+ describe("StepCard footer", () => {
+   it("names the previous and next steps and calls each handler once", async () => {
+     const user = userEvent.setup();
+@@ -132,10 +164,12 @@ describe("StepReadError", () => {
+         onRetry={onRetry}
+       />,
+     );
+-    expect(
+-      screen.getByText("Couldn't read history depth: FactorFlow is not answering"),
+-    ).toBeInTheDocument();
+-    await user.click(screen.getByRole("button", { name: "Try again" }));
++    const message = screen.getByText("Couldn't read history depth: FactorFlow is not answering");
++    expect(message).toBeInTheDocument();
++    expect(message).toHaveClass("text-destructive");
++    const retry = screen.getByRole("button", { name: "Try again" });
++    expect(retry).toHaveAttribute("data-variant", "outline");
++    await user.click(retry);
+     expect(onRetry).toHaveBeenCalledTimes(1);
+   });
+ });

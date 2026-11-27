@@ -137,3 +137,32 @@ cycles:
     reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-5.patch
     commit_hash: stage
     mutation: {not_applicable: "test-only cycle: token-literals.test.ts gains a scanned directory and adds no production code"}
+
+  - id: cycle-6
+    tasks: [T008, T014]
+    description: >
+      Review rework of implementation review v1 (IR-001, IR-002), a test-only cycle: step-card.test.tsx gains a design-token describe block and two assertions on the existing StepReadError case, pinning the card's data-variant default, gap-5 and p-4, the position line's text-xs and text-muted-foreground, the h2's text-xl, the footer's justify-between with Back first and the Next hint (text-xs) with Continue in the last group, the read-error line's text-destructive and Try again's outline variant. No production change. The nine IR-001 survivors were taken from the review's mutation file as manual mutants (mutants-cycle-6.json). IR-002: T001's pre-change baseline run (npm ci and the full suite at the review base) was never recorded; it cannot be reconstructed after the fact without switching branches in repos/, so it stays absent, and the later full-suite runs on the final bytes (cycle 5's validation-cycle-5.log and this rework's final run) are the suite evidence. Both per-cycle reviews approved; the code review raised one LOW optional observation (the class checks would stop catching a mutant if Card ever applied p-4 or gap-5 as defaults).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-6-step-card-tokens.log
+    red_log_sha256: d87f2be4b9e8b0ffdcf94f516f7642d4a096c057e7e3d61eacfe80986ff7c598
+    red_evidence: >
+      Run against the step-card tests as committed at HEAD, all nine review mutants survived.
+    green_evidence: >
+      step-card.test.tsx 12 passed and the setup suites 269 passed (green-cycle-6-step-card-tokens.log); all nine mutants killed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 557fa22be929d36a1f9c50d11d32a36ab3ab0afcf48454f0eaa06bd5ab503752
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-6-results.json
+      results_sha256: b90ed1aebaf6daf1b903ef02a83b8dca9db0eaad1ff09b4565b03ecfb73bc94e
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

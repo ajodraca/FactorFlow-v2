@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/bfb31aa7-7a58-4a94-9027-ea14b28e1e13/scratchpad/mwork2/mutation-run-7iwjr9k8/w1/web
+
+ ❯ src/screens/setup/step-card.test.tsx (12 tests | 1 failed) 112ms
+   × StepReadError > states the read failure with its reason and offers Try again 6ms
+     → expect(element).toHaveAttribute("data-variant", "outline") // element.getAttribute("data-variant") === "outline"
+
+Expected the element to have attribute:
+  data-variant="outline"
+Received:
+  data-variant="ghost"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepReadError > states the read failure with its reason and offers Try again
+Error: expect(element).toHaveAttribute("data-variant", "outline") // element.getAttribute("data-variant") === "outline"
+
+Expected the element to have attribute:
+  data-variant="outline"
+Received:
+  data-variant="ghost"
+ ❯ src/screens/setup/step-card.test.tsx:171:19
+    169|     expect(message).toHaveClass("text-destructive");
+    170|     const retry = screen.getByRole("button", { name: "Try again" });
+    171|     expect(retry).toHaveAttribute("data-variant", "outline");
+       |                   ^
+    172|     await user.click(retry);
+    173|     expect(onRetry).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 passed (12)
+   Start at  12:54:08
+   Duration  1.56s (transform 431ms, setup 53ms, collect 161ms, tests 112ms, environment 379ms, prepare 626ms)
+
