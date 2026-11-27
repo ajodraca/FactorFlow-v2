@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wzfm9kpg/w3/web
+
+ ❯ src/screens/setup/step-history-depth.test.tsx (39 tests | 1 failed) 825ms
+   × step 2: saving > rethrows a failure that is not an answer from the server, and moves nowhere 28ms
+     → expected [] to deeply equal [ Array(1) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: saving > rethrows a failure that is not an answer from the server, and moves nowhere
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- Array [
+-   [TypeError: not an error the API sent],
+- ]
++ Array []
+
+ ❯ src/screens/setup/step-history-depth.test.tsx:569:22
+    567|       await user.click(screen.getByRole("button", { name: "Continue" }…
+    568|     });
+    569|     expect(surfaced).toEqual([surprise]);
+       |                      ^
+    570|     expect(goTo).not.toHaveBeenCalled();
+    571|     expect(screen.queryByRole("alert")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  12:21:43
+   Duration  2.17s (transform 200ms, setup 81ms, collect 629ms, tests 825ms, environment 246ms, prepare 104ms)
+

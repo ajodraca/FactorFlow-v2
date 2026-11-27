@@ -1,0 +1,85 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wzfm9kpg/w2/web
+
+ ❯ src/screens/setup/step-history-depth.test.tsx (39 tests | 4 failed) 1685ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 324ms
+   × TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a save failure with a server failure 79ms
+     → expected 'Step 2 of 4How far back should histor…' not to match /\b(instrument|acquisition|acquire|ru…/i
+   × TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a save failure with an unreachable server 39ms
+     → expected 'Step 2 of 4How far back should histor…' not to match /\b(instrument|acquisition|acquire|ru…/i
+   × step 2: saving > shows a server failure as a field error and keeps the value 38ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Couldn't save history depth: FactorFlow hit an unexpected problem$/
+Received:
+  Couldn't save history depth: x
+   × step 2: saving > shows an unreachable server as a field error and keeps the value 54ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Couldn't save history depth: FactorFlow is not answering$/
+Received:
+  Couldn't save history depth: x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a save failure with a server failure
+ FAIL  src/screens/setup/step-history-depth.test.tsx > TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a save failure with an unreachable server
+AssertionError: expected 'Step 2 of 4How far back should histor…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+- Expected: 
+/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"Step 2 of 4How far back should history go?History depthyearsWhole years, 1 to 50.Couldn't save history depth: an active instrument is retiredYour provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.← Back: Market dataNext: Stocks to followContinue   How far back should history go?       History depth          History depth years Whole years, 1 to 50. Couldn't save history depth: an active instrument is retired                  "
+
+ ❯ src/screens/setup/step-history-depth.test.tsx:364:53
+    362|     await user.click(screen.getByRole("button", { name: "Continue" }));
+    363|     await screen.findByRole("alert");
+    364|     expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+       |                                                     ^
+    365|   });
+    366| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: saving > shows a server failure as a field error and keeps the value
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Couldn't save history depth: FactorFlow hit an unexpected problem$/
+Received:
+  Couldn't save history depth: x
+ ❯ src/screens/setup/step-history-depth.test.tsx:553:46
+    551|     await user.type(field(), "7");
+    552|     await user.click(screen.getByRole("button", { name: "Continue" }));
+    553|     expect(await screen.findByRole("alert")).toHaveTextContent(new Reg…
+       |                                              ^
+    554|     expect(field()).toHaveValue(7);
+    555|     expect(field()).toHaveAttribute("aria-invalid", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: saving > shows an unreachable server as a field error and keeps the value
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Couldn't save history depth: FactorFlow is not answering$/
+Received:
+  Couldn't save history depth: x
+ ❯ src/screens/setup/step-history-depth.test.tsx:553:46
+    551|     await user.type(field(), "7");
+    552|     await user.click(screen.getByRole("button", { name: "Continue" }));
+    553|     expect(await screen.findByRole("alert")).toHaveTextContent(new Reg…
+       |                                              ^
+    554|     expect(field()).toHaveValue(7);
+    555|     expect(field()).toHaveAttribute("aria-invalid", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 35 passed (39)
+   Start at  12:21:29
+   Duration  4.60s (transform 266ms, setup 82ms, collect 1.32s, tests 1.68s, environment 412ms, prepare 364ms)
+

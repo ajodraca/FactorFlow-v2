@@ -143,7 +143,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that renders the label in a bare `span` with the status colour classes: (a), no `data-variant` badge and no `svg`.
   - drop-field-copy on the `reason` passed to `NotDeterminable`: (b).
 
-- [ ] T005 Implement TC-COMP-108 (Successful depth save marks step 2 done and focuses step 3) in a new `web/src/screens/setup/step-history-depth.test.tsx`, with a `// Implements TC-COMP-108` comment.
+- [x] T005 Implement TC-COMP-108 (Successful depth save marks step 2 done and focuses step 3) in a new `web/src/screens/setup/step-history-depth.test.tsx`, with a `// Implements TC-COMP-108` comment.
   - **Harness.** A test-local `Screen` stands in for CAP-003-E4-S4's `SetupScreen`: it calls the real `useSetupState()` and `useStepHeadingFocus(state.current)`, renders `<p>loading</p>` while `state.loading`, and otherwise renders `<StepList state={state} />` and the current step: `StepMarketData` for 1, `StepHistoryDepth` for 2, and for 3 and 4 a bare `<StepCard step={n} question={n === 3 ? QUESTIONS[3] : STEP4.downloadFor("12")} onBack={() => state.goTo(n - 1)} />`. It is wrapped in `SetupDraftProvider`. The shell gives `HEALTH_FOUND` and an `ok` attention with `latest_download: null`. `listInstruments` resolves `{ rows: [], activeCount: 0, retiredCount: 0, nextCursor: null }`. `getHistoryDepth` resolves `{ years: null, updatedAt: null }` first and `{ years: 5, updatedAt: "2026-09-06T18:00:00Z" }` second.
   - **Steps (the TC's).** Await the step 2 region (*How far back should history go?*). Assert `document.activeElement` is not its `h2` (no focus on entry; Resolved Conflict 1). Type `5` into `getByRole("spinbutton", { name: "History depth years" })` and click **Continue**.
   - **Expected.** `setHistoryDepth` was called once with exactly the number `5` (`toHaveBeenCalledWith(5)`, not `"5"`). `getHistoryDepth` has 2 calls. The step list's second item holds `getByRole("link", { name: "How far back, done" })` and the text *5 years of history*. The third item has `aria-current="step"`. `document.activeElement` is the `h2` whose text is *Which stocks do you want to follow?*.
@@ -155,7 +155,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - swap-case on the `422` code test (`"validation_error"` → another code): the `422` case renders the save-failure line instead.
   - a hand-written mutant that passes `years` (the string) to `setHistoryDepth`: `toHaveBeenCalledWith(5)`.
 
-- [ ] T006 Implement TC-COMP-111 (Step list, step card, steps 1 and 2 use the display vocabulary) in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T005, with a `// Implements TC-COMP-111` comment, using T005's harness and the vocabulary helper.
+- [x] T006 Implement TC-COMP-111 (Step list, step card, steps 1 and 2 use the display vocabulary) in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T005, with a `// Implements TC-COMP-111` comment, using T005's harness and the vocabulary helper.
   - (a) **Non-vacuity.** `FORBIDDEN` matches the planted `"one run"`, `"Runs"`, `"Retired"`, `"Instrument"`, `"acquire"` and `"Provider credential"`, and does not match `"this keeps running"` or `"Restart FactorFlow after setting it."`.
   - (b) **Every state of this story.** `it.each` over these renders; each asserts `visibleAndAccessibleText(container)` does not match `FORBIDDEN`:
     1. Step 1 current, with `HEALTH_FOUND`, `HEALTH_MISSING`, `HEALTH_UNREACHABLE_STALE_MISSING` and `HEALTH_UNKNOWN` (`StepMarketData` rendered directly with `stateWith`, since the harness shows *loading* while health is unknown).
@@ -225,7 +225,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
   Kills: a hand-written mutant that treats `unknown` as missing (`health === null` → *Missing*): (c).
 
-- [ ] T012 [P] Write step 2's further cases in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T006 (DAC-E4-4, DAC-E4-13, AC-3, AC-17; DEC-0346, DEC-0347). Render `<StepHistoryDepth state={stateWith({ current: 2, … })} />` with the shell and client mocked. Cases:
+- [x] T012 [P] Write step 2's further cases in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T006 (DAC-E4-4, DAC-E4-13, AC-3, AC-17; DEC-0346, DEC-0347). Render `<StepHistoryDepth state={stateWith({ current: 2, … })} />` with the shell and client mocked. Cases:
   - (a) **The field.** `getByRole("spinbutton", { name: "History depth years" })` with `toHaveAccessibleDescription("Whole years, 1 to 50.")`. The note *Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.* is present. The region is named *How far back should history go?*.
   - (b) **Initial value.** Draft `yearsText` `"12"` with a saved depth of 5: the value is `12`. Draft `""` with a saved depth of 5: `5` (S02 §5 `historyYears`). Draft `""` with `years: null`: empty. Draft `""` with a failed read: empty.
   - (c) **Drafts kept.** Typing `7` into an empty field makes the last `setDraft` call `("yearsText", "7")`.
@@ -296,7 +296,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
   Makes T002–T004 and T011 pass.
 
-- [ ] T017 Create `web/src/screens/setup/step-history-depth.tsx` (depends on T013, T014; T005, T006 and T012 RED first), to DEC-0346 and -3.
+- [x] T017 Create `web/src/screens/setup/step-history-depth.tsx` (depends on T013, T014; T005, T006 and T012 RED first), to DEC-0346 and -3.
   - **Imports.** `useForm` from `"react-hook-form"`; `zodResolver` from `"@hookform/resolvers/zod"`; `z` from `"zod"`; `setHistoryDepth`, `ApiError`, `ApiUnreachableError` from `"../../api/client"`; `Form`, `FormRoot`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage` from `"../../components/ui/form"`; `Input` from `"../../components/ui/input"`; `type SetupState` from `"./use-setup-state"`; `QUESTIONS`, `STEP2`, `READ_ERRORS` from `"./copy"`; `StepCard`, `StepReadError`, `failureReason` from `"./step-card"`.
   - **Bounds.** Module constants `MIN_YEARS = 1` and `MAX_YEARS = 50`, commented as mirrors of the delivered `MIN_HISTORY_DEPTH_YEARS` and `MAX_HISTORY_DEPTH_YEARS` (`src/factorflow/api/bounds.py:9,15`), the range the copy states (*Whole years, 1 to 50.*). The server stays the authority: its `422` is still rendered.
   - **Schema.** `z.object({ years: z.string().trim().refine((text) => /^\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS, STEP2.rangeError) })`.

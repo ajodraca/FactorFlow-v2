@@ -1,0 +1,628 @@
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  ApiError,
+  ApiUnreachableError,
+  getHistoryDepth,
+  listInstruments,
+  setHistoryDepth,
+} from "../../api/client";
+import type { HistoryDepth } from "../../api/types";
+import { type ShellContextValue, useShell } from "../../app/shell-context";
+import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
+import { labelOf } from "../../components/patterns/tiers";
+import { SetupDraftProvider } from "./draft";
+import { QUESTIONS, STEP4, STEP_TITLES } from "./copy";
+import { StepCard, useStepHeadingFocus } from "./step-card";
+import { StepHistoryDepth } from "./step-history-depth";
+import { StepList } from "./step-list";
+import { StepMarketData } from "./step-market-data";
+import { type SetupState, useSetupState } from "./use-setup-state";
+
+// Implements TC-COMP-108, TC-COMP-111 (CAP-003-E4-S2 T005, T006) and the
+// step 2 cases of T012 (AC-3, AC-17, DAC-E4-4, DAC-E4-13, DAC-E4-S2-1,
+// DAC-E4-S2-4; DEC-0346, DEC-0347).
+
+vi.mock("../../api/client", async (importActual) => ({
+  ...(await importActual<typeof import("../../api/client")>()),
+  getHistoryDepth: vi.fn(),
+  listInstruments: vi.fn(),
+  setHistoryDepth: vi.fn(),
+}));
+vi.mock("../../app/shell-context", () => ({ useShell: vi.fn() }));
+
+type Health = ShellContextValue["health"];
+
+const CHECKED_AT = new Date("2026-09-06T18:30:00.000Z");
+const RANGE_ERROR = "History depth must be a whole number of years from 1 to 50.";
+const NOT_ANSWERING = "FactorFlow is not answering";
+const UNEXPECTED = "FactorFlow hit an unexpected problem";
+
+const health = (credential_present: boolean): Health => ({
+  liveness: "answering",
+  health: {
+    status: "ok",
+    database: "reachable",
+    credential_present,
+    schema_version: 3,
+    most_recent_run: null,
+  },
+  lastUpdated: CHECKED_AT,
+  lastAnsweredAt: CHECKED_AT,
+});
+const HEALTH_FOUND = health(true);
+const HEALTH_MISSING = health(false);
+const HEALTH_UNREACHABLE_STALE_MISSING: Health = {
+  liveness: "unreachable",
+  health: HEALTH_MISSING.health,
+  lastUpdated: new Date("2026-09-06T18:31:00.000Z"),
+  lastAnsweredAt: CHECKED_AT,
+};
+const HEALTH_UNKNOWN: Health = {
+  liveness: "unknown",
+  health: null,
+  lastUpdated: null,
+  lastAnsweredAt: null,
+};
+
+const ATTENTION_BASE: Attention = {
+  checked_at: "2026-09-06T18:30:00Z",
+  followed_count: 3,
+  prices_as_of: null,
+  credential_present: true,
+  problems: { stock_count: 0, symbols: [], newest_completed_at: null },
+  latest_download: null,
+  latest_terminal_download: null,
+  items: [],
+};
+
+const attentionWith = (latest_download: LatestDownload | null): ReadState<Attention> => ({
+  kind: "ok",
+  data: { ...ATTENTION_BASE, latest_download },
+  checkedAt: CHECKED_AT,
+});
+
+function shell(overrides: Partial<ShellContextValue> = {}): ShellContextValue {
+  return {
+    health: HEALTH_FOUND,
+    attention: attentionWith(null),
+    scores: { kind: "loading" },
+    refresh: vi.fn(),
+    setTitleDetail: vi.fn(),
+    ...overrides,
+  };
+}
+
+const depthOk = (years: number | null): ReadState<HistoryDepth> => ({
+  kind: "ok",
+  data: { years, updatedAt: years === null ? null : "2026-09-06T18:00:00Z" },
+  checkedAt: CHECKED_AT,
+});
+
+function stateWith(overrides: Partial<SetupState> = {}): SetupState {
+  return {
+    current: 2,
+    done: { 1: true, 2: false, 3: false, 4: false },
+    step4: "ready",
+    drafts: { yearsText: "", source: null, pasted: "", unposted: [] },
+    depth: depthOk(null),
+    activeCount: { kind: "ok", data: 0, checkedAt: CHECKED_AT },
+    loading: false,
+    goTo: vi.fn(),
+    reread: vi.fn(),
+    setDraft: vi.fn(),
+    ...overrides,
+  };
+}
+
+/**
+ * Stands in for the setup screen: the real step state, the persistent focus
+ * hook, the list and the current step, as the screen will compose them.
+ */
+function Screen() {
+  const state = useSetupState();
+  useStepHeadingFocus(state.current);
+  if (state.loading) {
+    return <p>loading</p>;
+  }
+  return (
+    <>
+      <StepList state={state} />
+      {state.current === 1 ? <StepMarketData state={state} /> : null}
+      {state.current === 2 ? <StepHistoryDepth state={state} /> : null}
+      {state.current === 3 ? (
+        <StepCard step={3} question={QUESTIONS[3]} onBack={() => state.goTo(2)} />
+      ) : null}
+      {state.current === 4 ? (
+        <StepCard step={4} question={STEP4.downloadFor("12")} onBack={() => state.goTo(3)} />
+      ) : null}
+    </>
+  );
+}
+
+function renderScreen() {
+  return render(
+    <SetupDraftProvider>
+      <Screen />
+    </SetupDraftProvider>,
+  );
+}
+
+/** The text a person or a screen reader meets: content, names, titles and descriptions. */
+function visibleAndAccessibleText(container: HTMLElement): string {
+  const parts: string[] = [container.textContent ?? ""];
+  for (const element of Array.from(container.querySelectorAll("*"))) {
+    for (const name of ["aria-label", "title"]) {
+      parts.push(element.getAttribute(name) ?? "");
+    }
+    for (const name of ["aria-labelledby", "aria-describedby"]) {
+      for (const id of (element.getAttribute(name) ?? "").split(/\s+/).filter(Boolean)) {
+        parts.push(document.getElementById(id)?.textContent ?? "");
+      }
+    }
+  }
+  return parts.join(" ");
+}
+
+/**
+ * Rejections nobody handled while `body` ran. The runner's own listeners are
+ * set aside meanwhile, since they would fail the suite for the very rejection
+ * the test expects.
+ */
+async function surfacedRejections(body: () => Promise<void>): Promise<unknown[]> {
+  const seen: unknown[] = [];
+  const saved = process.listeners("unhandledRejection");
+  process.removeAllListeners("unhandledRejection");
+  process.on("unhandledRejection", (reason) => {
+    seen.push(reason);
+  });
+  try {
+    await body();
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+  } finally {
+    process.removeAllListeners("unhandledRejection");
+    for (const listener of saved) {
+      process.on("unhandledRejection", listener);
+    }
+  }
+  return seen;
+}
+
+const FORBIDDEN =
+  /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
+
+const field = (): HTMLElement => screen.getByRole("spinbutton", { name: "History depth years" });
+const item = (n: number): HTMLElement => screen.getAllByRole("listitem")[n - 1] as HTMLElement;
+const headingOf = (text: string): HTMLElement => screen.getByRole("heading", { name: text });
+
+beforeEach(() => {
+  vi.mocked(useShell).mockReset().mockReturnValue(shell());
+  vi.mocked(getHistoryDepth).mockReset();
+  vi.mocked(setHistoryDepth).mockReset();
+  vi.mocked(listInstruments)
+    .mockReset()
+    .mockResolvedValue({ rows: [], activeCount: 0, retiredCount: 0, nextCursor: null });
+});
+
+describe("TC-COMP-108: a successful depth save marks step 2 done and focuses step 3", () => {
+  it("saves the number, re-reads the depth and moves to step 3 with its heading focused", async () => {
+    const user = userEvent.setup();
+    vi.mocked(getHistoryDepth)
+      .mockResolvedValueOnce({ years: null, updatedAt: null })
+      .mockResolvedValueOnce({ years: 5, updatedAt: "2026-09-06T18:00:00Z" });
+    vi.mocked(setHistoryDepth).mockResolvedValue({
+      years: 5,
+      updatedAt: "2026-09-06T18:00:00Z",
+    });
+    renderScreen();
+    const region = await screen.findByRole("region", { name: "How far back should history go?" });
+    expect(headingOf("How far back should history go?")).not.toHaveFocus();
+    expect(region).toBeInTheDocument();
+
+    await user.type(field(), "5");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    await waitFor(() => expect(setHistoryDepth).toHaveBeenCalledTimes(1));
+    expect(setHistoryDepth).toHaveBeenCalledWith(5);
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "How far back, done" })).toBeInTheDocument(),
+    );
+    expect(getHistoryDepth).toHaveBeenCalledTimes(2);
+    expect(item(2)).toHaveTextContent("5 years of history");
+    expect(item(3)).toHaveAttribute("aria-current", "step");
+    await waitFor(() => expect(headingOf("Which stocks do you want to follow?")).toHaveFocus());
+  });
+
+  it("renders a refused value as the field error, keeps it and stays on step 2", async () => {
+    const user = userEvent.setup();
+    vi.mocked(getHistoryDepth).mockResolvedValue({ years: null, updatedAt: null });
+    vi.mocked(setHistoryDepth).mockRejectedValue(
+      new ApiError("The request did not match the expected shape: `years`.", "req-2", {
+        code: "validation_error",
+      }),
+    );
+    renderScreen();
+    await screen.findByRole("region", { name: "How far back should history go?" });
+    await user.type(field(), "7");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(new RegExp(`^${RANGE_ERROR}$`));
+    expect(field()).toHaveValue(7);
+    expect(field()).toHaveAttribute("aria-invalid", "true");
+    expect(item(2)).toHaveAttribute("aria-current", "step");
+    expect(getHistoryDepth).toHaveBeenCalledTimes(1);
+    expect(document.querySelector("h2:focus")).toBeNull();
+    expect(document.body).not.toHaveTextContent("expected shape");
+  });
+});
+
+describe("TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary", () => {
+  it("proves the scan: it flags the planted terms and not near misses", () => {
+    for (const planted of [
+      "one run",
+      "Runs",
+      "Retired",
+      "Instrument",
+      "acquire",
+      "Provider credential",
+    ]) {
+      expect(planted).toMatch(FORBIDDEN);
+    }
+    expect("this keeps running").not.toMatch(FORBIDDEN);
+    expect("Restart FactorFlow after setting it.").not.toMatch(FORBIDDEN);
+  });
+
+  it.each([
+    ["found", HEALTH_FOUND],
+    ["missing", HEALTH_MISSING],
+    ["unreachable", HEALTH_UNREACHABLE_STALE_MISSING],
+    ["unknown", HEALTH_UNKNOWN],
+  ])("step 1 with the key %s", (_name, h) => {
+    vi.mocked(useShell).mockReturnValue(shell({ health: h }));
+    const { container } = render(<StepMarketData state={stateWith({ current: 1 })} />);
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+  });
+
+  it("step 1 badges read the labels of the shared catalogue", () => {
+    vi.mocked(useShell).mockReturnValue(shell({ health: HEALTH_FOUND }));
+    const found = render(<StepMarketData state={stateWith({ current: 1 })} />);
+    expect(found.container.querySelector('[data-variant="status-good"]')?.textContent).toBe(
+      labelOf({ of: "credential", present: true }),
+    );
+    found.unmount();
+    vi.mocked(useShell).mockReturnValue(shell({ health: HEALTH_MISSING }));
+    const missing = render(<StepMarketData state={stateWith({ current: 1 })} />);
+    expect(missing.container.querySelector('[data-variant="status-critical"]')?.textContent).toBe(
+      labelOf({ of: "credential", present: false }),
+    );
+  });
+
+  const failures: [string, ApiError | ApiUnreachableError][] = [
+    [
+      "a server failure",
+      new ApiError("an active instrument is retired", "req-5", { code: "internal_error" }),
+    ],
+    ["an unreachable server", new ApiUnreachableError("could not run the request")],
+  ];
+
+  it.each([
+    ["empty", stateWith()],
+    ["prefilled from a saved depth", stateWith({ depth: depthOk(12) })],
+    [
+      "with a failed depth read (server failure)",
+      stateWith({
+        depth: { kind: "error", error: (failures[0] as [string, ApiError])[1], last: null },
+      }),
+    ],
+    [
+      "with a failed depth read (unreachable)",
+      stateWith({
+        depth: {
+          kind: "error",
+          error: (failures[1] as [string, ApiUnreachableError])[1],
+          last: null,
+        },
+      }),
+    ],
+  ])("step 2 %s", (_name, state) => {
+    const { container } = render(<StepHistoryDepth state={state} />);
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+  });
+
+  it("step 2 after a blur error", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<StepHistoryDepth state={stateWith()} />);
+    await user.type(field(), "0");
+    await user.tab();
+    await screen.findByRole("alert");
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+  });
+
+  it("step 2 after a refused value", async () => {
+    const user = userEvent.setup();
+    vi.mocked(setHistoryDepth).mockRejectedValue(
+      new ApiError("an instrument was refused", "req-6", { code: "validation_error" }),
+    );
+    const { container } = render(<StepHistoryDepth state={stateWith()} />);
+    await user.type(field(), "7");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("alert");
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+  });
+
+  it.each(failures)("step 2 after a save failure with %s", async (_name, error) => {
+    const user = userEvent.setup();
+    vi.mocked(setHistoryDepth).mockRejectedValue(error);
+    const { container } = render(<StepHistoryDepth state={stateWith()} />);
+    await user.type(field(), "7");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("alert");
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+  });
+
+  it("step 3 current after a save lists two done links with their summaries", async () => {
+    const user = userEvent.setup();
+    vi.mocked(getHistoryDepth)
+      .mockResolvedValueOnce({ years: null, updatedAt: null })
+      .mockResolvedValueOnce({ years: 5, updatedAt: "2026-09-06T18:00:00Z" });
+    vi.mocked(setHistoryDepth).mockResolvedValue({ years: 5, updatedAt: "2026-09-06T18:00:00Z" });
+    const { container } = renderScreen();
+    await screen.findByRole("region", { name: "How far back should history go?" });
+    await user.type(field(), "5");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "How far back, done" })).toBeInTheDocument(),
+    );
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+    for (const [index, title] of [
+      STEP_TITLES[1],
+      STEP_TITLES[2],
+      STEP_TITLES[3],
+      STEP_TITLES[4],
+    ].entries()) {
+      expect(item(index + 1)).toHaveTextContent(title);
+    }
+  });
+
+  it("all four done lists the download's start time", () => {
+    vi.mocked(useShell).mockReturnValue(
+      shell({
+        attention: attentionWith({
+          run_id: "dl-1",
+          state: "running",
+          requested_at: "2026-10-15T14:29:00Z",
+          started_at: "2026-10-15T14:30:00Z",
+          ended_at: null,
+          progress: { done: 1, total: 3 },
+        }),
+      }),
+    );
+    const { container } = render(
+      <StepList
+        state={stateWith({
+          current: 4,
+          done: { 1: true, 2: true, 3: true, 4: true },
+          depth: depthOk(12),
+          activeCount: { kind: "ok", data: 5, checkedAt: CHECKED_AT },
+        })}
+      />,
+    );
+    expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:30 CDT");
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+    for (const [index, title] of [
+      STEP_TITLES[1],
+      STEP_TITLES[2],
+      STEP_TITLES[3],
+      STEP_TITLES[4],
+    ].entries()) {
+      expect(item(index + 1)).toHaveTextContent(title);
+    }
+  });
+});
+
+describe("step 2: the field", () => {
+  it("is named with its unit, described by the range, with the plan note and the question", () => {
+    render(<StepHistoryDepth state={stateWith()} />);
+    expect(field()).toHaveAccessibleDescription("Whole years, 1 to 50.");
+    expect(
+      screen.getByText(
+        "Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "How far back should history go?" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Step 2 of 4")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["the draft over the saved years", "12", depthOk(5), 12],
+    ["the saved years when there is no draft", "", depthOk(5), 5],
+    ["empty when nothing is saved", "", depthOk(null), null],
+    [
+      "empty when the read failed",
+      "",
+      { kind: "error", error: new ApiUnreachableError("x"), last: null } as ReadState<HistoryDepth>,
+      null,
+    ],
+  ])("starts with %s", (_name, yearsText, depth, expected) => {
+    render(
+      <StepHistoryDepth
+        state={stateWith({ depth, drafts: { yearsText, source: null, pasted: "", unposted: [] } })}
+      />,
+    );
+    expect(field()).toHaveValue(expected);
+  });
+
+  it("keeps what is typed as the draft", async () => {
+    const user = userEvent.setup();
+    const setDraft = vi.fn();
+    render(<StepHistoryDepth state={stateWith({ setDraft })} />);
+    await user.type(field(), "7");
+    expect(setDraft).toHaveBeenLastCalledWith("yearsText", "7");
+  });
+});
+
+describe("step 2: validation on blur and on Continue", () => {
+  it.each(["0", "51", "5.5"])(
+    "refuses %s with the field error and sends nothing",
+    async (typed) => {
+      const user = userEvent.setup();
+      render(<StepHistoryDepth state={stateWith()} />);
+      await user.type(field(), typed);
+      await user.tab();
+      expect(await screen.findByRole("alert")).toHaveTextContent(new RegExp(`^${RANGE_ERROR}$`));
+      await user.click(screen.getByRole("button", { name: "Continue" }));
+      expect(screen.getByRole("alert")).toHaveTextContent(new RegExp(`^${RANGE_ERROR}$`));
+      expect(field()).toHaveValue(Number(typed));
+      expect(setHistoryDepth).not.toHaveBeenCalled();
+    },
+  );
+
+  it("refuses an empty field on Continue and sends nothing", async () => {
+    const user = userEvent.setup();
+    render(<StepHistoryDepth state={stateWith()} />);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(new RegExp(`^${RANGE_ERROR}$`));
+    expect(setHistoryDepth).not.toHaveBeenCalled();
+  });
+
+  it.each([1, 50])("accepts the bound %i", async (years) => {
+    const user = userEvent.setup();
+    vi.mocked(setHistoryDepth).mockResolvedValue({ years, updatedAt: "2026-09-06T18:00:00Z" });
+    render(<StepHistoryDepth state={stateWith()} />);
+    await user.type(field(), String(years));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await waitFor(() => expect(setHistoryDepth).toHaveBeenCalledWith(years));
+  });
+});
+
+describe("step 2: saving", () => {
+  // user-event does not press Enter through a number field into its form (its
+  // implicit submission lists text-like types only), so the form's own submit,
+  // which is what a browser fires on Enter, stands in for the keypress.
+  it.each(["Continue", "submitting the form"])(
+    "re-reads the depth and goes to step 3 on %s",
+    async (how) => {
+      const user = userEvent.setup();
+      const goTo = vi.fn();
+      const reread = vi.fn();
+      vi.mocked(setHistoryDepth).mockResolvedValue({
+        years: 7,
+        updatedAt: "2026-09-06T18:00:00Z",
+      });
+      render(<StepHistoryDepth state={stateWith({ goTo, reread })} />);
+      await user.type(field(), "7");
+      if (how === "Continue") {
+        await user.click(screen.getByRole("button", { name: "Continue" }));
+      } else {
+        fireEvent.submit(screen.getByRole("form", { name: "History depth" }));
+      }
+      await waitFor(() => expect(goTo).toHaveBeenCalledTimes(1));
+      expect(goTo).toHaveBeenCalledWith(3);
+      expect(reread).toHaveBeenCalledTimes(1);
+      expect(reread).toHaveBeenCalledWith("depth");
+      expect(setHistoryDepth).toHaveBeenCalledWith(7);
+    },
+  );
+
+  it.each([
+    [
+      "a server failure",
+      new ApiError("x", "req-3", { code: "internal_error" }),
+      `Couldn't save history depth: ${UNEXPECTED}`,
+    ],
+    [
+      "an unreachable server",
+      new ApiUnreachableError("x"),
+      `Couldn't save history depth: ${NOT_ANSWERING}`,
+    ],
+  ])("shows %s as a field error and keeps the value", async (_name, error, text) => {
+    const user = userEvent.setup();
+    const goTo = vi.fn();
+    const reread = vi.fn();
+    vi.mocked(setHistoryDepth).mockRejectedValue(error);
+    render(<StepHistoryDepth state={stateWith({ goTo, reread })} />);
+    await user.type(field(), "7");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(new RegExp(`^${text}$`));
+    expect(field()).toHaveValue(7);
+    expect(field()).toHaveAttribute("aria-invalid", "true");
+    expect(goTo).not.toHaveBeenCalled();
+    expect(reread).not.toHaveBeenCalled();
+  });
+  it("rethrows a failure that is not an answer from the server, and moves nowhere", async () => {
+    const user = userEvent.setup();
+    const goTo = vi.fn();
+    const surprise = new TypeError("not an error the API sent");
+    vi.mocked(setHistoryDepth).mockRejectedValue(surprise);
+    render(<StepHistoryDepth state={stateWith({ goTo })} />);
+    await user.type(field(), "7");
+    const surfaced = await surfacedRejections(async () => {
+      await user.click(screen.getByRole("button", { name: "Continue" }));
+    });
+    expect(surfaced).toEqual([surprise]);
+    expect(goTo).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("ignores spaces around a restored draft", async () => {
+    const user = userEvent.setup();
+    vi.mocked(setHistoryDepth).mockResolvedValue({ years: 7, updatedAt: "2026-09-06T18:00:00Z" });
+    render(
+      <StepHistoryDepth
+        state={stateWith({ drafts: { yearsText: " 7 ", source: null, pasted: "", unposted: [] } })}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await waitFor(() => expect(setHistoryDepth).toHaveBeenCalledWith(7));
+  });
+});
+
+describe("step 2: a failed depth read, in this step only", () => {
+  it("says why, offers Try again and still shows the field", async () => {
+    const user = userEvent.setup();
+    const reread = vi.fn();
+    render(
+      <StepHistoryDepth
+        state={stateWith({
+          reread,
+          depth: {
+            kind: "error",
+            error: new ApiError("x", "req-4", { code: "internal_error" }),
+            last: null,
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText(`Couldn't read history depth: ${UNEXPECTED}`)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(reread).toHaveBeenCalledTimes(1);
+    expect(reread).toHaveBeenCalledWith("depth");
+    expect(field()).toBeInTheDocument();
+  });
+
+  it("shows no read failure when the read answered", () => {
+    render(<StepHistoryDepth state={stateWith()} />);
+    expect(screen.queryByText(/Couldn't read/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+  });
+});
+
+describe("step 2: Back", () => {
+  it("goes to step 1 and sends nothing", async () => {
+    const user = userEvent.setup();
+    const goTo = vi.fn();
+    render(<StepHistoryDepth state={stateWith({ goTo })} />);
+    await user.click(screen.getByRole("button", { name: "← Back: Market data" }));
+    expect(goTo).toHaveBeenCalledTimes(1);
+    expect(goTo).toHaveBeenCalledWith(1);
+    expect(setHistoryDepth).not.toHaveBeenCalled();
+    expect(within(document.body).queryByRole("alert")).toBeNull();
+  });
+});

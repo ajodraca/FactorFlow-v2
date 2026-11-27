@@ -89,3 +89,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T005, T006, T012, T017]
+    description: >
+      Step 2, the history depth (TC-COMP-108, TC-COMP-111, AC-3, AC-17, DAC-E4-4, DAC-E4-13, DAC-E4-S2-1, DAC-E4-S2-4, DEC-0346, DEC-0347): step-history-depth.tsx holds StepHistoryDepth, a form with a numeric field and the years suffix, checked on blur and on Continue by a schema (a whole number from 1 to 50, spaces ignored, bounds mirroring the server's) and sent only when valid, as a number, through setHistoryDepth; a success re-reads the depth and moves to step 3; a refused value (the 422 code) and any other failure are field errors (the range sentence, and Couldn't save history depth with a reason that never echoes the server's message) with the value kept; a failure that is not an answer from the server is rethrown; the typed text is kept as a draft; a failed depth read shows Couldn't read history depth with Try again in this step only; the plan limit is the card's note. step-history-depth.test.tsx holds TC-COMP-108's composed save through the real step state, the 422 edge, TC-COMP-111's scan (with planted terms) over every state of the list, the card and steps 1 and 2, and the field, initial value, draft, blur and Continue validation, bounds, save, failure, read-failure and Back cases. The form's submit event stands in for Enter in the number field, since user-event's implicit submission lists text-like input types only. The generator produced 15 mutants and 14 were hand-written from the plan's kill list. The first run left three survivors: the trim of the typed text and the rethrow of a failure that is not an API answer, each prescribed by the plan and unpinned, and the generator's removal of the same trim; a rethrow case (through a surfaced-rejection helper) and a restored-draft-with-spaces case were added and the run repeated: 29 mutants, all killed. Both reviews approved; the code review raised one MEDIUM (nothing guards a second submit while the save is in flight, which the plan's Other Notes records as accepted: the same PUT is idempotent) and LOW observations (the initial value is read once, so a depth that arrives after a failed read leaves the field empty).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-4-step-history-depth.log
+    red_log_sha256: 92aed777c826530c53d31b252a34abd5f919777fc61e131e134baeea58711f28
+    red_evidence: >
+      step-history-depth.test.tsx failed to load (./step-history-depth did not resolve) before the module existed.
+    green_evidence: >
+      step-history-depth.test.tsx 39 passed (the setup suites, 266 passed, in green-cycle-4-step-history-depth.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2fbc38663c656a99b668d1acb2991a2695a96d545c7b4f7fbd578880f403f37b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: d7eda990c33eae2ccc2be9c2e2ad42f277abd5c10a0a6497bd4d62cd43a0b17b
+      generated: 29
+      killed: 29
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

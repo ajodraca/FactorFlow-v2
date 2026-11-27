@@ -1,0 +1,92 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wzfm9kpg/w2/web
+
+ ❯ src/screens/setup/step-history-depth.test.tsx (39 tests | 3 failed) 815ms
+   × TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 109ms
+     → expect(element).toHaveAttribute("aria-current", "step") // element.getAttribute("aria-current") === "step"
+
+Expected the element to have attribute:
+  aria-current="step"
+Received:
+  null
+   × step 2: saving > re-reads the depth and goes to step 3 on Continue 34ms
+     → expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   3,
++   4,
+  ]
+
+
+Number of calls: 1
+
+   × step 2: saving > re-reads the depth and goes to step 3 on submitting the form 67ms
+     → expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   3,
++   4,
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused
+Error: expect(element).toHaveAttribute("aria-current", "step") // element.getAttribute("aria-current") === "step"
+
+Expected the element to have attribute:
+  aria-current="step"
+Received:
+  null
+ ❯ src/screens/setup/step-history-depth.test.tsx:235:21
+    233|     expect(getHistoryDepth).toHaveBeenCalledTimes(2);
+    234|     expect(item(2)).toHaveTextContent("5 years of history");
+    235|     expect(item(3)).toHaveAttribute("aria-current", "step");
+       |                     ^
+    236|     await waitFor(() => expect(headingOf("Which stocks do you want to …
+    237|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: saving > re-reads the depth and goes to step 3 on Continue
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: saving > re-reads the depth and goes to step 3 on submitting the form
+AssertionError: expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   3,
++   4,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/setup/step-history-depth.test.tsx:527:20
+    525|       }
+    526|       await waitFor(() => expect(goTo).toHaveBeenCalledTimes(1));
+    527|       expect(goTo).toHaveBeenCalledWith(3);
+       |                    ^
+    528|       expect(reread).toHaveBeenCalledTimes(1);
+    529|       expect(reread).toHaveBeenCalledWith("depth");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 36 passed (39)
+   Start at  12:21:22
+   Duration  2.36s (transform 150ms, setup 48ms, collect 736ms, tests 815ms, environment 407ms, prepare 99ms)
+

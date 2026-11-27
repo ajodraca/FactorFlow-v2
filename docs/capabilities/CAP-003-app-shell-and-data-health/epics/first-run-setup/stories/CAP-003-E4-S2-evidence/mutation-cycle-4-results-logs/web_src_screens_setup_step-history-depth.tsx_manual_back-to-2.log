@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wzfm9kpg/w3/web
+
+ ❯ src/screens/setup/step-history-depth.test.tsx (39 tests | 1 failed) 1116ms
+   × step 2: Back > goes to step 1 and sends nothing 15ms
+     → expected "spy" to be called with arguments: [ 1 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   1,
++   2,
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: Back > goes to step 1 and sends nothing
+AssertionError: expected "spy" to be called with arguments: [ 1 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   1,
++   2,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/setup/step-history-depth.test.tsx:624:18
+    622|     await user.click(screen.getByRole("button", { name: "← Back: Marke…
+    623|     expect(goTo).toHaveBeenCalledTimes(1);
+    624|     expect(goTo).toHaveBeenCalledWith(1);
+       |                  ^
+    625|     expect(setHistoryDepth).not.toHaveBeenCalled();
+    626|     expect(within(document.body).queryByRole("alert")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  12:21:39
+   Duration  3.10s (transform 286ms, setup 94ms, collect 866ms, tests 1.12s, environment 540ms, prepare 103ms)
+
