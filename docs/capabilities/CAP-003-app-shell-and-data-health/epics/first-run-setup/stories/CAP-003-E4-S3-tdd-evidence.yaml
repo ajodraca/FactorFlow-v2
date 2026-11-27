@@ -32,3 +32,32 @@ cycles:
       score: 1.0
       survivors: []
 
+  - id: cycle-2
+    tasks: [T003, T011, T015]
+    description: >
+      The batches (TC-COMP-114 request half, AC-5, AC-17, DAC-E4-6, DAC-E4-S3-2, DEC-0354): post-in-batches.ts holds MAX_SYMBOLS_PER_REQUEST (the mirror of the server bound, pinned equal by reading bounds.py in a test), the BatchOutcome union and postInBatches, which posts one batch at a time through the delivered addInstruments, counts a 409 all_duplicate batch as posted and goes on, collects each batch's rejected dispositions in order, stops at any other ApiError or an ApiUnreachableError returning the posted count with that batch's and every later symbol unposted, and rethrows anything else. post-in-batches.test.ts holds the 1000/1000/500 split, the sequential posting, the 409 and transport and 500 cases, the boundaries, the accumulation, the other refusal codes, the rethrow and the bound mirror. The generator produced 6 mutants and 6 were hand-written from the plan's kill list (the Promise.all mutant is covered by the sequential case and was not generated). All 12 were killed on the first run. Both reviews approved; the code review raised LOW observations only (a 409 batch adds no per-symbol rows, the sequential case settles on a fixed number of microtask ticks, and the bounds mirror and its comment depend on a line layout).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-2-post-in-batches.log
+    red_log_sha256: dd6cc71fa4f5c7bf43b9d7a500f97cf487c3d1219e1affe935bf1803817f2176
+    red_evidence: >
+      post-in-batches.test.ts failed to load (./post-in-batches did not resolve) before the module existed.
+    green_evidence: >
+      post-in-batches.test.ts 13 passed (the setup suites, 314 passed, in green-cycle-2-post-in-batches.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4359a7dd4502c2e8a74ff4b4addf7736de6b2a0d9d4411b93175577691d302a0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: b3bb39f765e634958f8aecb4ce634424a3d157f23bb25bc2c18ff3bef8109cad
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+

@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-52c7m1x4/w2/web
+
+ ❯ src/screens/setup/post-in-batches.test.ts (13 tests | 1 failed) 22ms
+   × postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > rethrows anything else 7ms
+     → promise resolved "{ kind: 'failed', posted: +0, …(3) }" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > rethrows anything else
+AssertionError: promise resolved "{ kind: 'failed', posted: +0, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- [Error: rejected promise]
++ Object {
++   "error": [ApiUnreachableError: x],
++   "kind": "failed",
++   "posted": 0,
++   "rejected": Array [],
++   "unposted": Array [
++     "S0",
++     "S1",
++     "S2",
++     "S3",
++     "S4",
++     "S5",
++     "S6",
++     "S7",
++     "S8",
++     "S9",
++   ],
++ }
+
+ ❯ src/screens/setup/post-in-batches.test.ts:153:44
+    151|     const boom = new TypeError("boom");
+    152|     vi.mocked(addInstruments).mockRejectedValueOnce(boom);
+    153|     await expect(postInBatches(symbols(10))).rejects.toBe(boom);
+       |                                            ^
+    154|   });
+    155| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  13:24:27
+   Duration  1.60s (transform 72ms, setup 55ms, collect 75ms, tests 22ms, environment 294ms, prepare 265ms)
+

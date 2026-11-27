@@ -123,7 +123,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - a hand-written mutant that pushes every repeat into `accepted` (no seen-set): (c) and (d).
   - a hand-written mutant that drops the valid entries when any entry is invalid: (d).
 
-- [ ] T003 [P] Implement TC-COMP-114, request half (2500 symbols post as 1000, 1000, 500) in a new `web/src/screens/setup/post-in-batches.test.ts`, with a `// Implements TC-COMP-114` comment. `vi.mock("../../api/client", …)` with `addInstruments: vi.fn()` resolving `{ added: batch.map(outcome("added")), reactivated: [], rejected: [] }` by default, where `outcome(disposition)` builds a `SymbolOutcome` literal.
+- [x] T003 [P] Implement TC-COMP-114, request half (2500 symbols post as 1000, 1000, 500) in a new `web/src/screens/setup/post-in-batches.test.ts`, with a `// Implements TC-COMP-114` comment. `vi.mock("../../api/client", …)` with `addInstruments: vi.fn()` resolving `{ added: batch.map(outcome("added")), reactivated: [], rejected: [] }` by default, where `outcome(disposition)` builds a `SymbolOutcome` literal.
   - (a) **The TC's split.** `postInBatches(symbols(2500))` calls `addInstruments` three times; the arguments' lengths are `[1000, 1000, 500]`; the first elements are `"S0"`, `"S1000"`, `"S2000"` and the last of the third call is `"S2499"` (in order, nothing reordered or dropped); the result `toEqual({ kind: "done", posted: 2500, rejected: [] })`.
   - (b) **Sequential.** With the second call's promise held by a `deferred()`, after a flush exactly two calls have been made; the third starts only after the second resolves.
   - (c) **TC edge: a `409` batch is success.** The second call rejects with `new ApiError("x", "req-1", { code: "all_duplicate" })`: three calls are made and the result is `{ kind: "done", posted: 2500, rejected: [] }`.
@@ -226,7 +226,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - a hand-written mutant that treats any repeated normalised form as a duplicate: (c).
   - a hand-written mutant that replaces substrings with `String.replaceAll`: (g) `"BRK/BX"`.
 
-- [ ] T011 Write the batch rules in `web/src/screens/setup/post-in-batches.test.ts`, sequential with T003 (DAC-E4-6, AC-17; DEC-0354):
+- [x] T011 Write the batch rules in `web/src/screens/setup/post-in-batches.test.ts`, sequential with T003 (DAC-E4-6, AC-17; DEC-0354):
   - (a) **Boundaries.** `symbols(1000)`: one call of 1000. `symbols(1001)`: two calls, `[1000, 1]`. `[]`: no call and `{ kind: "done", posted: 0, rejected: [] }` (an empty batch is never posted: the delivered route answers `409` to it).
   - (b) **Dispositions accumulate in order.** Batch 1 resolves with one `duplicate_active` rejection for `"S5"` and batch 2 with one for `"S1500"`: `rejected` is `[<S5 outcome>, <S1500 outcome>]`, each `toBe` the client's object.
   - (c) **Other refusals take the failure path.** `new ApiError("x", "req-3", { code: "all_malformed" })` and `{ code: "validation_error" }` on batch 1: `{ kind: "failed", posted: 0, … }`. `new ApiError("x", "req-4", { code: null })`: failed.
@@ -283,7 +283,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: The two pure modules, the copy and step card additions, and the step, each in its own TDD cycle. Every module's comments cite AC, DAC and TC in the style of the delivered `status-region.tsx`, and none writes a length, a colour, a layout value or one of the eight DAC-E7-3 terms (no *run* or *runs* in a comment either; the delivered client names `addInstruments` and the module path `../instruments/` contain none of them as whole words).
 
-- [ ] T015 Create `web/src/screens/setup/summarise-paste.ts` and `web/src/screens/setup/post-in-batches.ts` (T002, T003, T010 and T011 RED first; the two modules are independent of each other).
+- [x] T015 Create `web/src/screens/setup/summarise-paste.ts` and `web/src/screens/setup/post-in-batches.ts` (T002, T003, T010 and T011 RED first; the two modules are independent of each other).
   - **`summarise-paste.ts`.** Imports `type ParsedSymbol` from `"../instruments/parse-bulk-symbols"` only (the parser is called by the step, so its calls stay countable; DAC-E4-S3-2). Exports:
     - `SYMBOL_SHAPE = /^[A-Z][A-Z0-9.-]{0,15}$/`, commented as the mirror of the delivered `parse-bulk-symbols.ts:17` and `src/factorflow/instruments/symbols.py:5` (not exported there; T010 (f) pins the equality), and `ENTRY_SEPARATOR = /([\n,\t;]+)/`, the mirror of `parse-bulk-symbols.ts:16` with a capture group so `split` keeps the separators.
     - `interface UnreadableEntry { input: string; fix: string | null }` and `interface PasteSummary { accepted: string[]; duplicates: string[]; unreadable: UnreadableEntry[] }`.

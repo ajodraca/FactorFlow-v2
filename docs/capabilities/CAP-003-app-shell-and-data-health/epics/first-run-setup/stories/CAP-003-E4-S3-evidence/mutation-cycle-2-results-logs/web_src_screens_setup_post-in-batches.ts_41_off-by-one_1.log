@@ -1,0 +1,73 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-52c7m1x4/w2/web
+
+ ❯ src/screens/setup/post-in-batches.test.ts (13 tests | 2 failed) 16ms
+   × postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > posts exactly 1000 as one batch and 1001 as two 4ms
+     → expected [ 1000, +0 ] to deeply equal [ 1000 ]
+   × postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > posts nothing for an empty list 2ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      Array [],
+    ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > posts exactly 1000 as one batch and 1001 as two
+AssertionError: expected [ 1000, +0 ] to deeply equal [ 1000 ]
+
+- Expected
++ Received
+
+  Array [
+    1000,
++   0,
+  ]
+
+ ❯ src/screens/setup/post-in-batches.test.ts:116:81
+    114|   it("posts exactly 1000 as one batch and 1001 as two", async () => {
+    115|     await postInBatches(symbols(1000));
+    116|     expect(vi.mocked(addInstruments).mock.calls.map(([batch]) => batch…
+       |                                                                                 ^
+    117|     vi.mocked(addInstruments).mockClear();
+    118|     await postInBatches(symbols(1001));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > posts nothing for an empty list
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      Array [],
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/setup/post-in-batches.test.ts:124:43
+    122|   it("posts nothing for an empty list", async () => {
+    123|     const result = await postInBatches([]);
+    124|     expect(vi.mocked(addInstruments)).not.toHaveBeenCalled();
+       |                                           ^
+    125|     expect(result).toEqual({ kind: "done", posted: 0, rejected: [] });
+    126|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  13:24:21
+   Duration  1.72s (transform 68ms, setup 92ms, collect 71ms, tests 16ms, environment 404ms, prepare 201ms)
+
