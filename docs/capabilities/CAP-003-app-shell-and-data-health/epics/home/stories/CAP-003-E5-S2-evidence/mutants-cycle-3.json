@@ -1,0 +1,215 @@
+{
+ "schema": 1,
+ "repo_head": "d8f4edfd0102350d2bfbf0fdca906932bfca4bd6",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:never-first-off",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "if (summary.never_classified) {",
+   "new": "if (!summary.never_classified) {",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:building-failed-swap",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.later?.state === \"building\") {\n    return \"building\"",
+   "new": "summary.later?.state === \"failed\") {\n    return \"building\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:failed-building-swap",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.later?.state === \"failed\") {\n    return \"failed\"",
+   "new": "summary.later?.state === \"building\") {\n    return \"failed\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:not-current-negate",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.set?.not_current === true) {\n    return \"not_current\"",
+   "new": "summary.set?.not_current !== true) {\n    return \"not_current\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:score-status-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "scores.kind === \"served\" ? { of: \"scores\", state: scoreStateOf(scores.data) } : null",
+   "new": "null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:affected-count",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "affectedCount: a.problems.stock_count",
+   "new": "affectedCount: 0",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:followed-source",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "formatCount(stocks === null ? a.followed_count : stocks.followed_count)",
+   "new": "formatCount(a.followed_count)",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:stocks-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "const current = stocks === null ? null",
+   "new": "const current = stocks !== null ? null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:scores-started",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "formatInstant(summary.set.ended_at)",
+   "new": "formatInstant(summary.set.started_at)",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:never-label",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.set === null\n        ? labelOf",
+   "new": "summary.set !== null\n        ? labelOf",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:prices-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "a.prices_as_of === null ? null",
+   "new": "a.prices_as_of !== null ? null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:prices-as-instant",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "formatSessionDate(a.prices_as_of)",
+   "new": "formatInstant(new Date(a.prices_as_of))",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:lag-negate",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.set?.not_current === true || summary.later !== null",
+   "new": "summary.set?.not_current !== true || summary.later !== null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:lag-and",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.set?.not_current === true || summary.later !== null",
+   "new": "summary.set?.not_current === true && summary.later !== null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:lag-no-later",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "summary.set?.not_current === true || summary.later !== null",
+   "new": "summary.set?.not_current === true",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:lag-lagging-off",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "{lagging ? (",
+   "new": "{!lagging ? (",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:metric-variant",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "<Card variant=\"metric\">",
+   "new": "<Card variant=\"default\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:hero-plain",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "<CardMetricValue>",
+   "new": "<p>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:hero-close",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "</CardMetricValue>",
+   "new": "</p>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:absent-plain",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "{current ?? <Absent label={NOT_DETERMINABLE} />}{\" \"}",
+   "new": "{current ?? \"\u2014\"}{\" \"}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:name-lower",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "scoresAt.charAt(0).toLowerCase()",
+   "new": "scoresAt.charAt(0)",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:scores-absent-plain",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "{DATA_TILE.scores} <Absent label={NOT_DETERMINABLE} />",
+   "new": "{DATA_TILE.scores} \u2014",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:route-element",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "<Link to={DATA_HEALTH} aria-label={name} className=\"block rounded\">",
+   "new": "<Link to={DATA_HEALTH} className=\"block rounded\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:name-no-aria",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "<Link to={DATA_HEALTH} aria-label={name}",
+   "new": "<Link to={DATA_HEALTH} aria-label={undefined}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:badge-bare",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "<StatusBadge tier={badge.tier}>{badge.label}</StatusBadge>",
+   "new": "<span>{badge.label}</span>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:lag-wrapper",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "data-testid=\"data-tile-lag\"",
+   "new": "data-testid=\"data-tile-lag-x\"",
+   "cycle": "cycle-3"
+  }
+ ]
+}

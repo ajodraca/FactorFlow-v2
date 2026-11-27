@@ -1,0 +1,91 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w1/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 5 failed) 207ms
+   × DataTile hero and as-of lines (TC-COMP-128; DAC-E5-4, AC-8) > (a) served: 27 of 30, never 27 of 26 5ms
+     → expected 'DataMostly yes27 of 30 stocks current…' to contain 'Scores 2026-10-15 17:46 CDT'
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (a) one link named by title, verdict, figures and as-of 4ms
+     → expected 'Data: mostly yes. 27 of 30 stocks cur…' to be 'Data: mostly yes. 27 of 30 stocks cur…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when score failed 2ms
+     → expected 'Data: score update failed. 27 of 30 s…' to be 'Data: score update failed. 27 of 30 s…' // Object.is equality
+   × DataTile composition (T010 f, g) > under TZ=Asia/Tokyo > (f) reads America/Chicago, not the machine zone 2ms
+     → expected 'DataMostly yes27 of 30 stocks current…' to contain 'Scores 2026-10-15 17:46 CDT'
+   × DataTile composition (T010 f, g) > under TZ=America/Los_Angeles > (f) reads America/Chicago, not the machine zone 2ms
+     → expected 'DataMostly yes27 of 30 stocks current…' to contain 'Scores 2026-10-15 17:46 CDT'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile hero and as-of lines (TC-COMP-128; DAC-E5-4, AC-8) > (a) served: 27 of 30, never 27 of 26
+AssertionError: expected 'DataMostly yes27 of 30 stocks current…' to contain 'Scores 2026-10-15 17:46 CDT'
+
+Expected: "Scores 2026-10-15 17:46 CDT"
+Received: "DataMostly yes27 of 30 stocks currentScores 2026-10-15 17:41 CDTPrices 2026-10-14Every other number on this page is as of those times."
+
+ ❯ src/screens/home/data-tile.test.tsx:361:21
+    359|     const c = show(ok(ATTENTION), served(SUMMARY()));
+    360|     expect(collapsed(heroOf(c))).toBe("27 of 30 stocks current");
+    361|     expect(text(c)).toContain("Scores 2026-10-15 17:46 CDT");
+       |                     ^
+    362|     expect(text(c)).toContain("Prices 2026-10-14");
+    363|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (a) one link named by title, verdict, figures and as-of
+AssertionError: expected 'Data: mostly yes. 27 of 30 stocks cur…' to be 'Data: mostly yes. 27 of 30 stocks cur…' // Object.is equality
+
+Expected: "Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+Received: "Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17:41 CDT, prices 2026-10-14."
+
+ ❯ src/screens/home/data-tile.test.tsx:429:23
+    427|     expect(links.length).toBe(1);
+    428|     expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    429|     expect(nameOf(c)).toBe(
+       |                       ^
+    430|       "Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17…
+    431|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when score failed
+AssertionError: expected 'Data: score update failed. 27 of 30 s…' to be 'Data: score update failed. 27 of 30 s…' // Object.is equality
+
+Expected: "Data: score update failed. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+Received: "Data: score update failed. 27 of 30 stocks current. Scores 2026-10-15 17:41 CDT, prices 2026-10-14."
+
+ ❯ src/screens/home/data-tile.test.tsx:460:23
+    458|   ])("(c) the name when %s", (_n, scores, attention, expected) => {
+    459|     const c = show(ok(attention), scores);
+    460|     expect(nameOf(c)).toBe(expected);
+       |                       ^
+    461|   });
+    462| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile composition (T010 f, g) > under TZ=Asia/Tokyo > (f) reads America/Chicago, not the machine zone
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile composition (T010 f, g) > under TZ=America/Los_Angeles > (f) reads America/Chicago, not the machine zone
+AssertionError: expected 'DataMostly yes27 of 30 stocks current…' to contain 'Scores 2026-10-15 17:46 CDT'
+
+Expected: "Scores 2026-10-15 17:46 CDT"
+Received: "DataMostly yes27 of 30 stocks currentScores 2026-10-15 17:41 CDTPrices 2026-10-14Every other number on this page is as of those times."
+
+ ❯ src/screens/home/data-tile.test.tsx:608:23
+    606|     it("(f) reads America/Chicago, not the machine zone", () => {
+    607|       const c = show(ok(ATTENTION), served(SUMMARY()));
+    608|       expect(text(c)).toContain("Scores 2026-10-15 17:46 CDT");
+       |                       ^
+    609|       expect(text(c)).toContain("Prices 2026-10-14");
+    610|       const first = show(ok(FIRST("running", "2026-10-15T21:02:00Z")),…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 44 passed (49)
+   Start at  17:02:15
+   Duration  1.53s (transform 82ms, setup 35ms, collect 421ms, tests 207ms, environment 190ms, prepare 113ms)
+

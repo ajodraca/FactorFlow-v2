@@ -1,12 +1,20 @@
 import { type JSX, type ReactNode, useId } from "react";
 import { Link } from "react-router-dom";
 import { useShell } from "../../app/shell-context";
-import { formatInstant } from "../../components/patterns/format";
+import type { ScoreState, ScoreSummary } from "../../app/shell-types";
+import { formatCount, formatInstant, formatSessionDate } from "../../components/patterns/format";
+import { Absent } from "../../components/patterns/presence";
 import { StatusBadge } from "../../components/patterns/status-badge";
 import { type Status, labelOf, tierOf } from "../../components/patterns/tiers";
 import { dataTileBadge, worstDataTier } from "../../components/patterns/worst-data-tier";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { DATA_TILE } from "./copy";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardMetricValue,
+  CardTitle,
+} from "../../components/ui/card";
+import { DATA_TILE, NOT_DETERMINABLE } from "./copy";
 
 /**
  * Home's data tile: how many followed stocks are current and whether the data
@@ -23,14 +31,48 @@ const DATA_HEALTH = "/data";
 /** The status of a download that is running, for the first-download badge. */
 const RUNNING: Status = { of: "download", state: "running" };
 
+/** The scores status of a lagging set, for the lag badge. */
+const NOT_CURRENT: Status = { of: "scores", state: "not_current" };
+
+type ScoresStatus = Extract<Status, { of: "scores" }>;
+
+/**
+ * The summary's score state, in the table order of data-health-ui 2.4 and epic
+ * DAC-E6-5 (home-ui 2.4: "the tier Data health's Factor scores card shows";
+ * spec review v3 FINDING-13): never classified, then a later set building, then
+ * failed, then a set not current, else current.
+ */
+function scoreStateOf(summary: ScoreSummary): ScoresStatus["state"] {
+  if (summary.never_classified) {
+    return "never_classified";
+  }
+  if (summary.later?.state === "building") {
+    return "building";
+  }
+  if (summary.later?.state === "failed") {
+    return "failed";
+  }
+  if (summary.set?.not_current === true) {
+    return "not_current";
+  }
+  return "current";
+}
+
+/** The score input of `dataTileBadge`: null while the summary is not served (home-ui 2.4). */
+function scoreStatus(scores: ScoreState): ScoresStatus | null {
+  return scores.kind === "served" ? { of: "scores", state: scoreStateOf(scores.data) } : null;
+}
+
 /** The section, the link and the card every state shares (Resolved Conflict 4). */
 function TileLink({
   name,
   titleId,
+  badge,
   children,
 }: {
   name: string;
   titleId: string;
+  badge?: ReactNode;
   children: ReactNode;
 }): JSX.Element {
   return (
@@ -39,6 +81,7 @@ function TileLink({
         <Card variant="metric">
           <CardHeader>
             <CardTitle id={titleId}>{DATA_TILE.title}</CardTitle>
+            {badge}
           </CardHeader>
           <CardContent>{children}</CardContent>
         </Card>
@@ -85,7 +128,7 @@ export function DataTile(): JSX.Element | null {
     followedCount: a.followed_count,
     latestTerminalDownload: a.latest_terminal_download?.state ?? null,
   });
-  const badge = dataTileBadge(verdict, null);
+  const badge = dataTileBadge(verdict, scoreStatus(scores));
 
   // No badge means no download has ended: `dataTileBadge` is null exactly when
   // the verdict is, which is exactly when there is no terminal download.
@@ -107,11 +150,67 @@ export function DataTile(): JSX.Element | null {
     return <TileSkeleton titleId={titleId} />;
   }
 
+  const summary = scores.kind === "served" ? scores.data : null;
+  const stocks = summary?.stocks_current ?? null;
+  const current = stocks === null ? null : formatCount(stocks.current_count);
+  const followed = formatCount(stocks === null ? a.followed_count : stocks.followed_count);
+  let scoresAt: string | null = null;
+  if (summary !== null) {
+    scoresAt =
+      summary.set === null
+        ? labelOf({ of: "scores", state: "never_classified" })
+        : formatInstant(summary.set.ended_at);
+  }
+  const pricesOn = a.prices_as_of === null ? null : formatSessionDate(a.prices_as_of);
+  const lagging = summary !== null && (summary.set?.not_current === true || summary.later !== null);
+
+  let nameOfScores = NOT_DETERMINABLE;
+  if (summary !== null && scoresAt !== null) {
+    nameOfScores =
+      summary.set === null ? `${scoresAt.charAt(0).toLowerCase()}${scoresAt.slice(1)}` : scoresAt;
+  }
+  const name = DATA_TILE.name(
+    badge.label,
+    current ?? NOT_DETERMINABLE,
+    followed,
+    nameOfScores,
+    pricesOn ?? DATA_TILE.pricesNotDownloaded,
+  );
+
   return (
-    <TileLink name={`Data: ${badge.label}`} titleId={titleId}>
-      <span data-testid="data-tile-badge">
-        <StatusBadge tier={badge.tier}>{badge.label}</StatusBadge>
-      </span>
+    <TileLink
+      name={name}
+      titleId={titleId}
+      badge={
+        <span data-testid="data-tile-badge">
+          <StatusBadge tier={badge.tier}>{badge.label}</StatusBadge>
+        </span>
+      }
+    >
+      <CardMetricValue>
+        {current ?? <Absent label={NOT_DETERMINABLE} />}{" "}
+        {DATA_TILE.ofFollowedStocksCurrent(followed)}
+      </CardMetricValue>
+      <p className="text-xs text-muted-foreground">
+        {summary === null ? (
+          <>
+            {DATA_TILE.scores} <Absent label={NOT_DETERMINABLE} />
+          </>
+        ) : summary.set === null ? (
+          scoresAt
+        ) : (
+          `${DATA_TILE.scores} ${scoresAt}`
+        )}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {DATA_TILE.prices} {pricesOn ?? <Absent label={DATA_TILE.pricesNotDownloaded} />}
+      </p>
+      <p className="text-xs text-muted-foreground">{DATA_TILE.scope}</p>
+      {lagging ? (
+        <span data-testid="data-tile-lag">
+          <StatusBadge tier={tierOf(NOT_CURRENT)}>{labelOf(NOT_CURRENT)}</StatusBadge>
+        </span>
+      ) : null}
     </TileLink>
   );
 }

@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 1 failed) 238ms
+   × DataTile hero and as-of lines (TC-COMP-128; DAC-E5-4, AC-8) > (b) not served: dashes through Absent and attention's followed count 5ms
+     → expected 'Scores —' to be 'Scores —not determinable' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile hero and as-of lines (TC-COMP-128; DAC-E5-4, AC-8) > (b) not served: dashes through Absent and attention's followed count
+AssertionError: expected 'Scores —' to be 'Scores —not determinable' // Object.is equality
+
+Expected: "Scores —not determinable"
+Received: "Scores —"
+
+ ❯ src/screens/home/data-tile.test.tsx:369:50
+    367|     DASH_THEN_WORDS(heroOf(c), "not determinable");
+    368|     expect(collapsed(heroOf(c))).toBe("—not determinable of 26 stocks …
+    369|     expect(collapsed(lineStarting(c, "Scores"))).toBe("Scores —not det…
+       |                                                  ^
+    370|     DASH_THEN_WORDS(lineStarting(c, "Scores"), "not determinable");
+    371|     expect(text(c)).toContain("Prices 2026-10-14");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 48 passed (49)
+   Start at  17:02:20
+   Duration  1.66s (transform 139ms, setup 34ms, collect 675ms, tests 238ms, environment 167ms, prepare 73ms)
+

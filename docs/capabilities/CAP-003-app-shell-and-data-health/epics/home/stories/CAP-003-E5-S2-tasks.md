@@ -203,7 +203,7 @@ Every expected string below is a literal.
     - negate-boolean on `state === "running"` (a) shows the badge, or (b) loses it;
     - swap-case of the fallback order `requested_at ?? started_at` (b reads 16:00);
     - a mutant passing the served score status into the first-download branch (c, NEVER_FAILED).
-- [ ] T003 Implement TC-COMP-137 (Tile verdict equals the Data health verdict; worse score state wins) in `data-tile.test.tsx` (same file, after T002), with a `// Implements TC-COMP-137` comment.
+- [x] T003 Implement TC-COMP-137 (Tile verdict equals the Data health verdict; worse score state wins) in `data-tile.test.tsx` (same file, after T002), with a `// Implements TC-COMP-137` comment.
   - (a) `it.each` with `NOT_SERVED`, so the verdict stands alone. The table is literal. Its first three rows are the Data health fixtures of CAP-003-E6-S1's DAC-E6-S1-1, the rest the other answer-table rows of ui-components 2.4. Each row is `VERDICT(stock, followed, state) → [variant, text]`:
     - `(1, 10, "partial")` → `["status-warning", "Mostly yes"]`
     - `(10, 10, "succeeded")` → `["status-critical", "No"]`
@@ -231,7 +231,7 @@ Every expected string below is a literal.
     - drop-field-copy of `problems.stock_count` as `affectedCount` (a, row 1 turns *Yes*);
     - passing attention's `latest_download.state` instead of `latest_terminal_download.state` (a: change `latest_download.state` to `"succeeded"` in a copy of row 3, and it still reads *No*);
     - passing the served score status as `null` (b, FAILED).
-- [ ] T004 Implement TC-COMP-128 (Hero line figures from stocks_current; fallbacks while not served) in `data-tile.test.tsx` (after T003), with a `// Implements TC-COMP-128` comment.
+- [x] T004 Implement TC-COMP-128 (Hero line figures from stocks_current; fallbacks while not served) in `data-tile.test.tsx` (after T003), with a `// Implements TC-COMP-128` comment.
   - (a) Served, `ok(ATTENTION)` with `served(SUMMARY())`:
     - the hero element's collapsed text is exactly `"27 of 30 stocks current"`, never `"27 of 26"`;
     - the tile contains `"Scores 2026-10-15 17:46 CDT"` and `"Prices 2026-10-14"`.
@@ -250,7 +250,7 @@ Every expected string below is a literal.
     - negate-boolean on the `stocks_current === null` branch (c renders `0 of`, or throws);
     - swap-case `set.ended_at` → `set.started_at` (a reads `17:41`);
     - a mutant routing `prices_as_of` through `formatInstant(new Date(...))`, which throws or shifts.
-- [ ] T005 Implement TC-COMP-129 (Lag badge only when the set is not current or a later set is building or failed) in `data-tile.test.tsx` (after T004), with a `// Implements TC-COMP-129` comment.
+- [x] T005 Implement TC-COMP-129 (Lag badge only when the set is not current or a later set is building or failed) in `data-tile.test.tsx` (after T004), with a `// Implements TC-COMP-129` comment.
   - `it.each` over `ok(ATTENTION)` with each of `served(NOT_CURRENT_ONLY)`, `served(BUILDING)`, `served(FAILED)` and `served(NEVER_FAILED)`:
     - `lagOf` is `[data-variant="status-warning"]` with text exactly `"Not reflecting the latest download"`;
     - the lag wrapper follows the prices line in document order (`compareDocumentPosition` has `DOCUMENT_POSITION_FOLLOWING`; home-ui 2.4 table order).
@@ -281,7 +281,7 @@ Every expected string below is a literal.
     - swap-case `refresh("scores")` → `refresh("attention")` (c);
     - a mutant rendering `error.message` (b shows `Internal error`);
     - a mutant rendering `last` while the summary fails (c, the `SUMMARY_500_LAST` case shows the hero).
-- [ ] T007 Implement TC-COMP-138 (Tile is one link named by its content; never reads /api/data-health) in `data-tile.test.tsx` (after T006), with a `// Implements TC-COMP-138` comment.
+- [x] T007 Implement TC-COMP-138 (Tile is one link named by its content; never reads /api/data-health) in `data-tile.test.tsx` (after T006), with a `// Implements TC-COMP-138` comment.
   - (a) Full tile, `ok(ATTENTION)` with `served(SUMMARY())`:
     - `within(tile()).getAllByRole("link")` has length 1, and its `href` attribute ends with `"/data"`;
     - its accessible name is exactly `"Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."`;
@@ -310,7 +310,7 @@ Every expected string below is a literal.
     - control: `TERMS` matches `"Next run"`, so a broken pattern cannot pass vacuously.
   - "Every label from `labelOf` or `copy.ts`" is asserted because each expected label in T002–T007 is a literal that `labelOf`'s table (CAP-003-E1-S5) or `copy.ts` (CAP-003-E5-S1, T011) pins.
   - Kills: the hand-written copy mutant `"not downloaded yet"` → `"not acquired yet"`, which T010 (e) renders and `TERMS` catches.
-- [ ] T009 Implement TC-COMP-140 (Tile badges and em dashes carry shape, never colour alone) in `data-tile.test.tsx` (after T008), with a `// Implements TC-COMP-140` comment.
+- [x] T009 Implement TC-COMP-140 (Tile badges and em dashes carry shape, never colour alone) in `data-tile.test.tsx` (after T008), with a `// Implements TC-COMP-140` comment.
   - (a) Badges. Take every badge element rendered across:
     - T003 (a)'s six rows;
     - T003 (b)'s `FAILED` and `NOT_CURRENT_ONLY`;
@@ -331,7 +331,7 @@ Every expected string below is a literal.
 
 ### Additional Unit Tests
 
-- [ ] T010 Add the loading, absent-download, cancelling, summary-loading, null-price, time-zone and composition cases to `data-tile.test.tsx` (after T009) (traces to AC-21, DAC-E5-2, DAC-E5-4, AC-8, DAC-E5-S2-5).
+- [x] T010 Add the loading, absent-download, cancelling, summary-loading, null-price, time-zone and composition cases to `data-tile.test.tsx` (after T009) (traces to AC-21, DAC-E5-2, DAC-E5-4, AC-8, DAC-E5-S2-5).
   - (a) `ATT_LOADING` with `NOT_SERVED`:
     - `getByTestId("data-tile-skeleton")` has `aria-busy="true"`;
     - no link, no `status-*` element, no `"Couldn't read"`.
@@ -414,7 +414,7 @@ Every expected string below is a literal.
     - DEC-0363 to -4.
 
     It says the tile makes no read of its own and never reads the aggregate (DEC-0219 withdrawn). The words `fetch`, `use-data-health` and `shell-client` appear nowhere in the file, comments included, so T007 (d) and the Validation Plan grep cannot contradict this task. No unit or hex literal, no inline `style`, and no `--gain` or `--loss` appear.
-- [ ] T014 Add the full tile to `web/src/screens/home/data-tile.tsx` (depends on T013). This makes T003, T004, T005, T007, T009 and T010 (d)–(g) pass.
+- [x] T014 Add the full tile to `web/src/screens/home/data-tile.tsx` (depends on T013). This makes T003, T004, T005, T007, T009 and T010 (d)–(g) pass.
   - **`scoreStateOf(d: ScoreSummary): Extract<Status, { of: "scores" }>["state"]`** is module-private and follows the table order of data-health-ui 2.4 and epic DAC-E6-5, as CAP-003-E6-S1's `scoreStateOf` applies it (Resolved Conflict 2):
     - `d.never_classified` → `"never_classified"`;
     - `d.later?.state === "building"` → `"building"`;

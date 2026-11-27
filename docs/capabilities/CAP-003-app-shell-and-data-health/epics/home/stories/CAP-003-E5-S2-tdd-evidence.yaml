@@ -60,3 +60,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T003, T004, T005, T007, T009, T010, T014]
+    description: >
+      The full tile (TC-COMP-137, TC-COMP-128, TC-COMP-129, TC-COMP-138, TC-COMP-140; DAC-E5-3, DAC-E5-4, DAC-E5-5, DAC-E5-S2-2, DAC-E5-S2-3, DAC-E5-S2-5, AC-8, AC-11): data-tile.tsx gains scoreStateOf (the table order of data-health-ui 2.4: never classified, then later building, then later failed, then not current), scoreStatus, the badge from dataTileBadge over the verdict and the score state, the hero from stocks_current with attention's followed count as the fallback, the scores and prices as-of lines through Absent, the scope sentence, the lag badge, and the accessible name of DEC-0364. data-tile.test.tsx adds the verdict table, the score-state and tie tables, the hero and as-of cases, the lag cases, the link name cases, the shape and dash cases, the composition cases and the time-zone cases, and widens the no-aggregate-read test to the full cross product of attention states and score states. The generator produced no mutants for a tsx file, so 26 were hand-written from the plan's kill list; all 26 were killed. The spec-drift review reported drift on the first four passes, each time on a test that asserted less than the plan names (T009 badge set; the states T007 (d) renders); each was fixed and the cycle re-fingerprinted and reviewed afresh, and the fifth pair of reviews approved with no drift. The code reviews raised LOW observations only (T009 (b)'s dash loop has no minimum count and T004 (b) and (c) assert the same structure; a nested ternary in the scores line).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-3-full-tile.log
+    red_log_sha256: e18c836825258f75f1711cea8bfd5f5eec45819aba0799142bfdfb539de863ea
+    red_evidence: >
+      21 of the 49 data-tile tests failed before the full tile existed (the placeholder rendered only the badge).
+    green_evidence: >
+      The web/src/screens/home suite, 175 tests (49 in data-tile.test.tsx), passes in green-cycle-3-full-tile.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8a70fc5d9da55658ce7a31364830b629d7843bfeae63791ac34d080e3775ed26
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: 33df5fd02bd772a2f205d3e23bbb97cb3bdfa445b1719919f928baa13f9e87e8
+      generated: 26
+      killed: 26
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -1,0 +1,124 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w0/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 6 failed) 318ms
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (b) score state FAILED over a good verdict -> { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-15', run_id: 'run-7', run_started_at: '2026-10-15T21:02:00Z', run_outcome: 'partial', state: 'complete', started_at: '2026-10-15T22:41:00Z', ended_at: '2026-10-15T22:46:00Z', latest_trading_day: '2026-10-15', active_instruments: 30, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-15T23:00:00Z', ended_at: '2026-10-15T23:05:00Z', failure_reason: 'The engine stopped', run_id: 'run-8', run_started_at: '2026-10-15T22:58:00Z' }, factors: { value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, quality: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, momentum: { qualified_count: 30, ranked: true, min_peer_set_size: 5 } }, stocks_current: { current_count: 27, followed_count: 30 } } status-critical 14ms
+     → expected 'status-good' to be 'status-critical' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (b) score state NEVER_FAILED over a good verdict -> { never_classified: true, set: null, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-15T23:00:00Z', ended_at: '2026-10-15T23:05:00Z', failure_reason: 'The engine stopped', run_id: 'run-8', run_started_at: '2026-10-15T22:58:00Z' }, factors: { value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, quality: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, momentum: { qualified_count: 30, ranked: true, min_peer_set_size: 5 } }, stocks_current: null } status-good 2ms
+     → expected 'status-critical' to be 'status-good' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (b) score state NOT_CURRENT_ONLY over a good verdict -> { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-15', run_id: 'run-7', run_started_at: '2026-10-15T21:02:00Z', run_outcome: 'partial', state: 'complete', started_at: '2026-10-15T22:41:00Z', ended_at: '2026-10-15T22:46:00Z', latest_trading_day: '2026-10-15', active_instruments: 30, not_current: true }, later: null, factors: { value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, quality: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, momentum: { qualified_count: 30, ranked: true, min_peer_set_size: 5 } }, stocks_current: { current_count: 27, followed_count: 30 } } status-warning 8ms
+     → expected 'status-good' to be 'status-warning' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (c) ties and the worse verdict 1 3ms
+     → expected 'status-warning' to be 'status-critical' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when score failed 3ms
+     → expected 'Data: yes. 27 of 30 stocks current. S…' to be 'Data: score update failed. 27 of 30 s…' // Object.is equality
+   × DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape 8ms
+     → expected 'Yes' to be 'Score update failed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (b) score state FAILED over a good verdict -> { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-15', run_id: 'run-7', run_started_at: '2026-10-15T21:02:00Z', run_outcome: 'partial', state: 'complete', started_at: '2026-10-15T22:41:00Z', ended_at: '2026-10-15T22:46:00Z', latest_trading_day: '2026-10-15', active_instruments: 30, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-15T23:00:00Z', ended_at: '2026-10-15T23:05:00Z', failure_reason: 'The engine stopped', run_id: 'run-8', run_started_at: '2026-10-15T22:58:00Z' }, factors: { value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, quality: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, momentum: { qualified_count: 30, ranked: true, min_peer_set_size: 5 } }, stocks_current: { current_count: 27, followed_count: 30 } } status-critical
+AssertionError: expected 'status-good' to be 'status-critical' // Object.is equality
+
+Expected: "status-critical"
+Received: "status-good"
+
+ ❯ src/screens/home/data-tile.test.tsx:341:35
+    339|   ] as const)("(b) score state %s over a good verdict -> %s %s", (_n, …
+    340|     const c = show(ok(VERDICT(0, 10, "succeeded")), served(summary));
+    341|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    342|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    343|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (b) score state NEVER_FAILED over a good verdict -> { never_classified: true, set: null, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-15T23:00:00Z', ended_at: '2026-10-15T23:05:00Z', failure_reason: 'The engine stopped', run_id: 'run-8', run_started_at: '2026-10-15T22:58:00Z' }, factors: { value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, quality: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, momentum: { qualified_count: 30, ranked: true, min_peer_set_size: 5 } }, stocks_current: null } status-good
+AssertionError: expected 'status-critical' to be 'status-good' // Object.is equality
+
+Expected: "status-good"
+Received: "status-critical"
+
+ ❯ src/screens/home/data-tile.test.tsx:341:35
+    339|   ] as const)("(b) score state %s over a good verdict -> %s %s", (_n, …
+    340|     const c = show(ok(VERDICT(0, 10, "succeeded")), served(summary));
+    341|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    342|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    343|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (b) score state NOT_CURRENT_ONLY over a good verdict -> { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-15', run_id: 'run-7', run_started_at: '2026-10-15T21:02:00Z', run_outcome: 'partial', state: 'complete', started_at: '2026-10-15T22:41:00Z', ended_at: '2026-10-15T22:46:00Z', latest_trading_day: '2026-10-15', active_instruments: 30, not_current: true }, later: null, factors: { value: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, quality: { qualified_count: 30, ranked: true, min_peer_set_size: 5 }, momentum: { qualified_count: 30, ranked: true, min_peer_set_size: 5 } }, stocks_current: { current_count: 27, followed_count: 30 } } status-warning
+AssertionError: expected 'status-good' to be 'status-warning' // Object.is equality
+
+Expected: "status-warning"
+Received: "status-good"
+
+ ❯ src/screens/home/data-tile.test.tsx:341:35
+    339|   ] as const)("(b) score state %s over a good verdict -> %s %s", (_n, …
+    340|     const c = show(ok(VERDICT(0, 10, "succeeded")), served(summary));
+    341|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    342|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    343|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (c) ties and the worse verdict 1
+AssertionError: expected 'status-warning' to be 'status-critical' // Object.is equality
+
+Expected: "status-critical"
+Received: "status-warning"
+
+ ❯ src/screens/home/data-tile.test.tsx:351:35
+    349|   ] as const)("(c) ties and the worse verdict %#", (attention, summary…
+    350|     const c = show(ok(attention), served(summary));
+    351|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    352|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    353|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when score failed
+AssertionError: expected 'Data: yes. 27 of 30 stocks current. S…' to be 'Data: score update failed. 27 of 30 s…' // Object.is equality
+
+Expected: "Data: score update failed. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+Received: "Data: yes. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+
+ ❯ src/screens/home/data-tile.test.tsx:460:23
+    458|   ])("(c) the name when %s", (_n, scores, attention, expected) => {
+    459|     const c = show(ok(attention), scores);
+    460|     expect(nameOf(c)).toBe(expected);
+       |                       ^
+    461|   });
+    462| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape
+AssertionError: expected 'Yes' to be 'Score update failed' // Object.is equality
+
+Expected: "Score update failed"
+Received: "Yes"
+
+ ❯ src/screens/home/data-tile.test.tsx:535:42
+    533|     for (const [c, word] of rendered) {
+    534|       const badge = c.querySelector('[data-testid="data-tile-badge"] […
+    535|       expect(badge?.textContent?.trim()).toBe(word);
+       |                                          ^
+    536|       expect(badge?.querySelectorAll("svg").length).toBe(1);
+    537|       expect(badge?.querySelector("svg")?.getAttribute("aria-hidden"))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 43 passed (49)
+   Start at  17:02:11
+   Duration  1.57s (transform 85ms, setup 37ms, collect 412ms, tests 318ms, environment 228ms, prepare 112ms)
+

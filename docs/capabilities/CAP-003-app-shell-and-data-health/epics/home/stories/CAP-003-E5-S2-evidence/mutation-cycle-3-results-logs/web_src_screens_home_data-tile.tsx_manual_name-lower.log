@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w1/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 1 failed) 233ms
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when never classified 6ms
+     → expected 'Data: mostly yes. not determinable of…' to be 'Data: mostly yes. not determinable of…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when never classified
+AssertionError: expected 'Data: mostly yes. not determinable of…' to be 'Data: mostly yes. not determinable of…' // Object.is equality
+
+Expected: "Data: mostly yes. not determinable of 26 stocks current. Scores no scores yet, prices 2026-10-14."
+Received: "Data: mostly yes. not determinable of 26 stocks current. Scores No scores yet, prices 2026-10-14."
+
+ ❯ src/screens/home/data-tile.test.tsx:460:23
+    458|   ])("(c) the name when %s", (_n, scores, attention, expected) => {
+    459|     const c = show(ok(attention), scores);
+    460|     expect(nameOf(c)).toBe(expected);
+       |                       ^
+    461|   });
+    462| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 48 passed (49)
+   Start at  17:02:20
+   Duration  1.72s (transform 194ms, setup 35ms, collect 746ms, tests 233ms, environment 170ms, prepare 79ms)
+
