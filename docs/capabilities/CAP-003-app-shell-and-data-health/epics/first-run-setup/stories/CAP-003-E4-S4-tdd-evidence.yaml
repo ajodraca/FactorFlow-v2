@@ -126,3 +126,23 @@ cycles:
           disposition: equivalent
           reason: >
             The named flag starts true instead of false, but it is read only while ours is set, and every path that sets ours calls setNamed(false) in the same handler first, so the initial value is never observed.
+
+  - id: cycle-5
+    tasks: [T009]
+    description: >
+      Rework of adversarial review v2 (IR-001): one test makes a second Start download after attention has named the first, the server answers 202 with queued_behind set, and the test asserts the queued status line and no progressbar, so the latch reset (setNamed(false)) is pinned. The cycle changes no production code. IR-002 (plan assertions unmade) and IR-003 (compile-only kills in cycles 2 and 3) are LOW, carried, and left for the owner; the review states IR-003 is evidence quality only and needs no change for the gate. Both reviews approved.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-5-rework.log
+    red_log_sha256: c958e812bd1a10c6754d4d50bf00db06dda780ae0e08c7459a2f36694d6201e2
+    red_evidence: >
+      With the reviewer's mutant review-v2-reset-dropped applied (the setNamed(false) line in step-download.tsx deleted) the new test fails: Unable to find an accessible element with the role "status". The original code passes it, because the test pins behaviour the code already had.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 485 passed, in green-cycle-5-rework.log; biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c5565bce97c90159246eb7038ffdb9ccedb8ad940acc6ddec71f6ebadcae6f75
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: The cycle adds one test and changes no production behaviour; the reviewer's surviving mutant is the RED evidence.
