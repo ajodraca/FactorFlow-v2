@@ -1,0 +1,83 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w1/web
+
+ ✓ src/screens/setup/copy.test.ts (163 tests) 26ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 12ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 24ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 486ms
+   ✓ reads, re-reads and unknown facts > makes exactly the two reads, with the exact query 322ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1148ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 1121ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 1633ms
+   ✓ StepCard section and heading > is a region named by its h2, which is focusable and says its position 329ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1049ms
+   ✓ StepList structure > is a navigation named Setup steps holding four titled items in order 335ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 1008ms
+   ✓ TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable 496ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3432ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 868ms
+   ✓ TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a save failure with a server failure 469ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 1 failed) 3702ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 768ms
+   × TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3 72ms
+     → expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   3,
++   4,
+  ]
+
+
+Number of calls: 1
+
+   ✓ TC-COMP-120: blocked step 4 by keyboard > is focusable, inert and described, with both exits by Tab 335ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 5073ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 994ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol 331ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > parses once on paste and once on blur, never per keystroke 491ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > posts 2500 symbols as three requests, then re-reads and moves to step 4 326ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3
+AssertionError: expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   3,
++   4,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/setup/step-download.test.tsx:319:24
+    317|     await userEvent.click(within(alert).getByRole("link", { name: "Go …
+    318|     expect(state.goTo).toHaveBeenCalledTimes(1);
+    319|     expect(state.goTo).toHaveBeenCalledWith(3);
+       |                        ^
+    320|   });
+    321| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  1 failed | 448 passed (449)
+   Start at  14:41:16
+   Duration  12.98s (transform 4.48s, setup 6.70s, collect 28.14s, tests 17.59s, environment 19.85s, prepare 7.59s)
+

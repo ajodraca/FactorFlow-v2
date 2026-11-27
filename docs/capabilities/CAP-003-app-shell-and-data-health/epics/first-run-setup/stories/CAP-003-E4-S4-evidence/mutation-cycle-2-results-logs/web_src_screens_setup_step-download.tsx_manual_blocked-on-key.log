@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w3/web
+
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 11ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 15ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 11ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 356ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 467ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 381ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 810ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 431ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 638ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 2 failed) 1510ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 332ms
+   × TC-COMP-102: a missing key does not block Start download > HEALTH_MISSING leaves the button usable and sends one request with no argument 38ms
+     → expect(element).toHaveAttribute("data-variant", "default") // element.getAttribute("data-variant") === "default"
+
+Expected the element to have attribute:
+  data-variant="default"
+Received:
+  data-variant="blocked"
+   × TC-COMP-102: a missing key does not block Start download > HEALTH_UNREACHABLE_STALE_MISSING leaves the button usable and sends one request with no argument 4ms
+     → expect(element).toHaveAttribute("data-variant", "default") // element.getAttribute("data-variant") === "default"
+
+Expected the element to have attribute:
+  data-variant="default"
+Received:
+  data-variant="blocked"
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 1381ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 2245ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 326ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-102: a missing key does not block Start download > HEALTH_MISSING leaves the button usable and sends one request with no argument
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-102: a missing key does not block Start download > HEALTH_UNREACHABLE_STALE_MISSING leaves the button usable and sends one request with no argument
+Error: expect(element).toHaveAttribute("data-variant", "default") // element.getAttribute("data-variant") === "default"
+
+Expected the element to have attribute:
+  data-variant="default"
+Received:
+  data-variant="blocked"
+ ❯ src/screens/setup/step-download.test.tsx:334:22
+    332|       renderStep();
+    333|       const button = startButton();
+    334|       expect(button).toHaveAttribute("data-variant", "default");
+       |                      ^
+    335|       expect(button).not.toHaveAttribute("aria-disabled");
+    336|       expect(button).not.toHaveAttribute("aria-describedby");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  2 failed | 447 passed (449)
+   Start at  14:42:05
+   Duration  7.43s (transform 2.97s, setup 4.05s, collect 16.79s, tests 7.88s, environment 13.24s, prepare 4.71s)
+

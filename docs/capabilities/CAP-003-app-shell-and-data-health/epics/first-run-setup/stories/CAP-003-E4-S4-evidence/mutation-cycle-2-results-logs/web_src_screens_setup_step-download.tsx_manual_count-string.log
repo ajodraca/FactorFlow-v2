@@ -1,0 +1,79 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w2/web
+
+ ✓ src/screens/setup/copy.test.ts (163 tests) 22ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 15ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 144ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 829ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1651ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 1453ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 754ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 958ms
+   ✓ StepList structure > renders the header before the navigation 307ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 790ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3134ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 490ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > renders a refused value as the field error, keeps it and stays on step 2 430ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 3 failed) 3460ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 659ms
+   × TC-COMP-104: the summary card and the unreadable progress > restates key, depth and count (HEALTH_FOUND) 33ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  1,236
+Received:
+  1236
+   × TC-COMP-104: the summary card and the unreadable progress > restates key, depth and count (HEALTH_MISSING) 6ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  1,236
+Received:
+  1236
+   × TC-COMP-104: the summary card and the unreadable progress > restates key, depth and count (HEALTH_UNREACHABLE_STALE_MISSING) 68ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  1,236
+Received:
+  1236
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 4664ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 557ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol 430ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 320ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > parses once on paste and once on blur, never per keystroke 356ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-104: the summary card and the unreadable progress > restates key, depth and count (HEALTH_FOUND)
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-104: the summary card and the unreadable progress > restates key, depth and count (HEALTH_MISSING)
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-104: the summary card and the unreadable progress > restates key, depth and count (HEALTH_UNREACHABLE_STALE_MISSING)
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  1,236
+Received:
+  1236
+ ❯ src/screens/setup/step-download.test.tsx:377:28
+    375|     }
+    376|     expect(definitions[1]).toHaveTextContent("12 years");
+    377|     expect(definitions[2]).toHaveTextContent("1,236");
+       |                            ^
+    378|     expect(container.innerHTML).not.toContain(SENTINEL);
+    379|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  3 failed | 446 passed (449)
+   Start at  14:42:27
+   Duration  13.74s (transform 7.51s, setup 3.75s, collect 36.80s, tests 16.42s, environment 21.28s, prepare 6.61s)
+

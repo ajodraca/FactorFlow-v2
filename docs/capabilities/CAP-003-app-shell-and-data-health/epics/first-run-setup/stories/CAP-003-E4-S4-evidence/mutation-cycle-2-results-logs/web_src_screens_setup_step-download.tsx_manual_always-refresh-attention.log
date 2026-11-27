@@ -1,0 +1,64 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w1/web
+
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 10ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 11ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 5ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 417ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 811ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 792ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 930ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 854ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1501ms
+   ✓ StepList structure > is a navigation named Setup steps holding four titled items in order 352ms
+   ✓ StepList summaries > shows no summary for a step that is not done 372ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 4531ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 913ms
+   ✓ TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 3 current after a save lists two done links with their summaries 440ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 1 failed) 4961ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 1145ms
+   × TC-COMP-101: Start download outcomes > (c) a 202 behind another download shows the queued line until this one leaves requested 320ms
+     → expected [ [ 'attention' ] ] to have a length of +0 but got 1
+   ✓ TC-COMP-119: checked time advances per answer; no interval of its own > follows the read's checkedAt, announces once per answer and opens no timer 428ms
+   ✓ TC-COMP-120: blocked step 4 by keyboard > is focusable, inert and described, with both exits by Tab 318ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 5657ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 1024ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol 527ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 541ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30 340ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > parses once on paste and once on blur, never per keystroke 391ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (c) a 202 behind another download shows the queued line until this one leaves requested
+AssertionError: expected [ [ 'attention' ] ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/screens/setup/step-download.test.tsx:275:73
+    273|     );
+    274|     expect(screen.queryByRole("progressbar")).toBeNull();
+    275|     expect(refresh.mock.calls.filter(([kind]) => kind === "attention")…
+       |                                                                         ^
+    276|     expect(refresh.mock.calls.filter(([kind]) => kind === "health")).t…
+    277| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  1 failed | 448 passed (449)
+   Start at  14:41:51
+   Duration  11.52s (transform 2.98s, setup 3.75s, collect 19.87s, tests 19.69s, environment 15.58s, prepare 2.68s)
+

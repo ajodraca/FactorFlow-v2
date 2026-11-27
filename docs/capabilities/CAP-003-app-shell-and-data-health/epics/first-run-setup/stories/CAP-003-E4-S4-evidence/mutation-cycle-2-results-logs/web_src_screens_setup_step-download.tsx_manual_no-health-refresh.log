@@ -1,0 +1,102 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w2/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 5ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 15ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 39ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 490ms
+   ✓ reads, re-reads and unknown facts > opens no interval 318ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1004ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 825ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 804ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 1134ms
+   ✓ TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Not determinable with its reason while health is not answering 301ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1446ms
+   ✓ StepList structure > is a navigation named Setup steps holding four titled items in order 466ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 3 failed) 3522ms
+   × TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 884ms
+     → expected [] to have a length of 1 but got +0
+   × TC-COMP-101: Start download outcomes > (c) a 202 behind another download shows the queued line until this one leaves requested 237ms
+     → expected [] to have a length of 1 but got +0
+   × step 4's own cases > (j) health is refreshed on every 202 and on nothing else 29ms
+     → expected [] to have a length of 1 but got +0
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3233ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 785ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > renders a refused value as the field error, keeps it and stays on step 2 466ms
+   ✓ TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a blur error 359ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 4326ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 918ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 360ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/screens/setup/step-download.test.tsx:233:70
+    231|     await settle();
+    232|     expect(refresh.mock.calls.filter(([kind]) => kind === "attention")…
+    233|     expect(refresh.mock.calls.filter(([kind]) => kind === "health")).t…
+       |                                                                      ^
+    234| 
+    235|     setShell({ attention: ok(download()) });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (c) a 202 behind another download shows the queued line until this one leaves requested
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/screens/setup/step-download.test.tsx:276:70
+    274|     expect(screen.queryByRole("progressbar")).toBeNull();
+    275|     expect(refresh.mock.calls.filter(([kind]) => kind === "attention")…
+    276|     expect(refresh.mock.calls.filter(([kind]) => kind === "health")).t…
+       |                                                                      ^
+    277| 
+    278|     setShell({ attention: ok(download({ run_id: "r-1", state: "running…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (j) health is refreshed on every 202 and on nothing else
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/screens/setup/step-download.test.tsx:929:70
+    927|     await userEvent.click(startButton());
+    928|     await settle();
+    929|     expect(refresh.mock.calls.filter(([kind]) => kind === "health")).t…
+       |                                                                      ^
+    930| 
+    931|     refresh.mockReset();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  3 failed | 446 passed (449)
+   Start at  14:41:51
+   Duration  11.53s (transform 3.70s, setup 2.61s, collect 27.08s, tests 16.02s, environment 15.08s, prepare 5.53s)
+

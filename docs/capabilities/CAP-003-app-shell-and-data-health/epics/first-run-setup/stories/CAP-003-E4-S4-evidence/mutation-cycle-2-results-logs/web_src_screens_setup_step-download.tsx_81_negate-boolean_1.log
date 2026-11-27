@@ -1,0 +1,62 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w2/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 11ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 28ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 39ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 490ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1288ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 954ms
+   ✓ useSetupDrafts > throws naming the provider when none is above it 330ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 1303ms
+   ✓ StepCard section and heading > is a region named by its h2, which is focusable and says its position 395ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 966ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1443ms
+   ✓ StepList structure > is a navigation named Setup steps holding four titled items in order 398ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3971ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 892ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 2 failed) 4290ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 417ms
+   ✓ TC-COMP-101: Start download outcomes > (c) a 202 behind another download shows the queued line until this one leaves requested 335ms
+   ✓ TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2 409ms
+   ✓ TC-COMP-120: blocked step 4 by keyboard > is focusable, inert and described, with both exits by Tab 334ms
+   × step 4's own cases > (d) an internal error 27ms
+     → expected 'Couldn\'t start the download: no stoc…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × step 4's own cases > (d) another code 19ms
+     → expected 'Couldn\'t start the download: no stoc…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 4810ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 740ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30 601ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) an internal error
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) another code
+AssertionError: expected 'Couldn\'t start the download: no stoc…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem"
+Received: "Couldn't start the download: no stocks are followed.Go to step 3"
+
+ ❯ src/screens/setup/step-download.test.tsx:820:60
+    818|     const { container } = renderStep();
+    819|     await userEvent.click(startButton());
+    820|     expect((await screen.findByRole("alert")).textContent).toBe(text);
+       |                                                            ^
+    821|     expect(refresh).not.toHaveBeenCalled();
+    822|     expect(startButton()).toHaveAttribute("data-variant", "default");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  2 failed | 447 passed (449)
+   Start at  14:41:16
+   Duration  13.07s (transform 4.21s, setup 4.85s, collect 28.71s, tests 18.64s, environment 18.18s, prepare 5.38s)
+

@@ -31,3 +31,36 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T016, T017]
+    description: >
+      The key verdict extraction and step 4 (TC-COMP-101, TC-COMP-102, TC-COMP-104, TC-COMP-119, TC-COMP-120, TC-COMP-123 step half, TC-COMP-124; AC-2, AC-7, AC-15, AC-21, DAC-E4-8 to DAC-E4-10, DAC-E4-12, DAC-E4-S4-1, DAC-E4-S4-2, DAC-E4-S4-5, DAC-E4-S4-6; DEC-0356 to DEC-0358, DEC-0360): step-market-data.tsx exports KeyPresence (the Found, Missing or Not determinable verdict, behaviour-preserving, step 1 renders it and its own tests pass unchanged); step-download.tsx holds StepDownload through the step card with the summary card, Start download (blocked after Add later with both exits as outline links, never native disabled, one request at a time, a 202 refreshing health and, when not queued, attention), the two 409 refusals naming their step, any other failure through failureReason, and the progress region (the pending Queued view before attention names this download, the bar or indeterminate bar, the queued line, the unreadable line while attention fails, Started and checked times from the read's checkedAt, and the leave line for a non-terminal download). step-download.test.tsx holds the cases of T002 to T009 (71 tests). Deviations, both judged acceptable by both reviews: the queued line is an output element, not p role=status (same role; biome's useSemanticElements lint requires it), and the plan's fromRead flag was dropped because the pending view carries no times, so no Started or checked line can render for it (two mutation survivors showed the flag redundant). The generator produced 20 mutants and 16 were hand-written from the plan's kill list; the first run left three survivors, two removed by dropping fromRead and one judged equivalent below; the repeated run: 36 mutants, 35 killed. Both reviews approved; the code review raised LOW observations only (ours is never cleared so a later unrelated download would still read Queued until attention names this one; a rethrown non-API error is an unhandled rejection; the unreadable line mounts already holding its text, so a screen reader may not announce it; the started-time expression is repeated).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-2-step-download.log
+    red_log_sha256: c53370c971fe7e0cd73352003f6ae846624eb99e5146962f4aa141bd7cb61765
+    red_evidence: >
+      step-download.test.tsx failed to load (./step-download did not resolve) before the module existed.
+    green_evidence: >
+      The setup suites and token-literals.test.ts pass in green-cycle-2-step-download.log (step-download.test.tsx 71 tests, step-market-data.test.tsx 21 unchanged); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f7ce981ad1d211b440155dca8a36f63cc5b112056e7e270a511ed1905a5b93b7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: dd16fb7de61f7841138acb918327d7e7ddd16af5a7111cf9d155e3a114f3ad01
+      generated: 36
+      killed: 35
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.972
+      survivors:
+        - id: web/src/screens/setup/step-download.tsx:34:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The pending view's done count is never read: its total is null, so the label renders empty and the bar is indeterminate, and Progress ignores the value when the maximum is null; no observable behaviour depends on it.

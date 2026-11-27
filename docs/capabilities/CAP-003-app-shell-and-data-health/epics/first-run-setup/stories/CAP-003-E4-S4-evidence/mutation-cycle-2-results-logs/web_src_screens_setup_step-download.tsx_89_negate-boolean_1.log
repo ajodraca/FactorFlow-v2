@@ -1,0 +1,120 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w3/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 24ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 22ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 98ms
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 471ms
+   ✓ step done flags follow server facts; current is the first not done > walks the four steps cumulatively 302ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 740ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 723ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 769ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 355ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 436ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 6 failed) 1311ms
+   × step 4's own cases > (d) an unreachable server 36ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × step 4's own cases > (d) an internal error 26ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × step 4's own cases > (d) another code 48ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × step 4's own cases > (e) one request at a time, and Start stays available after a 202 32ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × step 4's own cases > (f) a new attempt clears the old outcome 22ms
+     → expected <div role="alert" …(1)>…(2)</div> to be null
+   × step 4's own cases > (j) health is refreshed on every 202 and on nothing else 22ms
+     → expected [] to have a length of 1 but got +0
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 1345ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 1883ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) an unreachable server
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) an internal error
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) another code
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/screens/setup/step-download.test.tsx:826:33
+    824|     expect(container.textContent).not.toContain("an instrument run fai…
+    825|     await userEvent.click(startButton());
+    826|     expect(startAcquisitionRun).toHaveBeenCalledTimes(2);
+       |                                 ^
+    827|   });
+    828| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (e) one request at a time, and Start stays available after a 202
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/screens/setup/step-download.test.tsx:846:33
+    844|     await userEvent.click(startButton());
+    845|     await settle();
+    846|     expect(startAcquisitionRun).toHaveBeenCalledTimes(2);
+       |                                 ^
+    847|     expect(screen.getByRole("status")).toHaveTextContent(STEP4.queued);
+    848|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (f) a new attempt clears the old outcome
+AssertionError: expected <div role="alert" …(1)>…(2)</div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  class="flex flex-wrap items-center gap-3 text-destructive"
+  role="alert"
+>
+  <span>
+    Couldn't start the download: no stocks are followed.
+  </span>
+  <a
+    href="#setup-step-heading"
+  >
+    Go to step 3
+  </a>
+</div>
+
+ ❯ src/screens/setup/step-download.test.tsx:859:41
+    857|     await userEvent.click(startButton());
+    858|     await settle();
+    859|     expect(screen.queryByRole("alert")).toBeNull();
+       |                                         ^
+    860|   });
+    861| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (j) health is refreshed on every 202 and on nothing else
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/screens/setup/step-download.test.tsx:935:70
+    933|     await userEvent.click(startButton());
+    934|     await settle();
+    935|     expect(refresh.mock.calls.filter(([kind]) => kind === "health")).t…
+       |                                                                      ^
+    936| 
+    937|     refresh.mockReset();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  6 failed | 443 passed (449)
+   Start at  14:41:21
+   Duration  9.07s (transform 4.66s, setup 3.74s, collect 21.05s, tests 7.45s, environment 23.08s, prepare 6.70s)
+

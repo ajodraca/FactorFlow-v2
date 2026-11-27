@@ -1,0 +1,73 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w1/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 5ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 34ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 21ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 358ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 635ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 626ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 784ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 1104ms
+   ✓ TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable 354ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1000ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3290ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 663ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 1 failed) 3545ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 463ms
+   × step 4's own cases > (e) one request at a time, and Start stays available after a 202 27ms
+     → expected "spy" to be called 1 times, but got 2 times
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 4428ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 522ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol 303ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > does not parse a keystroke typed before any paste 348ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (e) one request at a time, and Start stays available after a 202
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/setup/step-download.test.tsx:835:33
+    833|     await userEvent.click(startButton());
+    834|     await userEvent.click(startButton());
+    835|     expect(startAcquisitionRun).toHaveBeenCalledTimes(1);
+       |                                 ^
+    836|     await act(async () => first.resolve(accepted(null)));
+    837|     expect(startButton()).toHaveAttribute("data-variant", "default");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: Cannot read properties of undefined (reading 'runId')
+ ❯ start src/screens/setup/step-download.tsx:70:31
+     68|     try {
+     69|       const result = await startAcquisitionRun();
+     70|       setOurs({ runId: result.runId, queuedBehind: result.queuedBehind…
+       |                               ^
+     71|       refresh("health");
+     72|       if (result.queuedBehind === null) {
+
+This error originated in "src/screens/setup/step-download.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "(e) one request at a time, and Start stays available after a 202". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  1 failed | 448 passed (449)
+     Errors  1 error
+   Start at  14:42:03
+   Duration  8.34s (transform 2.41s, setup 2.17s, collect 15.08s, tests 15.20s, environment 7.04s, prepare 1.83s)
+

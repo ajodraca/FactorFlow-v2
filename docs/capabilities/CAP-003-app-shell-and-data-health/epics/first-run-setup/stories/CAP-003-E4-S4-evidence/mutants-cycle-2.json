@@ -1,0 +1,315 @@
+{
+ "schema": 1,
+ "repo_head": "a7ff270d396bc0493c23c2b22c23bfa94f2edf58",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/setup/step-download.tsx:34:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 34,
+   "original": "  progress: { done: 0, total: null },",
+   "mutated": "  progress: { done: 1, total: null },"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:44:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 44,
+   "original": "type Outcome = { kind: \"refused\"; step: 2 | 3 } | { kind: \"failed\"; reason: string } | null;",
+   "mutated": "type Outcome = { kind: \"refused\"; step: 3 | 3 } | { kind: \"failed\"; reason: string } | null;"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:44:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 44,
+   "original": "type Outcome = { kind: \"refused\"; step: 2 | 3 } | { kind: \"failed\"; reason: string } | null;",
+   "mutated": "type Outcome = { kind: \"refused\"; step: 2 | 4 } | { kind: \"failed\"; reason: string } | null;"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:59:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 59,
+   "original": "  const starting = useRef(false);",
+   "mutated": "  const starting = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:69:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 69,
+   "original": "    starting.current = true;",
+   "mutated": "    starting.current = false;"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:73:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 73,
+   "original": "      setOurs({ runId: result.runId, queuedBehind: result.queuedBehind });",
+   "mutated": "      setOurs({ runId: nil, queuedBehind: result.queuedBehind });"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:79:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 79,
+   "original": "      if (error instanceof ApiError && error.code === \"history_depth_not_set\") {",
+   "mutated": "      if (error instanceof ApiError || error.code === \"history_depth_not_set\") {"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:80:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 80,
+   "original": "        setOutcome({ kind: \"refused\", step: 2 });",
+   "mutated": "        setOutcome({ kind: \"refused\", step: 3 });"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:81:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 81,
+   "original": "      } else if (error instanceof ApiError && error.code === \"no_active_instruments\") {",
+   "mutated": "      } else if (error instanceof ApiError || error.code === \"no_active_instruments\") {"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:82:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 82,
+   "original": "        setOutcome({ kind: \"refused\", step: 3 });",
+   "mutated": "        setOutcome({ kind: \"refused\", step: 4 });"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:83:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 83,
+   "original": "      } else if (error instanceof ApiError || error instanceof ApiUnreachableError) {",
+   "mutated": "      } else if (error instanceof ApiError && error instanceof ApiUnreachableError) {"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:89:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 89,
+   "original": "      starting.current = false;",
+   "mutated": "      starting.current = true;"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:96:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 96,
+   "original": "      : STEP_TITLES[4];",
+   "mutated": "      : STEP_TITLES[5];"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:137:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 137,
+   "original": "  const shown: Shown | null = ours !== null && latest?.run_id !== ours.runId ? PENDING : latest;",
+   "mutated": "  const shown: Shown | null = ours !== null || latest?.run_id !== ours.runId ? PENDING : latest;"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:140:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 140,
+   "original": "    <StepCard step={4} question={question} onBack={() => state.goTo(3)}>",
+   "mutated": "    <StepCard step={5} question={question} onBack={() => state.goTo(3)}>"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:140:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 140,
+   "original": "    <StepCard step={4} question={question} onBack={() => state.goTo(3)}>",
+   "mutated": "    <StepCard step={4} question={question} onBack={() => state.goTo(4)}>"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:184:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 184,
+   "original": "              <span>{outcome.step === 2 ? STEP4.depthNotSet : STEP4.noStocks}</span>",
+   "mutated": "              <span>{outcome.step === 3 ? STEP4.depthNotSet : STEP4.noStocks}</span>"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:192:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 192,
+   "original": "                {outcome.step === 2 ? STEP4.goToStep2 : STEP4.goToStep3}",
+   "mutated": "                {outcome.step === 3 ? STEP4.goToStep2 : STEP4.goToStep3}"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:210:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 210,
+   "original": "          ) : ours?.queuedBehind != null && shown.state === \"requested\" ? (",
+   "mutated": "          ) : ours?.queuedBehind == null && shown.state === \"requested\" ? ("
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:210:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "line": 210,
+   "original": "          ) : ours?.queuedBehind != null && shown.state === \"requested\" ? (",
+   "mutated": "          ) : ours?.queuedBehind != null || shown.state === \"requested\" ? ("
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:always-refresh-attention",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "      if (result.queuedBehind === null) {\n        refresh(\"attention\");\n      }",
+   "new": "      refresh(\"attention\");",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:no-health-refresh",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "      refresh(\"health\");\n",
+   "new": "",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:pending-only-when-null",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "ours !== null && latest?.run_id !== ours.runId ? PENDING : latest",
+   "new": "ours !== null && latest === null ? PENDING : latest",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:started-requested-swap",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "formatInstant((shown.started_at ?? shown.requested_at) as string)",
+   "new": "formatInstant((shown.requested_at ?? shown.started_at) as string)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:no-start-guard",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "    if (starting.current) {\n      return;\n    }\n",
+   "new": "",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:error-message",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "reason: failureReason(error)",
+   "new": "reason: error.message",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:blocked-on-key",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "const blocked = state.step4 === \"blocked\";",
+   "new": "const blocked = state.step4 === \"blocked\" || useShell().health.health?.credential_present === false;",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:zero-fallback",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "      : STEP_TITLES[4];",
+   "new": "      : STEP4.downloadFor(\"0\");",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:error-branch-gone",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "attention.kind === \"error\" ? (\n            <p aria-live=\"polite\">{STEP4.progressUnreadable}</p>\n          ) :",
+   "new": "false ? null :",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:swap-codes",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "error.code === \"history_depth_not_set\"",
+   "new": "error.code === \"no_active_instruments\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:step-off",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "goTo(outcome.step)",
+   "new": "goTo(3)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:terminal-bar",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "TERMINAL.includes(shown.state) ? null : (\n            <>",
+   "new": "false ? null : (\n            <>",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:checked-wire",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "formatClock(attention.checkedAt)",
+   "new": "formatClock(attention.data.checked_at)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:count-string",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "return formatCount(state.activeCount.data);",
+   "new": "return String(state.activeCount.data);",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-download.tsx:manual:no-aria-live",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-download.tsx",
+   "old": "<p id={labelId} aria-live=\"polite\">",
+   "new": "<p id={labelId}>",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/setup/step-market-data.tsx:manual:drop-liveness",
+   "operator": "manual",
+   "file": "web/src/screens/setup/step-market-data.tsx",
+   "old": "health.liveness === \"answering\" ? health.health : null;\n  return answer === null ? (",
+   "new": "health.health;\n  return answer === null ? (",
+   "cycle": "cycle-2"
+  }
+ ]
+}

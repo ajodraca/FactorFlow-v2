@@ -9,6 +9,24 @@ import type { SetupState } from "./use-setup-state";
 /** The shared status of the key, from whether it is present. */
 const statusOf = (present: boolean) => ({ of: "credential", present }) as const;
 
+/**
+ * The key verdict: Found or Missing from the answered health read, Not
+ * determinable while health is not answering (DAC-E4-S2-2; DEC-0349). Step 4's
+ * summary card repeats step 1's badge (setup-ui 10; UX design 1.2), so the
+ * rule lives once (CAP-003-E4-S4).
+ */
+export function KeyPresence() {
+  const { health } = useShell();
+  const answer = health.liveness === "answering" ? health.health : null;
+  return answer === null ? (
+    <NotDeterminable reason={STEP1.notAnswering} />
+  ) : (
+    <StatusBadge tier={tierOf(statusOf(answer.credential_present))}>
+      {labelOf(statusOf(answer.credential_present))}
+    </StatusBadge>
+  );
+}
+
 /*
  * Step 1, the market data key (CAP-003-E4-S2; component design setup-ui 4,
  * 10; AC-4, DAC-E4-3, DAC-E4-S2-2, DAC-E4-S2-5; DEC-0203, DEC-0349). The key
@@ -26,13 +44,7 @@ export function StepMarketData({ state }: { state: SetupState }) {
     <StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>
       <p className="flex flex-wrap items-center gap-2">
         <span>{STEP1.keyLabel}</span>
-        {answer === null ? (
-          <NotDeterminable reason={STEP1.notAnswering} />
-        ) : (
-          <StatusBadge tier={tierOf(statusOf(answer.credential_present))}>
-            {labelOf(statusOf(answer.credential_present))}
-          </StatusBadge>
-        )}
+        <KeyPresence />
       </p>
       {answer !== null && !answer.credential_present ? (
         <>

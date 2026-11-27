@@ -1,0 +1,131 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w2/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 6ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 38ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 34ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 314ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1232ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 1013ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 1361ms
+   ✓ StepCard explanation and note > caps the explanation's measure and sets the note apart 372ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 1313ms
+   ✓ TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable 514ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1366ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 3 failed) 4203ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 755ms
+   × TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2 411ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: history depth isn't set.
+Received:
+  Couldn't start the download: FactorFlow hit an unexpected problem
+   × TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3 193ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: no stocks are followed.
+Received:
+  Couldn't start the download: history depth isn't set.Go to step 2
+   ✓ TC-COMP-120: blocked step 4 by keyboard > is focusable, inert and described, with both exits by Tab 392ms
+   × TC-COMP-123 (step 4): the display vocabulary > (b6) the history_depth_not_set refusal never renders the error's message 60ms
+     → Unable to find an accessible element with the role "link"
+
+There are no accessible roles. But there might be some inaccessible roles. If you wish to access them, then set the `hidden` option to `true`. Learn more about this here: https://testing-library.com/docs/dom-testing-library/api-queries#byrole
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"flex flex-wrap items-center gap-3 text-destructive"[39m
+  [33mrole[39m=[32m"alert"[39m
+[36m>[39m
+  [36m<span>[39m
+    [0mCouldn't start the download: FactorFlow hit an unexpected problem[0m
+  [36m</span>[39m
+[36m</div>[39m
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3708ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 810ms
+   ✓ TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 2 after a save failure with a server failure 343ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 4969ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 960ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 507ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30 345ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > parses once on paste and once on blur, never per keystroke 318ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: history depth isn't set.
+Received:
+  Couldn't start the download: FactorFlow hit an unexpected problem
+ ❯ src/screens/setup/step-download.test.tsx:300:19
+    298|     await userEvent.click(startButton());
+    299|     const alert = await screen.findByRole("alert");
+    300|     expect(alert).toHaveTextContent("Couldn't start the download: hist…
+       |                   ^
+    301|     const link = within(alert).getByRole("link", { name: "Go to step 2…
+    302|     expect(link).toHaveAttribute("href", "#setup-step-heading");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: no stocks are followed.
+Received:
+  Couldn't start the download: history depth isn't set.Go to step 2
+ ❯ src/screens/setup/step-download.test.tsx:316:19
+    314|     await userEvent.click(startButton());
+    315|     const alert = await screen.findByRole("alert");
+    316|     expect(alert).toHaveTextContent("Couldn't start the download: no s…
+       |                   ^
+    317|     await userEvent.click(within(alert).getByRole("link", { name: "Go …
+    318|     expect(state.goTo).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-123 (step 4): the display vocabulary > (b6) the history_depth_not_set refusal never renders the error's message
+TestingLibraryElementError: Unable to find an accessible element with the role "link"
+
+There are no accessible roles. But there might be some inaccessible roles. If you wish to access them, then set the `hidden` option to `true`. Learn more about this here: https://testing-library.com/docs/dom-testing-library/api-queries#byrole
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"flex flex-wrap items-center gap-3 text-destructive"[39m
+  [33mrole[39m=[32m"alert"[39m
+[36m>[39m
+  [36m<span>[39m
+    [0mCouldn't start the download: FactorFlow hit an unexpected problem[0m
+  [36m</span>[39m
+[36m</div>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/setup/step-download.test.tsx:673:65
+    671|       expect(view.container.textContent).not.toContain("every instrume…
+    672|       const names = [STEP4.goToStep2, STEP4.goToStep3];
+    673|       expect(names).toContain(within(screen.getByRole("alert")).getByR…
+       |                                                                 ^
+    674|     },
+    675|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  3 failed | 446 passed (449)
+   Start at  14:42:13
+   Duration  12.85s (transform 6.10s, setup 3.56s, collect 33.65s, tests 18.54s, environment 15.43s, prepare 5.89s)
+
