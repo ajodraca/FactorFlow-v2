@@ -31,3 +31,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T010, T015]
+    description: >
+      The step list (AC-25, DAC-E4-1 rendering half, DAC-E4-S2-1, DEC-0348, DEC-0349, DEC-0350): step-list.tsx holds StepList, the left column with an optional header and the vertical stepper as a navigation named Setup steps, bounded by LAYOUT.sideColumnMin and sideColumnMax with dots of LAYOUT.markerSize; a done step that is not the current one is an in-page link to the step heading that calls goTo, and a done step's one-line summary reads Found or Missing (only while health is answering), the saved years, the followed count through formatCount, or the download's start time, else its request time, from the attention answer or the last good one. step-list.test.tsx holds the structure, current and done, activation, keyboard, summaries, layout values and header cases against independent literals. The generator produced 10 mutants and 9 were hand-written from the plan's kill list. The first run left two survivors, both on the link condition: the stepper only links a step whose state is done, so a guard beside it was redundant and unobservable; the link is now derived from the computed state (stepState === done) and the manual mutant changed to its negation, and the run repeated: 19 mutants, all killed. Both reviews approved; the code review raised LOW observations only (a fixture run_id value that holds a scanned word in a test file, no test for an answering state with a null health, and no check that the link click's default is prevented).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-2-step-list.log
+    red_log_sha256: 80eedc89ee01cc651e6ef010d7853a8f7fe3d9cbfc1c24b9bfa9ff0f15a3ed26
+    red_evidence: >
+      step-list.test.tsx failed to load (./step-list did not resolve) before the module existed.
+    green_evidence: >
+      step-list.test.tsx 13 passed (the setup suites, 206 passed, in green-cycle-2-step-list.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9fac39627bc0ff5968864a955ab68d1a44573359148d7e4c5203863528136469
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: f98d8956c3861c27d2cc2d4f988c14e1862888218108e3f30d378d593c8cfef3
+      generated: 19
+      killed: 19
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

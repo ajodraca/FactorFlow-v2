@@ -1,0 +1,70 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w2/web
+
+12:11:47 PM [vite] warning: This case clause will never be evaluated because it duplicates an earlier case clause
+38 |            ? labelOf({ of: "credential", present: health.health.credential_present })
+39 |            : undefined;
+40 |        case 2:
+   |        ^
+41 |          return state.depth.kind === "ok" && state.depth.data.years !== null
+42 |            ? SUMMARIES.years(String(state.depth.data.years))
+
+  Plugin: vite:esbuild
+  File: /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w2/web/src/screens/setup/step-list.tsx
+ ❯ src/screens/setup/step-list.test.tsx (13 tests | 2 failed) 235ms
+   × StepList summaries > says Found or Missing for step 1 from the key's presence 17ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Found
+Received:
+  1Market data, current
+   × StepList summaries > says the saved years and the followed count with a thousands separator 6ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  12 years of history
+Received:
+  How far backFound
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > says Found or Missing for step 1 from the key's presence
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Found
+Received:
+  1Market data, current
+ ❯ src/screens/setup/step-list.test.tsx:215:21
+    213|     vi.mocked(useShell).mockReturnValue(shell({ health: HEALTH_FOUND }…
+    214|     const { unmount } = render(<StepList state={stateWith({ done: { ..…
+    215|     expect(item(1)).toHaveTextContent("Found");
+       |                     ^
+    216|     unmount();
+    217|     vi.mocked(useShell).mockReturnValue(shell({ health: HEALTH_MISSING…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > says the saved years and the followed count with a thousands separator
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  12 years of history
+Received:
+  How far backFound
+ ❯ src/screens/setup/step-list.test.tsx:239:21
+    237|       />,
+    238|     );
+    239|     expect(item(2)).toHaveTextContent("12 years of history");
+       |                     ^
+    240|     expect(item(3)).toHaveTextContent("1,236 followed stocks");
+    241|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  12:11:44
+   Duration  3.74s (transform 342ms, setup 81ms, collect 1.50s, tests 235ms, environment 525ms, prepare 623ms)
+

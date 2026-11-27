@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w2/web
+
+ ❯ src/screens/setup/step-list.test.tsx (13 tests | 2 failed) 189ms
+   × StepList summaries > names the download by its start time, else its request time 7ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data
+   × StepList summaries > still reads the download from the last good answer when the attention read failed 3ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > names the download by its start time, else its request time
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data
+ ❯ src/screens/setup/step-list.test.tsx:250:21
+    248|     );
+    249|     const { unmount } = render(<StepList state={stateWith({ done: { ..…
+    250|     expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:…
+       |                     ^
+    251|     unmount();
+    252|     vi.mocked(useShell).mockReturnValue(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > still reads the download from the last good answer when the attention read failed
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data
+ ❯ src/screens/setup/step-list.test.tsx:276:21
+    274|     );
+    275|     render(<StepList state={stateWith({ done: { ...ALL_DONE } })} />);
+    276|     expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:…
+       |                     ^
+    277|   });
+    278| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  12:11:49
+   Duration  2.52s (transform 205ms, setup 100ms, collect 787ms, tests 189ms, environment 396ms, prepare 400ms)
+
