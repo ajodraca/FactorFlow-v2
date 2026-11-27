@@ -1,0 +1,54 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wuwht1f4/w2/web
+
+ ❯ src/screens/home/copy.test.ts (23 tests | 2 failed) 17ms
+   × static strings > READ_FAILURE 4ms
+     → expected { …(2) } to deeply equal { …(2) }
+   × templates > DATA_TILE sentences 9ms
+     → expected 'Couldn\'t read the data summary: Fact…' to be 'Couldn\'t read the data summary: Fact…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > READ_FAILURE
+AssertionError: expected { …(2) } to deeply equal { …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "unexpected": "FactorFlow hit an unexpected problem",
++   "unexpected": "FactorFlow is not answering",
+    "unreachable": "FactorFlow is not answering",
+  }
+
+ ❯ src/screens/home/copy.test.ts:54:26
+     52| 
+     53|   it("READ_FAILURE", () => {
+     54|     expect(READ_FAILURE).toEqual({
+       |                          ^
+     55|       unreachable: "FactorFlow is not answering",
+     56|       unexpected: "FactorFlow hit an unexpected problem",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > DATA_TILE sentences
+AssertionError: expected 'Couldn\'t read the data summary: Fact…' to be 'Couldn\'t read the data summary: Fact…' // Object.is equality
+
+Expected: "Couldn't read the data summary: FactorFlow hit an unexpected problem."
+Received: "Couldn't read the data summary: FactorFlow is not answering."
+
+ ❯ src/screens/home/copy.test.ts:198:58
+    196|       "Couldn't read the data summary: FactorFlow is not answering.",
+    197|     );
+    198|     expect(DATA_TILE.readError(READ_FAILURE.unexpected)).toBe(
+       |                                                          ^
+    199|       "Couldn't read the data summary: FactorFlow hit an unexpected pr…
+    200|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 21 passed (23)
+   Start at  16:50:38
+   Duration  1.38s (transform 89ms, setup 88ms, collect 79ms, tests 17ms, environment 337ms, prepare 172ms)
+

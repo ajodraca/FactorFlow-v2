@@ -54,6 +54,11 @@ export const DATA_TILE = {
   scores: "Scores",
   prices: "Prices",
   scope: "Every other number on this page is as of those times.",
+  /**
+   * The hidden words of the tile's prices em dash while `prices_as_of` is null.
+   * No design contains it; added by CAP-003-E5-S2 as DEC-0365.
+   */
+  pricesNotDownloaded: "not downloaded yet",
   firstDownloadRunning: (time: string): string =>
     `Your first download, started ${time}, is running.`,
   readError: (reason: string): string => `Couldn't read the data summary: ${reason}.`,
@@ -68,6 +73,16 @@ export const DATA_TILE = {
     `Data: ${label.charAt(0).toLowerCase()}${label.slice(1)}. ${current} of ${followed} stocks current. Scores ${scores}, prices ${prices}.`,
   firstDownloadName: (time: string): string =>
     `Data: your first download, started ${time}, is running.`,
+} as const;
+
+/**
+ * The `{reason}` of *Couldn't read the data summary: {reason}.*: one fixed
+ * sentence per failure kind, never the server's message or request id. No
+ * design contains these words; added by CAP-003-E5-S2 as DEC-0366.
+ */
+export const READ_FAILURE = {
+  unreachable: "FactorFlow is not answering",
+  unexpected: "FactorFlow hit an unexpected problem",
 } as const;
 
 /** The Needs you card (home-ui 2.5, section 10; UX design 1.3 Page Layout 3 and States). */

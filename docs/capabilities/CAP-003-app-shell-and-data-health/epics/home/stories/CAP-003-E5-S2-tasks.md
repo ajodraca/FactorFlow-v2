@@ -108,7 +108,7 @@ TC-COMP-131 traces to DAC-E5-11, which CAP-003-E5-S3 lists. This story's Descrip
 
 **Purpose**: Confirm the hard dependencies are in the tree and record a green baseline.
 
-- [ ] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix. Any producer whose merged signature differs: use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to DAC-E5-3, DAC-E5-S2-5).
+- [x] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix. Any producer whose merged signature differs: use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to DAC-E5-3, DAC-E5-S2-5).
   - CAP-003-E3-S3: `web/src/app/shell-context.tsx` exports `useShell` and `ShellContextValue`.
   - CAP-003-E3-S1: `web/src/app/shell-types.ts` exports `Attention`, `ReadState`, `ScoreState` and `ScoreSummary`, snake_case as served.
   - CAP-003-E1-S7: `web/src/components/patterns/worst-data-tier.ts` exports `worstDataTier` and `dataTileBadge`.
@@ -348,7 +348,7 @@ Every expected string below is a literal.
     - `container.querySelectorAll("[style]")` is empty.
 
     Kills removing `CardMetricValue` (no `text-2xl`), and swap-case `metric` → `default`.
-- [ ] T011 [P] Extend `web/src/screens/home/copy.test.ts` (CAP-003-E5-S1's file) with the strings this story adds. Each assertion compares against a literal.
+- [x] T011 [P] Extend `web/src/screens/home/copy.test.ts` (CAP-003-E5-S1's file) with the strings this story adds. Each assertion compares against a literal.
   - `DATA_TILE.pricesNotDownloaded` is `"not downloaded yet"`.
   - `READ_FAILURE` `toEqual({ unreachable: "FactorFlow is not answering", unexpected: "FactorFlow hit an unexpected problem" })`.
   - `DATA_TILE.readError(READ_FAILURE.unreachable)` is `"Couldn't read the data summary: FactorFlow is not answering."`.
@@ -364,7 +364,7 @@ Every expected string below is a literal.
 
 **Purpose**: Add the two copy entries and build the tile, state by state.
 
-- [ ] T012 [P] Add the two string groups to `web/src/screens/home/copy.ts` (CAP-003-E5-S1's file). Each gets a doc comment saying no design contains it and naming its decision, per the catalogue's rule (E5-S1 Open Gap 2). This makes T011 pass.
+- [x] T012 [P] Add the two string groups to `web/src/screens/home/copy.ts` (CAP-003-E5-S1's file). Each gets a doc comment saying no design contains it and naming its decision, per the catalogue's rule (E5-S1 Open Gap 2). This makes T011 pass.
   - `DATA_TILE.pricesNotDownloaded: "not downloaded yet"`: the hidden words of the tile's prices em dash while `prices_as_of` is null (DEC-0365).
   - `export const READ_FAILURE = { unreachable: "FactorFlow is not answering", unexpected: "FactorFlow hit an unexpected problem" } as const`: the `{reason}` of *Couldn't read the data summary: {reason}.* (DEC-0366).
 

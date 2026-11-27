@@ -7,6 +7,7 @@ import {
   ITEMS,
   NEEDS_YOU,
   NOT_DETERMINABLE,
+  READ_FAILURE,
   TRY_AGAIN,
 } from "./copy";
 
@@ -45,6 +46,14 @@ describe("static strings", () => {
       scores: "Scores",
       prices: "Prices",
       scope: "Every other number on this page is as of those times.",
+      pricesNotDownloaded: "not downloaded yet",
+    });
+  });
+
+  it("READ_FAILURE", () => {
+    expect(READ_FAILURE).toEqual({
+      unreachable: "FactorFlow is not answering",
+      unexpected: "FactorFlow hit an unexpected problem",
     });
   });
 
@@ -182,6 +191,12 @@ describe("templates", () => {
     );
     expect(DATA_TILE.readError("The server answered 500")).toBe(
       "Couldn't read the data summary: The server answered 500.",
+    );
+    expect(DATA_TILE.readError(READ_FAILURE.unreachable)).toBe(
+      "Couldn't read the data summary: FactorFlow is not answering.",
+    );
+    expect(DATA_TILE.readError(READ_FAILURE.unexpected)).toBe(
+      "Couldn't read the data summary: FactorFlow hit an unexpected problem.",
     );
   });
 
