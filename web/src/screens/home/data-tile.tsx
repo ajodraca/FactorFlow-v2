@@ -65,7 +65,7 @@ function scoreStatus(scores: ScoreState): ScoresStatus | null {
   return scores.kind === "served" ? { of: "scores", state: scoreStateOf(scores.data) } : null;
 }
 
-/** The section, the link and the card every state shares (Resolved Conflict 4). */
+/** The section, link and card the first-download and full states share; the error and skeleton states build their own, without the link (Resolved Conflict 4). */
 function TileLink({
   name,
   titleId,
@@ -178,13 +178,18 @@ export function DataTile(): JSX.Element | null {
   if (badge === null) {
     const time = formatInstant(d.started_at ?? d.requested_at);
     return (
-      <TileLink name={DATA_TILE.firstDownloadName(time)} titleId={titleId}>
+      <TileLink
+        name={DATA_TILE.firstDownloadName(time)}
+        titleId={titleId}
+        badge={
+          d.state === "running" ? (
+            <span data-testid="data-tile-badge">
+              <StatusBadge tier={tierOf(RUNNING)}>{labelOf(RUNNING)}</StatusBadge>
+            </span>
+          ) : null
+        }
+      >
         <p>{DATA_TILE.firstDownloadRunning(time)}</p>
-        {d.state === "running" ? (
-          <span data-testid="data-tile-badge">
-            <StatusBadge tier={tierOf(RUNNING)}>{labelOf(RUNNING)}</StatusBadge>
-          </span>
-        ) : null}
       </TileLink>
     );
   }
