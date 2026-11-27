@@ -1,0 +1,112 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w2/web
+
+ ❯ src/screens/setup/step-market-data.test.tsx (21 tests | 5 failed) 158ms
+   × TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Not determinable with its reason while health is not answering 5ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+   × TC-COMP-109: step 1 unreachable shows Not determinable and never the key > ignores a stale missing answer kept after a failed poll 3ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+   × TC-COMP-109: step 1 unreachable shows Not determinable and never the key > renders the same when health has never answered 2ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+   × TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > describes the Not determinable badge by its reason and draws no status badge 1ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+   × step 1 further cases > treats a health that has not answered yet as not determinable, never missing 4ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Not determinable with its reason while health is not answering
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:138:19
+    136|     const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    137|     const badge = container.querySelector('[data-variant="coverage-unk…
+    138|     expect(badge).toHaveTextContent(/^Not determinable$/);
+       |                   ^
+    139|     expect(region()).toHaveTextContent(NOT_ANSWERING);
+    140|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-109: step 1 unreachable shows Not determinable and never the key > ignores a stale missing answer kept after a failed poll
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:171:74
+    169|   it("ignores a stale missing answer kept after a failed poll", () => {
+    170|     const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    171|     expect(container.querySelector('[data-variant="coverage-unknown"]'…
+       |                                                                          ^
+    172|       "Not determinable",
+    173|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-109: step 1 unreachable shows Not determinable and never the key > renders the same when health has never answered
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:196:74
+    194|   it("renders the same when health has never answered", () => {
+    195|     const { container } = renderStep(HEALTH_UNREACHABLE_NEVER);
+    196|     expect(container.querySelector('[data-variant="coverage-unknown"]'…
+       |                                                                          ^
+    197|       "Not determinable",
+    198|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > describes the Not determinable badge by its reason and draws no status badge
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:223:19
+    221|     const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    222|     const badge = container.querySelector('[data-variant="coverage-unk…
+    223|     expect(badge).toHaveTextContent("Not determinable");
+       |                   ^
+    224|     expect(badge).toHaveAccessibleDescription(NOT_ANSWERING);
+    225|     expect(container.querySelector('[data-variant^="status-"]')).toBeN…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > step 1 further cases > treats a health that has not answered yet as not determinable, never missing
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:262:74
+    260|   it("treats a health that has not answered yet as not determinable, n…
+    261|     const { container } = renderStep(HEALTH_UNKNOWN);
+    262|     expect(container.querySelector('[data-variant="coverage-unknown"]'…
+       |                                                                          ^
+    263|       "Not determinable",
+    264|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 16 passed (21)
+   Start at  12:15:10
+   Duration  1.87s (transform 117ms, setup 47ms, collect 536ms, tests 158ms, environment 234ms, prepare 264ms)
+

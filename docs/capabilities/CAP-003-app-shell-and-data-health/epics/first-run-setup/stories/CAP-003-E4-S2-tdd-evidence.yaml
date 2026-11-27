@@ -60,3 +60,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T003, T004, T011, T016]
+    description: >
+      Step 1, the market data key (TC-COMP-099, TC-COMP-109, TC-COMP-112, AC-4, DAC-E4-3, DAC-E4-S2-2, DAC-E4-S2-5, DEC-0203, DEC-0349): step-market-data.tsx holds StepMarketData, which reads one answer (the health answer only while liveness is answering, so a stale answer kept after a failed poll is never shown) and renders the key line as a StatusBadge Found or Missing from labelOf and tierOf, or NotDeterminable with its reason whenever health is not answering; a missing key adds the variable line, with the name in code type, and the restart line; Continue always moves to step 2 and is never blocked, and nothing of the answer but the boolean reaches the page. step-market-data.test.tsx holds the three renderings, the always-available Continue, the planted-value checks over innerHTML and over every text node and attribute, the stale and never-answered unreachable cases, the badge and description structure, no colour alone, and the position line, Back and unknown-health cases. The generator produced 5 mutants and 11 were hand-written from the plan's kill list (adapted to the single answer value). The first run left one survivor, the step number passed to the card, which no case pinned; a case for the position line and the Next hint was added and the run repeated: 16 mutants, all killed. Both reviews approved; the code review raised LOW observations only (a test that a failed depth read does not show in step 1 would pass if the depth state were ignored, and the sentence split depends on the copy still containing the variable name, which the copy tests pin).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-3-step-market-data.log
+    red_log_sha256: 450750d45a205ef3fe3981f9f570d0777ed9398a4d66dc86e31f0517263064cb
+    red_evidence: >
+      step-market-data.test.tsx failed to load (./step-market-data did not resolve) before the module existed.
+    green_evidence: >
+      step-market-data.test.tsx 21 passed (the setup suites, 227 passed, in green-cycle-3-step-market-data.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8bd232f1f31afe7d1e9b31d99d8e75c985a74bf4c1b11b25bec1500454ba0690
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: acd87c3c6ff41fa678b9d1ede8211e3c949439776b1369edcb03083477f33dae
+      generated: 16
+      killed: 16
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

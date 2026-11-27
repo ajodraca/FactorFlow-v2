@@ -1,0 +1,69 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w0/web
+
+ ❯ src/screens/setup/step-market-data.test.tsx (21 tests | 4 failed) 114ms
+   × TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable 44ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+   × TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Missing in a critical badge, with the variable in code type and the restart line 3ms
+     → expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+   × TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > draws found as a labelled badge with an aria-hidden shape 1ms
+     → Cannot read properties of null (reading 'textContent')
+   × TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > draws missing as a labelled badge with an aria-hidden shape 1ms
+     → Cannot read properties of null (reading 'textContent')
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:116:19
+    114|     expect(region()).toHaveTextContent("Market data key:");
+    115|     const badge = container.querySelector('[data-variant="status-good"…
+    116|     expect(badge).toHaveTextContent(/^Found$/);
+       |                   ^
+    117|     expect(screen.queryByText(/Set the environment variable/)).toBeNul…
+    118|     expect(screen.queryByText("Restart FactorFlow after setting it."))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Missing in a critical badge, with the variable in code type and the restart line
+Error: expect(received).toHaveTextContent()
+
+received value must be a Node.
+
+ ❯ src/screens/setup/step-market-data.test.tsx:124:19
+    122|     const { container } = renderStep(HEALTH_MISSING);
+    123|     const badge = container.querySelector('[data-variant="status-criti…
+    124|     expect(badge).toHaveTextContent(/^Missing$/);
+       |                   ^
+    125|     const line = screen.getByText(/Set the environment variable/);
+    126|     expect(line.tagName).toBe("P");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > draws found as a labelled badge with an aria-hidden shape
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > draws missing as a labelled badge with an aria-hidden shape
+TypeError: Cannot read properties of null (reading 'textContent')
+ ❯ src/screens/setup/step-market-data.test.tsx:211:18
+    209|     const { container } = renderStep(health);
+    210|     const badge = container.querySelector(`[data-variant="${variant}"]…
+    211|     expect(badge.textContent).toBe(label);
+       |                  ^
+    212|     const shape = badge.querySelector('svg[aria-hidden="true"]');
+    213|     expect(shape).not.toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 17 passed (21)
+   Start at  12:15:08
+   Duration  1.37s (transform 84ms, setup 40ms, collect 156ms, tests 114ms, environment 329ms, prepare 152ms)
+

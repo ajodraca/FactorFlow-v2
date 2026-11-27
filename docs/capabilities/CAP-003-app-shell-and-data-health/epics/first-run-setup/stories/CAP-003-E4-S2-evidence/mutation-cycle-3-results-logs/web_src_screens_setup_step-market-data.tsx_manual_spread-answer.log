@@ -1,0 +1,45 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w0/web
+
+stderr | src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable
+Warning: Received `true` for a non-boolean attribute `credential_present`.
+
+If you want to write it to the DOM, pass a string instead: credential_present="true" or credential_present={value.toString()}.
+    at span
+    at p
+    at div
+    at /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w0/web/src/components/ui/card.tsx:15:6
+    at section
+    at StepCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w0/web/src/screens/setup/step-card.tsx:18:3)
+    at StepMarketData (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w0/web/src/screens/setup/step-market-data.tsx:16:27)
+
+ ❯ src/screens/setup/step-market-data.test.tsx (21 tests | 2 failed) 148ms
+   × TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > puts no value of the answer into the page (found) 8ms
+     → expected '<section aria-labelledby="setup-step-…' not to contain 'SENTINEL-KEY-VALUE'
+   × TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > puts no value of the answer into the page (missing) 4ms
+     → expected '<section aria-labelledby="setup-step-…' not to contain 'SENTINEL-KEY-VALUE'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > puts no value of the answer into the page (found)
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > puts no value of the answer into the page (missing)
+AssertionError: expected '<section aria-labelledby="setup-step-…' not to contain 'SENTINEL-KEY-VALUE'
+
+Expected: "SENTINEL-KEY-VALUE"
+Received: "<section aria-labelledby="setup-step-heading"><div data-variant="default" class="rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"><p class="text-xs text-muted-foreground">Step 1 of 4</p><h2 id="setup-step-heading" tabindex="-1" class="text-xl font-semibold text-foreground focus-visible:outline-none">Connect market data</h2><p class="flex flex-wrap items-center gap-2"><span status="ok" database="reachable" schema_version="3" api_key="SENTINEL-KEY-VALUE">Market data key:</span><span data-variant="status-good" class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide h-3 w-3 shrink-0" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="currentColor"></circle></svg>Found</span></p><div class="flex items-center justify-between gap-4"><span></span><div class="flex items-center gap-3"><span class="text-xs text-muted-foreground">Next: How far back</span><button data-variant="default" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90">Continue</button></div></div></div></section>"
+
+ ❯ src/screens/setup/step-market-data.test.tsx:164:37
+    162|   ])("puts no value of the answer into the page (%s)", (_name, health)…
+    163|     const { container } = renderStep(health);
+    164|     expect(container.innerHTML).not.toContain(SENTINEL);
+       |                                     ^
+    165|   });
+    166| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  12:15:10
+   Duration  1.76s (transform 374ms, setup 570ms, collect 604ms, tests 148ms, environment 182ms, prepare 62ms)
+

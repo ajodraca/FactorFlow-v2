@@ -1,0 +1,269 @@
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ApiUnreachableError } from "../../api/client";
+import { type ShellContextValue, useShell } from "../../app/shell-context";
+import type { Attention, ReadState } from "../../app/shell-types";
+import { StepMarketData } from "./step-market-data";
+import type { SetupState } from "./use-setup-state";
+
+// Implements TC-COMP-099, TC-COMP-109 and TC-COMP-112 (CAP-003-E4-S2 T002 to
+// T004, T011; AC-4, DAC-E4-3, DAC-E4-S2-2, DAC-E4-S2-5; DEC-0203, DEC-0349).
+
+vi.mock("../../app/shell-context", () => ({ useShell: vi.fn() }));
+
+type Health = ShellContextValue["health"];
+
+const SENTINEL = "SENTINEL-KEY-VALUE";
+const CHECKED_AT = new Date("2026-09-06T18:30:00.000Z");
+const NOT_ANSWERING = "FactorFlow isn't answering, so the key can't be checked.";
+
+/** A health answer carrying one planted property that stands in for a leaked value. */
+function answer(credential_present: boolean): Health["health"] {
+  return {
+    status: "ok",
+    database: "reachable",
+    credential_present,
+    schema_version: 3,
+    most_recent_run: null,
+    api_key: SENTINEL,
+  } as unknown as Health["health"];
+}
+
+const HEALTH_FOUND: Health = {
+  liveness: "answering",
+  health: answer(true),
+  lastUpdated: CHECKED_AT,
+  lastAnsweredAt: CHECKED_AT,
+};
+const HEALTH_MISSING: Health = { ...HEALTH_FOUND, health: answer(false) };
+const HEALTH_UNREACHABLE_STALE_MISSING: Health = {
+  liveness: "unreachable",
+  health: answer(false),
+  lastUpdated: new Date("2026-09-06T18:31:00.000Z"),
+  lastAnsweredAt: CHECKED_AT,
+};
+const HEALTH_UNREACHABLE_NEVER: Health = {
+  liveness: "unreachable",
+  health: null,
+  lastUpdated: new Date("2026-09-06T18:31:00.000Z"),
+  lastAnsweredAt: null,
+};
+const HEALTH_UNKNOWN: Health = {
+  liveness: "unknown",
+  health: null,
+  lastUpdated: null,
+  lastAnsweredAt: null,
+};
+
+const ATTENTION: ReadState<Attention> = {
+  kind: "ok",
+  data: {
+    checked_at: "2026-09-06T18:30:00Z",
+    followed_count: 3,
+    prices_as_of: null,
+    credential_present: true,
+    problems: { stock_count: 0, symbols: [], newest_completed_at: null },
+    latest_download: null,
+    latest_terminal_download: null,
+    items: [],
+  },
+  checkedAt: CHECKED_AT,
+};
+
+function shell(health: Health): ShellContextValue {
+  return {
+    health,
+    attention: ATTENTION,
+    scores: { kind: "loading" },
+    refresh: vi.fn(),
+    setTitleDetail: vi.fn(),
+  };
+}
+
+function stateWith(overrides: Partial<SetupState> = {}): SetupState {
+  return {
+    current: 1,
+    done: { 1: false, 2: false, 3: false, 4: false },
+    step4: "ready",
+    drafts: { yearsText: "", source: null, pasted: "", unposted: [] },
+    depth: { kind: "ok", data: { years: null, updatedAt: null }, checkedAt: CHECKED_AT },
+    activeCount: { kind: "ok", data: 0, checkedAt: CHECKED_AT },
+    loading: false,
+    goTo: vi.fn(),
+    reread: vi.fn(),
+    setDraft: vi.fn(),
+    ...overrides,
+  };
+}
+
+function renderStep(health: Health, state: SetupState = stateWith()) {
+  vi.mocked(useShell).mockReturnValue(shell(health));
+  return render(<StepMarketData state={state} />);
+}
+
+const region = (): HTMLElement => screen.getByRole("region", { name: "Connect market data" });
+
+beforeEach(() => {
+  vi.mocked(useShell).mockReset();
+});
+
+describe("TC-COMP-099: step 1 shows Found or Missing with the variable and restart line", () => {
+  it("says Found in a good badge and nothing about setting the variable", () => {
+    const { container } = renderStep(HEALTH_FOUND);
+    expect(region()).toHaveTextContent("Market data key:");
+    const badge = container.querySelector('[data-variant="status-good"]');
+    expect(badge).toHaveTextContent(/^Found$/);
+    expect(screen.queryByText(/Set the environment variable/)).toBeNull();
+    expect(screen.queryByText("Restart FactorFlow after setting it.")).toBeNull();
+  });
+
+  it("says Missing in a critical badge, with the variable in code type and the restart line", () => {
+    const { container } = renderStep(HEALTH_MISSING);
+    const badge = container.querySelector('[data-variant="status-critical"]');
+    expect(badge).toHaveTextContent(/^Missing$/);
+    const line = screen.getByText(/Set the environment variable/);
+    expect(line.tagName).toBe("P");
+    expect(line.textContent).toBe(
+      "Set the environment variable FACTORFLOW_MASSIVE_API_KEY to your Massive API key.",
+    );
+    const code = within(line).getByText("FACTORFLOW_MASSIVE_API_KEY");
+    expect(code.tagName).toBe("CODE");
+    expect(screen.getByText("Restart FactorFlow after setting it.").tagName).toBe("P");
+  });
+
+  it("says Not determinable with its reason while health is not answering", () => {
+    const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    const badge = container.querySelector('[data-variant="coverage-unknown"]');
+    expect(badge).toHaveTextContent(/^Not determinable$/);
+    expect(region()).toHaveTextContent(NOT_ANSWERING);
+  });
+
+  it.each([
+    ["found", HEALTH_FOUND],
+    ["missing", HEALTH_MISSING],
+    ["unreachable", HEALTH_UNREACHABLE_STALE_MISSING],
+  ])("always offers an unblocked Continue that moves to step 2 (%s)", async (_name, health) => {
+    const user = userEvent.setup();
+    const goTo = vi.fn();
+    renderStep(health, stateWith({ goTo }));
+    const next = screen.getByRole("button", { name: "Continue" });
+    expect(next).toHaveAttribute("data-variant", "default");
+    expect(next).not.toHaveAttribute("aria-disabled");
+    await user.click(next);
+    expect(goTo).toHaveBeenCalledTimes(1);
+    expect(goTo).toHaveBeenCalledWith(2);
+  });
+
+  it.each([
+    ["found", HEALTH_FOUND],
+    ["missing", HEALTH_MISSING],
+    ["unreachable", HEALTH_UNREACHABLE_STALE_MISSING],
+  ])("puts no value of the answer into the page (%s)", (_name, health) => {
+    const { container } = renderStep(health);
+    expect(container.innerHTML).not.toContain(SENTINEL);
+  });
+});
+
+describe("TC-COMP-109: step 1 unreachable shows Not determinable and never the key", () => {
+  it("ignores a stale missing answer kept after a failed poll", () => {
+    const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    expect(container.querySelector('[data-variant="coverage-unknown"]')).toHaveTextContent(
+      "Not determinable",
+    );
+    expect(screen.queryByText("Missing")).toBeNull();
+    expect(container.querySelector('[data-variant="status-critical"]')).toBeNull();
+    expect(screen.queryByText(/Set the environment variable/)).toBeNull();
+    expect(screen.queryByText("Restart FactorFlow after setting it.")).toBeNull();
+  });
+
+  it("carries the value in no text node and no attribute of any element", () => {
+    const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    for (const element of Array.from(container.querySelectorAll("*"))) {
+      const ownText = Array.from(element.childNodes)
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent)
+        .join("");
+      expect(ownText).not.toContain(SENTINEL);
+      for (const attribute of Array.from(element.attributes)) {
+        expect(attribute.value).not.toContain(SENTINEL);
+      }
+    }
+  });
+
+  it("renders the same when health has never answered", () => {
+    const { container } = renderStep(HEALTH_UNREACHABLE_NEVER);
+    expect(container.querySelector('[data-variant="coverage-unknown"]')).toHaveTextContent(
+      "Not determinable",
+    );
+    expect(screen.queryByText("Missing")).toBeNull();
+    expect(screen.queryByText("Found")).toBeNull();
+  });
+});
+
+describe("TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable", () => {
+  it.each([
+    ["found", HEALTH_FOUND, "status-good", "Found"],
+    ["missing", HEALTH_MISSING, "status-critical", "Missing"],
+  ])("draws %s as a labelled badge with an aria-hidden shape", (_name, health, variant, label) => {
+    const { container } = renderStep(health);
+    const badge = container.querySelector(`[data-variant="${variant}"]`) as HTMLElement;
+    expect(badge.textContent).toBe(label);
+    const shape = badge.querySelector('svg[aria-hidden="true"]');
+    expect(shape).not.toBeNull();
+    for (const element of [badge, shape as Element]) {
+      expect(element).not.toHaveAttribute("aria-label");
+      expect(element).not.toHaveAttribute("title");
+    }
+  });
+
+  it("describes the Not determinable badge by its reason and draws no status badge", () => {
+    const { container } = renderStep(HEALTH_UNREACHABLE_STALE_MISSING);
+    const badge = container.querySelector('[data-variant="coverage-unknown"]') as HTMLElement;
+    expect(badge).toHaveTextContent("Not determinable");
+    expect(badge).toHaveAccessibleDescription(NOT_ANSWERING);
+    expect(container.querySelector('[data-variant^="status-"]')).toBeNull();
+  });
+
+  it.each([
+    ["found", HEALTH_FOUND],
+    ["missing", HEALTH_MISSING],
+    ["unreachable", HEALTH_UNREACHABLE_STALE_MISSING],
+  ])("carries no state by colour alone (%s)", (_name, health) => {
+    const { container } = renderStep(health);
+    const badges = Array.from(container.querySelectorAll("[data-variant]")).filter(
+      (element) => !(element instanceof HTMLButtonElement),
+    );
+    expect(badges.length).toBeGreaterThan(0);
+    for (const badge of badges) {
+      expect((badge.textContent ?? "").trim()).not.toBe("");
+    }
+  });
+});
+
+describe("step 1 further cases", () => {
+  it("is step 1 of 4, names the next step and renders no Back button", () => {
+    renderStep(HEALTH_FOUND);
+    expect(screen.getByText("Step 1 of 4")).toBeInTheDocument();
+    expect(screen.getByText("Next: How far back")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Back/ })).toBeNull();
+  });
+
+  it("shows a failed depth read in its own step only", () => {
+    renderStep(
+      HEALTH_FOUND,
+      stateWith({ depth: { kind: "error", error: new ApiUnreachableError("x"), last: null } }),
+    );
+    expect(screen.queryByText(/Couldn't read/)).toBeNull();
+  });
+
+  it("treats a health that has not answered yet as not determinable, never missing", () => {
+    const { container } = renderStep(HEALTH_UNKNOWN);
+    expect(container.querySelector('[data-variant="coverage-unknown"]')).toHaveTextContent(
+      "Not determinable",
+    );
+    expect(region()).toHaveTextContent(NOT_ANSWERING);
+    expect(screen.queryByText("Found")).toBeNull();
+    expect(screen.queryByText("Missing")).toBeNull();
+  });
+});

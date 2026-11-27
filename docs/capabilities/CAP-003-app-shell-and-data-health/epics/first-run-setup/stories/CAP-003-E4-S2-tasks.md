@@ -112,7 +112,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-099 (Step 1 shows Found or Missing with the variable and restart line) in a new `web/src/screens/setup/step-market-data.test.tsx`, with a `// Implements TC-COMP-099` comment. Render `<StepMarketData state={stateWith({ current: 1 })} />` with the shell mocked. Cases, `it.each` over the three health fixtures where the row says so:
+- [x] T002 [P] Implement TC-COMP-099 (Step 1 shows Found or Missing with the variable and restart line) in a new `web/src/screens/setup/step-market-data.test.tsx`, with a `// Implements TC-COMP-099` comment. Render `<StepMarketData state={stateWith({ current: 1 })} />` with the shell mocked. Cases, `it.each` over the three health fixtures where the row says so:
   - (a) `HEALTH_FOUND`: the region `getByRole("region", { name: "Connect market data" })` holds the text *Market data key:* and a badge `[data-variant="status-good"]` whose text is exactly *Found*. Neither *Set the environment variable* nor *Restart FactorFlow after setting it.* is present.
   - (b) `HEALTH_MISSING`: a badge `[data-variant="status-critical"]` with text *Missing*; a paragraph whose `textContent` is exactly *Set the environment variable FACTORFLOW_MASSIVE_API_KEY to your Massive API key.*, holding a `code` element whose text is `FACTORFLOW_MASSIVE_API_KEY`; and a paragraph *Restart FactorFlow after setting it.*
   - (c) `HEALTH_UNREACHABLE_STALE_MISSING`: a badge `[data-variant="coverage-unknown"]` with text *Not determinable* and the reason *FactorFlow isn't answering, so the key can't be checked.* beside it.
@@ -125,7 +125,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that renders **Continue** `blocked` when the key is missing: (d).
   - a hand-written mutant that spreads `health.health` onto an element as `data-*` attributes: (e).
 
-- [ ] T003 [P] Implement TC-COMP-109 (Step 1 unreachable shows Not determinable and never the key) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T002 (one file), with a `// Implements TC-COMP-109` comment. With `HEALTH_UNREACHABLE_STALE_MISSING`, whose retained `health` still says `credential_present: false`:
+- [x] T003 [P] Implement TC-COMP-109 (Step 1 unreachable shows Not determinable and never the key) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T002 (one file), with a `// Implements TC-COMP-109` comment. With `HEALTH_UNREACHABLE_STALE_MISSING`, whose retained `health` still says `credential_present: false`:
   - (a) The badge is `[data-variant="coverage-unknown"]`; `queryByText("Missing")` is `null`; no `[data-variant="status-critical"]` exists; the variable and restart lines are absent.
   - (b) No element's text or attribute contains `SENTINEL-KEY-VALUE`: walk `container.querySelectorAll("*")` and check each element's own text nodes and every `attributes[i].value`.
   - (c) The same with `liveness: "unreachable"` and `health: null` (never answered): the same `coverage-unknown` rendering.
@@ -134,7 +134,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that reads `health.health?.credential_present` before checking `liveness`: (a) renders *Missing* from the stale answer.
   - swap-case `NotDeterminable` → `StatusBadge tier="neutral"`: (a)'s `coverage-unknown`.
 
-- [ ] T004 [P] Implement TC-COMP-112 (Key-presence badge through StatusBadge; Not determinable through NotDeterminable) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T003, with a `// Implements TC-COMP-112` comment.
+- [x] T004 [P] Implement TC-COMP-112 (Key-presence badge through StatusBadge; Not determinable through NotDeterminable) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T003, with a `// Implements TC-COMP-112` comment.
   - (a) For `HEALTH_FOUND` and `HEALTH_MISSING`: the `status-*` badge's text is exactly the label (*Found*, *Missing*), it contains an `svg[aria-hidden="true"]` (the tier shape), and neither the badge nor its `svg` carries an `aria-label` or `title`.
   - (b) For `HEALTH_UNREACHABLE_STALE_MISSING`: the `coverage-unknown` badge's text is *Not determinable*, it has `aria-describedby` naming an element whose text is the reason (`toHaveAccessibleDescription("FactorFlow isn't answering, so the key can't be checked.")`), and no `[data-variant^="status-"]` element exists.
   - (c) No state by colour alone: every `[data-variant]` badge in every row has non-empty text.
@@ -218,7 +218,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - swap-case `sideColumnMin` ↔ `sideColumnMax`: (f).
   - negate-boolean on the step 1 summary's `liveness === "answering"` guard: (e) step 1, third row.
 
-- [ ] T011 [P] Write step 1's further cases in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T004 (DAC-E4-3, DAC-E4-13; DEC-0349):
+- [x] T011 [P] Write step 1's further cases in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T004 (DAC-E4-3, DAC-E4-13; DEC-0349):
   - (a) No **← Back** button renders on step 1.
   - (b) **In that step only.** With `depth` `{ kind: "error", error: new ApiUnreachableError("x"), last: null }` in the state, step 1 renders no *Couldn't read* text.
   - (c) **Not answered yet.** With `HEALTH_UNKNOWN`, the badge is `coverage-unknown` *Not determinable* with the same reason, and no *Found* or *Missing* text renders.
@@ -287,7 +287,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
   Makes T010 pass.
 
-- [ ] T016 Create `web/src/screens/setup/step-market-data.tsx` (depends on T014; T002–T004 and T011 RED first).
+- [x] T016 Create `web/src/screens/setup/step-market-data.tsx` (depends on T014; T002–T004 and T011 RED first).
   - **Imports.** `StatusBadge` from `"../../components/patterns/status-badge"`; `tierOf`, `labelOf` from `"../../components/patterns/tiers"`; `NotDeterminable` from `"../../components/patterns/presence"`; `useShell` from `"../../app/shell-context"`; `type SetupState` from `"./use-setup-state"`; `QUESTIONS`, `STEP1` from `"./copy"`; `StepCard` from `"./step-card"`.
   - **`StepMarketData({ state }: { state: SetupState }): JSX.Element`.** Reads `const { health } = useShell()`. Renders `<StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>`, with no `onBack`, holding:
     - `<p className="flex flex-wrap items-center gap-2"><span>{STEP1.keyLabel}</span>{verdict}</p>`. `verdict` is, when `health.liveness === "answering"` and `health.health` is not null, `<StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>` with `status = { of: "credential", present: health.health.credential_present }`; otherwise `<NotDeterminable reason={STEP1.notAnswering} />` (DAC-E4-S2-2; DEC-0349). `liveness` is read first, so a stale `credential_present` retained after a failed poll is never shown.

@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "repo_head": "e7457266cc68a6966309b7c6d0fa46624810163b",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:26:off-by-one:1",
+      "cycle": "cycle-3",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "line": 26,
+      "original": "    <StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>",
+      "mutated": "    <StepCard step={2} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:26:off-by-one:2",
+      "cycle": "cycle-3",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "line": 26,
+      "original": "    <StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>",
+      "mutated": "    <StepCard step={1} question={QUESTIONS[2]} onContinue={() => state.goTo(2)}>"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:26:off-by-one:3",
+      "cycle": "cycle-3",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "line": 26,
+      "original": "    <StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>",
+      "mutated": "    <StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(3)}>"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:37:negate-boolean:1",
+      "cycle": "cycle-3",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "line": 37,
+      "original": "      {answer !== null && !answer.credential_present ? (",
+      "mutated": "      {answer !== null || !answer.credential_present ? ("
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:37:negate-boolean:2",
+      "cycle": "cycle-3",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "line": 37,
+      "original": "      {answer !== null && !answer.credential_present ? (",
+      "mutated": "      {answer !== null && answer.credential_present ? ("
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:ignore-liveness",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "health.liveness === \"answering\" ? health.health : null",
+      "new": "health.health",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:continue-blocked-when-missing",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "onContinue={() => state.goTo(2)}",
+      "new": "onContinue={health.health?.credential_present ? () => state.goTo(2) : undefined}",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:plain-span-badge",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "<StatusBadge tier={tierOf(statusOf(answer.credential_present))}>\n            {labelOf(statusOf(answer.credential_present))}\n          </StatusBadge>",
+      "new": "<span className=\"text-status-good\">{labelOf(statusOf(answer.credential_present))}</span>",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:spread-answer",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "<span>{STEP1.keyLabel}</span>",
+      "new": "<span {...(answer as object)}>{STEP1.keyLabel}</span>",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:present-swapped",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "labelOf(statusOf(answer.credential_present))}\n          </StatusBadge>",
+      "new": "labelOf(statusOf(true))}\n          </StatusBadge>",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:not-determinable-as-neutral",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "<NotDeterminable reason={STEP1.notAnswering} />",
+      "new": "<StatusBadge tier=\"neutral\">Not determinable</StatusBadge>",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:drop-reason",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "<NotDeterminable reason={STEP1.notAnswering} />",
+      "new": "<NotDeterminable reason=\"\" />",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:unknown-as-missing",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "health.liveness === \"answering\" ? health.health : null",
+      "new": "health.health ?? { credential_present: false }",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:drop-code",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "<code className=\"font-mono\">{STEP1.KEY_VARIABLE}</code>",
+      "new": "",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:drop-restart",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "<p>{STEP1.restart}</p>",
+      "new": "",
+      "cycle": "cycle-3"
+    },
+    {
+      "id": "web/src/screens/setup/step-market-data.tsx:manual:always-lines",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-market-data.tsx",
+      "old": "answer !== null && !answer.credential_present ? (",
+      "new": "answer !== null ? (",
+      "cycle": "cycle-3"
+    }
+  ]
+}
