@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "repo_head": "b86fb68f71f31a9697a6bc2df94bba2689fd1cf4",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:review-month-numeric",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "  month: \"2-digit\",\n",
+   "new": "  month: \"numeric\",\n",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:review-day-numeric",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "  day: \"2-digit\",\n",
+   "new": "  day: \"numeric\",\n",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:review-one-shot-timer",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "const timer = setInterval(() => setNow(new Date()), MINUTE_MS);\n    return () => clearInterval(timer);",
+   "new": "const timer = setTimeout(() => setNow(new Date()), MINUTE_MS);\n    return () => clearTimeout(timer);",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:review-skeleton-classes",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "className=\"min-h-7 w-full animate-pulse rounded bg-secondary\"",
+   "new": "className=\"w-full rounded bg-secondary\"",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:review-done-unformatted",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "`${formatCount(done)} of ${formatCount(total)}",
+   "new": "`${done} of ${formatCount(total)}",
+   "cycle": "cycle-4"
+  }
+ ]
+}

@@ -72,6 +72,12 @@ describe.each(["Asia/Tokyo", "UTC", "America/Los_Angeles"])("under TZ=%s", (zone
       });
     });
 
+    it("pads the month and day to two digits on the DST-change dates", () => {
+      expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).toBe("2026-03-08");
+      expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).toBe("2026-11-01");
+      expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekday).toBe("Sunday");
+    });
+
     it("reads midnight as 0, never 1440", () => {
       expect(chicagoWallClock(new Date("2026-10-16T05:00:00Z"))).toEqual({
         weekday: "Friday",

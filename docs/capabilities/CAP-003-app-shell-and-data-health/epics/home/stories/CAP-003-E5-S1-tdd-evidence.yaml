@@ -89,3 +89,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T003, T004, T007, T008, T014]
+    description: >
+      Review v1 rework (IR-001 to IR-005; AC-24, DAC-E5-6, DAC-E5-S1-2; DEC-0362). Tests only; production is unchanged. IR-001: chicagoWallClock reads 2026-03-08 and 2026-11-01 padded, and the h1 renders Sunday, 2026-03-08 and Sunday, 2026-11-01. IR-002: a case advances two minutes from 14:58:30 CDT to 15:00:30 and the badge flips to Market closed on the second tick. IR-003: first_download.body(1236, 1236) reads 1,236 of 1,236. IR-004: the skeleton asserts min-h-7, w-full, animate-pulse, rounded and bg-secondary. IR-005: the stray file x and the two orphaned cycle-3 mutation logs (now-once, unshifted-date) are removed; the replaced now-once mutant is not kept, and the review's own now-never-updates mutant in cycle 3 covers the clock. The review's five non-equivalent mutants are the cycle's mutants, run against the new tests: all five die. The sixth survivor (review-header-as-div) the review judged equivalent and is not part of this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log
+    red_log_sha256: 28c57cd305a37d931a12bbbf04ecc317627bc4048a39ea7bf3aa9bfaa8133af4
+    red_evidence: >
+      The new assertions are RED against the review's five mutants: each mutant fails the home suite (see red-cycle-4-review-rework.log). Production code already satisfied the story, so the RED is observed on the mutant, not on HEAD.
+    green_evidence: >
+      The home suites pass on the unmutated code in green-cycle-4-review-rework.log (3 files, 125 tests); the full suite (128 files, 3560 tests), tsc --noEmit, biome lint, biome format and build pass in validation-cycle-4.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 418f19950c9aeb8e232135006918de1c78b1e8192a3bd8069bc7cf8584be27db
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json
+      results_sha256: ef2d37f6d25353e4e89237c0a691f230bbbfc4ec31861c219571d52e70f8955d
+      generated: 5
+      killed: 5
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -86,6 +86,14 @@ describe("HomeHeader: date and prices as-of (TC-COMP-133)", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Thursday, 2026-10-15");
   });
 
+  it.each([
+    ["2026-03-08T18:00:00Z", "Sunday, 2026-03-08"],
+    ["2026-11-01T18:00:00Z", "Sunday, 2026-11-01"],
+  ])("pads the heading date across a DST change: %s", (instant, heading) => {
+    renderAt(instant, OK);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(heading);
+  });
+
   describe.each(["Asia/Tokyo", "America/Los_Angeles"])("under TZ=%s", (zone) => {
     let previous: string | undefined;
     beforeEach(() => {
@@ -287,7 +295,9 @@ describe("HomeHeader: freshness, failure, loading, tick and composition", () => 
   it("(e) renders the heading and a hidden skeleton while loading", () => {
     const { container } = renderAt(OUTSIDE, LOADING);
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
-    expect(screen.getByTestId("home-as-of-skeleton")).toHaveAttribute("aria-hidden", "true");
+    const skeleton = screen.getByTestId("home-as-of-skeleton");
+    expect(skeleton).toHaveAttribute("aria-hidden", "true");
+    expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse", "rounded", "bg-secondary");
     expect(screen.queryByTestId("as-of-line")).toBeNull();
     expect(container.textContent).not.toContain("checked");
   });
@@ -305,6 +315,20 @@ describe("HomeHeader: freshness, failure, loading, tick and composition", () => 
     expect(refresh).not.toHaveBeenCalled();
     expect(setTitleDetail).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
+  });
+
+  it("(f) keeps recomputing on every later minute, not once", () => {
+    renderAt("2026-10-15T19:58:30Z", OK);
+    expect(screen.getByText("Market state not determinable")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(screen.getByText("Market state not determinable")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(lineText()).toContain("Market closed");
+    expect(screen.queryByText("Market state not determinable")).toBeNull();
   });
 
   it("(f) rolls the date over at midnight in Chicago, with no read", () => {

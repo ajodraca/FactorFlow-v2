@@ -152,6 +152,7 @@ describe("templates", () => {
   });
 
   it.each([
+    [1236, 1236, "1,236 of 1,236 stocks so far. Scores appear when it finishes."],
     [12, 1236, "12 of 1,236 stocks so far. Scores appear when it finishes."],
     [0, 1, "0 of 1 stock so far. Scores appear when it finishes."],
     [5, null, "Scores appear when it finishes."],
