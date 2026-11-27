@@ -259,7 +259,7 @@ Every expected string below is a literal.
     - negate-boolean on `set?.not_current === true` (NOT_CURRENT_ONLY loses it, or SUMMARY() gains it);
     - `||` → `&&` between the two causes (BUILDING and FAILED still pass, but NOT_CURRENT_ONLY and NEVER_FAILED lose the badge);
     - removing the `later !== null` cause (NEVER_FAILED loses it).
-- [ ] T006 Implement TC-COMP-131, the tile half (attention failure and summary errors render inside the tile; `404` is not an error), in `data-tile.test.tsx` (after T005), with a `// Implements TC-COMP-131 (tile half; CAP-003-E5-S3 asserts the Home half)` comment.
+- [x] T006 Implement TC-COMP-131, the tile half (attention failure and summary errors render inside the tile; `404` is not an error), in `data-tile.test.tsx` (after T005), with a `// Implements TC-COMP-131 (tile half; CAP-003-E5-S3 asserts the Home half)` comment.
   - (a) `ATT_UNREACHABLE`:
     - `getByRole("heading", { level: 2, name: "Data" })` renders;
     - the tile contains exactly `"Couldn't read the data summary: FactorFlow is not answering."`;
@@ -301,7 +301,7 @@ Every expected string below is a literal.
     - swap-case `formatInstant` → `formatClock` in the name;
     - a mutant wrapping each figure in its own link (two links);
     - a planted `useDataHealth()` call (fetch is called, and the import is flagged).
-- [ ] T008 Implement TC-COMP-139 (Data tile uses the display vocabulary in every state) in `data-tile.test.tsx` (after T007), with a `// Implements TC-COMP-139` comment.
+- [x] T008 Implement TC-COMP-139 (Data tile uses the display vocabulary in every state) in `data-tile.test.tsx` (after T007), with a `// Implements TC-COMP-139` comment.
   - Define `TERMS = /\b(?:instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i`, the eight DAC-E7-3 terms, as CAP-003-E5-S1's T006 does.
   - Render each of these states: every state of T002 (a)–(d), T003 (b), T004 (a)–(c), T005, T006 (a)–(d) and T010 (a) and (e). From each, collect the container's `textContent` and every `aria-label`, `title` and `alt` value.
   - Assert:
@@ -447,7 +447,7 @@ Every expected string below is a literal.
     - `scoresAt` when it is a time;
     - `NOT_DETERMINABLE` when `s === null`;
     - the *No scores yet* label with its first letter lower-cased, the rule `DATA_TILE.name` applies to its own label.
-- [ ] T015 Add the error state to `web/src/screens/home/data-tile.tsx` (depends on T014). This makes T006 and T008 pass.
+- [x] T015 Add the error state to `web/src/screens/home/data-tile.tsx` (depends on T014). This makes T006 and T008 pass.
   - **Reason.** A module-private `readFailureReason(error: ApiError | ApiUnreachableError): string` returns `READ_FAILURE.unreachable` for `error instanceof ApiUnreachableError` and `READ_FAILURE.unexpected` otherwise. It never reads `message` or `requestId` (DEC-0366).
   - **`ErrorTile({ error, onRetry })`** renders, in the same `section`/`Card` without a `Link`:
     - the title;
@@ -469,7 +469,7 @@ Every expected string below is a literal.
 
 **Purpose**: Prove the tile sits inside the delivered and shared checks, with only this story's files touched.
 
-- [ ] T016 Run `npm run test` and confirm the whole suite is green, including these, unchanged (traces to DAC-E5-S2-4, DAC-E5-S2-5):
+- [x] T016 Run `npm run test` and confirm the whole suite is green, including these, unchanged (traces to DAC-E5-S2-4, DAC-E5-S2-5):
   - CAP-003-E5-S1's `header.test.tsx` (its T006 walks `copy.ts` and now scans T012's strings);
   - `web/src/components/token-literals.test.ts`;
   - `web/src/components/patterns/worst-data-tier.test.ts`;
@@ -488,11 +488,11 @@ Every expected string below is a literal.
 
 **Purpose**: Validation commands and TDD evidence.
 
-- [ ] T017 Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to DAC-E5-S2-5).
+- [x] T017 Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to DAC-E5-S2-5).
   - Fix format findings with `npx biome format --write web/src/screens/home/data-tile.tsx web/src/screens/home/data-tile.test.tsx web/src/screens/home/copy.ts web/src/screens/home/copy.test.ts`.
   - `tsc` checks the test fixtures against CAP-003-E3-S1's `Attention` and `ScoreSummary`.
   - Fix findings in this story's four files only.
-- [ ] T018 After each TDD cycle in T002–T017 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E5-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage`; no per-cycle commit is planned. T016–T017 add no behaviour and join cycle 4's validation evidence (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles are:
+- [x] T018 After each TDD cycle in T002–T017 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E5-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage`; no per-cycle commit is planned. T016–T017 add no behaviour and join cycle 4's validation evidence (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles are:
   1. T011 + T012, the copy entries;
   2. T002 + T007 (b) + T010 (a)–(c) + T013, the skeleton, absent download and first download;
   3. T003 + T004 + T005 + T007 (a), (c), (d) + T009 + T010 (d)–(g) + T014, the full tile;

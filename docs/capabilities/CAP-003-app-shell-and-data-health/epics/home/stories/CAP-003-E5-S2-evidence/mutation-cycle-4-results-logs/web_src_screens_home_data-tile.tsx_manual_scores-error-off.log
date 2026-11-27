@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ybclssdn/w1/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (57 tests | 2 failed) 350ms
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores 8ms
+     → expected 'DataMostly yes—not determinable of 26…' to contain 'Couldn\'t read the data summary: Fact…'
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores 2ms
+     → expected 'DataMostly yes—not determinable of 26…' to contain 'Couldn\'t read the data summary: Fact…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores
+AssertionError: expected 'DataMostly yes—not determinable of 26…' to contain 'Couldn\'t read the data summary: Fact…'
+
+Expected: "Couldn't read the data summary: FactorFlow hit an unexpected problem."
+Received: "DataMostly yes—not determinable of 26 stocks currentScores —not determinablePrices 2026-10-14Every other number on this page is as of those times."
+
+ ❯ src/screens/home/data-tile.test.tsx:676:23
+    674|     async (_n, scores) => {
+    675|       const c = show(ok(ATTENTION), scores);
+    676|       expect(text(c)).toContain(
+       |                       ^
+    677|         "Couldn't read the data summary: FactorFlow hit an unexpected …
+    678|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 55 passed (57)
+   Start at  17:06:08
+   Duration  1.63s (transform 102ms, setup 40ms, collect 463ms, tests 350ms, environment 194ms, prepare 62ms)
+

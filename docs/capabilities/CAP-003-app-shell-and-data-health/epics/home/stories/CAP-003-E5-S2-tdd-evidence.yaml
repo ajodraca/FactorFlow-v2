@@ -89,3 +89,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T006, T008, T015, T016, T017]
+    description: >
+      The read failures and the vocabulary scan (TC-COMP-131 tile half, TC-COMP-139; DAC-E5-11, DAC-E5-S2-4, AC-19; DEC-0366): data-tile.tsx gains readFailureReason (one fixed sentence per failure kind, never the server's message or request id) and ErrorTile (the title, Couldn't read the data summary: {reason}. and an outline Try again button, with no badge, figure or link), wired so an attention failure retries attention and a summary failure retries scores, neither showing the last good answer; the first-download state still reads no summary. data-tile.test.tsx adds the T006 cases, the T008 vocabulary scan and one ALL_STATES() cross product of every attention fixture and every score state, which T007 (d) (no aggregate read) and T008 both render. T016 and T017 add no behaviour and join this cycle: npm run test (129 files, 3618 tests), lint, format, tsc --noEmit and build all pass, the plan's greps print nothing, and no producer or delivered file changed (validation-cycle-4.log). The generator produced no mutants for a tsx file, so 10 were hand-written; the first run left the button variant alive (a test now pins data-variant outline) and the second run killed all 10. The spec-drift review reported drift once, on the T008 state list, which was then made exhaustive; the second pair of reviews approved with no drift.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-4-errors.log
+    red_log_sha256: e045d4fe2cb0fd10efc305ece6712692673620266412ebb7457e5384bc4ccfb9
+    red_evidence: >
+      4 of the 57 data-tile tests failed before ErrorTile existed (T006 (a), (b) and both (c) cases).
+    green_evidence: >
+      The web/src/screens/home suite, 183 tests (57 in data-tile.test.tsx), passes in green-cycle-4-errors.log; the full validation passes in validation-cycle-4.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 48d8f91d57d3f1ebfea719c455fdf81e61f5518c2cd9cd94137b10535d2e2650
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: d117c30b9567deabab9c52b26cb9522ff664a21cc1f73bd634ab401972d0b694
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

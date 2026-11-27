@@ -1,0 +1,87 @@
+{
+ "schema": 1,
+ "repo_head": "5d1ca664e6980c7a8cbf5b2aeb9d01c65eb5caf3",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:instanceof-negate",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "error instanceof ApiUnreachableError ?",
+   "new": "!(error instanceof ApiUnreachableError) ?",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:reasons-swap",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "ApiUnreachableError ? READ_FAILURE.unreachable : READ_FAILURE.unexpected",
+   "new": "ApiUnreachableError ? READ_FAILURE.unexpected : READ_FAILURE.unreachable",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:reason-message",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "readFailureReason(error)",
+   "new": "error.message",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:retry-attention",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "refresh(\"attention\")",
+   "new": "refresh(\"scores\")",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:retry-scores",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "refresh(\"scores\")",
+   "new": "refresh(\"attention\")",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:attention-error-off",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "attention.kind === \"error\"",
+   "new": "attention.kind === \"ok\"",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:scores-error-off",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "scores.kind === \"error\"",
+   "new": "scores.kind === \"never\"",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:scores-error-not",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "scores.kind === \"error\"",
+   "new": "scores.kind !== \"error\"",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:button-variant",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "variant=\"outline\"",
+   "new": "variant=\"default\"",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:retry-noop",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "onClick={onRetry}",
+   "new": "onClick={undefined}",
+   "cycle": "cycle-4"
+  }
+ ]
+}

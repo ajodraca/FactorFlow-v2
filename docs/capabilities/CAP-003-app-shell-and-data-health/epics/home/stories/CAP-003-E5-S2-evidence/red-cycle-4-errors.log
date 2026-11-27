@@ -1,0 +1,30 @@
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (b) attention fails with a server error: a fixed sentence, never the server's words
+AssertionError: expected '' to contain 'Couldn\'t read the data summary: Fact…'
+- Expected
++ Received
+- Couldn't read the data summary: FactorFlow hit an unexpected problem.
+ ❯ src/screens/home/data-tile.test.tsx:656:21
+    654|   it("(b) attention fails with a server error: a fixed sentence, never…
+    655|     const c = show(ATT_500, NOT_SERVED);
+    656|     expect(text(c)).toContain(
+       |                     ^
+    657|       "Couldn't read the data summary: FactorFlow hit an unexpected pr…
+    658|     );
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores
+AssertionError: expected 'DataMostly yes—not determinable of 26…' to contain 'Couldn\'t read the data summary: Fact…'
+Expected: "Couldn't read the data summary: FactorFlow hit an unexpected problem."
+Received: "DataMostly yes—not determinable of 26 stocks currentScores —not determinablePrices 2026-10-14Every other number on this page is as of those times."
+ ❯ src/screens/home/data-tile.test.tsx:670:23
+    668|     async (_n, scores) => {
+    669|       const c = show(ok(ATTENTION), scores);
+    670|       expect(text(c)).toContain(
+       |                       ^
+    671|         "Couldn't read the data summary: FactorFlow hit an unexpected …
+    672|       );
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+ Test Files  1 failed (1)
+      Tests  4 failed | 53 passed (57)
+   Start at  17:03:50
+   Duration  1.39s (transform 86ms, setup 53ms, collect 469ms, tests 252ms, environment 284ms, prepare 36ms)

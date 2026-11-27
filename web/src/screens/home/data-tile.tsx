@@ -1,5 +1,6 @@
 import { type JSX, type ReactNode, useId } from "react";
 import { Link } from "react-router-dom";
+import { type ApiError, ApiUnreachableError } from "../../api/client";
 import { useShell } from "../../app/shell-context";
 import type { ScoreState, ScoreSummary } from "../../app/shell-types";
 import { formatCount, formatInstant, formatSessionDate } from "../../components/patterns/format";
@@ -7,6 +8,7 @@ import { Absent } from "../../components/patterns/presence";
 import { StatusBadge } from "../../components/patterns/status-badge";
 import { type Status, labelOf, tierOf } from "../../components/patterns/tiers";
 import { dataTileBadge, worstDataTier } from "../../components/patterns/worst-data-tier";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,7 +16,7 @@ import {
   CardMetricValue,
   CardTitle,
 } from "../../components/ui/card";
-import { DATA_TILE, NOT_DETERMINABLE } from "./copy";
+import { DATA_TILE, NOT_DETERMINABLE, READ_FAILURE, TRY_AGAIN } from "./copy";
 
 /**
  * Home's data tile: how many followed stocks are current and whether the data
@@ -90,6 +92,45 @@ function TileLink({
   );
 }
 
+/**
+ * The reason a read failed, as one fixed sentence per kind; never the server's
+ * message or request id (DEC-0366).
+ */
+function readFailureReason(error: ApiError | ApiUnreachableError): string {
+  return error instanceof ApiUnreachableError ? READ_FAILURE.unreachable : READ_FAILURE.unexpected;
+}
+
+/**
+ * A failed read, replacing the tile's body under its title: the sentence and
+ * Try again, no badge and no figure, and no link (home-ui 2.4; epic DAC-E5-11).
+ * It never shows the last good answer (Resolved Conflict 4).
+ */
+function ErrorTile({
+  error,
+  titleId,
+  onRetry,
+}: {
+  error: ApiError | ApiUnreachableError;
+  titleId: string;
+  onRetry: () => void;
+}): JSX.Element {
+  return (
+    <section aria-labelledby={titleId}>
+      <Card variant="metric">
+        <CardHeader>
+          <CardTitle id={titleId}>{DATA_TILE.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{DATA_TILE.readError(readFailureReason(error))}</p>
+          <Button variant="outline" type="button" onClick={onRetry}>
+            {TRY_AGAIN}
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
 /** The tile's title over one pulsing block, while a read it needs has not answered. */
 function TileSkeleton({ titleId }: { titleId: string }): JSX.Element {
   return (
@@ -107,14 +148,16 @@ function TileSkeleton({ titleId }: { titleId: string }): JSX.Element {
 }
 
 export function DataTile(): JSX.Element | null {
-  const { attention, scores } = useShell();
+  const { attention, scores, refresh } = useShell();
   const titleId = useId();
 
   if (attention.kind === "loading") {
     return <TileSkeleton titleId={titleId} />;
   }
   if (attention.kind === "error") {
-    return null;
+    return (
+      <ErrorTile error={attention.error} titleId={titleId} onRetry={() => refresh("attention")} />
+    );
   }
 
   const a = attention.data;
@@ -148,6 +191,10 @@ export function DataTile(): JSX.Element | null {
 
   if (scores.kind === "loading") {
     return <TileSkeleton titleId={titleId} />;
+  }
+
+  if (scores.kind === "error") {
+    return <ErrorTile error={scores.error} titleId={titleId} onRetry={() => refresh("scores")} />;
   }
 
   const summary = scores.kind === "served" ? scores.data : null;
