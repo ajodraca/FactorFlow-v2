@@ -31,3 +31,35 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T003, T004, T011, T012, T016]
+    description: >
+      The Needs you card (TC-COMP-141, TC-COMP-142, TC-COMP-146; DAC-E5-7 to DAC-E5-9, DAC-E5-11, DAC-E5-S3-1, DAC-E5-S3-2, DAC-E5-S3-3, DAC-E5-S3-6, AC-7, AC-9, AC-12, AC-16; DEC-0367 to DEC-0370): needs-you-card.tsx exports NeedsYouCard() and NEEDS_YOU_STATES. The list is sortAttention(deriveNeedsYou(...)) once, each row goes through NeedsYouItemRow with the catalogue copy, a polite unkeyed output carries the count, and the body renders through StateRegion (loading skeleton, populated list or the empty sentence, error with Try again; five kinds recorded not-applicable). needs-you-card.test.tsx holds the shared harness and T002 to T004, T011 and T012. It also asserts T007 (a) to (d) and T008's records at card level, because this cycle's code introduces the error path and the records; home.test.tsx will assert the same through the screen. The first spec-drift pass reported drift (tests for a later cycle written early, and gaps in T003, T004 and T011); the gaps were fixed, the extra describe was kept and declared, and the second pair of reviews approved with no drift. The generator produced 13 mutants and 16 were hand-written; 28 of 29 were killed. The one survivor, the off-by-one on the done fallback of copy.body in the first_download case, is equivalent: the fallback applies only when latest_download is null, which the derivation never produces for that kind, and body ignores done when total is null.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/red-cycle-2-card.log
+    red_log_sha256: 74b67461af25cce35d03fc05eec7de19edc7fcb4f37371b6edecef4bfc5da5ce
+    red_evidence: >
+      needs-you-card.test.tsx failed to load (./needs-you-card did not resolve) before the module existed.
+    green_evidence: >
+      The web/src/screens/home suite, 238 tests (44 in needs-you-card.test.tsx), passes in green-cycle-2-card.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 3da4776e26cf547be3f32f033a5fc8341fb5441d439a931709f427eeeda27084
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: bdc1742464b95f876e73f5f2e72303dca26a02381cafd90374bea08249ba1a31
+      generated: 29
+      killed: 28
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.966
+      survivors:
+        - id: web/src/screens/home/needs-you-card.tsx:133:off-by-one:1
+          disposition: equivalent
+          reason: "The done fallback applies only when latest_download is null, which deriveNeedsYou never yields for first_download; copy.body also ignores done when total is null, so no input distinguishes 0 from 1."

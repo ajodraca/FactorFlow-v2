@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w1/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 2 failed) 498ms
+   × attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > replaces the body with the error, ages checked, and retries attention 6ms
+     → expected 'Needs you · —not determinablechecked …' to contain 'Couldn\'t read what needs you: Factor…'
+   × attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > never shows the server's words, and shows the absent pair when nothing ever answered 3ms
+     → expected 'Needs you · —not determinablechecked …' to contain 'Couldn\'t read what needs you: Factor…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > replaces the body with the error, ages checked, and retries attention
+AssertionError: expected 'Needs you · —not determinablechecked …' to contain 'Couldn\'t read what needs you: Factor…'
+
+Expected: "Couldn't read what needs you: FactorFlow is not answering."
+Received: "Needs you · —not determinablechecked 17:40:05 CDTMost important first. Nothing here is urgent unless marked.Couldn't read what needs you: GET /api/attention could not be reached.Try again"
+
+ ❯ src/screens/home/needs-you-card.test.tsx:768:28
+    766|     const user = userSetup();
+    767|     mount(unreachable, served(SUMMARY()));
+    768|     expect(squash(card())).toContain("Couldn't read what needs you: Fa…
+       |                            ^
+    769|     expect(rows()).toEqual([]);
+    770|     expect(squash(card())).toContain("checked 17:40:05 CDT");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > never shows the server's words, and shows the absent pair when nothing ever answered
+AssertionError: expected 'Needs you · —not determinablechecked …' to contain 'Couldn\'t read what needs you: Factor…'
+
+Expected: "Couldn't read what needs you: FactorFlow hit an unexpected problem."
+Received: "Needs you · —not determinablechecked —not determinableMost important first. Nothing here is urgent unless marked.Couldn't read what needs you: Internal error.Try again"
+
+ ❯ src/screens/home/needs-you-card.test.tsx:782:28
+    780|   it("never shows the server's words, and shows the absent pair when n…
+    781|     mount(ATT_500, served(SUMMARY()));
+    782|     expect(squash(card())).toContain(
+       |                            ^
+    783|       "Couldn't read what needs you: FactorFlow hit an unexpected prob…
+    784|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 42 passed (44)
+   Start at  17:54:37
+   Duration  1.48s (transform 101ms, setup 36ms, collect 385ms, tests 498ms, environment 178ms, prepare 105ms)
+

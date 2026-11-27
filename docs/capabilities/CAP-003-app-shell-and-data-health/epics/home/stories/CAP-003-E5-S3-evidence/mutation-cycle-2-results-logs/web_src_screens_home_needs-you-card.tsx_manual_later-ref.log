@@ -1,0 +1,91 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w3/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 5 failed) 583ms
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > score_failed with a set 7ms
+     → expected 'The scoring engine stopped. Scores st…' to be 'The scoring engine stopped. Scores st…' // Object.is equality
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > score_failed without a set drops its second sentence 4ms
+     → expected 'The scoring engine stopped. Scores st…' to be 'The scoring engine stopped.' // Object.is equality
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > score_failed with no recorded reason 3ms
+     → expected 'No reason was recorded. Scores still …' to be 'No reason was recorded. Scores still …' // Object.is equality
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > in Asia/Tokyo > reads the set start in the owner's zone 7ms
+     → expected 'The scoring engine stopped. Scores st…' to contain '16:02 CDT'
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > in America/Los_Angeles > reads the set start in the owner's zone 9ms
+     → expected 'The scoring engine stopped. Scores st…' to contain '16:02 CDT'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > score_failed with a set
+AssertionError: expected 'The scoring engine stopped. Scores st…' to be 'The scoring engine stopped. Scores st…' // Object.is equality
+
+Expected: "The scoring engine stopped. Scores still show the set from the download started 2026-10-15 16:02 CDT."
+Received: "The scoring engine stopped. Scores still show the set from the download started 2026-10-15 18:00 CDT."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:628:25
+    626|     mount(ok(SCORED), served(FAILED));
+    627|     const row = rowByTitle("The latest score update failed");
+    628|     expect(bodyOf(row)).toBe(
+       |                         ^
+    629|       "The scoring engine stopped. Scores still show the set from the …
+    630|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > score_failed without a set drops its second sentence
+AssertionError: expected 'The scoring engine stopped. Scores st…' to be 'The scoring engine stopped.' // Object.is equality
+
+Expected: "The scoring engine stopped."
+Received: "The scoring engine stopped. Scores still show the set from the download started 2026-10-15 17:41 CDT."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:636:66
+    634|   it("score_failed without a set drops its second sentence", () => {
+    635|     mount(ok(SCORED), served(NEVER_FAILED));
+    636|     expect(bodyOf(rowByTitle("The latest score update failed"))).toBe(
+       |                                                                  ^
+    637|       "The scoring engine stopped.",
+    638|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > score_failed with no recorded reason
+AssertionError: expected 'No reason was recorded. Scores still …' to be 'No reason was recorded. Scores still …' // Object.is equality
+
+Expected: "No reason was recorded. Scores still show the set from the download started 2026-10-15 16:02 CDT."
+Received: "No reason was recorded. Scores still show the set from the download started 2026-10-15 18:00 CDT."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:646:66
+    644|       served({ ...FAILED, later: { ...FAILED.later, failure_reason: nu…
+    645|     );
+    646|     expect(bodyOf(rowByTitle("The latest score update failed"))).toBe(
+       |                                                                  ^
+    647|       "No reason was recorded. Scores still show the set from the down…
+    648|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > in Asia/Tokyo > reads the set start in the owner's zone
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > in America/Los_Angeles > reads the set start in the owner's zone
+AssertionError: expected 'The scoring engine stopped. Scores st…' to contain '16:02 CDT'
+
+Expected: "16:02 CDT"
+Received: "The scoring engine stopped. Scores still show the set from the download started 2026-10-15 18:00 CDT."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:671:68
+    669|     it("reads the set start in the owner's zone", () => {
+    670|       mount(ok(SCORED), served(FAILED));
+    671|       expect(bodyOf(rowByTitle("The latest score update failed"))).toC…
+       |                                                                    ^
+    672|     });
+    673|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 39 passed (44)
+   Start at  17:54:31
+   Duration  1.55s (transform 124ms, setup 57ms, collect 413ms, tests 583ms, environment 239ms, prepare 62ms)
+

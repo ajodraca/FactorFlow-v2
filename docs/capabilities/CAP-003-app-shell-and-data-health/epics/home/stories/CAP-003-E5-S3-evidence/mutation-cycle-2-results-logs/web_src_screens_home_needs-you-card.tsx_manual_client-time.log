@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w2/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 1 failed) 632ms
+   × a count change is announced politely and focus stays (TC-COMP-142; DAC-E5-S3-2, DAC-E5-9) > reads Nothing needs you right now with the checked time at zero items 12ms
+     → expected 'Needs you · 0checked 17:53:41 CDTMost…' to contain 'checked 17:52:10 CDT'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > a count change is announced politely and focus stays (TC-COMP-142; DAC-E5-S3-2, DAC-E5-9) > reads Nothing needs you right now with the checked time at zero items
+AssertionError: expected 'Needs you · 0checked 17:53:41 CDTMost…' to contain 'checked 17:52:10 CDT'
+
+Expected: "checked 17:52:10 CDT"
+Received: "Needs you · 0checked 17:53:41 CDTMost important first. Nothing here is urgent unless marked.Needs you · 0Nothing needs you right now."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:380:28
+    378|     expect(card().querySelector("ul")).toBeNull();
+    379|     expect(squash(card())).toContain("Nothing needs you right now.");
+    380|     expect(squash(card())).toContain("checked 17:52:10 CDT");
+       |                            ^
+    381|     expect(within(card()).getByRole("status").textContent).toBe("Needs…
+    382|     expect(card().querySelector("h2")?.textContent).toBe("Needs you · …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 43 passed (44)
+   Start at  17:54:32
+   Duration  1.85s (transform 155ms, setup 66ms, collect 540ms, tests 632ms, environment 269ms, prepare 125ms)
+

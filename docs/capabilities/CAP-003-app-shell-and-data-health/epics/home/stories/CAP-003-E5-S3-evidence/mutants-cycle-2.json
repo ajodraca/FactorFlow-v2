@@ -1,0 +1,252 @@
+{
+ "schema": 1,
+ "repo_head": "a67a39ed0a2ad4b0726f9639a2b817d7ca9b9850",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:53:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 53,
+   "original": "    if (items.length === 0) {",
+   "mutated": "    if (items.length === 1) {"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:122:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 122,
+   "original": "        title: copy.title,",
+   "mutated": "        title: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:123:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 123,
+   "original": "        body: copy.body,",
+   "mutated": "        body: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:125:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 125,
+   "original": "        actionName: copy.actionName,",
+   "mutated": "        actionName: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:132:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 132,
+   "original": "        title: copy.title,",
+   "mutated": "        title: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:133:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 133,
+   "original": "        body: copy.body(progress?.done ?? 0, progress?.total ?? null),",
+   "mutated": "        body: copy.body(progress?.done ?? 1, progress?.total ?? null),"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:135:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 135,
+   "original": "        actionName: copy.actionName,",
+   "mutated": "        actionName: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:141:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 141,
+   "original": "        title: copy.title,",
+   "mutated": "        title: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:142:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 142,
+   "original": "        body: copy.body,",
+   "mutated": "        body: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:144:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 144,
+   "original": "        actionName: copy.actionName,",
+   "mutated": "        actionName: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:151:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 151,
+   "original": "        title: copy.title,",
+   "mutated": "        title: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:157:drop-field-copy:1",
+   "cycle": "cycle-2",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 157,
+   "original": "        actionName: copy.actionName,",
+   "mutated": "        actionName: nil,"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:180:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "line": 180,
+   "original": "  if (attention.kind === \"ok\" && items !== null) {",
+   "mutated": "  if (attention.kind === \"ok\" || items !== null) {"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:no-sort",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "sortAttention(deriveNeedsYou(attention.data, scores))",
+   "new": "deriveNeedsYou(attention.data, scores)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:raw-count",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "heading = NEEDS_YOU.heading(items.length);",
+   "new": "heading = NEEDS_YOU.heading(attention.kind === \"ok\" ? attention.data.items.length : 0);",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:failed-negated",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "const failed = item.tier === \"critical\";",
+   "new": "const failed = item.tier !== \"critical\";",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:no-reason-blank",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "attention.latest_terminal_download?.failure_reason ?? NO_REASON",
+   "new": "attention.latest_terminal_download?.failure_reason ?? \"\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:later-ref",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "summary?.set ? formatInstant(summary.set.run_started_at) : null",
+   "new": "formatInstant(summary?.later?.started_at ?? \"\")",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:marker-size",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "markerSize={LAYOUT.markerSize}",
+   "new": "markerSize={LAYOUT.railIconSize}",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:client-time",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "formatClock(attention.data.checked_at)",
+   "new": "formatClock(attention.checkedAt)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:last-client-time",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "formatClock(attention.last.data.checked_at)",
+   "new": "formatClock(attention.last.checkedAt)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:output-keyed",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "<output className=\"sr-only\">",
+   "new": "<output key={items.length} className=\"sr-only\">",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:no-match-renders",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "\"empty-no-match\": { notApplicable: \"Nothing on Home is filtered (DAC-E5-S3-3)\" },",
+   "new": "\"empty-no-match\": () => null,",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:retry-scores",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "refresh(\"attention\")",
+   "new": "refresh(\"scores\")",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:variant-metric",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "<Card variant=\"default\">",
+   "new": "<Card variant=\"metric\">",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:done-twice",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "copy.body(progress?.done ?? 0, progress?.total ?? null)",
+   "new": "copy.body(progress?.done ?? 0, progress?.done ?? null)",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:empty-branch",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "if (items.length === 0) {",
+   "new": "if (items.length !== 0) {",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:error-message",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "message: readFailureReason(attention.error),",
+   "new": "message: attention.error.message,",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:unreachable-flip",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "error instanceof ApiUnreachableError ? READ_FAILURE.unreachable : READ_FAILURE.unexpected",
+   "new": "error instanceof ApiUnreachableError ? READ_FAILURE.unexpected : READ_FAILURE.unreachable",
+   "cycle": "cycle-2"
+  }
+ ]
+}
