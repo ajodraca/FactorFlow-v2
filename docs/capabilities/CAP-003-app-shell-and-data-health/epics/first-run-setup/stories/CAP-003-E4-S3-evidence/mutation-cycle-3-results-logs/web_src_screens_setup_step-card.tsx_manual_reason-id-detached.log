@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-3h_tryku/w2/web
+
+ ✓ src/screens/setup/copy.test.ts (159 tests) 16ms
+ ✓ src/components/token-literals.test.ts (58 tests) 106ms
+ ❯ src/screens/setup/step-card.test.tsx (14 tests | 1 failed) 124ms
+   × blocked Continue (CAP-003-E4-S3, DAC-E4-7) > is blocked, focusable and described by its reason, and swallows activation 6ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Paste at least one symbol, or choose Add later.
+Received:
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > blocked Continue (CAP-003-E4-S3, DAC-E4-7) > is blocked, focusable and described by its reason, and swallows activation
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Paste at least one symbol, or choose Add later.
+Received:
+
+ ❯ src/screens/setup/step-card.test.tsx:189:18
+    187|     expect(next).toHaveAttribute("data-variant", "blocked");
+    188|     expect(next).toHaveAttribute("aria-disabled", "true");
+    189|     expect(next).toHaveAccessibleDescription(REASON);
+       |                  ^
+    190|     expect(screen.getByText(REASON)).toBeVisible();
+    191|     await user.tab();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 230 passed (231)
+   Start at  13:27:53
+   Duration  1.98s (transform 215ms, setup 314ms, collect 454ms, tests 245ms, environment 1.67s, prepare 371ms)
+

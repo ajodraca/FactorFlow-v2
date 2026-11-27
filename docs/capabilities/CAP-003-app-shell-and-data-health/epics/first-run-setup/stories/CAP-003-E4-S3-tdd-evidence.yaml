@@ -61,3 +61,32 @@ cycles:
       score: 1.0
       survivors: []
 
+  - id: cycle-3
+    tasks: [T013, T014, T016]
+    description: >
+      The copy strings and the blocked Continue (AC-5, DAC-E4-7, DAC-E4-5, DEC-0351, DEC-0354): copy.ts gains five STEP3 members, each with a doc comment saying CAP-003-E4-S3 adds it and which decision gives its wording (duplicateEntry, alreadyFollowedEntry reusing STEP3.alreadyFollowed, saveFailed, followedSoFar, keptForRetry), importing nothing and exporting no number or boolean; step-card.tsx gains the optional continueBlocked prop, whose reason renders as visible text before a blocked Continue described by it (useId), and leaves the footer unchanged without it. copy.test.ts gains the five verbatim rows against independent literals; step-card.test.tsx gains the blocked Continue describe block (T014 a and b) and changes no existing case. The generator produced no mutants (the changes are template strings and JSX attributes) and 10 were hand-written: five on the card's blocked branch from the plan's kill list and one on each copy string. All 10 were killed. The first spec-drift review reported one exceedance (a module-level const sharing the already-followed text, beyond T016's five additions); it was removed in favour of the plan's literal wording, the mutation run repeated and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved; the code review raised LOW observations only (the Tab case depends on no Back button rendering, the reason carries no live-region role, STEP3 is read inside its own initializer, safely).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-3-copy-and-blocked-continue.log
+    red_log_sha256: 111daff3d6c1d1cbf2fea4eaef67de3ba4b69621dd1003fc2ce7f178a1aa17fd
+    red_evidence: >
+      Five copy.test.ts rows failed (STEP3.duplicateEntry, alreadyFollowedEntry, saveFailed, followedSoFar and keptForRetry undefined) and the blocked Continue case in step-card.test.tsx failed (the footer had no blocked variant) before the changes.
+    green_evidence: >
+      copy.test.ts and step-card.test.tsx pass (the setup suites and token-literals.test.ts, 384 passed, in green-cycle-3-copy-and-blocked-continue.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: aa7926892eb61738c248bf136b1ba6c1e26411d1709d145afdc9438cbb661646
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: e9760728449c3a91c90bbcde180ee43ab6f73d545c42a4be49945bf2a84656ff
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+

@@ -230,6 +230,15 @@ const ROWS: [string, string[], string][] = [
     ["FactorFlow is not answering"],
     "Couldn't save history depth: FactorFlow is not answering",
   ],
+  ["STEP3.duplicateEntry", ["KO"], "KO, listed more than once"],
+  ["STEP3.alreadyFollowedEntry", ["KO"], "KO, already followed"],
+  [
+    "STEP3.saveFailed",
+    ["FactorFlow is not answering"],
+    "Couldn't save the followed list: FactorFlow is not answering",
+  ],
+  ["STEP3.followedSoFar", ["1,000"], "1,000 followed so far."],
+  ["STEP3.keptForRetry", ["1,500"], "1,500 not saved yet; kept in the list to try again."],
 ];
 
 describe("setup copy is complete and verbatim", () => {

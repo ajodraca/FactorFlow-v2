@@ -173,3 +173,38 @@ describe("StepReadError", () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });
+
+// Implements the blocked Continue of CAP-003-E4-S3 T014 (DAC-E4-7; CAP-003-E1-S1
+// button `blocked`, never `disabled`, DAC-E1-15).
+describe("blocked Continue (CAP-003-E4-S3, DAC-E4-7)", () => {
+  const REASON = "Paste at least one symbol, or choose Add later.";
+
+  it("is blocked, focusable and described by its reason, and swallows activation", async () => {
+    const user = userEvent.setup();
+    const spy = vi.fn();
+    render(<StepCard step={3} question="Q" onContinue={spy} continueBlocked={REASON} />);
+    const next = screen.getByRole("button", { name: "Continue" });
+    expect(next).toHaveAttribute("data-variant", "blocked");
+    expect(next).toHaveAttribute("aria-disabled", "true");
+    expect(next).toHaveAccessibleDescription(REASON);
+    expect(screen.getByText(REASON)).toBeVisible();
+    await user.tab();
+    expect(next).toHaveFocus();
+    await user.click(next);
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+    expect(spy).not.toHaveBeenCalled();
+    expect(screen.getByText("Next: Download data")).toBeInTheDocument();
+  });
+
+  it("is the default Continue, with no description, when nothing blocks it", async () => {
+    const user = userEvent.setup();
+    const spy = vi.fn();
+    render(<StepCard step={3} question="Q" onContinue={spy} />);
+    const next = screen.getByRole("button", { name: "Continue" });
+    expect(next).toHaveAttribute("data-variant", "default");
+    expect(next).not.toHaveAttribute("aria-describedby");
+    await user.click(next);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});

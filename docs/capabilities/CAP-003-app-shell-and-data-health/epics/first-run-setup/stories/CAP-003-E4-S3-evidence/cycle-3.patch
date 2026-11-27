@@ -1,0 +1,153 @@
+diff --git a/web/src/screens/setup/copy.test.ts b/web/src/screens/setup/copy.test.ts
+index 0dfd6294..3bdda0a8 100644
+--- a/web/src/screens/setup/copy.test.ts
++++ b/web/src/screens/setup/copy.test.ts
+@@ -230,6 +230,15 @@ const ROWS: [string, string[], string][] = [
+     ["FactorFlow is not answering"],
+     "Couldn't save history depth: FactorFlow is not answering",
+   ],
++  ["STEP3.duplicateEntry", ["KO"], "KO, listed more than once"],
++  ["STEP3.alreadyFollowedEntry", ["KO"], "KO, already followed"],
++  [
++    "STEP3.saveFailed",
++    ["FactorFlow is not answering"],
++    "Couldn't save the followed list: FactorFlow is not answering",
++  ],
++  ["STEP3.followedSoFar", ["1,000"], "1,000 followed so far."],
++  ["STEP3.keptForRetry", ["1,500"], "1,500 not saved yet; kept in the list to try again."],
+ ];
+ 
+ describe("setup copy is complete and verbatim", () => {
+diff --git a/web/src/screens/setup/copy.ts b/web/src/screens/setup/copy.ts
+index 7cb316a7..e9a7d02c 100644
+--- a/web/src/screens/setup/copy.ts
++++ b/web/src/screens/setup/copy.ts
+@@ -118,6 +118,27 @@ export const STEP3 = {
+   alreadyFollowed: "already followed",
+   infoNote:
+     "This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.",
++  /**
++   * A repeated symbol, named once. CAP-003-E4-S3 adds it and no design gives
++   * its wording (DEC-0351): the *{entry}, {reason}* shape of UX design 1.2's
++   * unreadable example, in plain words.
++   */
++  duplicateEntry: (entry: string): string => `${entry}, listed more than once`,
++  /**
++   * A symbol the post found already followed. CAP-003-E4-S3 adds the entry
++   * form; the wording is DAC-E4-5's pinned *already followed* (DEC-0351).
++   */
++  alreadyFollowedEntry: (entry: string): string => `${entry}, ${STEP3.alreadyFollowed}`,
++  /**
++   * A failed batch other than the all-followed refusal. CAP-003-E4-S3 adds it
++   * and no design gives its wording (DEC-0354): it mirrors the read failure's
++   * shape and names the operation, the resource and the reason.
++   */
++  saveFailed: (reason: string): string => `Couldn't save the followed list: ${reason}`,
++  /** How many symbols a failed post had followed. CAP-003-E4-S3 adds it (DEC-0354). */
++  followedSoFar: (n: string): string => `${n} followed so far.`,
++  /** The symbols a failed post left in the field for another try. CAP-003-E4-S3 adds it (DEC-0354). */
++  keptForRetry: (n: string): string => `${n} not saved yet; kept in the list to try again.`,
+ };
+ 
+ /** Step 4, the download (setup-ui 10; epic DAC-E4-9 for the two progress times). */
+diff --git a/web/src/screens/setup/step-card.test.tsx b/web/src/screens/setup/step-card.test.tsx
+index ed4cfcd9..4b5fbe76 100644
+--- a/web/src/screens/setup/step-card.test.tsx
++++ b/web/src/screens/setup/step-card.test.tsx
+@@ -173,3 +173,38 @@ describe("StepReadError", () => {
+     expect(onRetry).toHaveBeenCalledTimes(1);
+   });
+ });
++
++// Implements the blocked Continue of CAP-003-E4-S3 T014 (DAC-E4-7; CAP-003-E1-S1
++// button `blocked`, never `disabled`, DAC-E1-15).
++describe("blocked Continue (CAP-003-E4-S3, DAC-E4-7)", () => {
++  const REASON = "Paste at least one symbol, or choose Add later.";
++
++  it("is blocked, focusable and described by its reason, and swallows activation", async () => {
++    const user = userEvent.setup();
++    const spy = vi.fn();
++    render(<StepCard step={3} question="Q" onContinue={spy} continueBlocked={REASON} />);
++    const next = screen.getByRole("button", { name: "Continue" });
++    expect(next).toHaveAttribute("data-variant", "blocked");
++    expect(next).toHaveAttribute("aria-disabled", "true");
++    expect(next).toHaveAccessibleDescription(REASON);
++    expect(screen.getByText(REASON)).toBeVisible();
++    await user.tab();
++    expect(next).toHaveFocus();
++    await user.click(next);
++    await user.keyboard("{Enter}");
++    await user.keyboard(" ");
++    expect(spy).not.toHaveBeenCalled();
++    expect(screen.getByText("Next: Download data")).toBeInTheDocument();
++  });
++
++  it("is the default Continue, with no description, when nothing blocks it", async () => {
++    const user = userEvent.setup();
++    const spy = vi.fn();
++    render(<StepCard step={3} question="Q" onContinue={spy} />);
++    const next = screen.getByRole("button", { name: "Continue" });
++    expect(next).toHaveAttribute("data-variant", "default");
++    expect(next).not.toHaveAttribute("aria-describedby");
++    await user.click(next);
++    expect(spy).toHaveBeenCalledTimes(1);
++  });
++});
+diff --git a/web/src/screens/setup/step-card.tsx b/web/src/screens/setup/step-card.tsx
+index 460f67cf..e7e89776 100644
+--- a/web/src/screens/setup/step-card.tsx
++++ b/web/src/screens/setup/step-card.tsx
+@@ -1,4 +1,4 @@
+-import { type ReactNode, useEffect, useRef } from "react";
++import { type ReactNode, useEffect, useId, useRef } from "react";
+ import { type ApiError, ApiUnreachableError } from "../../api/client";
+ import { LAYOUT } from "../../app/layout";
+ import { Button } from "../../components/ui/button";
+@@ -23,6 +23,12 @@ export interface StepCardProps {
+   note?: ReactNode;
+   onBack?: () => void;
+   onContinue?: () => void;
++  /**
++   * The reason a gated Continue is blocked (DAC-E4-7; CAP-003-E1-S1's button
++   * `blocked`, never `disabled`, DAC-E1-15). Set, Continue is inert, stays in
++   * the tab order and is described by this text.
++   */
++  continueBlocked?: string;
+   children?: ReactNode;
+ }
+ 
+@@ -39,8 +45,10 @@ export function StepCard({
+   note,
+   onBack,
+   onContinue,
++  continueBlocked,
+   children,
+ }: StepCardProps) {
++  const reasonId = useId();
+   return (
+     <section aria-labelledby={STEP_HEADING_ID}>
+       <Card variant="default" className="flex flex-col gap-5 p-4">
+@@ -70,9 +78,20 @@ export function StepCard({
+               <span className="text-xs text-muted-foreground">
+                 {nextHint(STEP_TITLES[(step + 1) as StepId])}
+               </span>
+-              <Button variant="default" onClick={onContinue}>
+-                {CONTINUE}
+-              </Button>
++              {continueBlocked !== undefined ? (
++                <>
++                  <p id={reasonId} className="text-xs text-muted-foreground">
++                    {continueBlocked}
++                  </p>
++                  <Button variant="blocked" aria-describedby={reasonId} onClick={onContinue}>
++                    {CONTINUE}
++                  </Button>
++                </>
++              ) : (
++                <Button variant="default" onClick={onContinue}>
++                  {CONTINUE}
++                </Button>
++              )}
+             </div>
+           ) : null}
+         </div>

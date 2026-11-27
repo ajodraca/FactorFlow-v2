@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useId, useRef } from "react";
 import { type ApiError, ApiUnreachableError } from "../../api/client";
 import { LAYOUT } from "../../app/layout";
 import { Button } from "../../components/ui/button";
@@ -23,6 +23,12 @@ export interface StepCardProps {
   note?: ReactNode;
   onBack?: () => void;
   onContinue?: () => void;
+  /**
+   * The reason a gated Continue is blocked (DAC-E4-7; CAP-003-E1-S1's button
+   * `blocked`, never `disabled`, DAC-E1-15). Set, Continue is inert, stays in
+   * the tab order and is described by this text.
+   */
+  continueBlocked?: string;
   children?: ReactNode;
 }
 
@@ -39,8 +45,10 @@ export function StepCard({
   note,
   onBack,
   onContinue,
+  continueBlocked,
   children,
 }: StepCardProps) {
+  const reasonId = useId();
   return (
     <section aria-labelledby={STEP_HEADING_ID}>
       <Card variant="default" className="flex flex-col gap-5 p-4">
@@ -70,9 +78,20 @@ export function StepCard({
               <span className="text-xs text-muted-foreground">
                 {nextHint(STEP_TITLES[(step + 1) as StepId])}
               </span>
-              <Button variant="default" onClick={onContinue}>
-                {CONTINUE}
-              </Button>
+              {continueBlocked !== undefined ? (
+                <>
+                  <p id={reasonId} className="text-xs text-muted-foreground">
+                    {continueBlocked}
+                  </p>
+                  <Button variant="blocked" aria-describedby={reasonId} onClick={onContinue}>
+                    {CONTINUE}
+                  </Button>
+                </>
+              ) : (
+                <Button variant="default" onClick={onContinue}>
+                  {CONTINUE}
+                </Button>
+              )}
             </div>
           ) : null}
         </div>
