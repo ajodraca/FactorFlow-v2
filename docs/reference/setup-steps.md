@@ -1,16 +1,18 @@
 # Setup screen step components (`web/src/screens/setup/`)
 
-Modules CAP-003-E4-S2 and CAP-003-E4-S3 added for the setup screen (component
-design `setup-ui` sections 2.3 and 10; AC-3 to AC-6, AC-17, AC-19, AC-25;
-DAC-E4-3 to DAC-E4-7, DAC-E4-11, DAC-E4-13, DAC-E4-S2-1 to DAC-E4-S2-5,
-DAC-E4-S3-1 to DAC-E4-S3-6). S2: `step-card.tsx`, `step-list.tsx`,
-`step-market-data.tsx` and `step-history-depth.tsx`. S3: `step-stocks.tsx`,
-`summarise-paste.ts` and `post-in-batches.ts`, and an added prop on the step
-card. They take a `SetupState` from `useSetupState`
-([`setup-state.md`](setup-state.md)) and their strings from `copy.ts`. No
-screen mounts them yet; their importers are their tests. Step 4 is not
-delivered here. The directory is scanned for style literals by
-`token-literals.test.ts` (tests excluded).
+Modules CAP-003-E4-S2, CAP-003-E4-S3 and CAP-003-E4-S4 added for the setup
+screen (component design `setup-ui` sections 2.1, 2.3 and 10; AC-3 to AC-6,
+AC-17, AC-19, AC-24 to AC-26; DAC-E4-3 to DAC-E4-13, DAC-E4-S2-1 to
+DAC-E4-S2-5, DAC-E4-S3-1 to DAC-E4-S3-6, DAC-E4-S4-1). S2: `step-card.tsx`,
+`step-list.tsx`, `step-market-data.tsx` and `step-history-depth.tsx`. S3:
+`step-stocks.tsx`, `summarise-paste.ts` and `post-in-batches.ts`, and an added
+prop on the step card. S4: `step-download.tsx` and `index.tsx` (the screen),
+and `KeyPresence` exported from `step-market-data.tsx`. They take a
+`SetupState` from `useSetupState` ([`setup-state.md`](setup-state.md)) and
+their strings from `copy.ts`. No route mounts `SetupScreen` yet (the shell
+mounts it with its draft provider in CAP-003-E4-S6); the only importer outside
+the directory is `token-literals.test.ts`. The directory is scanned for style
+literals by `token-literals.test.ts` (tests excluded).
 
 ## Step card (`step-card.tsx`)
 
@@ -40,10 +42,11 @@ is known:
 
 ## Step 1 (`step-market-data.tsx`)
 
-`StepMarketData({ state })` shows the key's status from
-`health.credential_present` alone, read only while `health.liveness` is
-`"answering"`; otherwise it shows the not-determinable form with
-`STEP1.notAnswering`. When the key is missing it adds the line naming
+`StepMarketData({ state })` shows the key's status through `KeyPresence()`,
+which reads `health.credential_present` alone, only while `health.liveness` is
+`"answering"`; otherwise it renders the not-determinable form with
+`STEP1.notAnswering`. `KeyPresence` is exported so step 4's summary card shows
+the same verdict from one rule. When the key is missing it adds the line naming
 `FACTORFLOW_MASSIVE_API_KEY` in code type and the restart line. Continue calls
 `state.goTo(2)` and is never blocked: a missing key does not stop setup
 (DEC-0203).
@@ -131,3 +134,27 @@ otherwise it is `null`.
 | `MAX_SYMBOLS_PER_REQUEST` | `1000`, a mirror of the server bound in `src/factorflow/api/bounds.py`, pinned equal by test |
 | `BatchOutcome` | `{ kind: "done", posted, rejected }` or `{ kind: "failed", posted, unposted, error, rejected }`; `unposted` holds the failed batch and every later one, in order |
 | `postInBatches(symbols)` | Calls `addInstruments` on consecutive slices of at most `MAX_SYMBOLS_PER_REQUEST`, one at a time. A batch's `rejected` entries are collected and its size counts as posted. An `ApiError` with code `all_duplicate` (the 409) counts as posted and the requests go on. Any other `ApiError` or an `ApiUnreachableError` stops with `failed`; any other error is rethrown |
+
+## Step 4 (`step-download.tsx`)
+
+`StepDownload({ state })` opens no interval and no animation frame: its progress
+follows the shell's `attention` read (DAC-E4-S4-1). The question is
+`STEP4.downloadFor(count)` while `state.activeCount` is `ok`, else
+`STEP_TITLES[4]`. Back calls `state.goTo(3)`; there is no Continue.
+
+| Part | Behavior |
+|---|---|
+| Summary card | Three rows: the key (`KeyPresence`), the history depth (`STEP4.yearsValue`, `Absent` with `STEP4.depthAbsent` when `years` is `null`, or the not-determinable form with `READ_ERRORS.readFailed` when the read failed) and the followed count (`formatCount`, or the not-determinable form on a failed read) |
+| Start download | `state.step4 === "blocked"` gives the `blocked` button variant (never `disabled`), described by `STEP4.blockedReason`, with no click handler, and adds the exits `STEP4.goHome` (to `/home`) and `STEP4.manageFollowed` (to `/data/followed`). Otherwise a click calls `startAcquisitionRun()`; a ref guard drops a second click while one start is in flight |
+| After a start | Stores the returned `runId` and `queuedBehind`, then `refresh("health")`, and `refresh("attention")` too when `queuedBehind` is `null` |
+| Refusals | An `ApiError` with code `history_depth_not_set` shows `STEP4.depthNotSet` and a link (`STEP4.goToStep2`) that calls `state.goTo(2)`; `no_active_instruments` shows `STEP4.noStocks` and `STEP4.goToStep3` to step 3. Any other `ApiError` or an `ApiUnreachableError` shows `STEP4.startFailed(failureReason(error))`. Each renders in a `role="alert"` region; any other error is rethrown |
+| Progress region | Shown from the latest download in `attention` (the last served one after a failed poll), or, between a start and attention first naming that run (`run_id` equal to the started `runId`), a pending `requested` view with no times (DEC-0356). It holds the download's status badge (`tierOf` and `labelOf` for `{ of: "download", state }`); while attention is in error, `STEP4.progressUnreadable`; while the start was queued behind another run and the state is `requested`, `STEP4.queued`; otherwise, for a state that is not terminal (`succeeded`, `partial`, `failed`, `cancelled`, `abandoned`), `STEP4.progress(done, total)` and a `Progress` bar (indeterminate while `total` is `null`) |
+| Footer lines | `STEP4.started` from `started_at`, else `requested_at`, when either is set, plus `STEP4.checked` from the attention check time while attention is `ok`; `STEP4.canLeave` while the state is not terminal |
+
+## Setup screen (`index.tsx`)
+
+| Export | Behavior |
+|---|---|
+| `screenStateOf(state, now)` | `loading` while the reads settle; `empty-never-populated` when no step is done; otherwise `populated` (all four done) or `partial`, carrying the `SetupState` |
+| `cardRenderers(state)` | The `StateRegion` renderers: the loading kind a card skeleton, the other three kinds the current step through `SetupBody`; `empty-no-match`, `unavailable`, `error` and `unreachable` are recorded not applicable, each with its reason, because those states render inside their steps or are the shell's |
+| default `SetupScreen` | Calls `useSetupState`; the side column holds the title and sub-line (`SCREEN`) and the step list (or its skeleton while loading); the main column is the `StateRegion`. `SetupBody` picks the step card for `state.current` and moves focus to the step heading when the step changes (`useStepHeadingFocus`), never on first render. It mounts no `SetupDraftProvider` and opens no interval |
