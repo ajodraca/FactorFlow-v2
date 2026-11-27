@@ -88,7 +88,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: Confirm the upstream modules this story imports exist. No package, configuration or directory change.
 
-- [ ] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
+- [x] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
   - CAP-003-E4-S1: `web/src/screens/setup/draft.tsx` (`SetupDraftProvider`), `use-setup-state.ts` (`useSetupState`, `SetupState` with `current`, `done`, `step4`, `depth`, `activeCount`, `loading`, `goTo`, `reread`, `drafts`, `setDraft`; `StepId`) and `copy.ts` (`SCREEN`, `STEP_TITLES`, `STEP4`, `READ_ERRORS`).
   - CAP-003-E4-S2: `web/src/screens/setup/step-card.tsx` (`StepCard`, `STEP_HEADING_ID`, `useStepHeadingFocus`, `failureReason`), `step-list.tsx` (`StepList`), `step-market-data.tsx` (`StepMarketData`), `step-history-depth.tsx` (`StepHistoryDepth`); `copy.ts` with `READ_ERRORS.notAnswering` and `READ_ERRORS.unexpected`; `web/src/components/token-literals.test.ts` scanning `web/src/screens/setup/`.
   - CAP-003-E4-S3: `web/src/screens/setup/step-stocks.tsx` (`StepStocks`), `summarise-paste.ts`, `post-in-batches.ts`.
@@ -231,7 +231,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 ### Mandatory Component Tests
 
-- [ ] T010 [P] Implement TC-COMP-121 (Going back from step 4 to step 2 and forward keeps every value) in a new `web/src/screens/setup/setup.test.tsx`, with a `// Implements TC-COMP-121` comment. `HEALTH_OK`, attention `ok(null)`; `depthAnswers(null, 7, 7)`, `countAnswers(0, 2, 2)`; `setHistoryDepth` resolves `{ years: 7, updatedAt: "…" }`; `addInstruments` resolves `{ added: [<AAPL>, <MSFT>], reactivated: [], rejected: [] }` first and rejects with `new ApiError("x", "r", { code: "all_duplicate" })` after.
+- [x] T010 [P] Implement TC-COMP-121 (Going back from step 4 to step 2 and forward keeps every value) in a new `web/src/screens/setup/setup.test.tsx`, with a `// Implements TC-COMP-121` comment. `HEALTH_OK`, attention `ok(null)`; `depthAnswers(null, 7, 7)`, `countAnswers(0, 2, 2)`; `setHistoryDepth` resolves `{ years: 7, updatedAt: "…" }`; `addInstruments` resolves `{ added: [<AAPL>, <MSFT>], reactivated: [], rejected: [] }` first and rejects with `new ApiError("x", "r", { code: "all_duplicate" })` after.
   - **Precondition: values on steps 2 to 4.** Await *How far back should history go?*. Type `7`, **Continue**. On step 3 choose *Paste a list*, paste `"AAPL, MSFT"`, tab, **Continue**. Await *Download data for 2 stocks*.
   - **TC step 1, back to step 2.** **← Back: Stocks to follow**: the radio *Paste a list* is checked and the textarea's value is `"AAPL, MSFT"`. Append `", NVDA"` without continuing. **← Back: How far back**: the spinbutton *History depth years* has value `7`. Change it to `9` without continuing.
   - **TC step 2, forward again.** Activate the step list's link *Stocks to follow, done*: *Paste a list* is checked and the textarea reads `"AAPL, MSFT, NVDA"` (unsaved, kept). Activate *How far back, done*: the field reads `9` (unsaved, kept). **Continue** (saves 9), then on step 3 **Continue** again: `addInstruments` answers `409`, treated as success (CAP-003-E4-S3), and step 4 is current again.
@@ -241,7 +241,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - a hand-written mutant that binds step 3's textarea to component state instead of the `pasted` draft: TC step 2 (the unsaved *NVDA* is lost when step 3 remounts).
   - a hand-written mutant that resets `yearsText` when step 2 mounts: TC step 1.
 
-- [ ] T011 Implement TC-COMP-122 (Each step's eight states render or are recorded not applicable) in `web/src/screens/setup/setup.test.tsx`, sequential with T010, with a `// Implements TC-COMP-122` comment (DEC-0359). One `describe.each` over steps 1 to 4 and one `it` per state, each either asserting the rendering through the composed screen or asserting the record:
+- [x] T011 Implement TC-COMP-122 (Each step's eight states render or are recorded not applicable) in `web/src/screens/setup/setup.test.tsx`, sequential with T010, with a `// Implements TC-COMP-122` comment (DEC-0359). One `describe.each` over steps 1 to 4 and one `it` per state, each either asserting the rendering through the composed screen or asserting the record:
   - **Loading (every step).** `getHistoryDepth` held by a `deferred()`: an element with `aria-busy="true"` holds the card skeleton; no `region` and no `navigation` named *Setup steps* render; the `h1` *Get set up* is present.
   - **Never populated.** `HEALTH_UNREACHABLE_NEVER`, `depthAnswers(null)`, `countAnswers(0)`, attention `ok(null)`: the region *Connect market data* is current and the step list shows no done link. Steps 2 to 4 assert the record: the step 1 card is what renders while nothing is done.
   - **Nothing found.** Step 3: choose *Paste a list* with an empty field; **Continue** has `data-variant="blocked"` described by *Paste at least one symbol, or choose Add later.* Step 4: `HEALTH_OK`, `depthAnswers(5)`, `countAnswers(0)`; choose *Add later*, **Continue**: **Start download** is `blocked` with both exits, and the step list shows *Stocks to follow* to do. Steps 1 and 2: `cardRenderers(state)["empty-no-match"]` is `{ notApplicable: <non-empty string> }`.
@@ -257,13 +257,13 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - negate-boolean on the all-done test (`every` → `some`): the table's partial row.
   - a hand-written mutant that renders `error` through `StateRegion`'s own wrapper: step 2's error row would hold a second **Try again** (`getAllByRole("button", { name: "Try again" })` has length 1).
 
-- [ ] T012 Implement TC-COMP-123, screen half in `web/src/screens/setup/setup.test.tsx`, sequential with T011, with a `// Implements TC-COMP-123` comment, using T008's helper declared again in this file. Rows: loading; never populated; step 2 current with two done links; step 4 current with the blocked exits after *Add later*; all four done with a running download. Each asserts `visibleAndAccessibleText(container)` does not match `FORBIDDEN`, and the `h1` and sub-line equal `SCREEN.title` and `SCREEN.subLine` (*About 10 minutes, then the data download continues on its own. You can leave and come back.*, CAP-003-E4-S1's DEC-0341).
+- [x] T012 Implement TC-COMP-123, screen half in `web/src/screens/setup/setup.test.tsx`, sequential with T011, with a `// Implements TC-COMP-123` comment, using T008's helper declared again in this file. Rows: loading; never populated; step 2 current with two done links; step 4 current with the blocked exits after *Add later*; all four done with a running download. Each asserts `visibleAndAccessibleText(container)` does not match `FORBIDDEN`, and the `h1` and sub-line equal `SCREEN.title` and `SCREEN.subLine` (*About 10 minutes, then the data download continues on its own. You can leave and come back.*, CAP-003-E4-S1's DEC-0341).
 
   Kills: a hand-written mutant that types the S02 §8 sub-line into `index.tsx` instead of reading `SCREEN.subLine`: every row (*runs*).
 
 ### Additional Unit Tests
 
-- [ ] T013 Write the screen's own cases in `web/src/screens/setup/setup.test.tsx`, sequential with T012 (AC-24, AC-25, AC-26; owner-shell §2.7; CAP-003-E3-S6's focus rule; setup-ui §2.1, §10):
+- [x] T013 Write the screen's own cases in `web/src/screens/setup/setup.test.tsx`, sequential with T012 (AC-24, AC-25, AC-26; owner-shell §2.7; CAP-003-E3-S6's focus rule; setup-ui §2.1, §10):
   - (a) **The `h1` persists across loading.** With the reads held by `deferred()`s, capture `const heading = getByRole("heading", { level: 1, name: "Get set up" })`; it has `tabIndex` `-1`. Resolve the reads: the `h1` is the same element (`toBe(heading)`), so the shell's focus on it is not lost.
   - (b) **No focus moved on entry.** Call `heading.focus()` while loading (the shell's move). Resolve the reads to `HEALTH_OK`, `depthAnswers(null)`, `countAnswers(0)`: `document.activeElement` is still `heading`, not the step 2 `h2` (CAP-003-E4-S2 Resolved Conflict 1).
   - (c) **Focus on a step change.** Then activate *Market data, done*: the active element is the `h2` *Connect market data*.
@@ -321,7 +321,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
   Makes T002–T009 pass.
 
-- [ ] T018 Create `web/src/screens/setup/index.tsx` (depends on T017; T010–T013 RED first), to DEC-0359.
+- [x] T018 Create `web/src/screens/setup/index.tsx` (depends on T017; T010–T013 RED first), to DEC-0359.
   - **Imports.** `type JSX` from `"react"`; `type ScreenState` from `"../../api/types"`; `LAYOUT` from `"../../app/layout"`; `Card` from `"../../components/ui/card"`; `StateRegion`, `type StateRenderers` from `"../../components/patterns/state-region"`; `useSetupState`, `type SetupState`, `type StepId` from `"./use-setup-state"`; `SCREEN` from `"./copy"`; `StepList` from `"./step-list"`; `useStepHeadingFocus` from `"./step-card"`; `StepMarketData` from `"./step-market-data"`; `StepHistoryDepth` from `"./step-history-depth"`; `StepStocks` from `"./step-stocks"`; `StepDownload` from `"./step-download"`.
   - **Module comment.** `SetupScreen` (setup-ui §2.1, §10; UX design §1.2; AC-3, AC-24, AC-26). It records STD-UI-23's eight states for the step card region: loading, never populated and partial or complete render through `StateRegion`; nothing found, unavailable and error render inside their steps (CAP-003-E4-S2, CAP-003-E4-S3 and step 4); unreachable is the shell's; and one line reading `Stale: not applicable, every step is re-derived on each visit; step 4's polled progress carries checked {time}` (setup-ui §10 States). T011 reads that line.
   - **`screenStateOf(state: SetupState, now: Date): ScreenState<SetupState>`** (exported): `{ kind: "loading" }` while `state.loading`; `{ kind: "empty-never-populated" }` when no `done` flag is true; `{ kind: "populated", data: state, fetchedAt: now.toISOString() }` when all four are; otherwise `partial` with the same fields. `fetchedAt` is never rendered (stale is not applicable).
@@ -350,7 +350,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: Confirm the change set is exactly the story's.
 
-- [ ] T019 Confirm scope (depends on T015–T018):
+- [x] T019 Confirm scope (depends on T015–T018):
   - `git status --short` lists only `web/src/screens/setup/step-download.tsx`, `step-download.test.tsx`, `index.tsx`, `setup.test.tsx`, `step-market-data.tsx`, `copy.ts` and `copy.test.ts`, plus this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
   - `git diff --exit-code -- web/src/app/ web/src/api/ web/src/components/ web/src/screens/instruments/ web/src/screens/settings/ web/src/main.tsx package.json src/` exits 0.
   - `git diff -- web/src/screens/setup/copy.ts` shows only T015's two additions; `git diff -- web/src/screens/setup/step-market-data.tsx` shows only the `KeyPresence` extraction and its use.
@@ -365,8 +365,8 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-19).
-- [ ] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
+- [x] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-19).
+- [x] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E4-S4-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch`.

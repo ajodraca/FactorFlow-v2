@@ -64,3 +64,32 @@ cycles:
           disposition: equivalent
           reason: >
             The pending view's done count is never read: its total is null, so the label renders empty and the bar is indeterminate, and Progress ignores the value when the maximum is null; no observable behaviour depends on it.
+
+  - id: cycle-3
+    tasks: [T010, T011, T012, T013, T018, T019, T020, T021]
+    description: >
+      The screen (TC-COMP-121, TC-COMP-122, TC-COMP-123 screen half; AC-3, AC-24, AC-25, AC-26, DAC-E4-S4-3, DAC-E4-S4-4, DAC-E4-S4-5; DEC-0359): index.tsx holds SetupScreen (default export for the shell's lazy binding) with the persistent h1 and sub-line outside the loading swap, the two columns inside LAYOUT.contentMaxWidth with the step list column bounded by LAYOUT.sideColumnMin and sideColumnMax, the step list or its skeleton, and the step card region through StateRegion; screenStateOf (loading, never populated, partial, populated and nothing else), cardRenderers (a function, because the never-populated kind carries no data) recording empty-no-match, unavailable, error and unreachable as not applicable with their reasons, the stale record in the module comment, the card and list skeletons, and SetupBody, which calls the step heading focus hook only once the reads have settled. It mounts no provider and opens no timer. setup.test.tsx holds T010 to T013: back and forward from step 4 to step 2 keeping the years text, the radio choice and the pasted text with nothing written to browser storage, every applicable state of every step through the composed screen with the not-applicable records, the vocabulary scan of five screen rows, and the screen's own cases (the h1 persists and takes the shell's focus, no focus moved on entry, focus on a step change, each step's card, the layout values, no provider of its own, re-derivation on every mount). T019 and T020 join this cycle's validation evidence (validation-cycle-3.log): the change set is the story's files and plan artifacts, the delivered directories are unchanged against HEAD, no timer, storage, layout literal or DAC-E7-3 term appears in step-download.tsx or index.tsx, /setup is not registered, and the full suite (125 files, 3430 tests), lint, format, tsc and build pass. The generator produced 20 mutants and 10 were hand-written from the plan's kill list; the first run left four survivors, the numeric keys of the skeleton's rows, which no test could observe, so the rows are now derived from the step titles and a test asserts four of them; the repeated run: 16 mutants, all killed. Both reviews approved; the code review raised LOW observations only (steps 2 to 4 of the never-populated row assert no record, the screenStateOf absence claim is not asserted, one fewer done link than the plan words in the step 2 vocabulary row, the loading row does not check the card skeleton inside the busy element, and one vacuous assertion on parseBulkSymbols), none a plan violation and left as follow-ups.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-3-screen.log
+    red_log_sha256: 977fccf926b022036502755ba48ed167bb8a88a043f37cf6c49bd9b7f4173dc7
+    red_evidence: >
+      setup.test.tsx failed to load (./index did not resolve) before the module existed.
+    green_evidence: >
+      The setup suites and token-literals.test.ts pass in green-cycle-3-screen.log; the full suite (125 files, 3430 tests), build, tsc --noEmit, biome lint and biome format are clean in validation-cycle-3.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9932b41121487dbbb42e1f86c5f11f52e0a0f2405d096d6622de67ddcb4f25ef
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 4d4ed2fac725b1a2b194262258b3e1e90e078db508dbe012105c0c231789c444
+      generated: 16
+      killed: 16
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

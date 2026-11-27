@@ -1,0 +1,633 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  ApiError,
+  ApiUnreachableError,
+  addInstruments,
+  getHistoryDepth,
+  listInstruments,
+  setHistoryDepth,
+  startAcquisitionRun,
+} from "../../api/client";
+import { type ShellContextValue, useShell } from "../../app/shell-context";
+import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
+import { parseBulkSymbols } from "../instruments/parse-bulk-symbols";
+import { SCREEN } from "./copy";
+import { SetupDraftProvider } from "./draft";
+import SetupScreen, { cardRenderers, screenStateOf } from "./index";
+import type { SetupState } from "./use-setup-state";
+
+// Implements TC-COMP-121, TC-COMP-122 and TC-COMP-123 (screen half) of
+// CAP-003-E4-S4 (T010 to T013; AC-3, AC-24, AC-25, AC-26, DAC-E4-S4-3,
+// DAC-E4-S4-4, DAC-E4-S4-5; DEC-0359).
+
+vi.mock("../../api/client", async (importActual) => ({
+  ...(await importActual<typeof import("../../api/client")>()),
+  getHistoryDepth: vi.fn(),
+  listInstruments: vi.fn(),
+  setHistoryDepth: vi.fn(),
+  addInstruments: vi.fn(),
+  startAcquisitionRun: vi.fn(),
+}));
+vi.mock("../../app/shell-context", () => ({ useShell: vi.fn() }));
+
+type Health = ShellContextValue["health"];
+
+const CHECKED_AT = new Date("2026-10-15T14:31:12Z");
+const ANSWERED_AT = new Date("2026-10-15T14:00:00.000Z");
+
+function answer(credential_present: boolean): Health["health"] {
+  return {
+    status: "ok",
+    database: "reachable",
+    credential_present,
+    schema_version: 3,
+    most_recent_run: null,
+  } as Health["health"];
+}
+
+const HEALTH_OK: Health = {
+  liveness: "answering",
+  health: answer(true),
+  lastUpdated: ANSWERED_AT,
+  lastAnsweredAt: ANSWERED_AT,
+};
+const HEALTH_UNREACHABLE_STALE_MISSING: Health = {
+  liveness: "unreachable",
+  health: answer(false),
+  lastUpdated: new Date("2026-10-15T14:05:00.000Z"),
+  lastAnsweredAt: ANSWERED_AT,
+};
+const HEALTH_UNREACHABLE_NEVER: Health = {
+  liveness: "unreachable",
+  health: null,
+  lastUpdated: new Date("2026-10-15T14:05:00.000Z"),
+  lastAnsweredAt: null,
+};
+
+const ATTENTION_BASE: Attention = {
+  checked_at: "2026-10-15T00:00:00Z",
+  followed_count: 0,
+  prices_as_of: null,
+  credential_present: true,
+  problems: { stock_count: 0, symbols: [], newest_completed_at: null },
+  latest_download: null,
+  latest_terminal_download: null,
+  items: [],
+};
+
+const RUNNING: LatestDownload = {
+  run_id: "r-2",
+  state: "running",
+  requested_at: "2026-10-15T14:29:00Z",
+  started_at: "2026-10-15T14:30:00Z",
+  ended_at: null,
+  progress: { done: 812, total: 1236 },
+};
+
+function ok(latest: LatestDownload | null): ReadState<Attention> {
+  return {
+    kind: "ok",
+    data: { ...ATTENTION_BASE, latest_download: latest },
+    checkedAt: CHECKED_AT,
+  };
+}
+
+function setShell(overrides: Partial<ShellContextValue> = {}): void {
+  const value: ShellContextValue = {
+    health: HEALTH_OK,
+    attention: ok(null),
+    scores: { kind: "loading" },
+    refresh: vi.fn(),
+    setTitleDetail: vi.fn(),
+    ...overrides,
+  };
+  vi.mocked(useShell).mockImplementation(() => value);
+}
+
+/** Queues the depth answers in order; the last one answers every later read. */
+function depthAnswers(...years: (number | null)[]): void {
+  for (const y of years) {
+    vi.mocked(getHistoryDepth).mockResolvedValueOnce({ years: y, updatedAt: null });
+  }
+  vi.mocked(getHistoryDepth).mockResolvedValue({
+    years: years[years.length - 1] ?? null,
+    updatedAt: null,
+  });
+}
+
+function countAnswers(...counts: number[]): void {
+  const result = (n: number) => ({ rows: [], activeCount: n, retiredCount: 0, nextCursor: null });
+  for (const n of counts) {
+    vi.mocked(listInstruments).mockResolvedValueOnce(result(n));
+  }
+  vi.mocked(listInstruments).mockResolvedValue(result(counts[counts.length - 1] ?? 0));
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+}
+
+function LocationProbe() {
+  return <p data-testid="location">{useLocation().pathname}</p>;
+}
+
+function screenTree() {
+  return (
+    <SetupDraftProvider>
+      <MemoryRouter initialEntries={["/setup"]}>
+        <Routes>
+          <Route path="/setup" element={<SetupScreen />} />
+          <Route path="*" element={<LocationProbe />} />
+        </Routes>
+      </MemoryRouter>
+    </SetupDraftProvider>
+  );
+}
+
+const renderScreen = () => render(screenTree());
+
+const FORBIDDEN =
+  /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
+
+function visibleAndAccessibleText(container: HTMLElement): string {
+  const parts: string[] = [container.textContent ?? ""];
+  for (const element of container.querySelectorAll("*")) {
+    for (const attribute of ["aria-label", "title"]) {
+      const value = element.getAttribute(attribute);
+      if (value !== null) {
+        parts.push(value);
+      }
+    }
+    for (const attribute of ["aria-labelledby", "aria-describedby"]) {
+      for (const id of (element.getAttribute(attribute) ?? "").split(/\s+/).filter(Boolean)) {
+        parts.push(document.getElementById(id)?.textContent ?? "");
+      }
+    }
+  }
+  return parts.join(" | ");
+}
+
+function anyState(overrides: Partial<SetupState> = {}): SetupState {
+  return {
+    current: 1,
+    done: { 1: false, 2: false, 3: false, 4: false },
+    step4: "ready",
+    drafts: { yearsText: "", source: null, pasted: "", unposted: [] },
+    depth: { kind: "loading" },
+    activeCount: { kind: "loading" },
+    loading: false,
+    goTo: vi.fn(),
+    reread: vi.fn(),
+    setDraft: vi.fn(),
+    ...overrides,
+  };
+}
+
+const heading = (name: string | RegExp) => screen.findByRole("heading", { level: 2, name });
+
+beforeEach(() => {
+  for (const mocked of [
+    getHistoryDepth,
+    listInstruments,
+    setHistoryDepth,
+    addInstruments,
+    startAcquisitionRun,
+    useShell,
+  ]) {
+    vi.mocked(mocked).mockReset();
+  }
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+  setShell();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+const SETTLED = { years: 7, updatedAt: "2026-10-15T13:00:00Z" };
+const symbolOutcome = (symbol: string) => ({
+  inputSymbol: symbol,
+  normalisedSymbol: symbol,
+  disposition: "added" as const,
+  reason: null,
+});
+
+describe("TC-COMP-121: going back from step 4 to step 2 and forward keeps every value", () => {
+  it("holds the years text, the radio choice and the pasted text across every return", async () => {
+    const user = userEvent.setup();
+    depthAnswers(null, 7);
+    countAnswers(0, 2);
+    vi.mocked(setHistoryDepth).mockResolvedValue(SETTLED);
+    vi.mocked(addInstruments)
+      .mockResolvedValueOnce({
+        added: [symbolOutcome("AAPL"), symbolOutcome("MSFT")],
+        reactivated: [],
+        rejected: [],
+      })
+      .mockRejectedValue(new ApiError("x", "r", { code: "all_duplicate" }));
+    renderScreen();
+
+    await heading("How far back should history go?");
+    await user.type(screen.getByRole("spinbutton", { name: "History depth years" }), "7");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await heading("Which stocks do you want to follow?");
+    await user.click(screen.getByRole("radio", { name: "Paste a list" }));
+    await user.click(screen.getByRole("textbox", { name: "Stock symbols" }));
+    await user.paste("AAPL, MSFT");
+    await user.tab();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await heading("Download data for 2 stocks");
+
+    await user.click(screen.getByRole("button", { name: "← Back: Stocks to follow" }));
+    await heading("Which stocks do you want to follow?");
+    expect(screen.getByRole("radio", { name: "Paste a list" })).toBeChecked();
+    const pasted = screen.getByRole("textbox", { name: "Stock symbols" }) as HTMLTextAreaElement;
+    expect(pasted.value).toBe("AAPL, MSFT");
+    await user.click(pasted);
+    await user.keyboard("{End}");
+    await user.keyboard(", NVDA");
+
+    await user.click(screen.getByRole("button", { name: "← Back: How far back" }));
+    await heading("How far back should history go?");
+    const years = screen.getByRole("spinbutton", {
+      name: "History depth years",
+    }) as HTMLInputElement;
+    expect(years.value).toBe("7");
+    await user.clear(years);
+    await user.type(years, "9");
+
+    await user.click(screen.getByRole("link", { name: "Stocks to follow, done" }));
+    await heading("Which stocks do you want to follow?");
+    expect(screen.getByRole("radio", { name: "Paste a list" })).toBeChecked();
+    expect(
+      (screen.getByRole("textbox", { name: "Stock symbols" }) as HTMLTextAreaElement).value,
+    ).toBe("AAPL, MSFT, NVDA");
+    await user.click(screen.getByRole("link", { name: "How far back, done" }));
+    await heading("How far back should history go?");
+    expect(
+      (screen.getByRole("spinbutton", { name: "History depth years" }) as HTMLInputElement).value,
+    ).toBe("9");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await heading("Which stocks do you want to follow?");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await heading(/^Download data/);
+
+    expect(vi.mocked(setHistoryDepth).mock.calls.map(([years]) => years)).toEqual([7, 9]);
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
+  });
+});
+
+describe("TC-COMP-122: each step's eight states render or are recorded not applicable", () => {
+  it("loading: the card skeleton is busy, no step list, and the h1 stays", () => {
+    vi.mocked(getHistoryDepth).mockReturnValue(deferred<never>().promise);
+    vi.mocked(listInstruments).mockReturnValue(deferred<never>().promise);
+    const { container } = renderScreen();
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(screen.queryByRole("region")).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "Setup steps" })).toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "Get set up" })).toBeInTheDocument();
+  });
+
+  it("never populated: step 1 is current and no step is done", async () => {
+    setShell({ health: HEALTH_UNREACHABLE_NEVER, attention: ok(null) });
+    depthAnswers(null);
+    countAnswers(0);
+    renderScreen();
+    expect(await screen.findByRole("region", { name: "Connect market data" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /, done$/ })).toBeNull();
+  });
+
+  it("nothing found: step 3 blocks Continue at zero", async () => {
+    const user = userEvent.setup();
+    depthAnswers(5);
+    countAnswers(0);
+    renderScreen();
+    await heading("Which stocks do you want to follow?");
+    await user.click(screen.getByRole("radio", { name: "Paste a list" }));
+    const blocked = screen.getByRole("button", { name: "Continue" });
+    expect(blocked).toHaveAttribute("data-variant", "blocked");
+    expect(blocked).toHaveAccessibleDescription("Paste at least one symbol, or choose Add later.");
+  });
+
+  it("nothing found: step 4 after Add later blocks Start download with both exits", async () => {
+    const user = userEvent.setup();
+    depthAnswers(5);
+    countAnswers(0);
+    renderScreen();
+    await heading("Which stocks do you want to follow?");
+    await user.click(screen.getByRole("radio", { name: "Add later" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await heading("Download data for 0 stocks");
+    expect(screen.getByRole("button", { name: "Start download" })).toHaveAttribute(
+      "data-variant",
+      "blocked",
+    );
+    expect(screen.getByRole("link", { name: "Go to Home" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Manage followed stocks" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Setup steps" })).toHaveTextContent(
+      "Stocks to follow",
+    );
+    expect(screen.queryByRole("link", { name: "Stocks to follow, done" })).toBeNull();
+  });
+
+  it("nothing found: steps 1 and 2 record why it does not apply", () => {
+    const record = cardRenderers(anyState())["empty-no-match"];
+    expect(record).toEqual({ notApplicable: expect.stringMatching(/\S/) });
+  });
+
+  it("partial: step 3 reports a mixed paste", async () => {
+    const user = userEvent.setup();
+    depthAnswers(5);
+    countAnswers(0);
+    renderScreen();
+    await heading("Which stocks do you want to follow?");
+    await user.click(screen.getByRole("radio", { name: "Paste a list" }));
+    await user.click(screen.getByRole("textbox", { name: "Stock symbols" }));
+    await user.paste("KO, KO, ZZZZ!, AAPL");
+    await user.tab();
+    expect(
+      screen.getByText("2 symbols recognised, 1 duplicates, 1 not recognised"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("KO, listed more than once")).toBeInTheDocument();
+    expect(screen.getByText("ZZZZ!, not a valid symbol format")).toBeInTheDocument();
+  });
+
+  it("partial: some steps done renders the current step's card", async () => {
+    depthAnswers(null);
+    countAnswers(0);
+    renderScreen();
+    expect(await heading("How far back should history go?")).toBeInTheDocument();
+    expect(
+      screenStateOf(anyState({ done: { 1: true, 2: true, 3: false, 4: false } }), new Date()).kind,
+    ).toBe("partial");
+  });
+
+  it("stale is not applicable, and the module records it", () => {
+    const source = readFileSync(
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), "index.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("Stale: not applicable");
+  });
+
+  it("unavailable: step 1's key line reads Not determinable, never Missing", async () => {
+    const user = userEvent.setup();
+    setShell({ health: HEALTH_UNREACHABLE_STALE_MISSING });
+    depthAnswers(5);
+    countAnswers(3);
+    const { container } = renderScreen();
+    await heading("Download data for 3 stocks");
+    await user.click(screen.getByRole("link", { name: "Market data, done" }));
+    const region = await screen.findByRole("region", { name: "Connect market data" });
+    expect(within(region).getByText("Not determinable")).toHaveAttribute(
+      "data-variant",
+      "coverage-unknown",
+    );
+    expect(container).not.toHaveTextContent("Missing");
+  });
+
+  it("unavailable: step 4 reads Progress can't be read right now and shows no bar", async () => {
+    depthAnswers(5);
+    countAnswers(3);
+    setShell({
+      attention: {
+        kind: "error",
+        error: new ApiUnreachableError("x"),
+        last: { data: { ...ATTENTION_BASE, latest_download: RUNNING }, checkedAt: CHECKED_AT },
+      },
+    });
+    renderScreen();
+    await heading("Download data for 3 stocks");
+    expect(screen.getByText("Progress can't be read right now")).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).toBeNull();
+  });
+
+  it("unavailable: steps 2 and 3 record not applicable", () => {
+    expect(cardRenderers(anyState()).unavailable).toEqual({
+      notApplicable: expect.stringMatching(/\S/),
+    });
+  });
+
+  it("error: step 2's failed read keeps its own Try again, and the list holds none", async () => {
+    vi.mocked(getHistoryDepth).mockRejectedValue(
+      new ApiError("x", "r", { code: "internal_error" }),
+    );
+    countAnswers(0);
+    renderScreen();
+    const region = await screen.findByRole("region", { name: "How far back should history go?" });
+    expect(
+      await within(region).findByText(
+        "Couldn't read history depth: FactorFlow hit an unexpected problem",
+      ),
+    ).toBeInTheDocument();
+    expect(within(region).getAllByRole("button", { name: "Try again" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Try again" })).toHaveLength(1);
+    expect(
+      within(screen.getByRole("navigation", { name: "Setup steps" })).queryByText(/Couldn't read/),
+    ).toBeNull();
+  });
+
+  it("error: step 3's failed read shows in step 3 only", async () => {
+    depthAnswers(5);
+    vi.mocked(listInstruments).mockRejectedValue(new ApiUnreachableError("x"));
+    renderScreen();
+    const region = await screen.findByRole("region", {
+      name: "Which stocks do you want to follow?",
+    });
+    expect(
+      await within(region).findByText(
+        "Couldn't read the followed list: FactorFlow is not answering",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/Couldn't read the followed list/)).toHaveLength(1);
+  });
+
+  it("error: step 4's refused start shows its refusal with Go to step 2", async () => {
+    const user = userEvent.setup();
+    depthAnswers(5);
+    countAnswers(3);
+    vi.mocked(startAcquisitionRun).mockRejectedValue(
+      new ApiError("x", "r", { code: "history_depth_not_set" }),
+    );
+    renderScreen();
+    await heading("Download data for 3 stocks");
+    await user.click(screen.getByRole("button", { name: "Start download" }));
+    expect(await screen.findByRole("link", { name: "Go to step 2" })).toBeInTheDocument();
+  });
+
+  it("error and unreachable: recorded not applicable at the region", () => {
+    expect(cardRenderers(anyState()).error).toEqual({ notApplicable: expect.stringMatching(/\S/) });
+    expect(cardRenderers(anyState()).unreachable).toEqual({
+      notApplicable: expect.stringMatching(/\S/),
+    });
+  });
+
+  it("screenStateOf derives loading, never populated, partial and populated and nothing else", () => {
+    const now = new Date("2026-10-15T15:00:00Z");
+    const none = { 1: false, 2: false, 3: false, 4: false };
+    expect(screenStateOf(anyState({ loading: true }), now)).toEqual({ kind: "loading" });
+    expect(screenStateOf(anyState({ done: none }), now)).toEqual({ kind: "empty-never-populated" });
+    const some = anyState({ done: { ...none, 1: true } });
+    expect(screenStateOf(some, now)).toEqual({
+      kind: "partial",
+      data: some,
+      fetchedAt: now.toISOString(),
+    });
+    const all = anyState({ done: { 1: true, 2: true, 3: true, 4: true } });
+    expect(screenStateOf(all, now)).toEqual({
+      kind: "populated",
+      data: all,
+      fetchedAt: now.toISOString(),
+    });
+    expect(screenStateOf(anyState({ done: { ...none, 4: true } }), now).kind).toBe("partial");
+  });
+});
+
+describe("TC-COMP-123 (screen half): the display vocabulary", () => {
+  const scan = (container: HTMLElement): void => {
+    expect(visibleAndAccessibleText(container)).not.toMatch(FORBIDDEN);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(SCREEN.title);
+    expect(screen.getByText(SCREEN.subLine)).toBeInTheDocument();
+  };
+
+  it("loading", () => {
+    vi.mocked(getHistoryDepth).mockReturnValue(deferred<never>().promise);
+    vi.mocked(listInstruments).mockReturnValue(deferred<never>().promise);
+    scan(renderScreen().container);
+  });
+
+  it("never populated", async () => {
+    setShell({ health: HEALTH_UNREACHABLE_NEVER });
+    depthAnswers(null);
+    countAnswers(0);
+    const view = renderScreen();
+    await screen.findByRole("region", { name: "Connect market data" });
+    scan(view.container);
+  });
+
+  it("step 2 current with its done link", async () => {
+    depthAnswers(null);
+    countAnswers(0);
+    const view = renderScreen();
+    await heading("How far back should history go?");
+    scan(view.container);
+  });
+
+  it("step 4 current with the blocked exits", async () => {
+    const user = userEvent.setup();
+    depthAnswers(5);
+    countAnswers(0);
+    const view = renderScreen();
+    await heading("Which stocks do you want to follow?");
+    await user.click(screen.getByRole("radio", { name: "Add later" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await heading("Download data for 0 stocks");
+    scan(view.container);
+  });
+
+  it("all four done with a running download", async () => {
+    depthAnswers(5);
+    countAnswers(3);
+    setShell({ attention: ok(RUNNING) });
+    const view = renderScreen();
+    await heading("Download data for 3 stocks");
+    scan(view.container);
+  });
+});
+
+describe("the screen's own cases", () => {
+  it("(a) the h1 persists across loading and is focusable", async () => {
+    const reads = deferred<{ years: number; updatedAt: null }>();
+    vi.mocked(getHistoryDepth).mockReturnValue(reads.promise);
+    countAnswers(0);
+    renderScreen();
+    const h1 = screen.getByRole("heading", { level: 1, name: "Get set up" });
+    expect(h1).toHaveAttribute("tabindex", "-1");
+    await act(async () => reads.resolve({ years: 5, updatedAt: null }));
+    expect(screen.getByRole("heading", { level: 1, name: "Get set up" })).toBe(h1);
+  });
+
+  it("(b) entering moves no focus, and (c) a step change focuses the step question", async () => {
+    const user = userEvent.setup();
+    const reads = deferred<{ years: null; updatedAt: null }>();
+    vi.mocked(getHistoryDepth).mockReturnValue(reads.promise);
+    countAnswers(0);
+    renderScreen();
+    const h1 = screen.getByRole("heading", { level: 1, name: "Get set up" });
+    h1.focus();
+    await act(async () => reads.resolve({ years: null, updatedAt: null }));
+    await heading("How far back should history go?");
+    expect(document.activeElement).toBe(h1);
+    await user.click(screen.getByRole("link", { name: "Market data, done" }));
+    const question = await heading("Connect market data");
+    expect(document.activeElement).toBe(question);
+  });
+
+  it.each([
+    ["Connect market data", HEALTH_UNREACHABLE_NEVER, 12, 12],
+    ["How far back should history go?", HEALTH_OK, null, 12],
+    ["Which stocks do you want to follow?", HEALTH_OK, 12, 0],
+    ["Download data for 12 stocks", HEALTH_OK, 12, 12],
+  ] as const)("(d) renders %s", async (name, health, years, count) => {
+    setShell({ health });
+    depthAnswers(years);
+    countAnswers(count);
+    renderScreen();
+    expect(await heading(name)).toBeInTheDocument();
+    expect(screen.getByRole("region", { name })).toBeInTheDocument();
+  });
+
+  it("(e) uses the layout values on its root, its left column and its skeleton", async () => {
+    vi.mocked(getHistoryDepth).mockReturnValue(deferred<never>().promise);
+    vi.mocked(listInstruments).mockReturnValue(deferred<never>().promise);
+    const { container } = renderScreen();
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.maxWidth).toBe("1180px");
+    expect(root.className).toContain("gap-6");
+    const left = screen.getByRole("heading", { level: 1 }).parentElement as HTMLElement;
+    expect(left.style.minWidth).toBe("260px");
+    expect(left.style.maxWidth).toBe("300px");
+    const skeleton = left.querySelector('[aria-hidden="true"]') as HTMLElement;
+    expect(skeleton).not.toBeNull();
+    expect(skeleton.children).toHaveLength(4);
+    expect((skeleton.querySelector(":scope > div > div") as HTMLElement).style.width).toBe("28px");
+  });
+
+  it("(f) mounts no provider of its own", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(getHistoryDepth).mockReturnValue(deferred<never>().promise);
+    vi.mocked(listInstruments).mockReturnValue(deferred<never>().promise);
+    expect(() =>
+      render(
+        <MemoryRouter>
+          <SetupScreen />
+        </MemoryRouter>,
+      ),
+    ).toThrow(/SetupDraftProvider/);
+  });
+
+  it("(g) re-derives the steps on every mount", async () => {
+    depthAnswers(5);
+    countAnswers(3);
+    const first = renderScreen();
+    await heading("Download data for 3 stocks");
+    first.unmount();
+    renderScreen();
+    await heading("Download data for 3 stocks");
+    expect(vi.mocked(getHistoryDepth)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(listInstruments)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(parseBulkSymbols)).toBeDefined();
+  });
+});
