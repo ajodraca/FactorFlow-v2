@@ -31,3 +31,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T007, T010, T013]
+    description: >
+      The skeleton, the absent download and the first-download-running state (TC-COMP-136; DAC-E5-2, DAC-E5-S2-1, AC-21): data-tile.tsx exports DataTile(), which reads useShell().attention and .scores only, renders a busy skeleton while attention loads (and while the summary loads once a download has ended), nothing while latest_download is null, and the first-download sentence from started_at or requested_at with a Downloading badge only while the state is running, inside one link named by the sentence. The full tile and the error state are placeholders that cycles 3 and 4 replace. data-tile.test.tsx holds the shared harness and the TC-COMP-136 cases plus T010 (a) to (c) and the summary-loading half of (d). The generator produced no mutants for a new tsx file, so 12 were hand-written from the plan's kill list; all 12 were killed. Both reviews approved; the code review raised LOW observations only (the plan's kill list names the fallback order the other way round from T013, and the code follows T013).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-2-tile-first-download.log
+    red_log_sha256: 98a5ce6f42ea8428ff20fec46bdc951a4038287be07b99b3f5044bf2b0605f59
+    red_evidence: >
+      data-tile.test.tsx failed to load (./data-tile did not resolve) before the module existed.
+    green_evidence: >
+      data-tile.test.tsx, 10 tests, passes in green-cycle-2-tile-first-download.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 10b79ab548625f138d6f37203ec92057e96835cf00f20f977c935abef801e55f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 99c86a0e37757eae3ce8b869fef64b37153450076bd372efe59eaa5ffa2965bf
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

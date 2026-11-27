@@ -186,7 +186,7 @@ Every expected string below is a literal.
 
 ### Mandatory Component Tests
 
-- [ ] T002 Implement TC-COMP-136 (Downloading badge only while running; verdict once a download ended) in a new `web/src/screens/home/data-tile.test.tsx`, with a `// Implements TC-COMP-136` comment.
+- [x] T002 Implement TC-COMP-136 (Downloading badge only while running; verdict once a download ended) in a new `web/src/screens/home/data-tile.test.tsx`, with a `// Implements TC-COMP-136` comment.
   - (a) `FIRST("requested", null)` with `NOT_SERVED`:
     - The collapsed text of the tile contains `"Your first download, started 2026-10-15 16:00 CDT, is running."`.
     - `badgeOf` is null, and no element in the tile has a `data-variant` starting with `status-`.
@@ -369,7 +369,7 @@ Every expected string below is a literal.
   - `export const READ_FAILURE = { unreachable: "FactorFlow is not answering", unexpected: "FactorFlow hit an unexpected problem" } as const`: the `{reason}` of *Couldn't read the data summary: {reason}.* (DEC-0366).
 
   Both are plain strings, not functions. CAP-003-E5-S1's T006 walk scans them with no change to its `CALLS` map. No unit or hex literal is added.
-- [ ] T013 Create `web/src/screens/home/data-tile.tsx` with the skeleton, the absent-download, the first-download-running and the link structure (depends on T012). This makes T002, and T010 (a)–(c) and the first half of (d), pass.
+- [x] T013 Create `web/src/screens/home/data-tile.tsx` with the skeleton, the absent-download, the first-download-running and the link structure (depends on T012). This makes T002, and T010 (a)–(c) and the first half of (d), pass.
   - **Imports:**
     - `useId` and `type JSX` from `react`;
     - `Link` from `react-router-dom`;

@@ -1,0 +1,103 @@
+{
+ "schema": 1,
+ "repo_head": "8dc956e6c289de0167477c085088e9f0d215035d",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:running-negate",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "d.state === \"running\"",
+   "new": "d.state !== \"running\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:running-nonrequested",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "d.state === \"running\"",
+   "new": "d.state !== \"requested\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:time-order",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "d.started_at ?? d.requested_at",
+   "new": "d.requested_at ?? d.started_at",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:badge-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "badge === null",
+   "new": "badge !== null",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:scores-loading",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "scores.kind === \"loading\"",
+   "new": "scores.kind === \"error\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:attention-loading",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "attention.kind === \"loading\"",
+   "new": "attention.kind !== \"loading\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:download-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "d === null",
+   "new": "d !== null",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:name-sentence",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "name={DATA_TILE.firstDownloadName(time)}",
+   "new": "name={DATA_TILE.firstDownloadRunning(time)}",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:route",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "const DATA_HEALTH = \"/data\"",
+   "new": "const DATA_HEALTH = \"/home\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:terminal-state",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "a.latest_terminal_download?.state ?? null",
+   "new": "a.latest_download?.state ?? null",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:busy",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "aria-busy=\"true\"",
+   "new": "aria-busy=\"false\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/data-tile.tsx:manual:running-status",
+   "operator": "manual",
+   "file": "web/src/screens/home/data-tile.tsx",
+   "old": "const RUNNING: Status = { of: \"download\", state: \"running\" }",
+   "new": "const RUNNING: Status = { of: \"download\", state: \"requested\" }",
+   "cycle": "cycle-2"
+  }
+ ]
+}

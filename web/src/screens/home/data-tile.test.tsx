@@ -1,0 +1,236 @@
+import { render, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ShellContextValue } from "../../app/shell-context";
+import type { Attention, ReadState, ScoreState, ScoreSummary } from "../../app/shell-types";
+import { DataTile } from "./data-tile";
+
+// The Data tile on Home (CAP-003-E5-S2; component design home-ui 2.2, 2.4,
+// section 10; UX design 1.3 Page Layout 2). Every expected string is a literal;
+// fixtures are independent literals typed `Attention` and `ScoreSummary`.
+
+const shell = vi.hoisted(() => ({ value: {} as unknown as ShellContextValue }));
+vi.mock("../../app/shell-context", () => ({ useShell: () => shell.value }));
+
+const ATTENTION: Attention = {
+  checked_at: "2026-10-15T22:52:10Z",
+  followed_count: 26,
+  prices_as_of: "2026-10-14",
+  credential_present: true,
+  problems: {
+    stock_count: 3,
+    symbols: ["FBXX", "KO", "TSLA"],
+    newest_completed_at: "2026-10-15T22:40:00Z",
+  },
+  latest_download: {
+    run_id: "run-7",
+    state: "partial",
+    requested_at: "2026-10-15T21:00:00Z",
+    started_at: "2026-10-15T21:02:00Z",
+    ended_at: "2026-10-15T22:40:00Z",
+    progress: { done: 30, total: 30 },
+  },
+  latest_terminal_download: {
+    run_id: "run-7",
+    state: "partial",
+    ended_at: "2026-10-15T22:40:00Z",
+    failure_reason: null,
+  },
+  items: [],
+};
+
+function FIRST(state: "requested" | "running" | "cancelling", startedAt: string | null): Attention {
+  return {
+    ...ATTENTION,
+    problems: { stock_count: 0, symbols: [], newest_completed_at: null },
+    latest_terminal_download: null,
+    latest_download: {
+      run_id: "run-1",
+      state,
+      requested_at: "2026-10-15T21:00:00Z",
+      started_at: startedAt,
+      ended_at: null,
+      progress: { done: 12, total: 30 },
+    },
+  };
+}
+
+const FACTOR = { qualified_count: 30, ranked: true, min_peer_set_size: 5 };
+
+function SUMMARY(over: Partial<ScoreSummary> = {}): ScoreSummary {
+  return {
+    never_classified: false,
+    set: {
+      set_id: "s-1",
+      classification_date: "2026-10-15",
+      run_id: "run-7",
+      run_started_at: "2026-10-15T21:02:00Z",
+      run_outcome: "partial",
+      state: "complete",
+      started_at: "2026-10-15T22:41:00Z",
+      ended_at: "2026-10-15T22:46:00Z",
+      latest_trading_day: "2026-10-15",
+      active_instruments: 30,
+      not_current: false,
+    },
+    later: null,
+    factors: Object.fromEntries(
+      (["value", "quality", "momentum"] as const).map((name) => [name, FACTOR]),
+    ) as ScoreSummary["factors"],
+    stocks_current: { current_count: 27, followed_count: 30 },
+    ...over,
+  } as ScoreSummary;
+}
+
+const FAILED = SUMMARY({
+  set: { ...SUMMARY().set, not_current: true } as ScoreSummary["set"],
+  later: {
+    set_id: "s-2",
+    state: "failed",
+    started_at: "2026-10-15T23:00:00Z",
+    ended_at: "2026-10-15T23:05:00Z",
+    failure_reason: "The engine stopped",
+    run_id: "run-8",
+    run_started_at: "2026-10-15T22:58:00Z",
+  },
+});
+const NEVER_FAILED = SUMMARY({
+  never_classified: true,
+  set: null,
+  stocks_current: null,
+  later: FAILED.later,
+});
+
+const served = (data: ScoreSummary): ScoreState => ({
+  kind: "served",
+  data,
+  checkedAt: new Date("2026-10-15T22:53:00Z"),
+});
+const NOT_SERVED: ScoreState = { kind: "not_served" };
+const ok = (data: Attention): ReadState<Attention> => ({
+  kind: "ok",
+  data,
+  checkedAt: new Date("2026-10-15T22:53:41Z"),
+});
+const LOADING: ScoreState = { kind: "loading" };
+const ATT_LOADING: ReadState<Attention> = { kind: "loading" };
+
+function show(attention: ReadState<Attention>, scores: ScoreState): HTMLElement {
+  shell.value = {
+    health: { kind: "loading" },
+    attention,
+    scores,
+    refresh: vi.fn(),
+    setTitleDetail: vi.fn(),
+  } as unknown as ShellContextValue;
+  return render(
+    <MemoryRouter>
+      <DataTile />
+    </MemoryRouter>,
+  ).container;
+}
+
+const text = (c: HTMLElement): string => (c.textContent ?? "").replace(/\s+/g, " ").trim();
+const badgeOf = (c: HTMLElement): Element | null =>
+  c.querySelector('[data-testid="data-tile-badge"] [data-variant^="status-"]');
+const statusElements = (c: HTMLElement): NodeListOf<Element> =>
+  c.querySelectorAll('[data-variant^="status-"]');
+
+beforeEach(() => {
+  shell.value = {} as unknown as ShellContextValue;
+});
+
+// Implements TC-COMP-136
+describe("DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21)", () => {
+  it("(a) requested: the sentence from requested_at and no badge", () => {
+    const c = show(ok(FIRST("requested", null)), NOT_SERVED);
+    expect(text(c)).toContain("Your first download, started 2026-10-15 16:00 CDT, is running.");
+    expect(badgeOf(c)).toBeNull();
+    expect(statusElements(c).length).toBe(0);
+  });
+
+  it("(b) running: the sentence from started_at and one Downloading badge", () => {
+    const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), NOT_SERVED);
+    expect(text(c)).toContain("started 2026-10-15 16:02 CDT");
+    expect(statusElements(c).length).toBe(1);
+    const badge = c.querySelector('[data-variant="status-active"]');
+    expect(badge?.textContent?.trim()).toBe("Downloading");
+  });
+
+  it("(c) no verdict word, hero, as-of, lag or progress, whatever the score state", () => {
+    const attentions = [FIRST("requested", null), FIRST("running", "2026-10-15T21:02:00Z")];
+    const words =
+      /\b(?:Yes|No|Mostly yes|Score update failed|Not reflecting the latest download|No scores yet)\b/;
+    for (const scores of [NOT_SERVED, served(NEVER_FAILED)]) {
+      for (const attention of attentions) {
+        const c = show(ok(attention), scores);
+        const t = text(c);
+        expect(t).not.toMatch(words);
+        for (const absent of [
+          "stocks current",
+          "Scores ",
+          "Prices ",
+          "Every other number",
+          "12 of",
+        ]) {
+          expect(t).not.toContain(absent);
+        }
+      }
+    }
+  });
+
+  it("(d) settled: with a download ended the verdict badge shows", () => {
+    const c = show(ok(ATTENTION), NOT_SERVED);
+    const badge = badgeOf(c);
+    expect(badge?.getAttribute("data-variant")).toBe("status-warning");
+    expect(badge?.textContent?.trim()).toBe("Mostly yes");
+  });
+});
+
+describe("DataTile states before the full tile (T010 a-c, T007 b)", () => {
+  it("(a) attention loading: a busy skeleton, no link, no badge, no error", () => {
+    const c = show(ATT_LOADING, NOT_SERVED);
+    expect(c.querySelector('[data-testid="data-tile-skeleton"]')?.getAttribute("aria-busy")).toBe(
+      "true",
+    );
+    expect(within(c).queryAllByRole("link").length).toBe(0);
+    expect(statusElements(c).length).toBe(0);
+    expect(text(c)).not.toContain("Couldn't read");
+  });
+
+  it("(d) summary loading after a download ended: the skeleton, no badge", () => {
+    const c = show(ok(ATTENTION), LOADING);
+    expect(c.querySelector('[data-testid="data-tile-skeleton"]')).not.toBeNull();
+    expect(statusElements(c).length).toBe(0);
+  });
+
+  it("(d) summary loading during the first download: the sentence, not the skeleton", () => {
+    const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), LOADING);
+    expect(c.querySelector('[data-testid="data-tile-skeleton"]')).toBeNull();
+    expect(text(c)).toContain("Your first download, started 2026-10-15 16:02 CDT, is running.");
+  });
+
+  it("(b) no download at all: nothing renders", () => {
+    const c = show(
+      ok({ ...ATTENTION, latest_download: null, latest_terminal_download: null }),
+      NOT_SERVED,
+    );
+    expect(c.innerHTML).toBe("");
+  });
+
+  it("(c) cancelling: the sentence and no status element", () => {
+    const c = show(ok(FIRST("cancelling", "2026-10-15T21:02:00Z")), NOT_SERVED);
+    expect(text(c)).toContain("Your first download, started 2026-10-15 16:02 CDT, is running.");
+    expect(statusElements(c).length).toBe(0);
+  });
+
+  it("the first-download state is one link named by its sentence", () => {
+    const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), NOT_SERVED);
+    const links = within(c).getAllByRole("link");
+    expect(links.length).toBe(1);
+    expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    expect(links[0]?.getAttribute("aria-label")).toBe(
+      "Data: your first download, started 2026-10-15 16:02 CDT, is running.",
+    );
+  });
+});
