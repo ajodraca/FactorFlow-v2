@@ -63,3 +63,32 @@ cycles:
         - id: web/src/screens/home/needs-you-card.tsx:133:off-by-one:1
           disposition: equivalent
           reason: "The done fallback applies only when latest_download is null, which deriveNeedsYou never yields for first_download; copy.body also ignores done when total is null, so no input distinguishes 0 from 1."
+
+  - id: cycle-3
+    tasks: [T005, T006, T007, T008, T009, T014, T017]
+    description: >
+      The Home screen (TC-COMP-127, TC-COMP-130, TC-COMP-131 Home half, TC-COMP-143, TC-COMP-145; DAC-E5-1, DAC-E5-10, DAC-E5-11, DAC-E5-S3-3, DAC-E5-S3-5, AC-10, AC-21, AC-24, AC-25, AC-26; DEC-0367): index.tsx default-exports HomeScreen, a div inside the shell's main capped at LAYOUT.contentMaxWidth, holding the header, then either the empty-state card with Start setup (while latest_download is null) or the three-column summary row with only the data tile and the Needs you card below it at full width (Resolved Conflicts 1 and 2). home.test.tsx holds the shared harness and T005 to T009 and T014. The generator produced 1 mutant and 13 were hand-written from the plan's list; the first run left the empty card's variant alive (the Start setup button carried the same data-variant), so the test now reads the section's first child, and the second run killed all 14. The first spec-drift pass reported omitted T007 and T008 assertions; they were added and the second pair of reviews approved with no drift.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/red-cycle-3-screen.log
+    red_log_sha256: 2621c5d33aa102ad466d464dde5c6b25b8f0c8003723bc4c9afff4cdf0bc4788
+    red_evidence: >
+      home.test.tsx failed to load (./index did not resolve) before the module existed.
+    green_evidence: >
+      The web/src/screens/home suite, 259 tests (21 in home.test.tsx), passes in green-cycle-3-screen.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d119f8ff599d48a0c6f2b6c405092eb9d75a31206e6b9cffceb36a6f66c924da
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 7ff57af0bc72063e5ec41321fb0de86e3e928e6cd0dfa05b1da86c2290a2b4f7
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

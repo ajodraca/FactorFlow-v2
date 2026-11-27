@@ -1,0 +1,120 @@
+{
+ "schema": 1,
+ "repo_head": "0bf928bd06e17b3acb52e43c1ecc10a1ec42a573",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/index.tsx:45:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/home/index.tsx",
+   "line": 45,
+   "original": "  const neverDownloaded = attention.kind === \"ok\" && attention.data.latest_download === null;",
+   "mutated": "  const neverDownloaded = attention.kind === \"ok\" || attention.data.latest_download === null;"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:negate-never",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "attention.kind === \"ok\" && attention.data.latest_download === null",
+   "new": "attention.kind === \"ok\" && attention.data.latest_download !== null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:terminal",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "attention.data.latest_download === null",
+   "new": "attention.data.latest_terminal_download === null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:card-in-row",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<DataTile />\n          </div>\n          <NeedsYouCard />",
+   "new": "<DataTile />\n            <NeedsYouCard />\n          </div>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:no-max-width",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": " style={{ maxWidth: LAYOUT.contentMaxWidth }}",
+   "new": "",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:side-max",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "LAYOUT.contentMaxWidth",
+   "new": "LAYOUT.sideColumnMax",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:setup-variant",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<Button asChild variant=\"default\">",
+   "new": "<Button asChild variant=\"outline\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:setup-route",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "const SETUP = \"/setup\";",
+   "new": "const SETUP = \"/home\";",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:columns",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "grid grid-cols-3 gap-5",
+   "new": "grid grid-cols-2 gap-5",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:placeholder",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<DataTile />",
+   "new": "<DataTile />\n            <div />",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:wrap-main",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<div className=\"flex w-full flex-col gap-5\"",
+   "new": "<main className=\"flex w-full flex-col gap-5\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:card-variant",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<Card variant=\"default\">",
+   "new": "<Card variant=\"metric\">",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:header-dropped",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<HomeHeader />",
+   "new": "",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:no-gap",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "flex w-full flex-col gap-5",
+   "new": "flex w-full flex-col",
+   "cycle": "cycle-3"
+  }
+ ]
+}

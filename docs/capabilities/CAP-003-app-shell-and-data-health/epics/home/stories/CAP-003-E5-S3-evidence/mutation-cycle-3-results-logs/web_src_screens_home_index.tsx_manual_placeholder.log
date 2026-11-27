@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-sq66xwas/w0/web
+
+stderr | src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/home.test.tsx (21 tests | 1 failed) 458ms
+   × no strategy, paper or live element (TC-COMP-130; DAC-E5-10, AC-10) > leaves columns two and three of the summary row empty 13ms
+     → expected <section …(1)>…(1)</section>
+<div></div> to have a length of 1 but got 2
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/home.test.tsx > no strategy, paper or live element (TC-COMP-130; DAC-E5-10, AC-10) > leaves columns two and three of the summary row empty
+AssertionError: expected <section …(1)>…(1)</section>
+<div></div> to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/screens/home/home.test.tsx:383:26
+    381|     const row = screen.getByTestId("home-summary-row");
+    382|     expect(row.className).toContain("grid-cols-3");
+    383|     expect(row.children).toHaveLength(1);
+       |                          ^
+    384|     expect((row.children[0] as HTMLElement).getAttribute("aria-labelle…
+    385|     expect(within(row).getByRole("region", { name: "Data" })).toBe(row…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  17:58:30
+   Duration  1.78s (transform 131ms, setup 46ms, collect 513ms, tests 458ms, environment 158ms, prepare 121ms)
+

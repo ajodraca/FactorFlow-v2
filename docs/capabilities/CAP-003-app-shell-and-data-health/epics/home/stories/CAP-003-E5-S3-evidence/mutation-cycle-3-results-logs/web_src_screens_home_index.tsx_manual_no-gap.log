@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-sq66xwas/w3/web
+
+stderr | src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/home.test.tsx (21 tests | 1 failed) 334ms
+   × composition and layout (AC-10, AC-25, AC-26, DAC-E5-10) > renders inside the shell's main, capped, in the stated order 8ms
+     → expected 'flex w-full flex-col' to contain 'gap-5'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/home.test.tsx > composition and layout (AC-10, AC-25, AC-26, DAC-E5-10) > renders inside the shell's main, capped, in the stated order
+AssertionError: expected 'flex w-full flex-col' to contain 'gap-5'
+
+Expected: "gap-5"
+Received: "flex w-full flex-col"
+
+ ❯ src/screens/home/home.test.tsx:578:30
+    576|     expect(root.style.maxWidth).toBe("1180px");
+    577|     for (const name of ["w-full", "flex", "flex-col", "gap-5"]) {
+    578|       expect(root.className).toContain(name);
+       |                              ^
+    579|     }
+    580|     const children = [...root.children];
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  17:58:32
+   Duration  998ms (transform 97ms, setup 29ms, collect 340ms, tests 334ms, environment 147ms, prepare 30ms)
+
