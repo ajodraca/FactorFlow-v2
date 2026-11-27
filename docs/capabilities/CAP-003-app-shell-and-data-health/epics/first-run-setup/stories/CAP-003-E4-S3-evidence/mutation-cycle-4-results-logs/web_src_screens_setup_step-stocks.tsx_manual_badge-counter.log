@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-uswrm_qx/w1/web
+
+ ❯ src/screens/setup/step-stocks.test.tsx (41 tests | 4 failed) 1395ms
+   × step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'a summary with a duplicate and two un…' 38ms
+     → expected <p data-variant="status-good"></p> to have a length of +0 but got 1
+   × step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a 201 with a duplicate_active r…' 47ms
+     → expected <p data-variant="status-good"></p> to have a length of +0 but got 1
+   × step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a failed batch (a server failur…' 42ms
+     → expected <p data-variant="status-good"></p> to have a length of +0 but got 1
+   × step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a failed batch (an unreachable …' 34ms
+     → expected <p data-variant="status-good"></p> to have a length of +0 but got 1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'a summary with a duplicate and two un…'
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a 201 with a duplicate_active r…'
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a failed batch (a server failur…'
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a failed batch (an unreachable …'
+AssertionError: expected <p data-variant="status-good"></p> to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/screens/setup/step-stocks.test.tsx:557:7
+    555|     expect(
+    556|       container.querySelectorAll('[data-variant^="status-"], [data-var…
+    557|     ).toHaveLength(0);
+       |       ^
+    558|     const summary = container.querySelector('[role="status"]');
+    559|     if (summary !== null) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 37 passed (41)
+   Start at  13:38:39
+   Duration  3.14s (transform 461ms, setup 233ms, collect 789ms, tests 1.40s, environment 322ms, prepare 169ms)
+

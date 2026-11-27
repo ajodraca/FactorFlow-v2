@@ -90,3 +90,38 @@ cycles:
       score: 1.0
       survivors: []
 
+  - id: cycle-4
+    tasks: [T004, T005, T006, T007, T008, T009, T012, T017, T018, T019]
+    description: >
+      Step 3 (TC-COMP-100, TC-COMP-103, TC-COMP-114 screen half, TC-COMP-115, TC-COMP-116, TC-COMP-117, TC-COMP-118; AC-3, AC-5, AC-6, AC-17, AC-19, DAC-E4-5 to DAC-E4-7, DAC-E4-11, DAC-E4-13, DAC-E4-S3-1 to DAC-E4-S3-6; DEC-0351 to DEC-0355): step-stocks.tsx holds StepStocks through the step card (the radio-group cards Paste a list and Add later with no file control; the textarea list field parsed on paste and on blur only, upper-cased on blur, with a polite live region tied to the field by aria-describedby holding the counter and every duplicate, unreadable and already-followed entry as text; Did you mean {fix}? as an outline button that replaces the entry, re-parses and refocuses the field; the below-30 warning for 1 to 29 accepted with Continue available; Continue blocked with its reason at zero accepted or with nothing chosen; Add later and Continue posting nothing and making step 4 current; Continue posting the accepted symbols in batches and reporting already-followed entries from the duplicate_active dispositions while keeping step 3 current, moving on when there is nothing to report; a failed batch keeping its and later entries in the field, counting the posted ones and staying on the step; a failed count read as Couldn't read the followed list with Try again). Its module comment records DAC-E4-S3-6 (no badge, one-tier rule not applicable, NotDeterminable unused). step-stocks.test.tsx holds the cases of T004 to T009 and T012. The generator produced 36 mutants and 20 were hand-written from the plan's kill list and the step's own behaviour. The first run left nine survivors: seven were strengthened by new cases (a single accepted symbol warns, an empty paste field is blocked, a keystroke typed before any paste or after a blur never parses, exactly one unposted entry is stated, and no kept line shows with none) and two are equivalent, recorded below; the run was repeated (56 mutants, 54 killed, 2 equivalent). Deviations from the plan, all in tests: T008 (c) gives the counter for the row 4 paste as 3 recognised but KO and AAPL are the two accepted symbols (the counter counts unique accepted symbols, as T005 and T012 (e) use it), so the test asserts 2 recognised, 1 duplicates, 2 not recognised; T008 (e) says each summary li text ends with a phrase but an entry with a fix ends with its button, so each li is checked to contain one. Both reviews approved. The code review raised one MEDIUM and LOW observations, none a plan violation and left as follow-ups for the owner: Back stays active while a post is in flight, so the post's goTo can pull the owner forward again; the failure alert stays after switching to Add later; the unposted count in the draft goes stale if the text is edited after a failure; the report keys assume unique lines; an empty list renders inside the live region. Full validation on the final bytes: npm run format, lint, tsc --noEmit and build clean, npm run test 3317 passed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-4-step-stocks.log
+    red_log_sha256: 89a079cfc56d273ac5ad9bcc9b9baaccdc7efa831a5e6b752b8b9eb2fcd508d6
+    red_evidence: >
+      step-stocks.test.tsx failed to load (./step-stocks did not resolve) before the module existed.
+    green_evidence: >
+      step-stocks.test.tsx 41 passed (the setup suites and token-literals.test.ts, 425 passed, in green-cycle-4-step-stocks.log); the full suite 3317 passed; tsc --noEmit, biome lint, biome format and build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 63eb8e56d1f1b328b7019eb0a9623c70c8c398b825ac8024164d4924204518e1
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: a6be0b758079c5bb958cbc9ccb5cfa8c98f56b5660dff2d065761171f5db3d45
+      generated: 56
+      killed: 54
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.964
+      survivors:
+        - id: web/src/screens/setup/step-stocks.tsx:205:off-by-one:2
+          disposition: equivalent
+          reason: "posted > 1 against posted > 0 differs only at posted == 1, which cannot happen: batches hold 1000 symbols and a failure stops the requests, so posted is 0 or a multiple of 1000 (the post-in-batches cases pin it)."
+        - id: web/src/screens/setup/step-stocks.tsx:manual:blocked-source-not-later
+          disposition: equivalent
+          reason: "The blocked formula reads source === null || (source === paste && accepted === 0); the plan's kill list says source !== later would differ, but a null source is already blocked by the first disjunct, so the two forms agree for every source."
+

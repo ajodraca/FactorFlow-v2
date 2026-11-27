@@ -137,7 +137,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - a hand-written mutant that computes `unposted` from the next batch (`symbols.slice(i + MAX)`): (d) `unposted`.
   - a hand-written mutant that fires the batches with `Promise.all`: (b).
 
-- [ ] T004 [P] Implement TC-COMP-100 (Zero accepted blocks Continue; below 30 warns and continues) in a new `web/src/screens/setup/step-stocks.test.tsx`, with a `// Implements TC-COMP-100` comment. Render `<Harness initial={{ source: "paste" }} />`.
+- [x] T004 [P] Implement TC-COMP-100 (Zero accepted blocks Continue; below 30 warns and continues) in a new `web/src/screens/setup/step-stocks.test.tsx`, with a `// Implements TC-COMP-100` comment. Render `<Harness initial={{ source: "paste" }} />`.
   - (a) **Nothing usable.** Paste `"!!!, ???"` into `getByRole("textbox", { name: "Stock symbols" })`, then `user.tab()`. `getByRole("button", { name: "Continue" })` has `data-variant="blocked"`, `aria-disabled="true"`, is not `toBeDisabled()` and `toHaveAccessibleDescription("Paste at least one symbol, or choose Add later.")`. Clicking it and pressing Enter on it leave `addInstruments`, `goTo` and `reread` uncalled. No warning text renders.
   - (b) **Twelve.** Clear and paste `symbols(12).join(", ")`, then tab: the text *Factor scores need at least 30 stocks with complete data. With 12, no factor can be ranked yet.* is present (exact `getByText`), and **Continue** has `data-variant="default"` and no `aria-disabled`.
   - (c) **TC edge: 30.** `symbols(30)`: no element's text starts with *Factor scores need*; **Continue** `default`. With `symbols(29)`: the warning reads *… With 29, no factor can be ranked yet.*
@@ -148,7 +148,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - negate-boolean on the blocked condition: (a) and (b).
   - a hand-written mutant that counts parsed valid entries instead of `accepted`: (d).
 
-- [ ] T005 Implement TC-COMP-114, screen half (parse on paste and blur only; the three requests from the step) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T004 (one file), with a `// Implements TC-COMP-114` comment.
+- [x] T005 Implement TC-COMP-114, screen half (parse on paste and blur only; the three requests from the step) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T004 (one file), with a `// Implements TC-COMP-114` comment.
   - (a) **Parse count.** With `source: "paste"` and an empty draft, record `vi.mocked(parseBulkSymbols).mock.calls.length` after mount as `base` (0 with an empty draft). Click the field and paste `"AAPL, MSFT"`: `base + 1`. `user.type(field, "{Enter}NVDA")` (five keystrokes): still `base + 1`, and `setDraft` was called with `"pasted"` once per keystroke. `user.tab()`: `base + 2`, and the counter reads *3 symbols recognised, 0 duplicates, 0 not recognised*.
   - (b) **The requests.** Paste `symbols(2500).join("\n")`, click **Continue**: `addInstruments` has 3 calls with lengths `[1000, 1000, 500]`, first elements `"S0"`, `"S1000"`, `"S2000"`. Then `reread` was called once with `"activeCount"` and `goTo` once with `4`, in that order (`invocationCallOrder`).
   - (c) **The counter formats.** The counter after (b)'s paste reads *2,500 symbols recognised, 0 duplicates, 0 not recognised* (`formatCount`).
@@ -159,7 +159,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - swap-case `goTo(4)` → `goTo(3)` on success: (b).
   - a hand-written mutant that renders `String(n)` instead of `formatCount(n)`: (c).
 
-- [ ] T006 Implement TC-COMP-115 (Add later and Continue post nothing and make step 4 current) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T005, with a `// Implements TC-COMP-115` comment. Harness: a test-local `Host` inside `SetupDraftProvider` calls the real `useSetupState()` and renders `<p data-testid="current">{state.current}</p>`, `<p data-testid="done-3">{String(state.done[3])}</p>`, `<p data-testid="source">{String(state.drafts.source)}</p>` and, when `state.current === 3`, `<StepStocks state={state} />`. The shell gives `shell()`; `getHistoryDepth` resolves `{ years: 5, updatedAt: "2026-09-06T18:00:00Z" }`; `listInstruments` resolves `{ rows: [], activeCount: 0, retiredCount: 0, nextCursor: null }`. `const fetchSpy = vi.spyOn(globalThis, "fetch")`.
+- [x] T006 Implement TC-COMP-115 (Add later and Continue post nothing and make step 4 current) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T005, with a `// Implements TC-COMP-115` comment. Harness: a test-local `Host` inside `SetupDraftProvider` calls the real `useSetupState()` and renders `<p data-testid="current">{state.current}</p>`, `<p data-testid="done-3">{String(state.done[3])}</p>`, `<p data-testid="source">{String(state.drafts.source)}</p>` and, when `state.current === 3`, `<StepStocks state={state} />`. The shell gives `shell()`; `getHistoryDepth` resolves `{ years: 5, updatedAt: "2026-09-06T18:00:00Z" }`; `listInstruments` resolves `{ rows: [], activeCount: 0, retiredCount: 0, nextCursor: null }`. `const fetchSpy = vi.spyOn(globalThis, "fetch")`.
   - Await `current` reading `3`. Choose *Add later* (`getByRole("radio", { name: "Add later" })`) and click **Continue**.
   - `current` reads `4`; `done-3` reads `false`; `source` reads `later`; `addInstruments` has 0 calls and `fetchSpy` has 0 calls (the two reads are mocked, so any request at all would be the post).
   - **Not blocked.** Before choosing, with nothing chosen, **Continue** is `blocked` (DEC-0355); after choosing *Add later* it is `default`, whatever the textarea held.
@@ -169,7 +169,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - swap-case `goTo(4)` → `goTo(3)` on the *Add later* path: `current` stays `3`.
   - a hand-written mutant that calls `reread("activeCount")` and lets the derived step move: `current` stays `3` (count is 0).
 
-- [ ] T007 Implement TC-COMP-116 (Pasted symbols are sent as a JSON array; rejections announced politely) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T006, with a `// Implements TC-COMP-116` comment. The real `addInstruments` is used; `fetch` is stubbed with `vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ added: [{ input_symbol: "AAPL", normalised_symbol: "AAPL", disposition: "added", reason: null }], reactivated: [], rejected: [{ input_symbol: "KO", normalised_symbol: "KO", disposition: "duplicate_active", reason: "an active instrument with this symbol already exists" }] }), { status: 201, headers: { "Content-Type": "application/json" } }))`.
+- [x] T007 Implement TC-COMP-116 (Pasted symbols are sent as a JSON array; rejections announced politely) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T006, with a `// Implements TC-COMP-116` comment. The real `addInstruments` is used; `fetch` is stubbed with `vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ added: [{ input_symbol: "AAPL", normalised_symbol: "AAPL", disposition: "added", reason: null }], reactivated: [], rejected: [{ input_symbol: "KO", normalised_symbol: "KO", disposition: "duplicate_active", reason: "an active instrument with this symbol already exists" }] }), { status: 201, headers: { "Content-Type": "application/json" } }))`.
   - Paste `"aapl, KO, ZZZZ!"`, tab, click **Continue**.
   - **The request.** `fetch` has exactly one call; its URL is `"/api/instruments"`, `init.method` `"POST"`, `init.headers` include `"Content-Type": "application/json"`, and `JSON.parse(init.body)` `toEqual({ symbols: ["AAPL", "KO"] })`: an array of normalised strings, the unreadable entry not sent.
   - **The live region.** The field's `aria-describedby` names exactly two ids: the `FormDescription` (*Whether the provider knows each one is checked during the download.*) and an element with `role="status"` (implicit `aria-live="polite"`). That element's text contains *ZZZZ!, not a valid symbol format* and *KO, already followed*. The server's `reason` string is nowhere in `document.body.textContent`.
@@ -181,7 +181,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - drop-field-copy on the summary id in the field's `aria-describedby`: the two-ids check.
   - a hand-written mutant that posts `parsed` inputs instead of `accepted` (`"aapl"`, `"ZZZZ!"`): the body literal.
 
-- [ ] T008 Implement TC-COMP-117 (Step 3 states use the display vocabulary) and TC-COMP-118 (Step 3 renders no status badge; one-tier rule recorded not applicable) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T007, with `// Implements TC-COMP-117` and `// Implements TC-COMP-118` comments.
+- [x] T008 Implement TC-COMP-117 (Step 3 states use the display vocabulary) and TC-COMP-118 (Step 3 renders no status badge; one-tier rule recorded not applicable) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T007, with `// Implements TC-COMP-117` and `// Implements TC-COMP-118` comments.
   - (a) **Non-vacuity.** `FORBIDDEN` matches the planted `"one run"`, `"Runs"`, `"Retired"`, `"Instrument"`, `"acquire"` and `"Provider credential"`, and does not match `"already followed"`, `"listed more than once"` or `"not a valid symbol format"`.
   - (b) **Every state of this story** (`it.each`), each asserting `visibleAndAccessibleText(container)` does not match `FORBIDDEN`:
     1. nothing chosen (blocked);
@@ -201,7 +201,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - a hand-written mutant that renders the read error's `message`: (b) row 7.
   - drop-field-copy on a disposition's reason text (the entry rendered alone, marked by colour): (e).
 
-- [ ] T009 Implement TC-COMP-103 (Exactly four steps and two sources, no file control) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T008, with a `// Implements TC-COMP-103` comment.
+- [x] T009 Implement TC-COMP-103 (Exactly four steps and two sources, no file control) in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T008, with a `// Implements TC-COMP-103` comment.
   - (a) **Two sources.** `getByRole("radiogroup", { name: "How do you want to name them?" })` holds exactly two `radio`s, named *Paste a list* and *Add later* in that order, each with its description (`toHaveAccessibleDescription` *Paste symbols separated by commas or one per line.* and *Continue without stocks for now; you can follow them later from Data health.*).
   - (b) **No file control**, in the nothing-chosen, paste and later states: `container.querySelector('input[type="file"]')` is `null` and `queryByText(/csv/i)` is `null`.
   - (c) **Four steps.** With the shell mocked, `<StepList state={stateWith()} />` (CAP-003-E4-S2) renders exactly four `listitem`s in its `navigation` *Setup steps*, titled *Market data*, *How far back*, *Stocks to follow*, *Download data*; none mentions paper trading.
@@ -239,7 +239,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
   - drop-field-copy on `rejected` accumulation: (b).
   - a hand-written mutant that swallows unknown errors as failures: (d).
 
-- [ ] T012 Write step 3's own cases in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T009 (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to -5):
+- [x] T012 Write step 3's own cases in `web/src/screens/setup/step-stocks.test.tsx`, sequential with T009 (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to -5):
   - (a) **The card.** `getByRole("region", { name: "Which stocks do you want to follow?" })`; the explanation is S02 §8's verbatim (`STEP3.explanation`); the info note *This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.*; **← Back: How far back** calls `goTo(2)` and sends nothing.
   - (b) **Drafts.** Choosing *Paste a list* calls `setDraft("source", "paste")`; the field is absent while `source` is `null` or `"later"` and present for `"paste"`; with `initial={{ source: "paste", pasted: "AAPL\nKO" }}` the field's value is `"AAPL\nKO"` and the counter reads *2 symbols recognised, 0 duplicates, 0 not recognised* on mount (one parse, `base` 1).
   - (c) **Upper case on blur, never while typing.** Type `"aapl"`: the value is `"aapl"` after each keystroke; tab away: the value is `"AAPL"` and the last `setDraft` call is `("pasted", "AAPL")`.
@@ -303,7 +303,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
   Makes T013 and T014 pass.
 
-- [ ] T017 Create `web/src/screens/setup/step-stocks.tsx` (depends on T015, T016; T004–T009 and T012 RED first).
+- [x] T017 Create `web/src/screens/setup/step-stocks.tsx` (depends on T015, T016; T004–T009 and T012 RED first).
   - **Imports.** `useId`, `useRef`, `useState` from `"react"`; `useForm` from `"react-hook-form"`; `parseBulkSymbols` from `"../instruments/parse-bulk-symbols"`; `Button` from `"../../components/ui/button"`; `Form`, `FormRoot`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormDescription`, `useFormField` from `"../../components/ui/form"`; `Textarea` from `"../../components/ui/textarea"`; `RadioGroup`, `RadioGroupCard` from `"../../components/ui/radio-group"`; `formatCount` from `"../../components/patterns/format"`; `type SetupState` from `"./use-setup-state"`; `QUESTIONS`, `STEP3`, `READ_ERRORS` from `"./copy"`; `StepCard`, `StepReadError`, `failureReason` from `"./step-card"`; `summarisePaste`, `replaceEntry`, `type PasteSummary` from `"./summarise-paste"`; `postInBatches` from `"./post-in-batches"`.
   - **Module comment.** Step 3 (setup-ui §2.3, §10; UX design §1.2; S02 §6). It records DAC-E4-S3-6: every disposition is listed as text, no status badge renders, so the one-tier rule does not apply here, and no value on this step is undeterminable, so `NotDeterminable` is not used (register conflict with setup-ui §10's counter badges settled by the story; Resolved Conflict 1).
   - **`StepStocks({ state }: { state: SetupState }): JSX.Element`.** Local state: `summary: PasteSummary | null`, initialised lazily as `summarise(state.drafts.pasted)` when that text is not blank, else `null`; `report: string[]` (the already-followed lines of the last post); `failure: { reason: string; posted: number } | null`; `posting: boolean` with a `useRef` guard. `summarise(text)` is `summarisePaste(parseBulkSymbols(text))`, the only parse call site.
@@ -339,7 +339,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: Confirm the change set is exactly the story's.
 
-- [ ] T018 Confirm scope (depends on T015–T017):
+- [x] T018 Confirm scope (depends on T015–T017):
   - `git status --short` lists only `web/src/screens/setup/summarise-paste.ts`, `summarise-paste.test.ts`, `post-in-batches.ts`, `post-in-batches.test.ts`, `step-stocks.tsx`, `step-stocks.test.tsx`, `copy.ts`, `copy.test.ts`, `step-card.tsx` and `step-card.test.tsx`, plus this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
   - `git diff --exit-code -- web/src/screens/instruments/ web/src/api/ web/src/app/ web/src/components/ package.json src/` exits 0 (the parser, the client and the server bound unchanged; DEC-0218, DAC-E7-13, AC-17).
   - `git diff -- web/src/screens/setup/copy.ts` shows only T016's five additions; `git diff -- web/src/screens/setup/step-card.tsx` shows only the `continueBlocked` prop, its `useId` and the footer branch.
@@ -353,8 +353,8 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T019 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-19).
-- [ ] T020 After each TDD cycle in T002–T019 — not once at the end — do the following before the next cycle begins:
+- [x] T019 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-19).
+- [x] T020 After each TDD cycle in T002–T019 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E4-S3-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch`.
