@@ -106,7 +106,7 @@ components and are not repeated.
 | `SUMMARIES` | `years`, `followed`, `downloadStarted` one-line step-list summaries |
 | `STEP1` | Market data key lines, including `KEY_VARIABLE` (`FACTORFLOW_MASSIVE_API_KEY`) |
 | `STEP2` | History depth label, suffix, description, plan-limit note, `rangeError` (1 to 50 whole years), `saveFailed(reason)` (CAP-003-E4-S2, DEC-0346) |
-| `STEP3` | Explanation, source legend, `paste` and `later` options, field text, `counter`, `unreadable`, `didYouMean`, `belowFloor`, `zeroBlocked`, `alreadyFollowed`, `infoNote` |
+| `STEP3` | Explanation, source legend, `paste` and `later` options, field text, `counter`, `unreadable`, `didYouMean`, `belowFloor`, `zeroBlocked`, `alreadyFollowed`, `infoNote`, and the S3 additions `duplicateEntry`, `alreadyFollowedEntry`, `saveFailed`, `followedSoFar`, `keptForRetry` |
 | `STEP4` | Download heading, summary labels, `start`, `progress`, `started`, `checked`, `canLeave`, `queued`, the two not-startable messages with `goToStep2` and `goToStep3`, `blockedReason`, `goHome`, `manageFollowed`, `progressUnreadable` |
 | `READ_ERRORS` | `subjects`, `readFailed(subject, reason)`, `tryAgain` for a failed depth or count read; `notAnswering` and `unexpected`, the two reasons a failure shows (CAP-003-E4-S2, DEC-0345) |
 
