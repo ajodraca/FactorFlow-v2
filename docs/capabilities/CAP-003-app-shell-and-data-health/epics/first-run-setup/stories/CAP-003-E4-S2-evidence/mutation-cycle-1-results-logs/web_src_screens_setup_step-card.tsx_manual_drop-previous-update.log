@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-irhzpaib/w2/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 12ms
+ ❯ src/screens/setup/step-card.test.tsx (9 tests | 1 failed) 144ms
+   × useStepHeadingFocus > never moves focus on first render, moves it on a change, and leaves it on a repeat 12ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  class="text-xl font-semibold text-foreground focus-visible:outline-none"
+  id="setup-step-heading"
+  tabindex="-1"
+>
+  Q1
+</h2>
+Received element with focus:
+  <button />
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > useStepHeadingFocus > never moves focus on first render, moves it on a change, and leaves it on a repeat
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  class="text-xl font-semibold text-foreground focus-visible:outline-none"
+  id="setup-step-heading"
+  tabindex="-1"
+>
+  Q1
+</h2>
+Received element with focus:
+  <button />
+ ❯ src/screens/setup/step-card.test.tsx:98:57
+     96|     expect(button).toHaveFocus();
+     97|     rerender(<Host step={1} />);
+     98|     expect(screen.getByRole("heading", { name: "Q1" })).toHaveFocus();
+       |                                                         ^
+     99|     button.remove();
+    100|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 157 passed (158)
+   Start at  12:08:13
+   Duration  1.45s (transform 97ms, setup 101ms, collect 284ms, tests 156ms, environment 916ms, prepare 373ms)
+

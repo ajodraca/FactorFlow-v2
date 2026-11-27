@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E4-S2 - Setup Steps 1 and 2: the Step List, the Step Card, Market Data Key Presence and History Depth.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T008, T009, T013, T014]
+    description: >
+      The copy strings and the step card (TC-COMP-111 groundwork, AC-25, DAC-E4-13, DEC-0345, DEC-0346, DEC-0350): copy.ts gains READ_ERRORS.notAnswering, READ_ERRORS.unexpected and STEP2.saveFailed, each with a doc comment saying this story adds it; step-card.tsx holds STEP_HEADING_ID, StepCard (a section labelled by its h2, the position line, explanation capped at LAYOUT.explanationMeasure, note, Back and Continue footer naming the neighbouring steps), useStepHeadingFocus (never on first render, on a change only), failureReason (never reads the message or request id) and StepReadError. step-card.test.tsx holds the section and heading, footer, absent controls, explanation and note, focus hook and failureReason and StepReadError cases; copy.test.ts gains the three verbatim rows. The generator produced 6 mutants and 8 were hand-written from the plan's kill list. The first run left nine survivors: cast-union off-by-ones on the Back and Next title index (no test can tell a type-level union member from another) and the step 4 Continue guard; the index casts were replaced by a single StepId cast and a step 4 case with a handler was added. The first spec-drift review then reported drift: that guard is not in the plan's T014, so the guard and its case were removed and the plan's literal footer kept, the mutation run repeated (14 mutants, all killed) and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved; the code review raised one MEDIUM (the h2 carries focus-visible:outline-none with no ring, which T014 prescribes and not-found.tsx does the same) and LOW observations (a step 4 card given a handler would read Next: undefined, which the plan says never happens).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-1-step-card.log
+    red_log_sha256: a318c216f42515b329d6a6d8da8c3f3f3b4e8e74072ba97d1a22a5a72f14574d
+    red_evidence: >
+      step-card.test.tsx failed to load (./step-card did not resolve) and three copy.test.ts rows failed (READ_ERRORS.notAnswering, READ_ERRORS.unexpected, STEP2.saveFailed undefined) before the modules existed.
+    green_evidence: >
+      step-card.test.tsx 9 passed and copy.test.ts 149 passed (the setup suites, 193 passed, in green-cycle-1-step-card.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d3e9ae93d5bcf008124c57f1ed74f571bfc323424e668834e8e7acdd43566b06
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: c5ba01b3d8d35038817e05b5f3501f3182f8e8343876e6f16d234901a61e9630
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -82,7 +82,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: Confirm the upstream modules this story imports exist. No package, configuration or directory change.
 
-- [ ] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
+- [x] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
   - CAP-003-E4-S1: `web/src/screens/setup/draft.tsx`, `use-setup-state.ts` (`SetupState` with `depth`, `activeCount`, `loading`, `reread`, `goTo`, `drafts`, `setDraft`) and `copy.ts`.
   - CAP-003-E1-S1: `web/src/components/ui/badge.tsx`, `button.tsx` (with `blocked`), `card.tsx`, and `web/src/components/token-literals.test.ts` exporting `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn`.
   - CAP-003-E1-S2: `web/src/components/ui/form.tsx` (`Form`, `FormRoot`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`) and `input.tsx` (`variant="numeric"`, `suffix`), with `react-hook-form`, `zod` and `@hookform/resolvers` in `package.json`.
@@ -177,7 +177,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 ### Additional Unit Tests
 
-- [ ] T008 [P] Write the step card contract in a new `web/src/screens/setup/step-card.test.tsx` (AC-25, DAC-E4-13; setup-ui §10; UX design §1.2 step card; DEC-0350, DEC-0345). Cases:
+- [x] T008 [P] Write the step card contract in a new `web/src/screens/setup/step-card.test.tsx` (AC-25, DAC-E4-13; setup-ui §10; UX design §1.2 step card; DEC-0350, DEC-0345). Cases:
   - (a) **Section and heading.** `<StepCard step={2} question="How far back should history go?" />` renders `getByRole("region", { name: "How far back should history go?" })`. The `h2` has `id` `STEP_HEADING_ID` (`"setup-step-heading"`) and `tabIndex` `-1`. The text *Step 2 of 4* is present.
   - (b) **Footer.** With `onBack` and `onContinue` spies: `getByRole("button", { name: "← Back: Market data" })` has `data-variant="ghost"` and calls `onBack` once; the text *Next: Stocks to follow* is present; `getByRole("button", { name: "Continue" })` has `data-variant="default"` and calls `onContinue` once. For step 3 the labels are *← Back: How far back* and *Next: Download data*.
   - (c) **Absent controls.** Step 1 with `onBack` given renders no Back button. With no `onContinue`, neither **Continue** nor a *Next:* hint renders (step 4's card).
@@ -194,7 +194,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that drops the hook's `previous.current = current` update: (e)'s return to step 1.
   - swap-case of the two reasons in `failureReason`: (f).
 
-- [ ] T009 [P] Add rows for this story's three new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal (DEC-0345, DEC-0346): `["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"]`, `["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"]` and `["STEP2.saveFailed", ["FactorFlow is not answering"], "Couldn't save history depth: FactorFlow is not answering"]`. CAP-003-E4-S1's T006 scan of every export and of the file's text then covers them unchanged. Kills: drop-field-copy on any of the three: its row.
+- [x] T009 [P] Add rows for this story's three new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal (DEC-0345, DEC-0346): `["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"]`, `["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"]` and `["STEP2.saveFailed", ["FactorFlow is not answering"], "Couldn't save history depth: FactorFlow is not answering"]`. CAP-003-E4-S1's T006 scan of every export and of the file's text then covers them unchanged. Kills: drop-field-copy on any of the three: its row.
 
 - [ ] T010 [P] Write the step list contract in a new `web/src/screens/setup/step-list.test.tsx` (AC-25, DAC-E4-1 rendering half, DAC-E4-S2-1; setup-ui §10; UX design §1.2; DEC-0348, DEC-0349, DEC-0350). Render `<StepList state={stateWith(…)} />` with the shell mocked. Cases:
   - (a) **Structure.** `getByRole("navigation", { name: "Setup steps" })` holds one `list` of four `listitem`s whose titles are, in order, *Market data*, *How far back*, *Stocks to follow*, *Download data* (DAC-E4-11's four steps).
@@ -253,13 +253,13 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: The three copy strings and the four modules, each in its own TDD cycle. Every module's comments cite AC, DAC and TC in the style of the delivered `status-region.tsx`, and none writes a length, a colour, a layout value or one of the eight DAC-E7-3 terms (write "28 px" with a space where a comment needs it).
 
-- [ ] T013 Add three strings to `web/src/screens/setup/copy.ts` (CAP-003-E4-S1's catalogue; T009 RED first), each with a doc comment saying this story adds it and no design gives its wording, as `copy.ts`'s module comment provides:
+- [x] T013 Add three strings to `web/src/screens/setup/copy.ts` (CAP-003-E4-S1's catalogue; T009 RED first), each with a doc comment saying this story adds it and no design gives its wording, as `copy.ts`'s module comment provides:
   - `READ_ERRORS.notAnswering` *FactorFlow is not answering* and `READ_ERRORS.unexpected` *FactorFlow hit an unexpected problem* (DEC-0345);
   - `STEP2.saveFailed(reason: string)` → `Couldn't save history depth: ${reason}` (DEC-0346).
 
   `copy.ts` keeps importing nothing and exporting no number or boolean. Makes T009 pass.
 
-- [ ] T014 Create `web/src/screens/setup/step-card.tsx` (depends on T013; T008 RED first), to DEC-0350.
+- [x] T014 Create `web/src/screens/setup/step-card.tsx` (depends on T013; T008 RED first), to DEC-0350.
   - **Imports.** `type ReactNode`, `useEffect`, `useRef` from `"react"`; `ApiUnreachableError` and `type ApiError` from `"../../api/client"`; `Button` from `"../../components/ui/button"`; `Card` from `"../../components/ui/card"`; `LAYOUT` from `"../../app/layout"`; `type StepId` from `"./use-setup-state"`; `STEP_TITLES`, `stepPosition`, `backLabel`, `nextHint`, `CONTINUE`, `READ_ERRORS` from `"./copy"`.
   - **`STEP_HEADING_ID`** `= "setup-step-heading"`: one step card renders at a time, so one id serves the heading, its `aria-labelledby` and the done-step links' `href`.
   - **`StepCard(props: StepCardProps): JSX.Element`** with `interface StepCardProps { step: StepId; question: string; explanation?: ReactNode; note?: ReactNode; onBack?: () => void; onContinue?: () => void; children?: ReactNode }`. Renders `<section aria-labelledby={STEP_HEADING_ID}>` around `<Card variant="default" className="flex flex-col gap-5 p-4">` holding, in order:
