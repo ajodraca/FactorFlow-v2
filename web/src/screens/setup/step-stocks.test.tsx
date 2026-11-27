@@ -134,12 +134,18 @@ const outcome = (symbol: string, disposition: SymbolOutcome["disposition"]): Sym
   reason: null,
 });
 
-function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
+function deferred<T>(): {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: unknown) => void;
+} {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((r) => {
-    resolve = r;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 
 /** The text a person or a screen reader meets: content, names, titles and descriptions. */
@@ -835,5 +841,116 @@ describe("step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; D
     render(<Harness initial={{ source: "later", pasted: symbols(12).join(",") }} />);
     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
     expect(continueButton()).toHaveAttribute("data-variant", "default");
+  });
+});
+
+// Implements TC-COMP-116 (the malformed half and the report reset, IR-001, IR-003) and
+// DAC-E4-6 with AC-3 (a settled post never overrides navigation, IR-004).
+describe("rework of review v1 (IR-001, IR-003, IR-004)", () => {
+  async function useRealClient(): Promise<void> {
+    const actual = await vi.importActual<typeof import("../../api/client")>("../../api/client");
+    vi.mocked(addInstruments).mockImplementation(actual.addInstruments);
+  }
+
+  const MALFORMED_RESPONSE = {
+    added: [],
+    reactivated: [],
+    rejected: [
+      {
+        input_symbol: "ZZZZ!",
+        normalised_symbol: null,
+        disposition: "malformed",
+        reason: "not a valid symbol shape",
+      },
+    ],
+  };
+
+  it("announces a malformed rejection as unreadable, without the server reason, and stays (IR-001)", async () => {
+    const user = userEvent.setup();
+    await useRealClient();
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      jsonResponse(MALFORMED_RESPONSE, 201),
+    );
+    render(<Harness />);
+    await pasteInto(user, "AAPL");
+    await user.tab();
+    await user.click(continueButton());
+    await waitFor(() => expect(rereadSpy).toHaveBeenCalledWith("activeCount"));
+    expect(screen.getByRole("status")).toHaveTextContent("ZZZZ!, not a valid symbol format");
+    expect(document.body.textContent).not.toContain("not a valid symbol shape");
+    expect(goToSpy).toHaveBeenLastCalledWith(3);
+    expect(goToSpy).not.toHaveBeenCalledWith(4);
+  });
+
+  it("clears the previous post's report when the next post starts (IR-003)", async () => {
+    const user = userEvent.setup();
+    await useRealClient();
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementationOnce(async () => jsonResponse(DUPLICATE_RESPONSE, 201));
+    render(<Harness />);
+    await pasteInto(user, "AAPL, KO");
+    await user.tab();
+    await user.click(continueButton());
+    expect(await screen.findByText("KO, already followed")).toBeInTheDocument();
+
+    const held = deferred<Response>();
+    fetchSpy.mockImplementationOnce(() => held.promise);
+    await user.click(continueButton());
+    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
+    expect(screen.queryByText("KO, already followed")).toBeNull();
+    held.resolve(
+      jsonResponse({ error: { code: "internal_error", message: "x", request_id: "r" } }, 500),
+    );
+    await screen.findByRole("alert");
+    expect(screen.queryByText("KO, already followed")).toBeNull();
+  });
+
+  it("does not move the owner again when a post settles after Back (IR-004)", async () => {
+    const user = userEvent.setup();
+    const held = deferred<ReturnType<typeof okResult>>();
+    vi.mocked(addInstruments).mockImplementation(() => held.promise);
+    render(<Harness />);
+    await pasteInto(user, "AAPL");
+    await user.tab();
+    await user.click(continueButton());
+    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
+    await user.click(screen.getByRole("button", { name: "← Back: How far back" }));
+    expect(goToSpy).toHaveBeenLastCalledWith(2);
+    held.resolve(okResult(["AAPL"]));
+    await waitFor(() => expect(field()).not.toHaveAttribute("readonly"));
+    expect(goToSpy.mock.calls).toEqual([[2]]);
+  });
+
+  it("does not move the owner again when a post fails after Back (IR-004)", async () => {
+    const user = userEvent.setup();
+    const held = deferred<ReturnType<typeof okResult>>();
+    vi.mocked(addInstruments).mockImplementation(() => held.promise);
+    render(<Harness />);
+    await pasteInto(user, "AAPL");
+    await user.tab();
+    await user.click(continueButton());
+    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
+    await user.click(screen.getByRole("button", { name: "← Back: How far back" }));
+    held.reject(new ApiUnreachableError("x"));
+    await screen.findByRole("alert");
+    expect(goToSpy.mock.calls).toEqual([[2]]);
+  });
+
+  it("does not move the owner again when the step unmounts before the post settles (IR-004)", async () => {
+    const user = userEvent.setup();
+    const held = deferred<ReturnType<typeof okResult>>();
+    vi.mocked(addInstruments).mockImplementation(() => held.promise);
+    const { unmount } = render(<Harness />);
+    await pasteInto(user, "AAPL");
+    await user.tab();
+    await user.click(continueButton());
+    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
+    unmount();
+    held.resolve(okResult(["AAPL"]));
+    await act(async () => {
+      await held.promise;
+    });
+    expect(goToSpy).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,278 @@
+diff --git a/web/src/screens/setup/step-card.test.tsx b/web/src/screens/setup/step-card.test.tsx
+index 4b5fbe76..6297c92c 100644
+--- a/web/src/screens/setup/step-card.test.tsx
++++ b/web/src/screens/setup/step-card.test.tsx
+@@ -207,4 +207,20 @@ describe("blocked Continue (CAP-003-E4-S3, DAC-E4-7)", () => {
+     await user.click(next);
+     expect(spy).toHaveBeenCalledTimes(1);
+   });
++
++  it("keeps one button element when it toggles between blocked and default (IR-005)", () => {
++    const { rerender } = render(
++      <StepCard step={3} question="Q" onContinue={vi.fn()} continueBlocked={REASON} />,
++    );
++    const before = screen.getByRole("button", { name: "Continue" });
++    rerender(<StepCard step={3} question="Q" onContinue={vi.fn()} />);
++    const after = screen.getByRole("button", { name: "Continue" });
++    expect(after).toBe(before);
++    expect(after).toHaveAttribute("data-variant", "default");
++    expect(after).not.toHaveAttribute("aria-describedby");
++    expect(screen.queryByText(REASON)).toBeNull();
++    rerender(<StepCard step={3} question="Q" onContinue={vi.fn()} continueBlocked={REASON} />);
++    expect(screen.getByRole("button", { name: "Continue" })).toBe(before);
++    expect(before).toHaveAccessibleDescription(REASON);
++  });
+ });
+diff --git a/web/src/screens/setup/step-card.tsx b/web/src/screens/setup/step-card.tsx
+index e7e89776..c1c8d42c 100644
+--- a/web/src/screens/setup/step-card.tsx
++++ b/web/src/screens/setup/step-card.tsx
+@@ -79,19 +79,17 @@ export function StepCard({
+                 {nextHint(STEP_TITLES[(step + 1) as StepId])}
+               </span>
+               {continueBlocked !== undefined ? (
+-                <>
+-                  <p id={reasonId} className="text-xs text-muted-foreground">
+-                    {continueBlocked}
+-                  </p>
+-                  <Button variant="blocked" aria-describedby={reasonId} onClick={onContinue}>
+-                    {CONTINUE}
+-                  </Button>
+-                </>
+-              ) : (
+-                <Button variant="default" onClick={onContinue}>
+-                  {CONTINUE}
+-                </Button>
+-              )}
++                <p id={reasonId} className="text-xs text-muted-foreground">
++                  {continueBlocked}
++                </p>
++              ) : null}
++              <Button
++                variant={continueBlocked !== undefined ? "blocked" : "default"}
++                aria-describedby={continueBlocked !== undefined ? reasonId : undefined}
++                onClick={onContinue}
++              >
++                {CONTINUE}
++              </Button>
+             </div>
+           ) : null}
+         </div>
+diff --git a/web/src/screens/setup/step-stocks.test.tsx b/web/src/screens/setup/step-stocks.test.tsx
+index dabadf68..4932cf63 100644
+--- a/web/src/screens/setup/step-stocks.test.tsx
++++ b/web/src/screens/setup/step-stocks.test.tsx
+@@ -134,12 +134,18 @@ const outcome = (symbol: string, disposition: SymbolOutcome["disposition"]): Sym
+   reason: null,
+ });
+ 
+-function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
++function deferred<T>(): {
++  promise: Promise<T>;
++  resolve: (value: T) => void;
++  reject: (error: unknown) => void;
++} {
+   let resolve!: (value: T) => void;
+-  const promise = new Promise<T>((r) => {
+-    resolve = r;
++  let reject!: (error: unknown) => void;
++  const promise = new Promise<T>((res, rej) => {
++    resolve = res;
++    reject = rej;
+   });
+-  return { promise, resolve };
++  return { promise, resolve, reject };
+ }
+ 
+ /** The text a person or a screen reader meets: content, names, titles and descriptions. */
+@@ -837,3 +843,114 @@ describe("step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; D
+     expect(continueButton()).toHaveAttribute("data-variant", "default");
+   });
+ });
++
++// Implements TC-COMP-116 (the malformed half and the report reset, IR-001, IR-003) and
++// DAC-E4-6 with AC-3 (a settled post never overrides navigation, IR-004).
++describe("rework of review v1 (IR-001, IR-003, IR-004)", () => {
++  async function useRealClient(): Promise<void> {
++    const actual = await vi.importActual<typeof import("../../api/client")>("../../api/client");
++    vi.mocked(addInstruments).mockImplementation(actual.addInstruments);
++  }
++
++  const MALFORMED_RESPONSE = {
++    added: [],
++    reactivated: [],
++    rejected: [
++      {
++        input_symbol: "ZZZZ!",
++        normalised_symbol: null,
++        disposition: "malformed",
++        reason: "not a valid symbol shape",
++      },
++    ],
++  };
++
++  it("announces a malformed rejection as unreadable, without the server reason, and stays (IR-001)", async () => {
++    const user = userEvent.setup();
++    await useRealClient();
++    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
++      jsonResponse(MALFORMED_RESPONSE, 201),
++    );
++    render(<Harness />);
++    await pasteInto(user, "AAPL");
++    await user.tab();
++    await user.click(continueButton());
++    await waitFor(() => expect(rereadSpy).toHaveBeenCalledWith("activeCount"));
++    expect(screen.getByRole("status")).toHaveTextContent("ZZZZ!, not a valid symbol format");
++    expect(document.body.textContent).not.toContain("not a valid symbol shape");
++    expect(goToSpy).toHaveBeenLastCalledWith(3);
++    expect(goToSpy).not.toHaveBeenCalledWith(4);
++  });
++
++  it("clears the previous post's report when the next post starts (IR-003)", async () => {
++    const user = userEvent.setup();
++    await useRealClient();
++    const fetchSpy = vi
++      .spyOn(globalThis, "fetch")
++      .mockImplementationOnce(async () => jsonResponse(DUPLICATE_RESPONSE, 201));
++    render(<Harness />);
++    await pasteInto(user, "AAPL, KO");
++    await user.tab();
++    await user.click(continueButton());
++    expect(await screen.findByText("KO, already followed")).toBeInTheDocument();
++
++    const held = deferred<Response>();
++    fetchSpy.mockImplementationOnce(() => held.promise);
++    await user.click(continueButton());
++    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
++    expect(screen.queryByText("KO, already followed")).toBeNull();
++    held.resolve(
++      jsonResponse({ error: { code: "internal_error", message: "x", request_id: "r" } }, 500),
++    );
++    await screen.findByRole("alert");
++    expect(screen.queryByText("KO, already followed")).toBeNull();
++  });
++
++  it("does not move the owner again when a post settles after Back (IR-004)", async () => {
++    const user = userEvent.setup();
++    const held = deferred<ReturnType<typeof okResult>>();
++    vi.mocked(addInstruments).mockImplementation(() => held.promise);
++    render(<Harness />);
++    await pasteInto(user, "AAPL");
++    await user.tab();
++    await user.click(continueButton());
++    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
++    await user.click(screen.getByRole("button", { name: "← Back: How far back" }));
++    expect(goToSpy).toHaveBeenLastCalledWith(2);
++    held.resolve(okResult(["AAPL"]));
++    await waitFor(() => expect(field()).not.toHaveAttribute("readonly"));
++    expect(goToSpy.mock.calls).toEqual([[2]]);
++  });
++
++  it("does not move the owner again when a post fails after Back (IR-004)", async () => {
++    const user = userEvent.setup();
++    const held = deferred<ReturnType<typeof okResult>>();
++    vi.mocked(addInstruments).mockImplementation(() => held.promise);
++    render(<Harness />);
++    await pasteInto(user, "AAPL");
++    await user.tab();
++    await user.click(continueButton());
++    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
++    await user.click(screen.getByRole("button", { name: "← Back: How far back" }));
++    held.reject(new ApiUnreachableError("x"));
++    await screen.findByRole("alert");
++    expect(goToSpy.mock.calls).toEqual([[2]]);
++  });
++
++  it("does not move the owner again when the step unmounts before the post settles (IR-004)", async () => {
++    const user = userEvent.setup();
++    const held = deferred<ReturnType<typeof okResult>>();
++    vi.mocked(addInstruments).mockImplementation(() => held.promise);
++    const { unmount } = render(<Harness />);
++    await pasteInto(user, "AAPL");
++    await user.tab();
++    await user.click(continueButton());
++    await waitFor(() => expect(field()).toHaveAttribute("readonly"));
++    unmount();
++    held.resolve(okResult(["AAPL"]));
++    await act(async () => {
++      await held.promise;
++    });
++    expect(goToSpy).not.toHaveBeenCalled();
++  });
++});
+diff --git a/web/src/screens/setup/step-stocks.tsx b/web/src/screens/setup/step-stocks.tsx
+index d43dbec8..71439969 100644
+--- a/web/src/screens/setup/step-stocks.tsx
++++ b/web/src/screens/setup/step-stocks.tsx
+@@ -1,4 +1,4 @@
+-import { type Ref, useId, useRef, useState } from "react";
++import { type Ref, useEffect, useId, useRef, useState } from "react";
+ import { useForm } from "react-hook-form";
+ import { formatCount } from "../../components/patterns/format";
+ import { Button } from "../../components/ui/button";
+@@ -144,6 +144,15 @@ export function StepStocks({ state }: { state: SetupState }) {
+   const textareaRef = useRef<HTMLTextAreaElement>(null);
+   const pendingParse = useRef(false);
+   const postingRef = useRef(false);
++  // False once the owner has left step 3 (Back, a step link, unmount): a post that settles
++  // afterwards must not move them again (AC-3, DAC-E4-6).
++  const onStepRef = useRef(true);
++  useEffect(() => {
++    onStepRef.current = true;
++    return () => {
++      onStepRef.current = false;
++    };
++  }, []);
+   const [summary, setSummary] = useState<PasteSummary | null>(() => summarise(state.drafts.pasted));
+   const [report, setReport] = useState<string[]>([]);
+   const [failure, setFailure] = useState<{ reason: string; posted: number } | null>(null);
+@@ -195,7 +204,9 @@ export function StepStocks({ state }: { state: SetupState }) {
+           return entry.disposition === "malformed" ? [STEP3.unreadable(entry.inputSymbol)] : [];
+         });
+         setReport(lines);
+-        state.goTo(lines.length > 0 ? 3 : 4);
++        if (onStepRef.current) {
++          state.goTo(lines.length > 0 ? 3 : 4);
++        }
+       } else {
+         const text = outcome.unposted.join("\n");
+         state.setDraft("unposted", outcome.unposted);
+@@ -205,7 +216,9 @@ export function StepStocks({ state }: { state: SetupState }) {
+         if (outcome.posted > 0) {
+           state.reread("activeCount");
+         }
+-        state.goTo(3);
++        if (onStepRef.current) {
++          state.goTo(3);
++        }
+       }
+     } finally {
+       postingRef.current = false;
+@@ -227,7 +240,10 @@ export function StepStocks({ state }: { state: SetupState }) {
+       question={QUESTIONS[3]}
+       explanation={STEP3.explanation}
+       note={STEP3.infoNote}
+-      onBack={() => state.goTo(2)}
++      onBack={() => {
++        onStepRef.current = false;
++        state.goTo(2);
++      }}
+       onContinue={onContinue}
+       continueBlocked={blocked ? STEP3.zeroBlocked : undefined}
+     >
+diff --git a/web/src/screens/setup/summarise-paste.test.ts b/web/src/screens/setup/summarise-paste.test.ts
+index bca08c07..ae0032b1 100644
+--- a/web/src/screens/setup/summarise-paste.test.ts
++++ b/web/src/screens/setup/summarise-paste.test.ts
+@@ -113,6 +113,11 @@ describe("replaceEntry (DEC-0352)", () => {
+     expect(replaceEntry("BRK/B\nBRK/B", "BRK/B", "BRK.B")).toBe("BRK.B\nBRK.B");
+   });
+ 
++  it("treats a lone tab as a separator, as the parser does (IR-002)", () => {
++    expect(replaceEntry("AAPL\tBRK/B", "BRK/B", "BRK.B")).toBe("AAPL\tBRK.B");
++    expect(replaceEntry("BRK/B\tAAPL", "BRK/B", "BRK.B")).toBe("BRK.B\tAAPL");
++  });
++
+   it("splits where the delivered parser splits", () => {
+     const corpus = "A,B\n\tC;;D , E";
+     const seen: string[] = [];

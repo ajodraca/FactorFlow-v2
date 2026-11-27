@@ -125,3 +125,34 @@ cycles:
           disposition: equivalent
           reason: "The blocked formula reads source === null || (source === paste && accepted === 0); the plan's kill list says source !== later would differ, but a null source is already blocked by the first disjunct, so the two forms agree for every source."
 
+  - id: cycle-5
+    tasks: [T007, T012, T016, T017]
+    description: >
+      Rework of CAP-003-E4-S3-implementation-review-v1 (IR-001 to IR-005). IR-001: TC-COMP-116 gains a 201 whose rejected entry is malformed; the live region must say "ZZZZ!, not a valid symbol format", the server reason must be absent and step 3 stays current. IR-002: replaceEntry is pinned on a lone tab separator. IR-003: a re-post that is held and then fails must not show the previous post's already-followed line. IR-004 (production): step-stocks.tsx keeps onStepRef, set false by Back and by the unmount cleanup (and true again on mount, for StrictMode), and a post that settles afterwards no longer calls goTo; tests cover success, failure and unmount after Back. IR-005 (production): step-card.tsx renders one Button whose variant and aria-describedby switch, with the reason paragraph conditional beside it, so toggling blocked and default no longer replaces the element; a test pins element identity. IR-001 to IR-003 are test-strength gaps, so their new tests pass on the unchanged production code and are proved by the reviewer's three mutants, rerun here as manual mutants and all killed. RED: IR-004 (two cases) and IR-005 failed before the production change. Both per-cycle reviews approved (code review LOW observations only; spec drift none). Full validation on the final bytes: npm run format, lint, tsc --noEmit and build clean, npm run test 3324 passed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-5-review-v1-rework.log
+    red_log_sha256: 3d0baa4ae8f765af2847e76d1e83143bcea4647c4d06693f10f0a18d96df746c
+    red_evidence: >
+      Three new cases failed before the production change: the IR-005 element-identity case and the two IR-004 cases (a post settling after Back, and after unmount, called goTo again). The IR-001 to IR-003 cases are test-strength additions and passed on the unchanged code, as the review's findings describe.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 432 passed, in green-cycle-5-review-v1-rework.log; the full suite 3324 passed; tsc --noEmit, biome lint, biome format and build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c01b3e4a328df2360172204b9ff2fe159062d75c981152af1d2cab2f444b2e8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-5-results.json
+      results_sha256: a6335f3589105530acaa8da5ed014c860bbce78176f9ed7e745cb1ecba4a6815
+      generated: 19
+      killed: 18
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.947
+      survivors:
+        - id: web/src/screens/setup/step-stocks.tsx:149:negate-boolean:1
+          disposition: equivalent
+          reason: "useRef(true) against useRef(false) differs only before the mount effect runs, and that effect sets the ref to true before any event can start a post, so no observable behaviour differs."

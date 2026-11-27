@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ibgdomkt/w0/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (33 tests | 1 failed) 20ms
+   × replaceEntry (DEC-0352) > treats a lone tab as a separator, as the parser does (IR-002) 7ms
+     → expected 'AAPL\tBRK/B' to be 'AAPL\tBRK.B' // Object.is equality
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 17ms
+ ✓ src/screens/setup/copy.test.ts (159 tests) 19ms
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 202ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 362ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 351ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 339ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 327ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 235ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 1304ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 2251ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > replaceEntry (DEC-0352) > treats a lone tab as a separator, as the parser does (IR-002)
+AssertionError: expected 'AAPL\tBRK/B' to be 'AAPL\tBRK.B' // Object.is equality
+
+Expected: "AAPL	BRK.B"
+Received: "AAPL	BRK/B"
+
+ ❯ src/screens/setup/summarise-paste.test.ts:117:59
+    115| 
+    116|   it("treats a lone tab as a separator, as the parser does (IR-002)", …
+    117|     expect(replaceEntry("AAPL\tBRK/B", "BRK/B", "BRK.B")).toBe("AAPL\t…
+       |                                                           ^
+    118|     expect(replaceEntry("BRK/B\tAAPL", "BRK/B", "BRK.B")).toBe("BRK.B\…
+    119|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  1 failed | 373 passed (374)
+   Start at  14:06:24
+   Duration  4.26s (transform 714ms, setup 1.57s, collect 5.24s, tests 5.08s, environment 4.23s, prepare 2.06s)
+

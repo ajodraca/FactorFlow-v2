@@ -79,19 +79,17 @@ export function StepCard({
                 {nextHint(STEP_TITLES[(step + 1) as StepId])}
               </span>
               {continueBlocked !== undefined ? (
-                <>
-                  <p id={reasonId} className="text-xs text-muted-foreground">
-                    {continueBlocked}
-                  </p>
-                  <Button variant="blocked" aria-describedby={reasonId} onClick={onContinue}>
-                    {CONTINUE}
-                  </Button>
-                </>
-              ) : (
-                <Button variant="default" onClick={onContinue}>
-                  {CONTINUE}
-                </Button>
-              )}
+                <p id={reasonId} className="text-xs text-muted-foreground">
+                  {continueBlocked}
+                </p>
+              ) : null}
+              <Button
+                variant={continueBlocked !== undefined ? "blocked" : "default"}
+                aria-describedby={continueBlocked !== undefined ? reasonId : undefined}
+                onClick={onContinue}
+              >
+                {CONTINUE}
+              </Button>
             </div>
           ) : null}
         </div>

@@ -113,6 +113,11 @@ describe("replaceEntry (DEC-0352)", () => {
     expect(replaceEntry("BRK/B\nBRK/B", "BRK/B", "BRK.B")).toBe("BRK.B\nBRK.B");
   });
 
+  it("treats a lone tab as a separator, as the parser does (IR-002)", () => {
+    expect(replaceEntry("AAPL\tBRK/B", "BRK/B", "BRK.B")).toBe("AAPL\tBRK.B");
+    expect(replaceEntry("BRK/B\tAAPL", "BRK/B", "BRK.B")).toBe("BRK.B\tAAPL");
+  });
+
   it("splits where the delivered parser splits", () => {
     const corpus = "A,B\n\tC;;D , E";
     const seen: string[] = [];

@@ -1,4 +1,4 @@
-import { type Ref, useId, useRef, useState } from "react";
+import { type Ref, useEffect, useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { formatCount } from "../../components/patterns/format";
 import { Button } from "../../components/ui/button";
@@ -144,6 +144,15 @@ export function StepStocks({ state }: { state: SetupState }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pendingParse = useRef(false);
   const postingRef = useRef(false);
+  // False once the owner has left step 3 (Back, a step link, unmount): a post that settles
+  // afterwards must not move them again (AC-3, DAC-E4-6).
+  const onStepRef = useRef(true);
+  useEffect(() => {
+    onStepRef.current = true;
+    return () => {
+      onStepRef.current = false;
+    };
+  }, []);
   const [summary, setSummary] = useState<PasteSummary | null>(() => summarise(state.drafts.pasted));
   const [report, setReport] = useState<string[]>([]);
   const [failure, setFailure] = useState<{ reason: string; posted: number } | null>(null);
@@ -195,7 +204,9 @@ export function StepStocks({ state }: { state: SetupState }) {
           return entry.disposition === "malformed" ? [STEP3.unreadable(entry.inputSymbol)] : [];
         });
         setReport(lines);
-        state.goTo(lines.length > 0 ? 3 : 4);
+        if (onStepRef.current) {
+          state.goTo(lines.length > 0 ? 3 : 4);
+        }
       } else {
         const text = outcome.unposted.join("\n");
         state.setDraft("unposted", outcome.unposted);
@@ -205,7 +216,9 @@ export function StepStocks({ state }: { state: SetupState }) {
         if (outcome.posted > 0) {
           state.reread("activeCount");
         }
-        state.goTo(3);
+        if (onStepRef.current) {
+          state.goTo(3);
+        }
       }
     } finally {
       postingRef.current = false;
@@ -227,7 +240,10 @@ export function StepStocks({ state }: { state: SetupState }) {
       question={QUESTIONS[3]}
       explanation={STEP3.explanation}
       note={STEP3.infoNote}
-      onBack={() => state.goTo(2)}
+      onBack={() => {
+        onStepRef.current = false;
+        state.goTo(2);
+      }}
       onContinue={onContinue}
       continueBlocked={blocked ? STEP3.zeroBlocked : undefined}
     >

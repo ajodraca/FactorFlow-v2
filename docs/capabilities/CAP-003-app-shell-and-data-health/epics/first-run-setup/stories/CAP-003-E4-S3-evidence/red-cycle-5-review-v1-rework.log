@@ -1,0 +1,108 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 4ms
+ ❯ src/screens/setup/step-card.test.tsx (15 tests | 1 failed) 133ms
+   × blocked Continue (CAP-003-E4-S3, DAC-E4-7) > keeps one button element when it toggles between blocked and default (IR-005) 8ms
+     → expected <button …(2)></button> to be <button …(4)></button> // Object.is equality
+ ❯ src/screens/setup/step-stocks.test.tsx (45 tests | 2 failed) 997ms
+   × rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post settles after Back (IR-004) 45ms
+     → expected [ [ 2 ], [ 4 ] ] to deeply equal [ [ 2 ] ]
+   × rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when the step unmounts before the post settles (IR-004) 32ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      4,
+    ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > blocked Continue (CAP-003-E4-S3, DAC-E4-7) > keeps one button element when it toggles between blocked and default (IR-005)
+AssertionError: expected <button …(2)></button> to be <button …(4)></button> // Object.is equality
+
+- Expected
++ Received
+
+  <button
+-   aria-describedby=":rc:"
+-   aria-disabled="true"
+-   class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background text-muted-foreground cursor-not-allowed"
+-   data-variant="blocked"
++   class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++   data-variant="default"
+  >
+    Continue
+  </button>
+
+ ❯ src/screens/setup/step-card.test.tsx:218:19
+    216|     rerender(<StepCard step={3} question="Q" onContinue={vi.fn()} />);
+    217|     const after = screen.getByRole("button", { name: "Continue" });
+    218|     expect(after).toBe(before);
+       |                   ^
+    219|     expect(after).toHaveAttribute("data-variant", "default");
+    220|     expect(after).not.toHaveAttribute("aria-describedby");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post settles after Back (IR-004)
+AssertionError: expected [ [ 2 ], [ 4 ] ] to deeply equal [ [ 2 ] ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      2,
+    ],
++   Array [
++     4,
++   ],
+  ]
+
+ ❯ src/screens/setup/step-stocks.test.tsx:916:32
+    914|     held.resolve(okResult(["AAPL"]));
+    915|     await waitFor(() => expect(field()).not.toHaveAttribute("readonly"…
+    916|     expect(goToSpy.mock.calls).toEqual([[2]]);
+       |                                ^
+    917|   });
+    918| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when the step unmounts before the post settles (IR-004)
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      4,
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/setup/step-stocks.test.tsx:933:25
+    931|       await held.promise;
+    932|     });
+    933|     expect(goToSpy).not.toHaveBeenCalled();
+       |                         ^
+    934|   });
+    935| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  3 failed | 90 passed (93)
+   Start at  14:04:20
+   Duration  2.32s (transform 214ms, setup 279ms, collect 777ms, tests 1.13s, environment 1.06s, prepare 544ms)
+

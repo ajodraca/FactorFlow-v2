@@ -207,4 +207,20 @@ describe("blocked Continue (CAP-003-E4-S3, DAC-E4-7)", () => {
     await user.click(next);
     expect(spy).toHaveBeenCalledTimes(1);
   });
+
+  it("keeps one button element when it toggles between blocked and default (IR-005)", () => {
+    const { rerender } = render(
+      <StepCard step={3} question="Q" onContinue={vi.fn()} continueBlocked={REASON} />,
+    );
+    const before = screen.getByRole("button", { name: "Continue" });
+    rerender(<StepCard step={3} question="Q" onContinue={vi.fn()} />);
+    const after = screen.getByRole("button", { name: "Continue" });
+    expect(after).toBe(before);
+    expect(after).toHaveAttribute("data-variant", "default");
+    expect(after).not.toHaveAttribute("aria-describedby");
+    expect(screen.queryByText(REASON)).toBeNull();
+    rerender(<StepCard step={3} question="Q" onContinue={vi.fn()} continueBlocked={REASON} />);
+    expect(screen.getByRole("button", { name: "Continue" })).toBe(before);
+    expect(before).toHaveAccessibleDescription(REASON);
+  });
 });
