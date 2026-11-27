@@ -31,3 +31,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-2
+    tasks: [T008, T010]
+    description: >
+      The Home copy catalogue (TC-COMP-134 catalogue half; DAC-E5-S1-3; DEC-0362; Resolved Conflicts 4 and 6): copy.ts holds the grouped as-const objects HEADER, DATA_TILE, NEEDS_YOU, EMPTY_STATE and ITEMS (keyed by the six kind names of ui-components 2.6, not typed by NeedsYouKind) plus NOT_DETERMINABLE, CHECKED and TRY_AGAIN, with a private listOf and formatCount as its only import; no tier label, answer word or route. copy.test.ts compares every static group and every template, the singular and plural forms included, with independent literals (21 tests). The generator produced 13 mutants and 8 were hand-written from the plan's kill list; the first run left one survivor, listOf with one item (a test of actionName with one symbol was added), the second run killed all 21. Both reviews approved with no blocking findings.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-2-copy.log
+    red_log_sha256: 5501b123ebc09f71ef09f05ab8a4ec76d69e45b16bda79ab6d500efee7c6922d
+    red_evidence: >
+      copy.test.ts failed to load (./copy did not resolve) with the module moved aside; the implementation was restored after the failure was observed.
+    green_evidence: >
+      copy.test.ts, 21 tests, passes in green-cycle-2-copy.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: dc2c7f4a27e102026df9b034559708d89a4400f91beb92657cb220bf36a5a89d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: bc239c3b705dcd9c63fd717df07e0f675c682d4a89ebd613f00ec11675f94ba2
+      generated: 21
+      killed: 21
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

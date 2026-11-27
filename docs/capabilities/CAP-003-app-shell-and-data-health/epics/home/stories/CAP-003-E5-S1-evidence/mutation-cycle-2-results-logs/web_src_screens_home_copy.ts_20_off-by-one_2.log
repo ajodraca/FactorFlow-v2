@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzw0odpt/w1/web
+
+ ❯ src/screens/home/copy.test.ts (21 tests | 2 failed) 8ms
+   × templates > data_problems.title(["KO","TSLA"], 2) is "KO and TSLA are missing data" 3ms
+     → expected 'KOTSLA are missing data' to be 'KO and TSLA are missing data' // Object.is equality
+   × templates > data_problems.actionName lists the symbols 0ms
+     → expected 'Fix data for KOTSLA' to be 'Fix data for KO and TSLA' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.title(["KO","TSLA"], 2) is "KO and TSLA are missing data"
+AssertionError: expected 'KOTSLA are missing data' to be 'KO and TSLA are missing data' // Object.is equality
+
+Expected: "KO and TSLA are missing data"
+Received: "KOTSLA are missing data"
+
+ ❯ src/screens/home/copy.test.ts:122:55
+    120|     [["FBXX", "KO", "TSLA"], 1239, "FBXX, KO, TSLA and 1,236 more stoc…
+    121|   ] as const)("data_problems.title(%j, %i) is %j", (symbols, count, ex…
+    122|     expect(ITEMS.data_problems.title(symbols, count)).toBe(expected);
+       |                                                       ^
+    123|   });
+    124| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.actionName lists the symbols
+AssertionError: expected 'Fix data for KOTSLA' to be 'Fix data for KO and TSLA' // Object.is equality
+
+Expected: "Fix data for KO and TSLA"
+Received: "Fix data for KOTSLA"
+
+ ❯ src/screens/home/copy.test.ts:139:60
+    137|     );
+    138|     expect(ITEMS.data_problems.actionName(["KO"])).toBe("Fix data for …
+    139|     expect(ITEMS.data_problems.actionName(["KO", "TSLA"])).toBe("Fix d…
+       |                                                            ^
+    140|   });
+    141| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  16:08:10
+   Duration  990ms (transform 45ms, setup 50ms, collect 41ms, tests 8ms, environment 218ms, prepare 160ms)
+

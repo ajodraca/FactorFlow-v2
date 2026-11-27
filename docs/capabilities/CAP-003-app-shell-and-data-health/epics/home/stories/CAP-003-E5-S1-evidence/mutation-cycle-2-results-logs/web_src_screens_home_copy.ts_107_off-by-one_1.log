@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzw0odpt/w0/web
+
+ ❯ src/screens/home/copy.test.ts (21 tests | 1 failed) 6ms
+   × templates > data_problems body follows the count 3ms
+     → expected 'Their scores show as Incomplete until…' to be 'Its scores show as Incomplete until t…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems body follows the count
+AssertionError: expected 'Their scores show as Incomplete until…' to be 'Its scores show as Incomplete until t…' // Object.is equality
+
+Expected: "Its scores show as Incomplete until the data is complete."
+Received: "Their scores show as Incomplete until the data is complete."
+
+ ❯ src/screens/home/copy.test.ts:126:41
+    124| 
+    125|   it("data_problems body follows the count", () => {
+    126|     expect(ITEMS.data_problems.body(1)).toBe(
+       |                                         ^
+    127|       "Its scores show as Incomplete until the data is complete.",
+    128|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  16:08:13
+   Duration  957ms (transform 31ms, setup 39ms, collect 25ms, tests 6ms, environment 218ms, prepare 184ms)
+

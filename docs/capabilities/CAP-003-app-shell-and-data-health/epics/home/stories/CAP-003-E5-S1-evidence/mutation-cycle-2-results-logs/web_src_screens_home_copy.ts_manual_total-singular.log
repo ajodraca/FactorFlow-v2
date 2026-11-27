@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzw0odpt/w1/web
+
+ ❯ src/screens/home/copy.test.ts (21 tests | 1 failed) 8ms
+   × templates > first_download.body(0, 1) is "0 of 1 stock so far. Scores appear when it finishes." 4ms
+     → expected '0 of 1 stocks so far. Scores appear w…' to be '0 of 1 stock so far. Scores appear wh…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > first_download.body(0, 1) is "0 of 1 stock so far. Scores appear when it finishes."
+AssertionError: expected '0 of 1 stocks so far. Scores appear w…' to be '0 of 1 stock so far. Scores appear wh…' // Object.is equality
+
+Expected: "0 of 1 stock so far. Scores appear when it finishes."
+Received: "0 of 1 stocks so far. Scores appear when it finishes."
+
+ ❯ src/screens/home/copy.test.ts:159:52
+    157|     [5, null, "Scores appear when it finishes."],
+    158|   ] as const)("first_download.body(%i, %j) is %j", (done, total, expec…
+    159|     expect(ITEMS.first_download.body(done, total)).toBe(expected);
+       |                                                    ^
+    160|   });
+    161| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  16:08:15
+   Duration  887ms (transform 44ms, setup 42ms, collect 33ms, tests 8ms, environment 245ms, prepare 76ms)
+
