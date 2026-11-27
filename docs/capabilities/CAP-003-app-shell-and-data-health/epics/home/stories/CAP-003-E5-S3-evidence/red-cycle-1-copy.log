@@ -1,0 +1,121 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/home/copy.test.ts (25 tests | 5 failed) 9ms
+   × static strings > top level 4ms
+     → expected undefined to be 'No reason was recorded' // Object.is equality
+   × static strings > NEEDS_YOU 1ms
+     → expected { title: 'Needs you', …(2) } to deeply equal { title: 'Needs you', …(3) }
+   × static strings > ITEMS, kind by kind 1ms
+     → expected { tag: 'Download', …(4) } to deeply equal { tag: 'Download', …(5) }
+   × templates > data_problems.actionName names the stocks beyond the symbols (DEC-0368) 1ms
+     → expected 'Fix data for FBXX, KO and TSLA' to be 'Fix data for FBXX, KO, TSLA and 1 mor…' // Object.is equality
+   × templates > download_not_complete.failedBody takes the no-reason sentence (DEC-0369) 0ms
+     → expected 'undefined. Ended 2026-10-15 17:40 CDT.' to be 'No reason was recorded. Ended 2026-10…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > top level
+AssertionError: expected undefined to be 'No reason was recorded' // Object.is equality
+
+- Expected: 
+"No reason was recorded"
+
++ Received: 
+undefined
+
+ ❯ src/screens/home/copy.test.ts:31:23
+     29|       TRY_AGAIN: "Try again",
+     30|     });
+     31|     expect(NO_REASON).toBe("No reason was recorded");
+       |                       ^
+     32|   });
+     33| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > NEEDS_YOU
+AssertionError: expected { title: 'Needs you', …(2) } to deeply equal { title: 'Needs you', …(3) }
+
+- Expected
++ Received
+
+  Object {
+-   "headingPrefix": "Needs you ·",
+    "nothingNeedsYou": "Nothing needs you right now.",
+    "subLine": "Most important first. Nothing here is urgent unless marked.",
+    "title": "Needs you",
+  }
+
+ ❯ src/screens/home/copy.test.ts:63:32
+     61| 
+     62|   it("NEEDS_YOU", () => {
+     63|     expect(statics(NEEDS_YOU)).toEqual({
+       |                                ^
+     64|       title: "Needs you",
+     65|       headingPrefix: "Needs you ·",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > ITEMS, kind by kind
+AssertionError: expected { tag: 'Download', …(4) } to deeply equal { tag: 'Download', …(5) }
+
+- Expected
++ Received
+
+  Object {
+    "action": "See download",
+    "failedActionName": "See the download that failed",
+    "failedTitle": "The last download failed",
+-   "interruptedActionName": "See the download that was interrupted",
+    "interruptedTitle": "The last download was interrupted",
+    "tag": "Download",
+  }
+
+ ❯ src/screens/home/copy.test.ts:89:50
+     87|     ]);
+     88|     expect(statics(ITEMS.data_problems)).toEqual({ tag: "Data", action…
+     89|     expect(statics(ITEMS.download_not_complete)).toEqual({
+       |                                                  ^
+     90|       tag: "Download",
+     91|       failedTitle: "The last download failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.actionName names the stocks beyond the symbols (DEC-0368)
+AssertionError: expected 'Fix data for FBXX, KO and TSLA' to be 'Fix data for FBXX, KO, TSLA and 1 mor…' // Object.is equality
+
+Expected: "Fix data for FBXX, KO, TSLA and 1 more stock"
+Received: "Fix data for FBXX, KO and TSLA"
+
+ ❯ src/screens/home/copy.test.ts:162:71
+    160| 
+    161|   it("data_problems.actionName names the stocks beyond the symbols (DE…
+    162|     expect(ITEMS.data_problems.actionName(["FBXX", "KO", "TSLA"], 4)).…
+       |                                                                       ^
+    163|       "Fix data for FBXX, KO, TSLA and 1 more stock",
+    164|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > download_not_complete.failedBody takes the no-reason sentence (DEC-0369)
+AssertionError: expected 'undefined. Ended 2026-10-15 17:40 CDT.' to be 'No reason was recorded. Ended 2026-10…' // Object.is equality
+
+Expected: "No reason was recorded. Ended 2026-10-15 17:40 CDT."
+Received: "undefined. Ended 2026-10-15 17:40 CDT."
+
+ ❯ src/screens/home/copy.test.ts:171:87
+    169| 
+    170|   it("download_not_complete.failedBody takes the no-reason sentence (D…
+    171|     expect(ITEMS.download_not_complete.failedBody(NO_REASON, "2026-10-…
+       |                                                                                       ^
+    172|       "No reason was recorded. Ended 2026-10-15 17:40 CDT.",
+    173|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 20 passed (25)
+   Start at  17:46:22
+   Duration  758ms (transform 34ms, setup 64ms, collect 23ms, tests 9ms, environment 303ms, prepare 194ms)
+

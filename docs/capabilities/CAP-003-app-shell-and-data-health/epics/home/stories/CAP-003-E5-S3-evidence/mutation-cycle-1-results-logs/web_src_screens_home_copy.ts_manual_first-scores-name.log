@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cjc9w28i/w3/web
+
+ ❯ src/screens/home/copy.test.ts (25 tests | 1 failed) 9ms
+   × static strings > ITEMS, kind by kind 5ms
+     → expected { tag: 'Scores', …(4) } to deeply equal { tag: 'Scores', …(4) }
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 90ms
+   × Home vocabulary (TC-COMP-134) > the catalogue has none of the eight terms, and the walk is not vacuous 4ms
+     → expected 'See the run your first scores come fr…' not to match /\b(?:instrument|acquisition|acquire|…/i
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > ITEMS, kind by kind
+AssertionError: expected { tag: 'Scores', …(4) } to deeply equal { tag: 'Scores', …(4) }
+
+- Expected
++ Received
+
+  Object {
+    "action": "See download",
+-   "actionName": "See the download your first scores come from",
++   "actionName": "See the run your first scores come from",
+    "body": "Scores appear when this finishes.",
+    "tag": "Scores",
+    "title": "Your first scores are being produced",
+  }
+
+ ❯ src/screens/home/copy.test.ts:110:41
+    108|       actionName: "See your first download",
+    109|     });
+    110|     expect(statics(ITEMS.first_scores)).toEqual({
+       |                                         ^
+    111|       tag: "Scores",
+    112|       title: "Your first scores are being produced",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/header.test.tsx > Home vocabulary (TC-COMP-134) > the catalogue has none of the eight terms, and the walk is not vacuous
+AssertionError: expected 'See the run your first scores come fr…' not to match /\b(?:instrument|acquisition|acquire|…/i
+
+- Expected: 
+/\b(?:instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"See the run your first scores come from"
+
+ ❯ src/screens/home/header.test.tsx:246:24
+    244|     expect(strings.length).toBeGreaterThanOrEqual(40);
+    245|     for (const text of strings) {
+    246|       expect(text).not.toMatch(TERMS);
+       |                        ^
+    247|     }
+    248|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 54 passed (56)
+   Start at  17:47:05
+   Duration  1.74s (transform 163ms, setup 137ms, collect 520ms, tests 100ms, environment 591ms, prepare 149ms)
+

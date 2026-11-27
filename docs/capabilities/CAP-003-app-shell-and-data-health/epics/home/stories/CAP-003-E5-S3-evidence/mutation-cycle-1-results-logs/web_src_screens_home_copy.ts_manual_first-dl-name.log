@@ -1,0 +1,43 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cjc9w28i/w0/web
+
+ ❯ src/screens/home/copy.test.ts (25 tests | 1 failed) 11ms
+   × static strings > ITEMS, kind by kind 7ms
+     → expected { tag: 'Download', …(3) } to deeply equal { tag: 'Download', …(3) }
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/home/header.test.tsx (31 tests) 89ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > ITEMS, kind by kind
+AssertionError: expected { tag: 'Download', …(3) } to deeply equal { tag: 'Download', …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "action": "See download",
+-   "actionName": "See your first download",
++   "actionName": "See download",
+    "tag": "Download",
+    "title": "Your first download is running",
+  }
+
+ ❯ src/screens/home/copy.test.ts:104:43
+    102|       actionName: "Open Settings to set the market data key",
+    103|     });
+    104|     expect(statics(ITEMS.first_download)).toEqual({
+       |                                           ^
+    105|       tag: "Download",
+    106|       title: "Your first download is running",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 55 passed (56)
+   Start at  17:47:05
+   Duration  1.49s (transform 170ms, setup 100ms, collect 560ms, tests 100ms, environment 651ms, prepare 159ms)
+

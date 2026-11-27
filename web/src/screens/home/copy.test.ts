@@ -6,6 +6,7 @@ import {
   HEADER,
   ITEMS,
   NEEDS_YOU,
+  NO_REASON,
   NOT_DETERMINABLE,
   READ_FAILURE,
   TRY_AGAIN,
@@ -27,6 +28,7 @@ describe("static strings", () => {
       CHECKED: "checked",
       TRY_AGAIN: "Try again",
     });
+    expect(NO_REASON).toBe("No reason was recorded");
   });
 
   it("HEADER", () => {
@@ -60,6 +62,7 @@ describe("static strings", () => {
   it("NEEDS_YOU", () => {
     expect(statics(NEEDS_YOU)).toEqual({
       title: "Needs you",
+      headingPrefix: "Needs you ·",
       subLine: "Most important first. Nothing here is urgent unless marked.",
       nothingNeedsYou: "Nothing needs you right now.",
     });
@@ -89,6 +92,7 @@ describe("static strings", () => {
       interruptedTitle: "The last download was interrupted",
       action: "See download",
       failedActionName: "See the download that failed",
+      interruptedActionName: "See the download that was interrupted",
     });
     expect(statics(ITEMS.credential_missing)).toEqual({
       tag: "Setup",
@@ -101,17 +105,20 @@ describe("static strings", () => {
       tag: "Download",
       title: "Your first download is running",
       action: "See download",
+      actionName: "See your first download",
     });
     expect(statics(ITEMS.first_scores)).toEqual({
       tag: "Scores",
       title: "Your first scores are being produced",
       body: "Scores appear when this finishes.",
       action: "See download",
+      actionName: "See the download your first scores come from",
     });
     expect(statics(ITEMS.score_failed)).toEqual({
       tag: "Scores",
       title: "The latest score update failed",
       action: "See details",
+      actionName: "See why the score update failed",
     });
   });
 });
@@ -146,6 +153,24 @@ describe("templates", () => {
     );
     expect(ITEMS.data_problems.actionName(["KO"])).toBe("Fix data for KO");
     expect(ITEMS.data_problems.actionName(["KO", "TSLA"])).toBe("Fix data for KO and TSLA");
+    expect(ITEMS.data_problems.actionName(["KO", "TSLA", "FBXX"], 3)).toBe(
+      "Fix data for KO, TSLA and FBXX",
+    );
+  });
+
+  it("data_problems.actionName names the stocks beyond the symbols (DEC-0368)", () => {
+    expect(ITEMS.data_problems.actionName(["FBXX", "KO", "TSLA"], 4)).toBe(
+      "Fix data for FBXX, KO, TSLA and 1 more stock",
+    );
+    expect(ITEMS.data_problems.actionName(["FBXX", "KO", "TSLA"], 1239)).toBe(
+      "Fix data for FBXX, KO, TSLA and 1,236 more stocks",
+    );
+  });
+
+  it("download_not_complete.failedBody takes the no-reason sentence (DEC-0369)", () => {
+    expect(ITEMS.download_not_complete.failedBody(NO_REASON, "2026-10-15 17:40 CDT")).toBe(
+      "No reason was recorded. Ended 2026-10-15 17:40 CDT.",
+    );
   });
 
   it("download_not_complete bodies carry the end time", () => {

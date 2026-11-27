@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E5-S3 - Needs You Card and the Home Screen.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T013, T015]
+    description: >
+      The copy entries the card needs (DAC-E5-7, DAC-E5-8, DAC-E5-S3-5; DEC-0367 to DEC-0369): NO_REASON, NEEDS_YOU.headingPrefix, four action names, and the defaulted stockCount parameter of ITEMS.data_problems.actionName in copy.ts, each with a doc comment naming its decision, and the matching literal assertions in copy.test.ts (added to the existing whole-group literals). The generator produced 2 mutants and 9 were hand-written from the plan's kill list; all 11 were killed. Both reviews approved with no blocking findings (one LOW on a doc comment).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/red-cycle-1-copy.log
+    red_log_sha256: e62a90fdc6765b5f1b536817f07fd17fe1996c2d88bc016c9efb9d83f691ee22
+    red_evidence: >
+      copy.test.ts failed 5 tests (NO_REASON, headingPrefix, the four action names and the stockCount form did not exist) before the implementation.
+    green_evidence: >
+      The web/src/screens/home suite, 194 tests, passes in green-cycle-1-copy.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 1fe7e598ad26c25939846f046376b25e6ffc654b68eb630fcfcc6b6f62b9dacf
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: b4c464d4a719e94a9048181072af572471a248ba48f736753fcc9787b98fc8f6
+      generated: 11
+      killed: 11
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

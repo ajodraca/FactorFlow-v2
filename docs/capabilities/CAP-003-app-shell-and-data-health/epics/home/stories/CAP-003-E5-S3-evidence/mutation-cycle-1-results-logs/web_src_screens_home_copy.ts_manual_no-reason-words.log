@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cjc9w28i/w2/web
+
+ ❯ src/screens/home/copy.test.ts (25 tests | 2 failed) 7ms
+   × static strings > top level 4ms
+     → expected 'Unknown reason' to be 'No reason was recorded' // Object.is equality
+   × templates > download_not_complete.failedBody takes the no-reason sentence (DEC-0369) 0ms
+     → expected 'Unknown reason. Ended 2026-10-15 17:4…' to be 'No reason was recorded. Ended 2026-10…' // Object.is equality
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/home/header.test.tsx (31 tests) 108ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > top level
+AssertionError: expected 'Unknown reason' to be 'No reason was recorded' // Object.is equality
+
+Expected: "No reason was recorded"
+Received: "Unknown reason"
+
+ ❯ src/screens/home/copy.test.ts:31:23
+     29|       TRY_AGAIN: "Try again",
+     30|     });
+     31|     expect(NO_REASON).toBe("No reason was recorded");
+       |                       ^
+     32|   });
+     33| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > download_not_complete.failedBody takes the no-reason sentence (DEC-0369)
+AssertionError: expected 'Unknown reason. Ended 2026-10-15 17:4…' to be 'No reason was recorded. Ended 2026-10…' // Object.is equality
+
+Expected: "No reason was recorded. Ended 2026-10-15 17:40 CDT."
+Received: "Unknown reason. Ended 2026-10-15 17:40 CDT."
+
+ ❯ src/screens/home/copy.test.ts:171:87
+    169| 
+    170|   it("download_not_complete.failedBody takes the no-reason sentence (D…
+    171|     expect(ITEMS.download_not_complete.failedBody(NO_REASON, "2026-10-…
+       |                                                                                       ^
+    172|       "No reason was recorded. Ended 2026-10-15 17:40 CDT.",
+    173|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 54 passed (56)
+   Start at  17:47:02
+   Duration  1.85s (transform 227ms, setup 156ms, collect 636ms, tests 116ms, environment 808ms, prepare 221ms)
+
