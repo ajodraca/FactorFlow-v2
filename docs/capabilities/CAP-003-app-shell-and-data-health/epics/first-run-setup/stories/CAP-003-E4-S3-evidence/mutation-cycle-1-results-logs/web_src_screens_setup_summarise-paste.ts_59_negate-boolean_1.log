@@ -1,0 +1,129 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w0/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 4 failed) 10ms
+   × summarisePaste (TC-COMP-113) > accepts KO once and names the repeat 4ms
+     → expected { accepted: [], …(2) } to deeply equal { accepted: [ 'KO' ], …(2) }
+   × summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected 1ms
+     → expected { accepted: [], …(2) } to deeply equal { accepted: [ 'AAPL', 'MSFT' ], …(2) }
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > names a repeated symbol once however often it repeats 0ms
+     → expected [] to deeply equal [ 'KO' ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > keeps first-occurrence order for accepted and first-repeat order for duplicates 0ms
+     → expected [] to deeply equal [ 'MSFT', 'AAPL', 'NVDA' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > accepts KO once and names the repeat
+AssertionError: expected { accepted: [], …(2) } to deeply equal { accepted: [ 'KO' ], …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [
+-     "KO",
+-   ],
++   "accepted": Array [],
+    "duplicates": Array [
+      "KO",
+    ],
+    "unreadable": Array [],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:24:56
+     22| 
+     23|   it("accepts KO once and names the repeat", () => {
+     24|     expect(summarisePaste(parseBulkSymbols("KO\nKO"))).toEqual({
+       |                                                        ^
+     25|       accepted: ["KO"],
+     26|       duplicates: ["KO"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected
+AssertionError: expected { accepted: [], …(2) } to deeply equal { accepted: [ 'AAPL', 'MSFT' ], …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [
++   "accepted": Array [],
++   "duplicates": Array [
+      "AAPL",
+      "MSFT",
+-   ],
+-   "duplicates": Array [
+-     "AAPL",
+    ],
+    "unreadable": Array [
+      Object {
+        "fix": null,
+        "input": "ZZZZ!",
+      },
+      Object {
+        "fix": "BRK.B",
+        "input": "BRK/B",
+      },
+    ],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:32:80
+     30| 
+     31|   it("keeps the accepted entries whatever else is rejected", () => {
+     32|     expect(summarisePaste(parseBulkSymbols("AAPL, ZZZZ!, MSFT, BRK/B, …
+       |                                                                                ^
+     33|       accepted: ["AAPL", "MSFT"],
+     34|       duplicates: ["AAPL"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > names a repeated symbol once however often it repeats
+AssertionError: expected [] to deeply equal [ 'KO' ]
+
+- Expected
++ Received
+
+- Array [
+-   "KO",
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:46:30
+     44|   it("names a repeated symbol once however often it repeats", () => {
+     45|     const summary = summarisePaste(parseBulkSymbols("KO, KO, ko, KO"));
+     46|     expect(summary.accepted).toEqual(["KO"]);
+       |                              ^
+     47|     expect(summary.duplicates).toEqual(["KO"]);
+     48|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > keeps first-occurrence order for accepted and first-repeat order for duplicates
+AssertionError: expected [] to deeply equal [ 'MSFT', 'AAPL', 'NVDA' ]
+
+- Expected
++ Received
+
+- Array [
+-   "MSFT",
+-   "AAPL",
+-   "NVDA",
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:52:30
+     50|   it("keeps first-occurrence order for accepted and first-repeat order…
+     51|     const summary = summarisePaste(parseBulkSymbols("MSFT, AAPL, MSFT,…
+     52|     expect(summary.accepted).toEqual(["MSFT", "AAPL", "NVDA"]);
+       |                              ^
+     53|     expect(summary.duplicates).toEqual(["MSFT", "AAPL"]);
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 28 passed (32)
+   Start at  13:21:26
+   Duration  1.02s (transform 56ms, setup 49ms, collect 33ms, tests 10ms, environment 403ms, prepare 56ms)
+

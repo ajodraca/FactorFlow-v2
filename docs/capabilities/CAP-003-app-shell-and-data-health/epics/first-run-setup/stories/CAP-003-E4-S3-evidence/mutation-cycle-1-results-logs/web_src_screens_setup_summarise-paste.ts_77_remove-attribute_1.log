@@ -1,0 +1,129 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w1/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 5 failed) 14ms
+   × replaceEntry (DEC-0352) > keeps the separators 5ms
+     → expected 'AAPL,BRK/B;MSFT' to be 'AAPL,BRK.B;MSFT' // Object.is equality
+   × replaceEntry (DEC-0352) > keeps the whitespace around the entry 1ms
+     → expected ' BRK/B \nKO' to be ' BRK.B \nKO' // Object.is equality
+   × replaceEntry (DEC-0352) > replaces a whole entry only 0ms
+     → expected 'BRK/BX, BRK/B' to be 'BRK/BX, BRK.B' // Object.is equality
+   × replaceEntry (DEC-0352) > replaces every occurrence of the entry 0ms
+     → expected 'BRK/B\nBRK/B' to be 'BRK.B\nBRK.B' // Object.is equality
+   × replaceEntry (DEC-0352) > splits where the delivered parser splits 1ms
+     → expected [ 'A,B\n\tC;;D , E', …(4) ] to deeply equal [ '<A>,B\n\tC;;D , E', …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > replaceEntry (DEC-0352) > keeps the separators
+AssertionError: expected 'AAPL,BRK/B;MSFT' to be 'AAPL,BRK.B;MSFT' // Object.is equality
+
+Expected: "AAPL,BRK.B;MSFT"
+Received: "AAPL,BRK/B;MSFT"
+
+ ❯ src/screens/setup/summarise-paste.test.ts:101:63
+     99| describe("replaceEntry (DEC-0352)", () => {
+    100|   it("keeps the separators", () => {
+    101|     expect(replaceEntry("AAPL,BRK/B;MSFT", "BRK/B", "BRK.B")).toBe("AA…
+       |                                                               ^
+    102|   });
+    103| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > replaceEntry (DEC-0352) > keeps the whitespace around the entry
+AssertionError: expected ' BRK/B \nKO' to be ' BRK.B \nKO' // Object.is equality
+
+- Expected
++ Received
+
+-  BRK.B 
++  BRK/B 
+  KO
+
+ ❯ src/screens/setup/summarise-paste.test.ts:105:59
+    103| 
+    104|   it("keeps the whitespace around the entry", () => {
+    105|     expect(replaceEntry(" BRK/B \nKO", "BRK/B", "BRK.B")).toBe(" BRK.B…
+       |                                                           ^
+    106|   });
+    107| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > replaceEntry (DEC-0352) > replaces a whole entry only
+AssertionError: expected 'BRK/BX, BRK/B' to be 'BRK/BX, BRK.B' // Object.is equality
+
+Expected: "BRK/BX, BRK.B"
+Received: "BRK/BX, BRK/B"
+
+ ❯ src/screens/setup/summarise-paste.test.ts:109:61
+    107| 
+    108|   it("replaces a whole entry only", () => {
+    109|     expect(replaceEntry("BRK/BX, BRK/B", "BRK/B", "BRK.B")).toBe("BRK/…
+       |                                                             ^
+    110|   });
+    111| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > replaceEntry (DEC-0352) > replaces every occurrence of the entry
+AssertionError: expected 'BRK/B\nBRK/B' to be 'BRK.B\nBRK.B' // Object.is equality
+
+- Expected
++ Received
+
+- BRK.B
++ BRK/B
+- BRK.B
++ BRK/B
+
+ ❯ src/screens/setup/summarise-paste.test.ts:113:60
+    111| 
+    112|   it("replaces every occurrence of the entry", () => {
+    113|     expect(replaceEntry("BRK/B\nBRK/B", "BRK/B", "BRK.B")).toBe("BRK.B…
+       |                                                            ^
+    114|   });
+    115| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > replaceEntry (DEC-0352) > splits where the delivered parser splits
+AssertionError: expected [ 'A,B\n\tC;;D , E', …(4) ] to deeply equal [ '<A>,B\n\tC;;D , E', …(4) ]
+
+- Expected
++ Received
+
+  Array [
+-   "<A>,B
++   "A,B
+  	C;;D , E",
+-   "A,<B>
++   "A,B
+  	C;;D , E",
+    "A,B
+- 	<C>;;D , E",
++ 	C;;D , E",
+    "A,B
+- 	C;;<D> , E",
++ 	C;;D , E",
+    "A,B
+- 	C;;D , <E>",
++ 	C;;D , E",
+  ]
+
+ ❯ src/screens/setup/summarise-paste.test.ts:130:18
+    128|       seen.push(replaceEntry(corpus, entry.input, `<${entry.input}>`));
+    129|     }
+    130|     expect(seen).toEqual([
+       |                  ^
+    131|       "<A>,B\n\tC;;D , E",
+    132|       "A,<B>\n\tC;;D , E",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 27 passed (32)
+   Start at  13:21:29
+   Duration  1.41s (transform 44ms, setup 51ms, collect 34ms, tests 14ms, environment 282ms, prepare 496ms)
+

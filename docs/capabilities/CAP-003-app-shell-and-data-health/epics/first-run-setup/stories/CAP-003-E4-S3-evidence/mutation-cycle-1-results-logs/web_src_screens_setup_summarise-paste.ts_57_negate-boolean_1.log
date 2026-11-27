@@ -1,0 +1,510 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w3/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 17 failed) 11ms
+   × summarisePaste (TC-COMP-113) > suggests BRK.B for BRK/B 5ms
+     → expected { accepted: [ 'BRK/B' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+   × summarisePaste (TC-COMP-113) > suggests BRK.B for BRK B 1ms
+     → expected { accepted: [ 'BRK B' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+   × summarisePaste (TC-COMP-113) > suggests BRK.B for BRK_B 0ms
+     → expected { accepted: [ 'BRK_B' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+   × summarisePaste (TC-COMP-113) > offers no fix for ZZZZ! 0ms
+     → expected { accepted: [ 'ZZZZ!' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+   × summarisePaste (TC-COMP-113) > accepts KO once and names the repeat 1ms
+     → expected { accepted: [], duplicates: [], …(1) } to deeply equal { accepted: [ 'KO' ], …(2) }
+   × summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected 0ms
+     → expected { Object (accepted, duplicates, ...) } to deeply equal { accepted: [ 'AAPL', 'MSFT' ], …(2) }
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > names a repeated symbol once however often it repeats 0ms
+     → expected [] to deeply equal [ 'KO' ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > keeps first-occurrence order for accepted and first-repeat order for duplicates 0ms
+     → expected [] to deeply equal [ 'MSFT', 'AAPL', 'NVDA' ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > does not treat a repeated unreadable entry as a duplicate 1ms
+     → expected [ 'ZZZZ!' ] to deeply equal []
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK / B only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: 'BRK / B', fix: 'BRK.B' } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for brk/b only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: 'brk/b', fix: 'BRK.B' } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/B! only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: 'BRK/B!', fix: null } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for A1/B only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: 'A1/B', fix: null } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for ABC 1 only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: 'ABC 1', fix: null } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for /BRK only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: '/BRK', fix: null } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/ only when a run of separators sits between letters 0ms
+     → expected [] to deeply equal [ { input: 'BRK/', fix: null } ]
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > applies the rule as recorded to two symbols joined by a space 0ms
+     → expected [] to deeply equal [ { input: 'AAPL MSFT', …(1) } ]
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > suggests BRK.B for BRK/B
+AssertionError: expected { accepted: [ 'BRK/B' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [],
+-   "duplicates": Array [],
+-   "unreadable": Array [
+-     Object {
+-       "fix": "BRK.B",
+-       "input": "BRK/B",
+-     },
++   "accepted": Array [
++     "BRK/B",
+    ],
++   "duplicates": Array [],
++   "unreadable": Array [],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:8:51
+      6| describe("summarisePaste (TC-COMP-113)", () => {
+      7|   it.each(["BRK/B", "BRK B", "BRK_B"])("suggests BRK.B for %s", (raw) …
+      8|     expect(summarisePaste(parseBulkSymbols(raw))).toEqual({
+       |                                                   ^
+      9|       accepted: [],
+     10|       duplicates: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > suggests BRK.B for BRK B
+AssertionError: expected { accepted: [ 'BRK B' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [],
+-   "duplicates": Array [],
+-   "unreadable": Array [
+-     Object {
+-       "fix": "BRK.B",
+-       "input": "BRK B",
+-     },
++   "accepted": Array [
++     "BRK B",
+    ],
++   "duplicates": Array [],
++   "unreadable": Array [],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:8:51
+      6| describe("summarisePaste (TC-COMP-113)", () => {
+      7|   it.each(["BRK/B", "BRK B", "BRK_B"])("suggests BRK.B for %s", (raw) …
+      8|     expect(summarisePaste(parseBulkSymbols(raw))).toEqual({
+       |                                                   ^
+      9|       accepted: [],
+     10|       duplicates: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > suggests BRK.B for BRK_B
+AssertionError: expected { accepted: [ 'BRK_B' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [],
+-   "duplicates": Array [],
+-   "unreadable": Array [
+-     Object {
+-       "fix": "BRK.B",
+-       "input": "BRK_B",
+-     },
++   "accepted": Array [
++     "BRK_B",
+    ],
++   "duplicates": Array [],
++   "unreadable": Array [],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:8:51
+      6| describe("summarisePaste (TC-COMP-113)", () => {
+      7|   it.each(["BRK/B", "BRK B", "BRK_B"])("suggests BRK.B for %s", (raw) …
+      8|     expect(summarisePaste(parseBulkSymbols(raw))).toEqual({
+       |                                                   ^
+      9|       accepted: [],
+     10|       duplicates: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > offers no fix for ZZZZ!
+AssertionError: expected { accepted: [ 'ZZZZ!' ], …(2) } to deeply equal { accepted: [], duplicates: [], …(1) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [],
+-   "duplicates": Array [],
+-   "unreadable": Array [
+-     Object {
+-       "fix": null,
+-       "input": "ZZZZ!",
+-     },
++   "accepted": Array [
++     "ZZZZ!",
+    ],
++   "duplicates": Array [],
++   "unreadable": Array [],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:16:55
+     14| 
+     15|   it("offers no fix for ZZZZ!", () => {
+     16|     expect(summarisePaste(parseBulkSymbols("ZZZZ!"))).toEqual({
+       |                                                       ^
+     17|       accepted: [],
+     18|       duplicates: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > accepts KO once and names the repeat
+AssertionError: expected { accepted: [], duplicates: [], …(1) } to deeply equal { accepted: [ 'KO' ], …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [
+-     "KO",
+-   ],
+-   "duplicates": Array [
+-     "KO",
++   "accepted": Array [],
++   "duplicates": Array [],
++   "unreadable": Array [
++     Object {
++       "fix": null,
++       "input": "KO",
++     },
++     Object {
++       "fix": null,
++       "input": "KO",
++     },
+    ],
+-   "unreadable": Array [],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:24:56
+     22| 
+     23|   it("accepts KO once and names the repeat", () => {
+     24|     expect(summarisePaste(parseBulkSymbols("KO\nKO"))).toEqual({
+       |                                                        ^
+     25|       accepted: ["KO"],
+     26|       duplicates: ["KO"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected
+AssertionError: expected { Object (accepted, duplicates, ...) } to deeply equal { accepted: [ 'AAPL', 'MSFT' ], …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "accepted": Array [
+-     "AAPL",
+-     "MSFT",
+-   ],
+-   "duplicates": Array [
+-     "AAPL",
++     "ZZZZ!",
++     "BRK/B",
+    ],
++   "duplicates": Array [],
+    "unreadable": Array [
+      Object {
+        "fix": null,
+-       "input": "ZZZZ!",
++       "input": "AAPL",
+      },
+      Object {
+-       "fix": "BRK.B",
+-       "input": "BRK/B",
++       "fix": null,
++       "input": "MSFT",
++     },
++     Object {
++       "fix": null,
++       "input": "AAPL",
+      },
+    ],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:32:80
+     30| 
+     31|   it("keeps the accepted entries whatever else is rejected", () => {
+     32|     expect(summarisePaste(parseBulkSymbols("AAPL, ZZZZ!, MSFT, BRK/B, …
+       |                                                                                ^
+     33|       accepted: ["AAPL", "MSFT"],
+     34|       duplicates: ["AAPL"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > names a repeated symbol once however often it repeats
+AssertionError: expected [] to deeply equal [ 'KO' ]
+
+- Expected
++ Received
+
+- Array [
+-   "KO",
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:46:30
+     44|   it("names a repeated symbol once however often it repeats", () => {
+     45|     const summary = summarisePaste(parseBulkSymbols("KO, KO, ko, KO"));
+     46|     expect(summary.accepted).toEqual(["KO"]);
+       |                              ^
+     47|     expect(summary.duplicates).toEqual(["KO"]);
+     48|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > keeps first-occurrence order for accepted and first-repeat order for duplicates
+AssertionError: expected [] to deeply equal [ 'MSFT', 'AAPL', 'NVDA' ]
+
+- Expected
++ Received
+
+- Array [
+-   "MSFT",
+-   "AAPL",
+-   "NVDA",
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:52:30
+     50|   it("keeps first-occurrence order for accepted and first-repeat order…
+     51|     const summary = summarisePaste(parseBulkSymbols("MSFT, AAPL, MSFT,…
+     52|     expect(summary.accepted).toEqual(["MSFT", "AAPL", "NVDA"]);
+       |                              ^
+     53|     expect(summary.duplicates).toEqual(["MSFT", "AAPL"]);
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > does not treat a repeated unreadable entry as a duplicate
+AssertionError: expected [ 'ZZZZ!' ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "ZZZZ!",
++ ]
+
+ ❯ src/screens/setup/summarise-paste.test.ts:58:32
+     56|   it("does not treat a repeated unreadable entry as a duplicate", () =…
+     57|     const summary = summarisePaste(parseBulkSymbols("ZZZZ!, ZZZZ!"));
+     58|     expect(summary.duplicates).toEqual([]);
+       |                                ^
+     59|     expect(summary.unreadable).toEqual([
+     60|       { input: "ZZZZ!", fix: null },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK / B only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: 'BRK / B', fix: 'BRK.B' } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": "BRK.B",
+-     "input": "BRK / B",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for brk/b only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: 'brk/b', fix: 'BRK.B' } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": "BRK.B",
+-     "input": "brk/b",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/B! only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: 'BRK/B!', fix: null } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": null,
+-     "input": "BRK/B!",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for A1/B only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: 'A1/B', fix: null } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": null,
+-     "input": "A1/B",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for ABC 1 only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: 'ABC 1', fix: null } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": null,
+-     "input": "ABC 1",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for /BRK only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: '/BRK', fix: null } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": null,
+-     "input": "/BRK",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/ only when a run of separators sits between letters
+AssertionError: expected [] to deeply equal [ { input: 'BRK/', fix: null } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": null,
+-     "input": "BRK/",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/17]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > applies the rule as recorded to two symbols joined by a space
+AssertionError: expected [] to deeply equal [ { input: 'AAPL MSFT', …(1) } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     "fix": "AAPL.MSFT",
+-     "input": "AAPL MSFT",
+-   },
+- ]
++ Array []
+
+ ❯ src/screens/setup/summarise-paste.test.ts:78:70
+     76| 
+     77|   it("applies the rule as recorded to two symbols joined by a space", …
+     78|     expect(summarisePaste(parseBulkSymbols("AAPL MSFT")).unreadable).t…
+       |                                                                      ^
+     79|       { input: "AAPL MSFT", fix: "AAPL.MSFT" },
+     80|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/17]⎯
+
+ Test Files  1 failed (1)
+      Tests  17 failed | 15 passed (32)
+   Start at  13:21:24
+   Duration  1.58s (transform 60ms, setup 102ms, collect 45ms, tests 11ms, environment 490ms, prepare 45ms)
+

@@ -1,0 +1,51 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w3/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 1 failed) 9ms
+   × summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected 4ms
+     → expected { accepted: [], …(2) } to deeply equal { accepted: [ 'AAPL', 'MSFT' ], …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected
+AssertionError: expected { accepted: [], …(2) } to deeply equal { accepted: [ 'AAPL', 'MSFT' ], …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "accepted": Array [
+-     "AAPL",
+-     "MSFT",
+-   ],
++   "accepted": Array [],
+    "duplicates": Array [
+      "AAPL",
+    ],
+    "unreadable": Array [
+      Object {
+        "fix": null,
+        "input": "ZZZZ!",
+      },
+      Object {
+        "fix": "BRK.B",
+        "input": "BRK/B",
+      },
+    ],
+  }
+
+ ❯ src/screens/setup/summarise-paste.test.ts:32:80
+     30| 
+     31|   it("keeps the accepted entries whatever else is rejected", () => {
+     32|     expect(summarisePaste(parseBulkSymbols("AAPL, ZZZZ!, MSFT, BRK/B, …
+       |                                                                                ^
+     33|       accepted: ["AAPL", "MSFT"],
+     34|       duplicates: ["AAPL"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 31 passed (32)
+   Start at  13:21:31
+   Duration  1.17s (transform 51ms, setup 56ms, collect 49ms, tests 9ms, environment 305ms, prepare 235ms)
+

@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w2/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 1 failed) 8ms
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/B! only when a run of separators sits between letters 4ms
+     → expected [ { input: 'BRK/B!', fix: 'BRK.B!' } ] to deeply equal [ { input: 'BRK/B!', fix: null } ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/B! only when a run of separators sits between letters
+AssertionError: expected [ { input: 'BRK/B!', fix: 'BRK.B!' } ] to deeply equal [ { input: 'BRK/B!', fix: null } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+-     "fix": null,
++     "fix": "BRK.B!",
+      "input": "BRK/B!",
+    },
+  ]
+
+ ❯ src/screens/setup/summarise-paste.test.ts:74:62
+     72|     ["BRK/", null],
+     73|   ])("offers the fix for %s only when a run of separators sits between…
+     74|     expect(summarisePaste(parseBulkSymbols(raw)).unreadable).toEqual([…
+       |                                                              ^
+     75|   });
+     76| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 31 passed (32)
+   Start at  13:21:24
+   Duration  1.57s (transform 47ms, setup 98ms, collect 42ms, tests 8ms, environment 472ms, prepare 355ms)
+

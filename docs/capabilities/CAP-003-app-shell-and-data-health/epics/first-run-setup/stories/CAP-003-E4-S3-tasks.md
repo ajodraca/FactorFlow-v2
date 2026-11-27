@@ -84,7 +84,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 **Purpose**: Confirm the upstream modules this story imports exist. No package, configuration or directory change.
 
-- [ ] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
+- [x] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
   - CAP-003-E4-S1: `web/src/screens/setup/draft.tsx` (`SetupDraftProvider`, `useSetupDrafts`), `use-setup-state.ts` (`useSetupState`, `SetupState` with `activeCount`, `reread`, `goTo`, `drafts`, `setDraft`) and `copy.ts` (`QUESTIONS`, `STEP3`, `READ_ERRORS`).
   - CAP-003-E4-S2: `web/src/screens/setup/step-card.tsx` (`StepCard`, `StepReadError`, `failureReason`, `STEP_HEADING_ID`) and `step-list.tsx` (`StepList`); `copy.ts` with `READ_ERRORS.notAnswering` and `READ_ERRORS.unexpected`; `web/src/components/token-literals.test.ts` scanning `web/src/screens/setup/`.
   - CAP-003-E1-S1: `web/src/components/ui/button.tsx` (`variant="blocked"`).
@@ -111,7 +111,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-113 (summarisePaste suggests fixes, names duplicates once) in a new `web/src/screens/setup/summarise-paste.test.ts`, with a `// Implements TC-COMP-113` comment. Each case calls `summarisePaste(parseBulkSymbols(raw))` with the real, unmocked parser and compares with `toEqual` against an independent literal:
+- [x] T002 [P] Implement TC-COMP-113 (summarisePaste suggests fixes, names duplicates once) in a new `web/src/screens/setup/summarise-paste.test.ts`, with a `// Implements TC-COMP-113` comment. Each case calls `summarisePaste(parseBulkSymbols(raw))` with the real, unmocked parser and compares with `toEqual` against an independent literal:
   - (a) **The three separators.** `"BRK/B"`, `"BRK B"` and `"BRK_B"` (`it.each`): `{ accepted: [], duplicates: [], unreadable: [{ input: <raw>, fix: "BRK.B" }] }`. The rendered wording *Did you mean BRK.B?* is T013's.
   - (b) **No fix.** `"ZZZZ!"`: `{ accepted: [], duplicates: [], unreadable: [{ input: "ZZZZ!", fix: null }] }`.
   - (c) **Twice.** `"KO\nKO"`: `{ accepted: ["KO"], duplicates: ["KO"], unreadable: [] }`, so `KO` is posted once.
@@ -210,7 +210,7 @@ The setup-ui test specification and the coverage matrix are `status: draft`, the
 
 ### Additional Unit Tests
 
-- [ ] T010 Write the summary's rule cases in `web/src/screens/setup/summarise-paste.test.ts`, sequential with T002 (one file) (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352). Independent literals throughout:
+- [x] T010 Write the summary's rule cases in `web/src/screens/setup/summarise-paste.test.ts`, sequential with T002 (one file) (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352). Independent literals throughout:
   - (a) **Named once, counted once.** `"KO, KO, ko, KO"`: `accepted` `["KO"]`, `duplicates` `["KO"]` (one name for three repeats; case-insensitive through the parser's normalisation).
   - (b) **Order.** `"MSFT, AAPL, MSFT, NVDA, AAPL"`: `accepted` `["MSFT", "AAPL", "NVDA"]`, `duplicates` `["MSFT", "AAPL"]` (first-repeat order).
   - (c) **A repeated unreadable entry is not a duplicate.** `"ZZZZ!, ZZZZ!"`: `duplicates` `[]`, `unreadable` holds both entries.

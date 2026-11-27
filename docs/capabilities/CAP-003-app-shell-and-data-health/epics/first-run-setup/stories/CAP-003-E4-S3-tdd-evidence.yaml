@@ -1,0 +1,34 @@
+# TDD evidence for CAP-003-E4-S3 - Setup Step 3: Paste a List, the Paste Summary with Near-Miss Fixes, Batches and Add Later.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T010, T015]
+    description: >
+      The paste summary (TC-COMP-113, AC-5, DAC-E4-5, DAC-E4-S3-1, DEC-0218, DEC-0351, DEC-0352): summarise-paste.ts holds SYMBOL_SHAPE and ENTRY_SEPARATOR (mirrors of the delivered parser, pinned equal by test), summarisePaste (accepted in paste order, each repeated valid symbol named once in duplicates, every invalid entry in unreadable with the near-miss fix when a stretch of slash, space or underscore between letters becomes one dot and yields a valid symbol) and replaceEntry (every whole entry equal to the unreadable one replaced, separators and surrounding whitespace kept). summarise-paste.test.ts holds TC-COMP-113's four cases and T010's rule cases (a) to (g). The generator produced 9 mutants and 5 were hand-written from the plan's kill list. The first run left one survivor: the even-index guard on replaceEntry's split parts, which no input can distinguish because a separator run never equals a non-blank parser entry; the guard was removed and the run repeated (14 mutants, all killed). The first code review rejected one HIGH (the word run in a comment, an AC-19 term), fixed; the first spec-drift review reported that ENTRY_SEPARATOR was not exported as T015 states, fixed and given a mirror assertion. Both reviews repeated on the corrected diff approved; the code review left LOW observations only (a replacement string would read $ patterns, an over-long near-miss and a double separator are not pinned).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-1-summarise-paste.log
+    red_log_sha256: 03d633850b3698e6d2681ab10fa35afd9df1b18ea0040c9e49e9769c7c9786f0
+    red_evidence: >
+      summarise-paste.test.ts failed to load (./summarise-paste did not resolve) before the module existed.
+    green_evidence: >
+      summarise-paste.test.ts 32 passed (the setup suites, 301 passed, in green-cycle-1-summarise-paste.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e59afabc8317f1c076538c6351a8225e89059cbd839d9ad3cdb2a68161eee0d0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 4ee844246f644d02fc2f6e306d7516cc2c6f6697b2051adbaf06917d6a3e3ae3
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
