@@ -1,0 +1,149 @@
+diff --git a/web/src/screens/home/market-state.test.ts b/web/src/screens/home/market-state.test.ts
+new file mode 100644
+index 00000000..27064f9c
+--- /dev/null
++++ b/web/src/screens/home/market-state.test.ts
+@@ -0,0 +1,83 @@
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++
++// The module's formatter is built when it loads, so each zone re-imports it:
++// a formatter that fell back to the machine zone would then read that zone.
++type MarketStateModule = typeof import("./market-state");
++let chicagoWallClock: MarketStateModule["chicagoWallClock"];
++let marketState: MarketStateModule["marketState"];
++
++// Implements TC-COMP-132
++// The literal table: UTC instants and their America/Chicago meaning (DEC-0206;
++// DAC-E5-6; DAC-E5-S1-1). The weekend instants fall inside session hours on
++// purpose, so only the weekday rule makes them `closed`.
++const TABLE: ReadonlyArray<readonly [string, "closed" | "not_determinable"]> = [
++  // March change (CST before 2026-03-08, CDT after)
++  ["2026-03-06T14:29:00Z", "closed"],
++  ["2026-03-06T14:30:00Z", "not_determinable"],
++  ["2026-03-06T20:59:00Z", "not_determinable"],
++  ["2026-03-06T21:00:00Z", "closed"],
++  ["2026-03-07T18:00:00Z", "closed"],
++  ["2026-03-08T17:00:00Z", "closed"],
++  ["2026-03-09T13:29:00Z", "closed"],
++  ["2026-03-09T13:30:00Z", "not_determinable"],
++  ["2026-03-09T19:59:00Z", "not_determinable"],
++  ["2026-03-09T20:00:00Z", "closed"],
++  // November change (CDT before 2026-11-01, CST after)
++  ["2026-10-30T13:29:00Z", "closed"],
++  ["2026-10-30T13:30:00Z", "not_determinable"],
++  ["2026-10-30T19:59:00Z", "not_determinable"],
++  ["2026-10-30T20:00:00Z", "closed"],
++  ["2026-10-31T17:00:00Z", "closed"],
++  ["2026-11-01T18:00:00Z", "closed"],
++  ["2026-11-02T14:29:00Z", "closed"],
++  ["2026-11-02T14:30:00Z", "not_determinable"],
++  ["2026-11-02T20:59:00Z", "not_determinable"],
++  ["2026-11-02T21:00:00Z", "closed"],
++];
++
++describe.each(["Asia/Tokyo", "UTC", "America/Los_Angeles"])("under TZ=%s", (zone) => {
++  let previous: string | undefined;
++  beforeEach(async () => {
++    previous = process.env.TZ;
++    process.env.TZ = zone;
++    vi.resetModules();
++    ({ chicagoWallClock, marketState } = await import("./market-state"));
++  });
++  afterEach(() => {
++    if (previous === undefined) {
++      Reflect.deleteProperty(process.env, "TZ");
++    } else {
++      process.env.TZ = previous;
++    }
++  });
++
++  describe("marketState (TC-COMP-132)", () => {
++    it.each(TABLE)("%s is %s", (instant, expected) => {
++      expect(marketState(new Date(instant))).toBe(expected);
++    });
++
++    it("is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00", () => {
++      expect(marketState(new Date("2026-10-15T13:29:59Z"))).toBe("closed");
++      expect(marketState(new Date("2026-10-15T19:59:59Z"))).toBe("not_determinable");
++      expect(marketState(new Date("2026-10-15T20:00:00Z"))).toBe("closed");
++    });
++  });
++
++  describe("chicagoWallClock (DAC-E5-6)", () => {
++    it("reads the Chicago weekday, date and minutes of the evening", () => {
++      expect(chicagoWallClock(new Date("2026-10-16T01:00:00Z"))).toEqual({
++        weekday: "Thursday",
++        date: "2026-10-15",
++        minutes: 1200,
++      });
++    });
++
++    it("reads midnight as 0, never 1440", () => {
++      expect(chicagoWallClock(new Date("2026-10-16T05:00:00Z"))).toEqual({
++        weekday: "Friday",
++        date: "2026-10-16",
++        minutes: 0,
++      });
++    });
++  });
++});
+diff --git a/web/src/screens/home/market-state.ts b/web/src/screens/home/market-state.ts
+new file mode 100644
+index 00000000..fda9988a
+--- /dev/null
++++ b/web/src/screens/home/market-state.ts
+@@ -0,0 +1,54 @@
++/**
++ * The market state and the America/Chicago wall clock Home's header reads
++ * (component design `home-ui` 2.3; DEC-0206; DAC-E5-6, DAC-E5-S1-1; system
++ * design open question 9: there is no trading calendar). Without one, a
++ * holiday or an early close cannot be told from a session, so inside weekday
++ * session hours the state is `not_determinable`, never open. The rule reads
++ * the clock only and never the viewer's machine zone. Module shape provisional,
++ * recorded as DEC-0362.
++ */
++
++export type MarketState = "closed" | "not_determinable";
++
++export interface ChicagoWallClock {
++  weekday: string;
++  date: string;
++  minutes: number;
++}
++
++/** 08:30 America/Chicago, in minutes after midnight. */
++const SESSION_OPENS = 8 * 60 + 30;
++/** 15:00 America/Chicago: the market is `closed` from here (DAC-E5-S1-1). */
++const SESSION_CLOSES = 15 * 60;
++
++const CLOCK = new Intl.DateTimeFormat("en-US", {
++  timeZone: "America/Chicago",
++  weekday: "long",
++  year: "numeric",
++  month: "2-digit",
++  day: "2-digit",
++  hour: "2-digit",
++  minute: "2-digit",
++  hourCycle: "h23",
++});
++
++/** The English weekday, the ISO date and the minutes since midnight in Chicago. */
++export function chicagoWallClock(now: Date): ChicagoWallClock {
++  const parts = CLOCK.formatToParts(now);
++  const part = (type: Intl.DateTimeFormatPartTypes): string =>
++    parts.find((candidate) => candidate.type === type)?.value ?? "";
++  return {
++    weekday: part("weekday"),
++    date: `${part("year")}-${part("month")}-${part("day")}`,
++    minutes: Number(part("hour")) * 60 + Number(part("minute")),
++  };
++}
++
++/** `closed` on weekends and outside 08:30 to 15:00; otherwise not determinable. */
++export function marketState(now: Date): MarketState {
++  const { weekday, minutes } = chicagoWallClock(now);
++  if (weekday === "Saturday" || weekday === "Sunday") {
++    return "closed";
++  }
++  return SESSION_OPENS <= minutes && minutes < SESSION_CLOSES ? "not_determinable" : "closed";
++}

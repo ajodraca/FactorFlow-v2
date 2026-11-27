@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E5-S1 - Home Header, Market State and the Home Copy Catalogue.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T009]
+    description: >
+      The market state (TC-COMP-132; DAC-E5-6, DAC-E5-S1-1, AC-24; DEC-0206, DEC-0362): market-state.ts exports MarketState, ChicagoWallClock, chicagoWallClock(now) and marketState(now), reading one module-level America/Chicago Intl.DateTimeFormat with hourCycle h23; closed on weekends and outside 08:30 to 15:00, not_determinable inside, 15:00:00 itself closed (Resolved Conflict 1). market-state.test.ts holds the literal UTC table across the March and November DST changes and the wall-clock and second-granularity cases, all inside a TZ block that re-imports the module per zone so a formatter without its own timeZone would read the machine zone (the first mutation run left no-tz alive because the formatter was built before TZ was set). The generator produced 10 mutants and 7 were hand-written from the plan's kill list; the second run killed all 17. Both reviews approved; the code review raised LOW observations only (the re-import is stricter than T002 names, and the reviewer could not find a heading Resolved Conflict 1, which is a note title in the plan).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-1-market-state.log
+    red_log_sha256: 901789499fe761ec8165f4e0ae0cf33fd91416c7128b91a61d230a67cb9c6afe
+    red_evidence: >
+      market-state.test.ts failed to load (./market-state did not resolve) before the module existed.
+    green_evidence: >
+      market-state.test.ts, 69 tests, passes in green-cycle-1-market-state.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8020cccaf1c8da780320c38809a67f725aa61491922a74ab29c82718e6771d48
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: e1b3af5f3b83f2853542829a850eecff5d3c4fab8268e0204129357c30b1d7b9
+      generated: 17
+      killed: 17
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

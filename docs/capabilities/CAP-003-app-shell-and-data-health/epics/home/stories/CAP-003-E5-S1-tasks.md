@@ -68,7 +68,7 @@ Mapped test cases (from `tests/component/home-ui-tests.md` lines 142-224, confir
 
 **Purpose**: Confirm the hard dependencies are in the tree and record a green baseline.
 
-- [ ] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix: `web/src/app/shell-context.tsx` exports `useShell` (CAP-003-E3-S3); `web/src/app/shell-types.ts` exports `Attention` and `ReadState` (CAP-003-E3-S1); `web/src/components/patterns/presence.tsx` exports `Absent({ label })` and `NotDeterminable({ reason, label? })`, and `web/src/components/patterns/format.ts` exports `formatClock` and `formatSessionDate` (CAP-003-E1-S6, DEC-0309 and -2); `web/src/components/patterns/as-of-line.tsx` exports `AsOfLine` accepting `{ parts, className? }` (CAP-003-E1-S10, DEC-0315); `web/src/components/ui/badge.tsx` renders `data-variant` (CAP-003-E1-S1). If a producer's merged signature differs from the one named here, use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to AC-26)
+- [x] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix: `web/src/app/shell-context.tsx` exports `useShell` (CAP-003-E3-S3); `web/src/app/shell-types.ts` exports `Attention` and `ReadState` (CAP-003-E3-S1); `web/src/components/patterns/presence.tsx` exports `Absent({ label })` and `NotDeterminable({ reason, label? })`, and `web/src/components/patterns/format.ts` exports `formatClock` and `formatSessionDate` (CAP-003-E1-S6, DEC-0309 and -2); `web/src/components/patterns/as-of-line.tsx` exports `AsOfLine` accepting `{ parts, className? }` (CAP-003-E1-S10, DEC-0315); `web/src/components/ui/badge.tsx` renders `data-variant` (CAP-003-E1-S1). If a producer's merged signature differs from the one named here, use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to AC-26)
 
 **Checkpoint**: Every producer is present and the Vitest suite is green.
 
@@ -89,7 +89,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-132 (marketState closed outside session hours, not determinable inside, across DST) in a new `web/src/screens/home/market-state.test.ts`, with a `// Implements TC-COMP-132` comment, as an `it.each` over this literal table of UTC instants and their America/Chicago meaning.
+- [x] T002 [P] Implement TC-COMP-132 (marketState closed outside session hours, not determinable inside, across DST) in a new `web/src/screens/home/market-state.test.ts`, with a `// Implements TC-COMP-132` comment, as an `it.each` over this literal table of UTC instants and their America/Chicago meaning.
   - March change (CST before 2026-03-08, CDT after):
     - Fri 2026-03-06: `14:29Z` 08:29 → `closed`; `14:30Z` 08:30 → `not_determinable`; `20:59Z` 14:59 → `not_determinable`; `21:00Z` 15:00 → `closed`.
     - Sat 2026-03-07 `18:00Z` (12:00 CST) → `closed`.
@@ -141,7 +141,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 ### Additional Unit Tests
 
-- [ ] T003 [P] Add the wall-clock and second-granularity cases to `web/src/screens/home/market-state.test.ts` (same file as T002, so sequential with it), also inside T002's TZ `describe.each` (traces to DAC-E5-S1-1, DAC-E5-6, AC-24).
+- [x] T003 [P] Add the wall-clock and second-granularity cases to `web/src/screens/home/market-state.test.ts` (same file as T002, so sequential with it), also inside T002's TZ `describe.each` (traces to DAC-E5-S1-1, DAC-E5-6, AC-24).
   - `chicagoWallClock(new Date("2026-10-16T01:00:00Z"))` `toEqual({ weekday: "Thursday", date: "2026-10-15", minutes: 1200 })`.
   - `chicagoWallClock(new Date("2026-10-16T05:00:00Z"))` `toEqual({ weekday: "Friday", date: "2026-10-16", minutes: 0 })`: midnight is `0`, never `1440`.
   - `marketState(new Date("2026-10-15T13:29:59Z"))` (08:29:59) is `"closed"`.
@@ -219,7 +219,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 **Purpose**: Create the three Home modules that make the Phase 2 tests pass.
 
-- [ ] T009 Create `web/src/screens/home/market-state.ts`, per DEC-0362 (Open Gap 1), which makes T002 and T003 pass.
+- [x] T009 Create `web/src/screens/home/market-state.ts`, per DEC-0362 (Open Gap 1), which makes T002 and T003 pass.
   - Export `type MarketState = "closed" | "not_determinable"` and `interface ChicagoWallClock { weekday: string; date: string; minutes: number }`.
   - One module-level `Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "long", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })`.
   - `chicagoWallClock(now: Date): ChicagoWallClock` reads `formatToParts` and returns:
