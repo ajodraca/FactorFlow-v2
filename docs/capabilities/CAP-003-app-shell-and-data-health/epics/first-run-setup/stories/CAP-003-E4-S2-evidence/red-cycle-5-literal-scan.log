@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/token-literals.test.ts (58 tests | 2 failed) 29ms
+   × setup screen is scanned (TC-COMP-110, DAC-E4-S2-3) > (a) widens the scan to the setup directory 3ms
+     → expected [ 'web/src/components/', …(1) ] to include 'web/src/screens/setup/'
+   × setup screen is scanned (TC-COMP-110, DAC-E4-S2-3) > (b) scans every setup source and no test file, and finds no literal in any 0ms
+     → expected [] to include 'web/src/screens/setup/draft.tsx'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > setup screen is scanned (TC-COMP-110, DAC-E4-S2-3) > (a) widens the scan to the setup directory
+AssertionError: expected [ 'web/src/components/', …(1) ] to include 'web/src/screens/setup/'
+ ❯ src/components/token-literals.test.ts:441:33
+    439| describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)", () => {
+    440|   it("(a) widens the scan to the setup directory", () => {
+    441|     expect(SCANNED_DIRECTORIES).toContain("web/src/screens/setup/");
+       |                                 ^
+    442|   });
+    443| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > setup screen is scanned (TC-COMP-110, DAC-E4-S2-3) > (b) scans every setup source and no test file, and finds no literal in any
+AssertionError: expected [] to include 'web/src/screens/setup/draft.tsx'
+ ❯ src/components/token-literals.test.ts:456:21
+    454|       "step-history-depth.tsx",
+    455|     ]) {
+    456|       expect(files).toContain(`${directory}${name}`);
+       |                     ^
+    457|     }
+    458|     expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 56 passed (58)
+   Start at  12:24:42
+   Duration  623ms (transform 36ms, setup 50ms, collect 20ms, tests 29ms, environment 255ms, prepare 141ms)
+

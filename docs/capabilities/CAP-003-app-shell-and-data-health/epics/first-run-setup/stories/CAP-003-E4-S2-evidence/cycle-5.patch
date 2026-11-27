@@ -1,0 +1,48 @@
+diff --git a/web/src/components/token-literals.test.ts b/web/src/components/token-literals.test.ts
+index fca117ab..fecff511 100644
+--- a/web/src/components/token-literals.test.ts
++++ b/web/src/components/token-literals.test.ts
+@@ -143,6 +143,7 @@ describe("tailwind.config.js keys (DAC-E1-11)", () => {
+ export const SCANNED_DIRECTORIES: readonly string[] = [
+   "web/src/components/",
+   "web/src/app/command-palette/",
++  "web/src/screens/setup/",
+ ];
+ 
+ /** The one module that holds approved-specification widths (system design constraint 12). */
+@@ -434,3 +435,35 @@ describe("layout rule (DAC-E3-16, DAC-E3-S2-4)", () => {
+     ]);
+   });
+ });
++
++// Implements TC-COMP-110
++describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)", () => {
++  it("(a) widens the scan to the setup directory", () => {
++    expect(SCANNED_DIRECTORIES).toContain("web/src/screens/setup/");
++  });
++
++  it("(b) scans every setup source and no test file, and finds no literal in any", () => {
++    const directory = "web/src/screens/setup/";
++    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
++    for (const name of [
++      "draft.tsx",
++      "use-setup-state.ts",
++      "copy.ts",
++      "step-list.tsx",
++      "step-card.tsx",
++      "step-market-data.tsx",
++      "step-history-depth.tsx",
++    ]) {
++      expect(files).toContain(`${directory}${name}`);
++    }
++    expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).toEqual([]);
++    for (const relPath of files) {
++      expect(literalsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8"))).toEqual([]);
++    }
++  });
++
++  it("(c) finds a literal planted in a setup source", () => {
++    const planted = "web/src/screens/setup/planted.tsx";
++    expect(literalsIn(planted, 'export const x = "p-[12px]";')).toEqual([`${planted}: 12px`]);
++  });
++});

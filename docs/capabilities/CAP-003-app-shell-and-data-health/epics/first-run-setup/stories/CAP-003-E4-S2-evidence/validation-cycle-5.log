@@ -1,0 +1,42 @@
+# validation for cycle 5 (T019, T020) on the final bytes
+## T019 scope against usr/alvaro-de-jodra/CAP-003-integration-20261127T180106Z (code and tests)
+web/src/components/token-literals.test.ts
+web/src/screens/setup/copy.test.ts
+web/src/screens/setup/copy.ts
+web/src/screens/setup/step-card.test.tsx
+web/src/screens/setup/step-card.tsx
+web/src/screens/setup/step-history-depth.test.tsx
+web/src/screens/setup/step-history-depth.tsx
+web/src/screens/setup/step-list.test.tsx
+web/src/screens/setup/step-list.tsx
+web/src/screens/setup/step-market-data.test.tsx
+web/src/screens/setup/step-market-data.tsx
+## delivered directories unchanged
+exit 0: unchanged
+## token-literals.test.ts diff, removed lines (none expected)
+## copy.ts diff: additions only
+0
+## story greps (no output = clean)
+## npm run format
+
+Checked 270 files in 91ms. No fixes applied.
+## npm run lint
+
+Checked 270 files in 116ms. No fixes applied.
+## tsc --noEmit
+(no output above = clean)
+## npm run build
+../src/factorflow/api/static/assets/index-Bcnxlt-5.js               211.21 kB │ gzip: 68.90 kB
+✓ built in 2.04s
+## npm run test
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/app/build-output.test.tsx > Build output — lands in the API static directory (DAC-E1-S4-6) > a real build places index.html in the static directory and leaves its tracked marker intact
+ FAIL  src/screens/research/results-pane.test.tsx > results pane states and props > (c) before the first summary poll the list result's later drives the banner
+ Test Files  2 failed | 118 passed (120)
+      Tests  2 failed | 3214 passed (3216)
+## npm run test, first run above: 2 failed under machine load (load average 66 from other sessions' runs); build-output.test.tsx timed out at 5000 ms, and results-pane.test.tsx's failure was not inspected
+##   src/app/build-output.test.tsx (a real build) and src/screens/research/results-pane.test.tsx; neither file is touched by this story.
+##   results-pane.test.tsx passed on rerun; build-output.test.tsx timed out once more under the same load, then passed twice.
+## npm run test, rerun of the whole suite on the same bytes:
+ Test Files  120 passed (120)
+      Tests  3216 passed (3216)

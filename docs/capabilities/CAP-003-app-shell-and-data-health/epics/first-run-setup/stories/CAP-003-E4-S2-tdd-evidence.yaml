@@ -118,3 +118,22 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-5
+    tasks: [T007, T018, T019, T020]
+    description: >
+      The literal scan widened to the setup directory (TC-COMP-110, DAC-E4-S2-3, AC-26), a test-only cycle: token-literals.test.ts gains one appended SCANNED_DIRECTORIES entry, web/src/screens/setup/, and one appended describe block holding the entry, the seven setup sources found by the real walk with no test file among them and no literal in any, and a literal planted in a setup source. T019 and T020 join this cycle's validation evidence (validation-cycle-5.log): the change set is the story's six modules and four test files, copy.ts and copy.test.ts, and token-literals.test.ts with nothing removed, the delivered directories are unchanged against the review base, the planted 12px file placed in the setup directory failed the scan naming it and was deleted, the story's two greps print nothing, and format, lint, tsc, build and the full suite (120 files, 3216 tests) pass; the first full run failed two tests that no change of this story touches, both under a machine load average of 66, which pass alone and on a rerun of the whole suite, as the log records. The first spec-drift review reported drift against T007's text (the block was placed before the layout section rather than appended, its title added a criterion, and a recursive-walk helper, a directory constant and an assertion beyond the plan were added); the block was rewritten to the plan's literal form, RED was observed again on the final bytes and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved with a LOW observation only (the list of seven sources is closed, so a later setup source is scanned but not named).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-5-literal-scan.log
+    red_log_sha256: 7371eb34533a3a4e258e8c7c028557b8007ef3cfcc01c70cb415851e353991b4
+    red_evidence: >
+      With the directory entry removed, TC-COMP-110 (a) and (b) fail: the scan does not list web/src/screens/setup/ and finds none of its sources.
+    green_evidence: >
+      token-literals.test.ts 58 passed (green-cycle-5-literal-scan.log); validation-cycle-5.log holds format, lint, tsc, build and the full suite (3216 passed on the rerun), all clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6fcd5047a08a410f3288336bd0f052a5b34f141c0c6bdc166f8462ea0cc117fb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation: {not_applicable: "test-only cycle: token-literals.test.ts gains a scanned directory and adds no production code"}

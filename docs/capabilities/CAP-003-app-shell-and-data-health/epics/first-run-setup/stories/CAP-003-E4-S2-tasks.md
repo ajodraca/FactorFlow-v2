@@ -168,7 +168,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that renders the save failure's `ApiError.message` (the delivered envelope messages name instruments): row 2.
   - a hand-written mutant that writes a step title as a domain term (*Acquisition*): rows 3 and 4.
 
-- [ ] T007 Implement TC-COMP-110 (Literal scan widened to web/src/screens/setup/) as a new `describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)")` block appended to `web/src/components/token-literals.test.ts` (CAP-003-E1-S1's file, which screen stories widen by design), with a `// Implements TC-COMP-110` comment, using the file's own `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn`. Do not edit any existing case.
+- [x] T007 Implement TC-COMP-110 (Literal scan widened to web/src/screens/setup/) as a new `describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)")` block appended to `web/src/components/token-literals.test.ts` (CAP-003-E1-S1's file, which screen stories widen by design), with a `// Implements TC-COMP-110` comment, using the file's own `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn`. Do not edit any existing case.
   - (a) `SCANNED_DIRECTORIES` contains `"web/src/screens/setup/"`.
   - (b) Walking `web/src/screens/setup/` recursively finds every one of `draft.tsx`, `use-setup-state.ts`, `copy.ts`, `step-list.tsx`, `step-card.tsx`, `step-market-data.tsx` and `step-history-depth.tsx` as scanned sources, and no `*.test.ts(x)` file. `literalsIn` over each returns `[]`.
   - (c) TC step 3, planted: `literalsIn("web/src/screens/setup/planted.tsx", 'export const x = "p-[12px]";')` returns exactly `["web/src/screens/setup/planted.tsx: 12px"]`.
@@ -321,8 +321,8 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: Bring the setup directory under the literal scan and confirm the change set is exactly the story's.
 
-- [ ] T018 Append `"web/src/screens/setup/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts` (DEC-0296's widening rule; T007 RED first). Change nothing else in the file. CAP-003-E1-S1's whole-tree case and CAP-003-E3-S2's layout rule then read every setup source, including CAP-003-E4-S1's. Makes T007 pass.
-- [ ] T019 Confirm scope (depends on T013–T018):
+- [x] T018 Append `"web/src/screens/setup/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts` (DEC-0296's widening rule; T007 RED first). Change nothing else in the file. CAP-003-E1-S1's whole-tree case and CAP-003-E3-S2's layout rule then read every setup source, including CAP-003-E4-S1's. Makes T007 pass.
+- [x] T019 Confirm scope (depends on T013–T018):
   - `git status --short` lists only `web/src/screens/setup/step-list.tsx`, `step-list.test.tsx`, `step-card.tsx`, `step-card.test.tsx`, `step-market-data.tsx`, `step-market-data.test.tsx`, `step-history-depth.tsx`, `step-history-depth.test.tsx`, `copy.ts`, `copy.test.ts` and `web/src/components/token-literals.test.ts`, plus this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
   - `git diff --exit-code -- web/src/app/ web/src/api/ web/src/components/ui/ web/src/components/patterns/ web/src/screens/settings/ web/src/screens/instruments/ web/src/main.tsx package.json` exits 0.
   - `git diff -- web/src/components/token-literals.test.ts` shows one added array entry and the T007 `describe` block only; `git diff -- web/src/screens/setup/copy.ts` shows only T013's three additions.
@@ -335,8 +335,8 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-25).
-- [ ] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
+- [x] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-25).
+- [x] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E4-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch`.
