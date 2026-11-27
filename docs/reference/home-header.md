@@ -1,16 +1,18 @@
-# Home header, market state and copy catalogue (`web/src/screens/home/`)
+# Home header, market state, data tile and copy catalogue (`web/src/screens/home/`)
 
-The first three modules of the Home screen (component design `home-ui` 2.1 and
-2.3; CAP-003-E5-S1; AC-24 to AC-26, DAC-E5-6, DAC-E5-S1-1). Their module shape is
+The first modules of the Home screen (component design `home-ui` 2.1 to 2.4;
+CAP-003-E5-S1 and CAP-003-E5-S2; AC-8, AC-11, AC-21, AC-24 to AC-26, DAC-E5-2 to
+DAC-E5-6, DAC-E5-S1-1, DAC-E5-S2-1 to DAC-E5-S2-5). Their module shape is
 provisional, recorded as DEC-0362. Nothing mounts them yet: the Home screen
-itself and its route registration come with CAP-003-E5-S2 and CAP-003-E5-S3,
-and the only importers today are the modules' own tests and, for `copy.ts`,
-`header.tsx`.
+itself and its route registration come with CAP-003-E5-S3, and the only
+importers today are the modules' own tests and, for `copy.ts`, `header.tsx` and
+`data-tile.tsx`.
 
 | File | Holds |
 |---|---|
 | `market-state.ts` | `chicagoWallClock`, `marketState` and their types |
 | `header.tsx` | `HomeHeader` |
+| `data-tile.tsx` | `DataTile` |
 | `copy.ts` | Every Home string the designs fix, as grouped `as const` objects |
 
 ## `market-state.ts`
@@ -70,12 +72,76 @@ Renders a `<header>` holding:
 
 The header uses `ui-components` patterns and theme tokens only (AC-26).
 
+## `data-tile.tsx`
+
+### `DataTile(): JSX.Element | null`
+
+Takes no props. It reads `attention`, `scores` and `refresh` from `useShell()`
+(see [`shell-context.md`](shell-context.md)) and makes no read of its own and
+never the aggregate (DEC-0219 withdrawn). It is one `section` labelled by its
+`CardTitle`, *Data* (`DATA_TILE.title`), over a `Card` of variant `metric`. It
+picks one of six states, in this order:
+
+| State | When | Renders |
+|---|---|---|
+| Skeleton | `attention` is `loading`; or a badge exists and `scores` is `loading` | The title over one `animate-pulse` block (`data-testid="data-tile-skeleton"`, `aria-busy`), no link |
+| Error | `attention` is `error`; or a badge exists and `scores` is `error` | The title, *Couldn't read the data summary: {reason}.* and a *Try again* button (`type="button"`) that calls `refresh("attention")` or `refresh("scores")`; no badge, figure or link, and never the last good answer |
+| Nothing | `attention.data.latest_download` is `null` | `null`; the empty state is another module's |
+| First download | No download has ended | The link card with the sentence *Your first download, started {time}, is running.*, the time from `started_at`, else `requested_at`, through `formatInstant`; no hero, as-of line or lag badge. While the download's state is `running` a *Downloading* `StatusBadge` shows in the header slot under the title |
+| Full | A download has ended and `scores` has answered | The link card below |
+
+The error reason is one fixed sentence per kind of failure, never the server's
+message or request id: `READ_FAILURE.unreachable` for `ApiUnreachableError`,
+`READ_FAILURE.unexpected` otherwise (DEC-0366).
+
+**Badge.** `worstDataTier` takes `attention.problems.stock_count`,
+`followed_count` and `latest_terminal_download.state`; `dataTileBadge` then adds
+the scores' status (see [`component-patterns.md`](component-patterns.md#the-data-verdict-worst-data-tierts)).
+The badge is `null` exactly when no download has ended, which is how the First
+download state is chosen. The scores status is `null` while `scores` is not
+`served`; otherwise the first of: `never_classified` when the summary says so,
+`building` or `failed` when `later` is in that state, `not_current` when
+`set.not_current` is true, else `current` (data-health-ui 2.4 order). The badge
+is in `data-testid="data-tile-badge"`.
+
+**Full state.** One `Link` to `/data` with `aria-label` set to the card's
+accessible name wraps the card. Under the header, in document order:
+
+1. The hero: the current stock count, then *of {followed} stocks current*. The
+   count is `stocks_current.current_count` and the followed count
+   `stocks_current.followed_count`, falling back to `attention.followed_count`
+   when `stocks_current` is absent; both through `formatCount`, so a four-digit
+   count shows its `,`. With no `stocks_current` the count is `Absent`
+   (*not determinable*).
+2. The scores line: *Scores {time}*, the time from `scores.set.ended_at`
+   through `formatInstant`; with no set, the *Never classified* label alone;
+   with `scores` not served, *Scores* then `Absent`.
+3. The prices line: *Prices {date}* from `prices_as_of` through
+   `formatSessionDate`; with `prices_as_of` null, *Prices* then `Absent` with the
+   hidden label *not downloaded yet*.
+4. The scope sentence, *Every other number on this page is as of those times.*
+5. A *Not current* `StatusBadge` (`data-testid="data-tile-lag"`) when `scores`
+   is served and either `set.not_current` is true or a `later` set exists.
+
+Every badge goes through `StatusBadge` and every dash through `Absent`.
+
+**Accessible name.** `DATA_TILE.name` of the badge label (first letter
+lower-cased), the count (or *not determinable*), the followed count, the scores
+time (the *Never classified* label lower-cased when no set; *not determinable*
+when not served) and the prices date (or *not downloaded yet*), e.g. *Data:
+mostly yes. 1,233 of 1,236 stocks current. Scores {time}, prices {date}.* The
+First download state uses `DATA_TILE.firstDownloadName(time)`.
+
+No domain term of the data model appears in any tile string (DAC-E5-S2-4).
+
+Tests: `data-tile.test.tsx`.
+
 ## `copy.ts`
 
 Holds every owner-facing Home string the designs fix, so the header, the data
 tile and the *Needs you* card share one source. The shape follows
 `screens/research/copy.ts`: grouped `as const` objects of constants and template
-functions (DEC-0362). Only the header's strings are rendered so far.
+functions (DEC-0362). The header's and the data tile's strings are rendered so far.
 
 | Export | Holds |
 |---|---|
@@ -83,7 +149,8 @@ functions (DEC-0362). Only the header's strings are rendered so far.
 | `CHECKED` | The prefix of the as-of line's last part, *checked* |
 | `TRY_AGAIN` | The retry action of a failed read, *Try again* |
 | `HEADER` | `heading(weekday, date)`, `marketClosed`, `marketNotDeterminable`, `noTradingCalendar`, `pricesCurrentTo` (a prefix, so `Absent` can follow it) and `pricesNotDownloaded` |
-| `DATA_TILE` | The data tile's title, figure text, as-of labels, scope line, first-download and read-error messages, and its accessible names |
+| `DATA_TILE` | The data tile's title, figure text, as-of labels, scope line, first-download and read-error messages, and its accessible names. CAP-003-E5-S2 added `pricesNotDownloaded`, *not downloaded yet*, the hidden words of the prices dash (DEC-0365) |
+| `READ_FAILURE` | The `{reason}` of the tile's read-error message, one fixed sentence per failure kind: `unreachable` (*FactorFlow is not answering*) and `unexpected` (*FactorFlow hit an unexpected problem*) (DEC-0366) |
 | `NEEDS_YOU` | The card's title, `heading(count)`, sub-line, empty message and read-error message |
 | `EMPTY_STATE` | The title, body and *Start setup* action shown before any download |
 | `ITEMS` | The six item kinds of `ui-components` 2.6 (`data_problems`, `download_not_complete`, `credential_missing`, `first_download`, `first_scores`, `score_failed`), each with its tag, title, body and action text. `data_problems.title` lists one, two or three symbols, or the first symbols and how many more |
