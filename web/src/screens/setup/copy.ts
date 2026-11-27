@@ -162,6 +162,18 @@ export const STEP4 = {
   goHome: "Go to Home",
   manageFollowed: "Manage followed stocks",
   progressUnreadable: "Progress can't be read right now",
+  /**
+   * A failed start other than the two refusals. CAP-003-E4-S4 adds it and no
+   * design gives its wording (DEC-0357): it mirrors the refusals' shape and
+   * names the operation and the reason.
+   */
+  startFailed: (reason: string): string => `Couldn't start the download: ${reason}`,
+  /**
+   * The words behind the dash when history depth is answered as not set.
+   * CAP-003-E4-S4 adds it (DEC-0358): it follows the refusal's *history depth
+   * isn't set*.
+   */
+  depthAbsent: "History depth isn't set",
 };
 
 /** A failed depth or count read, shown in that step only (setup-ui 10, States; DAC-E4-13). */

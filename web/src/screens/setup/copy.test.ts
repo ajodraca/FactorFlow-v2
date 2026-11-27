@@ -239,6 +239,12 @@ const ROWS: [string, string[], string][] = [
   ],
   ["STEP3.followedSoFar", ["1,000"], "1,000 followed so far."],
   ["STEP3.keptForRetry", ["1,500"], "1,500 not saved yet; kept in the list to try again."],
+  [
+    "STEP4.startFailed",
+    ["FactorFlow is not answering"],
+    "Couldn't start the download: FactorFlow is not answering",
+  ],
+  ["STEP4.depthAbsent", [], "History depth isn't set"],
 ];
 
 describe("setup copy is complete and verbatim", () => {

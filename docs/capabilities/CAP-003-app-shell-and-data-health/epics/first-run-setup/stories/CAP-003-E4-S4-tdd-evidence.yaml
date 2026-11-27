@@ -1,0 +1,33 @@
+# TDD evidence for CAP-003-E4-S4 - Setup Step 4 and the Setup Screen.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T014, T015]
+    description: >
+      The two copy strings (DEC-0357, DEC-0358): copy.ts gains STEP4.startFailed(reason) and STEP4.depthAbsent, each with a doc comment saying CAP-003-E4-S4 adds it and which decision gives its wording, importing nothing and exporting no number or boolean; copy.test.ts gains the two verbatim rows against independent literals. The generator produced no mutants (template strings only) and 3 were hand-written (the prefix, the dropped reason, the depthAbsent text); all 3 were killed. Both reviews approved; the code review raised one LOW cosmetic observation on a doc comment's wording.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-1-copy-strings.log
+    red_log_sha256: d826ee342f06248a3e0eae4e7266423943da4385980b457f841aad9d1f2a004d
+    red_evidence: >
+      Two copy.test.ts rows failed (STEP4.startFailed and STEP4.depthAbsent undefined) before the strings existed.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 436 passed, in green-cycle-1-copy-strings.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: cd7abf009776f2fd20f7ffc45f999702727f02c4d442be8250c6f86600ea3a4a
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 407f977bf43c6fd4d6e51f67ff31285e0c0b5287fb184bfadeeb8b7f140d998d
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
