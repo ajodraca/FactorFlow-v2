@@ -137,3 +137,25 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-4
+    tasks: [T010]
+    description: >
+      Tests only: the cards' vocabulary and badge scans (TC-COMP-159 and TC-COMP-160, cards half) in
+      check-cards.test.tsx: the DAC-E7-3 term scan over every card state with a planted-case proof, exact badge
+      labels with a hidden tier shape, every Not determinable as a coverage-unknown badge with a description, and
+      every null as an aria-hidden dash with its hidden words. No production file changes.
+    deviations: >
+      (1) The cycle adds characterization tests over code cycles 1-3 already wrote, so they pass on arrival and there
+      is no RED log; the plan itself says T010 adds tests only. (2) Three earlier drafts of the tests were judged
+      narrower than T010 (a sampled state list, substring badge text, hidden words not pinned) and were broadened
+      before this commit; the reviews recorded here judge the final patch.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e44ea8b65273a4e7ceae264c69c010f4f5c2665cec55c336131cf4004cee56ef
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-4.patch
+    index_tree: 0301e656a457d1fc8d4a586a3c502e9187267b8a
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 3 already mutated
