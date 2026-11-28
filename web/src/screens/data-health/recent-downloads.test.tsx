@@ -775,6 +775,97 @@ describe("Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-
   });
 });
 
+/** The reasons of every unhandled rejection raised while `run` settles (vitest's own listeners paused). */
+async function unhandledDuring(run: () => Promise<void>): Promise<unknown[]> {
+  const saved = process.listeners("unhandledRejection");
+  process.removeAllListeners("unhandledRejection");
+  const seen: unknown[] = [];
+  const collect = (reason: unknown) => {
+    seen.push(reason);
+  };
+  process.on("unhandledRejection", collect);
+  try {
+    await run();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  } finally {
+    process.off("unhandledRejection", collect);
+    for (const listener of saved) {
+      process.on("unhandledRejection", listener as NodeJS.UnhandledRejectionListener);
+    }
+  }
+  return seen;
+}
+
+describe("Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2)", () => {
+  it("takes progress only from an answered attention read, never from a failed read's last value", async () => {
+    listMock.mockResolvedValue(RUNNING_THEN_DONE);
+    setShell({
+      attention: {
+        kind: "error",
+        error: INTERNAL,
+        last: {
+          data: ATT(LATEST("running", { run_id: "r-9" })),
+          checkedAt: new Date("2026-10-30T19:03:10Z"),
+        },
+      },
+    });
+    renderRecent();
+    await screen.findByRole("table");
+    expect(screen.queryByRole("progressbar")).toBeNull();
+    expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 stocks");
+  });
+
+  it("reads again when the same answer returns after a failed attention read only if it is new", async () => {
+    listMock.mockResolvedValue(RUNNING_PAGE);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    setShell({ attention: { kind: "error", error: INTERNAL, last: null } });
+    view.rerender(ui());
+    await settle();
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    view.rerender(ui());
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores an older read's failure once a newer read has answered", async () => {
+    let failOld: (reason: Error) => void = () => undefined;
+    listMock.mockReturnValueOnce(
+      new Promise((_, reject) => {
+        failOld = reject;
+      }),
+    );
+    listMock.mockResolvedValueOnce(PAGE([RUN({ runId: "r-2" })]));
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:20Z") });
+    view.rerender(ui());
+    await screen.findByRole("table");
+    await act(async () => failOld(INTERNAL));
+    expect(hrefs()).toEqual(["/data/downloads/r-2"]);
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("does not swallow a failure that is not an API error", async () => {
+    listMock.mockRejectedValue(new TypeError("boom"));
+    const seen = await unhandledDuring(async () => {
+      renderRecent();
+    });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toBeInstanceOf(TypeError);
+  });
+
+  it("is the default card with a compact table", async () => {
+    listMock.mockResolvedValue(PAGE([RUN()]));
+    renderRecent();
+    await screen.findByRole("table");
+    const region = screen.getByRole("region", { name: "Recent downloads" });
+    expect(region.querySelector('[data-variant="default"]')).not.toBeNull();
+    expect(regionTable().getAttribute("data-variant")).toBe("compact");
+  });
+});
+
 describe("copy.ts recent downloads and what you follow strings", () => {
   it("(a) the result sentences", () => {
     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");

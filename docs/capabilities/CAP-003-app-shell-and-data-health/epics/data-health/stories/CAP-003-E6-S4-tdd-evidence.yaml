@@ -235,3 +235,30 @@ cycles:
         - id: web/src/screens/data-health/what-you-follow.tsx:57:off-by-one:1
           disposition: equivalent
           reason: "The counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
+  - id: cycle-6
+    tasks: [T016]
+    description: >
+      Hand-off survivors. The first hand-off run (134 mutants: 18 catalogue and 116 hand-written by an independent
+      subagent) left 14 alive; five are equivalent counter values (cycles 2 and 5's) and nine were real gaps. Tests
+      only: recent-downloads.test.tsx pins that progress comes from an answered attention read and never a failed
+      read's last value, that the same answer returning after a failed read is not read again, that an older read's
+      failure is ignored once a newer read answered, that a non-API failure is rethrown (captured as an unhandled
+      rejection), and the default card with a compact table; what-you-follow.test.tsx pins the same stale-failure and
+      rethrow cases and Manage followed stocks as a link, not a link nested in a button.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the surviving hand-off mutants
+      (manual:13, 22, 23, 28, 52, 60, 67, 68, 90), which the full rerun on the committed tree records as killed. They
+      are probed by that run rather than by a separate red log.
+    red_cycle: cycle-5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups from the reviews, not adopted: the unhandled-rejection helper is copied into both test
+        files; the default-card test reads data-variant attributes of the shared components.
+    diff_sha256: 3943b7b77e2b99a8891506703c862f2f1ade40ee08400bee59b009a5b7b0626f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 5 already mutated, and the hand-off run scores it

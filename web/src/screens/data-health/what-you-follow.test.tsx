@@ -462,3 +462,64 @@ describe("What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E
     );
   });
 });
+
+/** The reasons of every unhandled rejection raised while `run` settles (vitest's own listeners paused). */
+async function unhandledDuring(run: () => Promise<void>): Promise<unknown[]> {
+  const saved = process.listeners("unhandledRejection");
+  process.removeAllListeners("unhandledRejection");
+  const seen: unknown[] = [];
+  const collect = (reason: unknown) => {
+    seen.push(reason);
+  };
+  process.on("unhandledRejection", collect);
+  try {
+    await run();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  } finally {
+    process.off("unhandledRejection", collect);
+    for (const listener of saved) {
+      process.on("unhandledRejection", listener as NodeJS.UnhandledRejectionListener);
+    }
+  }
+  return seen;
+}
+
+describe("What you follow hand-off cases (DAC-E6-16, DAC-E6-17)", () => {
+  it("ignores an older read's failure once a newer read has answered", async () => {
+    let failOld: (reason: Error) => void = () => undefined;
+    listMock.mockRejectedValueOnce(INTERNAL);
+    depthMock.mockResolvedValue(DEPTH(5));
+    renderOnly();
+    const retry = await screen.findByRole("button", { name: "Try again" });
+    listMock.mockReturnValueOnce(
+      new Promise((_, reject) => {
+        failOld = reject;
+      }),
+    );
+    listMock.mockResolvedValueOnce(COUNTS(3, 0));
+    await userEvent.click(retry);
+    await userEvent.click(retry);
+    await screen.findAllByRole("term");
+    await act(async () => failOld(INTERNAL));
+    expect(definitionOf("Followed stocks").textContent).toBe("3");
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("does not swallow a failure that is not an API error", async () => {
+    listMock.mockRejectedValue(new TypeError("boom"));
+    depthMock.mockResolvedValue(DEPTH(5));
+    const seen = await unhandledDuring(async () => {
+      renderOnly();
+    });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toBeInstanceOf(TypeError);
+  });
+
+  it("offers Manage followed stocks as a link, not a link nested in a button", async () => {
+    listMock.mockResolvedValue(COUNTS(30, 2));
+    depthMock.mockResolvedValue(DEPTH(5));
+    await renderFollow();
+    const manage = screen.getByRole("link", { name: "Manage followed stocks" });
+    expect(manage.closest("button")).toBeNull();
+  });
+});
