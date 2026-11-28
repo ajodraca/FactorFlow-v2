@@ -1,18 +1,18 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0z9_elc5/w0/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w2/web
 
 stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 136ms
-   × Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14) > navigates to Followed stocks with focusAdd in the router state 13ms
+ ❯ src/screens/data-health/problem-row.test.tsx (23 tests | 1 failed) 143ms
+   × Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14) > navigates to Followed stocks with focusAdd in the router state 14ms
      → expected { path: '/data/followed', …(1) } to deeply equal { path: '/data/followed', …(1) }
 stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/needs-fixing.test.tsx (46 tests) 1717ms
+ ✓ src/screens/data-health/needs-fixing.test.tsx (51 tests) 1888ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -30,18 +30,18 @@ AssertionError: expected { path: '/data/followed', …(1) } to deeply equal { pa
     },
   }
 
- ❯ src/screens/data-health/problem-row.test.tsx:262:74
-    260|     const user = userEvent.setup();
-    261|     await user.click(screen.getByRole("link", { name: "Follow a differ…
-    262|     expect(JSON.parse(screen.getByTestId("location").textContent ?? ""…
+ ❯ src/screens/data-health/problem-row.test.tsx:278:74
+    276|     const user = userEvent.setup();
+    277|     await user.click(screen.getByRole("link", { name: "Follow a differ…
+    278|     expect(JSON.parse(screen.getByTestId("location").textContent ?? ""…
        |                                                                          ^
-    263|       path: "/data/followed",
-    264|       state: { focusAdd: true },
+    279|       path: "/data/followed",
+    280|       state: { focusAdd: true },
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  1 failed | 66 passed (67)
-   Start at  00:27:55
-   Duration  2.71s (transform 166ms, setup 110ms, collect 853ms, tests 1.85s, environment 405ms, prepare 161ms)
+      Tests  1 failed | 73 passed (74)
+   Start at  00:31:57
+   Duration  2.96s (transform 194ms, setup 70ms, collect 1.15s, tests 2.03s, environment 341ms, prepare 153ms)
 

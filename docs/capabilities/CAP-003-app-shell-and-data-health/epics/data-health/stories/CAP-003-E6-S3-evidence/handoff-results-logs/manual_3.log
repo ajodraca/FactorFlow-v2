@@ -1,11 +1,11 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0z9_elc5/w0/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w2/web
 
 stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 134ms
+ ❯ src/screens/data-health/problem-row.test.tsx (23 tests | 1 failed) 150ms
    × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > encodes the symbol in the coverage link 5ms
      → expect(element).toHaveAttribute("href", "/data/coverage?symbol=A%26B%2FC") // element.getAttribute("href") === "/data/coverage?symbol=A%26B%2FC"
 
@@ -17,7 +17,7 @@ stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and S
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/needs-fixing.test.tsx (46 tests) 1704ms
+ ✓ src/screens/data-health/needs-fixing.test.tsx (51 tests) 1841ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -28,18 +28,18 @@ Expected the element to have attribute:
   href="/data/coverage?symbol=A%26B%2FC"
 Received:
   href="/data/coverage?symbol=A&B/C"
- ❯ src/screens/data-health/problem-row.test.tsx:222:85
-    220|   it("encodes the symbol in the coverage link", () => {
-    221|     renderRow(ROW("A&B/C", [FAIL("prices")], true));
-    222|     expect(screen.getByRole("link", { name: "A&B/C, show in the covera…
+ ❯ src/screens/data-health/problem-row.test.tsx:238:85
+    236|   it("encodes the symbol in the coverage link", () => {
+    237|     renderRow(ROW("A&B/C", [FAIL("prices")], true));
+    238|     expect(screen.getByRole("link", { name: "A&B/C, show in the covera…
        |                                                                                     ^
-    223|       "href",
-    224|       "/data/coverage?symbol=A%26B%2FC",
+    239|       "href",
+    240|       "/data/coverage?symbol=A%26B%2FC",
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  1 failed | 66 passed (67)
-   Start at  00:27:58
-   Duration  2.63s (transform 154ms, setup 68ms, collect 832ms, tests 1.84s, environment 361ms, prepare 161ms)
+      Tests  1 failed | 73 passed (74)
+   Start at  00:32:00
+   Duration  2.96s (transform 261ms, setup 73ms, collect 1.21s, tests 1.99s, environment 349ms, prepare 163ms)
 

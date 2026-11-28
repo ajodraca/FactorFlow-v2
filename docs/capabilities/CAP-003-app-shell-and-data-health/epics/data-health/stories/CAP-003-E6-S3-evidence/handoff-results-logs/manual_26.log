@@ -1,19 +1,19 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0z9_elc5/w1/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w1/web
 
 stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/problem-row.test.tsx (21 tests) 142ms
+ ✓ src/screens/data-health/problem-row.test.tsx (23 tests) 179ms
 stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ❯ src/screens/data-health/needs-fixing.test.tsx (46 tests | 2 failed) 1742ms
+ ❯ src/screens/data-health/needs-fixing.test.tsx (51 tests | 2 failed) 2021ms
    × Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13) > (a) names the last complete download by its start time 11ms
      → expected [ [ { limit: 1 } ] ] to deeply equal [ Array(1) ]
-   × Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13) > (f) names a failed read and retries only that read 16ms
+   × Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13) > (f) names a failed read and retries only that read 13ms
      → expected [ [ { limit: 1 } ], [ { limit: 1 } ] ] to deeply equal [ …(2) ]
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
@@ -33,13 +33,13 @@ AssertionError: expected [ [ { limit: 1 } ] ] to deeply equal [ Array(1) ]
     ],
   ]
 
- ❯ src/screens/data-health/needs-fixing.test.tsx:458:33
-    456|       await screen.findByText("Last complete download 2026-10-29 09:00…
-    457|     ).toBeInTheDocument();
-    458|     expect(runsMock.mock.calls).toEqual([[{ state: "succeeded", limit:…
+ ❯ src/screens/data-health/needs-fixing.test.tsx:519:33
+    517|       await screen.findByText("Last complete download 2026-10-29 09:00…
+    518|     ).toBeInTheDocument();
+    519|     expect(runsMock.mock.calls).toEqual([[{ state: "succeeded", limit:…
        |                                 ^
-    459|     expect(screen.getByText("Nothing needs fixing.")).toBeInTheDocumen…
-    460|     expect(screen.getByRole("heading", { level: 2, name: "Needs fixing…
+    520|     expect(screen.getByText("Nothing needs fixing.")).toBeInTheDocumen…
+    521|     expect(screen.getByRole("heading", { level: 2, name: "Needs fixing…
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
 
@@ -64,18 +64,18 @@ AssertionError: expected [ [ { limit: 1 } ], [ { limit: 1 } ] ] to deeply equal 
     ],
   ]
 
- ❯ src/screens/data-health/needs-fixing.test.tsx:515:33
-    513|     await user.click(screen.getByRole("button", { name: "Try again" })…
-    514|     expect(await screen.findByText("No complete download yet")).toBeIn…
-    515|     expect(runsMock.mock.calls).toEqual([
+ ❯ src/screens/data-health/needs-fixing.test.tsx:576:33
+    574|     await user.click(screen.getByRole("button", { name: "Try again" })…
+    575|     expect(await screen.findByText("No complete download yet")).toBeIn…
+    576|     expect(runsMock.mock.calls).toEqual([
        |                                 ^
-    516|       [{ state: "succeeded", limit: 1 }],
-    517|       [{ state: "succeeded", limit: 1 }],
+    577|       [{ state: "succeeded", limit: 1 }],
+    578|       [{ state: "succeeded", limit: 1 }],
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  2 failed | 65 passed (67)
-   Start at  00:28:20
-   Duration  2.94s (transform 148ms, setup 73ms, collect 1.02s, tests 1.88s, environment 814ms, prepare 108ms)
+      Tests  2 failed | 72 passed (74)
+   Start at  00:32:24
+   Duration  3.17s (transform 164ms, setup 75ms, collect 1.13s, tests 2.20s, environment 391ms, prepare 150ms)
 

@@ -251,3 +251,42 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 4 already mutated, and the hand-off run scores it
+
+handoff_mutation:
+  runner: scripts/mutation-run.py
+  results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/handoff-results.json
+  results_sha256: 27ee265d6bd259ca4968f887c74f9e878cc564bc969d1103abbdb81718403361
+  generated: 108
+  killed: 99
+  survived: 9
+  stillborn: 0
+  timeout: 0
+  score: 0.917
+  survivors:
+    - id: web/src/screens/data-health/needs-fixing.tsx:44:off-by-one:1
+      disposition: equivalent
+      reason: "The read counter's starting value is only compared with itself."
+    - id: web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1
+      disposition: equivalent
+      reason: "The read counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
+    - id: web/src/screens/data-health/needs-fixing.tsx:82:off-by-one:1
+      disposition: equivalent
+      reason: "The cleanup advances the read counter by 2 instead of 1; it only has to differ, and it still does."
+    - id: web/src/screens/data-health/needs-fixing.tsx:123:negate-boolean:1
+      disposition: equivalent
+      reason: "The initial pagePending is overwritten by the reset effect, which runs on mount, before any interaction."
+    - id: web/src/screens/data-health/needs-fixing.tsx:125:off-by-one:1
+      disposition: equivalent
+      reason: "The announcement serial's initial value only keys the span; it is first compared against the next value."
+    - id: web/src/screens/data-health/needs-fixing.tsx:126:negate-boolean:1
+      disposition: equivalent
+      reason: "The initial inFlight is overwritten by the reset effect, which runs on mount, before any interaction."
+    - id: web/src/screens/data-health/needs-fixing.tsx:127:off-by-one:1
+      disposition: equivalent
+      reason: "The generation counter is only compared with itself, so its starting value is unobservable."
+    - id: web/src/screens/data-health/needs-fixing.tsx:141:off-by-one:1
+      disposition: equivalent
+      reason: "The generation advances by 2 instead of 1; it only has to differ after a reset, and it still does."
+    - id: web/src/screens/data-health/needs-fixing.tsx:176:off-by-one:1
+      disposition: equivalent
+      reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each page, and it still does."
