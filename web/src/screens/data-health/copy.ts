@@ -373,3 +373,16 @@ export const MARKET_DATA_KEY = "Market data key";
 export const KEY_NOT_DETERMINABLE_REASON = "FactorFlow is not answering";
 
 export const MANAGE_FOLLOWED_STOCKS = "Manage followed stocks";
+
+// CAP-003-E6-S5: the never-downloaded empty card (data-health-ui 10; DAC-E6-6)
+
+export const NO_DATA_YET = "No data has been downloaded yet.";
+
+/** `n` arrives already formatted (`formatCount`), as the other strings take it. */
+export function downloadForFollowed(n: string): string {
+  return `Download data for your ${n} followed stocks to see whether it can be trusted.`;
+}
+
+export const START_FIRST_DOWNLOAD = "Start the first download";
+export const FOLLOW_FIRST = "Follow some stocks first.";
+export const OPEN_SETUP = "Open setup";

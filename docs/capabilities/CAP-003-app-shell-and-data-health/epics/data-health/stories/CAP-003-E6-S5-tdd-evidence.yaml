@@ -1,0 +1,54 @@
+# TDD evidence for CAP-003-E6-S5 - the Data health screen.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862).
+# The plan's six cycles (T017) are run as two: the screen with its strings and tests (T002-T008, T010-T013), then the scan widening (T009, T014).
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/data-health.test.tsx'; catalogue mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T010, T011, T012, T013]
+    description: >
+      The copy cases, the empty card, the refresh rule, the eight states, layout, vocabulary and badges of
+      data-health.test.tsx, then the empty-card strings of copy.ts and index.tsx (DataHealthScreen: the slot adapter,
+      the empty card, the check grid and the region conditions).
+    deviations: >
+      (1) The plan's six cycles run as two (this one and the scan). (2) T003 (a) asserts that the lower regions are
+      absent and no longer read once the empty state settles, not that they are never read, because they mount while
+      attention loads (DEC-0405). (3) Interactions click through fireEvent inside act: user-event waits on a real timer
+      under vitest fake timers and hangs. (4) T004 (c) steps the clock in two advances so React renders the running
+      answer before the terminal one. (5) T008 (a) reads a badge's visible text for its name, since a span has no
+      accessible name from content. (6) T005 (h) is enforced by tsc; the test only renders. (7) The never-wired slot
+      retry (the error kind is a notApplicable renderer, so StateRegion's retry is unreachable) has no mutant.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log
+    red_log_sha256: 64b3c1fa9f8b097da5c27242bb4c805880a4e5351c14f45f266862dde3c87270
+    red_evidence: >
+      With data-health.test.tsx staged and no index.tsx, the file failed to load: Failed to resolve import "./index".
+    green_evidence: >
+      51 tests pass in data-health.test.tsx and every sibling file in web/src/screens/data-health; npx tsc --noEmit and
+      npm run lint are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log
+        sha256: 64b3c1fa9f8b097da5c27242bb4c805880a4e5351c14f45f266862dde3c87270
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Third pass. Two earlier passes found test-strength gaps (a vacuous header aria-busy check, missing variant, time,
+        sr-only and no-other-read assertions, a thin per-region record, a short T007 scenario set); all were fixed and
+        re-reviewed. Follow-ups, not adopted: the Found badge is not asserted in T008 (a); T005 (g)'s retry does not
+        assert the lower regions' reads.
+    diff_sha256: b1b7f49f0a2ac59c354b6c8906b6a58e8cdafc97b8e2611e1e36159597d7841d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/mutation-cycle-1-results.json
+      results_sha256: e731ac64cac1420a59574798d313e7de3ec7dbbf6e5e7e174e760add7865efbc
+      generated: 40
+      killed: 40
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
