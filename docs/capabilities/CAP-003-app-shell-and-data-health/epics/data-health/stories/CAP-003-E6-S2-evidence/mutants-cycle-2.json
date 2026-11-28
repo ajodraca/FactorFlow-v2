@@ -1,0 +1,304 @@
+{
+ "schema": 1,
+ "repo_head": "dad1fe77a9a5aa7da2237ecdd655f19049db9e3c",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/copy.ts:229:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 229,
+   "original": "  return code !== null && Object.hasOwn(STOP_REFUSAL_REASONS, code);",
+   "mutated": "  return code !== null || Object.hasOwn(STOP_REFUSAL_REASONS, code);"
+  },
+  {
+   "id": "web/src/screens/data-health/copy.ts:234:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 234,
+   "original": "  return error instanceof ApiError && isStopRefusalCode(error.code);",
+   "mutated": "  return error instanceof ApiError || isStopRefusalCode(error.code);"
+  },
+  {
+   "id": "web/src/screens/data-health/copy.ts:238:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 238,
+   "original": "  if (error instanceof ApiError && isStopRefusalCode(error.code)) {",
+   "mutated": "  if (error instanceof ApiError || isStopRefusalCode(error.code)) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:62:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 62,
+   "original": "  const [pending, setPending] = useState(false);",
+   "mutated": "  const [pending, setPending] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 64,
+   "original": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 0 });",
+   "mutated": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 1 });"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 66,
+   "original": "  const watchRowExit = useRef(false);",
+   "mutated": "  const watchRowExit = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:76:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 76,
+   "original": "      watchRowExit.current = false;",
+   "mutated": "      watchRowExit.current = true;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:86:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 86,
+   "original": "      if (!watchRowExit.current) return;",
+   "mutated": "      if (watchRowExit.current) return;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:88:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 88,
+   "original": "      const focusOnBody = active === null || active === document.body;",
+   "mutated": "      const focusOnBody = active === null && active === document.body;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:89:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 89,
+   "original": "      if (opener.current?.isConnected === false && focusOnBody) {",
+   "mutated": "      if (opener.current?.isConnected === true && focusOnBody) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:89:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 89,
+   "original": "      if (opener.current?.isConnected === false && focusOnBody) {",
+   "mutated": "      if (opener.current?.isConnected === false || focusOnBody) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:91:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 91,
+   "original": "        watchRowExit.current = false;",
+   "mutated": "        watchRowExit.current = true;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 92,
+   "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+   "mutated": "      } else if (!focusOnBody || active !== opener.current && !active?.closest('[role=\"dialog\"]')) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:2",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 92,
+   "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+   "mutated": "      } else if (!focusOnBody && active !== opener.current || !active?.closest('[role=\"dialog\"]')) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:3",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 92,
+   "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+   "mutated": "      } else if (focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:4",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 92,
+   "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+   "mutated": "      } else if (!focusOnBody && active !== opener.current && active?.closest('[role=\"dialog\"]')) {"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:94:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 94,
+   "original": "        watchRowExit.current = false;",
+   "mutated": "        watchRowExit.current = true;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:98:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 98,
+   "original": "    if (!watchRowExit.current) return;",
+   "mutated": "    if (watchRowExit.current) return;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 99,
+   "original": "    const timer = setTimeout(settle, 0);",
+   "mutated": "    const timer = setTimeout(settle, 1);"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:104:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 104,
+   "original": "    setPending(true);",
+   "mutated": "    setPending(false);"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:108:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 108,
+   "original": "      watchRowExit.current = true;",
+   "mutated": "      watchRowExit.current = false;"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 112,
+   "original": "      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 1 }));",
+   "mutated": "      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 2 }));"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:115:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 115,
+   "original": "        cause instanceof ApiUnreachableError || cause instanceof ApiError",
+   "mutated": "        cause instanceof ApiUnreachableError && cause instanceof ApiError"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:123:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 123,
+   "original": "      setPending(false);",
+   "mutated": "      setPending(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:130:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 130,
+   "original": "      watchRowExit.current = true;",
+   "mutated": "      watchRowExit.current = false;"
+  },
+  {
+   "id": "manual:stale-always",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 129,
+   "original": "    if (failure?.staleRow) {",
+   "mutated": "    if (true) {"
+  },
+  {
+   "id": "manual:refresh-deleted",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 111,
+   "original": "      refresh(\"attention\");",
+   "mutated": "      void 0;"
+  },
+  {
+   "id": "manual:refresh-scores",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 111,
+   "original": "      refresh(\"attention\");",
+   "mutated": "      refresh(\"scores\");"
+  },
+  {
+   "id": "manual:stopped-deleted",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 110,
+   "original": "      onStopped();",
+   "mutated": "      void 0;"
+  },
+  {
+   "id": "manual:refusal-closed-deleted",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 131,
+   "original": "      onRefusalClosed();",
+   "mutated": "      void 0;"
+  },
+  {
+   "id": "manual:body-guard-true",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 89,
+   "original": "      if (opener.current?.isConnected === false && focusOnBody) {",
+   "mutated": "      if (opener.current?.isConnected === false) {"
+  },
+  {
+   "id": "manual:key-removed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 151,
+   "original": "        <span key={announcement.serial}>{announcement.text}</span>",
+   "mutated": "        <span>{announcement.text}</span>"
+  },
+  {
+   "id": "manual:swap-reasons",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 224,
+   "original": "  instrument_not_found: \"FactorFlow doesn't follow it\",",
+   "mutated": "  instrument_not_found: \"you already stopped following it\","
+  }
+ ]
+}

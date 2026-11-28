@@ -6,7 +6,7 @@
  * 2.4 and epic DAC-E6-1 to DAC-E6-5 unless the plan marks them.
  */
 
-import { ApiUnreachableError } from "../../api/client";
+import { ApiError, ApiUnreachableError } from "../../api/client";
 import { formatCount } from "../../components/patterns/format";
 import type { DataAnswer } from "../../components/patterns/worst-data-tier";
 
@@ -191,4 +191,52 @@ export const START_REFUSALS: Readonly<
 
 export function startFailed(reason: string): string {
   return `Couldn't start the download: ${reason}.`;
+}
+
+export const STOP_FOLLOWING = "Stop following";
+
+export function stopFollowingTitle(symbol: string): string {
+  return `Stop following ${symbol}`;
+}
+
+/** The blueprint section 9 sentence, verbatim. */
+export function stopFollowingDescription(symbol: string): string {
+  return `Stop following ${symbol}? Its history is kept, and strategies holding it keep holding it. You can follow it again later.`;
+}
+
+export function stopFollowingFailed(symbol: string, reason: string): string {
+  return `Couldn't stop following ${symbol}: ${reason}.`;
+}
+
+export function stoppedFollowing(symbol: string): string {
+  return `Stopped following ${symbol}`;
+}
+
+/**
+ * The `{reason}` of a refused stop (DEC-0377). The keys are wire codes from the
+ * delivered route (`instruments.py` l.113-125), selected by `ApiError.code`.
+ * The envelope `message`, which carries domain terms, is never rendered
+ * (ux-design 0.7; register C13; AC-19).
+ */
+export const STOP_REFUSAL_REASONS: Readonly<
+  Record<"instrument_not_found" | "instrument_already_retired", string>
+> = {
+  instrument_not_found: "FactorFlow doesn't follow it",
+  instrument_already_retired: "you already stopped following it",
+};
+
+function isStopRefusalCode(code: string | null): code is keyof typeof STOP_REFUSAL_REASONS {
+  return code !== null && Object.hasOwn(STOP_REFUSAL_REASONS, code);
+}
+
+/** True exactly for the two refusals that mean the row on screen is stale. */
+export function isStaleRowRefusal(error: unknown): boolean {
+  return error instanceof ApiError && isStopRefusalCode(error.code);
+}
+
+export function stopFailureReason(error: ApiError | ApiUnreachableError): string {
+  if (error instanceof ApiError && isStopRefusalCode(error.code)) {
+    return STOP_REFUSAL_REASONS[error.code];
+  }
+  return readFailureReason(error);
 }

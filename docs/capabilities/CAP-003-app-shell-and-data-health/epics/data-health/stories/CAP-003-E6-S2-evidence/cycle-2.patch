@@ -1,0 +1,720 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log
+new file mode 100644
+index 00000000..2ca77200
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/data-health/stop-following-dialog.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/stop-following-dialog.test.tsx [ src/screens/data-health/stop-following-dialog.test.tsx ]
++Error: Failed to resolve import "./stop-following-dialog" from "web/src/screens/data-health/stop-following-dialog.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/stop-following-dialog.test.tsx:17:38
++  15 |  const __vi_import_5__ = await import('../../components/ui/toast')
++  16 |  const __vi_import_6__ = await import('./copy')
++  17 |  const __vi_import_7__ = await import('./stop-following-dialog')
++     |                                       ^
++  18 |  
++  19 |  
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  21:43:40
++   Duration  1.16s (transform 28ms, setup 83ms, collect 0ms, tests 0ms, environment 425ms, prepare 274ms)
++
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+index 4c1bb10b..af0613db 100644
+--- a/web/src/screens/data-health/copy.ts
++++ b/web/src/screens/data-health/copy.ts
+@@ -6,7 +6,7 @@
+  * 2.4 and epic DAC-E6-1 to DAC-E6-5 unless the plan marks them.
+  */
+ 
+-import { ApiUnreachableError } from "../../api/client";
++import { ApiError, ApiUnreachableError } from "../../api/client";
+ import { formatCount } from "../../components/patterns/format";
+ import type { DataAnswer } from "../../components/patterns/worst-data-tier";
+ 
+@@ -192,3 +192,51 @@ export const START_REFUSALS: Readonly<
+ export function startFailed(reason: string): string {
+   return `Couldn't start the download: ${reason}.`;
+ }
++
++export const STOP_FOLLOWING = "Stop following";
++
++export function stopFollowingTitle(symbol: string): string {
++  return `Stop following ${symbol}`;
++}
++
++/** The blueprint section 9 sentence, verbatim. */
++export function stopFollowingDescription(symbol: string): string {
++  return `Stop following ${symbol}? Its history is kept, and strategies holding it keep holding it. You can follow it again later.`;
++}
++
++export function stopFollowingFailed(symbol: string, reason: string): string {
++  return `Couldn't stop following ${symbol}: ${reason}.`;
++}
++
++export function stoppedFollowing(symbol: string): string {
++  return `Stopped following ${symbol}`;
++}
++
++/**
++ * The `{reason}` of a refused stop (DEC-0377). The keys are wire codes from the
++ * delivered route (`instruments.py` l.113-125), selected by `ApiError.code`.
++ * The envelope `message`, which carries domain terms, is never rendered
++ * (ux-design 0.7; register C13; AC-19).
++ */
++export const STOP_REFUSAL_REASONS: Readonly<
++  Record<"instrument_not_found" | "instrument_already_retired", string>
++> = {
++  instrument_not_found: "FactorFlow doesn't follow it",
++  instrument_already_retired: "you already stopped following it",
++};
++
++function isStopRefusalCode(code: string | null): code is keyof typeof STOP_REFUSAL_REASONS {
++  return code !== null && Object.hasOwn(STOP_REFUSAL_REASONS, code);
++}
++
++/** True exactly for the two refusals that mean the row on screen is stale. */
++export function isStaleRowRefusal(error: unknown): boolean {
++  return error instanceof ApiError && isStopRefusalCode(error.code);
++}
++
++export function stopFailureReason(error: ApiError | ApiUnreachableError): string {
++  if (error instanceof ApiError && isStopRefusalCode(error.code)) {
++    return STOP_REFUSAL_REASONS[error.code];
++  }
++  return readFailureReason(error);
++}
+diff --git a/web/src/screens/data-health/stop-following-dialog.test.tsx b/web/src/screens/data-health/stop-following-dialog.test.tsx
+new file mode 100644
+index 00000000..a4024d3b
+--- /dev/null
++++ b/web/src/screens/data-health/stop-following-dialog.test.tsx
+@@ -0,0 +1,450 @@
++import { act, render, screen, waitFor, within } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { useRef, useState } from "react";
++import { beforeEach, describe, expect, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError, retireInstrument } from "../../api/client";
++import { toast } from "../../components/ui/toast";
++import {
++  STOP_FOLLOWING,
++  isStaleRowRefusal,
++  stopFailureReason,
++  stopFollowingDescription,
++  stopFollowingFailed,
++  stopFollowingTitle,
++  stoppedFollowing,
++} from "./copy";
++import { StopFollowingDialog } from "./stop-following-dialog";
++
++vi.mock("../../api/client", async () => {
++  const actual = await vi.importActual<typeof import("../../api/client")>("../../api/client");
++  return { ...actual, startAcquisitionRun: vi.fn(), retireInstrument: vi.fn() };
++});
++
++const refresh = vi.fn();
++vi.mock("../../app/shell-context", () => ({ useShell: () => ({ refresh }) }));
++
++vi.mock("../../components/ui/toast", () => ({
++  toast: { success: vi.fn(), warning: vi.fn(), error: vi.fn() },
++  Toaster: () => null,
++}));
++
++const retireMock = vi.mocked(retireInstrument);
++
++const INTERNAL = new ApiError("database said no", "req-9f3", { code: "internal_error" });
++const OTHER_409 = new ApiError("a refusal nobody has met", "req-o1", {
++  code: "some_future_code",
++});
++const NOT_FOUND = new ApiError("no instrument exists for symbol 'FBXX'", "req-404", {
++  code: "instrument_not_found",
++});
++const ALREADY = new ApiError("instrument 'FBXX' is already retired", "req-409", {
++  code: "instrument_already_retired",
++});
++const UNREACHABLE = new ApiUnreachableError("DELETE /api/instruments/FBXX could not be reached");
++const RETIRED = { lifecycle: "retired" as const, retiredAt: "2026-10-30T19:00:00Z" };
++
++const DESCRIPTION =
++  "Stop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.";
++
++function deferred<T>() {
++  let resolve!: (value: T) => void;
++  let reject!: (reason: unknown) => void;
++  const promise = new Promise<T>((res, rej) => {
++    resolve = res;
++    reject = rej;
++  });
++  return { promise, resolve, reject };
++}
++
++async function settle() {
++  await act(async () => {
++    await new Promise((resolve) => setTimeout(resolve, 20));
++  });
++}
++
++const stopped = vi.fn();
++const refusalClosed = vi.fn();
++
++/** Stands in for CAP-003-E6-S3's Needs fixing card: the rows, the heading and the dialog beside them. */
++function NeedsFixingHarness({
++  rows = ["FBXX", "GOOD"],
++  removeOnStopped = false,
++}: {
++  rows?: string[];
++  removeOnStopped?: boolean;
++}) {
++  const [openFor, setOpenFor] = useState<string | null>(null);
++  const [gone, setGone] = useState<string[]>([]);
++  const headingRef = useRef<HTMLHeadingElement>(null);
++  const shown = rows.filter((s) => !gone.includes(s));
++  return (
++    <>
++      <h2 ref={headingRef} tabIndex={-1}>
++        Needs fixing
++      </h2>
++      <ul>
++        {shown.map((s) => (
++          <li key={s}>
++            <button type="button" onClick={() => setOpenFor(s)}>
++              Stop following {s}
++            </button>
++          </li>
++        ))}
++      </ul>
++      <StopFollowingDialog
++        symbol={openFor}
++        onClose={() => setOpenFor(null)}
++        onStopped={() => {
++          stopped();
++          if (removeOnStopped && openFor !== null) setGone((g) => [...g, openFor]);
++        }}
++        onRefusalClosed={refusalClosed}
++        fallbackFocusRef={headingRef}
++      />
++    </>
++  );
++}
++
++const rowButton = (symbol: string) =>
++  screen.getByRole("button", { name: `Stop following ${symbol}` });
++
++async function openDialog(user: ReturnType<typeof userEvent.setup>, symbol = "FBXX") {
++  await user.click(rowButton(symbol));
++  return screen.findByRole("dialog", { name: `Stop following ${symbol}` });
++}
++
++async function confirm(user: ReturnType<typeof userEvent.setup>, dialog: HTMLElement) {
++  await user.click(within(dialog).getByRole("button", { name: "Stop following" }));
++}
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  retireMock.mockReset();
++});
++
++describe("Stop following dialog (DAC-E6-12, AC-14, AC-25)", () => {
++  it("(a) is titled with the symbol and carries the blueprint sentence verbatim", async () => {
++    const user = userEvent.setup();
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    expect(dialog).toHaveAccessibleName("Stop following FBXX");
++    expect(dialog).toHaveAccessibleDescription(DESCRIPTION);
++  });
++
++  it("(b) is a confirm dialog, never destructive", async () => {
++    const user = userEvent.setup();
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    expect(dialog).toHaveAttribute("data-variant", "confirm");
++    expect(dialog).toHaveAttribute("aria-modal", "true");
++    expect(screen.queryByRole("alertdialog")).toBeNull();
++    expect(within(dialog).getByRole("button", { name: "Stop following" })).toHaveAttribute(
++      "data-variant",
++      "default",
++    );
++    expect(document.body.querySelector('[class*="destructive"]')).toBeNull();
++  });
++
++  it("(c) puts Cancel first and focused, and traps Tab", async () => {
++    const user = userEvent.setup();
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    const buttons = within(dialog).getAllByRole("button");
++    expect(buttons.map((b) => b.textContent)).toEqual(["Cancel", "Stop following"]);
++    expect(within(dialog).getByRole("button", { name: "Cancel" })).toHaveFocus();
++    await user.tab();
++    expect(within(dialog).getByRole("button", { name: "Stop following" })).toHaveFocus();
++    await user.tab();
++    expect(within(dialog).getByRole("button", { name: "Cancel" })).toHaveFocus();
++  });
++
++  it("(d) Cancel closes, returns focus to the row's button and calls nothing", async () => {
++    const user = userEvent.setup();
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    expect(retireMock).not.toHaveBeenCalled();
++    expect(stopped).not.toHaveBeenCalled();
++    expect(refusalClosed).not.toHaveBeenCalled();
++    expect(refresh).not.toHaveBeenCalled();
++  });
++
++  it("(e) in flight: busy, not closable, and the call carries exactly the symbol", async () => {
++    const user = userEvent.setup();
++    const pending = deferred<typeof RETIRED>();
++    retireMock.mockReturnValue(pending.promise);
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    expect(dialog).toHaveAttribute("aria-busy", "true");
++    await user.keyboard("{Escape}");
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++    expect(screen.getByRole("dialog", { name: "Stop following FBXX" })).toBeInTheDocument();
++    expect(retireMock).toHaveBeenCalledTimes(1);
++    expect(retireMock).toHaveBeenCalledWith("FBXX");
++    await act(async () => {
++      pending.resolve(RETIRED);
++    });
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++  });
++});
++
++describe("Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17)", () => {
++  // Implements TC-COMP-162
++  it("(a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row", async () => {
++    const user = userEvent.setup();
++    retireMock.mockRejectedValue(ALREADY);
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    const status = await within(dialog).findByRole("status");
++    expect(status.textContent).toBe(
++      "Couldn't stop following FBXX: you already stopped following it.",
++    );
++    expect(screen.getByRole("dialog", { name: "Stop following FBXX" })).toBeInTheDocument();
++    expect(stopped).not.toHaveBeenCalled();
++    expect(refresh).not.toHaveBeenCalled();
++    expect(refusalClosed).not.toHaveBeenCalled();
++
++    await user.keyboard("{Escape}");
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    expect(refusalClosed).toHaveBeenCalledTimes(1);
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++  });
++
++  it("(c) a 404 follows the same path, and Cancel closes it the same way", async () => {
++    const user = userEvent.setup();
++    retireMock.mockRejectedValue(NOT_FOUND);
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    const status = await within(dialog).findByRole("status");
++    expect(status.textContent).toBe("Couldn't stop following FBXX: FactorFlow doesn't follow it.");
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    expect(refusalClosed).toHaveBeenCalledTimes(1);
++  });
++
++  it("(d) reopening clears the refusal", async () => {
++    const user = userEvent.setup();
++    retireMock.mockRejectedValue(ALREADY);
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await within(dialog).findByRole("status");
++    await user.keyboard("{Escape}");
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    await openDialog(user);
++    expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
++  });
++
++  it.each([
++    ["an internal error", INTERNAL, "FactorFlow hit an unexpected problem"],
++    ["an unknown 409 code", OTHER_409, "FactorFlow hit an unexpected problem"],
++    ["a transport failure", UNREACHABLE, "FactorFlow is not answering"],
++  ])(
++    "(e) %s keeps the dialog open and closing it leaves the row alone",
++    async (_n, error, reason) => {
++      const user = userEvent.setup();
++      retireMock.mockRejectedValue(error);
++      render(<NeedsFixingHarness />);
++      const dialog = await openDialog(user);
++      await confirm(user, dialog);
++      const status = await within(dialog).findByRole("status");
++      expect(status.textContent).toBe(`Couldn't stop following FBXX: ${reason}.`);
++      expect(screen.getByRole("dialog", { name: "Stop following FBXX" })).toBeInTheDocument();
++      await user.keyboard("{Escape}");
++      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++      expect(refusalClosed).not.toHaveBeenCalled();
++      expect(stopped).not.toHaveBeenCalled();
++    },
++  );
++
++  it("(f) a 200 closes, re-reads, refreshes attention, announces politely and raises no toast", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    expect(stopped).toHaveBeenCalledTimes(1);
++    expect(refresh).toHaveBeenCalledTimes(1);
++    expect(refresh).toHaveBeenCalledWith("attention");
++    const live = document.body.querySelector('[aria-live="polite"]');
++    expect(live?.textContent).toBe("Stopped following FBXX");
++    expect(live?.closest('[role="dialog"]')).toBeNull();
++    expect(toast.success).not.toHaveBeenCalled();
++    expect(toast.warning).not.toHaveBeenCalled();
++    expect(toast.error).not.toHaveBeenCalled();
++    expect(screen.queryByRole("alert")).toBeNull();
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++  });
++
++  it("(g) when the row leaves after a stop, focus goes to the Needs fixing heading", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    const view = render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    await waitFor(() =>
++      expect(screen.getByRole("heading", { name: "Needs fixing" })).toHaveFocus(),
++    );
++    expect(document.body.querySelector('[aria-live="polite"]')?.textContent).toBe(
++      "Stopped following FBXX",
++    );
++  });
++
++  it("(h) when the row leaves with the close itself, focus still reaches the heading", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    render(<NeedsFixingHarness removeOnStopped />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    await waitFor(() =>
++      expect(screen.getByRole("heading", { name: "Needs fixing" })).toHaveFocus(),
++    );
++    expect(document.body).not.toHaveFocus();
++  });
++
++  it("(i) never steals focus the owner has placed elsewhere", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    const view = render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    act(() => rowButton("GOOD").focus());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    expect(rowButton("GOOD")).toHaveFocus();
++  });
++
++  it("(j) a second stop announces again, in a fresh node", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    render(<NeedsFixingHarness />);
++    let dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    const live = document.body.querySelector('[aria-live="polite"]');
++    const first = live?.firstElementChild;
++    expect(first?.textContent).toBe("Stopped following FBXX");
++    dialog = await openDialog(user, "GOOD");
++    await confirm(user, dialog);
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    expect(live?.textContent).toBe("Stopped following GOOD");
++    expect(live?.firstElementChild).not.toBe(first);
++    expect(retireMock).toHaveBeenLastCalledWith("GOOD");
++  });
++
++  it("(l) after Cancel, a row that leaves later does not move focus", async () => {
++    const user = userEvent.setup();
++    const view = render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    await settle();
++    expect(screen.getByRole("heading", { name: "Needs fixing" })).not.toHaveFocus();
++    expect(document.body).toHaveFocus();
++  });
++
++  it("(m) the heading is focused once, not grabbed again after the owner leaves it", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    const view = render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    const heading = screen.getByRole("heading", { name: "Needs fixing" });
++    await waitFor(() => expect(heading).toHaveFocus());
++    act(() => heading.blur());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    await settle();
++    expect(heading).not.toHaveFocus();
++  });
++
++  it("(n) focus the owner placed elsewhere is not grabbed later either", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    const view = render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    act(() => rowButton("GOOD").focus());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    act(() => rowButton("GOOD").blur());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    await settle();
++    expect(screen.getByRole("heading", { name: "Needs fixing" })).not.toHaveFocus();
++  });
++
++  it("(o) when the refused row leaves, focus goes to the heading", async () => {
++    const user = userEvent.setup();
++    retireMock.mockRejectedValue(ALREADY);
++    const view = render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await within(dialog).findByRole("status");
++    await user.keyboard("{Escape}");
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
++    await waitFor(() =>
++      expect(screen.getByRole("heading", { name: "Needs fixing" })).toHaveFocus(),
++    );
++  });
++
++  it.each([
++    ["ALREADY", ALREADY],
++    ["NOT_FOUND", NOT_FOUND],
++    ["INTERNAL", INTERNAL],
++    ["UNREACHABLE", UNREACHABLE],
++  ])("(k) %s: no envelope text reaches the page", async (_n, error) => {
++    const user = userEvent.setup();
++    retireMock.mockRejectedValue(error);
++    render(<NeedsFixingHarness />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await within(dialog).findByRole("status");
++    const text = document.body.textContent ?? "";
++    for (const leaked of [error.message, "req-", "instrument_not_found", "instrument_already"]) {
++      expect(text).not.toContain(leaked);
++    }
++  });
++});
++
++describe("copy.ts, stop following strings (DEC-0377)", () => {
++  it("(d) the titles and sentences", () => {
++    expect(stopFollowingTitle("FBXX")).toBe("Stop following FBXX");
++    expect(stopFollowingDescription("FBXX")).toBe(DESCRIPTION);
++    expect(STOP_FOLLOWING).toBe("Stop following");
++    expect(stopFollowingFailed("FBXX", "x")).toBe("Couldn't stop following FBXX: x.");
++    expect(stoppedFollowing("FBXX")).toBe("Stopped following FBXX");
++  });
++
++  it("(e) the reason of a failed stop, never an envelope message or request id", () => {
++    expect(stopFailureReason(ALREADY)).toBe("you already stopped following it");
++    expect(stopFailureReason(NOT_FOUND)).toBe("FactorFlow doesn't follow it");
++    expect(stopFailureReason(INTERNAL)).toBe("FactorFlow hit an unexpected problem");
++    expect(stopFailureReason(UNREACHABLE)).toBe("FactorFlow is not answering");
++    for (const error of [ALREADY, NOT_FOUND, INTERNAL, UNREACHABLE]) {
++      const reason = stopFailureReason(error);
++      expect(reason).not.toContain(error.message);
++      if (error instanceof ApiError) expect(reason).not.toContain(error.requestId);
++    }
++  });
++
++  it("(f) only a 404 or the already-stopped 409 makes the row stale", () => {
++    expect(isStaleRowRefusal(NOT_FOUND)).toBe(true);
++    expect(isStaleRowRefusal(ALREADY)).toBe(true);
++    expect(isStaleRowRefusal(INTERNAL)).toBe(false);
++    expect(isStaleRowRefusal(OTHER_409)).toBe(false);
++    expect(isStaleRowRefusal(UNREACHABLE)).toBe(false);
++    expect(isStaleRowRefusal("instrument_not_found")).toBe(false);
++  });
++});
+diff --git a/web/src/screens/data-health/stop-following-dialog.tsx b/web/src/screens/data-health/stop-following-dialog.tsx
+new file mode 100644
+index 00000000..fce3bbdb
+--- /dev/null
++++ b/web/src/screens/data-health/stop-following-dialog.tsx
+@@ -0,0 +1,155 @@
++import { type JSX, type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
++import { ApiError, ApiUnreachableError, retireInstrument } from "../../api/client";
++import { useShell } from "../../app/shell-context";
++import { ConfirmDialog } from "../../components/ui/dialog";
++import {
++  STOP_FOLLOWING,
++  isStaleRowRefusal,
++  stopFailureReason,
++  stopFollowingDescription,
++  stopFollowingFailed,
++  stopFollowingTitle,
++  stoppedFollowing,
++} from "./copy";
++
++interface Failure {
++  sentence: string;
++  staleRow: boolean;
++}
++
++export interface StopFollowingDialogProps {
++  /** The symbol being confirmed; the dialog is open while it is not `null`. */
++  symbol: string | null;
++  onClose: () => void;
++  /** The caller's aggregate re-read, called after a successful stop. */
++  onStopped: () => void;
++  /** Called once when a dialog that showed a `404` or `409` closes: the row is stale. */
++  onRefusalClosed: () => void;
++  /** The Needs fixing heading, focused when the row has left. */
++  fallbackFocusRef: RefObject<HTMLElement | null>;
++}
++
++/**
++ * The confirmed recovery: stop following a symbol with its history kept
++ * (component design data-health-ui 2.7 and 10; DAC-E6-12, DAC-E6-S2-2, AC-14,
++ * AC-17, AC-25; blueprint section 9).
++ *
++ * It is the design system's `confirm` dialog and never `destructive`, because
++ * nothing is deleted (STD-UI-2). Cancel is first and focused and focus is
++ * trapped, which the shared dialog supplies. A success closes the dialog, then
++ * calls the caller's re-read and re-reads attention, and announces the stop
++ * politely; no toast is raised. A `404` or `409` keeps the dialog open with the
++ * reason, and closing it calls `onRefusalClosed` once, because only those two
++ * mean the row is stale. Any other failure leaves the row alone.
++ *
++ * The AC-20 one-tier rule does not apply: no status renders here
++ * (DAC-E6-S2-4).
++ *
++ * Caller contract: render it beside the rows, so that it re-renders with them
++ * (do not wrap it in `memo`), give the heading `tabIndex={-1}`, and decide what
++ * `onRefusalClosed` re-reads. When the row that opened the dialog has left and
++ * focus has fallen to the body, focus moves to the heading; focus the owner has
++ * placed elsewhere is never moved (STD-UI-24).
++ */
++export function StopFollowingDialog({
++  symbol,
++  onClose,
++  onStopped,
++  onRefusalClosed,
++  fallbackFocusRef,
++}: StopFollowingDialogProps): JSX.Element {
++  const { refresh } = useShell();
++  const [pending, setPending] = useState(false);
++  const [failure, setFailure] = useState<Failure | null>(null);
++  const [announcement, setAnnouncement] = useState({ text: "", serial: 0 });
++  const opener = useRef<HTMLElement | null>(null);
++  const watchRowExit = useRef(false);
++  const lastSymbol = useRef("");
++  if (symbol !== null) lastSymbol.current = symbol;
++  const shown = symbol ?? lastSymbol.current;
++
++  // Runs before the dialog moves focus to Cancel, so the opener is the row's button.
++  useLayoutEffect(() => {
++    if (symbol !== null) {
++      opener.current =
++        document.activeElement instanceof HTMLElement ? document.activeElement : null;
++      watchRowExit.current = false;
++      setFailure(null);
++    }
++  }, [symbol]);
++
++  // After every render: the caller re-renders when its rows change, so this sees each change.
++  // A row that leaves in the same update as the close can leave focus inside the closing
++  // dialog until the next tick, and nothing renders after that, so the check runs once more then.
++  useEffect(() => {
++    const settle = () => {
++      if (!watchRowExit.current) return;
++      const active = document.activeElement;
++      const focusOnBody = active === null || active === document.body;
++      if (opener.current?.isConnected === false && focusOnBody) {
++        fallbackFocusRef.current?.focus();
++        watchRowExit.current = false;
++      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role="dialog"]')) {
++        // Focus the owner placed elsewhere; the closing dialog's own buttons do not count.
++        watchRowExit.current = false;
++      }
++    };
++    settle();
++    if (!watchRowExit.current) return;
++    const timer = setTimeout(settle, 0);
++    return () => clearTimeout(timer);
++  });
++
++  async function confirm(target: string): Promise<void> {
++    setPending(true);
++    setFailure(null);
++    try {
++      await retireInstrument(target);
++      watchRowExit.current = true;
++      onClose();
++      onStopped();
++      refresh("attention");
++      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 1 }));
++    } catch (cause: unknown) {
++      const known =
++        cause instanceof ApiUnreachableError || cause instanceof ApiError
++          ? cause
++          : new ApiError("", "");
++      setFailure({
++        sentence: stopFollowingFailed(target, stopFailureReason(known)),
++        staleRow: isStaleRowRefusal(cause),
++      });
++    } finally {
++      setPending(false);
++    }
++  }
++
++  function onOpenChange(next: boolean): void {
++    if (next) return;
++    if (failure?.staleRow) {
++      watchRowExit.current = true;
++      onRefusalClosed();
++    }
++    setFailure(null);
++    onClose();
++  }
++
++  return (
++    <>
++      <ConfirmDialog
++        open={symbol !== null}
++        onOpenChange={onOpenChange}
++        title={stopFollowingTitle(shown)}
++        description={stopFollowingDescription(shown)}
++        confirmLabel={STOP_FOLLOWING}
++        onConfirm={() => void confirm(shown)}
++        pending={pending}
++      >
++        {failure !== null ? <output className="text-sm">{failure.sentence}</output> : null}
++      </ConfirmDialog>
++      <output aria-live="polite" className="sr-only">
++        <span key={announcement.serial}>{announcement.text}</span>
++      </output>
++    </>
++  );
++}

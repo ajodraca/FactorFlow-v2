@@ -55,3 +55,70 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-2
+    tasks: [T004, T005, T006, T009, T011, T014]
+    description: >
+      The stop-following dialog. stop-following-dialog.test.tsx (new): the dialog's own contract (T004 a-e), TC-COMP-162
+      with its 200 edge case and the focus rules (T005 a-k, plus l-o added after mutation scoring) and the stop copy
+      cases (T006 d-f). Then copy.ts (STOP_FOLLOWING, the title, description, failure and stopped strings,
+      STOP_REFUSAL_REASONS, isStaleRowRefusal, stopFailureReason) and stop-following-dialog.tsx (StopFollowingDialog).
+    deviations: >
+      (1) The fallback-focus effect also runs a retry on setTimeout(0), and focus inside the closing [role=dialog] is
+      not read as the owner's own focus: with only the plan's per-render effect, T005 (g) cleared its watch while
+      focus was still on the closing dialog's Cancel, and T005 (h) never re-rendered after the dialog left, so the
+      heading was never focused. (2) The refusal and failure sentences are output elements (implicit role status) for the
+      same reason as cycle 1. (3) Tests l to o and the fresh-node assertion in (j) were added after the first scoring left
+      nine mutants alive (24 of 33); the second scoring is the final one. (4) The OTHER_409 fixture message is the
+      same one as in cycle 1.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log
+    red_log_sha256: b34c182e5f1053ea11a61ebd7a59953aa342b5605b6f3df7d2c39082ae2e3fd8
+    red_evidence: >
+      With stop-following-dialog.test.tsx staged and no production file, the module failed to load: 1 file failed, no
+      tests (the import of ./stop-following-dialog did not resolve).
+    green_evidence: >
+      27 tests passed in stop-following-dialog.test.tsx and 134 in web/src/screens/data-health; biome lint and format
+      clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log
+        sha256: b34c182e5f1053ea11a61ebd7a59953aa342b5605b6f3df7d2c39082ae2e3fd8
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The spec-drift review found only small additions beyond the plan (a private isStopRefusalCode helper, an
+        OTHER_409 case, extra negative assertions) and no change to specified behaviour. Follow-ups from the code review,
+        outside the plan's T011 and not adopted here: an always-mounted status element for the refusal so it announces
+        on every screen reader; treating a body opener (Safari does not focus a clicked button) as no opener; the
+        success path's callbacks sit inside the try, so a throwing caller would read as a failed stop; a test that
+        confirms twice while in flight; a refusal close by overlay click.
+    diff_sha256: 2a7968c1a2723550a58d867dc0a9eb8d103ae94d64fad4113468694279e37986
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-2.patch
+    index_tree: abaee9f036d201aee095844d9aaa5a4fe806fe7f
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 65c8ce2dc1cba7b842e40394936be897d5968ec366d544580d71d9e3b74dba82
+      generated: 33
+      killed: 28
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.848
+      survivors:
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1
+          disposition: equivalent
+          reason: "The announcement serial's initial value only keys the span; it is first compared against the next value, so 0 and 1 are indistinguishable by any input."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1
+          disposition: equivalent
+          reason: "The watchRowExit ref starts true, but the layout effect resets it on every open, and before the first open the opener is null so the effect has nothing to act on."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:91:negate-boolean:1
+          disposition: equivalent
+          reason: "After the heading takes focus the flag stays true only until the effect's own setTimeout pass, which reads focus on the heading and clears it before any caller render or test step can see it."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1
+          disposition: equivalent
+          reason: "The retry delay of 0 against 1 millisecond: the contract fixes only that the heading is focused after the close, and every observer polls (waitFor) rather than timing it."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1
+          disposition: equivalent
+          reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each stop, and it still does."
