@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9w198npb/w1/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 725ms
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (f) unavailable: a failed attention read keeps the cards from their own reads 14ms
+     → expected undefined to be 'Gaps not determinable' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (f) unavailable: a failed attention read keeps the cards from their own reads
+AssertionError: expected undefined to be 'Gaps not determinable' // Object.is equality
+
+- Expected: 
+"Gaps not determinable"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/data-health.test.tsx:781:7
+    779|     expect(
+    780|       region("Daily prices").querySelector('[data-variant="coverage-un…
+    781|     ).toBe("Gaps not determinable");
+       |       ^
+    782|     expect(
+    783|       region("Factor scores").querySelector('[data-variant="coverage-u…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:35:16
+   Duration  2.76s (transform 218ms, setup 43ms, collect 794ms, tests 725ms, environment 307ms, prepare 310ms)
+

@@ -1,0 +1,239 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9w198npb/w4/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 7 failed) 930ms
+   × never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > shows the two check cards' null state, never a passed check, never the empty card 34ms
+     → expected null not to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (d) shows a running first download's progress beneath the card 23ms
+     → expected <section …(1)>…(1)</section> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (e) shows Needs fixing only while the count is above zero 30ms
+     → expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with followed stocks 12ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with no followed stocks 8ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with a running first download 16ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > keeps Needs fixing out of the empty state while the aggregate loads or fails 5ms
+     → expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > shows the two check cards' null state, never a passed check, never the empty card
+AssertionError: expected null not to be null
+ ❯ src/screens/data-health/data-health.test.tsx:420:48
+    418|     expect(screen.queryByRole("heading", { name: NO_DATA_YET })).toBeN…
+    419|     expect(queryRegion("Factor scores")).not.toBeNull();
+    420|     expect(queryRegion("What you follow")).not.toBeNull();
+       |                                                ^
+    421|   });
+    422| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (d) shows a running first download's progress beneath the card
+AssertionError: expected <section …(1)>…(1)</section> to be null
+
+- Expected: 
+null
+
++ Received: 
+<section
+  aria-labelledby=":r2b:"
+>
+  <div
+    class="rounded border border-border bg-card text-card-foreground"
+    data-variant="summary"
+  >
+    <div
+      class="flex flex-col space-y-1 p-6"
+    >
+      <h2
+        class="text-lg font-semibold"
+        id=":r2b:"
+      >
+        What you follow
+      </h2>
+    </div>
+    <div
+      class="p-6 pt-0"
+    >
+      <dl
+        class="grid gap-x-4 gap-y-2 grid-cols-[auto_1fr]"
+      >
+        <dt
+          class="text-muted-foreground"
+        >
+          Followed stocks
+        </dt>
+        <dd>
+          12
+        </dd>
+        <dt
+          class="text-muted-foreground"
+        >
+          Stopped following
+        </dt>
+        <dd>
+          1 (history kept)
+        </dd>
+        <dt
+          class="text-muted-foreground"
+        >
+          History depth
+        </dt>
+        <dd>
+          <a
+            href="/settings"
+          >
+            5 years
+          </a>
+        </dd>
+        <dt
+          class="text-muted-foreground"
+        >
+          Market data key
+        </dt>
+        <dd>
+          <span
+            class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+            data-variant="status-good"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide h-3 w-3 shrink-0"
+              fill="none"
+              focusable="false"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                fill="currentColor"
+                r="10"
+              />
+            </svg>
+            Found
+          </span>
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="flex items-center p-6 pt-0"
+    >
+      <a
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+        data-variant="outline"
+        href="/data/followed"
+      >
+        Manage followed stocks
+      </a>
+    </div>
+  </div>
+</section>
+
+ ❯ src/screens/data-health/data-health.test.tsx:524:44
+    522|     expect(within(recent).getByRole("progressbar", { name: "3 of 12 st…
+    523|     expect(within(recent).getByText("3 of 12 stocks")).toBeTruthy();
+    524|     expect(queryRegion("What you follow")).toBeNull();
+       |                                            ^
+    525|   });
+    526| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (e) shows Needs fixing only while the count is above zero
+AssertionError: expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+
+Expected: "Needs fixing"
+Received: "Is the data good enough to trust?Full coverage tableDownload nowNo data has been downloaded yet.Download data for your 12 followed stocks to see whether it can be trusted.Start the first downloadNeeds fixing · 0From your most recent downloads · checked 14:03:12 CDTNothing needs fixing.Last complete download 2026-10-30 09:00 CDTRecent downloadsStarts when you press Download now · checked 14:03:12 CDTStartedOutcomeEndedResult2026-10-30 09:00 CDTComplete2026-10-30 11:30 CDT12 of 12 stocksWhat you followFollowed stocks12Stopped following1 (history kept)History depth5 yearsMarket data keyFoundManage followed stocks"
+
+ ❯ src/screens/data-health/data-health.test.tsx:545:43
+    543|     standing({ attention: running, dh: DH({ affected_count: 0 }) });
+    544|     await renderScreen();
+    545|     expect(document.body.textContent).not.toContain("Needs fixing");
+       |                                           ^
+    546|   });
+    547| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with followed stocks
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with no followed stocks
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with a running first download
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Found
+</span>
+
+ ❯ src/screens/data-health/data-health.test.tsx:568:68
+    566|     });
+    567|     await renderScreen();
+    568|     expect(document.querySelector('[data-variant="status-good"]')).toB…
+       |                                                                    ^
+    569|     const text = document.body.textContent ?? "";
+    570|     for (const passed of ["No missing prices or gaps", "All financials…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > keeps Needs fixing out of the empty state while the aggregate loads or fails
+AssertionError: expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+
+Expected: "Needs fixing"
+Received: "Is the data good enough to trust?Full coverage tableDownload nowNo data has been downloaded yet.Download data for your 12 followed stocks to see whether it can be trusted.Start the first downloadNeeds fixingRecent downloadsStarts when you press Download now · checked 14:03:12 CDTStartedOutcomeEndedResult2026-10-30 09:00 CDTComplete2026-10-30 11:30 CDT12 of 12 stocksWhat you followFollowed stocks12Stopped following1 (history kept)History depth5 yearsMarket data keyFoundManage followed stocks"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1249:43
+    1247|     healthReadMock.mockReturnValue(defer<DataHealth>().promise);
+    1248|     const first = await renderScreen();
+    1249|     expect(document.body.textContent).not.toContain("Needs fixing");
+       |                                           ^
+    1250|     first.unmount();
+    1251|     standing({ attention: empty });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 58 passed (65)
+   Start at  03:35:47
+   Duration  2.98s (transform 295ms, setup 113ms, collect 902ms, tests 930ms, environment 214ms, prepare 330ms)
+

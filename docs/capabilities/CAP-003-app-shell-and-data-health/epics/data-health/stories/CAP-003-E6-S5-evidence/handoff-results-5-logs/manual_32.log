@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9w198npb/w0/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 884ms
+   × Review v1 rework > holds a skeleton inside each of the three check cards while attention loads 14ms
+     → expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Review v1 rework > holds a skeleton inside each of the three check cards while attention loads
+AssertionError: expected null not to be null
+ ❯ src/screens/data-health/data-health.test.tsx:1306:68
+    1304|     await renderScreen();
+    1305|     for (const name of ["Daily prices", "Company financials", "Factor …
+    1306|       expect(region(name).querySelector('[aria-busy="true"]')).not.toB…
+       |                                                                    ^
+    1307|     }
+    1308|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:35:33
+   Duration  2.95s (transform 260ms, setup 56ms, collect 862ms, tests 884ms, environment 285ms, prepare 320ms)
+

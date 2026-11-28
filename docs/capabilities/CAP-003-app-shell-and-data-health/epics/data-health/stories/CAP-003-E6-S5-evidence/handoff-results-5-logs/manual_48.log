@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9w198npb/w0/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 1044ms
+   × Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (b) holds the three checks in a four-column grid with the fourth column empty 26ms
+     → expected 'flex flex-col gap-5' to contain 'grid-cols-4'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (b) holds the three checks in a four-column grid with the fourth column empty
+AssertionError: expected 'flex flex-col gap-5' to contain 'grid-cols-4'
+
+Expected: "grid-cols-4"
+Received: "flex flex-col gap-5"
+
+ ❯ src/screens/data-health/data-health.test.tsx:853:28
+    851|     await renderScreen();
+    852|     const grid = region("Daily prices").parentElement as HTMLElement;
+    853|     expect(grid.className).toContain("grid-cols-4");
+       |                            ^
+    854|     expect(
+    855|       Array.from(grid.children).map(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:35:40
+   Duration  3.00s (transform 256ms, setup 49ms, collect 778ms, tests 1.04s, environment 265ms, prepare 150ms)
+
