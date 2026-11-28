@@ -1,14 +1,15 @@
 # Data health modules (`web/src/screens/data-health/`)
 
 The first modules of the Data health screen (component design `data-health-ui`
-2.1, 2.3, 2.4, 2.5 and 2.7; CAP-003-E6-S1 to CAP-003-E6-S3; AC-8, AC-13 to
-AC-17, AC-19, AC-25, DAC-E6-1 to DAC-E6-5, DAC-E6-8 to DAC-E6-13, DAC-E6-15,
-DAC-E6-17). Nothing mounts them
+2.1, 2.3 to 2.7; CAP-003-E6-S1 to CAP-003-E6-S4; AC-4, AC-8, AC-12 to AC-17,
+AC-19, AC-25, DAC-E6-1 to DAC-E6-5, DAC-E6-8 to DAC-E6-17, DAC-E6-S4-1 to
+DAC-E6-S4-4). Nothing mounts them
 yet: there is no screen `index.tsx` and no `/data` route registration, and the
 only importers today are the modules' own tests. The verdict and the cards take
 the reads, the retries and the **Download now** node as props and call no shell
 hook; `DownloadNow` and `StopFollowingDialog` (E6-S2) read the shell context for
-`refresh`.
+`refresh`. `RecentDownloads` and `WhatYouFollow` (E6-S4) take no props, read
+the shell context (`attention`, `health`) and make their own reads.
 
 | File | Holds |
 |---|---|
@@ -22,6 +23,8 @@ hook; `DownloadNow` and `StopFollowingDialog` (E6-S2) read the shell context for
 | `stop-following-dialog.tsx` | `StopFollowingDialog`, the confirmed **Stop following** recovery |
 | `problem-row.tsx` | `ProblemRow`, one stock with a problem |
 | `needs-fixing.tsx` | `NeedsFixing`, the Needs fixing card (rows, paging, last complete download) |
+| `recent-downloads.tsx` | `RecentDownloads`, the five newest downloads |
+| `what-you-follow.tsx` | `WhatYouFollow`, the followed and stopped counts, history depth and key presence |
 
 ## `copy.ts`
 
@@ -78,6 +81,21 @@ functions take already-formatted counts, except `countClause` and `andMore`.
 - Paging and empty state: `SHOW_MORE`, `MORE_PROBLEMS`, `showingOf(shown, n)`,
   `NOTHING_NEEDS_FIXING`, `lastCompleteDownload(time)`, `NO_COMPLETE_DOWNLOAD`
   and `LAST_COMPLETE_TARGET`.
+- Recent downloads: `RECENT_DOWNLOADS`, `recentDownloadsSubline(time)` (*Starts
+  when you press Download now*, then ` · checked {time}` once `time` is not
+  `null`), `DOWNLOAD_COLUMNS` (*Started*, *Outcome*, *Ended*, *Result*),
+  `READ_TARGETS.recentDownloads`, `ABSENT.notEnded` (*not ended yet*) and the
+  result sentences `writtenOf(written, named)` (*W of N stocks*),
+  `partialResult(written, named, failed)` (*W of N stocks, F failed*),
+  `interruptedResult(written)` (*FactorFlow restarted mid-download; W kept, the
+  rest picked up next time*) and `progressOf(done, total)` (*D of T stocks*).
+  The counts are passed already formatted.
+- What you follow: `WHAT_YOU_FOLLOW`, `FOLLOWED_STOCKS`, `STOPPED_FOLLOWING`,
+  `historyKept(count)` (*N (history kept)*), `HISTORY_DEPTH`,
+  `depthYears(years)` (*N years*), `DEPTH_NOT_SET` (*not set*),
+  `MARKET_DATA_KEY`, `KEY_NOT_DETERMINABLE_REASON` (*FactorFlow is not
+  answering*, the unreachable clause of `readFailureReason`, DEC-0385),
+  `MANAGE_FOLLOWED_STOCKS` and `READ_TARGETS.whatYouFollow`.
 - `isStaleRowRefusal(error)`: true only for an `ApiError` whose code is one of
   those two. `stopFailureReason(error)`: the refusal's reason for them, else
   `readFailureReason(error)`.
@@ -322,6 +340,62 @@ The card calls no shell hook itself; its children (`DownloadNow`,
   and `onRefusalClosed` call `onReread`. Its open symbol is dropped when the
   answer is not `ok`.
 
+## `recent-downloads.tsx`
+
+### `RecentDownloads()`
+
+A `section` named by its card title (`RECENT_DOWNLOADS`), with
+`recentDownloadsSubline(...)` beneath it. The subline carries *checked {time}*
+(`formatClock`) of the last time the list answered, kept when a later read
+fails.
+
+- **Reads:** `listAcquisitionRuns({ limit: 5 })` on mount, and again on each new
+  `attention` answer (a changed `checkedAt`) while the latest download is
+  `requested`, `running` or `cancelling`. It is never read otherwise and no
+  timer is set. A retry calls the same read; a read a later one has outdated is
+  ignored. A thrown value that is neither an `ApiError` nor an
+  `ApiUnreachableError` is rethrown.
+- **Loading:** three `SkeletonLine`s. **Error:** the body is replaced by a
+  `ReadFailure` with `readFailed(READ_TARGETS.recentDownloads,
+  readFailureReason(error))`, retrying the read.
+- **Answer:** a compact `DataTable` with *Started* as the row header. The rows
+  are ordered running or cancelling first, then requested, then the outcomes,
+  each group keeping the list's order. *Started* is `startedAt` (else
+  `requestedAt`) through `formatInstant`, a link to
+  `/data/downloads/{runId}`; *Outcome* is a `StatusBadge` from `tierOf` /
+  `labelOf` of the download's state; *Ended* is `formatInstant(endedAt)` or the
+  absent `ABSENT.notEnded`.
+- **Result:** `partialResult` for `partial`, `interruptedResult` for
+  `abandoned`, `writtenOf` otherwise. For the download that is the attention
+  answer's latest and not finished, the cell shows `progressOf` in a polite
+  live region and a `Progress` bar from its `progress`; with no `total` yet it
+  is an indeterminate bar named by the row's outcome label (DEC-0384).
+
+## `what-you-follow.tsx`
+
+### `WhatYouFollow()`
+
+A `section` named by its card title (`WHAT_YOU_FOLLOW`), a `summary` card.
+
+- **Reads:** `listInstruments({ limit: 1 })` and `getHistoryDepth()` together on
+  mount; a retry re-reads both and shows the skeleton again. Either failing
+  replaces the body with a `ReadFailure` (`readFailed(READ_TARGETS.whatYouFollow,
+  ...)`); a result a later read has outdated is ignored. A non-API thrown
+  value is rethrown.
+- **Loading:** three `SkeletonLine`s.
+- **Answer:** a definition list: *Followed stocks* (`activeCount`), *Stopped
+  following* (`historyKept(retiredCount)`), *History depth* (a link to
+  `/settings`: `depthYears(years)`, or `DEPTH_NOT_SET` when `years` is `null`)
+  and *Market data key*, then a **Manage followed stocks** `outline` link to
+  `/data/followed` in the footer. Counts pass through `formatCount`.
+- **Market data key:** when the shell's `health.liveness` is `answering` and a
+  health answer is held, a `StatusBadge` of `tierOf` / `labelOf` for
+  `credential_present`; otherwise `NotDeterminable` with
+  `KEY_NOT_DETERMINABLE_REASON`, because `health` keeps its last answer while
+  unreachable. Only `credential_present` is read; the key's value is never
+  shown.
+
 Tests: `check-cards.test.tsx`, `verdict.test.tsx`, `download-now.test.tsx`,
 `stop-following-dialog.test.tsx`, `problem-row.test.tsx`,
-`needs-fixing.test.tsx`.
+`needs-fixing.test.tsx`, `recent-downloads.test.tsx`,
+`what-you-follow.test.tsx`.
