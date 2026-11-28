@@ -122,3 +122,36 @@ cycles:
         - id: web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1
           disposition: equivalent
           reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each stop, and it still does."
+  - id: cycle-3
+    tasks: [T007, T008, T012, T013, T014]
+    description: >
+      Tests only: the vocabulary and badge scans (TC-COMP-163 and TC-COMP-164) in both test files: the DAC-E7-3 term scan
+      over every state each control defines (eight for Download now, seven for the dialog) with a planted-case proof
+      that also covers aria-label and title, the label allow-lists, no status or coverage badge, only Button's own
+      variants and the dialog's confirm, no colour utility conveying state, and non-empty text in every status
+      element. No production file changes. T012's scans and T013's full validation ran on these bytes: 3846 tests
+      across 135 files, biome lint and format, tsc, and the build, all clean.
+    deviations: >
+      (1) The cycle adds characterization tests over code cycles 1 and 2 already wrote, so they pass on arrival and
+      have no RED log of their own: red_cycle cites cycle-2. They were instead probed with eight hand-made production
+      mutants (the CAP-001 queued sentence, a reason naming an instrument, text-status-critical, hover:text-destructive,
+      a status-critical button variant, the error message rendered, an empty refusal and an empty announcement); all
+      eight were caught. (2) Four earlier drafts were tightened after the reviews: the colour check now covers prefixed
+      utilities and raw palette colours, the live-text check covers every status or live element, the dialog's states
+      gained UNREACHABLE, and the variant allow-lists are exact. (3) The dialog's label check asserts the exact list
+      Cancel and Stop following, stricter than the plan's any-copy-literal.
+    red_cycle: cycle-2
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Earlier passes reported narrower assertions, which were tightened; the last pass found none. Follow-ups from the
+        reviews, not adopted: a planted-positive for the badge and colour scans, a colour regex that also catches a
+        bare text-red, and an aria-label check in the label allow-list.
+    diff_sha256: 542426d776561b3cbcdb72298b2a586eae8954aab083d213acf4d2ece935c908
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-3.patch
+    index_tree: e7e4cee16d70bd4e767790cadfa8346d66847125
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 and 2 already mutated

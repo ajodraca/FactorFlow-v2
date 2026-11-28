@@ -448,3 +448,138 @@ describe("copy.ts, stop following strings (DEC-0377)", () => {
     expect(isStaleRowRefusal("instrument_not_found")).toBe(false);
   });
 });
+
+// The DAC-E7-3 term list: whole words, any case (DAC-E6-S2-3).
+const TERMS = /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
+
+/** Everything a reader sees or hears: the page's text and every aria-label or title on it. */
+function visibleAndAccessibleText(): string {
+  const names = [...document.body.querySelectorAll("[aria-label], [title]")].map(
+    (el) => `${el.getAttribute("aria-label") ?? ""} ${el.getAttribute("title") ?? ""}`,
+  );
+  return [document.body.textContent ?? "", ...names].join("\n");
+}
+
+type State =
+  | "open"
+  | "in flight"
+  | "ALREADY"
+  | "NOT_FOUND"
+  | "INTERNAL"
+  | "UNREACHABLE"
+  | "stopped";
+const STATES: State[] = [
+  "open",
+  "in flight",
+  "ALREADY",
+  "NOT_FOUND",
+  "INTERNAL",
+  "UNREACHABLE",
+  "stopped",
+];
+
+/** Renders the dialog in each state this story defines, and runs the check in every one. */
+async function inEveryState(check: (state: State) => void): Promise<void> {
+  for (const state of STATES) {
+    vi.clearAllMocks();
+    retireMock.mockReset();
+    const user = userEvent.setup();
+    const view = render(<NeedsFixingHarness />);
+    const dialog = await openDialog(user);
+    if (state === "in flight") {
+      retireMock.mockReturnValue(new Promise(() => undefined));
+      await confirm(user, dialog);
+    } else if (
+      state === "ALREADY" ||
+      state === "NOT_FOUND" ||
+      state === "INTERNAL" ||
+      state === "UNREACHABLE"
+    ) {
+      retireMock.mockRejectedValue({ ALREADY, NOT_FOUND, INTERNAL, UNREACHABLE }[state]);
+      await confirm(user, dialog);
+      await within(dialog).findByRole("status");
+    } else if (state === "stopped") {
+      retireMock.mockResolvedValue(RETIRED);
+      await confirm(user, dialog);
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    }
+    check(state);
+    view.unmount();
+  }
+}
+
+describe("Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19)", () => {
+  // Implements TC-COMP-163
+  it("(b) no term of the DAC-E7-3 list appears in any state, in the dialog or beside it", async () => {
+    await inEveryState(() => {
+      expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    });
+  });
+
+  it("(c) the scan is not vacuous", () => {
+    const planted = render(
+      <>
+        <button type="button" aria-label="the instrument">
+          x
+        </button>
+        <span title="one run">y</span>
+      </>,
+    );
+    expect(visibleAndAccessibleText()).toMatch(TERMS);
+    planted.unmount();
+    for (const term of ["one run", "Retired", "Provider credential", "no instrument exists"]) {
+      expect(term).toMatch(TERMS);
+    }
+    for (const fine of ["A download is running", "downloads", "instrument_not_found"]) {
+      expect(fine).not.toMatch(TERMS);
+    }
+  });
+
+  it("(d) the dialog's buttons and links are Cancel and the copy.ts label", async () => {
+    await inEveryState((state) => {
+      if (state === "stopped") return;
+      const dialog = screen.getByRole("dialog");
+      const names = within(dialog)
+        .getAllByRole("button")
+        .concat(within(dialog).queryAllByRole("link"))
+        .map((b) => b.textContent?.trim());
+      expect(names).toEqual(["Cancel", STOP_FOLLOWING]);
+    });
+  });
+});
+
+describe("No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20)", () => {
+  // Implements TC-COMP-164
+  it("(a) no status or coverage badge renders in any state", async () => {
+    await inEveryState(() => {
+      expect(document.body.querySelector('[data-variant^="status-"]')).toBeNull();
+      expect(document.body.querySelector('[data-variant="coverage-unknown"]')).toBeNull();
+      for (const el of document.body.querySelectorAll("[data-variant]")) {
+        const variant = el.getAttribute("data-variant");
+        // `confirm` is the dialog's own variant; every other element is a Button.
+        const allowed = el.matches('[role="dialog"]')
+          ? ["confirm"]
+          : ["default", "outline", "ghost"];
+        expect(allowed, `${el.tagName} ${variant}`).toContain(variant);
+      }
+    });
+  });
+
+  it("(b) no state is conveyed by colour alone", async () => {
+    await inEveryState((state) => {
+      for (const el of document.body.querySelectorAll("[class]")) {
+        expect(el.getAttribute("class") ?? "").not.toMatch(
+          /(^|[\s:])(text|bg|border)-((status|destructive)-?|(red|green|amber|yellow|orange)-\d)/,
+        );
+      }
+      for (const el of document.body.querySelectorAll(
+        "output, [role=status], [role=alert], [aria-live]",
+      )) {
+        // The announcement region is empty until the first stop, by design.
+        const announcement = el.classList.contains("sr-only");
+        if (announcement && state !== "stopped") continue;
+        expect((el.textContent ?? "").trim()).not.toBe("");
+      }
+    });
+  });
+});

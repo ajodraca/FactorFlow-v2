@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, ApiUnreachableError, startAcquisitionRun } from "../../api/client";
 import type { RunStartResult } from "../../api/types";
 import { toast } from "../../components/ui/toast";
-import { DOWNLOAD_NOW, QUEUED_NOTICE, START_REFUSALS, startFailed } from "./copy";
+import { DOWNLOAD_NOW, QUEUED_NOTICE, START_REFUSALS, TRY_AGAIN, startFailed } from "./copy";
 import { DownloadNow } from "./download-now";
 
 vi.mock("../../api/client", async () => {
@@ -282,5 +282,146 @@ describe("copy.ts, Download now strings (DEC-0378)", () => {
 
   it("(c) a failure sentence", () => {
     expect(startFailed("x")).toBe("Couldn't start the download: x.");
+  });
+});
+
+// The DAC-E7-3 term list: whole words, any case (DAC-E6-S2-3).
+const TERMS = /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
+
+/** Everything a reader sees or hears: the page's text and every aria-label or title on it. */
+function visibleAndAccessibleText(): string {
+  const names = [...document.body.querySelectorAll("[aria-label], [title]")].map(
+    (el) => `${el.getAttribute("aria-label") ?? ""} ${el.getAttribute("title") ?? ""}`,
+  );
+  return [document.body.textContent ?? "", ...names].join("\n");
+}
+
+const CUSTOM_LABEL = "Start the first download";
+
+type State =
+  | "idle"
+  | "in flight"
+  | "queued"
+  | "DEPTH"
+  | "NONE"
+  | "UNREACHABLE"
+  | "INTERNAL"
+  | "label";
+const STATES: State[] = [
+  "idle",
+  "in flight",
+  "queued",
+  "DEPTH",
+  "NONE",
+  "UNREACHABLE",
+  "INTERNAL",
+  "label",
+];
+
+/** Renders the control in each state this story defines, and runs the check in every one. */
+async function inEveryState(check: (state: State) => void): Promise<void> {
+  for (const state of STATES) {
+    vi.clearAllMocks();
+    startMock.mockReset();
+    const user = userEvent.setup();
+    const view = renderDownload(state === "label" ? CUSTOM_LABEL : undefined);
+    const button = screen.getByRole("button", {
+      name: state === "label" ? CUSTOM_LABEL : DOWNLOAD_NOW,
+    });
+    if (state === "in flight") {
+      startMock.mockReturnValue(new Promise(() => undefined));
+      await user.click(button);
+    } else if (state === "queued") {
+      startMock.mockResolvedValue(QUEUED);
+      await user.click(button);
+      await screen.findByRole("status");
+    } else if (
+      state === "DEPTH" ||
+      state === "NONE" ||
+      state === "UNREACHABLE" ||
+      state === "INTERNAL"
+    ) {
+      startMock.mockRejectedValue({ DEPTH, NONE, UNREACHABLE, INTERNAL }[state]);
+      await user.click(button);
+      await screen.findByRole("status");
+    }
+    check(state);
+    view.unmount();
+  }
+}
+
+describe("Download now vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19)", () => {
+  // Implements TC-COMP-163
+  it("(a) no term of the DAC-E7-3 list appears in any state", async () => {
+    await inEveryState(() => {
+      expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    });
+  });
+
+  it("(c) the scan is not vacuous", () => {
+    const planted = render(
+      <>
+        <button type="button" aria-label="the instrument">
+          x
+        </button>
+        <span title="one run">y</span>
+      </>,
+    );
+    expect(visibleAndAccessibleText()).toMatch(TERMS);
+    planted.unmount();
+    for (const term of ["one run", "Retired", "Provider credential", "the instrument"]) {
+      expect(term).toMatch(TERMS);
+    }
+    for (const fine of ["A download is running", "downloads", "instrument_not_found"]) {
+      expect(fine).not.toMatch(TERMS);
+    }
+  });
+
+  it("(d) every button and link name is a copy.ts label", async () => {
+    const allowed = new Set([
+      DOWNLOAD_NOW,
+      TRY_AGAIN,
+      ...Object.values(START_REFUSALS).map((r) => r.fix),
+    ]);
+    await inEveryState((state) => {
+      for (const el of screen.getAllByRole("button").concat(screen.queryAllByRole("link"))) {
+        const name = el.textContent?.trim() ?? "";
+        if (state === "label" && name === CUSTOM_LABEL) continue;
+        expect(allowed.has(name), `"${name}" in state ${state}`).toBe(true);
+      }
+    });
+  });
+});
+
+describe("No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20)", () => {
+  // Implements TC-COMP-164
+  it("(a) no status or coverage badge renders in any state", async () => {
+    await inEveryState(() => {
+      expect(document.body.querySelector('[data-variant^="status-"]')).toBeNull();
+      expect(document.body.querySelector('[data-variant="coverage-unknown"]')).toBeNull();
+      const variants = new Set(
+        [...document.body.querySelectorAll("[data-variant]")].map((el) =>
+          el.getAttribute("data-variant"),
+        ),
+      );
+      for (const variant of variants) {
+        expect(["default", "outline", "ghost"]).toContain(variant);
+      }
+    });
+  });
+
+  it("(b) no state is conveyed by colour alone", async () => {
+    await inEveryState(() => {
+      for (const el of document.body.querySelectorAll("[class]")) {
+        expect(el.getAttribute("class") ?? "").not.toMatch(
+          /(^|[\s:])(text|bg|border)-((status|destructive)-?|(red|green|amber|yellow|orange)-\d)/,
+        );
+      }
+      for (const el of document.body.querySelectorAll(
+        "output, [role=status], [role=alert], [aria-live]",
+      )) {
+        expect((el.textContent ?? "").trim()).not.toBe("");
+      }
+    });
   });
 });
