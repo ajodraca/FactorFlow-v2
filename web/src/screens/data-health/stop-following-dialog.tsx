@@ -68,7 +68,7 @@ export function StopFollowingDialog({
   if (symbol !== null) lastSymbol.current = symbol;
   const shown = symbol ?? lastSymbol.current;
 
-  // Runs before the dialog moves focus to Cancel, so the opener is the row's button.
+  // Fires before the dialog moves focus to Cancel, so the opener is the row's button.
   useLayoutEffect(() => {
     if (symbol !== null) {
       opener.current =
@@ -80,7 +80,7 @@ export function StopFollowingDialog({
 
   // After every render: the caller re-renders when its rows change, so this sees each change.
   // A row that leaves in the same update as the close can leave focus inside the closing
-  // dialog until the next tick, and nothing renders after that, so the check runs once more then.
+  // dialog until the next tick, and nothing renders after that, so the check is repeated then.
   useEffect(() => {
     const settle = () => {
       if (!watchRowExit.current) return;

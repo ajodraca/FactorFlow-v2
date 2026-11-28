@@ -79,9 +79,11 @@ function NeedsFixingHarness({
   const shown = rows.filter((s) => !gone.includes(s));
   return (
     <>
-      <h2 ref={headingRef} tabIndex={-1}>
-        Needs fixing
-      </h2>
+      {shown.length > 0 ? (
+        <h2 ref={headingRef} tabIndex={-1}>
+          Needs fixing
+        </h2>
+      ) : null}
       <ul>
         {shown.map((s) => (
           <li key={s}>
@@ -367,6 +369,40 @@ describe("Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17)",
     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
     await settle();
     expect(heading).not.toHaveFocus();
+  });
+
+  it("(m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed", async () => {
+    const user = userEvent.setup();
+    retireMock.mockResolvedValue(RETIRED);
+    const view = render(<NeedsFixingHarness rows={["FBXX"]} />);
+    const dialog = await openDialog(user);
+    await confirm(user, dialog);
+    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
+    view.rerender(<NeedsFixingHarness rows={[]} />);
+    await settle();
+    expect(screen.queryByRole("heading", { name: "Needs fixing" })).toBeNull();
+    expect(document.body).toHaveFocus();
+    view.rerender(<NeedsFixingHarness rows={["NEW"]} />);
+    await settle();
+    expect(screen.getByRole("heading", { name: "Needs fixing" })).not.toHaveFocus();
+  });
+
+  it("(d2) a refusal does not follow the dialog to another symbol the caller sets", async () => {
+    const user = userEvent.setup();
+    retireMock.mockRejectedValue(ALREADY);
+    const heading = { current: null };
+    const props = { onClose: vi.fn(), onStopped: vi.fn(), onRefusalClosed: vi.fn() };
+    const view = render(
+      <StopFollowingDialog symbol="FBXX" fallbackFocusRef={heading} {...props} />,
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Stop following FBXX" });
+    await confirm(user, dialog);
+    await within(dialog).findByRole("status");
+    view.rerender(<StopFollowingDialog symbol={null} fallbackFocusRef={heading} {...props} />);
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    view.rerender(<StopFollowingDialog symbol="GOOD" fallbackFocusRef={heading} {...props} />);
+    await screen.findByRole("dialog", { name: "Stop following GOOD" });
+    expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
   });
 
   it("(n) focus the owner placed elsewhere is not grabbed later either", async () => {

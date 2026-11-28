@@ -1,5 +1,6 @@
 # TDD evidence for CAP-003-E6-S2 - Download Now and the Stop Following Dialog.
-# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T021153Z (c276899f).
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T021153Z, 985e532e when cycle 1 was committed (c276899f is the
+# frozen run base). T001's pre-change green run was not captured in a log (IR-004).
 # Cycles per the plan's T014: (1) Download now, (2) Stop following dialog, (3) vocabulary and badge scans (tests only).
 # Each cycle is committed as it ends with this file's entry beside its code, so commit_hash is stage.
 # Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/<file>'
@@ -155,3 +156,38 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 and 2 already mutated
+  - id: cycle-4
+    tasks: [T005, T008, T011, T013]
+    description: >
+      Review rework (implementation review v1: IR-001, IR-002, IR-003, IR-006). Tests only plus two comment rewordings:
+      stop-following-dialog.test.tsx gains (m2) (no heading when the row leaves: nothing focused, a later heading not
+      grabbed; kills :91 negate-boolean) and (d2) (a refusal does not follow a caller-driven symbol change; kills the
+      reset in the opener layout effect), and its harness renders the heading only while rows exist. download-now.test.tsx
+      pins data-variant on Download now (default), the refusal links and Try again (outline). IR-006: the two comments
+      no longer use runs as a verb. IR-004 is answered in this file's header; IR-005 needs no change to pass.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the reviewer's mutants, each
+      applied by hand: the tests fail against them (4 failed) and pass with them reverted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log
+    red_log_sha256: 4da420bf5bc3e2d84100edaa1c76a93c7d1981eceed7c92ef1abb12745d63aea
+    red_evidence: >
+      Against the mutants (focus-clear deleted, failure reset deleted, variants swapped) 4 tests failed: download-now (a),
+      (c) and stop-following-dialog (m2), (d2).
+    green_evidence: >
+      146 tests passed in web/src/screens/data-health; biome lint and format clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log
+        sha256: 4da420bf5bc3e2d84100edaa1c76a93c7d1981eceed7c92ef1abb12745d63aea
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The independent review asked for the Follow stocks link's variant too, which was added to (b); it shares one
+        Button with the Set history depth link. The idle-state Download now variant is pinned only in the refusal state.
+    diff_sha256: 67b4fa24bdfd5ffca261ee2b27281d47099250dfdbe75abb5ba991f753a0b5d0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-4.patch
+    index_tree: 945084e2663b9ff0a129d7d3a46950c6997b867d
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour (two comments); its tests kill the reviewer mutants for the focus clear, the refusal reset and the three variants

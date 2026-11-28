@@ -1,0 +1,82 @@
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+ ❯ src/screens/data-health/download-now.test.tsx (26 tests | 2 failed) 566ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 61ms
+     → expected 'default' to be 'outline' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again 13ms
+     → expected 'default' to be 'outline' // Object.is equality
+ ✓ src/screens/data-health/verdict.test.tsx (32 tests) 179ms
+ ✓ src/screens/data-health/check-cards.test.tsx (54 tests) 214ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (34 tests | 2 failed) 1661ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed 74ms
+     → expect(element).not.toHaveFocus()
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (d2) a refusal does not follow the dialog to another symbol the caller sets 25ms
+     → expected <output class="text-sm"></output> to be null
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+AssertionError: expected 'default' to be 'outline' // Object.is equality
+Expected: "outline"
+Received: "default"
+ ❯ src/screens/data-health/download-now.test.tsx:85:47
+     83|     const link = screen.getByRole("link", { name: "Set history depth" …
+     84|     expect(link.getAttribute("href")).toBe("/settings");
+     85|     expect(link.getAttribute("data-variant")).toBe("outline");
+       |                                               ^
+     86|     expect(pressed().getAttribute("data-variant")).toBe("default");
+     87|     expect(screen.queryByText(/no stocks are followed/)).toBeNull();
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again
+AssertionError: expected 'default' to be 'outline' // Object.is equality
+Expected: "outline"
+Received: "default"
+ ❯ src/screens/data-health/download-now.test.tsx:117:48
+    115|     const again = screen.getByRole("button", { name: "Try again" });
+    116|     expect(status.contains(again)).toBe(false);
+    117|     expect(again.getAttribute("data-variant")).toBe("outline");
+       |                                                ^
+    118|     expect(screen.queryByRole("link", { name: "Set history depth" })).…
+    119|     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBe…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed
+Error: expect(element).not.toHaveFocus()
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:387:71
+    385|     view.rerender(<NeedsFixingHarness rows={["NEW"]} />);
+    386|     await settle();
+    387|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
+       |                                                                       ^
+    388|   });
+    389| 
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (d2) a refusal does not follow the dialog to another symbol the caller sets
+AssertionError: expected <output class="text-sm"></output> to be null
+- Expected: 
+null
++ Received: 
+<output
+  class="text-sm"
+>
+  Couldn't stop following FBXX: you already stopped following it.
+</output>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:405:59
+    403|     view.rerender(<StopFollowingDialog symbol="GOOD" fallbackFocusRef=…
+    404|     await screen.findByRole("dialog", { name: "Stop following GOOD" });
+    405|     expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
+       |                                                           ^
+    406|   });
+    407| 
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+ Test Files  2 failed | 2 passed (4)
+      Tests  4 failed | 142 passed (146)
+   Start at  22:13:37
+   Duration  2.93s (transform 296ms, setup 313ms, collect 1.65s, tests 2.62s, environment 1.73s, prepare 885ms)

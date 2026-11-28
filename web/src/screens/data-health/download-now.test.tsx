@@ -82,6 +82,8 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
     expect(status.textContent).toBe("Couldn't start the download: history depth isn't set.");
     const link = screen.getByRole("link", { name: "Set history depth" });
     expect(link.getAttribute("href")).toBe("/settings");
+    expect(link.getAttribute("data-variant")).toBe("outline");
+    expect(pressed().getAttribute("data-variant")).toBe("default");
     expect(screen.queryByText(/no stocks are followed/)).toBeNull();
     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBeNull();
     await user.click(link);
@@ -97,6 +99,7 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
     expect(status.textContent).toBe("Couldn't start the download: no stocks are followed.");
     const link = screen.getByRole("link", { name: "Follow stocks" });
     expect(link.getAttribute("href")).toBe("/data/followed");
+    expect(link.getAttribute("data-variant")).toBe("outline");
     expect(screen.queryByText(/history depth/)).toBeNull();
     expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
     await user.click(link);
@@ -112,6 +115,7 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
     expect(status.textContent).toBe("Couldn't start the download: FactorFlow is not answering.");
     const again = screen.getByRole("button", { name: "Try again" });
     expect(status.contains(again)).toBe(false);
+    expect(again.getAttribute("data-variant")).toBe("outline");
     expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBeNull();
     startMock.mockResolvedValueOnce(ACCEPTED);
