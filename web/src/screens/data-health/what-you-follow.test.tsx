@@ -523,6 +523,53 @@ async function unhandledDuring(run: () => Promise<void>): Promise<unknown[]> {
   return seen;
 }
 
+describe("What you follow hand-off cases (DAC-E6-16, DAC-E6-17, AC-4)", () => {
+  it("(a) a change of health does not read again; the key badge follows it", async () => {
+    listMock.mockResolvedValue(COUNTS(30, 2));
+    depthMock.mockResolvedValue(DEPTH(5));
+    const view = await renderFollow();
+    expect(listMock).toHaveBeenCalledTimes(1);
+    setShell(ANSWERING(false));
+    view.rerender(
+      <MemoryRouter>
+        <WhatYouFollow />
+      </MemoryRouter>,
+    );
+    expect(
+      definitionOf("Market data key").querySelector('[data-variant="status-critical"]'),
+    ).not.toBeNull();
+    expect(listMock).toHaveBeenCalledTimes(1);
+    expect(depthMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("(b) a read failure shows no key badge and no summary", async () => {
+    listMock.mockRejectedValue(INTERNAL);
+    depthMock.mockResolvedValue(DEPTH(5));
+    const { container } = renderOnly();
+    await screen.findByRole("status");
+    expect(container.textContent).not.toContain("Market data key");
+    expect(container.querySelector("[data-variant^='status-']")).toBeNull();
+    expect(container.querySelector("[data-variant^='coverage-']")).toBeNull();
+  });
+
+  it("(c) while the reads are pending, three busy lines show", () => {
+    listMock.mockReturnValue(new Promise(() => undefined));
+    depthMock.mockReturnValue(new Promise(() => undefined));
+    const { container } = renderOnly();
+    expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(3);
+  });
+
+  it("(d) the summary is a two-column list and Manage followed stocks an outline action", async () => {
+    listMock.mockResolvedValue(COUNTS(30, 2));
+    depthMock.mockResolvedValue(DEPTH(5));
+    await renderFollow();
+    expect(region().querySelector("dl")?.classList.contains("grid-cols-[auto_1fr]")).toBe(true);
+    expect(
+      screen.getByRole("link", { name: "Manage followed stocks" }).getAttribute("data-variant"),
+    ).toBe("outline");
+  });
+});
+
 describe("What you follow hand-off cases (DAC-E6-16, DAC-E6-17)", () => {
   it("ignores an older read's failure once a newer read has answered", async () => {
     let failOld: (reason: Error) => void = () => undefined;

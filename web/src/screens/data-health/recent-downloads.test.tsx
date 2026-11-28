@@ -955,6 +955,162 @@ describe("Recent downloads progress follows each new attention answer (DAC-E6-14
   });
 });
 
+describe("Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384)", () => {
+  async function answerWith(
+    view: ReturnType<typeof renderRecent>,
+    latest: LatestDownload,
+    checkedAt: string,
+  ) {
+    setShell({ attention: ok(ATT(latest), checkedAt) });
+    view.rerender(ui());
+    await settle();
+  }
+
+  it("(a) an interrupted or cancelled latest download is finished: no re-read, no progress", async () => {
+    for (const state of ["abandoned", "cancelled"] as const) {
+      listMock.mockReset();
+      listMock.mockResolvedValue(PAGE([RUN({ runId: "r-9", state })]));
+      setShell({ attention: ok(ATT(LATEST(state)), "2026-10-30T19:03:10Z") });
+      const view = renderRecent();
+      await screen.findByRole("table");
+      await answerWith(view, LATEST(state), "2026-10-30T19:03:20Z");
+      expect(listMock).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole("progressbar")).toBeNull();
+      view.unmount();
+    }
+  });
+
+  it("(b) rows in the same state keep distinct row keys", async () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    listMock.mockResolvedValue(
+      PAGE([RUN({ runId: "r-3" }), RUN({ runId: "r-2" }), RUN({ runId: "r-1" })]),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    expect(bodyRows()).toHaveLength(3);
+    const keyWarnings = errors.mock.calls.filter((call) => String(call[0]).includes("same key"));
+    errors.mockRestore();
+    expect(keyWarnings).toEqual([]);
+  });
+
+  it("(c) a partial download's failed count has thousands separators", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({
+          runId: "r-5",
+          state: "partial",
+          instrumentsNamed: 2500,
+          instrumentsWritten: 1266,
+          instrumentsFailed: 1234,
+        }),
+      ]),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    expect(cellsOf(rowFor("r-5"))[2]?.textContent).toBe("1,266 of 2,500 stocks, 1,234 failed");
+  });
+
+  it("(d) a re-read keeps the table on screen until it answers", async () => {
+    const view = await mountRunning();
+    listMock.mockReturnValueOnce(new Promise(() => undefined));
+    await answerWith(
+      view,
+      LATEST("running", { progress: { done: 900, total: 1236 } }),
+      "2026-10-30T19:03:20Z",
+    );
+    expect(listMock).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(view.container.querySelector('[aria-busy="true"]')).toBeNull();
+  });
+
+  it("(e) an older read answering last does not move the time the list answered", async () => {
+    const view = await mountRunning();
+    let answerOld: (page: AcquisitionRunPage) => void = () => undefined;
+    listMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answerOld = resolve;
+      }),
+    );
+    vi.setSystemTime(new Date("2026-10-30T19:03:22Z"));
+    await answerWith(view, LATEST("running"), "2026-10-30T19:03:20Z");
+    listMock.mockResolvedValueOnce(RUNNING_PAGE);
+    vi.setSystemTime(new Date("2026-10-30T19:03:32Z"));
+    await answerWith(view, LATEST("running"), "2026-10-30T19:03:30Z");
+    await screen.findByText(`${SUBLINE} · checked 14:03:32 CDT`);
+    vi.setSystemTime(new Date("2026-10-30T19:03:40Z"));
+    await act(async () => answerOld(RUNNING_PAGE));
+    expect(screen.getByText(`${SUBLINE} · checked 14:03:32 CDT`)).toBeInTheDocument();
+  });
+
+  it("(f) sets no timer: time passing without a new answer reads nothing", async () => {
+    vi.useFakeTimers();
+    listMock.mockResolvedValue(RUNNING_PAGE);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    renderRecent();
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      vi.advanceTimersByTime(120_000);
+    });
+    expect(listMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("(g) a running answer re-reads after a failed read and shows the list again", async () => {
+    listMock.mockRejectedValueOnce(INTERNAL);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("status");
+    listMock.mockResolvedValueOnce(RUNNING_PAGE);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:20Z") });
+    view.rerender(ui());
+    await screen.findByRole("table");
+    expect(listMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("(h) a queued download's bar is named by its own row's outcome", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({ runId: "r-8", state: "running", endedAt: null }),
+        RUN({
+          runId: "r-9",
+          state: "requested",
+          startedAt: null,
+          endedAt: null,
+          instrumentsNamed: 0,
+          instrumentsWritten: 0,
+        }),
+      ]),
+    );
+    const latest = LATEST("requested", {
+      run_id: "r-9",
+      started_at: null,
+      progress: { done: 0, total: null },
+    });
+    setShell({ attention: ok(ATT(latest), "2026-10-30T19:03:10Z") });
+    renderRecent();
+    await screen.findByRole("table");
+    expect(screen.getByRole("progressbar", { name: "Queued" })).toBeInTheDocument();
+  });
+
+  it("(i) the sub-line is small text in the card header, and is not announced", async () => {
+    listMock.mockResolvedValue(PAGE([RUN()]));
+    renderRecent();
+    await screen.findByRole("table");
+    const subline = screen.getByText(new RegExp(`^${SUBLINE}`));
+    expect(subline.classList.contains("text-xs")).toBe(true);
+    expect(subline.closest("[aria-live]")).toBeNull();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Recent downloads" }).parentElement,
+    ).toContainElement(subline);
+  });
+
+  it("(j) while the first read is pending, three busy lines show", () => {
+    listMock.mockReturnValue(new Promise(() => undefined));
+    const { container } = renderRecent();
+    expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(3);
+  });
+});
+
 describe("copy.ts recent downloads and what you follow strings", () => {
   it("(a) the result sentences", () => {
     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");

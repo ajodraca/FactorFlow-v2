@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 1 failed) 317ms
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again 14ms
+     → expected <a data-variant="outline" …(2)></a> to be null
+ ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 722ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again
+AssertionError: expected <a data-variant="outline" …(2)></a> to be null
+
+- Expected: 
+null
+
++ Received: 
+<a
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+  data-variant="outline"
+  href="/data/followed"
+>
+  Manage followed stocks
+</a>
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:230:76
+    228|     expect(screen.getByRole("button", { name: "Try again" })).toBeInTh…
+    229|     expect(container.querySelector("dl")).toBeNull();
+    230|     expect(screen.queryByRole("link", { name: "Manage followed stocks"…
+       |                                                                            ^
+    231|   });
+    232| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 71 passed (72)
+   Start at  02:05:47
+   Duration  1.99s (transform 413ms, setup 76ms, collect 1.24s, tests 1.04s, environment 455ms, prepare 348ms)
+

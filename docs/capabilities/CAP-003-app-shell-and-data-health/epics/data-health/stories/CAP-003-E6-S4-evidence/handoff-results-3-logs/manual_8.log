@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w5/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 697ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 2 failed) 1286ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 41ms
+     → expected '1230 of 1,236 stocks, 6 failed' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 40ms
+     → expected '1236 of 1,236 stocks' to be '1,236 of 1,236 stocks' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected '1230 of 1,236 stocks, 6 failed' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+Expected: "1,230 of 1,236 stocks, 6 failed"
+Received: "1230 of 1,236 stocks, 6 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:223:42
+    221|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-war…
+    222|     expect(badgeOf(row).textContent).toBe("Partial");
+    223|     expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, …
+       |                                          ^
+    224|   });
+    225| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected '1236 of 1,236 stocks' to be '1,236 of 1,236 stocks' // Object.is equality
+
+Expected: "1,236 of 1,236 stocks"
+Received: "1236 of 1,236 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:247:47
+    245|     expect(badgeOf(complete).getAttribute("data-variant")).toBe("statu…
+    246|     expect(badgeOf(complete).textContent).toBe("Complete");
+    247|     expect(cellsOf(complete)[2]?.textContent).toBe("1,236 of 1,236 sto…
+       |                                               ^
+    248|     const failed = rowFor("r-3");
+    249|     expect(badgeOf(failed).getAttribute("data-variant")).toBe("status-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 70 passed (72)
+   Start at  02:04:59
+   Duration  7.33s (transform 417ms, setup 370ms, collect 4.50s, tests 1.98s, environment 4.89s, prepare 650ms)
+

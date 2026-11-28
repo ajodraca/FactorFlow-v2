@@ -1,0 +1,75 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w3/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 3 failed) 388ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable 20ms
+     → expected 'Unknown' to be 'Not determinable' // Object.is equality
+   × Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (a) an unreachable interface never shows the stale value as Missing 7ms
+     → expected 'Unknown' to be 'Not determinable' // Object.is equality
+   × Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (b) before the first answer it reads the same 6ms
+     → expected 'Unknown' to be 'Not determinable' // Object.is equality
+ ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 1055ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable
+AssertionError: expected 'Unknown' to be 'Not determinable' // Object.is equality
+
+Expected: "Not determinable"
+Received: "Unknown"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:145:32
+    143|       '[data-variant="coverage-unknown"]',
+    144|     );
+    145|     expect(badge?.textContent).toBe("Not determinable");
+       |                                ^
+    146|   });
+    147| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (a) an unreachable interface never shows the stale value as Missing
+AssertionError: expected 'Unknown' to be 'Not determinable' // Object.is equality
+
+Expected: "Not determinable"
+Received: "Unknown"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:328:32
+    326|       '[data-variant="coverage-unknown"]',
+    327|     );
+    328|     expect(badge?.textContent).toBe("Not determinable");
+       |                                ^
+    329|     expect(badge).toHaveAccessibleDescription("FactorFlow is not answe…
+    330|     expect(region().querySelector('[data-variant="status-critical"]'))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (b) before the first answer it reads the same
+AssertionError: expected 'Unknown' to be 'Not determinable' // Object.is equality
+
+Expected: "Not determinable"
+Received: "Unknown"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:340:32
+    338|       '[data-variant="coverage-unknown"]',
+    339|     );
+    340|     expect(badge?.textContent).toBe("Not determinable");
+       |                                ^
+    341|     expect(badge).toHaveAccessibleDescription("FactorFlow is not answe…
+    342|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 69 passed (72)
+   Start at  02:05:41
+   Duration  2.79s (transform 227ms, setup 125ms, collect 1.72s, tests 1.44s, environment 596ms, prepare 265ms)
+

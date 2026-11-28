@@ -1,0 +1,93 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 640ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 4 failed) 1039ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 21ms
+     → expected '1,236 of 1,236 stocks, 0 failed' to be '1,236 of 1,236 stocks' // Object.is equality
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 11ms
+     → expected '700 of 1,236 stocks, 0 failed' to be '700 of 1,236 stocks' // Object.is equality
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value 13ms
+     → expected '700 of 1,236 stocks, 0 failed' to be '700 of 1,236 stocks' // Object.is equality
+   × Recent downloads progress follows each new attention answer (DAC-E6-14, AC-25, DEC-0384) > (c) a changed latest download moves the progress to the matching row 24ms
+     → expected '700 of 1,236 stocks, 0 failed' to be '700 of 1,236 stocks' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected '1,236 of 1,236 stocks, 0 failed' to be '1,236 of 1,236 stocks' // Object.is equality
+
+Expected: "1,236 of 1,236 stocks"
+Received: "1,236 of 1,236 stocks, 0 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:247:47
+    245|     expect(badgeOf(complete).getAttribute("data-variant")).toBe("statu…
+    246|     expect(badgeOf(complete).textContent).toBe("Complete");
+    247|     expect(cellsOf(complete)[2]?.textContent).toBe("1,236 of 1,236 sto…
+       |                                               ^
+    248|     const failed = rowFor("r-3");
+    249|     expect(badgeOf(failed).getAttribute("data-variant")).toBe("status-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download
+AssertionError: expected '700 of 1,236 stocks, 0 failed' to be '700 of 1,236 stocks' // Object.is equality
+
+Expected: "700 of 1,236 stocks"
+Received: "700 of 1,236 stocks, 0 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:501:52
+    499|     await screen.findByRole("table");
+    500|     expect(screen.queryByRole("progressbar")).toBeNull();
+    501|     expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 …
+       |                                                    ^
+    502|     setShell({
+    503|       attention: ok(ATT(LATEST("succeeded", { run_id: "r-9" })), "2026…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value
+AssertionError: expected '700 of 1,236 stocks, 0 failed' to be '700 of 1,236 stocks' // Object.is equality
+
+Expected: "700 of 1,236 stocks"
+Received: "700 of 1,236 stocks, 0 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:823:52
+    821|     await screen.findByRole("table");
+    822|     expect(screen.queryByRole("progressbar")).toBeNull();
+    823|     expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 …
+       |                                                    ^
+    824|   });
+    825| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress follows each new attention answer (DAC-E6-14, AC-25, DEC-0384) > (c) a changed latest download moves the progress to the matching row
+AssertionError: expected '700 of 1,236 stocks, 0 failed' to be '700 of 1,236 stocks' // Object.is equality
+
+Expected: "700 of 1,236 stocks"
+Received: "700 of 1,236 stocks, 0 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:951:52
+    949|     await answer(view, LATEST("running", { run_id: "r-8" }), "2026-10-…
+    950|     expect(within(rowFor("r-9")).queryByRole("progressbar")).toBeNull(…
+    951|     expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 …
+       |                                                    ^
+    952|     expect(
+    953|       within(rowFor("r-8")).getByRole("progressbar", { name: "812 of 1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 68 passed (72)
+   Start at  02:04:59
+   Duration  7.30s (transform 704ms, setup 323ms, collect 4.94s, tests 1.68s, environment 4.81s, prepare 476ms)
+

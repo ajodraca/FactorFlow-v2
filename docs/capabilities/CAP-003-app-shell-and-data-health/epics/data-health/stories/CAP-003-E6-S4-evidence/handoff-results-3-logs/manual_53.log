@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 2 failed) 460ms
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again 12ms
+     → expected 'Couldn\'t read what you follow: Facto…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (f) Try again returns to the loading body until the reads settle, then fails again in view 49ms
+     → expected 'Couldn\'t read what you follow: Facto…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+ ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 948ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again
+AssertionError: expected 'Couldn\'t read what you follow: Facto…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+Expected: "Couldn't read what you follow: FactorFlow hit an unexpected problem."
+Received: "Couldn't read what you follow: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:224:32
+    222|     const { container } = renderOnly();
+    223|     const status = await screen.findByRole("status");
+    224|     expect(status.textContent).toBe(
+       |                                ^
+    225|       "Couldn't read what you follow: FactorFlow hit an unexpected pro…
+    226|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (f) Try again returns to the loading body until the reads settle, then fails again in view
+AssertionError: expected 'Couldn\'t read what you follow: Facto…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+Expected: "Couldn't read what you follow: FactorFlow hit an unexpected problem."
+Received: "Couldn't read what you follow: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:287:61
+    285|     expect(screen.queryByRole("button", { name: "Try again" })).toBeNu…
+    286|     await act(async () => failAgain(INTERNAL));
+    287|     expect((await screen.findByRole("status")).textContent).toBe(
+       |                                                             ^
+    288|       "Couldn't read what you follow: FactorFlow hit an unexpected pro…
+    289|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 70 passed (72)
+   Start at  02:05:38
+   Duration  2.67s (transform 334ms, setup 106ms, collect 1.59s, tests 1.41s, environment 473ms, prepare 727ms)
+

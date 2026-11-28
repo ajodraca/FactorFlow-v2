@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 2 failed) 385ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing 21ms
+     → expected undefined to be 'Missing' // Object.is equality
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape 10ms
+     → expected undefined to be 'Missing' // Object.is equality
+ ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 982ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing
+AssertionError: expected undefined to be 'Missing' // Object.is equality
+
+- Expected: 
+"Missing"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:154:32
+    152|     await renderFollow();
+    153|     const badge = definitionOf("Market data key").querySelector('[data…
+    154|     expect(badge?.textContent).toBe("Missing");
+       |                                ^
+    155|   });
+    156| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape
+AssertionError: expected undefined to be 'Missing' // Object.is equality
+
+- Expected: 
+"Missing"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:480:34
+    478|       const { unmount } = await renderFollow();
+    479|       const badge = definitionOf("Market data key").querySelector(`[da…
+    480|       expect(badge?.textContent).toBe(word);
+       |                                  ^
+    481|       expect(badge?.querySelector('svg[aria-hidden="true"]')).not.toBe…
+    482|       unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 70 passed (72)
+   Start at  02:05:40
+   Duration  2.55s (transform 423ms, setup 83ms, collect 1.86s, tests 1.37s, environment 412ms, prepare 235ms)
+

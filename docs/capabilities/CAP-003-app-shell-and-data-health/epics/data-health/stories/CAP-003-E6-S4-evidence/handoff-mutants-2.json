@@ -1,0 +1,688 @@
+{
+  "schema": 1,
+  "repo_head": "cc61c645cb8366465365a49775359f85ba4deaf3",
+  "range": "12b95689785b5b28d901a0f79a69fe8762f698bc..HEAD",
+  "source": "12b95689785b5b28d901a0f79a69fe8762f698bc",
+  "mutants": [
+    {
+      "id": "manual:1",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 43,
+      "original": "  \"running\",",
+      "mutated": "  // \"running\",",
+      "description": "A running latest download no longer counts as non-terminal, so running answers trigger no re-read and the running row shows no progress (DAC-E6-14, DAC-E6-S4-2; task plan T013 Inputs NON_TERMINAL; owner-shell 2.4)."
+    },
+    {
+      "id": "manual:2",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 44,
+      "original": "  \"cancelling\",",
+      "mutated": "  \"cancelling\",\n  \"abandoned\",",
+      "description": "An interrupted (abandoned) latest download counts as non-terminal, so each answer after it re-reads the list and its row carries a progress bar; abandoned is a terminal outcome (DAC-E6-S4-2 'given a terminal latest_download, no re-read follows an answer'; task plan T013 NON_TERMINAL is exactly requested, running, cancelling)."
+    },
+    {
+      "id": "manual:3",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 44,
+      "original": "  \"cancelling\",",
+      "mutated": "  \"cancelling\",\n  \"cancelled\",",
+      "description": "A download cancelled by the owner counts as non-terminal, so answers after it re-read the list and its row carries progress (DAC-E6-S4-2 no re-read after a terminal answer; task plan T013 NON_TERMINAL; owner-shell 2.4)."
+    },
+    {
+      "id": "manual:4",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 48,
+      "original": "  return run.runId;",
+      "mutated": "  return run.state;",
+      "description": "Rows are identified by their state instead of their run id, so two downloads in the same state share a row id and key (task plan T013 Render getRowId={(r) => r.runId}; CAP-003-E1-S4 DataTable getRowId keeps rows stable across re-reads)."
+    },
+    {
+      "id": "manual:5",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 55,
+      "original": "    case \"cancelling\":\n      return 0;",
+      "mutated": "      return 0;",
+      "description": "A stopping (cancelling) download no longer ranks with the running one at the head of the list; it falls to the outcomes (task plan T013 Order: running and cancelling 0; Resolved Conflict 3)."
+    },
+    {
+      "id": "manual:6",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 57,
+      "original": "    case \"requested\":",
+      "mutated": "    case \"partial\":",
+      "description": "A queued download ranks with the outcomes and a partial one ranks above them, so the queued row no longer follows the running one (task plan T013 Order: requested 1, terminal 2; T004 (e); Resolved Conflict 3)."
+    },
+    {
+      "id": "manual:7",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 59,
+      "original": "    default:\n      return 2;\n  }\n}",
+      "mutated": "    default:\n      return 1;\n  }\n}",
+      "description": "Every finished download ranks with the queued one, so a queued download no longer precedes the outcomes and keeps its served place (task plan T013 Order: requested 1, every terminal state 2; T004 (e))."
+    },
+    {
+      "id": "manual:8",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 66,
+      "original": "  const written = formatCount(run.instrumentsWritten);",
+      "mutated": "  const written = String(run.instrumentsWritten);",
+      "description": "The Result written count bypasses formatCount, losing its thousands separator (*1236 of 1,236 stocks*) (task plan T013 Result: counts go through formatCount; data-health-ui 2.6)."
+    },
+    {
+      "id": "manual:9",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 70,
+      "original": "      return partialResult(written, named, formatCount(run.instrumentsFailed));",
+      "mutated": "      return partialResult(written, named, String(run.instrumentsFailed));",
+      "description": "The Partial failed count bypasses formatCount, so 1,000 or more failed reads *1000 failed* (task plan T013 Result: counts go through formatCount; DAC-E6-S4-1 *{written} of {named} stocks, {failed} failed*)."
+    },
+    {
+      "id": "manual:10",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 72,
+      "original": "      return interruptedResult(written);",
+      "mutated": "      return interruptedResult(named);",
+      "description": "The Interrupted sentence states the named count as kept, so an interrupted download reads as if every stock was kept (DAC-E6-S4-1, AC-12; data-health-ui 2.6 *{written} kept*)."
+    },
+    {
+      "id": "manual:11",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 74,
+      "original": "      return writtenOf(written, named);",
+      "mutated": "      return partialResult(written, named, formatCount(run.instrumentsFailed));",
+      "description": "Every plain outcome (Complete, Failed, Cancelled by you, queued, running) gains the *, {failed} failed* clause reserved for Partial (data-health-ui 2.6 Result forms; DAC-E6-S4-1; T002 (e))."
+    },
+    {
+      "id": "manual:12",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 96,
+      "original": "  const active = latest !== null && NON_TERMINAL.has(latest.state);",
+      "mutated": "  const active = latest !== null;",
+      "description": "Any latest download, finished or not, counts as active, so terminal answers re-read the list and a finished latest row shows progress (DAC-E6-14 'otherwise only on load'; DAC-E6-S4-2; Resolved Conflict 2)."
+    },
+    {
+      "id": "manual:13",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 97,
+      "original": "  const answerKey = attention.kind === \"ok\" ? attention.checkedAt.getTime() : null;",
+      "mutated": "  const answerKey = attention.kind === \"ok\" ? Date.parse(attention.data.checked_at) : null;",
+      "description": "The re-read keys on the payload's checked_at rather than the instant of the attention answer, so successive answers carrying the same server check time give no re-read (task plan T013 When it reads: answerKey = attention.checkedAt.getTime(); DAC-E6-S4-2 once per answer)."
+    },
+    {
+      "id": "manual:14",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 92,
+      "original": "  const [answeredAt, setAnsweredAt] = useState<Date | null>(null);",
+      "mutated": "  const [answeredAt, setAnsweredAt] = useState<Date | null>(new Date());",
+      "description": "The header claims *checked {time}* before the list has ever answered (AC-25 the time the list last answered; task plan T013 answeredAt set on success only; data-health-ui 2.6)."
+    },
+    {
+      "id": "manual:15",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 91,
+      "original": "  const [list, setList] = useState<ListState>({ kind: \"loading\" });",
+      "mutated": "  const [list, setList] = useState<ListState>({ kind: \"ok\", runs: [] });",
+      "description": "Before the first answer the card shows an empty table instead of the busy skeleton body (task plan T013 Render loading: three SkeletonLines; T005 (a); data-health-ui 10 States Loading skeleton rows)."
+    },
+    {
+      "id": "manual:16",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 102,
+      "original": "    const mine = latestCall.current;\n    listAcquisitionRuns({ limit: 5 }).then(",
+      "mutated": "    const mine = latestCall.current;\n    setList({ kind: \"loading\" });\n    listAcquisitionRuns({ limit: 5 }).then(",
+      "description": "Every re-read returns the card to its skeleton body, so the table blanks on each 10 s attention answer while a download runs (data-health-ui 2.6 the running download heads the list and its progress updates; ux-design 1.4 Refresh; review v1 IR-002 'a loading body there would blank the table on every tick, and T013 deliberately sets none')."
+    },
+    {
+      "id": "manual:17",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 102,
+      "original": "    const mine = latestCall.current;\n    listAcquisitionRuns({ limit: 5 }).then(\n      (page) => {\n        if (mine !== latestCall.current) {\n          return;\n        }\n        setList({ kind: \"ok\", runs: page.runs });\n        setAnsweredAt(new Date());",
+      "mutated": "    const mine = latestCall.current;\n    setAnsweredAt(new Date());\n    listAcquisitionRuns({ limit: 5 }).then(\n      (page) => {\n        if (mine !== latestCall.current) {\n          return;\n        }\n        setList({ kind: \"ok\", runs: page.runs });",
+      "description": "*checked {time}* records when the read was sent, not when the list answered, so it shows before any answer and advances even when the read fails (AC-25 'the time the list last answered'; task plan T013 List state: answeredAt on success, unchanged on failure; T005 (f))."
+    },
+    {
+      "id": "manual:18",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 104,
+      "original": "      (page) => {\n        if (mine !== latestCall.current) {\n          return;\n        }\n        setList({ kind: \"ok\", runs: page.runs });\n        setAnsweredAt(new Date());",
+      "mutated": "      (page) => {\n        setAnsweredAt(new Date());\n        if (mine !== latestCall.current) {\n          return;\n        }\n        setList({ kind: \"ok\", runs: page.runs });",
+      "description": "A stale list answer, ignored for its rows, still moves *checked {time}*, so the header claims a time whose answer is not the one shown (task plan T013 List state: only the latest call's settlement applies, and on success it sets answeredAt; Other Notes Request ordering; AC-25)."
+    },
+    {
+      "id": "manual:19",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 108,
+      "original": "        setList({ kind: \"ok\", runs: page.runs });",
+      "mutated": "        setList({ kind: \"ok\", runs: page.runs.slice(0, 4) });",
+      "description": "Only four of the five most recent downloads are shown (story User Story and Description: the five most recent downloads, listAcquisitionRuns({ limit: 5 }); DAC-E6-14)."
+    },
+    {
+      "id": "manual:20",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiError)) {",
+      "description": "An unreachable interface on the list read is rethrown instead of shown, so the card stays on its skeleton with no *Couldn't read recent downloads: FactorFlow is not answering.* (DAC-E6-17; T005 (d))."
+    },
+    {
+      "id": "manual:21",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiUnreachableError)) {",
+      "description": "An API error envelope (500) on the list read is rethrown instead of shown, so no error body or Try again appears (DAC-E6-17; T005 (b))."
+    },
+    {
+      "id": "manual:22",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 116,
+      "original": "          throw cause;",
+      "mutated": "          setList({ kind: \"error\", error: cause as ApiError });\n          return;",
+      "description": "The catch is widened: a failure that is not an API error is rendered as a read failure instead of rethrown (task plan T013 List state: any other thrown value is rethrown)."
+    },
+    {
+      "id": "manual:23",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 119,
+      "original": "        setList({ kind: \"error\", error: cause });",
+      "mutated": "        setList({ kind: \"error\", error: cause });\n        setAnsweredAt(null);",
+      "description": "A failed re-read clears the last answered time, so the header drops *checked {time}* (task plan T013: on failure answeredAt is left as it was; Resolved Conflict 7; T005 (f); AC-25)."
+    },
+    {
+      "id": "manual:24",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 119,
+      "original": "        setList({ kind: \"error\", error: cause });",
+      "mutated": "        setList((prev) => (prev.kind === \"ok\" ? prev : { kind: \"error\", error: cause }));",
+      "description": "A failed re-read after a success keeps the stale table instead of replacing the body with the error and Try again (DAC-E6-17 'replace its body with its error'; Resolved Conflict 7; T005 (f))."
+    },
+    {
+      "id": "manual:25",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 126,
+      "original": "  }, [read]);",
+      "mutated": "  }, [read, answerKey]);",
+      "description": "The load read re-runs on every new attention answer, so terminal answers re-read the list (DAC-E6-14 'otherwise only on load'; DAC-E6-S4-2 no re-read follows a terminal answer)."
+    },
+    {
+      "id": "manual:26",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 124,
+      "original": "  useEffect(() => {\n    read();\n  }, [read]);",
+      "mutated": "  useEffect(() => {\n    read();\n    const timer = setInterval(read, 10_000);\n    return () => clearInterval(timer);\n  }, [read]);",
+      "description": "A 10 s timer re-reads the list on its own, independent of attention answers and of whether a download runs (DAC-E6-14 re-read on each attention answer while non-terminal and otherwise only on load; task plan T013 'No timer and no other trigger exists')."
+    },
+    {
+      "id": "manual:27",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 133,
+      "original": "    if (active) {",
+      "mutated": "    if (active && list.kind !== \"error\") {",
+      "description": "After a failed re-read, later running attention answers no longer re-read the list, so the card stays on its error until Try again (DAC-E6-14 re-read on each attention answer while latest_download is non-terminal; task plan T013 When it reads)."
+    },
+    {
+      "id": "manual:28",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 136,
+      "original": "  }, [answerKey, active, read]);",
+      "mutated": "  }, [active, read]);",
+      "description": "The re-read effect no longer runs on a new answer key, so consecutive running answers give no re-read and checked {time} stops advancing (DAC-E6-S4-2 one call per answer; T003 (b))."
+    },
+    {
+      "id": "manual:29",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 138,
+      "original": "  const runningId = active ? latest.run_id : null;\n  const done = active ? latest.progress.done : null;\n  const total = active ? latest.progress.total : null;",
+      "mutated": "  const runningId = latest !== null ? latest.run_id : null;\n  const done = latest !== null ? latest.progress.done : null;\n  const total = latest !== null ? latest.progress.total : null;",
+      "description": "The progress row loses its non-terminal guard, so a finished latest download keeps a progress bar on its row (DAC-E6-14 progress for a running download; task plan T013 Result 'when active && latest.run_id === r.runId'; T004 (d) negate-boolean on the non-terminal guard)."
+    },
+    {
+      "id": "manual:30",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 143,
+      "original": "    const outcomeId = (run: AcquisitionRun) => `${idPrefix}-outcome-${run.runId}`;",
+      "mutated": "    const outcomeId = (_run: AcquisitionRun) => `${idPrefix}-outcome`;",
+      "description": "Every row's outcome label shares one id, so an indeterminate bar on a queued row below a running one is named by the first row's label (*Downloading*) instead of its own (*Queued*) (DEC-0384 the bar is named by the row's outcome label; task plan T013 outcomeId = useId prefix plus the run id; Open Gap 4)."
+    },
+    {
+      "id": "manual:31",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 151,
+      "original": "            to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}",
+      "mutated": "            to={`/data/downloads/${row.original.runId}`}",
+      "description": "The run id is not URL-encoded in the Started link target (task plan T013 Started cell encodeURIComponent(r.runId))."
+    },
+    {
+      "id": "manual:32",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 151,
+      "original": "            to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}",
+      "mutated": "            to={`/runs/${encodeURIComponent(row.original.runId)}`}",
+      "description": "The Started link targets the delivered /runs/ path instead of /data/downloads/{id} (story Description; data-health-ui 2.6; T002 swap-case of the link target)."
+    },
+    {
+      "id": "manual:33",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 152,
+      "original": "            className=\"font-numeric\"",
+      "mutated": "            className=\"\"",
+      "description": "The Started time is no longer set in the numeric face (data-health-ui 10 Tokens and ux-design 1.4: times and counts --font-numeric; review v1 IR-003)."
+    },
+    {
+      "id": "manual:34",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 177,
+      "original": "            <span className=\"font-numeric\">{formatInstant(row.original.endedAt)}</span>",
+      "mutated": "            formatInstant(row.original.endedAt)",
+      "description": "The Ended time is no longer set in the numeric face (data-health-ui 10 Tokens: times --font-numeric; review v1 IR-003)."
+    },
+    {
+      "id": "manual:35",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 177,
+      "original": "            <span className=\"font-numeric\">{formatInstant(row.original.endedAt)}</span>",
+      "mutated": "            <span className=\"font-numeric\">{formatInstant(row.original.requestedAt)}</span>",
+      "description": "Ended shows the request time instead of the end time (story Description *Ended*; data-health-ui 2.6; T002 (f))."
+    },
+    {
+      "id": "manual:36",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 175,
+      "original": "            <Absent label={ABSENT.notEnded} />",
+      "mutated": "            <Absent label={ABSENT.noData} />",
+      "description": "The Ended em dash's hidden words say *no data stored yet* instead of *not ended yet* (task plan T012 ABSENT.notEnded and Other Notes Hidden words; DAC-E6-S4-5)."
+    },
+    {
+      "id": "manual:37",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 184,
+      "original": "          if (runningId !== row.original.runId || done === null) {",
+      "mutated": "          if (runningId !== row.original.runId || done === null || total === null) {",
+      "description": "A running or queued latest download whose total is not known yet loses its indeterminate bar and shows *{written} of {named} stocks* instead (DEC-0384; DEC-0213 (f); T004 (b))."
+    },
+    {
+      "id": "manual:38",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 193,
+      "original": "              <span id={labelId} aria-live=\"polite\">",
+      "mutated": "              <span id={labelId} aria-live=\"assertive\">",
+      "description": "The progress text interrupts assertively on each answer instead of announcing politely (data-health-ui 10 'Polling ... announce politely'; task plan Other Notes Announcements)."
+    },
+    {
+      "id": "manual:39",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 194,
+      "original": "                {progressOf(formatCount(done), formatCount(total))}",
+      "mutated": "                {progressOf(String(done), String(total))}",
+      "description": "The progress sentence bypasses formatCount (*812 of 1236 stocks*) (task plan T013 Result: progressOf(formatCount(done), formatCount(total)); DAC-E6-14)."
+    },
+    {
+      "id": "manual:40",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 196,
+      "original": "              <Progress value={done} max={total} aria-labelledby={labelId} />",
+      "mutated": "              <Progress value={done} max={total} aria-labelledby={outcomeId(row.original)} />",
+      "description": "The determinate bar is named by the outcome label (*Downloading*) instead of its visible *{done} of {total} stocks* text (data-health-ui 10 'the running progressbar is labelled by its text'; DAC-E6-S4-5; T004 (a))."
+    },
+    {
+      "id": "manual:41",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 205,
+      "original": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(a.state) - rank(b.state)) : []),",
+      "mutated": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(a.state) - rank(b.state) || a.runId.localeCompare(b.runId)) : []),",
+      "description": "Rows of equal rank are reordered by run id instead of keeping their served (newest first) order (task plan T013 Order: the served rows stably sorted by rank; Resolved Conflict 3; T004 (e))."
+    },
+    {
+      "id": "manual:42",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 214,
+      "original": "          <CardDescription className=\"text-xs\">",
+      "mutated": "          <CardDescription>",
+      "description": "The sub-line is set at the card description's default size instead of --text-xs (data-health-ui 10 Tokens: sub-lines --text-xs; task plan T013 Render CardDescription className=\"text-xs\")."
+    },
+    {
+      "id": "manual:43",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 214,
+      "original": "          <CardDescription className=\"text-xs\">",
+      "mutated": "          <CardDescription className=\"text-xs\" aria-live=\"polite\">",
+      "description": "The sub-line becomes a live region, so every list answer announces *checked {time}* (task plan Other Notes Announcements: 'the table and the sub-line are not live regions'; data-health-ui 10)."
+    },
+    {
+      "id": "manual:44",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 215,
+      "original": "            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}",
+      "mutated": "            {recentDownloadsSubline(answeredAt && formatClock(new Date()))}",
+      "description": "*checked {time}* shows the time of the latest render instead of the time the list answered, so a terminal answer with no re-read still advances it (AC-25; data-health-ui 2.6 'the time the list last answered'; T003 (e))."
+    },
+    {
+      "id": "manual:45",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 215,
+      "original": "            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}",
+      "mutated": "            {recentDownloadsSubline(active && answeredAt ? formatClock(answeredAt) : null)}",
+      "description": "*checked {time}* shows only while a download runs (story Description and data-health-ui 2.6: 'both while a download runs and otherwise'; AC-25)."
+    },
+    {
+      "id": "manual:46",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 212,
+      "original": "        <CardHeader>\n          <CardTitle id={headingId}>{RECENT_DOWNLOADS}</CardTitle>\n          <CardDescription className=\"text-xs\">\n            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}\n          </CardDescription>\n        </CardHeader>",
+      "mutated": "        <CardHeader>\n          <CardTitle id={headingId}>{RECENT_DOWNLOADS}</CardTitle>\n        </CardHeader>\n        <CardDescription className=\"text-xs\">\n          {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}\n        </CardDescription>",
+      "description": "*checked {time}* is moved out of the card's header into the body area (story Description '*checked {time}* in the header'; data-health-ui 2.6 'The card's header carries checked {time}'; ux-design 1.4 item 4 sub-line under the h2)."
+    },
+    {
+      "id": "manual:47",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 220,
+      "original": "            <>\n              <SkeletonLine />\n              <SkeletonLine />\n              <SkeletonLine />\n            </>",
+      "mutated": "            <>\n              <SkeletonLine />\n            </>",
+      "description": "The loading body shows one skeleton line instead of three skeleton rows (task plan T013 Render: loading, three SkeletonLines; data-health-ui 10 States Loading skeleton rows in the lower cards)."
+    },
+    {
+      "id": "manual:48",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    setState({ kind: \"loading\" });",
+      "mutated": "",
+      "description": "Try again no longer returns the card to its loading body, so the error sentence and button stay until the reads settle and a repeat failure changes nothing on screen (task plan T014 Reads: read() sets loading; review v1 IR-002; STD-UI-24)."
+    },
+    {
+      "id": "manual:49",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    setState({ kind: \"loading\" });\n    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(\n      ([counts, depth]) => {\n        if (mine !== latestCall.current) {\n          return;\n        }",
+      "mutated": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(\n      ([counts, depth]) => {\n        setState({ kind: \"loading\" });\n        if (mine !== latestCall.current) {\n          return;\n        }",
+      "description": "The loading state is set after the reads answer instead of before they are sent, so Try again shows no busy body while the reads are pending (task plan T014 Reads: read() sets loading and then awaits Promise.all; review v1 IR-002; T008 (a))."
+    },
+    {
+      "id": "manual:50",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 71,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiError)) {",
+      "description": "An unreachable interface on either read is rethrown instead of shown, so no *Couldn't read what you follow: FactorFlow is not answering.* appears (DAC-E6-17; T008 (c))."
+    },
+    {
+      "id": "manual:51",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 71,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiUnreachableError)) {",
+      "description": "An API error envelope (500) on either read is rethrown instead of shown (DAC-E6-17; T008 (b))."
+    },
+    {
+      "id": "manual:52",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 72,
+      "original": "          throw cause;",
+      "mutated": "          setState({ kind: \"error\", error: cause as ApiError });\n          return;",
+      "description": "The catch is widened: a failure that is not an API error is shown as a read failure instead of rethrown (task plan T014 Reads 'the same latest-call guard as T013', whose other thrown values are rethrown)."
+    },
+    {
+      "id": "manual:53",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 75,
+      "original": "        setState({ kind: \"error\", error: cause });",
+      "mutated": "        setState({ kind: \"error\", error: new ApiUnreachableError(String(cause)) });",
+      "description": "Every failed read is reported as *FactorFlow is not answering*, even a 500 (DAC-E6-17 the error's own reason through readFailureReason; T008 (b))."
+    },
+    {
+      "id": "manual:54",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 82,
+      "original": "  }, [read]);",
+      "mutated": "  }, [read, health]);",
+      "description": "What you follow re-reads its counts and depth whenever the shell's health changes, not only on mount and Try again (task plan T014 Reads 'It runs once on mount and on Try again, never otherwise'; Other Notes Stale counts)."
+    },
+    {
+      "id": "manual:55",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 85,
+      "original": "  if (health.liveness === \"answering\" && health.health !== null) {",
+      "mutated": "  if (health.liveness !== \"unknown\" && health.health !== null) {",
+      "description": "An unreachable health keeps showing its stale Found or Missing instead of Not determinable (DAC-E6-S4-3; Resolved Conflict 6; DEC-0385; T009 (a))."
+    },
+    {
+      "id": "manual:56",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 87,
+      "original": "    key = <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;",
+      "mutated": "    key = <StatusBadge tier={tierOf({ of: \"credential\", present: true })}>{labelOf(status)}</StatusBadge>;",
+      "description": "*Missing* takes the good tier of *Found*, so a missing key reads as fine by colour and shape (DAC-E6-16; DAC-E6-S4-5 tier shape; T007 (c) status-critical)."
+    },
+    {
+      "id": "manual:57",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 89,
+      "original": "    key = <NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} />;",
+      "mutated": "    key = <NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} label=\"Unknown\" />;",
+      "description": "The key's coverage-unknown badge reads *Unknown* instead of *Not determinable* (DAC-E6-16; data-health-ui 2.6 `coverage-unknown` *Not determinable*; T009 (a))."
+    },
+    {
+      "id": "manual:58",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 99,
+      "original": "          <CardContent>\n            <SkeletonLine />\n            <SkeletonLine />\n            <SkeletonLine />\n          </CardContent>",
+      "mutated": "          <CardContent>\n            <SkeletonLine />\n          </CardContent>",
+      "description": "The loading body shows one skeleton line instead of three (task plan T014 Render: loading, three SkeletonLines; data-health-ui 10 States Loading skeleton rows in the lower cards)."
+    },
+    {
+      "id": "manual:59",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 106,
+      "original": "            <ReadFailure\n              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}\n              onRetry={read}\n            />",
+      "mutated": "            <ReadFailure\n              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}\n              onRetry={read}\n            />\n            {key}",
+      "description": "A failed read still shows the market data key badge beside the error, so the body is not replaced by the error and Try again alone (DAC-E6-17 'replace its body with its error and Try again'; data-health-ui 10 States Error)."
+    },
+    {
+      "id": "manual:60",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 114,
+      "original": "              <CardSummaryList className=\"grid-cols-[auto_1fr]\">",
+      "mutated": "              <CardSummaryList>",
+      "description": "The summary list loses its label/value column layout and falls back to two equal columns (task plan T014 Render CardSummaryList grid-cols-[auto_1fr])."
+    },
+    {
+      "id": "manual:61",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 115,
+      "original": "                <dt className=\"text-muted-foreground\">{FOLLOWED_STOCKS}</dt>\n                <dd>{formatCount(state.counts.activeCount)}</dd>\n                <dt className=\"text-muted-foreground\">{STOPPED_FOLLOWING}</dt>\n                <dd>{historyKept(formatCount(state.counts.retiredCount))}</dd>",
+      "mutated": "                <dt className=\"text-muted-foreground\">{STOPPED_FOLLOWING}</dt>\n                <dd>{historyKept(formatCount(state.counts.retiredCount))}</dd>\n                <dt className=\"text-muted-foreground\">{FOLLOWED_STOCKS}</dt>\n                <dd>{formatCount(state.counts.activeCount)}</dd>",
+      "description": "*Stopped following* is listed before *Followed stocks* (task plan T014 Render: four dt/dd pairs in this order; DAC-E6-16; T007 (a))."
+    },
+    {
+      "id": "manual:62",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 116,
+      "original": "                <dd>{formatCount(state.counts.activeCount)}</dd>",
+      "mutated": "                <dd>{String(state.counts.activeCount)}</dd>",
+      "description": "The followed count bypasses formatCount (*1236*) (task plan T014 Render formatCount(activeCount); T007 (d))."
+    },
+    {
+      "id": "manual:63",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 118,
+      "original": "                <dd>{historyKept(formatCount(state.counts.retiredCount))}</dd>",
+      "mutated": "                <dd>{historyKept(String(state.counts.retiredCount))}</dd>",
+      "description": "The stopped-following count bypasses formatCount (*1000 (history kept)*) (task plan T014 Render historyKept(formatCount(retiredCount)))."
+    },
+    {
+      "id": "manual:64",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 121,
+      "original": "                  <Link to=\"/settings\">\n                    {state.depth.years === null\n                      ? DEPTH_NOT_SET\n                      : depthYears(formatCount(state.depth.years))}\n                  </Link>",
+      "mutated": "                  {state.depth.years === null ? (\n                    <Link to=\"/settings\">{DEPTH_NOT_SET}</Link>\n                  ) : (\n                    depthYears(formatCount(state.depth.years))\n                  )}",
+      "description": "*{y} years* is plain text; only *not set* links to /settings (Resolved Conflict 1: both values are links; TC-COMP-154; T007 (a))."
+    },
+    {
+      "id": "manual:65",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 121,
+      "original": "                  <Link to=\"/settings\">\n                    {state.depth.years === null\n                      ? DEPTH_NOT_SET\n                      : depthYears(formatCount(state.depth.years))}\n                  </Link>",
+      "mutated": "                  {state.depth.years === null ? (\n                    DEPTH_NOT_SET\n                  ) : (\n                    <Link to=\"/settings\">{depthYears(formatCount(state.depth.years))}</Link>\n                  )}",
+      "description": "*not set* is plain text; only *{y} years* links to /settings, so an owner with no depth has no way to set it from here (DAC-E6-16 '*not set* as a link to /settings'; Resolved Conflict 1; T007 (b))."
+    },
+    {
+      "id": "manual:66",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 128,
+      "original": "                <dd>{key}</dd>",
+      "mutated": "                <dd>{state.depth.years === null ? null : key}</dd>",
+      "description": "The market data key badge disappears when the history depth is not set (DAC-E6-16 and AC-4: What you follow MUST state whether the key was found; T007 (b))."
+    },
+    {
+      "id": "manual:67",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 131,
+      "original": "            <CardFooter>\n              <Button variant=\"outline\" asChild>\n                <Link to=\"/data/followed\">{MANAGE_FOLLOWED_STOCKS}</Link>\n              </Button>\n            </CardFooter>\n          </>\n        )}",
+      "mutated": "          </>\n        )}\n        <CardFooter>\n          <Button variant=\"outline\" asChild>\n            <Link to=\"/data/followed\">{MANAGE_FOLLOWED_STOCKS}</Link>\n          </Button>\n        </CardFooter>",
+      "description": "**Manage followed stocks** renders while loading and under a read failure, not only with the loaded summary (task plan T014 Render 'When ok, CardFooter holds ...'; DAC-E6-17 body replaced by the error; T008 (b))."
+    },
+    {
+      "id": "manual:68",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 132,
+      "original": "              <Button variant=\"outline\" asChild>",
+      "mutated": "              <Button variant=\"default\" asChild>",
+      "description": "**Manage followed stocks** renders as a primary default button instead of outline (data-health-ui 10 Component mapping: Manage followed stocks `button` `outline`; task plan T014 Render)."
+    }
+  ]
+}

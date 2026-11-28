@@ -1,0 +1,106 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w0/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 761ms
+   ✓ What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 326ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 4 failed) 1421ms
+   ✓ Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face 322ms
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays 20ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow 31ms
+     → expected "spy" to be called 1 times, but got 3 times
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished 19ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 17ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:361:24
+    359|       view.rerender(ui());
+    360|       await settle();
+    361|       expect(listMock).toHaveBeenCalledTimes(1);
+       |                        ^
+    362|       expect(screen.getByText(`${SUBLINE} · checked 14:03:12 CDT`)).to…
+    363|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow
+AssertionError: expected "spy" to be called 1 times, but got 3 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:377:22
+    375|       await settle();
+    376|     }
+    377|     expect(listMock).toHaveBeenCalledTimes(1);
+       |                      ^
+    378|   });
+    379| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:410:22
+    408|     view.rerender(ui());
+    409|     await settle();
+    410|     expect(listMock).toHaveBeenCalledTimes(1);
+       |                      ^
+    411|   });
+    412| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download
+AssertionError: expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-labelledby=":r2v:-progress"
+  aria-valuemax="1236"
+  aria-valuemin="0"
+  aria-valuenow="812"
+  aria-valuetext="66%"
+  class="relative h-2 w-full overflow-hidden rounded bg-seq-1"
+  data-max="1236"
+  data-state="loading"
+  data-value="812"
+  data-variant="determinate"
+  role="progressbar"
+>
+  <div
+    class="h-full w-full flex-1 bg-status-active transition-all"
+    data-max="1236"
+    data-state="loading"
+    data-value="812"
+    style="transform: translateX(-34.30420711974111%);"
+  />
+</div>
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:507:47
+    505|     view.rerender(ui());
+    506|     await settle();
+    507|     expect(screen.queryByRole("progressbar")).toBeNull();
+       |                                               ^
+    508|   });
+    509| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 68 passed (72)
+   Start at  02:05:06
+   Duration  3.11s (transform 193ms, setup 89ms, collect 1.91s, tests 2.18s, environment 387ms, prepare 450ms)
+

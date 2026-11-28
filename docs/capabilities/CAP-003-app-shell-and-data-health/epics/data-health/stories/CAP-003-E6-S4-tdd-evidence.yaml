@@ -309,6 +309,35 @@ cycles:
       score: 1.0
       survivors: []
 
+  - id: cycle-8
+    tasks: [T016]
+    description: >
+      Hand-off survivors of the rework. The first run of the rework's hand-off (68 hand-written mutants, no catalogue
+      mutant in the range) left 18 alive. Tests only: recent-downloads.test.tsx pins that an interrupted or cancelled
+      latest download is finished, distinct row keys, the failed count's thousands separators, the table kept while a
+      re-read is pending, an older read not moving the answered time, no timer, a re-read after a failed read, the queued
+      bar named by its own row, the sub-line's size, place and silence, and three busy lines while loading;
+      what-you-follow.test.tsx pins that health changes cause no re-read, no key badge beside a read failure, three busy
+      lines, the two-column list and the outline Manage action.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the surviving hand-off mutants
+      (manual:2, 3, 4, 9, 16, 18, 26, 27, 30, 42, 43, 46, 47, 54, 58, 59, 60, 68 of handoff-mutants-2.json), which the
+      full rerun on the committed tree records as killed.
+    red_cycle: cycle-7
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: the duplicate-key case spies on console.error and restores after its
+        assertions; two cases assert a class name (jsdom cannot compute styles); the same-key case pins React's warning
+        text.
+    diff_sha256: 24bb4ed4b1c6426ca5fbb781a4da2b3ac658f7ed6efe61ab696ac6b82b6770fc
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-8.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 7 already mutated, and the hand-off run scores it
+
 handoff_mutation:
   runner: scripts/mutation-run.py
   results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/handoff-results-2.json
