@@ -147,7 +147,10 @@ export function RecentDownloads(): JSX.Element {
         id: "started",
         header: DOWNLOAD_COLUMNS.started,
         cell: ({ row }) => (
-          <Link to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}>
+          <Link
+            to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}
+            className="font-numeric"
+          >
             {formatInstant(row.original.startedAt ?? row.original.requestedAt)}
           </Link>
         ),
@@ -171,7 +174,7 @@ export function RecentDownloads(): JSX.Element {
           row.original.endedAt === null ? (
             <Absent label={ABSENT.notEnded} />
           ) : (
-            formatInstant(row.original.endedAt)
+            <span className="font-numeric">{formatInstant(row.original.endedAt)}</span>
           ),
       },
       {

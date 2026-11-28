@@ -56,6 +56,7 @@ export function WhatYouFollow(): JSX.Element {
   const read = useCallback(() => {
     latestCall.current += 1;
     const mine = latestCall.current;
+    setState({ kind: "loading" });
     Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(
       ([counts, depth]) => {
         if (mine !== latestCall.current) {

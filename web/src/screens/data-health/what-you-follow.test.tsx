@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { StrictMode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, ApiUnreachableError, getHistoryDepth, listInstruments } from "../../api/client";
@@ -183,6 +184,17 @@ function renderOnly() {
   );
 }
 
+/** Mounts under StrictMode, which runs the mount read twice: the one way two reads overlap now. */
+function renderStrict() {
+  return render(
+    <StrictMode>
+      <MemoryRouter>
+        <WhatYouFollow />
+      </MemoryRouter>
+    </StrictMode>,
+  );
+}
+
 describe("What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24)", () => {
   // Implements TC-COMP-155
   it("(a) while either read is pending, the heading stays, the body is busy and no list renders", () => {
@@ -254,21 +266,42 @@ describe("What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24)", () => {
     expect(definitionOf("Followed stocks").textContent).toBe("30");
   });
 
-  it("keeps the newest read when an older one answers last", async () => {
-    let answerOld: (counts: InstrumentListResult) => void = () => undefined;
+  it("(f) Try again returns to the loading body until the reads settle, then fails again in view", async () => {
     listMock.mockRejectedValueOnce(INTERNAL);
     depthMock.mockResolvedValue(DEPTH(5));
-    renderOnly();
+    const { container } = renderOnly();
     const retry = await screen.findByRole("button", { name: "Try again" });
+    let failAgain: (reason: Error) => void = () => undefined;
+    listMock.mockReturnValueOnce(
+      new Promise((_, reject) => {
+        failAgain = reject;
+      }),
+    );
+    await userEvent.click(retry);
+    expect(screen.getByRole("heading", { level: 2, name: "What you follow" })).toBeInTheDocument();
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(container.querySelector("dl")).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+    await act(async () => failAgain(INTERNAL));
+    expect((await screen.findByRole("status")).textContent).toBe(
+      "Couldn't read what you follow: FactorFlow hit an unexpected problem.",
+    );
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull();
+  });
+
+  it("keeps the newest read when an older one answers last", async () => {
+    let answerOld: (counts: InstrumentListResult) => void = () => undefined;
     listMock.mockReturnValueOnce(
       new Promise((resolve) => {
         answerOld = resolve;
       }),
     );
     listMock.mockResolvedValueOnce(COUNTS(3, 0));
-    await userEvent.click(retry);
-    await userEvent.click(retry);
+    depthMock.mockResolvedValue(DEPTH(5));
+    renderStrict();
     await screen.findAllByRole("term");
+    expect(listMock).toHaveBeenCalledTimes(2);
     await act(async () => answerOld(COUNTS(9, 9)));
     expect(definitionOf("Followed stocks").textContent).toBe("3");
   });
@@ -360,6 +393,12 @@ const FORBIDDEN =
 describe("What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)", () => {
   // Implements TC-COMP-173
   // Implements TC-COMP-174
+  it("(a) the scan is not vacuous", () => {
+    expect(FORBIDDEN.test("one run")).toBe(true);
+    expect(FORBIDDEN.test("Retired")).toBe(true);
+    expect(FORBIDDEN.test("downloads")).toBe(false);
+  });
+
   it("(a) no state shows a domain term in its text or accessible names", async () => {
     const states: { name: string; arrange: () => void; wait: "term" | "status" }[] = [
       {
@@ -487,19 +526,16 @@ async function unhandledDuring(run: () => Promise<void>): Promise<unknown[]> {
 describe("What you follow hand-off cases (DAC-E6-16, DAC-E6-17)", () => {
   it("ignores an older read's failure once a newer read has answered", async () => {
     let failOld: (reason: Error) => void = () => undefined;
-    listMock.mockRejectedValueOnce(INTERNAL);
-    depthMock.mockResolvedValue(DEPTH(5));
-    renderOnly();
-    const retry = await screen.findByRole("button", { name: "Try again" });
     listMock.mockReturnValueOnce(
       new Promise((_, reject) => {
         failOld = reject;
       }),
     );
     listMock.mockResolvedValueOnce(COUNTS(3, 0));
-    await userEvent.click(retry);
-    await userEvent.click(retry);
+    depthMock.mockResolvedValue(DEPTH(5));
+    renderStrict();
     await screen.findAllByRole("term");
+    expect(listMock).toHaveBeenCalledTimes(2);
     await act(async () => failOld(INTERNAL));
     expect(definitionOf("Followed stocks").textContent).toBe("3");
     expect(screen.queryByRole("status")).toBeNull();

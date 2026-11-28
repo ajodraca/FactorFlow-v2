@@ -1,0 +1,320 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-7.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-7.log
+new file mode 100644
+index 00000000..bbbffb36
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-7.log
+@@ -0,0 +1,56 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 1 failed) 239ms
++   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (f) Try again returns to the loading body until the reads settle, then fails again in view 15ms
++     → expected null not to be null
++ ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 1 failed) 601ms
++   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face 100ms
++     → expected false to be true // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
++AssertionError: expected false to be true // Object.is equality
++
++- Expected
+++ Received
++
++- true
+++ false
++
++ ❯ src/screens/data-health/recent-downloads.test.tsx:198:80
++    196|   it("the Started link and the Ended time are set in the numeric face"…
++    197|     for (const row of bodyRows()) {
++    198|       expect(within(row).getByRole("link").classList.contains("font-nu…
++       |                                                                                ^
++    199|       const ended = cellsOf(row)[1] as HTMLElement;
++    200|       expect(ended.querySelector(".font-numeric")?.textContent).toMatc…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (f) Try again returns to the loading body until the reads settle, then fails again in view
++AssertionError: expected null not to be null
++ ❯ src/screens/data-health/what-you-follow.test.tsx:282:63
++    280|     await userEvent.click(retry);
++    281|     expect(screen.getByRole("heading", { level: 2, name: "What you fol…
++    282|     expect(container.querySelector('[aria-busy="true"]')).not.toBeNull…
++       |                                                               ^
++    283|     expect(container.querySelector("dl")).toBeNull();
++    284|     expect(screen.queryByRole("status")).toBeNull();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  2 failed (2)
++      Tests  2 failed | 70 passed (72)
++   Start at  01:54:35
++   Duration  2.29s (transform 179ms, setup 141ms, collect 1.37s, tests 839ms, environment 900ms, prepare 78ms)
++
+diff --git a/web/src/screens/data-health/recent-downloads.test.tsx b/web/src/screens/data-health/recent-downloads.test.tsx
+index f03365d6..66d3a275 100644
+--- a/web/src/screens/data-health/recent-downloads.test.tsx
++++ b/web/src/screens/data-health/recent-downloads.test.tsx
+@@ -193,6 +193,14 @@ describe("Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12)", (
+     await screen.findByRole("table");
+   });
+ 
++  it("the Started link and the Ended time are set in the numeric face", () => {
++    for (const row of bodyRows()) {
++      expect(within(row).getByRole("link").classList.contains("font-numeric")).toBe(true);
++      const ended = cellsOf(row)[1] as HTMLElement;
++      expect(ended.querySelector(".font-numeric")?.textContent).toMatch(/^2026-10-30 /);
++    }
++  });
++
+   it("(a) the columns are Started, Outcome, Ended, Result, and each row header links to its download", () => {
+     expect(
+       within(regionTable())
+@@ -866,6 +874,87 @@ describe("Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2)",
+   });
+ });
+ 
++describe("Recent downloads progress follows each new attention answer (DAC-E6-14, AC-25, DEC-0384)", () => {
++  /** Delivers a new running answer, as the shell does each 10 s, and lets the re-read settle. */
++  async function answer(
++    view: ReturnType<typeof renderRecent>,
++    latest: LatestDownload,
++    checkedAt: string,
++  ) {
++    setShell({ attention: ok(ATT(latest), checkedAt) });
++    view.rerender(ui());
++    await settle();
++  }
++
++  it("(a) a changed count with the same total moves the bar and its sentence", async () => {
++    listMock.mockResolvedValue(RUNNING_THEN_DONE);
++    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
++    const view = renderRecent();
++    await screen.findByRole("table");
++    expect(screen.getByRole("progressbar", { name: "812 of 1,236 stocks" })).toBeInTheDocument();
++    for (const [done, at] of [
++      [900, "2026-10-30T19:03:20Z"],
++      [1000, "2026-10-30T19:03:30Z"],
++    ] as const) {
++      await answer(view, LATEST("running", { progress: { done, total: 1236 } }), at);
++      const result = cellsOf(rowFor("r-9"))[2] as HTMLElement;
++      const bar = within(result).getByRole("progressbar", {
++        name: `${done.toLocaleString("en-US")} of 1,236 stocks`,
++      });
++      expect(bar.getAttribute("aria-valuenow")).toBe(String(done));
++      expect(bar.getAttribute("aria-valuemax")).toBe("1236");
++      expect(result.querySelector('[aria-live="polite"]')?.textContent).toBe(
++        `${done.toLocaleString("en-US")} of 1,236 stocks`,
++      );
++      expect(screen.getAllByRole("progressbar")).toHaveLength(1);
++    }
++  });
++
++  it("(b) a total that becomes known while the count stays turns the bar determinate", async () => {
++    listMock.mockResolvedValue(RUNNING_THEN_DONE);
++    setShell({
++      attention: ok(
++        ATT(LATEST("running", { progress: { done: 0, total: null } })),
++        "2026-10-30T19:03:10Z",
++      ),
++    });
++    const view = renderRecent();
++    await screen.findByRole("table");
++    const waiting = screen.getByRole("progressbar", { name: "Downloading" });
++    expect(waiting.hasAttribute("aria-valuenow")).toBe(false);
++    expect(waiting.getAttribute("data-variant")).toBe("indeterminate");
++    await answer(
++      view,
++      LATEST("running", { progress: { done: 0, total: 1236 } }),
++      "2026-10-30T19:03:20Z",
++    );
++    const bar = screen.getByRole("progressbar", { name: "0 of 1,236 stocks" });
++    expect(bar.getAttribute("data-variant")).toBe("determinate");
++    expect(bar.getAttribute("aria-valuenow")).toBe("0");
++    expect(bar.getAttribute("aria-valuemax")).toBe("1236");
++  });
++
++  it("(c) a changed latest download moves the progress to the matching row", async () => {
++    listMock.mockResolvedValue(
++      PAGE([
++        RUN({ runId: "r-9", state: "running", endedAt: null, instrumentsWritten: 700 }),
++        RUN({ runId: "r-8", state: "running", endedAt: null, instrumentsWritten: 650 }),
++      ]),
++    );
++    setShell({ attention: ok(ATT(LATEST("running", { run_id: "r-9" })), "2026-10-30T19:03:10Z") });
++    const view = renderRecent();
++    await screen.findByRole("table");
++    expect(within(rowFor("r-9")).getByRole("progressbar")).toBeInTheDocument();
++    expect(within(rowFor("r-8")).queryByRole("progressbar")).toBeNull();
++    await answer(view, LATEST("running", { run_id: "r-8" }), "2026-10-30T19:03:20Z");
++    expect(within(rowFor("r-9")).queryByRole("progressbar")).toBeNull();
++    expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 stocks");
++    expect(
++      within(rowFor("r-8")).getByRole("progressbar", { name: "812 of 1,236 stocks" }),
++    ).toBeInTheDocument();
++  });
++});
++
+ describe("copy.ts recent downloads and what you follow strings", () => {
+   it("(a) the result sentences", () => {
+     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");
+diff --git a/web/src/screens/data-health/recent-downloads.tsx b/web/src/screens/data-health/recent-downloads.tsx
+index 8c75eeb6..4b2e5622 100644
+--- a/web/src/screens/data-health/recent-downloads.tsx
++++ b/web/src/screens/data-health/recent-downloads.tsx
+@@ -147,7 +147,10 @@ export function RecentDownloads(): JSX.Element {
+         id: "started",
+         header: DOWNLOAD_COLUMNS.started,
+         cell: ({ row }) => (
+-          <Link to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}>
++          <Link
++            to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}
++            className="font-numeric"
++          >
+             {formatInstant(row.original.startedAt ?? row.original.requestedAt)}
+           </Link>
+         ),
+@@ -171,7 +174,7 @@ export function RecentDownloads(): JSX.Element {
+           row.original.endedAt === null ? (
+             <Absent label={ABSENT.notEnded} />
+           ) : (
+-            formatInstant(row.original.endedAt)
++            <span className="font-numeric">{formatInstant(row.original.endedAt)}</span>
+           ),
+       },
+       {
+diff --git a/web/src/screens/data-health/what-you-follow.test.tsx b/web/src/screens/data-health/what-you-follow.test.tsx
+index b74e512c..6dfc7fb0 100644
+--- a/web/src/screens/data-health/what-you-follow.test.tsx
++++ b/web/src/screens/data-health/what-you-follow.test.tsx
+@@ -3,6 +3,7 @@ import path from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { act, render, screen, waitFor, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
++import { StrictMode } from "react";
+ import { MemoryRouter } from "react-router-dom";
+ import { beforeEach, describe, expect, it, vi } from "vitest";
+ import { ApiError, ApiUnreachableError, getHistoryDepth, listInstruments } from "../../api/client";
+@@ -183,6 +184,17 @@ function renderOnly() {
+   );
+ }
+ 
++/** Mounts under StrictMode, which runs the mount read twice: the one way two reads overlap now. */
++function renderStrict() {
++  return render(
++    <StrictMode>
++      <MemoryRouter>
++        <WhatYouFollow />
++      </MemoryRouter>
++    </StrictMode>,
++  );
++}
++
+ describe("What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24)", () => {
+   // Implements TC-COMP-155
+   it("(a) while either read is pending, the heading stays, the body is busy and no list renders", () => {
+@@ -254,21 +266,42 @@ describe("What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24)", () => {
+     expect(definitionOf("Followed stocks").textContent).toBe("30");
+   });
+ 
+-  it("keeps the newest read when an older one answers last", async () => {
+-    let answerOld: (counts: InstrumentListResult) => void = () => undefined;
++  it("(f) Try again returns to the loading body until the reads settle, then fails again in view", async () => {
+     listMock.mockRejectedValueOnce(INTERNAL);
+     depthMock.mockResolvedValue(DEPTH(5));
+-    renderOnly();
++    const { container } = renderOnly();
+     const retry = await screen.findByRole("button", { name: "Try again" });
++    let failAgain: (reason: Error) => void = () => undefined;
++    listMock.mockReturnValueOnce(
++      new Promise((_, reject) => {
++        failAgain = reject;
++      }),
++    );
++    await userEvent.click(retry);
++    expect(screen.getByRole("heading", { level: 2, name: "What you follow" })).toBeInTheDocument();
++    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
++    expect(container.querySelector("dl")).toBeNull();
++    expect(screen.queryByRole("status")).toBeNull();
++    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
++    await act(async () => failAgain(INTERNAL));
++    expect((await screen.findByRole("status")).textContent).toBe(
++      "Couldn't read what you follow: FactorFlow hit an unexpected problem.",
++    );
++    expect(container.querySelector('[aria-busy="true"]')).toBeNull();
++  });
++
++  it("keeps the newest read when an older one answers last", async () => {
++    let answerOld: (counts: InstrumentListResult) => void = () => undefined;
+     listMock.mockReturnValueOnce(
+       new Promise((resolve) => {
+         answerOld = resolve;
+       }),
+     );
+     listMock.mockResolvedValueOnce(COUNTS(3, 0));
+-    await userEvent.click(retry);
+-    await userEvent.click(retry);
++    depthMock.mockResolvedValue(DEPTH(5));
++    renderStrict();
+     await screen.findAllByRole("term");
++    expect(listMock).toHaveBeenCalledTimes(2);
+     await act(async () => answerOld(COUNTS(9, 9)));
+     expect(definitionOf("Followed stocks").textContent).toBe("3");
+   });
+@@ -360,6 +393,12 @@ const FORBIDDEN =
+ describe("What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)", () => {
+   // Implements TC-COMP-173
+   // Implements TC-COMP-174
++  it("(a) the scan is not vacuous", () => {
++    expect(FORBIDDEN.test("one run")).toBe(true);
++    expect(FORBIDDEN.test("Retired")).toBe(true);
++    expect(FORBIDDEN.test("downloads")).toBe(false);
++  });
++
+   it("(a) no state shows a domain term in its text or accessible names", async () => {
+     const states: { name: string; arrange: () => void; wait: "term" | "status" }[] = [
+       {
+@@ -487,19 +526,16 @@ async function unhandledDuring(run: () => Promise<void>): Promise<unknown[]> {
+ describe("What you follow hand-off cases (DAC-E6-16, DAC-E6-17)", () => {
+   it("ignores an older read's failure once a newer read has answered", async () => {
+     let failOld: (reason: Error) => void = () => undefined;
+-    listMock.mockRejectedValueOnce(INTERNAL);
+-    depthMock.mockResolvedValue(DEPTH(5));
+-    renderOnly();
+-    const retry = await screen.findByRole("button", { name: "Try again" });
+     listMock.mockReturnValueOnce(
+       new Promise((_, reject) => {
+         failOld = reject;
+       }),
+     );
+     listMock.mockResolvedValueOnce(COUNTS(3, 0));
+-    await userEvent.click(retry);
+-    await userEvent.click(retry);
++    depthMock.mockResolvedValue(DEPTH(5));
++    renderStrict();
+     await screen.findAllByRole("term");
++    expect(listMock).toHaveBeenCalledTimes(2);
+     await act(async () => failOld(INTERNAL));
+     expect(definitionOf("Followed stocks").textContent).toBe("3");
+     expect(screen.queryByRole("status")).toBeNull();
+diff --git a/web/src/screens/data-health/what-you-follow.tsx b/web/src/screens/data-health/what-you-follow.tsx
+index 7300abbd..6516d5b0 100644
+--- a/web/src/screens/data-health/what-you-follow.tsx
++++ b/web/src/screens/data-health/what-you-follow.tsx
+@@ -56,6 +56,7 @@ export function WhatYouFollow(): JSX.Element {
+   const read = useCallback(() => {
+     latestCall.current += 1;
+     const mine = latestCall.current;
++    setState({ kind: "loading" });
+     Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(
+       ([counts, depth]) => {
+         if (mine !== latestCall.current) {

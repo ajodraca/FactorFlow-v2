@@ -193,6 +193,14 @@ describe("Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12)", (
     await screen.findByRole("table");
   });
 
+  it("the Started link and the Ended time are set in the numeric face", () => {
+    for (const row of bodyRows()) {
+      expect(within(row).getByRole("link").classList.contains("font-numeric")).toBe(true);
+      const ended = cellsOf(row)[1] as HTMLElement;
+      expect(ended.querySelector(".font-numeric")?.textContent).toMatch(/^2026-10-30 /);
+    }
+  });
+
   it("(a) the columns are Started, Outcome, Ended, Result, and each row header links to its download", () => {
     expect(
       within(regionTable())
@@ -863,6 +871,87 @@ describe("Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2)", 
     const region = screen.getByRole("region", { name: "Recent downloads" });
     expect(region.querySelector('[data-variant="default"]')).not.toBeNull();
     expect(regionTable().getAttribute("data-variant")).toBe("compact");
+  });
+});
+
+describe("Recent downloads progress follows each new attention answer (DAC-E6-14, AC-25, DEC-0384)", () => {
+  /** Delivers a new running answer, as the shell does each 10 s, and lets the re-read settle. */
+  async function answer(
+    view: ReturnType<typeof renderRecent>,
+    latest: LatestDownload,
+    checkedAt: string,
+  ) {
+    setShell({ attention: ok(ATT(latest), checkedAt) });
+    view.rerender(ui());
+    await settle();
+  }
+
+  it("(a) a changed count with the same total moves the bar and its sentence", async () => {
+    listMock.mockResolvedValue(RUNNING_THEN_DONE);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    expect(screen.getByRole("progressbar", { name: "812 of 1,236 stocks" })).toBeInTheDocument();
+    for (const [done, at] of [
+      [900, "2026-10-30T19:03:20Z"],
+      [1000, "2026-10-30T19:03:30Z"],
+    ] as const) {
+      await answer(view, LATEST("running", { progress: { done, total: 1236 } }), at);
+      const result = cellsOf(rowFor("r-9"))[2] as HTMLElement;
+      const bar = within(result).getByRole("progressbar", {
+        name: `${done.toLocaleString("en-US")} of 1,236 stocks`,
+      });
+      expect(bar.getAttribute("aria-valuenow")).toBe(String(done));
+      expect(bar.getAttribute("aria-valuemax")).toBe("1236");
+      expect(result.querySelector('[aria-live="polite"]')?.textContent).toBe(
+        `${done.toLocaleString("en-US")} of 1,236 stocks`,
+      );
+      expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+    }
+  });
+
+  it("(b) a total that becomes known while the count stays turns the bar determinate", async () => {
+    listMock.mockResolvedValue(RUNNING_THEN_DONE);
+    setShell({
+      attention: ok(
+        ATT(LATEST("running", { progress: { done: 0, total: null } })),
+        "2026-10-30T19:03:10Z",
+      ),
+    });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    const waiting = screen.getByRole("progressbar", { name: "Downloading" });
+    expect(waiting.hasAttribute("aria-valuenow")).toBe(false);
+    expect(waiting.getAttribute("data-variant")).toBe("indeterminate");
+    await answer(
+      view,
+      LATEST("running", { progress: { done: 0, total: 1236 } }),
+      "2026-10-30T19:03:20Z",
+    );
+    const bar = screen.getByRole("progressbar", { name: "0 of 1,236 stocks" });
+    expect(bar.getAttribute("data-variant")).toBe("determinate");
+    expect(bar.getAttribute("aria-valuenow")).toBe("0");
+    expect(bar.getAttribute("aria-valuemax")).toBe("1236");
+  });
+
+  it("(c) a changed latest download moves the progress to the matching row", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({ runId: "r-9", state: "running", endedAt: null, instrumentsWritten: 700 }),
+        RUN({ runId: "r-8", state: "running", endedAt: null, instrumentsWritten: 650 }),
+      ]),
+    );
+    setShell({ attention: ok(ATT(LATEST("running", { run_id: "r-9" })), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    expect(within(rowFor("r-9")).getByRole("progressbar")).toBeInTheDocument();
+    expect(within(rowFor("r-8")).queryByRole("progressbar")).toBeNull();
+    await answer(view, LATEST("running", { run_id: "r-8" }), "2026-10-30T19:03:20Z");
+    expect(within(rowFor("r-9")).queryByRole("progressbar")).toBeNull();
+    expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 stocks");
+    expect(
+      within(rowFor("r-8")).getByRole("progressbar", { name: "812 of 1,236 stocks" }),
+    ).toBeInTheDocument();
   });
 });
 

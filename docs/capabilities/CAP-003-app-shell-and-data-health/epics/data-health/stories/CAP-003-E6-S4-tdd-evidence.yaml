@@ -263,6 +263,52 @@ cycles:
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 5 already mutated, and the hand-off run scores it
 
+  - id: cycle-7
+    tasks: [T004, T008, T010, T013, T014]
+    description: >
+      Rework of review v1 (IR-001 to IR-004). recent-downloads.test.tsx: three cases pin that the running row's progress
+      follows each new attention answer (a changed count, a total that becomes known, a changed latest run), and one that
+      the Started link and Ended time are in the numeric face. what-you-follow.test.tsx: Try again returns to the loading
+      body until the reads settle and then fails again in view, the planted non-vacuity case of the term scan, and the two
+      newest-read-wins cases reworked under StrictMode. Then read() sets loading in what-you-follow.tsx and the
+      font-numeric class on the Started link and the Ended time in recent-downloads.tsx.
+    deviations: >
+      (1) Try again now unmounts its own button, so the double-click cases of cycle 5 can no longer overlap two reads;
+      they mount under StrictMode, which runs the mount read twice, and assert the two calls. (2) IR-001 and IR-004 add
+      tests over correct code; their RED is the reviewer's mutants rv:1 to rv:3 (manual:2 to 4 here), killed by this run.
+      (3) The cycle's single red log holds the two failing tests (IR-002 and IR-003).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-7.log
+    red_log_sha256: 464f53cd350fd3912a6045916ea6e94e174d19fd2c9f8c26970352dc5e6a8f2c
+    red_evidence: >
+      With the new tests staged and the cycle-6 component: 2 of 72 tests failed (What you follow's Try again loading
+      body and the numeric face of the Started and Ended times); the progress and scan cases passed on correct code.
+    green_evidence: >
+      298 tests passed in web/src/screens/data-health; biome lint, biome format and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-7.log
+        sha256: 464f53cd350fd3912a6045916ea6e94e174d19fd2c9f8c26970352dc5e6a8f2c
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: two tests share the label (a) in what-you-follow.test.tsx; the numeric-face test
+        asserts a class name, as jsdom cannot compute styles.
+    diff_sha256: e4103b0cd1682a5c7c6c660f92ff1b2a3dd9b5ed8a73c2ab0e660cd9743c761f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-7.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/mutation-cycle-7-results.json
+      results_sha256: 4fd34facf05df570c21daed009ba21f3666fe8ab2e5c0fd6c7c08c90ca8ad718
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
 handoff_mutation:
   runner: scripts/mutation-run.py
   results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/handoff-results-2.json

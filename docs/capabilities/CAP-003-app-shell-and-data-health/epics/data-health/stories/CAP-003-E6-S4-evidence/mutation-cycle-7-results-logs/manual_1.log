@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-aa0wtucp/w0/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 1 failed) 313ms
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (f) Try again returns to the loading body until the reads settle, then fails again in view 17ms
+     → expected null not to be null
+ ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 686ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (f) Try again returns to the loading body until the reads settle, then fails again in view
+AssertionError: expected null not to be null
+ ❯ src/screens/data-health/what-you-follow.test.tsx:282:63
+    280|     await userEvent.click(retry);
+    281|     expect(screen.getByRole("heading", { level: 2, name: "What you fol…
+    282|     expect(container.querySelector('[aria-busy="true"]')).not.toBeNull…
+       |                                                               ^
+    283|     expect(container.querySelector("dl")).toBeNull();
+    284|     expect(screen.queryByRole("status")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 71 passed (72)
+   Start at  01:55:39
+   Duration  2.50s (transform 220ms, setup 86ms, collect 1.57s, tests 999ms, environment 607ms, prepare 490ms)
+
