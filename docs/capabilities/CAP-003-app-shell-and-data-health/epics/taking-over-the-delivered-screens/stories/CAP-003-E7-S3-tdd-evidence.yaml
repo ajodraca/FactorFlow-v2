@@ -1,5 +1,5 @@
 # TDD evidence for CAP-003-E7-S3 - Followed stocks under the shell.
-# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862).
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862); the cycles, the hand-off run and the reviews measure from the review base 9033ec3d (the integration head when the story was cut).
 # The plan's cycles are run as two: the screen with its parts, tests and strings (T002, T003, T005-T019), then the scan widening (T004, T020).
 # Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/instruments web/src/screens/coverage'; catalogue mutants plus the plan's six hand-written ones (operator manual).
 # Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
@@ -125,6 +125,54 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 1 mutated, and the hand-off run scores it
+
+  - id: cycle-4
+    tasks: [T018, T019, T014, T007, T021]
+    description: >
+      Review v1 rework (IR-001, IR-002, IR-003, IR-006): the table's populated state renders Last updated from its
+      read's fetchedAt, in the timestamp form the Coverage and Downloads screens use; Stop following is held while the
+      stop is in flight (RetireDialog passes pending to ConfirmDialog), so one confirmation sends one DELETE; the screen
+      h1's text-xl is pinned; the TC-COMP-184 markers sit on the cases asserting the Followed label deltas.
+    deviations: >
+      (1) IR-006, recorded: T021's role="alert" grep lists three paragraphs, not two, because bulk-add.tsx keeps the
+      delivered Following stocks failed alert, which AC-17 requires; the plan's count was wrong. (2) IR-002's
+      "a dialog never shows another stock's refusal" is pinned by a case that already passed (onCancel clears the error);
+      with the confirmation held while in flight no other path reaches it. (3) IR-004 (carry Open Gap 1 to the owning
+      design) is for doc sync or the owner, and IR-005 (skeleton) stays the recorded paragraph deviation (6) of cycle 1:
+      neither is code in this story.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log
+    red_log_sha256: c539cdcb6c8543efc1d85ef4449c35e31a21e94f25b6c8bd046c4926d49e36c0
+    red_evidence: >
+      With the new tests staged and the screen unchanged, 3 tests failed: the last-updated time was absent, a double
+      activation sent two stops, and the dialog did not hold its confirmation while pending. The text-xl pin and the
+      reopen case pass against the unchanged code, as they pin behaviour that was already right.
+    green_evidence: >
+      121 tests pass in web/src/screens/instruments and web/src/screens/coverage; npx tsc --noEmit, npm run lint and
+      npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log
+        sha256: c539cdcb6c8543efc1d85ef4449c35e31a21e94f25b6c8bd046c4926d49e36c0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: Last updated keeps the first page's read time when a further page is
+        appended; the reopen case does not distinguish stocks.
+    diff_sha256: 23b3daa189ca6510b8101ea0049d8e0c24f47bdae30521b7d5ab7561cc295b1c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: f557d5f8b7e57ed9899a27f6a637d5acc99380052e3a2d1aa99d7f2c0e5ce1ee
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
 
 handoff_mutation:
   runner: scripts/mutation-run.py

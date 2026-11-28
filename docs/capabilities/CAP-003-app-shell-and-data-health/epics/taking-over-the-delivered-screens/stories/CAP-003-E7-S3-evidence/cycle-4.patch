@@ -1,0 +1,826 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutants-cycle-4.json
+new file mode 100644
+index 00000000..2ffe4e26
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutants-cycle-4.json
+@@ -0,0 +1,44 @@
++{
++  "schema": 1,
++  "repo_head": "2ea22be13a61acd131f58a0a0cf2e4885101baeb",
++  "range": "HEAD..worktree",
++  "source": "2ea22be13a61acd131f58a0a0cf2e4885101baeb",
++  "mutants": [
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:83:negate-boolean:1",
++      "cycle": "cycle-4",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "line": 83,
++      "original": "  const [retirePending, setRetirePending] = useState(false);",
++      "mutated": "  const [retirePending, setRetirePending] = useState(true);"
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:180:negate-boolean:1",
++      "cycle": "cycle-4",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "line": 180,
++      "original": "    setRetirePending(true);",
++      "mutated": "    setRetirePending(false);"
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:188:negate-boolean:1",
++      "cycle": "cycle-4",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "line": 188,
++      "original": "      setRetirePending(false);",
++      "mutated": "      setRetirePending(true);"
++    },
++    {
++      "id": "web/src/screens/instruments/retire-dialog.tsx:18:negate-boolean:1",
++      "cycle": "cycle-4",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/retire-dialog.tsx",
++      "line": 18,
++      "original": "  pending = false,",
++      "mutated": "  pending = true,"
++    }
++  ]
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log
+new file mode 100644
+index 00000000..7bc767dc
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log
+@@ -0,0 +1,526 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/instruments/parse-bulk-symbols.test.ts (5 tests) 2ms
++stderr | src/screens/instruments/start-action.test.tsx > StartAction — blocked when history depth is unset > renders the blocked variant, stays focusable, and exposes its reason via aria-describedby
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/instruments/start-action.test.tsx (2 tests) 75ms
++ ❯ src/screens/instruments/retire-dialog.test.tsx (9 tests | 1 failed) 252ms
++   × RetireDialog — stop following > holds the confirmation while pending: no second onConfirm, and Escape does not cancel 10ms
++     → expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"
++
++Expected the element to have attribute:
++  aria-disabled="true"
++Received:
++  null
++ ✓ src/screens/instruments/add-field.test.tsx (9 tests) 354ms
++ ✓ src/screens/instruments/bulk-add.test.tsx (12 tests) 572ms
++ ✓ src/screens/instruments/badges.test.tsx (5 tests) 33ms
++stderr | src/screens/instruments/empty-states.test.tsx > Followed stocks vocabulary (TC-COMP-201, DAC-E7-S3-4) > uses the display labels, with the exact deltas, when populated
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/instruments/instrument-table.test.tsx > InstrumentTable — followed stocks > renders followed and stopped-following stocks in one virtualised table, stopped ones marked
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/instruments/entry-hint.test.tsx > Followed stocks — the focusAdd entry hint > focuses the add field when opened with focusAdd, and consumes the hint
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++
++ ✓ src/screens/instruments/entry-hint.test.tsx (5 tests) 786ms
++ ✓ src/screens/instruments/empty-states.test.tsx (12 tests) 1273ms
++   ✓ Followed stocks vocabulary (TC-COMP-201, DAC-E7-S3-4) > uses the display labels, with the exact deltas, when populated 417ms
++ ❯ src/screens/instruments/instrument-table.test.tsx (28 tests | 2 failed) 2449ms
++   ✓ InstrumentTable — followed stocks > issues a server-side request, after the debounce, when the symbol filter changes 703ms
++   × InstrumentTable — followed stocks > shows when the list was last read, and moves it on when the list is read again 81ms
++     → Unable to find an element with the text: Last updated 2026-03-02 09:04:05 America/Chicago. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mstyle[39m=[32m""[39m
++[36m>[39m
++  [36m<div>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex flex-col gap-3"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-3"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex flex-col gap-1 text-sm"[39m
++        [36m>[39m
++          [36m<label[39m
++            [33mfor[39m=[32m"followed-symbol-filter"[39m
++          [36m>[39m
++            [0mFilter by symbol[0m
++          [36m</label>[39m
++          [36m<input[39m
++            [33mclass[39m=[32m"h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"[39m
++            [33mdata-variant[39m=[32m"text"[39m
++            [33mid[39m=[32m"followed-symbol-filter"[39m
++            [33mvalue[39m=[32m""[39m
++          [36m/>[39m
++        [36m</div>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex flex-col gap-1 text-sm"[39m
++        [36m>[39m
++          [36m<span>[39m
++            [0mLifecycle[0m
++          [36m</span>[39m
++          [36m<button[39m
++            [33maria-autocomplete[39m=[32m"none"[39m
++            [33maria-expanded[39m=[32m"false"[39m
++            [33maria-label[39m=[32m"Lifecycle"[39m
++            [33mclass[39m=[32m"flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"[39m
++            [33mdata-state[39m=[32m"closed"[39m
++            [33mdata-variant[39m=[32m"inline"[39m
++            [33mdir[39m=[32m"ltr"[39m
++            [33mrole[39m=[32m"combobox"[39m
++            [33mtype[39m=[32m"button"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mstyle[39m=[32m"pointer-events: none;"[39m
++            [36m>[39m
++              [0mAll[0m
++            [36m</span>[39m
++            [36m<svg[39m
++              [33maria-hidden[39m=[32m"true"[39m
++              [33mclass[39m=[32m"lucide lucide-chevron-down h-4 w-4 text-muted-foreground"[39m
++              [33mfill[39m=[32m"none"[39m
++              [33mheight[39m=[32m"24"[39m
++              [33mstroke[39m=[32m"currentColor"[39m
++              [33mstroke-linecap[39m=[32m"round"[39m
++              [33mstroke-linejoin[39m=[32m"round"[39m
++              [33mstroke-width[39m=[32m"2"[39m
++              [33mviewBox[39m=[32m"0 0 24 24"[39m
++              [33mwidth[39m=[32m"24"[39m
++              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++            [36m>[39m
++              [36m<path[39m
++                [33md[39m=[32m"m6 9 6 6 6-6"[39m
++              [36m/>[39m
++            [36m</svg>[39m
++          [36m</button>[39m
++        [36m</div>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"font-numeric text-sm"[39m
++        [36m>[39m
++          [0m1[0m
++          [0m followed, [0m
++          [0m1[0m
++          [0m stopped following[0m
++        [36m</p>[39m
++      [36m</div>[39m
++      [36m<section[39m
++        [33maria-label[39m=[32m"Followed stocks"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"overflow-y-auto"[39m
++          [33mdata-slot[39m=[32m"data-table-scroller"[39m
++          [33mstyle[39m=[32m"height: calc(var(--row-height) * 16);"[39m
++          [33mtabindex[39m=[32m"0"[39m
++        [36m>[39m
++          [36m<table[39m
++            [33maria-rowcount[39m=[32m"3"[39m
++            [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
++            [33mdata-variant[39m=[32m"virtualised"[39m
++          [36m>[39m
++            [36m<thead>[39m
++              [36m<tr[39m
++                [33mclass[39m=[32m"h-row border-b border-border sticky top-0 bg-background"[39m
++              [36m>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
++                  [33mscope[39m=[32m"col"[39m
++                [36m>[39m
++                  [0mSymbol[0m
++                [36m</th>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
++                  [33mscope[39m=[32m"col"[39m
++                [36m>[39m
++                  [0mLifecycle[0m
++                [36m</th>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
++                  [33mscope[39m=[32m"col"[39m
++                [36m>[39m
++                  [0mActions[0m
++                [36m</th>[39m
++              [36m</tr>[39m
++            [36m</thead>[39m
++            [36m<tbody>[39m
++              [36m<tr[39m
++                [33maria-rowindex[39m=[32m"2"[39m
++                [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
++                [33mdata-row-id[39m=[32m"1"[39m
++              [36m>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"[39m
++                  [33mscope[39m=[32m"row"[39m
++                [36m>[39m
++                  [36m<span[39m
++                    [33mclass[39m=[32m"flex items-center gap-2"[39m
++                  [36m>[39m
++                    [36m<a[39m
++                      [33mhref[39m=[32m"/data/coverage?symbol=AAPL"[39m
++                    [36m>[39m
++                      [0mAAPL[0m
++                    [36m</a>[39m
++                  [36m</span>[39m
++                [36m</th>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m>[39m
++                  [36m<span>[39m
++                    [0mFollowed[0m
++                  [36m</span>[39m
++                [36m</td>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m>[39m
++                  [36m<button[39m
++                    [33maria-label[39m=[32m"Stop following AAPL"[39m
++                    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++                    [33mdata-variant[39m=[32m"ghost"[39m
++                    [33mtype[39m=[32m"button"[39m
++                  [36m>[39m
++                    [0mStop following[0m
++                  [36m</button>[39m
++                [36m</td>[39m
++              [36m</tr>[39m
++              [36m<tr[39m
++                [33maria-rowindex[39m=[32m"3"[39m
++                [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
++                [33mdata-row-id[39m=[32m"2"[39m
++              [36m>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"[39m
++                  [33mscope[39m=[32m"row"[39m
++                [36m>[39m
++                  [36m<span[39m
++                    [33mclass[39m=[32m"flex items-center gap-2"[39m
++                  [36m>[39m
++                    [36m<a[39m
++                      [33mclass[39m=[32m"text-muted-foreground"[39m
++                      [33mhref[39m=[32m"/data/coverage?symbol=MSFT"[39m
++                    [36m>[39m
++                      [0mMSFT[0m
++                    [36m</a>[39m
++                  [36m</span>[39m
++                [36m</th>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m>[39m
++                  [36m<span[39m
++                    [33mclass[39m=[32m"inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"[39m
++                    [33mdata-variant[39m=[32m"status-neutral"[39m
++                  [36m>[39m
++                    [36m<svg[39m
++                      [33maria-hidden[39m=[32m"true"[39m
++                      [33mclass[39m=[32m"lucide lucide-circle h-3 w-3 shrink-0"[39m
++                      [33mfill[39m=[32m"none"[39m
++                      [33mfocusable[39m=[32m"false"[39m
++                      [33mheight[39m=[32m"24"[39m
++                      [33mstroke[39m=[32m"currentColor"[39m
++                      [33mstroke-linecap[39m=[32m"round"[39m
++                      [33mstroke-linejoin[39m=[32m"round"[39m
++                      [33mstroke-width[39m=[32m"2"[39m
++                      [33mviewBox[39m=[32m"0 0 24 24"[39m
++                      [33mwidth[39m=[32m"24"[39m
++                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++                    [36m>[39m
++                      [36m<circle[39m
++                        [33mcx[39m=[32m"12"[39m
++                        [33mcy[39m=[32m"12"[39m
++                        [33mr[39m=[32m"10"[39m
++                      [36m/>[39m
++                    [36m</svg>[39m
++                    [0mStopped following[0m
++                  [36m</span>[39m
++                [36m</td>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m/>[39m
++              [36m</tr>[39m
++            [36m</tbody>[39m
++          [36m</table>[39m
++        [36m</div>[39m
++      [36m</section>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++[36m</body>[39m
++   × InstrumentTable — followed stocks > sends one stop when Stop following is activated twice while the first is in flight 55ms
++     → expected "spy" to be called 1 times, but got 2 times
++   ✓ InstrumentTable — followed stocks > carries both filters on the next page's request 329ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/instruments/instrument-table.test.tsx > InstrumentTable — followed stocks > shows when the list was last read, and moves it on when the list is read again
++TestingLibraryElementError: Unable to find an element with the text: Last updated 2026-03-02 09:04:05 America/Chicago. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++[36m<body[39m
++  [33mstyle[39m=[32m""[39m
++[36m>[39m
++  [36m<div>[39m
++    [36m<div[39m
++      [33mclass[39m=[32m"flex flex-col gap-3"[39m
++    [36m>[39m
++      [36m<div[39m
++        [33mclass[39m=[32m"flex items-center gap-3"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex flex-col gap-1 text-sm"[39m
++        [36m>[39m
++          [36m<label[39m
++            [33mfor[39m=[32m"followed-symbol-filter"[39m
++          [36m>[39m
++            [0mFilter by symbol[0m
++          [36m</label>[39m
++          [36m<input[39m
++            [33mclass[39m=[32m"h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"[39m
++            [33mdata-variant[39m=[32m"text"[39m
++            [33mid[39m=[32m"followed-symbol-filter"[39m
++            [33mvalue[39m=[32m""[39m
++          [36m/>[39m
++        [36m</div>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"flex flex-col gap-1 text-sm"[39m
++        [36m>[39m
++          [36m<span>[39m
++            [0mLifecycle[0m
++          [36m</span>[39m
++          [36m<button[39m
++            [33maria-autocomplete[39m=[32m"none"[39m
++            [33maria-expanded[39m=[32m"false"[39m
++            [33maria-label[39m=[32m"Lifecycle"[39m
++            [33mclass[39m=[32m"flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"[39m
++            [33mdata-state[39m=[32m"closed"[39m
++            [33mdata-variant[39m=[32m"inline"[39m
++            [33mdir[39m=[32m"ltr"[39m
++            [33mrole[39m=[32m"combobox"[39m
++            [33mtype[39m=[32m"button"[39m
++          [36m>[39m
++            [36m<span[39m
++              [33mstyle[39m=[32m"pointer-events: none;"[39m
++            [36m>[39m
++              [0mAll[0m
++            [36m</span>[39m
++            [36m<svg[39m
++              [33maria-hidden[39m=[32m"true"[39m
++              [33mclass[39m=[32m"lucide lucide-chevron-down h-4 w-4 text-muted-foreground"[39m
++              [33mfill[39m=[32m"none"[39m
++              [33mheight[39m=[32m"24"[39m
++              [33mstroke[39m=[32m"currentColor"[39m
++              [33mstroke-linecap[39m=[32m"round"[39m
++              [33mstroke-linejoin[39m=[32m"round"[39m
++              [33mstroke-width[39m=[32m"2"[39m
++              [33mviewBox[39m=[32m"0 0 24 24"[39m
++              [33mwidth[39m=[32m"24"[39m
++              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++            [36m>[39m
++              [36m<path[39m
++                [33md[39m=[32m"m6 9 6 6 6-6"[39m
++              [36m/>[39m
++            [36m</svg>[39m
++          [36m</button>[39m
++        [36m</div>[39m
++        [36m<p[39m
++          [33mclass[39m=[32m"font-numeric text-sm"[39m
++        [36m>[39m
++          [0m1[0m
++          [0m followed, [0m
++          [0m1[0m
++          [0m stopped following[0m
++        [36m</p>[39m
++      [36m</div>[39m
++      [36m<section[39m
++        [33maria-label[39m=[32m"Followed stocks"[39m
++      [36m>[39m
++        [36m<div[39m
++          [33mclass[39m=[32m"overflow-y-auto"[39m
++          [33mdata-slot[39m=[32m"data-table-scroller"[39m
++          [33mstyle[39m=[32m"height: calc(var(--row-height) * 16);"[39m
++          [33mtabindex[39m=[32m"0"[39m
++        [36m>[39m
++          [36m<table[39m
++            [33maria-rowcount[39m=[32m"3"[39m
++            [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
++            [33mdata-variant[39m=[32m"virtualised"[39m
++          [36m>[39m
++            [36m<thead>[39m
++              [36m<tr[39m
++                [33mclass[39m=[32m"h-row border-b border-border sticky top-0 bg-background"[39m
++              [36m>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
++                  [33mscope[39m=[32m"col"[39m
++                [36m>[39m
++                  [0mSymbol[0m
++                [36m</th>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
++                  [33mscope[39m=[32m"col"[39m
++                [36m>[39m
++                  [0mLifecycle[0m
++                [36m</th>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
++                  [33mscope[39m=[32m"col"[39m
++                [36m>[39m
++                  [0mActions[0m
++                [36m</th>[39m
++              [36m</tr>[39m
++            [36m</thead>[39m
++            [36m<tbody>[39m
++              [36m<tr[39m
++                [33maria-rowindex[39m=[32m"2"[39m
++                [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
++                [33mdata-row-id[39m=[32m"1"[39m
++              [36m>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"[39m
++                  [33mscope[39m=[32m"row"[39m
++                [36m>[39m
++                  [36m<span[39m
++                    [33mclass[39m=[32m"flex items-center gap-2"[39m
++                  [36m>[39m
++                    [36m<a[39m
++                      [33mhref[39m=[32m"/data/coverage?symbol=AAPL"[39m
++                    [36m>[39m
++                      [0mAAPL[0m
++                    [36m</a>[39m
++                  [36m</span>[39m
++                [36m</th>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m>[39m
++                  [36m<span>[39m
++                    [0mFollowed[0m
++                  [36m</span>[39m
++                [36m</td>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m>[39m
++                  [36m<button[39m
++                    [33maria-label[39m=[32m"Stop following AAPL"[39m
++                    [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"[39m
++                    [33mdata-variant[39m=[32m"ghost"[39m
++                    [33mtype[39m=[32m"button"[39m
++                  [36m>[39m
++                    [0mStop following[0m
++                  [36m</button>[39m
++                [36m</td>[39m
++              [36m</tr>[39m
++              [36m<tr[39m
++                [33maria-rowindex[39m=[32m"3"[39m
++                [33mclass[39m=[32m"h-row border-b border-border hover:bg-muted"[39m
++                [33mdata-row-id[39m=[32m"2"[39m
++              [36m>[39m
++                [36m<th[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"[39m
++                  [33mscope[39m=[32m"row"[39m
++                [36m>[39m
++                  [36m<span[39m
++                    [33mclass[39m=[32m"flex items-center gap-2"[39m
++                  [36m>[39m
++                    [36m<a[39m
++                      [33mclass[39m=[32m"text-muted-foreground"[39m
++                      [33mhref[39m=[32m"/data/coverage?symbol=MSFT"[39m
++                    [36m>[39m
++                      [0mMSFT[0m
++                    [36m</a>[39m
++                  [36m</span>[39m
++                [36m</th>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m>[39m
++                  [36m<span[39m
++                    [33mclass[39m=[32m"inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"[39m
++                    [33mdata-variant[39m=[32m"status-neutral"[39m
++                  [36m>[39m
++                    [36m<svg[39m
++                      [33maria-hidden[39m=[32m"true"[39m
++                      [33mclass[39m=[32m"lucide lucide-circle h-3 w-3 shrink-0"[39m
++                      [33mfill[39m=[32m"none"[39m
++                      [33mfocusable[39m=[32m"false"[39m
++                      [33mheight[39m=[32m"24"[39m
++                      [33mstroke[39m=[32m"currentColor"[39m
++                      [33mstroke-linecap[39m=[32m"round"[39m
++                      [33mstroke-linejoin[39m=[32m"round"[39m
++                      [33mstroke-width[39m=[32m"2"[39m
++                      [33mviewBox[39m=[32m"0 0 24 24"[39m
++                      [33mwidth[39m=[32m"24"[39m
++                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
++                    [36m>[39m
++                      [36m<circle[39m
++                        [33mcx[39m=[32m"12"[39m
++                        [33mcy[39m=[32m"12"[39m
++                        [33mr[39m=[32m"10"[39m
++                      [36m/>[39m
++                    [36m</svg>[39m
++                    [0mStopped following[0m
++                  [36m</span>[39m
++                [36m</td>[39m
++                [36m<td[39m
++                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"[39m
++                [36m/>[39m
++              [36m</tr>[39m
++            [36m</tbody>[39m
++          [36m</table>[39m
++        [36m</div>[39m
++      [36m</section>[39m
++    [36m</div>[39m
++  [36m</div>[39m
++[36m</body>[39m
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/instruments/instrument-table.test.tsx:301:21
++    299|       const { rerender } = renderTable({ refreshToken: 0 });
++    300|       await screen.findByRole("table");
++    301|       expect(screen.getByText(`Last updated ${formatTimestamp(first)}`…
++       |                     ^
++    302| 
++    303|       vi.setSystemTime(second);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/instruments/instrument-table.test.tsx > InstrumentTable — followed stocks > sends one stop when Stop following is activated twice while the first is in flight
++AssertionError: expected "spy" to be called 1 times, but got 2 times
++ ❯ src/screens/instruments/instrument-table.test.tsx:336:37
++    334|     await user.click(confirm);
++    335| 
++    336|     expect(client.retireInstrument).toHaveBeenCalledTimes(1);
++       |                                     ^
++    337|     expect(confirm).toHaveAttribute("aria-disabled", "true");
++    338|     settle();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/instruments/retire-dialog.test.tsx > RetireDialog — stop following > holds the confirmation while pending: no second onConfirm, and Escape does not cancel
++Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"
++
++Expected the element to have attribute:
++  aria-disabled="true"
++Received:
++  null
++ ❯ src/screens/instruments/retire-dialog.test.tsx:60:21
++     58| 
++     59|     const confirm = screen.getByRole("button", { name: "Stop following…
++     60|     expect(confirm).toHaveAttribute("aria-disabled", "true");
++       |                     ^
++     61|     await user.click(confirm);
++     62|     await user.keyboard("{Escape}");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  2 failed | 7 passed (9)
++      Tests  3 failed | 84 passed (87)
++   Start at  04:46:03
++   Duration  4.70s (transform 553ms, setup 841ms, collect 5.97s, tests 5.80s, environment 4.67s, prepare 1.28s)
++
+diff --git a/web/src/screens/instruments/empty-states.test.tsx b/web/src/screens/instruments/empty-states.test.tsx
+index cfcecdc2..7cbdc329 100644
+--- a/web/src/screens/instruments/empty-states.test.tsx
++++ b/web/src/screens/instruments/empty-states.test.tsx
+@@ -85,7 +85,10 @@ describe("Followed stocks vocabulary (TC-COMP-201, DAC-E7-S3-4)", () => {
+     renderScreen();
+ 
+     const table = await screen.findByRole("table");
+-    expect(screen.getByRole("heading", { level: 1, name: "Followed stocks" })).toBeInTheDocument();
++    const heading = screen.getByRole("heading", { level: 1, name: "Followed stocks" });
++    expect(heading).toBeInTheDocument();
++    // IR-003, AC-26: the screen h1 is on the type scale's --text-xl.
++    expect(heading).toHaveClass("text-xl");
+     expect(screen.getByRole("button", { name: "Follow a stock" })).toBeInTheDocument();
+     expect(
+       screen.getByRole("textbox", { name: "Symbol of the stock to follow" }),
+diff --git a/web/src/screens/instruments/instrument-table.test.tsx b/web/src/screens/instruments/instrument-table.test.tsx
+index 53843c16..20ca9d03 100644
+--- a/web/src/screens/instruments/instrument-table.test.tsx
++++ b/web/src/screens/instruments/instrument-table.test.tsx
+@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
+ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+ import * as client from "../../api/client";
+ import type { Instrument } from "../../api/types";
++import { formatTimestamp } from "../../app/status-region";
+ import { InstrumentTable } from "./instrument-table";
+ 
+ vi.mock("../../api/client", async () => {
+@@ -73,6 +74,7 @@ describe("InstrumentTable — followed stocks", () => {
+   });
+ 
+   // Implements TC-COMP-203
++  // Implements TC-COMP-184
+   it("renders followed and stopped-following stocks in one virtualised table, stopped ones marked", async () => {
+     renderTable();
+ 
+@@ -112,6 +114,7 @@ describe("InstrumentTable — followed stocks", () => {
+     });
+   });
+ 
++  // Implements TC-COMP-184
+   it("issues a server-side request when the lifecycle filter changes, naming the options in the product's words", async () => {
+     const user = userEvent.setup();
+     renderTable();
+@@ -286,6 +289,75 @@ describe("InstrumentTable — followed stocks", () => {
+     expect(client.listInstruments).not.toHaveBeenCalled();
+   });
+ 
++  // IR-001, AC-24: the Stale row of the eight-state table, the last-updated time.
++  it("shows when the list was last read, and moves it on when the list is read again", async () => {
++    vi.useFakeTimers({ toFake: ["Date"] });
++    try {
++      const first = new Date("2026-03-02T15:04:05Z");
++      const second = new Date("2026-03-02T15:09:30Z");
++      vi.setSystemTime(first);
++      const { rerender } = renderTable({ refreshToken: 0 });
++      await screen.findByRole("table");
++      expect(screen.getByText(`Last updated ${formatTimestamp(first)}`)).toBeInTheDocument();
++
++      vi.setSystemTime(second);
++      rerender(
++        <MemoryRouter>
++          <InstrumentTable refreshToken={1} />
++        </MemoryRouter>,
++      );
++      expect(
++        await screen.findByText(`Last updated ${formatTimestamp(second)}`),
++      ).toBeInTheDocument();
++      expect(screen.queryByText(`Last updated ${formatTimestamp(first)}`)).not.toBeInTheDocument();
++    } finally {
++      vi.useRealTimers();
++    }
++  });
++
++  // IR-002, AC-17, AC-25: one stop per confirmation, and no refusal carried to another stock.
++  it("sends one stop when Stop following is activated twice while the first is in flight", async () => {
++    const user = userEvent.setup();
++    let settle: () => void = () => undefined;
++    vi.mocked(client.retireInstrument).mockReturnValue(
++      new Promise<never>((resolve) => {
++        settle = () => resolve(undefined as never);
++      }),
++    );
++    renderTable();
++    await screen.findByRole("table");
++
++    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
++    const dialog = await screen.findByRole("dialog");
++    const confirm = within(dialog).getByRole("button", { name: "Stop following" });
++    await user.click(confirm);
++    await user.click(confirm);
++
++    expect(client.retireInstrument).toHaveBeenCalledTimes(1);
++    expect(confirm).toHaveAttribute("aria-disabled", "true");
++    settle();
++    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
++  });
++
++  it("shows no refusal of an earlier stop when the dialog is opened again", async () => {
++    const user = userEvent.setup();
++    vi.mocked(client.retireInstrument).mockRejectedValueOnce(new Error("AAPL is already stopped"));
++    renderTable();
++    await screen.findByRole("table");
++
++    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
++    await user.click(
++      within(await screen.findByRole("dialog")).getByRole("button", { name: "Stop following" }),
++    );
++    await screen.findByRole("alert");
++    await user.click(screen.getByRole("button", { name: "Cancel" }));
++    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
++
++    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
++    await screen.findByRole("dialog");
++    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
++  });
++
+   // IR-006, AC-25: focus returns to the row action on cancel.
+   it("returns focus to the row action when the dialog is cancelled", async () => {
+     const user = userEvent.setup();
+@@ -387,6 +459,7 @@ describe("InstrumentTable — followed stocks", () => {
+   });
+ 
+   // The hand-off pins: what the table asks for, shows and marks beyond the delivered cases.
++  // Implements TC-COMP-184
+   it("shows each count against its own word", async () => {
+     vi.mocked(client.listInstruments).mockResolvedValue({
+       ...MIXED_PAGE,
+@@ -398,6 +471,7 @@ describe("InstrumentTable — followed stocks", () => {
+     expect(await screen.findByText("2 followed, 5 stopped following")).toBeInTheDocument();
+   });
+ 
++  // Implements TC-COMP-184
+   it("names All in the lifecycle filter while nothing is filtered", async () => {
+     renderTable();
+     await screen.findByRole("table");
+diff --git a/web/src/screens/instruments/instrument-table.tsx b/web/src/screens/instruments/instrument-table.tsx
+index 393aa082..3d01d2fe 100644
+--- a/web/src/screens/instruments/instrument-table.tsx
++++ b/web/src/screens/instruments/instrument-table.tsx
+@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
+ import { type JSX, useEffect, useMemo, useState } from "react";
+ import { Link } from "react-router-dom";
+ import { listInstruments, retireInstrument } from "../../api/client";
++import { formatTimestamp } from "../../app/status-region";
+ import type { Instrument, InstrumentLifecycle, ScreenState } from "../../api/types";
+ import { StateRegion, type StateRenderers } from "../../components/patterns/state-region";
+ import { Button } from "../../components/ui/button";
+@@ -79,6 +80,7 @@ export function InstrumentTable({
+   const [loadingMore, setLoadingMore] = useState(false);
+   const [retireTarget, setRetireTarget] = useState<RetireTarget | null>(null);
+   const [retireError, setRetireError] = useState<string | null>(null);
++  const [retirePending, setRetirePending] = useState(false);
+   const [reloadToken, setReloadToken] = useState(0);
+ 
+   // refreshToken and reloadToken below are deliberate re-fetch triggers
+@@ -175,12 +177,15 @@ export function InstrumentTable({
+    */
+   async function handleRetireConfirm(symbol: string): Promise<void> {
+     setRetireError(null);
++    setRetirePending(true);
+     try {
+       await retireInstrument(symbol);
+       setRetireTarget(null);
+       setReloadToken((token) => token + 1);
+     } catch (cause) {
+       setRetireError(cause instanceof Error ? cause.message : "the request could not be completed");
++    } finally {
++      setRetirePending(false);
+     }
+   }
+ 
+@@ -247,6 +252,9 @@ export function InstrumentTable({
+     ),
+     populated: (populated) => (
+       <section aria-label="Followed stocks">
++        <p className="font-numeric text-xs text-muted-foreground">
++          Last updated {formatTimestamp(new Date(populated.fetchedAt))}
++        </p>
+         <DataTable
+           variant="virtualised"
+           rowHeader
+@@ -309,6 +317,7 @@ export function InstrumentTable({
+         <RetireDialog
+           symbol={retireTarget.symbol}
+           error={retireError}
++          pending={retirePending}
+           onConfirm={() => void handleRetireConfirm(retireTarget.symbol)}
+           onCancel={() => {
+             setRetireTarget(null);
+diff --git a/web/src/screens/instruments/retire-dialog.test.tsx b/web/src/screens/instruments/retire-dialog.test.tsx
+index d6d1935e..ca3986b3 100644
+--- a/web/src/screens/instruments/retire-dialog.test.tsx
++++ b/web/src/screens/instruments/retire-dialog.test.tsx
+@@ -49,6 +49,22 @@ describe("RetireDialog — stop following", () => {
+     expect(onCancel).not.toHaveBeenCalled();
+   });
+ 
++  // IR-002: the confirmation is held while the stop is in flight.
++  it("holds the confirmation while pending: no second onConfirm, and Escape does not cancel", async () => {
++    const user = userEvent.setup();
++    const onConfirm = vi.fn();
++    const onCancel = vi.fn();
++    render(<RetireDialog symbol="AAPL" pending onConfirm={onConfirm} onCancel={onCancel} />);
++
++    const confirm = screen.getByRole("button", { name: "Stop following" });
++    expect(confirm).toHaveAttribute("aria-disabled", "true");
++    await user.click(confirm);
++    await user.keyboard("{Escape}");
++
++    expect(onConfirm).not.toHaveBeenCalled();
++    expect(onCancel).not.toHaveBeenCalled();
++  });
++
+   it("calls onCancel when Escape is pressed", async () => {
+     const user = userEvent.setup();
+     const onCancel = vi.fn();
+diff --git a/web/src/screens/instruments/retire-dialog.tsx b/web/src/screens/instruments/retire-dialog.tsx
+index 0d7d340e..087e2f86 100644
+--- a/web/src/screens/instruments/retire-dialog.tsx
++++ b/web/src/screens/instruments/retire-dialog.tsx
+@@ -15,11 +15,14 @@ import { ConfirmDialog } from "../../components/ui/dialog";
+ export function RetireDialog({
+   symbol,
+   error = null,
++  pending = false,
+   onConfirm,
+   onCancel,
+ }: {
+   symbol: string;
+   error?: string | null;
++  /** True while the stop is in flight: the confirmation is held (IR-002). */
++  pending?: boolean;
+   onConfirm: () => void;
+   onCancel: () => void;
+ }): JSX.Element {
+@@ -35,6 +38,7 @@ export function RetireDialog({
+       description="Its history is kept, and strategies holding it keep holding it. You can follow it again later."
+       confirmLabel="Stop following"
+       onConfirm={onConfirm}
++      pending={pending}
+     >
+       <p data-testid="retire-dialog-in-flight-notice">
+         A download is running and will still download {symbol} this time. Stopping takes effect from

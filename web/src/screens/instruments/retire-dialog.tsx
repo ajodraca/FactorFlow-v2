@@ -15,11 +15,14 @@ import { ConfirmDialog } from "../../components/ui/dialog";
 export function RetireDialog({
   symbol,
   error = null,
+  pending = false,
   onConfirm,
   onCancel,
 }: {
   symbol: string;
   error?: string | null;
+  /** True while the stop is in flight: the confirmation is held (IR-002). */
+  pending?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }): JSX.Element {
@@ -35,6 +38,7 @@ export function RetireDialog({
       description="Its history is kept, and strategies holding it keep holding it. You can follow it again later."
       confirmLabel="Stop following"
       onConfirm={onConfirm}
+      pending={pending}
     >
       <p data-testid="retire-dialog-in-flight-notice">
         A download is running and will still download {symbol} this time. Stopping takes effect from

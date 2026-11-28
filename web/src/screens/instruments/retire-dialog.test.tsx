@@ -49,6 +49,22 @@ describe("RetireDialog — stop following", () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
+  // IR-002: the confirmation is held while the stop is in flight.
+  it("holds the confirmation while pending: no second onConfirm, and Escape does not cancel", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    const onCancel = vi.fn();
+    render(<RetireDialog symbol="AAPL" pending onConfirm={onConfirm} onCancel={onCancel} />);
+
+    const confirm = screen.getByRole("button", { name: "Stop following" });
+    expect(confirm).toHaveAttribute("aria-disabled", "true");
+    await user.click(confirm);
+    await user.keyboard("{Escape}");
+
+    expect(onConfirm).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
   it("calls onCancel when Escape is pressed", async () => {
     const user = userEvent.setup();
     const onCancel = vi.fn();

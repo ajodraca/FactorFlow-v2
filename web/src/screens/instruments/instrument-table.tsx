@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { type JSX, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listInstruments, retireInstrument } from "../../api/client";
+import { formatTimestamp } from "../../app/status-region";
 import type { Instrument, InstrumentLifecycle, ScreenState } from "../../api/types";
 import { StateRegion, type StateRenderers } from "../../components/patterns/state-region";
 import { Button } from "../../components/ui/button";
@@ -79,6 +80,7 @@ export function InstrumentTable({
   const [loadingMore, setLoadingMore] = useState(false);
   const [retireTarget, setRetireTarget] = useState<RetireTarget | null>(null);
   const [retireError, setRetireError] = useState<string | null>(null);
+  const [retirePending, setRetirePending] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
 
   // refreshToken and reloadToken below are deliberate re-fetch triggers
@@ -175,12 +177,15 @@ export function InstrumentTable({
    */
   async function handleRetireConfirm(symbol: string): Promise<void> {
     setRetireError(null);
+    setRetirePending(true);
     try {
       await retireInstrument(symbol);
       setRetireTarget(null);
       setReloadToken((token) => token + 1);
     } catch (cause) {
       setRetireError(cause instanceof Error ? cause.message : "the request could not be completed");
+    } finally {
+      setRetirePending(false);
     }
   }
 
@@ -247,6 +252,9 @@ export function InstrumentTable({
     ),
     populated: (populated) => (
       <section aria-label="Followed stocks">
+        <p className="font-numeric text-xs text-muted-foreground">
+          Last updated {formatTimestamp(new Date(populated.fetchedAt))}
+        </p>
         <DataTable
           variant="virtualised"
           rowHeader
@@ -309,6 +317,7 @@ export function InstrumentTable({
         <RetireDialog
           symbol={retireTarget.symbol}
           error={retireError}
+          pending={retirePending}
           onConfirm={() => void handleRetireConfirm(retireTarget.symbol)}
           onCancel={() => {
             setRetireTarget(null);

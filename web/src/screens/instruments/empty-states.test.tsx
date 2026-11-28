@@ -85,7 +85,10 @@ describe("Followed stocks vocabulary (TC-COMP-201, DAC-E7-S3-4)", () => {
     renderScreen();
 
     const table = await screen.findByRole("table");
-    expect(screen.getByRole("heading", { level: 1, name: "Followed stocks" })).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { level: 1, name: "Followed stocks" });
+    expect(heading).toBeInTheDocument();
+    // IR-003, AC-26: the screen h1 is on the type scale's --text-xl.
+    expect(heading).toHaveClass("text-xl");
     expect(screen.getByRole("button", { name: "Follow a stock" })).toBeInTheDocument();
     expect(
       screen.getByRole("textbox", { name: "Symbol of the stock to follow" }),

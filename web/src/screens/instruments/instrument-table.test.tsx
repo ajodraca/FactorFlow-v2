@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import * as client from "../../api/client";
 import type { Instrument } from "../../api/types";
+import { formatTimestamp } from "../../app/status-region";
 import { InstrumentTable } from "./instrument-table";
 
 vi.mock("../../api/client", async () => {
@@ -73,6 +74,7 @@ describe("InstrumentTable — followed stocks", () => {
   });
 
   // Implements TC-COMP-203
+  // Implements TC-COMP-184
   it("renders followed and stopped-following stocks in one virtualised table, stopped ones marked", async () => {
     renderTable();
 
@@ -112,6 +114,7 @@ describe("InstrumentTable — followed stocks", () => {
     });
   });
 
+  // Implements TC-COMP-184
   it("issues a server-side request when the lifecycle filter changes, naming the options in the product's words", async () => {
     const user = userEvent.setup();
     renderTable();
@@ -286,6 +289,75 @@ describe("InstrumentTable — followed stocks", () => {
     expect(client.listInstruments).not.toHaveBeenCalled();
   });
 
+  // IR-001, AC-24: the Stale row of the eight-state table, the last-updated time.
+  it("shows when the list was last read, and moves it on when the list is read again", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const first = new Date("2026-03-02T15:04:05Z");
+      const second = new Date("2026-03-02T15:09:30Z");
+      vi.setSystemTime(first);
+      const { rerender } = renderTable({ refreshToken: 0 });
+      await screen.findByRole("table");
+      expect(screen.getByText(`Last updated ${formatTimestamp(first)}`)).toBeInTheDocument();
+
+      vi.setSystemTime(second);
+      rerender(
+        <MemoryRouter>
+          <InstrumentTable refreshToken={1} />
+        </MemoryRouter>,
+      );
+      expect(
+        await screen.findByText(`Last updated ${formatTimestamp(second)}`),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(`Last updated ${formatTimestamp(first)}`)).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  // IR-002, AC-17, AC-25: one stop per confirmation, and no refusal carried to another stock.
+  it("sends one stop when Stop following is activated twice while the first is in flight", async () => {
+    const user = userEvent.setup();
+    let settle: () => void = () => undefined;
+    vi.mocked(client.retireInstrument).mockReturnValue(
+      new Promise<never>((resolve) => {
+        settle = () => resolve(undefined as never);
+      }),
+    );
+    renderTable();
+    await screen.findByRole("table");
+
+    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
+    const dialog = await screen.findByRole("dialog");
+    const confirm = within(dialog).getByRole("button", { name: "Stop following" });
+    await user.click(confirm);
+    await user.click(confirm);
+
+    expect(client.retireInstrument).toHaveBeenCalledTimes(1);
+    expect(confirm).toHaveAttribute("aria-disabled", "true");
+    settle();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("shows no refusal of an earlier stop when the dialog is opened again", async () => {
+    const user = userEvent.setup();
+    vi.mocked(client.retireInstrument).mockRejectedValueOnce(new Error("AAPL is already stopped"));
+    renderTable();
+    await screen.findByRole("table");
+
+    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "Stop following" }),
+    );
+    await screen.findByRole("alert");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
+    await screen.findByRole("dialog");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   // IR-006, AC-25: focus returns to the row action on cancel.
   it("returns focus to the row action when the dialog is cancelled", async () => {
     const user = userEvent.setup();
@@ -387,6 +459,7 @@ describe("InstrumentTable — followed stocks", () => {
   });
 
   // The hand-off pins: what the table asks for, shows and marks beyond the delivered cases.
+  // Implements TC-COMP-184
   it("shows each count against its own word", async () => {
     vi.mocked(client.listInstruments).mockResolvedValue({
       ...MIXED_PAGE,
@@ -398,6 +471,7 @@ describe("InstrumentTable — followed stocks", () => {
     expect(await screen.findByText("2 followed, 5 stopped following")).toBeInTheDocument();
   });
 
+  // Implements TC-COMP-184
   it("names All in the lifecycle filter while nothing is filtered", async () => {
     renderTable();
     await screen.findByRole("table");
