@@ -3,8 +3,10 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DataHealth } from "../../app/shell-types";
 import { DailyPricesCard } from "./daily-prices-card";
+import { FinancialsCard } from "./financials-card";
 
 type Prices = NonNullable<DataHealth["checks"]["daily_prices"]>;
+type Financials = NonNullable<DataHealth["checks"]["company_financials"]>;
 
 const OK_PRICES: Prices = {
   status: "ok",
@@ -21,6 +23,31 @@ const NO_GAPS_REASON = "fewer_than_two_instruments_with_data";
 
 function prices(over: Partial<Prices> = {}): Prices {
   return { ...OK_PRICES, ...over };
+}
+
+const OK_FINANCIALS: Financials = {
+  status: "ok",
+  absent_count: 0,
+  problem_count: 0,
+  as_of: "2026-10-30T18:00:00Z",
+  exception_count: 0,
+  exception_symbols: [],
+};
+
+function financials(over: Partial<Financials> = {}): Financials {
+  return { ...OK_FINANCIALS, ...over };
+}
+
+function renderFinancials(
+  check: Financials | null,
+  followedCount = 10,
+): { container: HTMLElement } {
+  const view = render(
+    <MemoryRouter>
+      <FinancialsCard check={check} followedCount={followedCount} />
+    </MemoryRouter>,
+  );
+  return { container: view.container };
 }
 
 function renderPrices(check: Prices | null, followedCount = 10): { container: HTMLElement } {
@@ -213,7 +240,116 @@ describe("Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DA
   });
 });
 
+describe("Company financials card (TC-COMP-149, DAC-E6-4)", () => {
+  // Implements TC-COMP-149
+  it("(a) ok: a good badge, the all-stocks result line and the as-of instant with its zone", () => {
+    renderFinancials(financials(), 30);
+    const card = region("Company financials");
+    expect(badgeWith(card, "status-good")).toHaveTextContent("All financials present");
+    expect(resultLine(card)).toHaveTextContent(/^All 30 stocks have financials$/);
+    expect(asOfLine(card)).toHaveTextContent(/^Financials to 2026-10-30 13:00 CDT$/);
+  });
+
+  // Implements TC-COMP-149
+  it("(b) exceptions: a warning badge, the two parts and the symbols", () => {
+    renderFinancials(
+      financials({
+        status: "exceptions",
+        absent_count: 2,
+        problem_count: 1,
+        exception_count: 3,
+        exception_symbols: ["AAA", "BBB", "CCC"],
+      }),
+    );
+    const card = region("Company financials");
+    expect(badgeWith(card, "status-warning")).toHaveTextContent("Needs attention");
+    expect(resultLine(card)).toHaveTextContent(/^2 without financials, 1 with failed downloads$/);
+    expect(asOfLine(card)).toHaveTextContent(
+      /^Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC$/,
+    );
+  });
+
+  // Implements TC-COMP-149
+  it.each([
+    [0, 4, "4 with failed downloads"],
+    [5, 0, "5 without financials"],
+    [1, 1, "1 without financials, 1 with failed downloads"],
+  ])("(c) absent %i and problems %i read %s", (absent, problems, expected) => {
+    const { container } = renderFinancials(
+      financials({ status: "exceptions", absent_count: absent, problem_count: problems }),
+    );
+    expect(resultLine(container).textContent).toBe(expected);
+  });
+
+  // Implements TC-COMP-149
+  it("(c) exceptions list more symbols than shown with and k more", () => {
+    const { container } = renderFinancials(
+      financials({
+        status: "exceptions",
+        absent_count: 1,
+        exception_count: 7,
+        exception_symbols: ["AAA", "BBB", "CCC", "DDD", "EEE"],
+      }),
+    );
+    expect(asOfLine(container).textContent).toBe(
+      "Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC, DDD, EEE and 2 more",
+    );
+  });
+
+  // Implements TC-COMP-149
+  it.each([
+    [6, ["AAA", "BBB", "CCC", "DDD", "EEE"], " and 1 more"],
+    [4, ["AAA", "BBB", "CCC"], " and 1 more"],
+    [5, ["AAA", "BBB", "CCC", "DDD", "EEE"], ""],
+    [3, ["AAA", "BBB", "CCC"], ""],
+  ])("(c) exception_count %i with %j appends %j", (count, symbols, tail) => {
+    const { container } = renderFinancials(
+      financials({
+        status: "exceptions",
+        absent_count: 1,
+        exception_count: count,
+        exception_symbols: symbols,
+      }),
+    );
+    expect(asOfLine(container).textContent).toBe(
+      `Financials to 2026-10-30 13:00 CDT · ${symbols.join(", ")}${tail}`,
+    );
+  });
+
+  // Implements TC-COMP-149
+  it("(d) a null as_of renders an absent em dash with its hidden words", () => {
+    const { container } = renderFinancials(
+      financials({ status: "exceptions", absent_count: 10, as_of: null }),
+    );
+    const line = asOfLine(container);
+    expect(within(line).getByText("—")).toHaveAttribute("aria-hidden", "true");
+    expect(line).toHaveTextContent("no financials stored yet");
+    expect(line.textContent).not.toMatch(/null|undefined/);
+  });
+
+  // Implements TC-COMP-149
+  it("(e) carries the scope note", () => {
+    renderFinancials(financials());
+    expect(region("Company financials")).toHaveTextContent(
+      "Checks that financials are present and downloaded, not that they are correct.",
+    );
+  });
+});
+
 describe("Check cards' null state (DAC-E6-7 support, AC-24)", () => {
+  it("Company financials with check null keeps its heading and renders absent dashes, no status badge", () => {
+    const { container } = renderFinancials(null);
+    const card = region("Company financials");
+    expect(
+      within(card).getByRole("heading", { level: 2, name: "Company financials" }),
+    ).toBeTruthy();
+    expect(card.querySelector('[data-variant^="status-"]')).toBeNull();
+    expect(card.querySelector('[data-variant="coverage-unknown"]')).toBeNull();
+    expect(within(card).getAllByText("—")).toHaveLength(2);
+    expect(within(card).getAllByText("no data stored yet")).toHaveLength(2);
+    expect(container.textContent).not.toMatch(/All financials present|All \d+ stocks/);
+  });
+
   it("Daily prices with check null keeps its heading and renders absent dashes, no status badge", () => {
     const { container } = renderPrices(null);
     const card = region("Daily prices");

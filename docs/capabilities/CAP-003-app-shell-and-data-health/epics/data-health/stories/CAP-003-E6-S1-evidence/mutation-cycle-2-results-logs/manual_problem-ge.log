@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-8nvl7qvz/w0/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (28 tests | 1 failed) 234ms
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 5 and problems 0 read 5 without financials 5ms
+     → expected '5 without financials, 0 with failed d…' to be '5 without financials' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 5 and problems 0 read 5 without financials
+AssertionError: expected '5 without financials, 0 with failed d…' to be '5 without financials' // Object.is equality
+
+Expected: "5 without financials"
+Received: "5 without financials, 0 with failed downloads"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:281:47
+    279|       financials({ status: "exceptions", absent_count: absent, problem…
+    280|     );
+    281|     expect(resultLine(container).textContent).toBe(expected);
+       |                                               ^
+    282|   });
+    283| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 27 passed (28)
+   Start at  20:40:57
+   Duration  2.13s (transform 170ms, setup 62ms, collect 655ms, tests 234ms, environment 254ms, prepare 52ms)
+

@@ -63,3 +63,19 @@ export const GAPS_NOT_DETERMINABLE = "Gaps not determinable";
 export const PRICES_TO = "Prices to";
 export const PRICES_SCOPE_NOTE =
   "Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.";
+
+export function allFinancials(m: string): string {
+  return `All ${m} stocks have financials`;
+}
+
+export function withoutFinancials(n: string): string {
+  return `${n} without financials`;
+}
+
+export function withFailedDownloads(n: string): string {
+  return `${n} with failed downloads`;
+}
+
+export const FINANCIALS_TO = "Financials to";
+export const FINANCIALS_NOTE =
+  "Checks that financials are present and downloaded, not that they are correct.";

@@ -53,3 +53,43 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-2
+    tasks: [T003, T004, T015]
+    description: >
+      Company financials card. check-cards.test.tsx gains the TC-COMP-149 rows (T003 a-e, plus parameterised
+      zero-part and exception-count rows) and the Company financials half of the null state (T004); then copy.ts
+      (financials strings) and financials-card.tsx.
+    deviations: >
+      (1) Extra exception_count rows (6, 4, 5, 3 against five and three symbols) were added after the first mutation
+      scoring left the off-by-one on the and-k-more guard and the hand-written exception_count - 5 mutant alive; the
+      first scoring (11/13) is superseded by the final run. (2) A non-ok status with both counts at 0 renders an
+      empty result; the plan does not state it and the reviewers noted it without a finding.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-2.log
+    red_log_sha256: 85efe108ce422001f501a7eb56eaf0f5a55784d394afae484e4e97ed8eed53e7
+    red_evidence: >
+      With the extended check-cards.test.tsx staged and no financials-card.tsx, the module failed to load: 1 file
+      failed, no tests (the import of ./financials-card did not resolve).
+    green_evidence: >
+      28 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-2.log
+        sha256: 85efe108ce422001f501a7eb56eaf0f5a55784d394afae484e4e97ed8eed53e7
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8cfaf7ccce55e228634ecf14d86666a8efa4d3fe6fe75afed3e57f36cc012b2e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-2.patch
+    index_tree: 8017f327916ab4ce6666712b043eca3dec6fb731
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 01b52e9fe3e323cfd54ce9ef63f3b6eaa73ec65bbae7534e0249e893666a7cd1
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
