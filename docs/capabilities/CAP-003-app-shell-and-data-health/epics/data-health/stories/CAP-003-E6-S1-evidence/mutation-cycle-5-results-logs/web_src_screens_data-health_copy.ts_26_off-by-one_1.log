@@ -1,0 +1,168 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cnk68xkn/w0/web
+
+stderr | src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/verdict.test.tsx (31 tests | 9 failed) 578ms
+   × Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention. 124ms
+     → expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+   × Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > partial with 1 of 10 affected is status-warning: Mostly yes. 1 of 10 followed stocks needs attention; its scores show as Incomplete until it's fixed. 6ms
+     → expected 'Mostly yes. None of the 10 followed s…' to be 'Mostly yes. 1 of 10 followed stocks n…' // Object.is equality
+   × Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > failed with 0 of 10 affected is status-critical: No. None of the 10 followed stocks needs attention, and the last download failed. 17ms
+     → expected 'No. 0 of 10 followed stocks need atte…' to be 'No. None of the 10 followed stocks ne…' // Object.is equality
+   × Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > abandoned with 0 of 10 affected is status-serious: Mostly yes. None of the 10 followed stocks needs attention, and the last download was interrupted. 2ms
+     → expected 'Mostly yes. 0 of 10 followed stocks n…' to be 'Mostly yes. None of the 10 followed s…' // Object.is equality
+   × Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > cancelled with 0 of 1236 affected is status-good: Yes. None of the 1,236 followed stocks needs attention. 3ms
+     → expected 'Yes. 0 of 1,236 followed stocks need …' to be 'Yes. None of the 1,236 followed stock…' // Object.is equality
+   × Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > the checks' tiers do not feed the answer 2ms
+     → expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+   × Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1) > (a, b) status exceptions is named after an unchanged sentence 9ms
+     → expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+   × Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1) > (a, b) status not_determinable is named after an unchanged sentence 7ms
+     → expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+   × Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1) > (e) no daily prices check names nothing and the verdict still renders from the counts 14ms
+     → expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/check-cards.test.tsx (51 tests) 768ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention.
+AssertionError: expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+
+Expected: "Yes. None of the 10 followed stocks needs attention."
+Received: "Yes. 0 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed."
+
+ ❯ src/screens/data-health/verdict.test.tsx:170:38
+    168|         dataHealth: ok(dh({ affected_count: affected, followed_count: …
+    169|       });
+    170|       expect(sentence().textContent).toBe(text);
+       |                                      ^
+    171|       const badges = statusBadges(container);
+    172|       expect(badges).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > partial with 1 of 10 affected is status-warning: Mostly yes. 1 of 10 followed stocks needs attention; its scores show as Incomplete until it's fixed.
+AssertionError: expected 'Mostly yes. None of the 10 followed s…' to be 'Mostly yes. 1 of 10 followed stocks n…' // Object.is equality
+
+Expected: "Mostly yes. 1 of 10 followed stocks needs attention; its scores show as Incomplete until it's fixed."
+Received: "Mostly yes. None of the 10 followed stocks needs attention."
+
+ ❯ src/screens/data-health/verdict.test.tsx:170:38
+    168|         dataHealth: ok(dh({ affected_count: affected, followed_count: …
+    169|       });
+    170|       expect(sentence().textContent).toBe(text);
+       |                                      ^
+    171|       const badges = statusBadges(container);
+    172|       expect(badges).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > failed with 0 of 10 affected is status-critical: No. None of the 10 followed stocks needs attention, and the last download failed.
+AssertionError: expected 'No. 0 of 10 followed stocks need atte…' to be 'No. None of the 10 followed stocks ne…' // Object.is equality
+
+Expected: "No. None of the 10 followed stocks needs attention, and the last download failed."
+Received: "No. 0 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed, and the last download failed."
+
+ ❯ src/screens/data-health/verdict.test.tsx:170:38
+    168|         dataHealth: ok(dh({ affected_count: affected, followed_count: …
+    169|       });
+    170|       expect(sentence().textContent).toBe(text);
+       |                                      ^
+    171|       const badges = statusBadges(container);
+    172|       expect(badges).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > abandoned with 0 of 10 affected is status-serious: Mostly yes. None of the 10 followed stocks needs attention, and the last download was interrupted.
+AssertionError: expected 'Mostly yes. 0 of 10 followed stocks n…' to be 'Mostly yes. None of the 10 followed s…' // Object.is equality
+
+Expected: "Mostly yes. None of the 10 followed stocks needs attention, and the last download was interrupted."
+Received: "Mostly yes. 0 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed, and the last download was interrupted."
+
+ ❯ src/screens/data-health/verdict.test.tsx:170:38
+    168|         dataHealth: ok(dh({ affected_count: affected, followed_count: …
+    169|       });
+    170|       expect(sentence().textContent).toBe(text);
+       |                                      ^
+    171|       const badges = statusBadges(container);
+    172|       expect(badges).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > cancelled with 0 of 1236 affected is status-good: Yes. None of the 1,236 followed stocks needs attention.
+AssertionError: expected 'Yes. 0 of 1,236 followed stocks need …' to be 'Yes. None of the 1,236 followed stock…' // Object.is equality
+
+Expected: "Yes. None of the 1,236 followed stocks needs attention."
+Received: "Yes. 0 of 1,236 followed stocks need attention; their scores show as Incomplete until they're fixed."
+
+ ❯ src/screens/data-health/verdict.test.tsx:170:38
+    168|         dataHealth: ok(dh({ affected_count: affected, followed_count: …
+    169|       });
+    170|       expect(sentence().textContent).toBe(text);
+       |                                      ^
+    171|       const badges = statusBadges(container);
+    172|       expect(badges).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > the checks' tiers do not feed the answer
+AssertionError: expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+
+Expected: "Yes. None of the 10 followed stocks needs attention."
+Received: "Yes. 0 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed."
+
+ ❯ src/screens/data-health/verdict.test.tsx:201:36
+    199|       ),
+    200|     });
+    201|     expect(sentence().textContent).toBe("Yes. None of the 10 followed …
+       |                                    ^
+    202|     expect(sentence().querySelector("[data-variant]")?.getAttribute("d…
+    203|       "status-good",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1) > (a, b) status exceptions is named after an unchanged sentence
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1) > (a, b) status not_determinable is named after an unchanged sentence
+AssertionError: expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+
+Expected: "Yes. None of the 10 followed stocks needs attention."
+Received: "Yes. 0 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed."
+
+ ❯ src/screens/data-health/verdict.test.tsx:365:38
+    363|         dataHealth: ok(gapsDh(status, NO_GAPS_REASON)),
+    364|       });
+    365|       expect(sentence().textContent).toBe("Yes. None of the 10 followe…
+       |                                      ^
+    366|       expect(
+    367|         screen.getByText(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1) > (e) no daily prices check names nothing and the verdict still renders from the counts
+AssertionError: expected 'Yes. 0 of 10 followed stocks need att…' to be 'Yes. None of the 10 followed stocks n…' // Object.is equality
+
+Expected: "Yes. None of the 10 followed stocks needs attention."
+Received: "Yes. 0 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed."
+
+ ❯ src/screens/data-health/verdict.test.tsx:405:36
+    403|     });
+    404|     expect(container.textContent).not.toContain("can't be checked");
+    405|     expect(sentence().textContent).toBe("Yes. None of the 10 followed …
+       |                                    ^
+    406|   });
+    407| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  9 failed | 73 passed (82)
+   Start at  20:53:01
+   Duration  4.58s (transform 363ms, setup 143ms, collect 4.61s, tests 1.35s, environment 886ms, prepare 617ms)
+

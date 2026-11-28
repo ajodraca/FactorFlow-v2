@@ -7,7 +7,10 @@
  */
 
 import { ApiUnreachableError } from "../../api/client";
+import { formatCount } from "../../components/patterns/format";
+import type { DataAnswer } from "../../components/patterns/worst-data-tier";
 
+export const PAGE_TITLE = "Is the data good enough to trust?";
 export const FULL_COVERAGE_TABLE = "Full coverage table";
 export const TRY_AGAIN = "Try again";
 
@@ -16,6 +19,44 @@ export const CHECK_TITLES = {
   company_financials: "Company financials",
   scores: "Factor scores",
 } as const;
+
+/** The count clause of the verdict: singular forms at 1, and none spelled out at 0 (data-health-ui 2.3). */
+export function countClause(n: number, m: number): string {
+  const followed = formatCount(m);
+  if (n === 0) {
+    return `None of the ${followed} followed stocks needs attention`;
+  }
+  if (n === 1) {
+    return `1 of ${followed} followed stocks needs attention; its scores show as Incomplete until it's fixed`;
+  }
+  return `${formatCount(n)} of ${followed} followed stocks need attention; their scores show as Incomplete until they're fixed`;
+}
+
+/** The sentence after the badge's word; the download clause replaces the count clause's full stop. */
+export function verdictSentenceRest(
+  n: number,
+  m: number,
+  downloadClause: DataAnswer["downloadClause"],
+): string {
+  const count = countClause(n, m);
+  switch (downloadClause) {
+    case "failed":
+      return `${count}, and the last download failed.`;
+    case "interrupted":
+      return `${count}, and the last download was interrupted.`;
+    case null:
+      return `${count}.`;
+  }
+}
+
+/** Names a daily prices check that could not look for gaps (Resolved Conflict 2). */
+export function gapsNotCheckable(reason: string): string {
+  return `Daily prices can't be checked for gaps: ${reason}.`;
+}
+
+export function checked(time: string): string {
+  return `checked ${time}`;
+}
 
 /** `Couldn't read {what}: {reason}.` */
 export function readFailed(what: string, reason: string): string {

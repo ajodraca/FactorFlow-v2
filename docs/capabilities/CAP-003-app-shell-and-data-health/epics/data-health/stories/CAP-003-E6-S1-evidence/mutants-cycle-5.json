@@ -1,0 +1,178 @@
+{
+ "schema": 1,
+ "repo_head": "a3fba4db2c19a59bd51b4924db6504447b074bcb",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/copy.ts:26:off-by-one:1",
+   "cycle": "cycle-5",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 26,
+   "original": "  if (n === 0) {",
+   "mutated": "  if (n === 1) {"
+  },
+  {
+   "id": "web/src/screens/data-health/copy.ts:29:off-by-one:1",
+   "cycle": "cycle-5",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 29,
+   "original": "  if (n === 1) {",
+   "mutated": "  if (n === 2) {"
+  },
+  {
+   "id": "web/src/screens/data-health/copy.ts:30:off-by-one:1",
+   "cycle": "cycle-5",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 30,
+   "original": "    return `1 of ${followed} followed stocks needs attention; its scores show as Incomplete until it's fixed`;",
+   "mutated": "    return `2 of ${followed} followed stocks needs attention; its scores show as Incomplete until it's fixed`;"
+  },
+  {
+   "id": "web/src/screens/data-health/verdict.tsx:47:off-by-one:1",
+   "cycle": "cycle-5",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 47,
+   "original": "        <h1 tabIndex={-1} className=\"text-xl font-semibold\">",
+   "mutated": "        <h1 tabIndex={-2} className=\"text-xl font-semibold\">"
+  },
+  {
+   "id": "manual:n-le1",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 29,
+   "original": "  if (n === 1) {",
+   "mutated": "  if (n <= 1) {"
+  },
+  {
+   "id": "manual:n-eq0",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 26,
+   "original": "  if (n === 0) {",
+   "mutated": "  if (n === 1) {"
+  },
+  {
+   "id": "manual:clause-swap",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 43,
+   "original": "    case \"failed\":",
+   "mutated": "    case \"interrupted\":"
+  },
+  {
+   "id": "manual:affected-att",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 93,
+   "original": "    affectedCount: health.affected_count,",
+   "mutated": "    affectedCount: attention.data.problems.stock_count,"
+  },
+  {
+   "id": "manual:checked-att",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 111,
+   "original": "      <p className=\"text-xs text-muted-foreground\">{checked(formatClock(health.checked_at))}</p>",
+   "mutated": "      <p className=\"text-xs text-muted-foreground\">{checked(formatClock(attention.data.checked_at))}</p>"
+  },
+  {
+   "id": "manual:att-err-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 71,
+   "original": "  if (attention.kind === \"error\") {",
+   "mutated": "  if (attention.kind !== \"error\") {"
+  },
+  {
+   "id": "manual:att-load-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 68,
+   "original": "  if (attention.kind === \"loading\") {",
+   "mutated": "  if (attention.kind !== \"loading\") {"
+  },
+  {
+   "id": "manual:dh-load-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 79,
+   "original": "  if (dataHealth.kind === \"loading\") {",
+   "mutated": "  if (dataHealth.kind !== \"loading\") {"
+  },
+  {
+   "id": "manual:dh-err-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 82,
+   "original": "  if (dataHealth.kind === \"error\") {",
+   "mutated": "  if (dataHealth.kind !== \"error\") {"
+  },
+  {
+   "id": "manual:retry-swap",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 75,
+   "original": "        onRetry={onRetryAttention}",
+   "mutated": "        onRetry={onRetryDataHealth}"
+  },
+  {
+   "id": "manual:gap-status",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 108,
+   "original": "      {prices?.gap_stock_count === null ? (",
+   "mutated": "      {prices?.status === \"not_determinable\" ? ("
+  },
+  {
+   "id": "manual:gap-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 108,
+   "original": "      {prices?.gap_stock_count === null ? (",
+   "mutated": "      {prices?.gap_stock_count !== null ? ("
+  },
+  {
+   "id": "manual:answer-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 97,
+   "original": "  if (answer === null) {",
+   "mutated": "  if (answer !== null) {"
+  },
+  {
+   "id": "manual:word-tier",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/verdict.tsx",
+   "line": 104,
+   "original": "        <StatusBadge tier={answer.tier}>{answer.word}</StatusBadge>",
+   "mutated": "        <StatusBadge tier={answer.tier}>{answer.tier}</StatusBadge>"
+  },
+  {
+   "id": "manual:unreach-neg",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 79,
+   "original": "  return error instanceof ApiUnreachableError",
+   "mutated": "  return !(error instanceof ApiUnreachableError)"
+  }
+ ]
+}

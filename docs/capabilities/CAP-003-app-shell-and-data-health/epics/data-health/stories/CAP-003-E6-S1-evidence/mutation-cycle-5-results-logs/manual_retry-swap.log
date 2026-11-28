@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cnk68xkn/w2/web
+
+stderr | src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/verdict.test.tsx (31 tests | 2 failed) 1578ms
+   ✓ Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > the header holds the h1, the coverage link and the download action 432ms
+   × Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) keeps the header, shows Try again and computes no tier 213ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiUnreachableError: fetch failed) keeps the header, shows Try again and computes no tier 5ms
+     → expected "spy" to be called 1 times, but got 0 times
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/check-cards.test.tsx (51 tests) 1790ms
+   ✓ Company financials card (TC-COMP-149, DAC-E6-4) > (a) ok: a good badge, the all-stocks result line and the as-of instant with its zone 391ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) keeps the header, shows Try again and computes no tier
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiUnreachableError: fetch failed) keeps the header, shows Try again and computes no tier
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/screens/data-health/verdict.test.tsx:279:30
+    277|       expect(screen.getByRole("status").textContent).toBe(text);
+    278|       fireEvent.click(screen.getByRole("button", { name: "Try again" }…
+    279|       expect(retryAttention).toHaveBeenCalledTimes(1);
+       |                              ^
+    280|       expect(retryDataHealth).not.toHaveBeenCalled();
+    281|       expect(statusBadges(container)).toHaveLength(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 80 passed (82)
+   Start at  20:53:13
+   Duration  6.66s (transform 925ms, setup 518ms, collect 6.09s, tests 3.37s, environment 1.70s, prepare 642ms)
+

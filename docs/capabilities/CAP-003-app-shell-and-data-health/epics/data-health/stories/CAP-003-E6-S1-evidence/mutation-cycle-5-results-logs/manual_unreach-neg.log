@@ -1,0 +1,99 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cnk68xkn/w0/web
+
+stderr | src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/verdict.test.tsx (31 tests | 4 failed) 561ms
+   × Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) keeps the header, shows Try again and computes no tier 26ms
+     → expected 'Couldn\'t read what needs attention: …' to be 'Couldn\'t read what needs attention: …' // Object.is equality
+   × Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiUnreachableError: fetch failed) keeps the header, shows Try again and computes no tier 51ms
+     → expected 'Couldn\'t read what needs attention: …' to be 'Couldn\'t read what needs attention: …' // Object.is equality
+   × Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (e) aggregate failing: its own sentence and Try again calling the aggregate's retry 2ms
+     → expected 'Couldn\'t read the data health checks…' to be 'Couldn\'t read the data health checks…' // Object.is equality
+   × copy.ts (DEC-0373, -2) > (a) readFailureReason names only the two cases and never an envelope field 0ms
+     → expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (51 tests | 2 failed) 647ms
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) 8ms
+     → expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed) 3ms
+     → expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null })
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed)
+AssertionError: expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
+
+Expected: "Couldn't read the factor scores: FactorFlow hit an unexpected problem."
+Received: "Couldn't read the factor scores: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/check-cards.test.tsx:542:60
+    540|       const card = region("Factor scores");
+    541|       expect(within(card).getByRole("heading", { level: 2, name: "Fact…
+    542|       expect(within(card).getByRole("status").textContent).toBe(senten…
+       |                                                            ^
+    543|       expect(card.querySelector(BADGE)).toBeNull();
+    544|       fireEvent.click(within(card).getByRole("button", { name: "Try ag…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) keeps the header, shows Try again and computes no tier
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (b) attention failing (ApiUnreachableError: fetch failed) keeps the header, shows Try again and computes no tier
+AssertionError: expected 'Couldn\'t read what needs attention: …' to be 'Couldn\'t read what needs attention: …' // Object.is equality
+
+Expected: "Couldn't read what needs attention: FactorFlow hit an unexpected problem."
+Received: "Couldn't read what needs attention: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/verdict.test.tsx:277:54
+    275|       );
+    276|       expectHeaderKept(container);
+    277|       expect(screen.getByRole("status").textContent).toBe(text);
+       |                                                      ^
+    278|       fireEvent.click(screen.getByRole("button", { name: "Try again" }…
+    279|       expect(retryAttention).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > Verdict states (TC-COMP-148, DAC-E6-2, AC-24) > (e) aggregate failing: its own sentence and Try again calling the aggregate's retry
+AssertionError: expected 'Couldn\'t read the data health checks…' to be 'Couldn\'t read the data health checks…' // Object.is equality
+
+Expected: "Couldn't read the data health checks: FactorFlow hit an unexpected problem."
+Received: "Couldn't read the data health checks: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/verdict.test.tsx:307:52
+    305|       { attention: retryAttention, dataHealth: retryDataHealth },
+    306|     );
+    307|     expect(screen.getByRole("status").textContent).toBe(
+       |                                                    ^
+    308|       "Couldn't read the data health checks: FactorFlow hit an unexpec…
+    309|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/data-health/verdict.test.tsx > copy.ts (DEC-0373, -2) > (a) readFailureReason names only the two cases and never an envelope field
+AssertionError: expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
+
+Expected: "FactorFlow is not answering"
+Received: "FactorFlow hit an unexpected problem"
+
+ ❯ src/screens/data-health/verdict.test.tsx:486:44
+    484| describe("copy.ts (DEC-0373, -2)", () => {
+    485|   it("(a) readFailureReason names only the two cases and never an enve…
+    486|     expect(readFailureReason(UNREACHABLE)).toBe("FactorFlow is not ans…
+       |                                            ^
+    487|     expect(readFailureReason(INTERNAL)).toBe("FactorFlow hit an unexpe…
+    488|     const validation = new ApiError("bad body", "req-1", { code: "vali…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 76 passed (82)
+   Start at  20:53:23
+   Duration  5.62s (transform 680ms, setup 385ms, collect 2.76s, tests 1.21s, environment 2.30s, prepare 2.72s)
+
