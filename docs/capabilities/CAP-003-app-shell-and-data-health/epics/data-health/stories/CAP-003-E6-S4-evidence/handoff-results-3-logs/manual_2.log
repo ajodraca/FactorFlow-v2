@@ -1,5 +1,5 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w1/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w1/web
 
 stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -9,11 +9,27 @@ stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads ro
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 431ms
- ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 1021ms
+ ✓ src/screens/data-health/what-you-follow.test.tsx (26 tests) 629ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (60 tests | 1 failed) 1082ms
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (a) an interrupted or cancelled latest download is finished: no re-read, no progress 10ms
+     → expected "spy" to be called 1 times, but got 2 times
 
- Test Files  2 passed (2)
-      Tests  72 passed (72)
-   Start at  02:04:51
-   Duration  7.74s (transform 502ms, setup 228ms, collect 3.96s, tests 1.45s, environment 3.38s, prepare 4.26s)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (a) an interrupted or cancelled latest download is finished: no re-read, no progress
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:977:24
+    975|       await screen.findByRole("table");
+    976|       await answerWith(view, LATEST(state), "2026-10-30T19:03:20Z");
+    977|       expect(listMock).toHaveBeenCalledTimes(1);
+       |                        ^
+    978|       expect(screen.queryByRole("progressbar")).toBeNull();
+    979|       view.unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 85 passed (86)
+   Start at  02:08:45
+   Duration  9.23s (transform 922ms, setup 629ms, collect 3.61s, tests 1.71s, environment 3.45s, prepare 2.50s)
 

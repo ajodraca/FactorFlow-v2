@@ -1,5 +1,5 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w4/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w2/web
 
 stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -9,12 +9,14 @@ stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads ro
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 416ms
- ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 1 failed) 1447ms
-   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 25ms
+ ✓ src/screens/data-health/what-you-follow.test.tsx (26 tests) 534ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (60 tests | 2 failed) 1592ms
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 193ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (a) an interrupted or cancelled latest download is finished: no re-read, no progress 12ms
      → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download
 AssertionError: expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
@@ -53,10 +55,49 @@ null
     508|   });
     509| 
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (a) an interrupted or cancelled latest download is finished: no re-read, no progress
+AssertionError: expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-labelledby=":r6j:-progress"
+  aria-valuemax="1236"
+  aria-valuemin="0"
+  aria-valuenow="812"
+  aria-valuetext="66%"
+  class="relative h-2 w-full overflow-hidden rounded bg-seq-1"
+  data-max="1236"
+  data-state="loading"
+  data-value="812"
+  data-variant="determinate"
+  role="progressbar"
+>
+  <div
+    class="h-full w-full flex-1 bg-status-active transition-all"
+    data-max="1236"
+    data-state="loading"
+    data-value="812"
+    style="transform: translateX(-34.30420711974111%);"
+  />
+</div>
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:978:49
+    976|       await answerWith(view, LATEST(state), "2026-10-30T19:03:20Z");
+    977|       expect(listMock).toHaveBeenCalledTimes(1);
+    978|       expect(screen.queryByRole("progressbar")).toBeNull();
+       |                                                 ^
+    979|       view.unmount();
+    980|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  1 failed | 71 passed (72)
-   Start at  02:05:18
-   Duration  3.54s (transform 327ms, setup 235ms, collect 1.89s, tests 1.86s, environment 597ms, prepare 609ms)
+      Tests  2 failed | 84 passed (86)
+   Start at  02:09:14
+   Duration  3.94s (transform 288ms, setup 123ms, collect 2.36s, tests 2.13s, environment 852ms, prepare 495ms)
 

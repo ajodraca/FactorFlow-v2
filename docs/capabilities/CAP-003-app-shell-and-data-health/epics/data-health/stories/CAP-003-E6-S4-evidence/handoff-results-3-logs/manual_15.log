@@ -1,5 +1,5 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w4/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w4/web
 
 stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -9,12 +9,14 @@ stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads ro
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 375ms
- ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 1 failed) 961ms
-   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (a) while loading, the heading stays, the body is busy and no table renders 8ms
+ ✓ src/screens/data-health/what-you-follow.test.tsx (26 tests) 533ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (60 tests | 2 failed) 1016ms
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (a) while loading, the heading stays, the body is busy and no table renders 7ms
      → expected null not to be null
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (j) while the first read is pending, three busy lines show 3ms
+     → expected  to have a length of 3 but got +0
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (a) while loading, the heading stays, the body is busy and no table renders
 AssertionError: expected null not to be null
@@ -26,10 +28,29 @@ AssertionError: expected null not to be null
     565|     expect(screen.queryByRole("table")).toBeNull();
     566|   });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (j) while the first read is pending, three busy lines show
+AssertionError: expected  to have a length of 3 but got +0
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:1110:62
+    1108|     listMock.mockReturnValue(new Promise(() => undefined));
+    1109|     const { container } = renderRecent();
+    1110|     expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLen…
+       |                                                              ^
+    1111|   });
+    1112| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  1 failed | 71 passed (72)
-   Start at  02:05:07
-   Duration  3.27s (transform 349ms, setup 215ms, collect 1.90s, tests 1.34s, environment 1.24s, prepare 261ms)
+      Tests  2 failed | 84 passed (86)
+   Start at  02:09:02
+   Duration  4.73s (transform 289ms, setup 252ms, collect 2.27s, tests 1.55s, environment 1.38s, prepare 893ms)
 

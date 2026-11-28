@@ -1,5 +1,5 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w0/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w3/web
 
 stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -9,20 +9,20 @@ stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads ro
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 761ms
-   ✓ What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 326ms
- ❯ src/screens/data-health/recent-downloads.test.tsx (50 tests | 4 failed) 1421ms
-   ✓ Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face 322ms
-   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays 20ms
+ ✓ src/screens/data-health/what-you-follow.test.tsx (26 tests) 471ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (60 tests | 5 failed) 1008ms
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays 15ms
      → expected "spy" to be called 1 times, but got 2 times
-   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow 31ms
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow 10ms
      → expected "spy" to be called 1 times, but got 3 times
-   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished 19ms
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished 8ms
      → expected "spy" to be called 1 times, but got 2 times
-   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 17ms
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 19ms
      → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (a) an interrupted or cancelled latest download is finished: no re-read, no progress 6ms
+     → expected "spy" to be called 1 times, but got 2 times
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays
 AssertionError: expected "spy" to be called 1 times, but got 2 times
@@ -34,7 +34,7 @@ AssertionError: expected "spy" to be called 1 times, but got 2 times
     362|       expect(screen.getByText(`${SUBLINE} · checked 14:03:12 CDT`)).to…
     363|     }
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
 
  FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow
 AssertionError: expected "spy" to be called 1 times, but got 3 times
@@ -46,7 +46,7 @@ AssertionError: expected "spy" to be called 1 times, but got 3 times
     378|   });
     379| 
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
 
  FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished
 AssertionError: expected "spy" to be called 1 times, but got 2 times
@@ -58,7 +58,7 @@ AssertionError: expected "spy" to be called 1 times, but got 2 times
     411|   });
     412| 
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
 
  FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download
 AssertionError: expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
@@ -97,10 +97,22 @@ null
     508|   });
     509| 
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (a) an interrupted or cancelled latest download is finished: no re-read, no progress
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:977:24
+    975|       await screen.findByRole("table");
+    976|       await answerWith(view, LATEST(state), "2026-10-30T19:03:20Z");
+    977|       expect(listMock).toHaveBeenCalledTimes(1);
+       |                        ^
+    978|       expect(screen.queryByRole("progressbar")).toBeNull();
+    979|       view.unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  4 failed | 68 passed (72)
-   Start at  02:05:06
-   Duration  3.11s (transform 193ms, setup 89ms, collect 1.91s, tests 2.18s, environment 387ms, prepare 450ms)
+      Tests  5 failed | 81 passed (86)
+   Start at  02:09:02
+   Duration  4.82s (transform 472ms, setup 247ms, collect 2.63s, tests 1.48s, environment 1.33s, prepare 828ms)
 

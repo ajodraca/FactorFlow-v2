@@ -1,5 +1,5 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w5/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w0/web
 
 stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -9,11 +9,61 @@ stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads ro
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ✓ src/screens/data-health/what-you-follow.test.tsx (22 tests) 449ms
- ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 1027ms
+ ❯ src/screens/data-health/what-you-follow.test.tsx (26 tests | 1 failed) 505ms
+   × What you follow hand-off cases (DAC-E6-16, DAC-E6-17, AC-4) > (b) a read failure shows no key badge and no summary 8ms
+     → expected <span …(2)>…(1)</span> to be null
+ ✓ src/screens/data-health/recent-downloads.test.tsx (60 tests) 1613ms
+   ✓ Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape 335ms
 
- Test Files  2 passed (2)
-      Tests  72 passed (72)
-   Start at  02:05:41
-   Duration  2.80s (transform 229ms, setup 108ms, collect 1.78s, tests 1.48s, environment 585ms, prepare 357ms)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow hand-off cases (DAC-E6-16, DAC-E6-17, AC-4) > (b) a read failure shows no key badge and no summary
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Found
+</span>
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:551:66
+    549|     await screen.findByRole("status");
+    550|     expect(container.textContent).not.toContain("Market data key");
+    551|     expect(container.querySelector("[data-variant^='status-']")).toBeN…
+       |                                                                  ^
+    552|     expect(container.querySelector("[data-variant^='coverage-']")).toB…
+    553|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 85 passed (86)
+   Start at  02:09:42
+   Duration  3.30s (transform 271ms, setup 114ms, collect 1.49s, tests 2.12s, environment 558ms, prepare 694ms)
 

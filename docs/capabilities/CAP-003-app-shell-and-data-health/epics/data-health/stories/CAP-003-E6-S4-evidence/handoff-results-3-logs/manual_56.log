@@ -1,5 +1,5 @@
 
- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-81zoa98p/w2/web
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w4/web
 
 stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -9,14 +9,17 @@ stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads ro
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
- ❯ src/screens/data-health/what-you-follow.test.tsx (22 tests | 2 failed) 385ms
-   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing 21ms
+ ❯ src/screens/data-health/what-you-follow.test.tsx (26 tests | 3 failed) 744ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing 139ms
      → expected undefined to be 'Missing' // Object.is equality
-   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape 10ms
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape 12ms
      → expected undefined to be 'Missing' // Object.is equality
- ✓ src/screens/data-health/recent-downloads.test.tsx (50 tests) 982ms
+   × What you follow hand-off cases (DAC-E6-16, DAC-E6-17, AC-4) > (a) a change of health does not read again; the key badge follows it 8ms
+     → expected null not to be null
+ ✓ src/screens/data-health/recent-downloads.test.tsx (60 tests) 1360ms
+   ✓ Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face 339ms
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing
 AssertionError: expected undefined to be 'Missing' // Object.is equality
@@ -35,7 +38,7 @@ undefined
     155|   });
     156| 
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
 
  FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape
 AssertionError: expected undefined to be 'Missing' // Object.is equality
@@ -54,10 +57,22 @@ undefined
     481|       expect(badge?.querySelector('svg[aria-hidden="true"]')).not.toBe…
     482|       unmount();
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow hand-off cases (DAC-E6-16, DAC-E6-17, AC-4) > (a) a change of health does not read again; the key badge follows it
+AssertionError: expected null not to be null
+ ❯ src/screens/data-health/what-you-follow.test.tsx:540:11
+    538|     expect(
+    539|       definitionOf("Market data key").querySelector('[data-variant="st…
+    540|     ).not.toBeNull();
+       |           ^
+    541|     expect(listMock).toHaveBeenCalledTimes(1);
+    542|     expect(depthMock).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
 
  Test Files  1 failed | 1 passed (2)
-      Tests  2 failed | 70 passed (72)
-   Start at  02:05:40
-   Duration  2.55s (transform 423ms, setup 83ms, collect 1.86s, tests 1.37s, environment 412ms, prepare 235ms)
+      Tests  3 failed | 83 passed (86)
+   Start at  02:09:41
+   Duration  2.83s (transform 187ms, setup 193ms, collect 1.24s, tests 2.10s, environment 773ms, prepare 296ms)
 
