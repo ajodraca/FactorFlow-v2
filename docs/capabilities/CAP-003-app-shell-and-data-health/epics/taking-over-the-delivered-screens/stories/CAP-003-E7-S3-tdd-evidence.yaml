@@ -206,6 +206,52 @@ cycles:
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 4 changed, and the hand-off run scores it
 
+  - id: cycle-6
+    tasks: [T018, T007]
+    description: >
+      Review v2 rework (IR-001): the last-updated time renders through ui-components' formatInstant
+      (YYYY-MM-DD HH:MM zone, CST or CDT), not the shell's delivered formatTimestamp; the app/status-region import is
+      gone; the tests pin the designed text as literals, with a CDT case beside the CST ones.
+    deviations: >
+      (1) The screen now imports formatInstant from components/patterns/format (CAP-003-E1-S6, implemented at the review
+      base), so E1-S6 is a direct dependency, not context only; the task plan's note that this story imports nothing from
+      E1-S6 is stale on that point and is left as written (a governed text, not edited here). (2) IR-002 (Not found data
+      source) is for doc sync or the owner. (3) IR-003 (loading skeleton) stays the recorded paragraph deviation of
+      cycle 1; it is optional in the review and is not built in this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log
+    red_log_sha256: 3bbd427ecfdaca103efc23b91572df8e9e5cce408b84270b26275191d919418b
+    red_evidence: >
+      With the literal-text tests staged and the screen unchanged, 2 tests failed: the last-updated line read the
+      delivered form (seconds and America/Chicago), so neither the CST literals nor the new CDT literal were found.
+    green_evidence: >
+      192 tests pass in web/src/screens/instruments, web/src/screens/coverage and token-literals; npx tsc --noEmit,
+      npm run lint and npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log
+        sha256: 3bbd427ecfdaca103efc23b91572df8e9e5cce408b84270b26275191d919418b
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The spec-drift review found the code and tests match IR-001; the one gap, recording E1-S6 as a direct
+        dependency, is recorded in this cycle's deviations (1). Follow-up, not adopted: the CDT case is an addition
+        in the spirit of the 0.7 form.
+    diff_sha256: 265183e42a96925808d4fa426ea5ec0c18ce6f2c6b0c6c20b75422a81d181dba
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutation-cycle-6-results.json
+      results_sha256: 78f367b0970614b850c82f519476a46da7d9b08a4bec0a9775a96ddc2f6b6027
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
 handoff_mutation:
   runner: scripts/mutation-run.py
   results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-rework-results-2.json

@@ -2,8 +2,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { type JSX, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listInstruments, retireInstrument } from "../../api/client";
-import { formatTimestamp } from "../../app/status-region";
 import type { Instrument, InstrumentLifecycle, ScreenState } from "../../api/types";
+import { formatInstant } from "../../components/patterns/format";
 import { StateRegion, type StateRenderers } from "../../components/patterns/state-region";
 import { Button } from "../../components/ui/button";
 import { DataTable } from "../../components/ui/data-table";
@@ -253,7 +253,7 @@ export function InstrumentTable({
     populated: (populated) => (
       <section aria-label="Followed stocks">
         <p className="font-numeric text-xs text-muted-foreground">
-          Last updated {formatTimestamp(new Date(populated.fetchedAt))}
+          Last updated {formatInstant(new Date(populated.fetchedAt))}
         </p>
         <DataTable
           variant="virtualised"

@@ -4,7 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import * as client from "../../api/client";
 import type { Instrument } from "../../api/types";
-import { formatTimestamp } from "../../app/status-region";
 import { InstrumentTable } from "./instrument-table";
 
 vi.mock("../../api/client", async () => {
@@ -298,7 +297,7 @@ describe("InstrumentTable — followed stocks", () => {
       vi.setSystemTime(first);
       const { rerender } = renderTable({ refreshToken: 0 });
       await screen.findByRole("table");
-      const stamp = screen.getByText(`Last updated ${formatTimestamp(first)}`);
+      const stamp = screen.getByText("Last updated 2026-03-02 09:04 CST");
       expect(stamp).toHaveClass("font-numeric", "text-xs");
 
       // The time is the read's, not the moment of a later redraw.
@@ -307,7 +306,7 @@ describe("InstrumentTable — followed stocks", () => {
         .setup({ advanceTimers: () => undefined })
         .click(screen.getByRole("button", { name: "Stop following AAPL" }));
       await screen.findByRole("dialog");
-      expect(screen.getByText(`Last updated ${formatTimestamp(first)}`)).toBeInTheDocument();
+      expect(screen.getByText("Last updated 2026-03-02 09:04 CST")).toBeInTheDocument();
       await userEvent.setup().keyboard("{Escape}");
       await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
       rerender(
@@ -315,10 +314,21 @@ describe("InstrumentTable — followed stocks", () => {
           <InstrumentTable refreshToken={1} />
         </MemoryRouter>,
       );
-      expect(
-        await screen.findByText(`Last updated ${formatTimestamp(second)}`),
-      ).toBeInTheDocument();
-      expect(screen.queryByText(`Last updated ${formatTimestamp(first)}`)).not.toBeInTheDocument();
+      expect(await screen.findByText("Last updated 2026-03-02 09:09 CST")).toBeInTheDocument();
+      expect(screen.queryByText("Last updated 2026-03-02 09:04 CST")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  // IR-001, AC-26: UX design 0.7's form, with the zone as CDT when the instant falls in daylight time.
+  it("writes the last-updated time as YYYY-MM-DD HH:MM zone, CDT in summer", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(new Date("2026-10-15T22:46:10Z"));
+      renderTable({ refreshToken: 0 });
+      await screen.findByRole("table");
+      expect(screen.getByText("Last updated 2026-10-15 17:46 CDT")).toBeInTheDocument();
     } finally {
       vi.useRealTimers();
     }
