@@ -1,8 +1,9 @@
 # Data health modules (`web/src/screens/data-health/`)
 
 The first modules of the Data health screen (component design `data-health-ui`
-2.1, 2.3, 2.4 and 2.7; CAP-003-E6-S1 and CAP-003-E6-S2; AC-8, AC-14, AC-15,
-AC-17, AC-19, DAC-E6-1 to DAC-E6-5, DAC-E6-11, DAC-E6-12). Nothing mounts them
+2.1, 2.3, 2.4, 2.5 and 2.7; CAP-003-E6-S1 to CAP-003-E6-S3; AC-8, AC-13 to
+AC-17, AC-19, AC-25, DAC-E6-1 to DAC-E6-5, DAC-E6-8 to DAC-E6-13, DAC-E6-15,
+DAC-E6-17). Nothing mounts them
 yet: there is no screen `index.tsx` and no `/data` route registration, and the
 only importers today are the modules' own tests. The verdict and the cards take
 the reads, the retries and the **Download now** node as props and call no shell
@@ -19,6 +20,8 @@ hook; `DownloadNow` and `StopFollowingDialog` (E6-S2) read the shell context for
 | `scores-card.tsx` | `ScoresCard` |
 | `download-now.tsx` | `DownloadNow`, the **Download now** control |
 | `stop-following-dialog.tsx` | `StopFollowingDialog`, the confirmed **Stop following** recovery |
+| `problem-row.tsx` | `ProblemRow`, one stock with a problem |
+| `needs-fixing.tsx` | `NeedsFixing`, the Needs fixing card (rows, paging, last complete download) |
 
 ## `copy.ts`
 
@@ -64,6 +67,17 @@ functions take already-formatted counts, except `countClause` and `andMore`.
   `STOP_REFUSAL_REASONS` (DEC-0377): `instrument_not_found` is *FactorFlow
   doesn't follow it*, `instrument_already_retired` is *you already stopped
   following it*.
+- Needs fixing: `NEEDS_FIXING`, `needsFixingTitle(n)` (*Needs fixing · N*),
+  `FROM_RECENT_DOWNLOADS`, `DATA_TYPE_WORDS` (wire `DataType` to *daily prices*,
+  *company financials*, *corporate actions*, *reference data*; the keys are never
+  rendered), `downloadFailed(dataType, reason, attempts)` (*Downloading X
+  failed: {reason}, N attempts*, with `NO_REASON_RECORDED` for a `null` reason),
+  `NOT_RECOGNISED`, `CONSEQUENCE`, `FAILED_FIX`, `NOT_FOUND_FIX`,
+  `FOLLOW_DIFFERENT`, and the accessible names `followDifferentName(symbol)`,
+  `stopFollowingName(symbol)` and `symbolLinkName(symbol)`.
+- Paging and empty state: `SHOW_MORE`, `MORE_PROBLEMS`, `showingOf(shown, n)`,
+  `NOTHING_NEEDS_FIXING`, `lastCompleteDownload(time)`, `NO_COMPLETE_DOWNLOAD`
+  and `LAST_COMPLETE_TARGET`.
 - `isStaleRowRefusal(error)`: true only for an `ApiError` whose code is one of
   those two. `stopFailureReason(error)`: the refusal's reason for them, else
   `readFailureReason(error)`.
@@ -247,5 +261,67 @@ Caller contract: render it beside the rows so it re-renders with them (do not
 wrap it in `memo`), give the heading `tabIndex={-1}`, and decide what
 `onRefusalClosed` re-reads.
 
+## `problem-row.tsx`
+
+### `ProblemRow({ row, onStopFollowing })`
+
+An `li` for one `ProblemRow` of the aggregate (`row.symbol`, `row.failures`,
+`row.retryable`):
+
+- The symbol is a link to `/data/coverage?symbol=<encoded symbol>`, named by
+  `symbolLinkName`.
+- Each failure is one line: a `StatusBadge` (tier and label from the `result`
+  status of its outcome) and `downloadFailed(...)` for `failed`, or
+  `NOT_RECOGNISED` for `not_found`. A provider `reason` is rendered as a text
+  child, never markup.
+- `CONSEQUENCE` always follows. Each fix renders once per row, however many
+  failures of that outcome the row has.
+- A `failed` outcome adds `FAILED_FIX` and no control: the card header's
+  **Download now** is the action.
+- A `not_found` outcome adds **Stop following** (`ghost`, calls
+  `onStopFollowing(symbol)`), **Follow a different symbol** (`outline` link to
+  `/data/followed` with router state `{ focusAdd: true }`) and `NOT_FOUND_FIX`.
+
+## `needs-fixing.tsx`
+
+### `NeedsFixing({ dataHealth, onReread })`
+
+`dataHealth` is a `ReadState<DataHealth>`; `onReread` re-reads the aggregate.
+The card calls no shell hook itself; its children (`DownloadNow`,
+`StopFollowingDialog`) do.
+
+- **Loading:** the heading *Needs fixing* without a count and three
+  `SkeletonLine`s. **Error:** the heading and a `ReadFailure` with
+  `readFailed(READ_TARGETS.checks, readFailureReason(error))`, retrying through
+  `onReread`. The last answer's rows are never shown beside a failure.
+- **Answer:** the heading is `needsFixingTitle(affected_count)`, with
+  `FROM_RECENT_DOWNLOADS · checked(formatClock(checked_at))` beneath it.
+  **Download now** shows in the header when any row is `retryable`.
+- **`affected_count` is 0:** `NOTHING_NEEDS_FIXING` and `LastComplete`, which
+  calls `listAcquisitionRuns({ state: "succeeded", limit: 1 })` once per
+  aggregate answer and shows `lastCompleteDownload(...)` of the run's
+  `startedAt` (else `requestedAt`), `NO_COMPLETE_DOWNLOAD` when there is none, or
+  a `ReadFailure` with a retry. A read an answer has outdated is ignored.
+- **Otherwise:** the rows are `problems.rows` of the answer, then the pages
+  **Show more** appends. **Show more** (`outline`, `aria-busy` while pending)
+  calls `fetchProblems(cursor, 50)` and appends the page, and shows while the
+  cursor is not `null`. Each new answer restarts from its first page, discarding
+  appended rows, the cursor, any page failure and any in-flight page, so a count
+  and its rows always come from one response. A request an answer has outdated
+  is ignored.
+- **Paging announcements:** `showingOf(rows, affected_count)` in a polite
+  screen-reader-only `output`, remounted per announcement.
+- **Paging failure:** `readFailed(MORE_PROBLEMS, reason)` in an `output` and
+  **Try again**, which calls `onReread`. A thrown value that is neither an
+  `ApiError` nor an `ApiUnreachableError` reads as the unexpected problem.
+- **Focus:** when the last page loads while **Show more** has focus, focus moves
+  to the list (`tabIndex={-1}`); when a page fails while it has focus, focus
+  moves to **Try again**.
+- One `StopFollowingDialog` sits beside the rows, opened by a row's
+  **Stop following**, with the heading as `fallbackFocusRef`; both `onStopped`
+  and `onRefusalClosed` call `onReread`. Its open symbol is dropped when the
+  answer is not `ok`.
+
 Tests: `check-cards.test.tsx`, `verdict.test.tsx`, `download-now.test.tsx`,
-`stop-following-dialog.test.tsx`.
+`stop-following-dialog.test.tsx`, `problem-row.test.tsx`,
+`needs-fixing.test.tsx`.
