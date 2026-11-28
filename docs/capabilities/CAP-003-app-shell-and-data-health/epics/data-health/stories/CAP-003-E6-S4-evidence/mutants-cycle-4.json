@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "repo_head": "17e9a833b9dd3dcf49a83311a8d34bbcf230a428",
+  "range": "HEAD..worktree",
+  "source": "17e9a833b9dd3dcf49a83311a8d34bbcf230a428",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:50:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 50,
+      "original": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(([counts, depth]) => {",
+      "mutated": "    Promise.all([listInstruments({ limit: 2 }), getHistoryDepth()]).then(([counts, depth]) => {"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:60:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 60,
+      "original": "  if (health.liveness === \"answering\" && health.health !== null) {",
+      "mutated": "  if (health.liveness === \"answering\" || health.health !== null) {"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 80,
+      "original": "                <dd>{historyKept(formatCount(state.counts.retiredCount))}</dd>",
+      "mutated": "                <dd>{historyKept(formatCount(state.counts.activeCount))}</dd>",
+      "description": "stopped count shows the followed count"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 84,
+      "original": "                    {state.depth.years === null",
+      "mutated": "                    {state.depth.years !== null",
+      "description": "depth set and not set swapped"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 61,
+      "original": "    const status = { of: \"credential\", present: health.health.credential_present } as const;",
+      "mutated": "    const status = { of: \"credential\", present: !health.health.credential_present } as const;",
+      "description": "key presence inverted"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 60,
+      "original": "  if (health.liveness === \"answering\" && health.health !== null) {",
+      "mutated": "  if (health.health !== null) {",
+      "description": "stale key value shown while unreachable"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 83,
+      "original": "                  <Link to=\"/settings\">",
+      "mutated": "                  <Link to=\"/\">",
+      "description": "depth links elsewhere"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 95,
+      "original": "                <Link to=\"/data/followed\">{MANAGE_FOLLOWED_STOCKS}</Link>",
+      "mutated": "                <Link to=\"/data\">{MANAGE_FOLLOWED_STOCKS}</Link>",
+      "description": "manage links elsewhere"
+    },
+    {
+      "id": "manual:7",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 78,
+      "original": "                <dd>{formatCount(state.counts.activeCount)}</dd>",
+      "mutated": "                <dd>{String(state.counts.activeCount)}</dd>",
+      "description": "followed count unformatted"
+    },
+    {
+      "id": "manual:8",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 73,
+      "original": "        {state.kind === \"ok\" ? (",
+      "mutated": "        {state.kind !== \"ok\" ? (",
+      "description": "body shown only while loading"
+    },
+    {
+      "id": "manual:9",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 69,
+      "original": "      <Card variant=\"summary\">",
+      "mutated": "      <Card variant=\"default\">",
+      "description": "wrong card variant"
+    },
+    {
+      "id": "manual:10",
+      "cycle": "cycle-4",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 366,
+      "original": "export const DEPTH_NOT_SET = \"not set\";",
+      "mutated": "export const DEPTH_NOT_SET = \"\";",
+      "description": "empty not-set wording"
+    }
+  ]
+}

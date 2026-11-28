@@ -145,3 +145,44 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-4
+    tasks: [T007, T011, T012, T014]
+    description: >
+      The What you follow card's loaded body. what-you-follow.test.tsx (new): TC-COMP-154 (T007 a-e), and the
+      what-you-follow sentences of T011 (d) in recent-downloads.test.tsx. Then the What you follow strings of copy.ts
+      and what-you-follow.tsx (the two reads, the summary list, the key rule keyed on liveness, Manage followed stocks).
+    deviations: >
+      (1) The stale-call guard of T014 moves to cycle 5 with its retry test, because no second read exists here to
+      observe it. (2) The key rule, which T009 sharpens, is implemented here because T007 (b) needs it. (3) One extra
+      case pins the thousands separator on the stopped count.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-4.log
+    red_log_sha256: 879c5618a5333096cbc7386c7cfabc96167b2a03292dea2e78b29daefdd356cb
+    red_evidence: >
+      With the new tests staged and no production change: what-you-follow.test.tsx failed to load (the import of
+      ./what-you-follow did not resolve) and the T011 (d) case failed (historyKept is not a function).
+    green_evidence: >
+      46 tests passed across the two test files; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-4.log
+        sha256: 879c5618a5333096cbc7386c7cfabc96167b2a03292dea2e78b29daefdd356cb
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: no singular form for 1 year (plan Open Gap 5); the not-determinable reason
+        text is asserted in cycle 5 (T009).
+    diff_sha256: 7e9be4caf2a7594aec5ec33600fba3493fdfdc72de03f64814e527c58d6bba8e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/mutation-cycle-4-results.json
+      results_sha256: 9400e8b08da3e8eb567adef8c016dbe26526e0822586a6e950293a918ced19dc
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

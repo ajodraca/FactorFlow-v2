@@ -8,6 +8,8 @@ import type { ShellContextValue } from "../../app/shell-context";
 import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
 import {
   READ_TARGETS,
+  depthYears,
+  historyKept,
   interruptedResult,
   partialResult,
   progressOf,
@@ -791,6 +793,11 @@ describe("copy.ts recent downloads and what you follow strings", () => {
 
   it("(b) the progress sentence", () => {
     expect(progressOf("812", "1,236")).toBe("812 of 1,236 stocks");
+  });
+
+  it("(d) the what-you-follow sentences", () => {
+    expect(historyKept("2")).toBe("2 (history kept)");
+    expect(depthYears("5")).toBe("5 years");
   });
 
   it("(c) the sub-line", () => {

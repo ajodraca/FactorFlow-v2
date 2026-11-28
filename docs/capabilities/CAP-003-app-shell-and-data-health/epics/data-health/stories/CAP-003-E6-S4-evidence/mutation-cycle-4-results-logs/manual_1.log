@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hxewvdkm/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (5 tests | 2 failed) 105ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 56ms
+     → expected '30 (history kept)' to be '2 (history kept)' // Object.is equality
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators 10ms
+     → expected '1,236 (history kept)' to be '1,000 (history kept)' // Object.is equality
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/recent-downloads.test.tsx (41 tests) 535ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected '30 (history kept)' to be '2 (history kept)' // Object.is equality
+
+Expected: "2 (history kept)"
+Received: "30 (history kept)"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:116:59
+    114|     ]);
+    115|     expect(definitionOf("Followed stocks").textContent).toBe("30");
+    116|     expect(definitionOf("Stopped following").textContent).toBe("2 (his…
+       |                                                           ^
+    117|     const depth = within(definitionOf("History depth")).getByRole("lin…
+    118|     expect(depth.getAttribute("href")).toBe("/settings");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators
+AssertionError: expected '1,236 (history kept)' to be '1,000 (history kept)' // Object.is equality
+
+Expected: "1,000 (history kept)"
+Received: "1,236 (history kept)"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:157:59
+    155|     await renderFollow();
+    156|     expect(definitionOf("Followed stocks").textContent).toBe("1,236");
+    157|     expect(definitionOf("Stopped following").textContent).toBe("1,000 …
+       |                                                           ^
+    158|   });
+    159| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 44 passed (46)
+   Start at  01:21:54
+   Duration  2.17s (transform 199ms, setup 105ms, collect 1.40s, tests 640ms, environment 545ms, prepare 300ms)
+

@@ -348,3 +348,28 @@ export function interruptedResult(written: string): string {
 export function progressOf(done: string, total: string): string {
   return `${done} of ${total} stocks`;
 }
+
+export const WHAT_YOU_FOLLOW = "What you follow";
+export const FOLLOWED_STOCKS = "Followed stocks";
+export const STOPPED_FOLLOWING = "Stopped following";
+
+export function historyKept(count: string): string {
+  return `${count} (history kept)`;
+}
+
+export const HISTORY_DEPTH = "History depth";
+
+export function depthYears(years: string): string {
+  return `${years} years`;
+}
+
+export const DEPTH_NOT_SET = "not set";
+export const MARKET_DATA_KEY = "Market data key";
+
+/**
+ * Why the key's presence cannot be told while health is not answering (DEC-0385):
+ * the same clause as `readFailureReason`'s unreachable case (DEC-0373).
+ */
+export const KEY_NOT_DETERMINABLE_REASON = "FactorFlow is not answering";
+
+export const MANAGE_FOLLOWED_STOCKS = "Manage followed stocks";
