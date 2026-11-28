@@ -52,3 +52,32 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-2
+    tasks: [T009, T014]
+    description: >
+      The literal scan is widened to web/src/screens/data-health/: the TC-COMP-178 block of token-literals.test.ts (RED
+      first, with the directory absent), then the directory appended to SCANNED_DIRECTORIES.
+    deviations: >
+      The RED run is the second block of red-cycle-1.log. The cycle changes only a test file, so the mutation
+      is not applicable.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log
+    red_log_sha256: 64b3c1fa9f8b097da5c27242bb4c805880a4e5351c14f45f266862dde3c87270
+    red_evidence: >
+      With the new block and the directory not yet appended: 2 tests failed (the directory is absent from
+      SCANNED_DIRECTORIES, and index.tsx is not among the scanned files).
+    green_evidence: >
+      65 tests pass in token-literals.test.ts, including the whole-tree scan over the 13 data-health sources.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log
+        sha256: 64b3c1fa9f8b097da5c27242bb4c805880a4e5351c14f45f266862dde3c87270
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. The bare 12px planted literal equals the home block's p-[12px] match.
+    diff_sha256: 17c18edd89bc28c3f925b4d25e163593fa85a8510c70cb53e63ccfec3e314281
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes only a test file; removing its one appended entry fails the cycle's own (a) and (b), as the RED run shows
