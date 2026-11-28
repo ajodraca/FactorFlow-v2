@@ -156,6 +156,13 @@ const ROWS: Row[] = [
     "Mostly yes. None of the 10 followed stocks needs attention, and the last download was interrupted.",
   ],
   ["cancelled", 0, 1236, "status-good", "Yes. None of the 1,236 followed stocks needs attention."],
+  [
+    "succeeded",
+    1500,
+    3000,
+    "status-warning",
+    "Mostly yes. 1,500 of 3,000 followed stocks need attention; their scores show as Incomplete until they're fixed.",
+  ],
 ];
 
 describe("Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1)", () => {

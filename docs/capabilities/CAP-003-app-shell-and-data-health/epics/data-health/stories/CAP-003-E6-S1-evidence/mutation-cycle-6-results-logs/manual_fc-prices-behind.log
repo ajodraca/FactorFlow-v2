@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1jw939sm/w3/web
+
+stderr | src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/verdict.test.tsx (32 tests) 188ms
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (54 tests | 1 failed) 302ms
+   × Check cards' thousands separators (STD-UI-3, DAC-E6-3, DAC-E6-4, DAC-E6-5) > the Daily prices absent, gap and behind counts carry separators at four digits 8ms
+     → expected '1,200 without prices, 1,300 with gaps…' to be '1,200 without prices, 1,300 with gaps…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Check cards' thousands separators (STD-UI-3, DAC-E6-3, DAC-E6-4, DAC-E6-5) > the Daily prices absent, gap and behind counts carry separators at four digits
+AssertionError: expected '1,200 without prices, 1,300 with gaps…' to be '1,200 without prices, 1,300 with gaps…' // Object.is equality
+
+Expected: "1,200 without prices, 1,300 with gaps, 1,400 behind 2026-10-29"
+Received: "1,200 without prices, 1,300 with gaps, 1400 behind 2026-10-29"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:801:47
+    799|       3000,
+    800|     );
+    801|     expect(resultLine(container).textContent).toBe(
+       |                                               ^
+    802|       "1,200 without prices, 1,300 with gaps, 1,400 behind 2026-10-29",
+    803|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 85 passed (86)
+   Start at  21:15:14
+   Duration  2.30s (transform 236ms, setup 184ms, collect 1.75s, tests 490ms, environment 1.31s, prepare 314ms)
+

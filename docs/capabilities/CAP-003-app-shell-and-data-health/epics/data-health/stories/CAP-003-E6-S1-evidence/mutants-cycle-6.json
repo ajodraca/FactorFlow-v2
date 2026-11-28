@@ -1,0 +1,97 @@
+{
+ "schema": 1,
+ "repo_head": "85d92ac235a6b98feba34ba599c15a8f07202cd6",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "manual:fc-verdict-n",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 32,
+   "original": "  return `${formatCount(n)} of ${followed} followed stocks need attention; their scores show as Incomplete until they're fixed`;",
+   "mutated": "  return `${String(n)} of ${followed} followed stocks need attention; their scores show as Incomplete until they're fixed`;"
+  },
+  {
+   "id": "manual:fc-prices-absent",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 68,
+   "original": "    parts.push(<Fragment key=\"absent\">{withoutPrices(formatCount(check.absent_count))}</Fragment>);",
+   "mutated": "    parts.push(<Fragment key=\"absent\">{withoutPrices(String(check.absent_count))}</Fragment>);"
+  },
+  {
+   "id": "manual:fc-prices-gaps",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 79,
+   "original": "    parts.push(<Fragment key=\"gaps\">{withGaps(formatCount(check.gap_stock_count))}</Fragment>);",
+   "mutated": "    parts.push(<Fragment key=\"gaps\">{withGaps(String(check.gap_stock_count))}</Fragment>);"
+  },
+  {
+   "id": "manual:fc-prices-behind",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 84,
+   "original": "        {behind(formatCount(check.behind_count), formatSessionDate(check.latest_session))}",
+   "mutated": "        {behind(String(check.behind_count), formatSessionDate(check.latest_session))}"
+  },
+  {
+   "id": "manual:fc-fin-absent",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 46,
+   "original": "    parts.push(withoutFinancials(formatCount(check.absent_count)));",
+   "mutated": "    parts.push(withoutFinancials(String(check.absent_count)));"
+  },
+  {
+   "id": "manual:fc-fin-problem",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 49,
+   "original": "    parts.push(withFailedDownloads(formatCount(check.problem_count)));",
+   "mutated": "    parts.push(withFailedDownloads(String(check.problem_count)));"
+  },
+  {
+   "id": "manual:fc-fin-followed",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 62,
+   "original": "      result={check.status === \"ok\" ? allFinancials(formatCount(followedCount)) : parts.join(\", \")}",
+   "mutated": "      result={check.status === \"ok\" ? allFinancials(String(followedCount)) : parts.join(\", \")}"
+  },
+  {
+   "id": "manual:fc-scores-current",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 96,
+   "original": "          stocksCurrent(formatCount(current.current_count), formatCount(current.followed_count))",
+   "mutated": "          stocksCurrent(String(current.current_count), formatCount(current.followed_count))"
+  },
+  {
+   "id": "manual:fc-scores-followed",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 96,
+   "original": "          stocksCurrent(formatCount(current.current_count), formatCount(current.followed_count))",
+   "mutated": "          stocksCurrent(formatCount(current.current_count), String(current.followed_count))"
+  },
+  {
+   "id": "manual:fc-scores-incomplete",
+   "cycle": "cycle-6",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 111,
+   "original": "        <p className=\"text-base font-semibold\">{showAsIncomplete(formatCount(incomplete))}</p>",
+   "mutated": "        <p className=\"text-base font-semibold\">{showAsIncomplete(String(incomplete))}</p>"
+  }
+ ]
+}

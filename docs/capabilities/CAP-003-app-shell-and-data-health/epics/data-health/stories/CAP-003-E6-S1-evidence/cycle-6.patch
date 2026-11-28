@@ -1,0 +1,70 @@
+diff --git a/web/src/screens/data-health/check-cards.test.tsx b/web/src/screens/data-health/check-cards.test.tsx
+index d2d93859..10bdb6d6 100644
+--- a/web/src/screens/data-health/check-cards.test.tsx
++++ b/web/src/screens/data-health/check-cards.test.tsx
+@@ -785,3 +785,47 @@ describe("Check cards vocabulary and badges (TC-COMP-159, TC-COMP-160, DAC-E6-S1
+     }
+   });
+ });
++
++describe("Check cards' thousands separators (STD-UI-3, DAC-E6-3, DAC-E6-4, DAC-E6-5)", () => {
++  // Implements TC-COMP-157
++  it("the Daily prices absent, gap and behind counts carry separators at four digits", () => {
++    const { container } = renderPrices(
++      prices({
++        status: "exceptions",
++        absent_count: 1200,
++        gap_stock_count: 1300,
++        behind_count: 1400,
++      }),
++      3000,
++    );
++    expect(resultLine(container).textContent).toBe(
++      "1,200 without prices, 1,300 with gaps, 1,400 behind 2026-10-29",
++    );
++  });
++
++  // Implements TC-COMP-149
++  it("the Company financials absent, failed-download and followed counts carry separators", () => {
++    const { container } = renderFinancials(
++      financials({ status: "exceptions", absent_count: 1100, problem_count: 2200 }),
++    );
++    expect(resultLine(container).textContent).toBe(
++      "1,100 without financials, 2,200 with failed downloads",
++    );
++    cleanup();
++    const ok = renderFinancials(financials(), 1236);
++    expect(resultLine(ok.container).textContent).toBe("All 1,236 stocks have financials");
++  });
++
++  // Implements TC-COMP-150
++  it("the Factor scores current, followed and Incomplete counts carry separators", () => {
++    const { container } = renderScores(
++      served(summary({ stocks_current: { current_count: 1233, followed_count: 3236 } })),
++    );
++    expect(container.querySelectorAll("p.text-base")[0]).toHaveTextContent(
++      /^1,233 of 3,236 stocks current$/,
++    );
++    expect(container.querySelectorAll("p.text-base")[1]).toHaveTextContent(
++      /^2,003 stocks show as Incomplete until their data is complete$/,
++    );
++  });
++});
+diff --git a/web/src/screens/data-health/verdict.test.tsx b/web/src/screens/data-health/verdict.test.tsx
+index bf560a9a..b86e8ade 100644
+--- a/web/src/screens/data-health/verdict.test.tsx
++++ b/web/src/screens/data-health/verdict.test.tsx
+@@ -156,6 +156,13 @@ const ROWS: Row[] = [
+     "Mostly yes. None of the 10 followed stocks needs attention, and the last download was interrupted.",
+   ],
+   ["cancelled", 0, 1236, "status-good", "Yes. None of the 1,236 followed stocks needs attention."],
++  [
++    "succeeded",
++    1500,
++    3000,
++    "status-warning",
++    "Mostly yes. 1,500 of 3,000 followed stocks need attention; their scores show as Incomplete until they're fixed.",
++  ],
+ ];
+ 
+ describe("Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1)", () => {

@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-1jw939sm/w0/web
+
+stderr | src/screens/data-health/verdict.test.tsx > Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1) > succeeded with 0 of 10 affected is status-good: Yes. None of the 10 followed stocks needs attention.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/verdict.test.tsx (32 tests) 239ms
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (54 tests | 1 failed) 303ms
+   × Check cards' thousands separators (STD-UI-3, DAC-E6-3, DAC-E6-4, DAC-E6-5) > the Company financials absent, failed-download and followed counts carry separators 8ms
+     → expected '1,100 without financials, 2200 with f…' to be '1,100 without financials, 2,200 with …' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Check cards' thousands separators (STD-UI-3, DAC-E6-3, DAC-E6-4, DAC-E6-5) > the Company financials absent, failed-download and followed counts carry separators
+AssertionError: expected '1,100 without financials, 2200 with f…' to be '1,100 without financials, 2,200 with …' // Object.is equality
+
+Expected: "1,100 without financials, 2,200 with failed downloads"
+Received: "1,100 without financials, 2200 with failed downloads"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:811:47
+    809|       financials({ status: "exceptions", absent_count: 1100, problem_c…
+    810|     );
+    811|     expect(resultLine(container).textContent).toBe(
+       |                                               ^
+    812|       "1,100 without financials, 2,200 with failed downloads",
+    813|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 85 passed (86)
+   Start at  21:15:17
+   Duration  2.46s (transform 150ms, setup 173ms, collect 1.68s, tests 543ms, environment 826ms, prepare 637ms)
+
