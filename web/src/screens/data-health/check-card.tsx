@@ -1,5 +1,7 @@
 import { type ReactNode, useId } from "react";
+import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { TRY_AGAIN } from "./copy";
 
 /**
  * The check-card composition (UX design 3; data-health-ui 10): a region named by
@@ -36,4 +38,26 @@ export function CheckCard({
       </Card>
     </section>
   );
+}
+
+/**
+ * The shared read-failure body: the sentence in a status region, **Try again**
+ * outside it, the error convention of `StateRegion` (DEC-0314) followed without
+ * importing it, because `StateRegion` takes a `ScreenState`, not the shell's
+ * `ReadState`.
+ */
+export function ReadFailure({ sentence, onRetry }: { sentence: string; onRetry: () => void }) {
+  return (
+    <>
+      <output>{sentence}</output>
+      <Button variant="outline" onClick={onRetry}>
+        {TRY_AGAIN}
+      </Button>
+    </>
+  );
+}
+
+/** One busy placeholder line, shown while a read has not answered. */
+export function SkeletonLine() {
+  return <div aria-busy="true" className="h-4 animate-pulse rounded bg-secondary" />;
 }

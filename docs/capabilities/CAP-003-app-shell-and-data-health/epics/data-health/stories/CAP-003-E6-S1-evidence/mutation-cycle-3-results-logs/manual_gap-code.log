@@ -1,0 +1,64 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 423ms
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 23ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  fewer than two followed stocks hold daily prices
+Received:
+  fewer_than_two_instruments_with_data
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 8ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  fewer than two followed stocks hold daily prices
+Received:
+  fewer_than_two_instruments_with_data
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  fewer than two followed stocks hold daily prices
+Received:
+  fewer_than_two_instruments_with_data
+ ❯ src/screens/data-health/check-cards.test.tsx:182:17
+    180|     const gap = badgeWith(card, "coverage-unknown");
+    181|     expect(gap).toHaveTextContent("Gaps not determinable");
+    182|     expect(gap).toHaveAccessibleDescription("fewer than two followed s…
+       |                 ^
+    183|     expect(resultLine(card)).toHaveTextContent(
+    184|       /^2 without prices, Gaps not determinable\s*fewer than two follo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  fewer than two followed stocks hold daily prices
+Received:
+  fewer_than_two_instruments_with_data
+ ❯ src/screens/data-health/check-cards.test.tsx:202:25
+    200|     const headerBadge = card.querySelector<HTMLElement>('[data-variant…
+    201|     expect(headerBadge).toHaveTextContent("Not determinable");
+    202|     expect(headerBadge).toHaveAccessibleDescription(
+       |                         ^
+    203|       "fewer than two followed stocks hold daily prices",
+    204|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 44 passed (46)
+   Start at  20:46:02
+   Duration  2.96s (transform 253ms, setup 349ms, collect 1.03s, tests 423ms, environment 421ms, prepare 220ms)
+

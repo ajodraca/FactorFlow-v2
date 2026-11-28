@@ -1,0 +1,142 @@
+{
+ "schema": 1,
+ "repo_head": "aa055950b7a0c03b216ca7ac45e33fa1de20d340",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/scores-card.tsx:87:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 87,
+   "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
+   "mutated": "  const incomplete = current === null ? 1 : current.followed_count - current.current_count;"
+  },
+  {
+   "id": "web/src/screens/data-health/scores-card.tsx:110:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 110,
+   "original": "      {incomplete > 0 ? (",
+   "mutated": "      {incomplete >= 0 ? ("
+  },
+  {
+   "id": "web/src/screens/data-health/scores-card.tsx:110:off-by-one:2",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 110,
+   "original": "      {incomplete > 0 ? (",
+   "mutated": "      {incomplete > 1 ? ("
+  },
+  {
+   "id": "manual:building-failed",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 33,
+   "original": "  if (d.later?.state === \"building\") {",
+   "mutated": "  if (d.later?.state === \"failed\") {"
+  },
+  {
+   "id": "manual:failed-building",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 36,
+   "original": "  if (d.later?.state === \"failed\") {",
+   "mutated": "  if (d.later?.state === \"building\") {"
+  },
+  {
+   "id": "manual:never-neg",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 30,
+   "original": "  if (d.never_classified) {",
+   "mutated": "  if (!d.never_classified) {"
+  },
+  {
+   "id": "manual:notcurrent-neg",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 39,
+   "original": "  if (d.set?.not_current) {",
+   "mutated": "  if (!d.set?.not_current) {"
+  },
+  {
+   "id": "manual:k-active",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 87,
+   "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
+   "mutated": "  const incomplete = current === null ? 0 : current.followed_count - d.set!.active_instruments;"
+  },
+  {
+   "id": "manual:k-ge",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 110,
+   "original": "      {incomplete > 0 ? (",
+   "mutated": "      {incomplete >= 0 ? ("
+  },
+  {
+   "id": "manual:current-neg",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 87,
+   "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
+   "mutated": "  const incomplete = current !== null ? 0 : current.followed_count - current.current_count;"
+  },
+  {
+   "id": "manual:link-setid",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 103,
+   "original": "            <Link to={`/data/downloads/${d.set.run_id}`}>",
+   "mutated": "            <Link to={`/data/downloads/${d.set.set_id}`}>"
+  },
+  {
+   "id": "manual:ended-started",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 102,
+   "original": "            {SCORES_AT} {formatInstant(d.set.ended_at)} \u00b7 {FROM_DOWNLOAD_STARTED}{\" \"}",
+   "mutated": "            {SCORES_AT} {formatInstant(d.set.started_at)} \u00b7 {FROM_DOWNLOAD_STARTED}{\" \"}"
+  },
+  {
+   "id": "manual:last-neg",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/scores-card.tsx",
+   "line": 68,
+   "original": "      if (scores.last === null) {",
+   "mutated": "      if (scores.last !== null) {"
+  },
+  {
+   "id": "manual:unreach-neg",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 38,
+   "original": "  return error instanceof ApiUnreachableError",
+   "mutated": "  return !(error instanceof ApiUnreachableError)"
+  },
+  {
+   "id": "manual:gap-code",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 69,
+   "original": "  return GAP_REASONS[code] ?? code;",
+   "mutated": "  return code;"
+  }
+ ]
+}

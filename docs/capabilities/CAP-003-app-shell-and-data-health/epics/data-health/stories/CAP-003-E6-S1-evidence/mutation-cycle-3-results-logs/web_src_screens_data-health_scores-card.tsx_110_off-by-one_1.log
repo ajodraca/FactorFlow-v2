@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 226ms
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) no Incomplete sentence when every stock is current 8ms
+     → expected 'Factor scoresCurrent12 of 12 stocks c…' not to match /Incomplete/
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set 4ms
+     → expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) no Incomplete sentence when every stock is current
+AssertionError: expected 'Factor scoresCurrent12 of 12 stocks c…' not to match /Incomplete/
+
+- Expected: 
+/Incomplete/
+
++ Received: 
+"Factor scoresCurrent12 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT0 stocks show as Incomplete until their data is complete"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:470:39
+    468|     );
+    469|     expect(container).toHaveTextContent("12 of 12 stocks current");
+    470|     expect(container.textContent).not.toMatch(/Incomplete/);
+       |                                       ^
+    471|   });
+    472| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
+AssertionError: expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
+
+- Expected: 
+/0 of|Scores \d|Incomplete/
+
++ Received: 
+"Factor scoresNo scores yet—no scores yet0 stocks show as Incomplete until their data is complete"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:510:39
+    508|     expect(within(result as HTMLElement).getByText("—")).toHaveAttribu…
+    509|     expect(result).toHaveTextContent("no scores yet");
+    510|     expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomple…
+       |                                       ^
+    511|     expect(container.querySelector("p.text-xs")).toBeNull();
+    512|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 44 passed (46)
+   Start at  20:45:47
+   Duration  3.80s (transform 202ms, setup 130ms, collect 1.30s, tests 226ms, environment 587ms, prepare 826ms)
+

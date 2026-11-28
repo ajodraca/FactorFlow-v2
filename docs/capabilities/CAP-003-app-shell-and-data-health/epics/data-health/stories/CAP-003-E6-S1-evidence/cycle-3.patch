@@ -1,0 +1,2162 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-3.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-3.json
+new file mode 100644
+index 00000000..a5087bc2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-3.json
+@@ -0,0 +1,142 @@
++{
++ "schema": 1,
++ "repo_head": "aa055950b7a0c03b216ca7ac45e33fa1de20d340",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/data-health/scores-card.tsx:87:off-by-one:1",
++   "cycle": "cycle-3",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 87,
++   "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
++   "mutated": "  const incomplete = current === null ? 1 : current.followed_count - current.current_count;"
++  },
++  {
++   "id": "web/src/screens/data-health/scores-card.tsx:110:off-by-one:1",
++   "cycle": "cycle-3",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 110,
++   "original": "      {incomplete > 0 ? (",
++   "mutated": "      {incomplete >= 0 ? ("
++  },
++  {
++   "id": "web/src/screens/data-health/scores-card.tsx:110:off-by-one:2",
++   "cycle": "cycle-3",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 110,
++   "original": "      {incomplete > 0 ? (",
++   "mutated": "      {incomplete > 1 ? ("
++  },
++  {
++   "id": "manual:building-failed",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 33,
++   "original": "  if (d.later?.state === \"building\") {",
++   "mutated": "  if (d.later?.state === \"failed\") {"
++  },
++  {
++   "id": "manual:failed-building",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 36,
++   "original": "  if (d.later?.state === \"failed\") {",
++   "mutated": "  if (d.later?.state === \"building\") {"
++  },
++  {
++   "id": "manual:never-neg",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 30,
++   "original": "  if (d.never_classified) {",
++   "mutated": "  if (!d.never_classified) {"
++  },
++  {
++   "id": "manual:notcurrent-neg",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 39,
++   "original": "  if (d.set?.not_current) {",
++   "mutated": "  if (!d.set?.not_current) {"
++  },
++  {
++   "id": "manual:k-active",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 87,
++   "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
++   "mutated": "  const incomplete = current === null ? 0 : current.followed_count - d.set!.active_instruments;"
++  },
++  {
++   "id": "manual:k-ge",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 110,
++   "original": "      {incomplete > 0 ? (",
++   "mutated": "      {incomplete >= 0 ? ("
++  },
++  {
++   "id": "manual:current-neg",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 87,
++   "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
++   "mutated": "  const incomplete = current !== null ? 0 : current.followed_count - current.current_count;"
++  },
++  {
++   "id": "manual:link-setid",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 103,
++   "original": "            <Link to={`/data/downloads/${d.set.run_id}`}>",
++   "mutated": "            <Link to={`/data/downloads/${d.set.set_id}`}>"
++  },
++  {
++   "id": "manual:ended-started",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 102,
++   "original": "            {SCORES_AT} {formatInstant(d.set.ended_at)} \u00b7 {FROM_DOWNLOAD_STARTED}{\" \"}",
++   "mutated": "            {SCORES_AT} {formatInstant(d.set.started_at)} \u00b7 {FROM_DOWNLOAD_STARTED}{\" \"}"
++  },
++  {
++   "id": "manual:last-neg",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/scores-card.tsx",
++   "line": 68,
++   "original": "      if (scores.last === null) {",
++   "mutated": "      if (scores.last !== null) {"
++  },
++  {
++   "id": "manual:unreach-neg",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/copy.ts",
++   "line": 38,
++   "original": "  return error instanceof ApiUnreachableError",
++   "mutated": "  return !(error instanceof ApiUnreachableError)"
++  },
++  {
++   "id": "manual:gap-code",
++   "cycle": "cycle-3",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/copy.ts",
++   "line": 69,
++   "original": "  return GAP_REASONS[code] ?? code;",
++   "mutated": "  return code;"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..40849f27
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (46 tests) 425ms
++
++ Test Files  1 passed (1)
++      Tests  46 passed (46)
++   Start at  20:45:40
++   Duration  4.92s (transform 314ms, setup 151ms, collect 1.86s, tests 425ms, environment 668ms, prepare 543ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..f575cd1a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (46 tests) 401ms
++
++ Test Files  1 passed (1)
++      Tests  46 passed (46)
++   Start at  20:45:40
++   Duration  4.95s (transform 344ms, setup 133ms, collect 1.78s, tests 401ms, environment 635ms, prepare 616ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..2583aabe
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (46 tests) 473ms
++
++ Test Files  1 passed (1)
++      Tests  46 passed (46)
++   Start at  20:45:40
++   Duration  5.15s (transform 300ms, setup 145ms, collect 1.88s, tests 473ms, environment 671ms, prepare 1.20s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..aefdb3c9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (46 tests) 383ms
++
++ Test Files  1 passed (1)
++      Tests  46 passed (46)
++   Start at  20:45:40
++   Duration  4.93s (transform 311ms, setup 159ms, collect 1.79s, tests 383ms, environment 597ms, prepare 722ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_building-failed.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_building-failed.log
+new file mode 100644
+index 00000000..78b111f7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_building-failed.log
+@@ -0,0 +1,47 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 4 failed) 250ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active 11ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical 5ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active 3ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical 2ms
++     → expected [] to have a length of 1 but got +0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:448:19
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ Test Files  1 failed (1)
++      Tests  4 failed | 42 passed (46)
++   Start at  20:45:47
++   Duration  3.78s (transform 191ms, setup 131ms, collect 1.28s, tests 250ms, environment 586ms, prepare 598ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_current-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_current-neg.log
+new file mode 100644
+index 00000000..587d8525
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_current-neg.log
+@@ -0,0 +1,216 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) never classified is { never_classified: true, set: null, later: null, factors: {}, stocks_current: null } status-neutral
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'followed_count')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'followed_count')
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:87:53)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'followed_count')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'followed_count')
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:87:53)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <ServedScores> component:
++
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:94:25)
++    at ScoresCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:33:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'followed_count')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'followed_count')
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:87:53)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'followed_count')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'followed_count')
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:87:53)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++The above error occurred in the <ServedScores> component:
++
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:94:25)
++    at ScoresCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web/src/screens/data-health/scores-card.tsx:33:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 5 failed) 425ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) never classified is { never_classified: true, set: null, later: null, factors: {}, stocks_current: null } status-neutral 7ms
++     → Cannot read properties of null (reading 'followed_count')
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) the result line and the Incomplete sentence 3ms
++     → expect(received).toHaveTextContent()
++
++received value must be a Node.
++
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) one stock short still shows the Incomplete sentence, as the copy is written (register G11) 1ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  1 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent11 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (d) the count comes from stocks_current alone, not the set's active_instruments 1ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  6 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent9 of 15 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set 19ms
++     → Cannot read properties of null (reading 'followed_count')
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) never classified is { never_classified: true, set: null, later: null, factors: {}, stocks_current: null } status-neutral
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
++TypeError: Cannot read properties of null (reading 'followed_count')
++ ❯ ServedScores src/screens/data-health/scores-card.tsx:87:53
++     85|   const status: ScoreStatus = { of: "scores", state: scoreStateOf(d) };
++     86|   const current = d.stocks_current;
++     87|   const incomplete = current !== null ? 0 : current.followed_count - c…
++       |                                                     ^
++     88|   return (
++     89|     <CheckCard
++ ❯ renderWithHooks ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26473:7
++ ❯ recoverFromConcurrentError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:25889:20
++ ❯ performConcurrentWorkOnRoot ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:25789:22
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) the result line and the Incomplete sentence
++Error: expect(received).toHaveTextContent()
++
++received value must be a Node.
++
++ ❯ src/screens/data-health/check-cards.test.tsx:459:58
++    457|       /^9 of 12 stocks current$/,
++    458|     );
++    459|     expect(container.querySelectorAll("p.text-base")[1]).toHaveTextCon…
++       |                                                          ^
++    460|       /^3 stocks show as Incomplete until their data is complete$/,
++    461|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) one stock short still shows the Incomplete sentence, as the copy is written (register G11)
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  1 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent11 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++ ❯ src/screens/data-health/check-cards.test.tsx:479:23
++    477|     );
++    478|     expect(container).toHaveTextContent("11 of 12 stocks current");
++    479|     expect(container).toHaveTextContent("1 stocks show as Incomplete u…
++       |                       ^
++    480|   });
++    481| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (d) the count comes from stocks_current alone, not the set's active_instruments
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  6 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent9 of 15 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++ ❯ src/screens/data-health/check-cards.test.tsx:488:23
++    486|     );
++    487|     expect(container).toHaveTextContent("9 of 15 stocks current");
++    488|     expect(container).toHaveTextContent("6 stocks show as Incomplete u…
++       |                       ^
++    489|   });
++    490| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
++
++ Test Files  1 failed (1)
++      Tests  5 failed | 41 passed (46)
++   Start at  20:45:58
++   Duration  3.11s (transform 175ms, setup 191ms, collect 918ms, tests 425ms, environment 458ms, prepare 308ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_ended-started.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_ended-started.log
+new file mode 100644
+index 00000000..f24562d3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_ended-started.log
+@@ -0,0 +1,34 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 1 failed) 326ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (e) the as-of line links the start time to the download 16ms
++     → expected 'Scores 2026-10-30 11:00 CDT · from th…' to be 'Scores 2026-10-30 11:45 CDT · from th…' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (e) the as-of line links the start time to the download
++AssertionError: expected 'Scores 2026-10-30 11:00 CDT · from th…' to be 'Scores 2026-10-30 11:45 CDT · from th…' // Object.is equality
++
++Expected: "Scores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT"
++Received: "Scores 2026-10-30 11:00 CDT · from the download started 2026-10-30 09:00 CDT"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:495:31
++    493|     const { container } = renderScores(served());
++    494|     const line = container.querySelector<HTMLElement>("p.text-xs");
++    495|     expect(line?.textContent).toBe(
++       |                               ^
++    496|       "Scores 2026-10-30 11:45 CDT · from the download started 2026-10…
++    497|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 45 passed (46)
++   Start at  20:45:58
++   Duration  3.04s (transform 192ms, setup 164ms, collect 975ms, tests 326ms, environment 512ms, prepare 284ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_failed-building.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_failed-building.log
+new file mode 100644
+index 00000000..bb57bf6a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_failed-building.log
+@@ -0,0 +1,41 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 930ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical 108ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical 4ms
++     → expected [] to have a length of 1 but got +0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:448:19
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 44 passed (46)
++   Start at  20:45:52
++   Duration  4.19s (transform 179ms, setup 110ms, collect 1.36s, tests 930ms, environment 556ms, prepare 631ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_gap-code.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_gap-code.log
+new file mode 100644
+index 00000000..b81b6a6e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_gap-code.log
+@@ -0,0 +1,64 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 423ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 23ms
++     → expect(element).toHaveAccessibleDescription()
++
++Expected element to have accessible description:
++  fewer than two followed stocks hold daily prices
++Received:
++  fewer_than_two_instruments_with_data
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 8ms
++     → expect(element).toHaveAccessibleDescription()
++
++Expected element to have accessible description:
++  fewer than two followed stocks hold daily prices
++Received:
++  fewer_than_two_instruments_with_data
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
++Error: expect(element).toHaveAccessibleDescription()
++
++Expected element to have accessible description:
++  fewer than two followed stocks hold daily prices
++Received:
++  fewer_than_two_instruments_with_data
++ ❯ src/screens/data-health/check-cards.test.tsx:182:17
++    180|     const gap = badgeWith(card, "coverage-unknown");
++    181|     expect(gap).toHaveTextContent("Gaps not determinable");
++    182|     expect(gap).toHaveAccessibleDescription("fewer than two followed s…
++       |                 ^
++    183|     expect(resultLine(card)).toHaveTextContent(
++    184|       /^2 without prices, Gaps not determinable\s*fewer than two follo…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++Error: expect(element).toHaveAccessibleDescription()
++
++Expected element to have accessible description:
++  fewer than two followed stocks hold daily prices
++Received:
++  fewer_than_two_instruments_with_data
++ ❯ src/screens/data-health/check-cards.test.tsx:202:25
++    200|     const headerBadge = card.querySelector<HTMLElement>('[data-variant…
++    201|     expect(headerBadge).toHaveTextContent("Not determinable");
++    202|     expect(headerBadge).toHaveAccessibleDescription(
++       |                         ^
++    203|       "fewer than two followed stocks hold daily prices",
++    204|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 44 passed (46)
++   Start at  20:46:02
++   Duration  2.96s (transform 253ms, setup 349ms, collect 1.03s, tests 423ms, environment 421ms, prepare 220ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-active.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-active.log
+new file mode 100644
+index 00000000..19704bac
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-active.log
+@@ -0,0 +1,84 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 3 failed) 900ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) the result line and the Incomplete sentence 117ms
++     → expect(received).toHaveTextContent()
++
++received value must be a Node.
++
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) one stock short still shows the Incomplete sentence, as the copy is written (register G11) 28ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  1 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent11 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (d) the count comes from stocks_current alone, not the set's active_instruments 2ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  6 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent9 of 15 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT3 stocks show as Incomplete until their data is complete
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) the result line and the Incomplete sentence
++Error: expect(received).toHaveTextContent()
++
++received value must be a Node.
++
++ ❯ src/screens/data-health/check-cards.test.tsx:459:58
++    457|       /^9 of 12 stocks current$/,
++    458|     );
++    459|     expect(container.querySelectorAll("p.text-base")[1]).toHaveTextCon…
++       |                                                          ^
++    460|       /^3 stocks show as Incomplete until their data is complete$/,
++    461|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) one stock short still shows the Incomplete sentence, as the copy is written (register G11)
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  1 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent11 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++ ❯ src/screens/data-health/check-cards.test.tsx:479:23
++    477|     );
++    478|     expect(container).toHaveTextContent("11 of 12 stocks current");
++    479|     expect(container).toHaveTextContent("1 stocks show as Incomplete u…
++       |                       ^
++    480|   });
++    481| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (d) the count comes from stocks_current alone, not the set's active_instruments
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  6 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent9 of 15 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT3 stocks show as Incomplete until their data is complete
++ ❯ src/screens/data-health/check-cards.test.tsx:488:23
++    486|     );
++    487|     expect(container).toHaveTextContent("9 of 15 stocks current");
++    488|     expect(container).toHaveTextContent("6 stocks show as Incomplete u…
++       |                       ^
++    489|   });
++    490| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 43 passed (46)
++   Start at  20:45:52
++   Duration  4.10s (transform 192ms, setup 111ms, collect 1.35s, tests 900ms, environment 549ms, prepare 688ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-ge.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-ge.log
+new file mode 100644
+index 00000000..7e803636
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-ge.log
+@@ -0,0 +1,58 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 379ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) no Incomplete sentence when every stock is current 4ms
++     → expected 'Factor scoresCurrent12 of 12 stocks c…' not to match /Incomplete/
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set 1ms
++     → expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) no Incomplete sentence when every stock is current
++AssertionError: expected 'Factor scoresCurrent12 of 12 stocks c…' not to match /Incomplete/
++
++- Expected: 
++/Incomplete/
++
+++ Received: 
++"Factor scoresCurrent12 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT0 stocks show as Incomplete until their data is complete"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:470:39
++    468|     );
++    469|     expect(container).toHaveTextContent("12 of 12 stocks current");
++    470|     expect(container.textContent).not.toMatch(/Incomplete/);
++       |                                       ^
++    471|   });
++    472| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
++AssertionError: expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
++
++- Expected: 
++/0 of|Scores \d|Incomplete/
++
+++ Received: 
++"Factor scoresNo scores yet—no scores yet0 stocks show as Incomplete until their data is complete"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:510:39
++    508|     expect(within(result as HTMLElement).getByText("—")).toHaveAttribu…
++    509|     expect(result).toHaveTextContent("no scores yet");
++    510|     expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomple…
++       |                                       ^
++    511|     expect(container.querySelector("p.text-xs")).toBeNull();
++    512|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 44 passed (46)
++   Start at  20:45:58
++   Duration  3.09s (transform 204ms, setup 170ms, collect 982ms, tests 379ms, environment 508ms, prepare 241ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_last-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_last-neg.log
+new file mode 100644
+index 00000000..db722a17
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_last-neg.log
+@@ -0,0 +1,170 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null })
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'never_classified')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'never_classified')
++    at scoreStateOf (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:30:9)
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:85:54)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'never_classified')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'never_classified')
++    at scoreStateOf (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:30:9)
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:85:54)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <ServedScores> component:
++
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:94:25)
++    at ScoresCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:33:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed)
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'never_classified')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'never_classified')
++    at scoreStateOf (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:30:9)
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:85:54)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [TypeError: Cannot read properties of null (reading 'never_classified')]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) TypeError: Cannot read properties of null (reading 'never_classified')
++    at scoreStateOf (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:30:9)
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:85:54)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <ServedScores> component:
++
++    at ServedScores (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:94:25)
++    at ScoresCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web/src/screens/data-health/scores-card.tsx:33:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 3 failed) 257ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary 16ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) 8ms
++     → Cannot read properties of null (reading 'never_classified')
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed) 1ms
++     → Cannot read properties of null (reading 'never_classified')
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:526:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null })
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed)
++TypeError: Cannot read properties of null (reading 'never_classified')
++ ❯ scoreStateOf src/screens/data-health/scores-card.tsx:30:9
++     28|  */
++     29| function scoreStateOf(d: ScoreSummary): ScoreStatus["state"] {
++     30|   if (d.never_classified) {
++       |         ^
++     31|     return "never_classified";
++     32|   }
++ ❯ ServedScores src/screens/data-health/scores-card.tsx:85:54
++ ❯ renderWithHooks ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26473:7
++ ❯ recoverFromConcurrentError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:25889:20
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 43 passed (46)
++   Start at  20:46:02
++   Duration  2.90s (transform 205ms, setup 249ms, collect 1.07s, tests 257ms, environment 463ms, prepare 272ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_link-setid.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_link-setid.log
+new file mode 100644
+index 00000000..d65fa17b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_link-setid.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 1 failed) 332ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (e) the as-of line links the start time to the download 6ms
++     → expect(element).toHaveAttribute("href", "/data/downloads/run-42") // element.getAttribute("href") === "/data/downloads/run-42"
++
++Expected the element to have attribute:
++  href="/data/downloads/run-42"
++Received:
++  href="/data/downloads/s-1"
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (e) the as-of line links the start time to the download
++Error: expect(element).toHaveAttribute("href", "/data/downloads/run-42") // element.getAttribute("href") === "/data/downloads/run-42"
++
++Expected the element to have attribute:
++  href="/data/downloads/run-42"
++Received:
++  href="/data/downloads/s-1"
++ ❯ src/screens/data-health/check-cards.test.tsx:499:18
++    497|     );
++    498|     const link = within(line as HTMLElement).getByRole("link", { name:…
++    499|     expect(link).toHaveAttribute("href", "/data/downloads/run-42");
++       |                  ^
++    500|   });
++    501| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 45 passed (46)
++   Start at  20:45:58
++   Duration  3.05s (transform 634ms, setup 165ms, collect 975ms, tests 332ms, environment 430ms, prepare 521ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_never-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_never-neg.log
+new file mode 100644
+index 00000000..01254ead
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_never-neg.log
+@@ -0,0 +1,79 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 8 failed) 1102ms
++   ✓ Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session 326ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) never classified is { never_classified: true, set: null, later: null, factors: {}, stocks_current: null } status-neutral 30ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active 3ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical 99ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-warning 4ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-good 2ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active 10ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical 13ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary 39ms
++     → expected [] to have a length of 1 but got +0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) never classified is { never_classified: true, set: null, later: null, factors: {}, stocks_current: null } status-neutral
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-warning
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-good
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) building beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'building', started_at: '2026-10-30T17:00:00Z', ended_at: null, failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-active
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) failed beats not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: { set_id: 's-2', state: 'failed', started_at: '2026-10-30T17:00:00Z', ended_at: '2026-10-30T17:10:00Z', failure_reason: null, run_id: 'run-43', run_started_at: '2026-10-30T16:55:00Z' }, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-critical
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:448:19
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:526:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
++
++ Test Files  1 failed (1)
++      Tests  8 failed | 38 passed (46)
++   Start at  20:45:52
++   Duration  4.28s (transform 222ms, setup 108ms, collect 1.34s, tests 1.10s, environment 559ms, prepare 467ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_notcurrent-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_notcurrent-neg.log
+new file mode 100644
+index 00000000..5b5c3450
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_notcurrent-neg.log
+@@ -0,0 +1,63 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 3 failed) 1187ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-warning 47ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-good 3ms
++     → expected [] to have a length of 1 but got +0
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary 5ms
++     → expected [] to have a length of 1 but got +0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-warning
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-good
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:448:19
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
++    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++    127|   const found = badges(root).filter((element) => element.dataset.varia…
++    128|   expect(found).toHaveLength(1);
++       |                 ^
++    129|   return found[0] as HTMLElement;
++    130| }
++ ❯ src/screens/data-health/check-cards.test.tsx:526:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 43 passed (46)
++   Start at  20:45:52
++   Duration  4.42s (transform 201ms, setup 113ms, collect 1.40s, tests 1.19s, environment 529ms, prepare 51ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_unreach-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_unreach-neg.log
+new file mode 100644
+index 00000000..d70886f7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_unreach-neg.log
+@@ -0,0 +1,37 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 359ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) 31ms
++     → expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed) 3ms
++     → expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null })
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed)
++AssertionError: expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
++
++Expected: "Couldn't read the factor scores: FactorFlow hit an unexpected problem."
++Received: "Couldn't read the factor scores: FactorFlow is not answering."
++
++ ❯ src/screens/data-health/check-cards.test.tsx:542:60
++    540|       const card = region("Factor scores");
++    541|       expect(within(card).getByRole("heading", { level: 2, name: "Fact…
++    542|       expect(within(card).getByRole("status").textContent).toBe(senten…
++       |                                                            ^
++    543|       expect(card.querySelector(BADGE)).toBeNull();
++    544|       fireEvent.click(within(card).getByRole("button", { name: "Try ag…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 44 passed (46)
++   Start at  20:46:02
++   Duration  3.09s (transform 343ms, setup 216ms, collect 1.27s, tests 359ms, environment 382ms, prepare 378ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_1.log
+new file mode 100644
+index 00000000..de315862
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_1.log
+@@ -0,0 +1,58 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 226ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) no Incomplete sentence when every stock is current 8ms
++     → expected 'Factor scoresCurrent12 of 12 stocks c…' not to match /Incomplete/
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set 4ms
++     → expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) no Incomplete sentence when every stock is current
++AssertionError: expected 'Factor scoresCurrent12 of 12 stocks c…' not to match /Incomplete/
++
++- Expected: 
++/Incomplete/
++
+++ Received: 
++"Factor scoresCurrent12 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT0 stocks show as Incomplete until their data is complete"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:470:39
++    468|     );
++    469|     expect(container).toHaveTextContent("12 of 12 stocks current");
++    470|     expect(container.textContent).not.toMatch(/Incomplete/);
++       |                                       ^
++    471|   });
++    472| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
++AssertionError: expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
++
++- Expected: 
++/0 of|Scores \d|Incomplete/
++
+++ Received: 
++"Factor scoresNo scores yet—no scores yet0 stocks show as Incomplete until their data is complete"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:510:39
++    508|     expect(within(result as HTMLElement).getByText("—")).toHaveAttribu…
++    509|     expect(result).toHaveTextContent("no scores yet");
++    510|     expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomple…
++       |                                       ^
++    511|     expect(container.querySelector("p.text-xs")).toBeNull();
++    512|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 44 passed (46)
++   Start at  20:45:47
++   Duration  3.80s (transform 202ms, setup 130ms, collect 1.30s, tests 226ms, environment 587ms, prepare 826ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_2.log
+new file mode 100644
+index 00000000..15601c3e
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_2.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 1 failed) 278ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) one stock short still shows the Incomplete sentence, as the copy is written (register G11) 19ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  1 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent11 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (c) one stock short still shows the Incomplete sentence, as the copy is written (register G11)
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  1 stocks show as Incomplete until their data is complete
++Received:
++  Factor scoresCurrent11 of 12 stocks currentScores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT
++ ❯ src/screens/data-health/check-cards.test.tsx:479:23
++    477|     );
++    478|     expect(container).toHaveTextContent("11 of 12 stocks current");
++    479|     expect(container).toHaveTextContent("1 stocks show as Incomplete u…
++       |                       ^
++    480|   });
++    481| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 45 passed (46)
++   Start at  20:45:47
++   Duration  3.76s (transform 208ms, setup 128ms, collect 1.24s, tests 278ms, environment 564ms, prepare 820ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_87_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_87_off-by-one_1.log
+new file mode 100644
+index 00000000..73a7d194
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_87_off-by-one_1.log
+@@ -0,0 +1,37 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 1 failed) 244ms
++   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set 9ms
++     → expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
++AssertionError: expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
++
++- Expected: 
++/0 of|Scores \d|Incomplete/
++
+++ Received: 
++"Factor scoresNo scores yet—no scores yet1 stocks show as Incomplete until their data is complete"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:510:39
++    508|     expect(within(result as HTMLElement).getByText("—")).toHaveAttribu…
++    509|     expect(result).toHaveTextContent("no scores yet");
++    510|     expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomple…
++       |                                       ^
++    511|     expect(container.querySelector("p.text-xs")).toBeNull();
++    512|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 45 passed (46)
++   Start at  20:45:47
++   Duration  3.60s (transform 203ms, setup 117ms, collect 1.21s, tests 244ms, environment 627ms, prepare 212ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results.json
+new file mode 100644
+index 00000000..78f2df60
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results.json
+@@ -0,0 +1,269 @@
++{
++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run src/screens/data-health",
++  "repo_head": "aa055950b7a0c03b216ca7ac45e33fa1de20d340",
++  "tree_patch_sha256": "eddb5e41ea53def0c64c53baefa71f667dde37544b417f458f3f7a8dd5c7aabd",
++  "mutants_sha256": "930f501e4ced3952b391e887aef2d75f2053c169feb759a558e4c7fd602e8818",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-3.json",
++  "jobs": 4,
++  "planned": 15,
++  "started": "2026-11-28T02:45:38Z",
++  "baselines": [
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 7.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w3.log",
++      "log_sha256": "5d76713a0365983de35581338612cb313645289b2a91e98784b2d25aba54bb6f"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 7.3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w1.log",
++      "log_sha256": "2f87b7ca1a66837e0b91bfeeba2c73c845ceae3af280f574a2878cbe0e532e3d"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 7.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w0.log",
++      "log_sha256": "a3380fd7b3b901f2d37056e9ec9d2bf0415bb8c1a3a79677d0fba539b3b96186"
++    },
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 7.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/baseline-w2.log",
++      "log_sha256": "048eba7207dc3c80b947425e81ff22fe0212aa0f3f4114a02326e7ed29bc38a0"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/data-health/scores-card.tsx:87:off-by-one:1",
++      "cycle": "cycle-3",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 87,
++      "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
++      "mutated": "  const incomplete = current === null ? 1 : current.followed_count - current.current_count;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_87_off-by-one_1.log",
++      "log_sha256": "3f963dc86246309a457ef35c65863f5013c9882e0f1ca2a5bfe3dabef41050a7"
++    },
++    {
++      "id": "web/src/screens/data-health/scores-card.tsx:110:off-by-one:1",
++      "cycle": "cycle-3",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 110,
++      "original": "      {incomplete > 0 ? (",
++      "mutated": "      {incomplete >= 0 ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_1.log",
++      "log_sha256": "2b3d776d7461a879e51f2be84b5c357d53c363bf718ca8539693649ee1d77caa"
++    },
++    {
++      "id": "web/src/screens/data-health/scores-card.tsx:110:off-by-one:2",
++      "cycle": "cycle-3",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 110,
++      "original": "      {incomplete > 0 ? (",
++      "mutated": "      {incomplete > 1 ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_data-health_scores-card.tsx_110_off-by-one_2.log",
++      "log_sha256": "6da5e2b9526e8a8f19b613259b47ca104ce9f1ceefd2f4cd68409c1986f502bb"
++    },
++    {
++      "id": "manual:building-failed",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 33,
++      "original": "  if (d.later?.state === \"building\") {",
++      "mutated": "  if (d.later?.state === \"failed\") {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_building-failed.log",
++      "log_sha256": "144db1104e5c489105944f4ffe29cdaa029fd88f20dc63389c3bc3ab20d314f0"
++    },
++    {
++      "id": "manual:failed-building",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 36,
++      "original": "  if (d.later?.state === \"failed\") {",
++      "mutated": "  if (d.later?.state === \"building\") {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_failed-building.log",
++      "log_sha256": "47d2b609ab9240a53bf8c3a94ae1303ffc356533c02bb8e291f3c9f088dfcad2"
++    },
++    {
++      "id": "manual:never-neg",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 30,
++      "original": "  if (d.never_classified) {",
++      "mutated": "  if (!d.never_classified) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.4,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_never-neg.log",
++      "log_sha256": "ac9dd9607dffd8bd50d9217c0a0c29653eeab25fb66b8540d641b4c64abb9c8b"
++    },
++    {
++      "id": "manual:notcurrent-neg",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 39,
++      "original": "  if (d.set?.not_current) {",
++      "mutated": "  if (!d.set?.not_current) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.8,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_notcurrent-neg.log",
++      "log_sha256": "36c8fa10141ad972aae5edff394584ecd37362ad8e7410b2e4a8805bb85b88f5"
++    },
++    {
++      "id": "manual:k-active",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 87,
++      "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
++      "mutated": "  const incomplete = current === null ? 0 : current.followed_count - d.set!.active_instruments;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.2,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-active.log",
++      "log_sha256": "a551a74591be205d0cf2f0b7656a050b584436e34c5ffc8ca7c8f05f60c850b8"
++    },
++    {
++      "id": "manual:k-ge",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 110,
++      "original": "      {incomplete > 0 ? (",
++      "mutated": "      {incomplete >= 0 ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_k-ge.log",
++      "log_sha256": "58321278544e8d372b144253f5179942e9dd07941b7d389542eed3f261971d4f"
++    },
++    {
++      "id": "manual:current-neg",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 87,
++      "original": "  const incomplete = current === null ? 0 : current.followed_count - current.current_count;",
++      "mutated": "  const incomplete = current !== null ? 0 : current.followed_count - current.current_count;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_current-neg.log",
++      "log_sha256": "905de5dcd62d5fd48bfafba13ddfc8bf787eaaa9ca838c942f876538894c733f"
++    },
++    {
++      "id": "manual:link-setid",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 103,
++      "original": "            <Link to={`/data/downloads/${d.set.run_id}`}>",
++      "mutated": "            <Link to={`/data/downloads/${d.set.set_id}`}>",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 5.1,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_link-setid.log",
++      "log_sha256": "8e570d90aec9f5bd07c78305b59cf74a980ce5268338b223e721b92f2af02fa1"
++    },
++    {
++      "id": "manual:ended-started",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 102,
++      "original": "            {SCORES_AT} {formatInstant(d.set.ended_at)} \u00b7 {FROM_DOWNLOAD_STARTED}{\" \"}",
++      "mutated": "            {SCORES_AT} {formatInstant(d.set.started_at)} \u00b7 {FROM_DOWNLOAD_STARTED}{\" \"}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.7,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_ended-started.log",
++      "log_sha256": "5f6f1f4a7292a5c15729be0491eea091986c823c38817269ae9f438e2d5da61e"
++    },
++    {
++      "id": "manual:last-neg",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/scores-card.tsx",
++      "line": 68,
++      "original": "      if (scores.last === null) {",
++      "mutated": "      if (scores.last !== null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_last-neg.log",
++      "log_sha256": "29e0a171c84c950c4e3c55fdf12c40a8af2373648ba2dec07df1d9d73e3f42c6"
++    },
++    {
++      "id": "manual:unreach-neg",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/copy.ts",
++      "line": 38,
++      "original": "  return error instanceof ApiUnreachableError",
++      "mutated": "  return !(error instanceof ApiUnreachableError)",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_unreach-neg.log",
++      "log_sha256": "d08333121ff6a88a6807360ba375692422b47f398fbccf6c5a827af760be92ec"
++    },
++    {
++      "id": "manual:gap-code",
++      "cycle": "cycle-3",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/copy.ts",
++      "line": 69,
++      "original": "  return GAP_REASONS[code] ?? code;",
++      "mutated": "  return code;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results-logs/manual_gap-code.log",
++      "log_sha256": "f4819cb3c24a28494320458702616f7e8b00ae531112d3cbc6fc82de813fc383"
++    }
++  ],
++  "finished": "2026-11-28T02:46:05Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log
+new file mode 100644
+index 00000000..dd4ecc33
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/data-health/check-cards.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx [ src/screens/data-health/check-cards.test.tsx ]
++Error: Failed to resolve import "./scores-card" from "web/src/screens/data-health/check-cards.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/check-cards.test.tsx:8:27
++  6  |  import { DailyPricesCard } from "./daily-prices-card";
++  7  |  import { FinancialsCard } from "./financials-card";
++  8  |  import { ScoresCard } from "./scores-card";
++     |                              ^
++  9  |  const OK_PRICES = {
++  10 |    status: "ok",
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  20:42:14
++   Duration  1.42s (transform 29ms, setup 156ms, collect 0ms, tests 0ms, environment 478ms, prepare 372ms)
++
+diff --git a/web/src/screens/data-health/check-card.tsx b/web/src/screens/data-health/check-card.tsx
+index 4db16054..627f4761 100644
+--- a/web/src/screens/data-health/check-card.tsx
++++ b/web/src/screens/data-health/check-card.tsx
+@@ -1,5 +1,7 @@
+ import { type ReactNode, useId } from "react";
++import { Button } from "../../components/ui/button";
+ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
++import { TRY_AGAIN } from "./copy";
+ 
+ /**
+  * The check-card composition (UX design 3; data-health-ui 10): a region named by
+@@ -37,3 +39,25 @@ export function CheckCard({
+     </section>
+   );
+ }
++
++/**
++ * The shared read-failure body: the sentence in a status region, **Try again**
++ * outside it, the error convention of `StateRegion` (DEC-0314) followed without
++ * importing it, because `StateRegion` takes a `ScreenState`, not the shell's
++ * `ReadState`.
++ */
++export function ReadFailure({ sentence, onRetry }: { sentence: string; onRetry: () => void }) {
++  return (
++    <>
++      <output>{sentence}</output>
++      <Button variant="outline" onClick={onRetry}>
++        {TRY_AGAIN}
++      </Button>
++    </>
++  );
++}
++
++/** One busy placeholder line, shown while a read has not answered. */
++export function SkeletonLine() {
++  return <div aria-busy="true" className="h-4 animate-pulse rounded bg-secondary" />;
++}
+diff --git a/web/src/screens/data-health/check-cards.test.tsx b/web/src/screens/data-health/check-cards.test.tsx
+index 06eb1987..72f17e1a 100644
+--- a/web/src/screens/data-health/check-cards.test.tsx
++++ b/web/src/screens/data-health/check-cards.test.tsx
+@@ -1,9 +1,11 @@
+-import { render, screen, within } from "@testing-library/react";
++import { fireEvent, render, screen, within } from "@testing-library/react";
+ import { MemoryRouter } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+-import type { DataHealth } from "../../app/shell-types";
++import { ApiError, ApiUnreachableError } from "../../api/client";
++import type { DataHealth, ScoreState, ScoreSummary } from "../../app/shell-types";
+ import { DailyPricesCard } from "./daily-prices-card";
+ import { FinancialsCard } from "./financials-card";
++import { ScoresCard } from "./scores-card";
+ 
+ type Prices = NonNullable<DataHealth["checks"]["daily_prices"]>;
+ type Financials = NonNullable<DataHealth["checks"]["company_financials"]>;
+@@ -50,6 +52,60 @@ function renderFinancials(
+   return { container: view.container };
+ }
+ 
++/** Any status or not-determinable badge; the card itself carries `data-variant="metric"`. */
++const BADGE = '[data-variant^="status-"], [data-variant="coverage-unknown"]';
++const INTERNAL = new ApiError("database said no", "req-9f3", { code: "internal_error" });
++const UNREACHABLE = new ApiUnreachableError("fetch failed");
++const CHECKED_AT = new Date("2026-10-30T16:50:00Z");
++
++function summary(over: Partial<ScoreSummary> = {}): ScoreSummary {
++  return {
++    never_classified: false,
++    set: {
++      set_id: "s-1",
++      classification_date: "2026-10-30",
++      run_id: "run-42",
++      run_started_at: "2026-10-30T14:00:00Z",
++      run_outcome: "succeeded",
++      state: "complete",
++      started_at: "2026-10-30T16:00:00Z",
++      ended_at: "2026-10-30T16:45:00Z",
++      latest_trading_day: "2026-10-29",
++      active_instruments: 12,
++      not_current: false,
++    },
++    later: null,
++    factors: {} as ScoreSummary["factors"],
++    stocks_current: { current_count: 9, followed_count: 12 },
++    ...over,
++  };
++}
++
++function served(data: ScoreSummary = summary()): ScoreState {
++  return { kind: "served", data, checkedAt: CHECKED_AT };
++}
++
++function later(state: "building" | "failed"): NonNullable<ScoreSummary["later"]> {
++  return {
++    set_id: "s-2",
++    state,
++    started_at: "2026-10-30T17:00:00Z",
++    ended_at: state === "failed" ? "2026-10-30T17:10:00Z" : null,
++    failure_reason: null,
++    run_id: "run-43",
++    run_started_at: "2026-10-30T16:55:00Z",
++  };
++}
++
++function renderScores(scores: ScoreState, onRetryScores: () => void = () => undefined) {
++  const view = render(
++    <MemoryRouter>
++      <ScoresCard scores={scores} onRetryScores={onRetryScores} />
++    </MemoryRouter>,
++  );
++  return { container: view.container };
++}
++
+ function renderPrices(check: Prices | null, followedCount = 10): { container: HTMLElement } {
+   const view = render(
+     <MemoryRouter>
+@@ -336,6 +392,162 @@ describe("Company financials card (TC-COMP-149, DAC-E6-4)", () => {
+   });
+ });
+ 
++describe("Factor scores card (TC-COMP-150, DAC-E6-5, AC-8)", () => {
++  // Implements TC-COMP-150
++  it("(a) not served: Not determinable with its reason once, and nothing else", () => {
++    const { container } = renderScores({ kind: "not_served" });
++    const card = region("Factor scores");
++    const badge = badgeWith(card, "coverage-unknown");
++    expect(badge).toHaveTextContent("Not determinable");
++    expect(badge).toHaveAccessibleDescription("FactorFlow can't read scores yet.");
++    expect(container.textContent?.match(/FactorFlow can't read scores yet\./g)).toHaveLength(1);
++    expect(card.querySelector('[data-variant^="status-"]')).toBeNull();
++    expect(card.querySelector("p.text-base")).toBeNull();
++    expect(card.textContent).not.toMatch(/Scores \d/);
++  });
++
++  // Implements TC-COMP-150
++  it.each([
++    [
++      "never classified",
++      summary({ never_classified: true, set: null, stocks_current: null }),
++      "status-neutral",
++      "No scores yet",
++    ],
++    ["building", summary({ later: later("building") }), "status-active", "Updating"],
++    ["failed", summary({ later: later("failed") }), "status-critical", "Score update failed"],
++    [
++      "not current",
++      summary({
++        set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
++      }),
++      "status-warning",
++      "Not reflecting the latest download",
++    ],
++    ["current", summary(), "status-good", "Current"],
++    [
++      "building beats not current",
++      summary({
++        later: later("building"),
++        set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
++      }),
++      "status-active",
++      "Updating",
++    ],
++    [
++      "failed beats not current",
++      summary({
++        later: later("failed"),
++        set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
++      }),
++      "status-critical",
++      "Score update failed",
++    ],
++  ])("(b) %s is %s %s", (_name, data, variant, label) => {
++    renderScores(served(data));
++    const badge = badgeWith(region("Factor scores"), variant);
++    expect(badge).toHaveTextContent(label);
++    expect(badge.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
++  });
++
++  // Implements TC-COMP-150
++  it("(c) the result line and the Incomplete sentence", () => {
++    const { container } = renderScores(served());
++    expect(container.querySelectorAll("p.text-base")[0]).toHaveTextContent(
++      /^9 of 12 stocks current$/,
++    );
++    expect(container.querySelectorAll("p.text-base")[1]).toHaveTextContent(
++      /^3 stocks show as Incomplete until their data is complete$/,
++    );
++  });
++
++  // Implements TC-COMP-150
++  it("(c) no Incomplete sentence when every stock is current", () => {
++    const { container } = renderScores(
++      served(summary({ stocks_current: { current_count: 12, followed_count: 12 } })),
++    );
++    expect(container).toHaveTextContent("12 of 12 stocks current");
++    expect(container.textContent).not.toMatch(/Incomplete/);
++  });
++
++  // Implements TC-COMP-150
++  it("(c) one stock short still shows the Incomplete sentence, as the copy is written (register G11)", () => {
++    const { container } = renderScores(
++      served(summary({ stocks_current: { current_count: 11, followed_count: 12 } })),
++    );
++    expect(container).toHaveTextContent("11 of 12 stocks current");
++    expect(container).toHaveTextContent("1 stocks show as Incomplete until their data is complete");
++  });
++
++  // Implements TC-COMP-150
++  it("(d) the count comes from stocks_current alone, not the set's active_instruments", () => {
++    const { container } = renderScores(
++      served(summary({ stocks_current: { current_count: 9, followed_count: 15 } })),
++    );
++    expect(container).toHaveTextContent("9 of 15 stocks current");
++    expect(container).toHaveTextContent("6 stocks show as Incomplete until their data is complete");
++  });
++
++  // Implements TC-COMP-150
++  it("(e) the as-of line links the start time to the download", () => {
++    const { container } = renderScores(served());
++    const line = container.querySelector<HTMLElement>("p.text-xs");
++    expect(line?.textContent).toBe(
++      "Scores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT",
++    );
++    const link = within(line as HTMLElement).getByRole("link", { name: "2026-10-30 09:00 CDT" });
++    expect(link).toHaveAttribute("href", "/data/downloads/run-42");
++  });
++
++  // Implements TC-COMP-150
++  it("(f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set", () => {
++    const { container } = renderScores(
++      served(summary({ never_classified: true, set: null, stocks_current: null })),
++    );
++    const result = container.querySelector<HTMLElement>("p.text-base");
++    expect(within(result as HTMLElement).getByText("—")).toHaveAttribute("aria-hidden", "true");
++    expect(result).toHaveTextContent("no scores yet");
++    expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomplete/);
++    expect(container.querySelector("p.text-xs")).toBeNull();
++  });
++
++  // Implements TC-COMP-150
++  it("(g) loading keeps the heading and shows a busy skeleton with no badge", () => {
++    const { container } = renderScores({ kind: "loading" });
++    const card = region("Factor scores");
++    expect(within(card).getByRole("heading", { level: 2, name: "Factor scores" })).toBeTruthy();
++    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
++    expect(card.querySelector(BADGE)).toBeNull();
++  });
++
++  // Implements TC-COMP-150
++  it("(h) a failed read keeps rendering its last summary", () => {
++    const { container } = renderScores({ kind: "error", error: INTERNAL, last: summary() });
++    expect(badgeWith(region("Factor scores"), "status-good")).toHaveTextContent("Current");
++    expect(container).toHaveTextContent("9 of 12 stocks current");
++    expect(container.querySelector('[role="status"]')).toBeNull();
++  });
++
++  // Implements TC-COMP-150
++  it.each([
++    [INTERNAL, "Couldn't read the factor scores: FactorFlow hit an unexpected problem."],
++    [UNREACHABLE, "Couldn't read the factor scores: FactorFlow is not answering."],
++  ])(
++    "(i) a failed read with no last value keeps the heading and offers Try again (%s)",
++    (error, sentence) => {
++      const retry = vi.fn();
++      const { container } = renderScores({ kind: "error", error, last: null }, retry);
++      const card = region("Factor scores");
++      expect(within(card).getByRole("heading", { level: 2, name: "Factor scores" })).toBeTruthy();
++      expect(within(card).getByRole("status").textContent).toBe(sentence);
++      expect(card.querySelector(BADGE)).toBeNull();
++      fireEvent.click(within(card).getByRole("button", { name: "Try again" }));
++      expect(retry).toHaveBeenCalledTimes(1);
++      expect(container.textContent).not.toMatch(/req-9f3|database said no|fetch failed/);
++    },
++  );
++});
++
+ describe("Check cards' null state (DAC-E6-7 support, AC-24)", () => {
+   it("Company financials with check null keeps its heading and renders absent dashes, no status badge", () => {
+     const { container } = renderFinancials(null);
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+index 6b67582f..aff9abc0 100644
+--- a/web/src/screens/data-health/copy.ts
++++ b/web/src/screens/data-health/copy.ts
+@@ -6,7 +6,10 @@
+  * 2.4 and epic DAC-E6-1 to DAC-E6-5 unless the plan marks them.
+  */
+ 
++import { ApiUnreachableError } from "../../api/client";
++
+ export const FULL_COVERAGE_TABLE = "Full coverage table";
++export const TRY_AGAIN = "Try again";
+ 
+ export const CHECK_TITLES = {
+   daily_prices: "Daily prices",
+@@ -14,6 +17,29 @@ export const CHECK_TITLES = {
+   scores: "Factor scores",
+ } as const;
+ 
++/** `Couldn't read {what}: {reason}.` */
++export function readFailed(what: string, reason: string): string {
++  return `Couldn't read ${what}: ${reason}.`;
++}
++
++export const READ_TARGETS = {
++  attention: "what needs attention",
++  checks: "the data health checks",
++  scores: "the factor scores",
++} as const;
++
++/**
++ * The `{reason}` of a failed read (DEC-0373). The GET reads used here answer
++ * only `200` or the `500` `internal_error` envelope (data-health-api 11,
++ * owner-shell 2.3), so a per-code table has nothing else to key on yet. Neither
++ * the envelope's `message` nor its `request_id` is ever shown.
++ */
++export function readFailureReason(error: Error): string {
++  return error instanceof ApiUnreachableError
++    ? "FactorFlow is not answering"
++    : "FactorFlow hit an unexpected problem";
++}
++
+ /** Hidden words for an absent value (STD-UI-4); `noData` is DAC-E6-7's. */
+ export const ABSENT = {
+   noData: "no data stored yet",
+@@ -79,3 +105,15 @@ export function withFailedDownloads(n: string): string {
+ export const FINANCIALS_TO = "Financials to";
+ export const FINANCIALS_NOTE =
+   "Checks that financials are present and downloaded, not that they are correct.";
++
++export function stocksCurrent(c: string, f: string): string {
++  return `${c} of ${f} stocks current`;
++}
++
++export function showAsIncomplete(k: string): string {
++  return `${k} stocks show as Incomplete until their data is complete`;
++}
++
++export const SCORES_AT = "Scores";
++export const FROM_DOWNLOAD_STARTED = "from the download started";
++export const SCORES_NOT_SERVED = "FactorFlow can't read scores yet.";
+diff --git a/web/src/screens/data-health/scores-card.tsx b/web/src/screens/data-health/scores-card.tsx
+new file mode 100644
+index 00000000..82eac373
+--- /dev/null
++++ b/web/src/screens/data-health/scores-card.tsx
+@@ -0,0 +1,115 @@
++import { Link } from "react-router-dom";
++import type { ScoreState, ScoreSummary } from "../../app/shell-types";
++import { formatCount, formatInstant } from "../../components/patterns/format";
++import { Absent, NotDeterminable } from "../../components/patterns/presence";
++import { StatusBadge } from "../../components/patterns/status-badge";
++import { type Status, labelOf, tierOf } from "../../components/patterns/tiers";
++import { CheckCard, ReadFailure, SkeletonLine } from "./check-card";
++import {
++  ABSENT,
++  CHECK_TITLES,
++  FROM_DOWNLOAD_STARTED,
++  READ_TARGETS,
++  SCORES_AT,
++  SCORES_NOT_SERVED,
++  readFailed,
++  readFailureReason,
++  showAsIncomplete,
++  stocksCurrent,
++} from "./copy";
++
++type ScoreStatus = Extract<Status, { of: "scores" }>;
++
++/**
++ * The state of a served summary, in the card table's order (data-health-ui 2.4;
++ * DAC-E6-5). `not_current` is checked after `later`: CAP-002 sets it exactly when
++ * `later` is non-null, so the branch is unreachable on real data and is kept in
++ * the epic's listed order (Resolved Conflict 5).
++ */
++function scoreStateOf(d: ScoreSummary): ScoreStatus["state"] {
++  if (d.never_classified) {
++    return "never_classified";
++  }
++  if (d.later?.state === "building") {
++    return "building";
++  }
++  if (d.later?.state === "failed") {
++    return "failed";
++  }
++  if (d.set?.not_current) {
++    return "not_current";
++  }
++  return "current";
++}
++
++/**
++ * The Factor scores check card, read from the shell's summary (data-health-ui 2.4
++ * and 3; DAC-E6-5; AC-8). Its counts come from `stocks_current` alone, never from
++ * another `followed_count`.
++ */
++export function ScoresCard({
++  scores,
++  onRetryScores,
++}: {
++  scores: ScoreState;
++  onRetryScores: () => void;
++}) {
++  const title = CHECK_TITLES.scores;
++  switch (scores.kind) {
++    case "loading":
++      return (
++        <CheckCard title={title}>
++          <SkeletonLine />
++        </CheckCard>
++      );
++    case "not_served":
++      return <CheckCard title={title} status={<NotDeterminable reason={SCORES_NOT_SERVED} />} />;
++    case "error":
++      if (scores.last === null) {
++        return (
++          <CheckCard title={title}>
++            <ReadFailure
++              sentence={readFailed(READ_TARGETS.scores, readFailureReason(scores.error))}
++              onRetry={onRetryScores}
++            />
++          </CheckCard>
++        );
++      }
++      return <ServedScores title={title} d={scores.last} />;
++    case "served":
++      return <ServedScores title={title} d={scores.data} />;
++  }
++}
++
++function ServedScores({ title, d }: { title: string; d: ScoreSummary }) {
++  const status: ScoreStatus = { of: "scores", state: scoreStateOf(d) };
++  const current = d.stocks_current;
++  const incomplete = current === null ? 0 : current.followed_count - current.current_count;
++  return (
++    <CheckCard
++      title={title}
++      status={<StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>}
++      result={
++        current === null ? (
++          <Absent label={ABSENT.noScores} />
++        ) : (
++          stocksCurrent(formatCount(current.current_count), formatCount(current.followed_count))
++        )
++      }
++      asOf={
++        d.set === null ? undefined : (
++          <>
++            {SCORES_AT} {formatInstant(d.set.ended_at)} · {FROM_DOWNLOAD_STARTED}{" "}
++            <Link to={`/data/downloads/${d.set.run_id}`}>
++              {formatInstant(d.set.run_started_at)}
++            </Link>
++          </>
++        )
++      }
++    >
++      {incomplete > 0 ? (
++        <p className="text-base font-semibold">{showAsIncomplete(formatCount(incomplete))}</p>
++      ) : null}
++    </CheckCard>
++  );
++}

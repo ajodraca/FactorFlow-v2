@@ -1,9 +1,11 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DataHealth } from "../../app/shell-types";
+import { ApiError, ApiUnreachableError } from "../../api/client";
+import type { DataHealth, ScoreState, ScoreSummary } from "../../app/shell-types";
 import { DailyPricesCard } from "./daily-prices-card";
 import { FinancialsCard } from "./financials-card";
+import { ScoresCard } from "./scores-card";
 
 type Prices = NonNullable<DataHealth["checks"]["daily_prices"]>;
 type Financials = NonNullable<DataHealth["checks"]["company_financials"]>;
@@ -45,6 +47,60 @@ function renderFinancials(
   const view = render(
     <MemoryRouter>
       <FinancialsCard check={check} followedCount={followedCount} />
+    </MemoryRouter>,
+  );
+  return { container: view.container };
+}
+
+/** Any status or not-determinable badge; the card itself carries `data-variant="metric"`. */
+const BADGE = '[data-variant^="status-"], [data-variant="coverage-unknown"]';
+const INTERNAL = new ApiError("database said no", "req-9f3", { code: "internal_error" });
+const UNREACHABLE = new ApiUnreachableError("fetch failed");
+const CHECKED_AT = new Date("2026-10-30T16:50:00Z");
+
+function summary(over: Partial<ScoreSummary> = {}): ScoreSummary {
+  return {
+    never_classified: false,
+    set: {
+      set_id: "s-1",
+      classification_date: "2026-10-30",
+      run_id: "run-42",
+      run_started_at: "2026-10-30T14:00:00Z",
+      run_outcome: "succeeded",
+      state: "complete",
+      started_at: "2026-10-30T16:00:00Z",
+      ended_at: "2026-10-30T16:45:00Z",
+      latest_trading_day: "2026-10-29",
+      active_instruments: 12,
+      not_current: false,
+    },
+    later: null,
+    factors: {} as ScoreSummary["factors"],
+    stocks_current: { current_count: 9, followed_count: 12 },
+    ...over,
+  };
+}
+
+function served(data: ScoreSummary = summary()): ScoreState {
+  return { kind: "served", data, checkedAt: CHECKED_AT };
+}
+
+function later(state: "building" | "failed"): NonNullable<ScoreSummary["later"]> {
+  return {
+    set_id: "s-2",
+    state,
+    started_at: "2026-10-30T17:00:00Z",
+    ended_at: state === "failed" ? "2026-10-30T17:10:00Z" : null,
+    failure_reason: null,
+    run_id: "run-43",
+    run_started_at: "2026-10-30T16:55:00Z",
+  };
+}
+
+function renderScores(scores: ScoreState, onRetryScores: () => void = () => undefined) {
+  const view = render(
+    <MemoryRouter>
+      <ScoresCard scores={scores} onRetryScores={onRetryScores} />
     </MemoryRouter>,
   );
   return { container: view.container };
@@ -334,6 +390,162 @@ describe("Company financials card (TC-COMP-149, DAC-E6-4)", () => {
       "Checks that financials are present and downloaded, not that they are correct.",
     );
   });
+});
+
+describe("Factor scores card (TC-COMP-150, DAC-E6-5, AC-8)", () => {
+  // Implements TC-COMP-150
+  it("(a) not served: Not determinable with its reason once, and nothing else", () => {
+    const { container } = renderScores({ kind: "not_served" });
+    const card = region("Factor scores");
+    const badge = badgeWith(card, "coverage-unknown");
+    expect(badge).toHaveTextContent("Not determinable");
+    expect(badge).toHaveAccessibleDescription("FactorFlow can't read scores yet.");
+    expect(container.textContent?.match(/FactorFlow can't read scores yet\./g)).toHaveLength(1);
+    expect(card.querySelector('[data-variant^="status-"]')).toBeNull();
+    expect(card.querySelector("p.text-base")).toBeNull();
+    expect(card.textContent).not.toMatch(/Scores \d/);
+  });
+
+  // Implements TC-COMP-150
+  it.each([
+    [
+      "never classified",
+      summary({ never_classified: true, set: null, stocks_current: null }),
+      "status-neutral",
+      "No scores yet",
+    ],
+    ["building", summary({ later: later("building") }), "status-active", "Updating"],
+    ["failed", summary({ later: later("failed") }), "status-critical", "Score update failed"],
+    [
+      "not current",
+      summary({
+        set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
+      }),
+      "status-warning",
+      "Not reflecting the latest download",
+    ],
+    ["current", summary(), "status-good", "Current"],
+    [
+      "building beats not current",
+      summary({
+        later: later("building"),
+        set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
+      }),
+      "status-active",
+      "Updating",
+    ],
+    [
+      "failed beats not current",
+      summary({
+        later: later("failed"),
+        set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
+      }),
+      "status-critical",
+      "Score update failed",
+    ],
+  ])("(b) %s is %s %s", (_name, data, variant, label) => {
+    renderScores(served(data));
+    const badge = badgeWith(region("Factor scores"), variant);
+    expect(badge).toHaveTextContent(label);
+    expect(badge.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+  });
+
+  // Implements TC-COMP-150
+  it("(c) the result line and the Incomplete sentence", () => {
+    const { container } = renderScores(served());
+    expect(container.querySelectorAll("p.text-base")[0]).toHaveTextContent(
+      /^9 of 12 stocks current$/,
+    );
+    expect(container.querySelectorAll("p.text-base")[1]).toHaveTextContent(
+      /^3 stocks show as Incomplete until their data is complete$/,
+    );
+  });
+
+  // Implements TC-COMP-150
+  it("(c) no Incomplete sentence when every stock is current", () => {
+    const { container } = renderScores(
+      served(summary({ stocks_current: { current_count: 12, followed_count: 12 } })),
+    );
+    expect(container).toHaveTextContent("12 of 12 stocks current");
+    expect(container.textContent).not.toMatch(/Incomplete/);
+  });
+
+  // Implements TC-COMP-150
+  it("(c) one stock short still shows the Incomplete sentence, as the copy is written (register G11)", () => {
+    const { container } = renderScores(
+      served(summary({ stocks_current: { current_count: 11, followed_count: 12 } })),
+    );
+    expect(container).toHaveTextContent("11 of 12 stocks current");
+    expect(container).toHaveTextContent("1 stocks show as Incomplete until their data is complete");
+  });
+
+  // Implements TC-COMP-150
+  it("(d) the count comes from stocks_current alone, not the set's active_instruments", () => {
+    const { container } = renderScores(
+      served(summary({ stocks_current: { current_count: 9, followed_count: 15 } })),
+    );
+    expect(container).toHaveTextContent("9 of 15 stocks current");
+    expect(container).toHaveTextContent("6 stocks show as Incomplete until their data is complete");
+  });
+
+  // Implements TC-COMP-150
+  it("(e) the as-of line links the start time to the download", () => {
+    const { container } = renderScores(served());
+    const line = container.querySelector<HTMLElement>("p.text-xs");
+    expect(line?.textContent).toBe(
+      "Scores 2026-10-30 11:45 CDT · from the download started 2026-10-30 09:00 CDT",
+    );
+    const link = within(line as HTMLElement).getByRole("link", { name: "2026-10-30 09:00 CDT" });
+    expect(link).toHaveAttribute("href", "/data/downloads/run-42");
+  });
+
+  // Implements TC-COMP-150
+  it("(f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set", () => {
+    const { container } = renderScores(
+      served(summary({ never_classified: true, set: null, stocks_current: null })),
+    );
+    const result = container.querySelector<HTMLElement>("p.text-base");
+    expect(within(result as HTMLElement).getByText("—")).toHaveAttribute("aria-hidden", "true");
+    expect(result).toHaveTextContent("no scores yet");
+    expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomplete/);
+    expect(container.querySelector("p.text-xs")).toBeNull();
+  });
+
+  // Implements TC-COMP-150
+  it("(g) loading keeps the heading and shows a busy skeleton with no badge", () => {
+    const { container } = renderScores({ kind: "loading" });
+    const card = region("Factor scores");
+    expect(within(card).getByRole("heading", { level: 2, name: "Factor scores" })).toBeTruthy();
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(card.querySelector(BADGE)).toBeNull();
+  });
+
+  // Implements TC-COMP-150
+  it("(h) a failed read keeps rendering its last summary", () => {
+    const { container } = renderScores({ kind: "error", error: INTERNAL, last: summary() });
+    expect(badgeWith(region("Factor scores"), "status-good")).toHaveTextContent("Current");
+    expect(container).toHaveTextContent("9 of 12 stocks current");
+    expect(container.querySelector('[role="status"]')).toBeNull();
+  });
+
+  // Implements TC-COMP-150
+  it.each([
+    [INTERNAL, "Couldn't read the factor scores: FactorFlow hit an unexpected problem."],
+    [UNREACHABLE, "Couldn't read the factor scores: FactorFlow is not answering."],
+  ])(
+    "(i) a failed read with no last value keeps the heading and offers Try again (%s)",
+    (error, sentence) => {
+      const retry = vi.fn();
+      const { container } = renderScores({ kind: "error", error, last: null }, retry);
+      const card = region("Factor scores");
+      expect(within(card).getByRole("heading", { level: 2, name: "Factor scores" })).toBeTruthy();
+      expect(within(card).getByRole("status").textContent).toBe(sentence);
+      expect(card.querySelector(BADGE)).toBeNull();
+      fireEvent.click(within(card).getByRole("button", { name: "Try again" }));
+      expect(retry).toHaveBeenCalledTimes(1);
+      expect(container.textContent).not.toMatch(/req-9f3|database said no|fetch failed/);
+    },
+  );
 });
 
 describe("Check cards' null state (DAC-E6-7 support, AC-24)", () => {

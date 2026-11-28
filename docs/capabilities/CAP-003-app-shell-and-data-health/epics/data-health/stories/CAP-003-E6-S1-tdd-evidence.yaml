@@ -93,3 +93,47 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-3
+    tasks: [T005, T016, T012, T013]
+    description: >
+      Factor scores card. check-cards.test.tsx gains the TC-COMP-150 rows (T005 a-i, plus the one-stock-short and
+      unreachable-failure rows); then copy.ts (scores strings, readFailed, READ_TARGETS, readFailureReason, TRY_AGAIN),
+      check-card.tsx (ReadFailure, SkeletonLine) and scores-card.tsx.
+    deviations: >
+      (1) ReadFailure renders the sentence in an output element (implicit role status), not p role=status: biome's
+      useSemanticElements rejects the latter and the delivered StateRegion uses output; the tests find it by the
+      status role as the plan's (i) does. (2) readFailureReason takes Error, not ApiError | ApiUnreachableError: it
+      only tests instanceof ApiUnreachableError, and ApiError would be an unused import. Both are plan-text follow-ups
+      (the plan is not this skill's to edit without a decision); both reviewers judged them faithful. (3) The
+      unreachable-failure sentence is asserted through the scores card here; the plan's T011 copy unit cases arrive
+      with the verdict cycle. (4) The first mutation scoring (13/15) left the null-stocks_current guard and the k > 0
+      boundary alive; rows were added and the final run is 15/15.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log
+    red_log_sha256: e852578b21a1b6dd442ce5d2132de6c7ac118b85d67afdb729535e2a24f35b62
+    red_evidence: >
+      With the extended check-cards.test.tsx staged and no scores-card.tsx, the module failed to load: 1 file failed,
+      no tests (the import of ./scores-card did not resolve).
+    green_evidence: >
+      46 tests passed in web/src/screens/data-health; biome lint and format clean over the repo; tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log
+        sha256: e852578b21a1b6dd442ce5d2132de6c7ac118b85d67afdb729535e2a24f35b62
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 70a9efaa9ce33f7c259bd4fb5777a90094dc52ee4dfa8674ed69bb35254b29ef
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-3.patch
+    index_tree: 641a122e0b8b893d8547bba99d90b1455bec205c
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: e232f4900adc5eab8c1cece384cc88e8cae1e779bfa2d8a6c1a46f4369ff02c0
+      generated: 15
+      killed: 15
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

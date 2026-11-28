@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 2 failed) 359ms
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null }) 31ms
+     → expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed) 3ms
+     → expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiError: database said no { requestId: 'req-9f3', code: 'internal_error', state: null })
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (i) a failed read with no last value keeps the heading and offers Try again (ApiUnreachableError: fetch failed)
+AssertionError: expected 'Couldn\'t read the factor scores: Fac…' to be 'Couldn\'t read the factor scores: Fac…' // Object.is equality
+
+Expected: "Couldn't read the factor scores: FactorFlow hit an unexpected problem."
+Received: "Couldn't read the factor scores: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/check-cards.test.tsx:542:60
+    540|       const card = region("Factor scores");
+    541|       expect(within(card).getByRole("heading", { level: 2, name: "Fact…
+    542|       expect(within(card).getByRole("status").textContent).toBe(senten…
+       |                                                            ^
+    543|       expect(card.querySelector(BADGE)).toBeNull();
+    544|       fireEvent.click(within(card).getByRole("button", { name: "Try ag…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 44 passed (46)
+   Start at  20:46:02
+   Duration  3.09s (transform 343ms, setup 216ms, collect 1.27s, tests 359ms, environment 382ms, prepare 378ms)
+

@@ -6,13 +6,39 @@
  * 2.4 and epic DAC-E6-1 to DAC-E6-5 unless the plan marks them.
  */
 
+import { ApiUnreachableError } from "../../api/client";
+
 export const FULL_COVERAGE_TABLE = "Full coverage table";
+export const TRY_AGAIN = "Try again";
 
 export const CHECK_TITLES = {
   daily_prices: "Daily prices",
   company_financials: "Company financials",
   scores: "Factor scores",
 } as const;
+
+/** `Couldn't read {what}: {reason}.` */
+export function readFailed(what: string, reason: string): string {
+  return `Couldn't read ${what}: ${reason}.`;
+}
+
+export const READ_TARGETS = {
+  attention: "what needs attention",
+  checks: "the data health checks",
+  scores: "the factor scores",
+} as const;
+
+/**
+ * The `{reason}` of a failed read (DEC-0373). The GET reads used here answer
+ * only `200` or the `500` `internal_error` envelope (data-health-api 11,
+ * owner-shell 2.3), so a per-code table has nothing else to key on yet. Neither
+ * the envelope's `message` nor its `request_id` is ever shown.
+ */
+export function readFailureReason(error: Error): string {
+  return error instanceof ApiUnreachableError
+    ? "FactorFlow is not answering"
+    : "FactorFlow hit an unexpected problem";
+}
 
 /** Hidden words for an absent value (STD-UI-4); `noData` is DAC-E6-7's. */
 export const ABSENT = {
@@ -79,3 +105,15 @@ export function withFailedDownloads(n: string): string {
 export const FINANCIALS_TO = "Financials to";
 export const FINANCIALS_NOTE =
   "Checks that financials are present and downloaded, not that they are correct.";
+
+export function stocksCurrent(c: string, f: string): string {
+  return `${c} of ${f} stocks current`;
+}
+
+export function showAsIncomplete(k: string): string {
+  return `${k} stocks show as Incomplete until their data is complete`;
+}
+
+export const SCORES_AT = "Scores";
+export const FROM_DOWNLOAD_STARTED = "from the download started";
+export const SCORES_NOT_SERVED = "FactorFlow can't read scores yet.";
