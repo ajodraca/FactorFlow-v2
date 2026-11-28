@@ -1,18 +1,19 @@
 # Data health modules (`web/src/screens/data-health/`)
 
-The first modules of the Data health screen (component design `data-health-ui`
-2.1, 2.3 to 2.7; CAP-003-E6-S1 to CAP-003-E6-S4; AC-4, AC-8, AC-12 to AC-17,
-AC-19, AC-25, DAC-E6-1 to DAC-E6-5, DAC-E6-8 to DAC-E6-17, DAC-E6-S4-1 to
-DAC-E6-S4-4). Nothing mounts them
-yet: there is no screen `index.tsx` and no `/data` route registration, and the
-only importers today are the modules' own tests. The verdict and the cards take
-the reads, the retries and the **Download now** node as props and call no shell
-hook; `DownloadNow` and `StopFollowingDialog` (E6-S2) read the shell context for
-`refresh`. `RecentDownloads` and `WhatYouFollow` (E6-S4) take no props, read
-the shell context (`attention`, `health`) and make their own reads.
+The Data health screen (component design `data-health-ui` 2.1 to 2.7, 3, 5, 10;
+CAP-003-E6-S1 to CAP-003-E6-S5; AC-4, AC-8, AC-12 to AC-17, AC-19, AC-21,
+AC-24 to AC-26, AC-28, DAC-E6-1 to DAC-E6-17, DAC-E6-S4-1 to DAC-E6-S4-4,
+DAC-E6-S5-1 to DAC-E6-S5-6). `index.tsx` (E6-S5) composes the regions below.
+No `/data` route registers it yet (CAP-003-E6-S7); the only importers today are
+the modules' own tests. The verdict and the cards take the reads, the retries
+and the **Download now** node as props and call no shell hook; `DownloadNow` and
+`StopFollowingDialog` (E6-S2) read the shell context for `refresh`.
+`RecentDownloads` and `WhatYouFollow` (E6-S4) take no props, read the shell
+context (`attention`, `health`) and make their own reads.
 
 | File | Holds |
 |---|---|
+| `index.tsx` | `DataHealthScreen` (default export), the screen: header, verdict, check grid or empty card, Needs fixing, Recent downloads, What you follow |
 | `copy.ts` | Every owner-facing string of the screen, as `as const` objects and small functions |
 | `check-card.tsx` | `CheckCard`, `ReadFailure`, `SkeletonLine` |
 | `verdict.tsx` | `Verdict`, the page header and the verdict |
@@ -96,9 +97,52 @@ functions take already-formatted counts, except `countClause` and `andMore`.
   `MARKET_DATA_KEY`, `KEY_NOT_DETERMINABLE_REASON` (*FactorFlow is not
   answering*, the unreachable clause of `readFailureReason`, DEC-0385),
   `MANAGE_FOLLOWED_STOCKS` and `READ_TARGETS.whatYouFollow`.
+- Never-downloaded empty card (E6-S5): `NO_DATA_YET` (*No data has been
+  downloaded yet.*), `downloadForFollowed(n)` (*Download data for your {n}
+  followed stocks to see whether it can be trusted.*; `n` arrives formatted),
+  `START_FIRST_DOWNLOAD`, `FOLLOW_FIRST` (*Follow some stocks first.*) and
+  `OPEN_SETUP`.
 - `isStaleRowRefusal(error)`: true only for an `ApiError` whose code is one of
   those two. `stopFailureReason(error)`: the refusal's reason for them, else
   `readFailureReason(error)`.
+
+## `index.tsx`
+
+### `DataHealthScreen()` (default export)
+
+Reads `attention`, `scores` and `refresh` from the shell context and the
+aggregate from `useDataHealth()`, which this module calls and no other does.
+The aggregate is read on load, on **Try again**, once when the latest download
+turns terminal (the hook's own trigger) and after a successful **Stop
+following**; there is no timer. The root is a flex column capped at
+`LAYOUT.contentMaxWidth`. In order: `Verdict`, one `StateRegion` slot over
+attention's read, `NeedsFixing`, then a two-column grid of `RecentDownloads`
+and `WhatYouFollow`. `/data` sets no title detail (DEC-0214).
+
+- **Slot:** `slotState` maps attention to a `ScreenState`: loading to
+  `loading`; an error to `unavailable` with `readFailureReason`; a null
+  `latest_terminal_download` to `empty-never-populated` (never
+  `never_acquired`, DAC-E6-7); otherwise `populated`. `loading`, `populated`
+  and `unavailable` render the check grid (`unavailable` with the aggregate's
+  own reads); `empty-never-populated` renders `EmptyCard`; `empty-no-match`,
+  `partial`, `error` and `unreachable` are declared not applicable.
+- **Check grid** (`CheckGrid`): a four-column grid. Daily prices and Company
+  financials show a skeleton card while the slot loads or the aggregate loads,
+  a `ReadFailure` (`readFailed(READ_TARGETS.checks, ...)`, retrying the
+  aggregate) on its error, else their cards. Factor scores shows a skeleton
+  while the slot loads, else `ScoresCard`, whose retry is `refresh("scores")`.
+- **Empty card** (`EmptyCard`): titled `NO_DATA_YET`. With followed stocks it
+  shows `downloadForFollowed` and a `DownloadNow` labelled
+  `START_FIRST_DOWNLOAD`; with none it shows `FOLLOW_FIRST` and an **Open
+  setup** link to `/setup`.
+- **Which lower regions mount:** while attention is not an answer, all do.
+  Once it answers with no terminal download: Needs fixing only while the
+  aggregate's `affected_count` is above zero, Recent downloads only when
+  `latest_download` is not null, and What you follow not at all. Otherwise all
+  three. They mount while attention loads and read once (DEC-0405).
+
+`web/src/components/token-literals.test.ts` scans this directory for style
+literals (tests excluded; TC-COMP-178, DAC-E6-S5-4).
 
 ## `check-card.tsx`
 
@@ -398,4 +442,4 @@ A `section` named by its card title (`WHAT_YOU_FOLLOW`), a `summary` card.
 Tests: `check-cards.test.tsx`, `verdict.test.tsx`, `download-now.test.tsx`,
 `stop-following-dialog.test.tsx`, `problem-row.test.tsx`,
 `needs-fixing.test.tsx`, `recent-downloads.test.tsx`,
-`what-you-follow.test.tsx`.
+`what-you-follow.test.tsx`, `data-health.test.tsx` (the screen).
