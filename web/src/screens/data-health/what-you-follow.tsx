@@ -1,6 +1,6 @@
-import { type JSX, useCallback, useEffect, useId, useState } from "react";
+import { type JSX, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getHistoryDepth, listInstruments } from "../../api/client";
+import { ApiError, ApiUnreachableError, getHistoryDepth, listInstruments } from "../../api/client";
 import type { HistoryDepth, InstrumentListResult } from "../../api/types";
 import { useShell } from "../../app/shell-context";
 import { formatCount } from "../../components/patterns/format";
@@ -16,6 +16,7 @@ import {
   CardSummaryList,
   CardTitle,
 } from "../../components/ui/card";
+import { ReadFailure, SkeletonLine } from "./check-card";
 import {
   DEPTH_NOT_SET,
   FOLLOWED_STOCKS,
@@ -23,15 +24,19 @@ import {
   KEY_NOT_DETERMINABLE_REASON,
   MANAGE_FOLLOWED_STOCKS,
   MARKET_DATA_KEY,
+  READ_TARGETS,
   STOPPED_FOLLOWING,
   WHAT_YOU_FOLLOW,
   depthYears,
   historyKept,
+  readFailed,
+  readFailureReason,
 } from "./copy";
 
 type FollowState =
   | { kind: "loading" }
-  | { kind: "ok"; counts: InstrumentListResult; depth: HistoryDepth };
+  | { kind: "ok"; counts: InstrumentListResult; depth: HistoryDepth }
+  | { kind: "error"; error: ApiError | ApiUnreachableError };
 
 /**
  * The What you follow card (component design data-health-ui 2.6 and 4;
@@ -46,10 +51,29 @@ export function WhatYouFollow(): JSX.Element {
   const { health } = useShell();
   const [state, setState] = useState<FollowState>({ kind: "loading" });
 
+  const latestCall = useRef(0);
+
   const read = useCallback(() => {
-    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(([counts, depth]) => {
-      setState({ kind: "ok", counts, depth });
-    });
+    latestCall.current += 1;
+    const mine = latestCall.current;
+    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(
+      ([counts, depth]) => {
+        if (mine !== latestCall.current) {
+          return;
+        }
+        setState({ kind: "ok", counts, depth });
+      },
+      (cause: unknown) => {
+        if (mine !== latestCall.current) {
+          return;
+        }
+        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {
+          throw cause;
+        }
+        // DAC-E6-17: either read failing replaces the body with the error.
+        setState({ kind: "error", error: cause });
+      },
+    );
   }, []);
 
   useEffect(() => {
@@ -70,7 +94,20 @@ export function WhatYouFollow(): JSX.Element {
         <CardHeader>
           <CardTitle id={headingId}>{WHAT_YOU_FOLLOW}</CardTitle>
         </CardHeader>
-        {state.kind === "ok" ? (
+        {state.kind === "loading" ? (
+          <CardContent>
+            <SkeletonLine />
+            <SkeletonLine />
+            <SkeletonLine />
+          </CardContent>
+        ) : state.kind === "error" ? (
+          <CardContent>
+            <ReadFailure
+              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}
+              onRetry={read}
+            />
+          </CardContent>
+        ) : (
           <>
             <CardContent>
               <CardSummaryList className="grid-cols-[auto_1fr]">
@@ -96,7 +133,7 @@ export function WhatYouFollow(): JSX.Element {
               </Button>
             </CardFooter>
           </>
-        ) : null}
+        )}
       </Card>
     </section>
   );

@@ -186,3 +186,52 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-5
+    tasks: [T008, T009, T010, T014, T015, T016]
+    description: >
+      What you follow's loading and error bodies, the key rule's tests and the vocabulary scan. what-you-follow.test.tsx:
+      TC-COMP-155 (T008 a-e), a newest-read-wins case, TC-COMP-172 (T009 a-c, with the source scan) and TC-COMP-173 and
+      TC-COMP-174 (T010 a-c). Then the loading body, the error body, the rejection handler and the stale-call guard in
+      what-you-follow.tsx. T015 and T016 add no behaviour and are validated in the Final Step.
+    deviations: >
+      (1) read() does not set loading before a retry, which T014 says it does; the error body stays until the reads
+      answer, as in Recent downloads, and no criterion or test case observes the difference. (2) The stale-call guard
+      lands here (see cycle 4).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-5.log
+    red_log_sha256: 2556ad718a7cbe06ebb38cf2477dcc5cf3350b56af2201f50aa56678498d0883
+    red_evidence: >
+      With the new tests staged and the cycle-4 component: 7 of 17 tests failed (the loading body, the error sentences,
+      Try again, the newest-read case and the vocabulary scan over the error states).
+    green_evidence: >
+      17 tests passed in what-you-follow.test.tsx; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-5.log
+        sha256: 2556ad718a7cbe06ebb38cf2477dcc5cf3350b56af2201f50aa56678498d0883
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: read() does not return to loading on retry (deviation 1); the shared
+        SkeletonLine puts aria-busy on an empty element (CAP-003-E6-S1); the source scan misses an aliased read of
+        health.health.
+    diff_sha256: b2e7741ceba7f297f2e6b6de66d76aed888e0d92ad8099fcd14d80af2377ae35
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/mutation-cycle-5-results.json
+      results_sha256: 905c44030e018fa68943e41c41bbca65b3b4edbd7e9cfd9d1d7bf74b3a9af100
+      generated: 14
+      killed: 12
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.857
+      survivors:
+        - id: web/src/screens/data-health/what-you-follow.tsx:54:off-by-one:1
+          disposition: equivalent
+          reason: "The call counter is only compared with itself, so its starting value is unobservable."
+        - id: web/src/screens/data-health/what-you-follow.tsx:57:off-by-one:1
+          disposition: equivalent
+          reason: "The counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
