@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 288ms
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE 26ms
+     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC,…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 3 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC 1ms
+     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC …' to be 'Prices to 2026-10-29 · AAA, BBB, CCC' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE
+AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC,…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
+
+Expected: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE"
+Received: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 0 more"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:179:53
+    177|       }),
+    178|     );
+    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
+       |                                                     ^
+    180|   });
+    181| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 3 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC
+AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC …' to be 'Prices to 2026-10-29 · AAA, BBB, CCC' // Object.is equality
+
+Expected: "Prices to 2026-10-29 · AAA, BBB, CCC"
+Received: "Prices to 2026-10-29 · AAA, BBB, CCC and 0 more"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:179:53
+    177|       }),
+    178|     );
+    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
+       |                                                     ^
+    180|   });
+    181| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  20:37:39
+   Duration  2.06s (transform 140ms, setup 96ms, collect 749ms, tests 288ms, environment 311ms, prepare 298ms)
+

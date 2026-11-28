@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-8nvl7qvz/w0/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (28 tests | 1 failed) 151ms
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) exception_count 4 with ["AAA","BBB","CCC"] appends " and 1 more" 6ms
+     → expected 'Financials to 2026-10-30 13:00 CDT · …' to be 'Financials to 2026-10-30 13:00 CDT · …' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) exception_count 4 with ["AAA","BBB","CCC"] appends " and 1 more"
+AssertionError: expected 'Financials to 2026-10-30 13:00 CDT · …' to be 'Financials to 2026-10-30 13:00 CDT · …' // Object.is equality
+
+Expected: "Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC and 1 more"
+Received: "Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:314:45
+    312|       }),
+    313|     );
+    314|     expect(asOfLine(container).textContent).toBe(
+       |                                             ^
+    315|       `Financials to 2026-10-30 13:00 CDT · ${symbols.join(", ")}${tai…
+    316|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 27 passed (28)
+   Start at  20:41:00
+   Duration  1.23s (transform 107ms, setup 32ms, collect 562ms, tests 151ms, environment 182ms, prepare 33ms)
+

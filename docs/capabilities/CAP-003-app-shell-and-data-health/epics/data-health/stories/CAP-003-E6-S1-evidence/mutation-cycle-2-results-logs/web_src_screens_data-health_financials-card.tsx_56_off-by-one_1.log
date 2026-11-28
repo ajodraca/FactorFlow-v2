@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-8nvl7qvz/w1/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (28 tests | 3 failed) 163ms
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (b) exceptions: a warning badge, the two parts and the symbols 11ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC$/
+Received:
+  Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC and 0 more
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] appends "" 3ms
+     → expected 'Financials to 2026-10-30 13:00 CDT · …' to be 'Financials to 2026-10-30 13:00 CDT · …' // Object.is equality
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) exception_count 3 with ["AAA","BBB","CCC"] appends "" 4ms
+     → expected 'Financials to 2026-10-30 13:00 CDT · …' to be 'Financials to 2026-10-30 13:00 CDT · …' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (b) exceptions: a warning badge, the two parts and the symbols
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC$/
+Received:
+  Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC and 0 more
+ ❯ src/screens/data-health/check-cards.test.tsx:267:28
+    265|     expect(badgeWith(card, "status-warning")).toHaveTextContent("Needs…
+    266|     expect(resultLine(card)).toHaveTextContent(/^2 without financials,…
+    267|     expect(asOfLine(card)).toHaveTextContent(
+       |                            ^
+    268|       /^Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC$/,
+    269|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] appends ""
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) exception_count 3 with ["AAA","BBB","CCC"] appends ""
+AssertionError: expected 'Financials to 2026-10-30 13:00 CDT · …' to be 'Financials to 2026-10-30 13:00 CDT · …' // Object.is equality
+
+Expected: "Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC, DDD, EEE"
+Received: "Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC, DDD, EEE and 0 more"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:314:45
+    312|       }),
+    313|     );
+    314|     expect(asOfLine(container).textContent).toBe(
+       |                                             ^
+    315|       `Financials to 2026-10-30 13:00 CDT · ${symbols.join(", ")}${tai…
+    316|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 25 passed (28)
+   Start at  20:40:52
+   Duration  4.63s (transform 239ms, setup 120ms, collect 2.16s, tests 163ms, environment 562ms, prepare 67ms)
+

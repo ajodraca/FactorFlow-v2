@@ -1,0 +1,124 @@
+{
+ "schema": 1,
+ "repo_head": "0e87e0e2336b02ce8b1c891a1124b3ecfd8131bd",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:45:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 45,
+   "original": "  if (check.absent_count > 0) {",
+   "mutated": "  if (check.absent_count >= 0) {"
+  },
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:45:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 45,
+   "original": "  if (check.absent_count > 0) {",
+   "mutated": "  if (check.absent_count > 1) {"
+  },
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:48:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 48,
+   "original": "  if (check.problem_count > 0) {",
+   "mutated": "  if (check.problem_count >= 0) {"
+  },
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:48:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 48,
+   "original": "  if (check.problem_count > 0) {",
+   "mutated": "  if (check.problem_count > 1) {"
+  },
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:54:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 54,
+   "original": "    check.exception_symbols.length === 0",
+   "mutated": "    check.exception_symbols.length === 1"
+  },
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:56:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 56,
+   "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
+   "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more >= 0 ? ` ${andMore(more)}` : \"\"}`;"
+  },
+  {
+   "id": "web/src/screens/data-health/financials-card.tsx:56:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 56,
+   "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
+   "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 1 ? ` ${andMore(more)}` : \"\"}`;"
+  },
+  {
+   "id": "manual:ok-neg",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 62,
+   "original": "      result={check.status === \"ok\" ? allFinancials(formatCount(followedCount)) : parts.join(\", \")}",
+   "mutated": "      result={check.status !== \"ok\" ? allFinancials(formatCount(followedCount)) : parts.join(\", \")}"
+  },
+  {
+   "id": "manual:null-neg",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 33,
+   "original": "  if (check === null) {",
+   "mutated": "  if (check !== null) {"
+  },
+  {
+   "id": "manual:asof-neg",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 66,
+   "original": "          {check.as_of === null ? (",
+   "mutated": "          {check.as_of !== null ? ("
+  },
+  {
+   "id": "manual:problem-ge",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 48,
+   "original": "  if (check.problem_count > 0) {",
+   "mutated": "  if (check.problem_count >= 0) {"
+  },
+  {
+   "id": "manual:problem-field",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 49,
+   "original": "    parts.push(withFailedDownloads(formatCount(check.problem_count)));",
+   "mutated": "    parts.push(withFailedDownloads(formatCount(check.absent_count)));"
+  },
+  {
+   "id": "manual:more-5",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/financials-card.tsx",
+   "line": 52,
+   "original": "  const more = check.exception_count - check.exception_symbols.length;",
+   "mutated": "  const more = check.exception_count - 5;"
+  }
+ ]
+}

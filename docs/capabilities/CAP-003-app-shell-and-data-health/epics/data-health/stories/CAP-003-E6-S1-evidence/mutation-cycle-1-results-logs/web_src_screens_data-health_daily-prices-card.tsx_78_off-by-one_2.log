@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 144ms
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 4ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
+Received:
+  1 without prices, 1 behind 2026-10-29
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
+Received:
+  1 without prices, 1 behind 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:150:35
+    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
+    149|     );
+    150|     expect(resultLine(container)).toHaveTextContent(
+       |                                   ^
+    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
+    152|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  20:37:33
+   Duration  2.12s (transform 165ms, setup 69ms, collect 685ms, tests 144ms, environment 347ms, prepare 79ms)
+

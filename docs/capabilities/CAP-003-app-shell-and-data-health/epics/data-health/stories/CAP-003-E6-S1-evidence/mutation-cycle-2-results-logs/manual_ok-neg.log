@@ -1,0 +1,118 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-8nvl7qvz/w3/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (28 tests | 5 failed) 173ms
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (a) ok: a good badge, the all-stocks result line and the as-of instant with its zone 30ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^All 30 stocks have financials$/
+Received:
+
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (b) exceptions: a warning badge, the two parts and the symbols 4ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 without financials, 1 with failed downloads$/
+Received:
+  All 10 stocks have financials
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 0 and problems 4 read 4 with failed downloads 3ms
+     → expected 'All 10 stocks have financials' to be '4 with failed downloads' // Object.is equality
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 5 and problems 0 read 5 without financials 3ms
+     → expected 'All 10 stocks have financials' to be '5 without financials' // Object.is equality
+   × Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 1 and problems 1 read 1 without financials, 1 with failed downloads 2ms
+     → expected 'All 10 stocks have financials' to be '1 without financials, 1 with failed d…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (a) ok: a good badge, the all-stocks result line and the as-of instant with its zone
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^All 30 stocks have financials$/
+Received:
+
+ ❯ src/screens/data-health/check-cards.test.tsx:249:30
+    247|     const card = region("Company financials");
+    248|     expect(badgeWith(card, "status-good")).toHaveTextContent("All fina…
+    249|     expect(resultLine(card)).toHaveTextContent(/^All 30 stocks have fi…
+       |                              ^
+    250|     expect(asOfLine(card)).toHaveTextContent(/^Financials to 2026-10-3…
+    251|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (b) exceptions: a warning badge, the two parts and the symbols
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 without financials, 1 with failed downloads$/
+Received:
+  All 10 stocks have financials
+ ❯ src/screens/data-health/check-cards.test.tsx:266:30
+    264|     const card = region("Company financials");
+    265|     expect(badgeWith(card, "status-warning")).toHaveTextContent("Needs…
+    266|     expect(resultLine(card)).toHaveTextContent(/^2 without financials,…
+       |                              ^
+    267|     expect(asOfLine(card)).toHaveTextContent(
+    268|       /^Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC$/,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 0 and problems 4 read 4 with failed downloads
+AssertionError: expected 'All 10 stocks have financials' to be '4 with failed downloads' // Object.is equality
+
+Expected: "4 with failed downloads"
+Received: "All 10 stocks have financials"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:281:47
+    279|       financials({ status: "exceptions", absent_count: absent, problem…
+    280|     );
+    281|     expect(resultLine(container).textContent).toBe(expected);
+       |                                               ^
+    282|   });
+    283| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 5 and problems 0 read 5 without financials
+AssertionError: expected 'All 10 stocks have financials' to be '5 without financials' // Object.is equality
+
+Expected: "5 without financials"
+Received: "All 10 stocks have financials"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:281:47
+    279|       financials({ status: "exceptions", absent_count: absent, problem…
+    280|     );
+    281|     expect(resultLine(container).textContent).toBe(expected);
+       |                                               ^
+    282|   });
+    283| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Company financials card (TC-COMP-149, DAC-E6-4) > (c) absent 1 and problems 1 read 1 without financials, 1 with failed downloads
+AssertionError: expected 'All 10 stocks have financials' to be '1 without financials, 1 with failed d…' // Object.is equality
+
+Expected: "1 without financials, 1 with failed downloads"
+Received: "All 10 stocks have financials"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:281:47
+    279|       financials({ status: "exceptions", absent_count: absent, problem…
+    280|     );
+    281|     expect(resultLine(container).textContent).toBe(expected);
+       |                                               ^
+    282|   });
+    283| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 23 passed (28)
+   Start at  20:40:52
+   Duration  4.61s (transform 261ms, setup 129ms, collect 2.16s, tests 173ms, environment 596ms, prepare 466ms)
+

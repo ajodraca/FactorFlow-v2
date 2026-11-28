@@ -1,0 +1,238 @@
+# TDD evidence for CAP-003-E6-S1 - The Verdict and the Three Check Cards.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T021153Z (c276899f).
+# Five cycles per the plan's T020: (1) Daily prices card, (2) Company financials card, (3) Factor scores card,
+# (4) cards' vocabulary and badges (tests only), (5) the verdict. Each cycle is committed as it ends with this
+# file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run src/screens/data-health'
+# as the command (the clones hold no node_modules); generated mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+# Two earlier scorings of cycle 1 (13/15 with two survivors at a count of exactly 1, then 15/15) were superseded after
+# the code review's rework of the null-session handling; only the final run is kept.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T004, T013, T012, T014]
+    description: >
+      Daily prices card. web/src/screens/data-health/check-cards.test.tsx (new): the TC-COMP-157 and TC-COMP-158 rows
+      (T002 a-g, plus a single-absent/single-gap row and an ok-with-no-session row) and the Daily prices half of the
+      null state (T004). Then copy.ts (card strings, GAP_REASONS, gapReason, andMore), check-card.tsx (CheckCard) and
+      daily-prices-card.tsx (DailyPricesCard).
+    deviations: >
+      (1) The shared test harness is smaller than the plan's list for this cycle: only the Daily prices fixtures
+      exist; DH/ATT/ok/INTERNAL arrive with the cycles that use them. (2) A check with status ok and no stored session
+      renders the absent dash alone as its result, and the behind part is omitted when there is no session; the plan
+      does not state these two unreachable-on-real-data cases and both reviewers read them as faithful to T014.
+      (3) Task checkboxes are marked in the story stage commit, not per cycle, because the tasks file is inside the
+      staged diff the cycle's reviews judged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log
+    red_log_sha256: 3fcee3ab913eb29e918a1ddd555fe030ddcd53e62bbf51dd33325e15d3863f85
+    red_evidence: >
+      With check-cards.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests
+      (the import of ./daily-prices-card did not resolve).
+    green_evidence: >
+      15 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log
+        sha256: 3fcee3ab913eb29e918a1ddd555fe030ddcd53e62bbf51dd33325e15d3863f85
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b49466034b66f4264c6bc8bc201adbc685485697d761a1605e7b9c1f1405fd57
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-1.patch
+    index_tree: 3fc34fa965f7b0e24b40ddd616a0e2ade0fd1372
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: 21ef294e8693594a275ca6e9178bf92748130bdcfe132c7c7eee1ebc4ec33925
+      generated: 17
+      killed: 17
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    tasks: [T003, T004, T015]
+    description: >
+      Company financials card. check-cards.test.tsx gains the TC-COMP-149 rows (T003 a-e, plus parameterised
+      zero-part and exception-count rows) and the Company financials half of the null state (T004); then copy.ts
+      (financials strings) and financials-card.tsx.
+    deviations: >
+      (1) Extra exception_count rows (6, 4, 5, 3 against five and three symbols) were added after the first mutation
+      scoring left the off-by-one on the and-k-more guard and the hand-written exception_count - 5 mutant alive; the
+      first scoring (11/13) is superseded by the final run. (2) A non-ok status with both counts at 0 renders an
+      empty result; the plan does not state it and the reviewers noted it without a finding.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-2.log
+    red_log_sha256: 85efe108ce422001f501a7eb56eaf0f5a55784d394afae484e4e97ed8eed53e7
+    red_evidence: >
+      With the extended check-cards.test.tsx staged and no financials-card.tsx, the module failed to load: 1 file
+      failed, no tests (the import of ./financials-card did not resolve).
+    green_evidence: >
+      28 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-2.log
+        sha256: 85efe108ce422001f501a7eb56eaf0f5a55784d394afae484e4e97ed8eed53e7
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8cfaf7ccce55e228634ecf14d86666a8efa4d3fe6fe75afed3e57f36cc012b2e
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-2.patch
+    index_tree: 8017f327916ab4ce6666712b043eca3dec6fb731
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-2-results.json
+      results_sha256: 01b52e9fe3e323cfd54ce9ef63f3b6eaa73ec65bbae7534e0249e893666a7cd1
+      generated: 13
+      killed: 13
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-3
+    tasks: [T005, T016, T012, T013]
+    description: >
+      Factor scores card. check-cards.test.tsx gains the TC-COMP-150 rows (T005 a-i, plus the one-stock-short and
+      unreachable-failure rows); then copy.ts (scores strings, readFailed, READ_TARGETS, readFailureReason, TRY_AGAIN),
+      check-card.tsx (ReadFailure, SkeletonLine) and scores-card.tsx.
+    deviations: >
+      (1) ReadFailure renders the sentence in an output element (implicit role status), not p role=status: biome's
+      useSemanticElements rejects the latter and the delivered StateRegion uses output; the tests find it by the
+      status role as the plan's (i) does. (2) readFailureReason takes Error, not ApiError | ApiUnreachableError: it
+      only tests instanceof ApiUnreachableError, and ApiError would be an unused import. Both are plan-text follow-ups
+      (the plan is not this skill's to edit without a decision); both reviewers judged them faithful. (3) The
+      unreachable-failure sentence is asserted through the scores card here; the plan's T011 copy unit cases arrive
+      with the verdict cycle. (4) The first mutation scoring (13/15) left the null-stocks_current guard and the k > 0
+      boundary alive; rows were added and the final run is 15/15.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log
+    red_log_sha256: e852578b21a1b6dd442ce5d2132de6c7ac118b85d67afdb729535e2a24f35b62
+    red_evidence: >
+      With the extended check-cards.test.tsx staged and no scores-card.tsx, the module failed to load: 1 file failed,
+      no tests (the import of ./scores-card did not resolve).
+    green_evidence: >
+      46 tests passed in web/src/screens/data-health; biome lint and format clean over the repo; tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-3.log
+        sha256: e852578b21a1b6dd442ce5d2132de6c7ac118b85d67afdb729535e2a24f35b62
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 70a9efaa9ce33f7c259bd4fb5777a90094dc52ee4dfa8674ed69bb35254b29ef
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-3.patch
+    index_tree: 641a122e0b8b893d8547bba99d90b1455bec205c
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-3-results.json
+      results_sha256: e232f4900adc5eab8c1cece384cc88e8cae1e779bfa2d8a6c1a46f4369ff02c0
+      generated: 15
+      killed: 15
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-4
+    tasks: [T010]
+    description: >
+      Tests only: the cards' vocabulary and badge scans (TC-COMP-159 and TC-COMP-160, cards half) in
+      check-cards.test.tsx: the DAC-E7-3 term scan over every card state with a planted-case proof, exact badge
+      labels with a hidden tier shape, every Not determinable as a coverage-unknown badge with a description, and
+      every null as an aria-hidden dash with its hidden words. No production file changes.
+    deviations: >
+      (1) The cycle adds characterization tests over code cycles 1-3 already wrote, so they pass on arrival and there
+      is no RED log of its own: red_cycle cites cycle-3, as the plan says T010 joins cycle 3's evidence when no production change follows. (2) Three earlier drafts of the tests were judged
+      narrower than T010 (a sampled state list, substring badge text, hidden words not pinned) and were broadened
+      before this commit; the reviews recorded here judge the final patch.
+    red_cycle: cycle-3
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e44ea8b65273a4e7ceae264c69c010f4f5c2665cec55c336131cf4004cee56ef
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-4.patch
+    index_tree: 0301e656a457d1fc8d4a586a3c502e9187267b8a
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 3 already mutated
+  - id: cycle-5
+    tasks: [T006, T007, T008, T009, T011, T012, T017]
+    description: >
+      The verdict. verdict.test.tsx (new): the nine sentence rows, tiers not feeding the answer, counts and checked time
+      from the aggregate, the header, the loading and failing states of both reads, the no-download case, the
+      gaps-not-checkable sentence, the vocabulary and badge scans and the copy unit cases (T006-T009, T011); then
+      copy.ts (PAGE_TITLE, countClause, verdictSentenceRest, gapsNotCheckable, checked) and verdict.tsx.
+    deviations: >
+      (1) T011's readFailureReason cases are asserted in this cycle's copy.ts describe, though cycle 3 introduced the
+      function and covered it through the scores card. (2) The mutant n <= 1 on countClause survives and is equivalent:
+      the n === 0 branch returns first, so no non-negative integer reaches the comparison with a different result than
+      n === 1; the plan's version of this mutant assumed the opposite branch order. Both reviewers judged the
+      disposition. (3) The first-draft task checkboxes are marked in the story stage commit, not here.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-5.log
+    red_log_sha256: c2cf89e5de4bcb16d2af4ffc3468f3ed0565799fa8f4159d628e16f96d67a200
+    red_evidence: >
+      With verdict.test.tsx staged and no verdict.tsx, 1 of 2 files failed to load (the import of ./verdict did not
+      resolve) and the 51 delivered card tests still passed.
+    green_evidence: >
+      82 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-5.log
+        sha256: c2cf89e5de4bcb16d2af4ffc3468f3ed0565799fa8f4159d628e16f96d67a200
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d50193f84c83aa3dd2dbdbd501dcf892f5927737575055380538542ad73312fe
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-5.patch
+    index_tree: 8c82cc11c4d366f19ecff3cae8bffdad7c944c77
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-5-results.json
+      results_sha256: 1f01c85ecddc3e24be863b88a73fec235de53eb233d28d702ebce8879fe6a7f5
+      generated: 19
+      killed: 18
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.947
+      survivors:
+        - id: manual:n-le1
+          disposition: equivalent
+          reason: countClause returns for n === 0 before the n === 1 test, so n <= 1 is reached only by n >= 1 and agrees with n === 1 for every count
+  - id: cycle-6
+    tasks: [T002, T003, T005, T006]
+    description: >
+      Review v1 rework (IR-001). check-cards.test.tsx gains a describe pinning the thousands separators on the Daily
+      prices absent, gap and behind counts, the Company financials absent, failed-download and followed counts and the
+      Factor scores current, followed and Incomplete counts, each at four digits; verdict.test.tsx gains a 1,500 of
+      3,000 row pinning the verdict's n. Tests only: the production code already formats every count.
+    deviations: >
+      (1) The cycle adds tests over code cycles 1 to 3 and 5 wrote, so they pass on arrival and there is no RED log of
+      their own; the RED is the mutation run, where each of the ten formatCount-to-String mutants the review listed
+      fails them. red_cycle cites cycle-5. (2) IR-002 and IR-003 are optional and not addressed here.
+    red_cycle: cycle-5
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 7215e20cb61f84c9f8ea252dde15dc03ed261b3d3351f24a2e404170b5b7bfa7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-6.patch
+    index_tree: c9f1bc89604d084120d4f8ba25e4e02dccc178db
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-6-results.json
+      results_sha256: bd1c3bd69b0716d0605eae1e8a8b065f80346894a9cdcb3b28e33a91e193cb8d
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

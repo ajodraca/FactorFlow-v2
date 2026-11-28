@@ -1,0 +1,226 @@
+diff --git a/web/src/screens/data-health/check-cards.test.tsx b/web/src/screens/data-health/check-cards.test.tsx
+index 72f17e1a..d2d93859 100644
+--- a/web/src/screens/data-health/check-cards.test.tsx
++++ b/web/src/screens/data-health/check-cards.test.tsx
+@@ -1,4 +1,4 @@
+-import { fireEvent, render, screen, within } from "@testing-library/react";
++import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+ import { MemoryRouter } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { ApiError, ApiUnreachableError } from "../../api/client";
+@@ -573,3 +573,215 @@ describe("Check cards' null state (DAC-E6-7 support, AC-24)", () => {
+     expect(container.textContent).not.toMatch(/No missing prices or gaps|All \d+ stocks/);
+   });
+ });
++
++const TERMS = /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
++
++/** Visible text joined with every aria-label, title and aria-describedby-referenced text. */
++function visibleAndAccessibleText(container: HTMLElement): string {
++  const parts = [container.textContent ?? ""];
++  for (const element of Array.from(container.querySelectorAll<HTMLElement>("*"))) {
++    for (const name of ["aria-label", "title"]) {
++      const value = element.getAttribute(name);
++      if (value) parts.push(value);
++    }
++    for (const id of (element.getAttribute("aria-describedby") ?? "").split(" ")) {
++      const text = id ? container.querySelector(`[id="${CSS.escape(id)}"]`)?.textContent : null;
++      if (text) parts.push(text);
++    }
++  }
++  return parts.join(" ");
++}
++
++describe("Check cards vocabulary and badges (TC-COMP-159, TC-COMP-160, DAC-E6-S1-4, DAC-E6-S1-5)", () => {
++  const exceptions: Partial<Prices> = {
++    status: "exceptions",
++    absent_count: 2,
++    gap_stock_count: null,
++    behind_count: 1,
++    gap_detection: { available: false, reason: NO_GAPS_REASON },
++    exception_count: 7,
++    exception_symbols: ["AAA", "BBB", "CCC", "DDD", "EEE"],
++  };
++
++  function everyState(): HTMLElement[] {
++    const roots: HTMLElement[] = [];
++    for (const check of [
++      prices(),
++      prices(exceptions),
++      prices({ ...exceptions, status: "not_determinable" }),
++      prices({ status: "exceptions", absent_count: 10, latest_session: null }),
++      prices({ status: "exceptions", absent_count: 0, gap_stock_count: 2 }),
++      prices({
++        status: "not_determinable",
++        gap_stock_count: null,
++        gap_detection: { available: false, reason: "calendar_unavailable" },
++      }),
++      prices({
++        status: "exceptions",
++        absent_count: 1,
++        exception_count: 4,
++        exception_symbols: ["AAA", "BBB", "CCC"],
++      }),
++      prices({
++        status: "exceptions",
++        absent_count: 1,
++        exception_count: 6,
++        exception_symbols: ["AAA", "BBB", "CCC", "DDD", "EEE"],
++      }),
++      null,
++    ]) {
++      roots.push(renderPrices(check).container);
++    }
++    for (const check of [
++      financials(),
++      financials({ status: "exceptions", absent_count: 2, problem_count: 1 }),
++      financials({ as_of: null }),
++      financials({ status: "exceptions", absent_count: 0, problem_count: 4 }),
++      financials({ status: "exceptions", absent_count: 5, problem_count: 0 }),
++      null,
++    ]) {
++      roots.push(renderFinancials(check).container);
++    }
++    const scoreStates: ScoreState[] = [
++      served(),
++      served(summary({ never_classified: true, set: null, stocks_current: null })),
++      served(summary({ later: later("building") })),
++      served(summary({ later: later("failed") })),
++      served(
++        summary({
++          set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
++        }),
++      ),
++      served(summary({ stocks_current: { current_count: 12, followed_count: 12 } })),
++      served(summary({ stocks_current: { current_count: 9, followed_count: 15 } })),
++      { kind: "not_served" },
++      { kind: "loading" },
++      { kind: "error", error: INTERNAL, last: null },
++      { kind: "error", error: UNREACHABLE, last: summary() },
++    ];
++    for (const state of scoreStates) {
++      roots.push(renderScores(state).container);
++    }
++    return roots;
++  }
++
++  // Implements TC-COMP-159
++  it("(a) no DAC-E7-3 term appears in any state's text or accessible names, and the scan is not vacuous", () => {
++    expect(TERMS.test("one run")).toBe(true);
++    expect(TERMS.test("Retired")).toBe(true);
++    expect(TERMS.test("downloads")).toBe(false);
++    expect(TERMS.test(NO_GAPS_REASON)).toBe(false);
++    for (const root of everyState()) {
++      expect(visibleAndAccessibleText(root)).not.toMatch(TERMS);
++    }
++    cleanup();
++  });
++
++  // Implements TC-COMP-159
++  it("(a) the download link's href holds the run id but no name or text does", () => {
++    const { container } = renderScores(served());
++    expect(container.querySelector("a")?.getAttribute("href")).toContain("run-42");
++    expect(visibleAndAccessibleText(container)).not.toMatch(/run-42/);
++  });
++
++  // Implements TC-COMP-160
++  it("(b) every ok, exceptions and score-state badge reads exactly its label with a hidden tier shape", () => {
++    const rows: [HTMLElement, string, string][] = [
++      [renderPrices(prices()).container, "status-good", "No missing prices or gaps"],
++      [renderPrices(prices(exceptions)).container, "status-warning", "Needs attention"],
++      [renderFinancials(financials()).container, "status-good", "All financials present"],
++      [
++        renderFinancials(financials({ status: "exceptions", absent_count: 1 })).container,
++        "status-warning",
++        "Needs attention",
++      ],
++      [
++        renderScores(served(summary({ never_classified: true, set: null, stocks_current: null })))
++          .container,
++        "status-neutral",
++        "No scores yet",
++      ],
++      [
++        renderScores(served(summary({ later: later("building") }))).container,
++        "status-active",
++        "Updating",
++      ],
++      [
++        renderScores(served(summary({ later: later("failed") }))).container,
++        "status-critical",
++        "Score update failed",
++      ],
++      [
++        renderScores(
++          served(
++            summary({
++              set: { ...(summary().set as NonNullable<ScoreSummary["set"]>), not_current: true },
++            }),
++          ),
++        ).container,
++        "status-warning",
++        "Not reflecting the latest download",
++      ],
++      [renderScores(served()).container, "status-good", "Current"],
++    ];
++    for (const [root, variant, label] of rows) {
++      const badge = root.querySelector<HTMLElement>(`[data-variant="${variant}"]`);
++      expect(badge?.textContent).toBe(label);
++      expect(badge?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
++    }
++  });
++
++  // Implements TC-COMP-160
++  it("(c) every Not determinable is a coverage-unknown badge with an accessible description, never a status badge, a dash or plain text", () => {
++    const rows: [HTMLElement, string][] = [
++      [
++        renderPrices(prices({ ...exceptions, status: "not_determinable" })).container,
++        "Not determinable",
++      ],
++      [renderPrices(prices(exceptions)).container, "Gaps not determinable"],
++      [renderScores({ kind: "not_served" }).container, "Not determinable"],
++    ];
++    for (const [root, label] of rows) {
++      const badge = Array.from(
++        root.querySelectorAll<HTMLElement>('[data-variant="coverage-unknown"]'),
++      ).find((candidate) => candidate.textContent === label);
++      expect(badge).toBeDefined();
++      expect(badge).toHaveAccessibleDescription(/\S/);
++      expect(within(root).queryByText("—")).toBeNull();
++    }
++    // the gap part inside an exceptions card is the badge itself, not plain text
++    expect(
++      within(rows[1]?.[0] as HTMLElement).getByText("Gaps not determinable").dataset.variant,
++    ).toBe("coverage-unknown");
++    // not_determinable and not_served carry no status badge at all
++    expect(rows[0]?.[0].querySelector('[data-variant^="status-"]')).toBeNull();
++    expect(rows[2]?.[0].querySelector('[data-variant^="status-"]')).toBeNull();
++  });
++
++  // Implements TC-COMP-160
++  it("(d) every null is an aria-hidden em dash with its hidden words, never a 0", () => {
++    const rows: [HTMLElement, string][] = [
++      [
++        renderPrices(prices({ status: "exceptions", absent_count: 10, latest_session: null }))
++          .container,
++        "no prices stored yet",
++      ],
++      [renderPrices(null).container, "no data stored yet"],
++      [renderFinancials(financials({ as_of: null })).container, "no financials stored yet"],
++      [renderFinancials(null).container, "no data stored yet"],
++      [
++        renderScores(served(summary({ never_classified: true, set: null, stocks_current: null })))
++          .container,
++        "no scores yet",
++      ],
++    ];
++    for (const [root, words] of rows) {
++      const dashes = within(root).getAllByText("—");
++      for (const dash of dashes) {
++        expect(dash).toHaveAttribute("aria-hidden", "true");
++        expect(dash.nextElementSibling?.textContent).toBe(words);
++      }
++      expect(root.textContent).not.toMatch(/\b0\b/);
++    }
++  });
++});

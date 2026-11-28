@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w0/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 1 failed) 244ms
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set 9ms
+     → expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (f) a null stocks_current is an absent dash, never 0 of, with no as-of line while there is no set
+AssertionError: expected 'Factor scoresNo scores yet—no scores …' not to match /0 of|Scores \d|Incomplete/
+
+- Expected: 
+/0 of|Scores \d|Incomplete/
+
++ Received: 
+"Factor scoresNo scores yet—no scores yet1 stocks show as Incomplete until their data is complete"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:510:39
+    508|     expect(within(result as HTMLElement).getByText("—")).toHaveAttribu…
+    509|     expect(result).toHaveTextContent("no scores yet");
+    510|     expect(container.textContent).not.toMatch(/0 of|Scores \d|Incomple…
+       |                                       ^
+    511|     expect(container.querySelector("p.text-xs")).toBeNull();
+    512|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 45 passed (46)
+   Start at  20:45:47
+   Duration  3.60s (transform 203ms, setup 117ms, collect 1.21s, tests 244ms, environment 627ms, prepare 212ms)
+

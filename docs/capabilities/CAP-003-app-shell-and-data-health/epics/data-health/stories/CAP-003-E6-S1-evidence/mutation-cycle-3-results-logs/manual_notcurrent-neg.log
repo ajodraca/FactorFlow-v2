@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-4ug2t61t/w3/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (46 tests | 3 failed) 1187ms
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-warning 47ms
+     → expected [] to have a length of 1 but got +0
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-good 3ms
+     → expected [] to have a length of 1 but got +0
+   × Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary 5ms
+     → expected [] to have a length of 1 but got +0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) not current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: true }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-warning
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (b) current is { never_classified: false, set: { set_id: 's-1', classification_date: '2026-10-30', run_id: 'run-42', run_started_at: '2026-10-30T14:00:00Z', run_outcome: 'succeeded', state: 'complete', started_at: '2026-10-30T16:00:00Z', ended_at: '2026-10-30T16:45:00Z', latest_trading_day: '2026-10-29', active_instruments: 12, not_current: false }, later: null, factors: {}, stocks_current: { current_count: 9, followed_count: 12 } } status-good
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
+    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
+    127|   const found = badges(root).filter((element) => element.dataset.varia…
+    128|   expect(found).toHaveLength(1);
+       |                 ^
+    129|   return found[0] as HTMLElement;
+    130| }
+ ❯ src/screens/data-health/check-cards.test.tsx:448:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Factor scores card (TC-COMP-150, DAC-E6-5, AC-8) > (h) a failed read keeps rendering its last summary
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:128:17
+    126| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
+    127|   const found = badges(root).filter((element) => element.dataset.varia…
+    128|   expect(found).toHaveLength(1);
+       |                 ^
+    129|   return found[0] as HTMLElement;
+    130| }
+ ❯ src/screens/data-health/check-cards.test.tsx:526:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 43 passed (46)
+   Start at  20:45:52
+   Duration  4.42s (transform 201ms, setup 113ms, collect 1.40s, tests 1.19s, environment 529ms, prepare 51ms)
+
