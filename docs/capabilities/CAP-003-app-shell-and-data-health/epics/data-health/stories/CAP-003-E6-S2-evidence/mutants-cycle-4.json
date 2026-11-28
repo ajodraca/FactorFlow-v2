@@ -1,0 +1,106 @@
+{
+ "schema": 1,
+ "repo_head": "353baa5971e7a5af3178b08bccc2e4fcb53aa18a",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 64,
+   "original": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 0 });",
+   "mutated": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 1 });",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 66,
+   "original": "  const watchRowExit = useRef(false);",
+   "mutated": "  const watchRowExit = useRef(true);",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:91:negate-boolean:1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 91,
+   "original": "        watchRowExit.current = false;",
+   "mutated": "        watchRowExit.current = true;",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 99,
+   "original": "    const timer = setTimeout(settle, 0);",
+   "mutated": "    const timer = setTimeout(settle, 1);",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 112,
+   "original": "      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 1 }));",
+   "mutated": "      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 2 }));",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "rv:download-variant-outline",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 78,
+   "original": "        variant=\"default\"",
+   "mutated": "        variant=\"outline\"",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "rv:refusal-link-variant-default",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 92,
+   "original": "          <Button variant=\"outline\" asChild>",
+   "mutated": "          <Button variant=\"default\" asChild>",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "rv:try-again-variant-default",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 100,
+   "original": "          <Button variant=\"outline\" onClick={() => void start()}>",
+   "mutated": "          <Button variant=\"default\" onClick={() => void start()}>",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "rv:open-failure-not-reset",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 77,
+   "original": "      setFailure(null);",
+   "mutated": "      void 0;",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "rv:close-failure-not-reset",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 133,
+   "original": "    setFailure(null);",
+   "mutated": "    void 0;",
+   "cycle": "cycle-4"
+  },
+  {
+   "id": "rv:no-last-symbol",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "line": 68,
+   "original": "  if (symbol !== null) lastSymbol.current = symbol;",
+   "mutated": "  void 0;",
+   "cycle": "cycle-4"
+  }
+ ]
+}

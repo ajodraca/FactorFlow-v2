@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zm5hwbe5/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (26 tests | 1 failed) 1010ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 143ms
+     → expected 'outline' to be 'default' // Object.is equality
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (34 tests) 2060ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+AssertionError: expected 'outline' to be 'default' // Object.is equality
+
+Expected: "default"
+Received: "outline"
+
+ ❯ src/screens/data-health/download-now.test.tsx:86:52
+     84|     expect(link.getAttribute("href")).toBe("/settings");
+     85|     expect(link.getAttribute("data-variant")).toBe("outline");
+     86|     expect(pressed().getAttribute("data-variant")).toBe("default");
+       |                                                    ^
+     87|     expect(screen.queryByText(/no stocks are followed/)).toBeNull();
+     88|     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 59 passed (60)
+   Start at  23:01:28
+   Duration  4.10s (transform 295ms, setup 202ms, collect 690ms, tests 3.07s, environment 960ms, prepare 1.31s)
+

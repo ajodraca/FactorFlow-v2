@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zm5hwbe5/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (26 tests) 2110ms
+   ✓ Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 375ms
+   ✓ Download now vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (d) every button and link name is a copy.ts label 333ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (b) no state is conveyed by colour alone 467ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (34 tests | 1 failed) 3297ms
+   ✓ Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (f) a 200 closes, re-reads, refreshes attention, announces politely and raises no toast 310ms
+   ✓ Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g) when the row leaves after a stop, focus goes to the Needs fixing heading 361ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed 86ms
+     → expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed
+Error: expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:387:71
+    385|     view.rerender(<NeedsFixingHarness rows={["NEW"]} />);
+    386|     await settle();
+    387|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
+       |                                                                       ^
+    388|   });
+    389| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 59 passed (60)
+   Start at  23:01:21
+   Duration  5.61s (transform 239ms, setup 262ms, collect 1.04s, tests 5.41s, environment 1.20s, prepare 626ms)
+
