@@ -111,6 +111,45 @@ cycles:
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 1 mutated, and the hand-off run scores it
 
+  - id: cycle-4
+    tasks: [T007, T008, T016]
+    description: >
+      Rework of review v1 (IR-001 to IR-006). Tests only, in a new describe of data-health.test.tsx: one read per load of
+      Recent downloads and What you follow across attention's first answer (IR-001); a skeleton inside each of the three
+      check cards while attention loads (IR-002); gap-5 on the root, check grid and lower pair, w-full on the root and
+      gap-4 inside the empty card (IR-003); every badge's text is a labelOf label or a verdict word, over the full screen
+      and the partial screen (IR-004); the exceptions badge, the credential badge, an undetermined gap part and the
+      shape and colour checks over a fixture with a Not found row (IR-005). The dead summary mock line of T005 (e) is
+      removed (IR-006).
+    deviations: >
+      Test-only; no production line changes, as the review required. The new cases pass on the unchanged production
+      code, which was correct; the RED is the reviewer's surviving mutants review-manual:1 to 6 and 10
+      (CAP-003-E6-S5-implementation-review-v1-mutation.json), each of which the new cases kill when applied by hand to
+      index.tsx. IR-005 widens T008's fixtures in this cycle's own describe rather than in place, which keeps cycle-1's
+      cases as they are.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-implementation-review-v1-mutation.json
+    red_log_sha256: 1df8115080fdb29968e313a4abed3caa4aa7d200600200ea4b983a020bf1fe76
+    red_evidence: >
+      The adversarial review's run of 102 mutants left 8 alive, 7 of them not equivalent (review-manual:1 to 6 and 10).
+      With each applied by hand to index.tsx, the cycle's new tests fail 1 of 65; on correct code all 65 pass.
+    green_evidence: >
+      65 tests pass in data-health.test.tsx.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-implementation-review-v1-mutation.json
+        sha256: 1df8115080fdb29968e313a4abed3caa4aa7d200600200ea4b983a020bf1fe76
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: the widened T008 case does not repeat the Partial and Interrupted rows or the
+        accessible-name checks, which cycle 1's cases keep; the IR-004 allowed set is the union of all labels.
+    diff_sha256: cbe57b0f732455ac9a49deb78615220cbc8307f4ebebf553e9efed45d5785ec6
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 1 mutated, and the hand-off run scores it
+
 handoff_mutation:
   runner: scripts/mutation-run.py
   results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/handoff-results-3.json
