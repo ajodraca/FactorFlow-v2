@@ -1,0 +1,100 @@
+diff --git a/web/src/screens/data-health/data-health.test.tsx b/web/src/screens/data-health/data-health.test.tsx
+index d6fdff3d..eafee386 100644
+--- a/web/src/screens/data-health/data-health.test.tsx
++++ b/web/src/screens/data-health/data-health.test.tsx
+@@ -1184,3 +1184,95 @@ describe("copy.ts, empty card strings (DAC-E6-6)", () => {
+     expect(NO_DATA_YET).not.toBe(FOLLOW_FIRST);
+   });
+ });
++
++describe("Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15)", () => {
++  it("frames the empty card with the default card, plain headings and set paragraphs", async () => {
++    standing({ attention: ATT({ latest_download: null, latest_terminal_download: null }) });
++    await renderScreen();
++    const section = region(NO_DATA_YET);
++    expect(section.firstElementChild?.getAttribute("data-variant")).toBe("default");
++    expect(within(section).getByRole("heading").className).not.toMatch(/status-/);
++    const sentence = within(section).getByText(downloadForFollowed("12"));
++    expect(sentence.className).toContain("text-base");
++    expect(sentence.parentElement?.className).toContain("items-start");
++  });
++
++  it("styles the setup branch's paragraph and action the same way", async () => {
++    standing({
++      attention: ATT({ followed_count: 0, latest_download: null, latest_terminal_download: null }),
++      active: 0,
++    });
++    await renderScreen();
++    expect(within(region(NO_DATA_YET)).getByText(FOLLOW_FIRST).className).toContain("text-base");
++  });
++
++  it("gives each check card its own result line and the follow count", async () => {
++    await renderScreen();
++    expect(region("Daily prices").textContent).toContain("All 12 stocks have prices to 2026-10-29");
++    expect(region("Company financials").textContent).toContain("All 12 stocks have financials");
++  });
++
++  it("shows skeleton lines in both check cards while the aggregate loads", async () => {
++    healthReadMock.mockReturnValue(defer<DataHealth>().promise);
++    await renderScreen();
++    for (const name of ["Daily prices", "Company financials"]) {
++      expect(region(name).querySelector("[aria-busy='true']")).not.toBeNull();
++    }
++  });
++
++  it("replaces a loaded check card with the failure when the next read fails", async () => {
++    attentionMock
++      .mockResolvedValueOnce(ATT())
++      .mockResolvedValueOnce(
++        ATT({
++          latest_download: LATEST("running"),
++          latest_terminal_download: TERMINAL("succeeded"),
++        }),
++      )
++      .mockResolvedValue(ATT());
++    healthReadMock.mockResolvedValueOnce(DH()).mockRejectedValue(INTERNAL);
++    await renderScreen();
++    expect(region("Daily prices").textContent).toContain("All 12 stocks have prices");
++    await act(() => vi.advanceTimersByTimeAsync(61_000));
++    await act(() => vi.advanceTimersByTimeAsync(11_000));
++    for (const name of ["Daily prices", "Company financials"]) {
++      expect(region(name).textContent).toContain("Couldn't read the data health checks");
++      expect(region(name).textContent).not.toContain("stocks have");
++    }
++  });
++
++  it("keeps Needs fixing out of the empty state while the aggregate loads or fails", async () => {
++    const empty = ATT({ latest_download: null, latest_terminal_download: null });
++    standing({ attention: empty });
++    healthReadMock.mockReturnValue(defer<DataHealth>().promise);
++    const first = await renderScreen();
++    expect(document.body.textContent).not.toContain("Needs fixing");
++    first.unmount();
++    standing({ attention: empty });
++    healthReadMock.mockRejectedValue(INTERNAL);
++    await renderScreen();
++    expect(document.body.textContent).not.toContain("Needs fixing");
++  });
++
++  it("retries the aggregate alone from the verdict's own Try again", async () => {
++    healthReadMock.mockRejectedValue(INTERNAL);
++    await renderScreen();
++    const att = attentionMock.mock.calls.length;
++    const sum = summaryMock.mock.calls.length;
++    const dh = healthReadMock.mock.calls.length;
++    const header = document.querySelector("header") as HTMLElement;
++    await click(within(header).getByRole("button", { name: "Try again" }));
++    expect(healthReadMock.mock.calls.length).toBe(dh + 1);
++    expect(attentionMock.mock.calls.length).toBe(att);
++    expect(summaryMock.mock.calls.length).toBe(sum);
++  });
++
++  it("centres the screen and aligns the lower pair to the top", async () => {
++    await renderScreen();
++    const header = document.querySelector("header") as HTMLElement;
++    expect((header.parentElement as HTMLElement).className).toContain("mx-auto");
++    expect((region("Recent downloads").parentElement as HTMLElement).className).toContain(
++      "items-start",
++    );
++  });
++});

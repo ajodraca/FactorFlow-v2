@@ -1,0 +1,236 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oubjogrb/w2/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 5 failed) 700ms
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way 17ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (d) shows a running first download's progress beneath the card 15ms
+     → expected <section …(1)>…(1)</section> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with followed stocks 7ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with no followed stocks 9ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with a running first download 9ms
+     → expected <span …(2)>…(1)</span> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Found
+</span>
+
+ ❯ src/screens/data-health/data-health.test.tsx:443:43
+    441|     expect(link.getAttribute("data-variant")).toBe("default");
+    442|     expect(within(card).queryByRole("button", { name: START_FIRST_DOWN…
+    443|     expect(document.querySelector(BADGE)).toBeNull();
+       |                                           ^
+    444|     expect(screen.queryByTestId("verdict-sentence")).toBeNull();
+    445|     expect(document.querySelector("header")?.textContent).not.toContai…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (d) shows a running first download's progress beneath the card
+AssertionError: expected <section …(1)>…(1)</section> to be null
+
+- Expected: 
+null
+
++ Received: 
+<section
+  aria-labelledby=":r22:"
+>
+  <div
+    class="rounded border border-border bg-card text-card-foreground"
+    data-variant="summary"
+  >
+    <div
+      class="flex flex-col space-y-1 p-6"
+    >
+      <h2
+        class="text-lg font-semibold"
+        id=":r22:"
+      >
+        What you follow
+      </h2>
+    </div>
+    <div
+      class="p-6 pt-0"
+    >
+      <dl
+        class="grid gap-x-4 gap-y-2 grid-cols-[auto_1fr]"
+      >
+        <dt
+          class="text-muted-foreground"
+        >
+          Followed stocks
+        </dt>
+        <dd>
+          12
+        </dd>
+        <dt
+          class="text-muted-foreground"
+        >
+          Stopped following
+        </dt>
+        <dd>
+          1 (history kept)
+        </dd>
+        <dt
+          class="text-muted-foreground"
+        >
+          History depth
+        </dt>
+        <dd>
+          <a
+            href="/settings"
+          >
+            5 years
+          </a>
+        </dd>
+        <dt
+          class="text-muted-foreground"
+        >
+          Market data key
+        </dt>
+        <dd>
+          <span
+            class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+            data-variant="status-good"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide h-3 w-3 shrink-0"
+              fill="none"
+              focusable="false"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                fill="currentColor"
+                r="10"
+              />
+            </svg>
+            Found
+          </span>
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="flex items-center p-6 pt-0"
+    >
+      <a
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+        data-variant="outline"
+        href="/data/followed"
+      >
+        Manage followed stocks
+      </a>
+    </div>
+  </div>
+</section>
+
+ ❯ src/screens/data-health/data-health.test.tsx:523:44
+    521|     expect(within(recent).getByRole("progressbar", { name: "3 of 12 st…
+    522|     expect(within(recent).getByText("3 of 12 stocks")).toBeTruthy();
+    523|     expect(queryRegion("What you follow")).toBeNull();
+       |                                            ^
+    524|   });
+    525| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with followed stocks
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with no followed stocks
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed with a running first download
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Found
+</span>
+
+ ❯ src/screens/data-health/data-health.test.tsx:567:68
+    565|     });
+    566|     await renderScreen();
+    567|     expect(document.querySelector('[data-variant="status-good"]')).toB…
+       |                                                                    ^
+    568|     const text = document.body.textContent ?? "";
+    569|     for (const passed of ["No missing prices or gaps", "All financials…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 54 passed (59)
+   Start at  02:54:12
+   Duration  1.80s (transform 179ms, setup 40ms, collect 548ms, tests 700ms, environment 188ms, prepare 32ms)
+

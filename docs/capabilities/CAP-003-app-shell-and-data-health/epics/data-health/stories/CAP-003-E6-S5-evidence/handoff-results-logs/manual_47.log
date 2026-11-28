@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xgvgnqob/w3/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (51 tests | 1 failed) 838ms
+   × Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (d) retries the scores read alone 22ms
+     → expected 1 to be 2 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (d) retries the scores read alone
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/screens/data-health/data-health.test.tsx:888:43
+    886|     await click(within(region("Factor scores")).getByRole("button", { …
+    887|     await flush();
+    888|     expect(summaryMock.mock.calls.length).toBe(sum + 1);
+       |                                           ^
+    889|     expect(attentionMock.mock.calls.length).toBe(att);
+    890|     expect(healthReadMock.mock.calls.length).toBe(dh);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 50 passed (51)
+   Start at  02:51:46
+   Duration  2.03s (transform 201ms, setup 37ms, collect 590ms, tests 838ms, environment 211ms, prepare 200ms)
+

@@ -1,0 +1,110 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-a5hjb1hh/w3/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (44 tests | 2 failed) 586ms
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way 15ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed 8ms
+     → expected <span …(2)>…(1)</span> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Complete
+</span>
+
+ ❯ src/screens/data-health/data-health.test.tsx:443:43
+    441|     expect(link.getAttribute("data-variant")).toBe("default");
+    442|     expect(within(card).queryByRole("button", { name: START_FIRST_DOWN…
+    443|     expect(document.querySelector(BADGE)).toBeNull();
+       |                                           ^
+    444|     expect(screen.queryByTestId("verdict-sentence")).toBeNull();
+    445|     for (const name of ["Daily prices", "Company financials", "Factor …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (f) never shows a check as passed
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Complete
+</span>
+
+ ❯ src/screens/data-health/data-health.test.tsx:549:68
+    547|     standing({ attention: ATT({ latest_download: null, latest_terminal…
+    548|     await renderScreen();
+    549|     expect(document.querySelector('[data-variant="status-good"]')).toB…
+       |                                                                    ^
+    550|     const text = document.body.textContent ?? "";
+    551|     for (const passed of ["No missing prices or gaps", "All financials…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 42 passed (44)
+   Start at  02:40:05
+   Duration  1.82s (transform 210ms, setup 31ms, collect 674ms, tests 586ms, environment 157ms, prepare 26ms)
+
