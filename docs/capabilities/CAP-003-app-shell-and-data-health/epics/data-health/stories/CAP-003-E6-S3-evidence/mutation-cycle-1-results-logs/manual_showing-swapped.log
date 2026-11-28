@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w1/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 167ms
+   × copy.ts, Needs fixing strings (DEC-0382, -4) > formats the count announcement and the last complete download 3ms
+     → expected 'Showing 1,236 of 100 stocks' to be 'Showing 100 of 1,236 stocks' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > copy.ts, Needs fixing strings (DEC-0382, -4) > formats the count announcement and the last complete download
+AssertionError: expected 'Showing 1,236 of 100 stocks' to be 'Showing 100 of 1,236 stocks' // Object.is equality
+
+Expected: "Showing 100 of 1,236 stocks"
+Received: "Showing 1,236 of 100 stocks"
+
+ ❯ src/screens/data-health/problem-row.test.tsx:326:34
+    324| 
+    325|   it("formats the count announcement and the last complete download", …
+    326|     expect(showingOf(100, 1236)).toBe("Showing 100 of 1,236 stocks");
+       |                                  ^
+    327|     expect(lastCompleteDownload("2026-10-29 09:00 CDT")).toBe(
+    328|       "Last complete download 2026-10-29 09:00 CDT",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  00:02:32
+   Duration  1.67s (transform 108ms, setup 58ms, collect 588ms, tests 167ms, environment 243ms, prepare 116ms)
+

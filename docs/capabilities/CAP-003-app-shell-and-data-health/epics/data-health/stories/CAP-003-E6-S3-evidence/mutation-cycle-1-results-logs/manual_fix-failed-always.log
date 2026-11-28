@@ -1,0 +1,41 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w3/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 167ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > offers the not-found controls and no download-again sentence for a not-found row 12ms
+     → expected <p class="text-sm"></p> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > offers the not-found controls and no download-again sentence for a not-found row
+AssertionError: expected <p class="text-sm"></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p
+  class="text-sm"
+>
+  Download again to retry; data already stored is never duplicated or overwritten.
+</p>
+
+ ❯ src/screens/data-health/problem-row.test.tsx:192:44
+    190|   it("offers the not-found controls and no download-again sentence for…
+    191|     renderRow(ROW("ZZZZ", [NF("reference")], false));
+    192|     expect(screen.queryByText(FAILED_FIX)).toBeNull();
+       |                                            ^
+    193|     expect(screen.getByRole("button", { name: "Stop following ZZZZ" })…
+    194|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  00:02:24
+   Duration  2.49s (transform 149ms, setup 149ms, collect 653ms, tests 167ms, environment 389ms, prepare 386ms)
+

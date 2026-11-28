@@ -7,6 +7,7 @@
  */
 
 import { ApiError, ApiUnreachableError } from "../../api/client";
+import type { DataType } from "../../api/types";
 import { formatCount } from "../../components/patterns/format";
 import type { DataAnswer } from "../../components/patterns/worst-data-tier";
 
@@ -240,3 +241,71 @@ export function stopFailureReason(error: ApiError | ApiUnreachableError): string
   }
   return readFailureReason(error);
 }
+
+// CAP-003-E6-S3: Needs fixing (data-health-ui 2.5)
+//
+// The `DATA_TYPE_WORDS` keys are wire values and are never rendered. The
+// `{reason}` of `downloadFailed` is provider text, rendered as text; the reasons
+// of failed reads come only from `readFailureReason`.
+
+export const NEEDS_FIXING = "Needs fixing";
+
+export function needsFixingTitle(n: number): string {
+  return `${NEEDS_FIXING} · ${formatCount(n)}`;
+}
+
+export const FROM_RECENT_DOWNLOADS = "From your most recent downloads";
+
+export const DATA_TYPE_WORDS: Readonly<Record<DataType, string>> = {
+  prices: "daily prices",
+  fundamentals: "company financials",
+  corporate_actions: "corporate actions",
+  reference: "reference data",
+};
+
+export const NO_REASON_RECORDED = "no reason was recorded";
+
+export function downloadFailed(
+  dataType: DataType,
+  reason: string | null,
+  attempts: number,
+): string {
+  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${formatCount(attempts)} attempts`;
+}
+
+export const NOT_RECOGNISED = "The provider doesn't recognise this symbol.";
+export const CONSEQUENCE =
+  "Its scores show as Incomplete until this is fixed, and so does every universe holding it.";
+export const FAILED_FIX =
+  "Download again to retry; data already stored is never duplicated or overwritten.";
+export const NOT_FOUND_FIX = "Probably a typo or a delisted ticker. Downloading again won't help.";
+
+export const FOLLOW_DIFFERENT = "Follow a different symbol";
+
+export function followDifferentName(symbol: string): string {
+  return `${FOLLOW_DIFFERENT} than ${symbol}`;
+}
+
+export function stopFollowingName(symbol: string): string {
+  return `${STOP_FOLLOWING} ${symbol}`;
+}
+
+export function symbolLinkName(symbol: string): string {
+  return `${symbol}, show in the coverage table`;
+}
+
+export const SHOW_MORE = "Show more";
+export const MORE_PROBLEMS = "more problems";
+
+export function showingOf(shown: number, n: number): string {
+  return `Showing ${formatCount(shown)} of ${formatCount(n)} stocks`;
+}
+
+export const NOTHING_NEEDS_FIXING = "Nothing needs fixing.";
+
+export function lastCompleteDownload(time: string): string {
+  return `Last complete download ${time}`;
+}
+
+export const NO_COMPLETE_DOWNLOAD = "No complete download yet";
+export const LAST_COMPLETE_TARGET = "the last complete download";

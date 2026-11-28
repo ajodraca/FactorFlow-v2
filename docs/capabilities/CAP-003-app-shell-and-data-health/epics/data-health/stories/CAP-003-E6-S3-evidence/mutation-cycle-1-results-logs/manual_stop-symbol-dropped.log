@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w2/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 181ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > calls onStopFollowing with the symbol and nothing else 16ms
+     → expected "spy" to be called with arguments: [ 'FBXX' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "FBXX",
++   "",
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > calls onStopFollowing with the symbol and nothing else
+AssertionError: expected "spy" to be called with arguments: [ 'FBXX' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "FBXX",
++   "",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/data-health/problem-row.test.tsx:216:18
+    214|     await user.click(screen.getByRole("button", { name: "Stop followin…
+    215|     expect(stop).toHaveBeenCalledTimes(1);
+    216|     expect(stop).toHaveBeenCalledWith("FBXX");
+       |                  ^
+    217|   });
+    218| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  00:02:24
+   Duration  2.53s (transform 146ms, setup 132ms, collect 646ms, tests 181ms, environment 427ms, prepare 307ms)
+

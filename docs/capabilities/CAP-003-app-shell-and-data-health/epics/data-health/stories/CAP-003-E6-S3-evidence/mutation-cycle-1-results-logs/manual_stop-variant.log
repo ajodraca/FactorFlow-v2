@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 163ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row 66ms
+     → expect(element).toHaveAttribute("data-variant", "ghost") // element.getAttribute("data-variant") === "ghost"
+
+Expected the element to have attribute:
+  data-variant="ghost"
+Received:
+  data-variant="outline"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+Error: expect(element).toHaveAttribute("data-variant", "ghost") // element.getAttribute("data-variant") === "ghost"
+
+Expected the element to have attribute:
+  data-variant="ghost"
+Received:
+  data-variant="outline"
+ ❯ src/screens/data-health/problem-row.test.tsx:144:24
+    142|     const stopButton = screen.getByRole("button", { name: "Stop follow…
+    143|     expect(stopButton).toHaveTextContent(/^Stop following$/);
+    144|     expect(stopButton).toHaveAttribute("data-variant", "ghost");
+       |                        ^
+    145|     const follow = screen.getByRole("link", { name: "Follow a differen…
+    146|     expect(follow).toHaveTextContent(/^Follow a different symbol$/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  00:02:27
+   Duration  2.04s (transform 132ms, setup 58ms, collect 763ms, tests 163ms, environment 256ms, prepare 204ms)
+

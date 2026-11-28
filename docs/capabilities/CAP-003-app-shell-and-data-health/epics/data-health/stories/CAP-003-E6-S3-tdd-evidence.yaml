@@ -1,0 +1,51 @@
+# TDD evidence for CAP-003-E6-S3 - Needs Fixing: problem rows, the header action, Show more and Nothing needs fixing.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862).
+# Cycles per the plan's T017. Each cycle is committed as it ends with this file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/<file>'
+# as the command; generated mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T011, T012, T013]
+    description: >
+      The row and its strings. problem-row.test.tsx (new): TC-COMP-165 (T002 a-f), TC-COMP-153 (T003), TC-COMP-167 row
+      half (T004), TC-COMP-169 (T005) and the copy cases (T011). Then the copy.ts Needs fixing section (T012) and
+      problem-row.tsx (T013).
+    deviations: >
+      (1) Assertions read the row list's text, not the container's, because the location probe renders beside it.
+      (2) Added after the first mutation scoring left the symbol-link encoding mutant alive (22 of 23): a test with a
+      symbol that needs encoding. (3) Extra tests pin DAC-E6-S3-6 (attempts served unchanged) and a request_id inside a
+      reason shown verbatim (DAC-E6-S3-3).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-1.log
+    red_log_sha256: 9a66017ddeb9476a9bdb1ab8a0e740a87abc984eb066f1295a47b6adaa8a6065
+    red_evidence: >
+      With problem-row.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests (the
+      import of ./problem-row did not resolve).
+    green_evidence: >
+      21 tests passed in problem-row.test.tsx; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-1.log
+        sha256: 9a66017ddeb9476a9bdb1ab8a0e740a87abc984eb066f1295a47b6adaa8a6065
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups from the reviews, outside the plan and not adopted: the card's copy exports are pinned by
+        later cycles; the row does not read retryable (the header's Download now does, DAC-E6-9); long unbroken
+        reasons are not wrapped; 1 attempts has no singular form (register G11).
+    diff_sha256: b8a5c10bbea43196cc2547c25196c987b27b7ed060c7b7e69870364851a9a80b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: e234483725fe48231d5d56bfea45c1a144c4f5ac4c53abb76e7e569e952f2e75
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

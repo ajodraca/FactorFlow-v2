@@ -1,0 +1,88 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 4 failed) 174ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the fundamentals download as Downloading company financials failed 10ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading company financials failed…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the corporate_actions download as Downloading corporate actions failed 3ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading corporate actions failed:…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the reference download as Downloading reference data failed 2ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading reference data failed: pr…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > shows the download-again sentence once for a row with only failed downloads 5ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading company financials failed…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the fundamentals download as Downloading company financials failed
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading company financials failed…'
+
+Expected: "Downloading company financials failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading daily prices failed: provider timeout, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the corporate_actions download as Downloading corporate actions failed
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading corporate actions failed:…'
+
+Expected: "Downloading corporate actions failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading daily prices failed: provider timeout, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the reference download as Downloading reference data failed
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading reference data failed: pr…'
+
+Expected: "Downloading reference data failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading daily prices failed: provider timeout, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > shows the download-again sentence once for a row with only failed downloads
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading company financials failed…'
+
+Expected: "Downloading company financials failed: rate limited, 5 attempts"
+Received: "KOFailedDownloading daily prices failed: provider timeout, 3 attemptsFailedDownloading daily prices failed: rate limited, 5 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:182:32
+    180|       "status-critical",
+    181|     ]);
+    182|     expect(rowText(container)).toContain(
+       |                                ^
+    183|       "Downloading company financials failed: rate limited, 5 attempts…
+    184|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 17 passed (21)
+   Start at  00:02:24
+   Duration  2.51s (transform 128ms, setup 169ms, collect 696ms, tests 174ms, environment 366ms, prepare 437ms)
+
