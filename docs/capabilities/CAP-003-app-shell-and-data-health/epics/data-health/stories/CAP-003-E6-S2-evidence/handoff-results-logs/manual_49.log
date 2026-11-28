@@ -1,0 +1,197 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 1181ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 3 failed) 4760ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row 88ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way 79ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (o) when the refused row leaves, focus goes to the heading 1086ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <h2
+      tabindex="-1"
+    >
+      Needs fixing
+    </h2>
+    <ul>
+      <li>
+        <button
+          type="button"
+        >
+          Stop following·
+          GOOD
+        </button>
+      </li>
+    </ul>
+    <output
+      aria-live="polite"
+      class="sr-only"
+    >
+      <span />
+    </output>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mstyle[39m=[32m""[39m
+  [36m>[39m
+    [36m<div>[39m
+      [36m<h2[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [0mNeeds fixing[0m
+      [36m</h2>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<button[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mStop following [0m
+            [0mGOOD[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span />[39m
+      [36m</output>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (b) no state is conveyed by colour alone 666ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:215:27
+    213|     await user.keyboard("{Escape}");
+    214|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+    215|     expect(refusalClosed).toHaveBeenCalledTimes(1);
+       |                           ^
+    216|     await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
+    217|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:229:27
+    227|     await user.click(within(dialog).getByRole("button", { name: "Cance…
+    228|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+    229|     expect(refusalClosed).toHaveBeenCalledTimes(1);
+       |                           ^
+    230|   });
+    231| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (o) when the refused row leaves, focus goes to the heading
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <h2
+      tabindex="-1"
+    >
+      Needs fixing
+    </h2>
+    <ul>
+      <li>
+        <button
+          type="button"
+        >
+          Stop following·
+          GOOD
+        </button>
+      </li>
+    </ul>
+    <output
+      aria-live="polite"
+      class="sr-only"
+    >
+      <span />
+    </output>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mstyle[39m=[32m""[39m
+  [36m>[39m
+    [36m<div>[39m
+      [36m<h2[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [0mNeeds fixing[0m
+      [36m</h2>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<button[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mStop following [0m
+            [0mGOOD[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span />[39m
+      [36m</output>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:491:69
+    489|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    490|     await waitFor(() =>
+    491|       expect(screen.getByRole("heading", { name: "Needs fixing" })).to…
+       |                                                                     ^
+    492|     );
+    493|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 62 passed (65)
+   Start at  23:20:58
+   Duration  6.87s (transform 384ms, setup 412ms, collect 995ms, tests 5.94s, environment 1.52s, prepare 233ms)
+

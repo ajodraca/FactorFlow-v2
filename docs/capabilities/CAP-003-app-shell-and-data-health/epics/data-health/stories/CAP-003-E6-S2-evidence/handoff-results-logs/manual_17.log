@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 1 failed) 739ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again 26ms
+     → expected "spy" to be called 2 times, but got 1 times
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 2610ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (b) no state is conveyed by colour alone 306ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/screens/data-health/download-now.test.tsx:123:23
+    121|     startMock.mockResolvedValueOnce(ACCEPTED);
+    122|     await user.click(again);
+    123|     expect(startMock).toHaveBeenCalledTimes(2);
+       |                       ^
+    124|     expect(refresh).toHaveBeenCalledTimes(1);
+    125|     expect(refresh).toHaveBeenCalledWith("attention");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:19:55
+   Duration  4.03s (transform 220ms, setup 149ms, collect 561ms, tests 3.35s, environment 891ms, prepare 319ms)
+

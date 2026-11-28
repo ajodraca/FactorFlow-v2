@@ -1,0 +1,288 @@
+# TDD evidence for CAP-003-E6-S2 - Download Now and the Stop Following Dialog.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T021153Z, 985e532e when cycle 1 was committed (c276899f is the
+# frozen run base). T001's pre-change green run was not captured in a log (IR-004).
+# Cycles per the plan's T014: (1) Download now, (2) Stop following dialog, (3) vocabulary and badge scans (tests only).
+# Each cycle is committed as it ends with this file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/<file>'
+# as the command; generated mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T006, T009, T010, T014]
+    description: >
+      Download now. web/src/screens/data-health/download-now.test.tsx (new): TC-COMP-161 (T002 a-f), its 202 edge cases
+      and routine-action rules (T003 a-g) and the Download now copy cases (T006 a-c). Then copy.ts (DOWNLOAD_NOW,
+      QUEUED_NOTICE, START_REFUSALS, startFailed) and download-now.tsx (DownloadNow).
+    deviations: >
+      (1) The OTHER_409 fixture's message is "a refusal nobody has met", not the plan's "x": "x" is a substring of the
+      rendered "unexpected", so the envelope-text assertion could never hold. (2) The refusal and failure sentences are
+      <output> elements (implicit role status), not <p role="status">: biome's useSemanticElements rejects the latter.
+      (3) The initial-state aria-busy assertion was added to T003 (e) after the first mutation scoring left the
+      busy useState(true) mutant alive (18 of 19); that scoring is superseded. (4) A first draft guarded Try again with
+      the pending ref; the spec-drift review read that as beyond T010, so it was removed and the patch re-reviewed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log
+    red_log_sha256: 3cbac73c63c41f49f5ad99a3635f4d894c256c17e8c2baccbf2c22e1a4ab3eb9
+    red_evidence: >
+      With download-now.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests
+      (the import of ./download-now did not resolve).
+    green_evidence: >
+      107 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log
+        sha256: 3cbac73c63c41f49f5ad99a3635f4d894c256c17e8c2baccbf2c22e1a4ab3eb9
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The second spec-drift pass named one item, the red-run log in the patch; that is the evidence file the TDD
+        workflow requires (TEST-TDD-002), not behaviour beyond the plan, and it found none in the code. Follow-ups
+        from the reviews, outside the plan's T010 markup and not adopted here: a persistent live region so the
+        sentences announce on every screen reader, focus after Try again unmounts the focused button, and a re-entrancy
+        guard on Try again.
+    diff_sha256: b7e0d0bebb7140472e30f5dabc3b5dd9a9b489b3580dd54496c79503d7842624
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-1.patch
+    index_tree: c600ba2fcc02572e6b0355d65f05cf2b4bb45e14
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: ce9be04ba6a6600803fa1eca416c97cd826a42cd126697956019d5d3748e28a9
+      generated: 18
+      killed: 18
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    tasks: [T004, T005, T006, T009, T011, T014]
+    description: >
+      The stop-following dialog. stop-following-dialog.test.tsx (new): the dialog's own contract (T004 a-e), TC-COMP-162
+      with its 200 edge case and the focus rules (T005 a-k, plus l-o added after mutation scoring) and the stop copy
+      cases (T006 d-f). Then copy.ts (STOP_FOLLOWING, the title, description, failure and stopped strings,
+      STOP_REFUSAL_REASONS, isStaleRowRefusal, stopFailureReason) and stop-following-dialog.tsx (StopFollowingDialog).
+    deviations: >
+      (1) The fallback-focus effect also runs a retry on setTimeout(0), and focus inside the closing [role=dialog] is
+      not read as the owner's own focus: with only the plan's per-render effect, T005 (g) cleared its watch while
+      focus was still on the closing dialog's Cancel, and T005 (h) never re-rendered after the dialog left, so the
+      heading was never focused. (2) The refusal and failure sentences are output elements (implicit role status) for the
+      same reason as cycle 1. (3) Tests l to o and the fresh-node assertion in (j) were added after the first scoring left
+      nine mutants alive (24 of 33); the second scoring is the final one. (4) The OTHER_409 fixture message is the
+      same one as in cycle 1.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log
+    red_log_sha256: b34c182e5f1053ea11a61ebd7a59953aa342b5605b6f3df7d2c39082ae2e3fd8
+    red_evidence: >
+      With stop-following-dialog.test.tsx staged and no production file, the module failed to load: 1 file failed, no
+      tests (the import of ./stop-following-dialog did not resolve).
+    green_evidence: >
+      27 tests passed in stop-following-dialog.test.tsx and 134 in web/src/screens/data-health; biome lint and format
+      clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-2.log
+        sha256: b34c182e5f1053ea11a61ebd7a59953aa342b5605b6f3df7d2c39082ae2e3fd8
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The spec-drift review found only small additions beyond the plan (a private isStopRefusalCode helper, an
+        OTHER_409 case, extra negative assertions) and no change to specified behaviour. Follow-ups from the code review,
+        outside the plan's T011 and not adopted here: an always-mounted status element for the refusal so it announces
+        on every screen reader; treating a body opener (Safari does not focus a clicked button) as no opener; the
+        success path's callbacks sit inside the try, so a throwing caller would read as a failed stop; a test that
+        confirms twice while in flight; a refusal close by overlay click.
+    diff_sha256: 2a7968c1a2723550a58d867dc0a9eb8d103ae94d64fad4113468694279e37986
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-2.patch
+    index_tree: abaee9f036d201aee095844d9aaa5a4fe806fe7f
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 65c8ce2dc1cba7b842e40394936be897d5968ec366d544580d71d9e3b74dba82
+      generated: 33
+      killed: 28
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.848
+      survivors:
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1
+          disposition: equivalent
+          reason: "The announcement serial's initial value only keys the span; it is first compared against the next value, so 0 and 1 are indistinguishable by any input."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1
+          disposition: equivalent
+          reason: "The watchRowExit ref starts true, but the layout effect resets it on every open, and before the first open the opener is null so the effect has nothing to act on."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:91:negate-boolean:1
+          disposition: equivalent
+          reason: "After the heading takes focus the flag stays true only until the effect's own setTimeout pass, which reads focus on the heading and clears it before any caller render or test step can see it."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1
+          disposition: equivalent
+          reason: "The retry delay of 0 against 1 millisecond: the contract fixes only that the heading is focused after the close, and every observer polls (waitFor) rather than timing it."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1
+          disposition: equivalent
+          reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each stop, and it still does."
+  - id: cycle-3
+    tasks: [T007, T008, T012, T013, T014]
+    description: >
+      Tests only: the vocabulary and badge scans (TC-COMP-163 and TC-COMP-164) in both test files: the DAC-E7-3 term scan
+      over every state each control defines (eight for Download now, seven for the dialog) with a planted-case proof
+      that also covers aria-label and title, the label allow-lists, no status or coverage badge, only Button's own
+      variants and the dialog's confirm, no colour utility conveying state, and non-empty text in every status
+      element. No production file changes. T012's scans and T013's full validation ran on these bytes: 3846 tests
+      across 135 files, biome lint and format, tsc, and the build, all clean.
+    deviations: >
+      (1) The cycle adds characterization tests over code cycles 1 and 2 already wrote, so they pass on arrival and
+      have no RED log of their own: red_cycle cites cycle-2. They were instead probed with eight hand-made production
+      mutants (the CAP-001 queued sentence, a reason naming an instrument, text-status-critical, hover:text-destructive,
+      a status-critical button variant, the error message rendered, an empty refusal and an empty announcement); all
+      eight were caught. (2) Four earlier drafts were tightened after the reviews: the colour check now covers prefixed
+      utilities and raw palette colours, the live-text check covers every status or live element, the dialog's states
+      gained UNREACHABLE, and the variant allow-lists are exact. (3) The dialog's label check asserts the exact list
+      Cancel and Stop following, stricter than the plan's any-copy-literal.
+    red_cycle: cycle-2
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Earlier passes reported narrower assertions, which were tightened; the last pass found none. Follow-ups from the
+        reviews, not adopted: a planted-positive for the badge and colour scans, a colour regex that also catches a
+        bare text-red, and an aria-label check in the label allow-list.
+    diff_sha256: 542426d776561b3cbcdb72298b2a586eae8954aab083d213acf4d2ece935c908
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-3.patch
+    index_tree: e7e4cee16d70bd4e767790cadfa8346d66847125
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 and 2 already mutated
+  - id: cycle-4
+    tasks: [T005, T008, T011, T013]
+    description: >
+      Review rework (implementation review v1: IR-001, IR-002, IR-003, IR-006). Tests only plus two comment rewordings:
+      stop-following-dialog.test.tsx gains (m2) (no heading when the row leaves: nothing focused, a later heading not
+      grabbed; kills :91 negate-boolean) and (d2) (a refusal does not follow a caller-driven symbol change; kills the
+      reset in the opener layout effect), and its harness renders the heading only while rows exist. download-now.test.tsx
+      pins data-variant on Download now (default), the refusal links and Try again (outline). IR-006: the two comments
+      no longer use runs as a verb. IR-004 is answered in this file's header; IR-005 needs no change to pass.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the reviewer's mutants, each
+      applied by hand: the tests fail against them (4 failed) and pass with them reverted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log
+    red_log_sha256: 4da420bf5bc3e2d84100edaa1c76a93c7d1981eceed7c92ef1abb12745d63aea
+    red_evidence: >
+      Against the mutants (focus-clear deleted, failure reset deleted, variants swapped) 4 tests failed: download-now (a),
+      (c) and stop-following-dialog (m2), (d2).
+    green_evidence: >
+      146 tests passed in web/src/screens/data-health; biome lint and format clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log
+        sha256: 4da420bf5bc3e2d84100edaa1c76a93c7d1981eceed7c92ef1abb12745d63aea
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The independent review asked for the Follow stocks link's variant too, which was added to (b); it shares one
+        Button with the Set history depth link. The idle-state Download now variant is pinned only in the refusal state.
+    diff_sha256: 67b4fa24bdfd5ffca261ee2b27281d47099250dfdbe75abb5ba991f753a0b5d0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-4.patch
+    index_tree: 945084e2663b9ff0a129d7d3a46950c6997b867d
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: 65dcc3fa51d168e1937de0cd2d0e4b5103c0ce45ef22e7f2b4b625e55d4a73ee
+      generated: 11
+      killed: 5
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 0.455
+      survivors:
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1
+          disposition: equivalent
+          reason: "The announcement serial's initial value only keys the span; it is first compared against the next value, so 0 and 1 are indistinguishable by any input (as in cycle 2)."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1
+          disposition: equivalent
+          reason: "The watchRowExit ref's initial true is reset to false by the layout effect on every open, and before the first open the opener is null so the effect has nothing to act on (as in cycle 2)."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1
+          disposition: equivalent
+          reason: "The retry delay of 0 against 1 millisecond: the contract fixes only that the heading is focused after the close, and every observer polls (waitFor) rather than timing it (as in cycle 2)."
+        - id: web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1
+          disposition: equivalent
+          reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each stop, and it still does (as in cycle 2)."
+        - id: rv:close-failure-not-reset
+          disposition: equivalent
+          reason: "Under DEC-0379's caller contract onClose makes the caller set symbol to null; ConfirmDialog has no exit animation, so the closed content is unmounted, onOpenChange is not called while closed, and the layout effect resets the refusal on the next open (implementation review v1 judged it equivalent)."
+        - id: rv:no-last-symbol
+          disposition: equivalent
+          reason: "ConfirmDialog has no exit animation, so the closing content unmounts in the same commit; T011 asks only that the title never render null, and the mutant renders an empty symbol in content that is no longer mounted (implementation review v1 judged it equivalent)."
+  - id: cycle-5
+    tasks: [T002, T005, T008, T011, T013]
+    description: >
+      Hand-off mutation survivors (six hand-written mutants from the mutant-writer run, manual:11, 29, 40, 42, 51, 62).
+      Tests only: download-now.test.tsx gains (g), a thrown value of neither error class reads as an unexpected problem,
+      and, in the queued case, the helper line follows the button; stop-following-dialog.test.tsx gains (g2) focus on the
+      opener keeps the row-exit watch, (p) a failed stop starts no watch, (q) confirming again clears the previous
+      refusal while in flight, and (r) the unexpected-problem fallback for a stop.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the six hand-written mutants,
+      each applied by hand to the runner's clone: the tests fail against each (red log) and pass with it reverted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-5.log
+    red_log_sha256: 5c0ce9daadc78aaeb454b52dd2cd7f283739f3e0c956b1f3a4c784e0d58d593e
+    red_evidence: >
+      Against each of the six mutants one new test failed: download-now (g) and (b), stop-following-dialog (p), (q), (r)
+      and (g2).
+    green_evidence: >
+      151 tests passed in web/src/screens/data-health; biome check clean on both test files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-5.log
+        sha256: 5c0ce9daadc78aaeb454b52dd2cd7f283739f3e0c956b1f3a4c784e0d58d593e
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Independent code review and spec-drift review both approved. Nits left as they are: the new letters (g2), (p), (q),
+        (r) extend the plan's lettering, and the assertions on the DEC-0377 and DEC-0378 wording move with the owner's
+        review of those provisional decisions.
+    diff_sha256: 4fe57698053caa795f22ce6fee26c3ebc5f3559c4ebaa6bf100a0a01e539d75b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-5.patch
+    index_tree: 40e1e9b2933e6ea94e4d254f52a4b698bf15fc28
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 17149bae1ba1e4b06cd7f7a4e7e8e21c2bf2f2c3b42610376d292fb7523e8c4b
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+handoff_mutation:
+  runner: scripts/mutation-run.py
+  results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/handoff-results.json
+  results_sha256: b70e5efe9142068a3a3a723f2ef9f2f417660447d70d08e9b2aa8e192d8ed236
+  generated: 115
+  killed: 111
+  survived: 4
+  stillborn: 0
+  timeout: 0
+  score: 0.965
+  survivors:
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1
+      disposition: equivalent
+      reason: "The announcement serial's initial value only keys the span; it is first compared against the next value, so 0 and 1 are indistinguishable by any input."
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1
+      disposition: equivalent
+      reason: "The watchRowExit ref's initial true is reset to false by the layout effect on every open, and before the first open the opener is null so the effect has nothing to act on."
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1
+      disposition: equivalent
+      reason: "The retry delay of 0 against 1 millisecond: the contract fixes only that the heading is focused after the close, and every observer polls (waitFor) rather than timing it."
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1
+      disposition: equivalent
+      reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each stop, and it still does."

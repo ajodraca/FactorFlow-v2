@@ -1,0 +1,199 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log
+new file mode 100644
+index 00000000..20fd3d7b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-4.log
+@@ -0,0 +1,82 @@
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++ ❯ src/screens/data-health/download-now.test.tsx (26 tests | 2 failed) 566ms
++   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 61ms
++     → expected 'default' to be 'outline' // Object.is equality
++   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again 13ms
++     → expected 'default' to be 'outline' // Object.is equality
++ ✓ src/screens/data-health/verdict.test.tsx (32 tests) 179ms
++ ✓ src/screens/data-health/check-cards.test.tsx (54 tests) 214ms
++ ❯ src/screens/data-health/stop-following-dialog.test.tsx (34 tests | 2 failed) 1661ms
++   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed 74ms
++     → expect(element).not.toHaveFocus()
++Received element is focused:
++  <h2
++  tabindex="-1"
++>
++  Needs fixing
++</h2>
++   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (d2) a refusal does not follow the dialog to another symbol the caller sets 25ms
++     → expected <output class="text-sm"></output> to be null
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
++AssertionError: expected 'default' to be 'outline' // Object.is equality
++Expected: "outline"
++Received: "default"
++ ❯ src/screens/data-health/download-now.test.tsx:85:47
++     83|     const link = screen.getByRole("link", { name: "Set history depth" …
++     84|     expect(link.getAttribute("href")).toBe("/settings");
++     85|     expect(link.getAttribute("data-variant")).toBe("outline");
++       |                                               ^
++     86|     expect(pressed().getAttribute("data-variant")).toBe("default");
++     87|     expect(screen.queryByText(/no stocks are followed/)).toBeNull();
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again
++AssertionError: expected 'default' to be 'outline' // Object.is equality
++Expected: "outline"
++Received: "default"
++ ❯ src/screens/data-health/download-now.test.tsx:117:48
++    115|     const again = screen.getByRole("button", { name: "Try again" });
++    116|     expect(status.contains(again)).toBe(false);
++    117|     expect(again.getAttribute("data-variant")).toBe("outline");
++       |                                                ^
++    118|     expect(screen.queryByRole("link", { name: "Set history depth" })).…
++    119|     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBe…
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed
++Error: expect(element).not.toHaveFocus()
++Received element is focused:
++  <h2
++  tabindex="-1"
++>
++  Needs fixing
++</h2>
++ ❯ src/screens/data-health/stop-following-dialog.test.tsx:387:71
++    385|     view.rerender(<NeedsFixingHarness rows={["NEW"]} />);
++    386|     await settle();
++    387|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
++       |                                                                       ^
++    388|   });
++    389| 
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
++ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (d2) a refusal does not follow the dialog to another symbol the caller sets
++AssertionError: expected <output class="text-sm"></output> to be null
++- Expected: 
++null
+++ Received: 
++<output
++  class="text-sm"
++>
++  Couldn't stop following FBXX: you already stopped following it.
++</output>
++ ❯ src/screens/data-health/stop-following-dialog.test.tsx:405:59
++    403|     view.rerender(<StopFollowingDialog symbol="GOOD" fallbackFocusRef=…
++    404|     await screen.findByRole("dialog", { name: "Stop following GOOD" });
++    405|     expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
++       |                                                           ^
++    406|   });
++    407| 
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
++ Test Files  2 failed | 2 passed (4)
++      Tests  4 failed | 142 passed (146)
++   Start at  22:13:37
++   Duration  2.93s (transform 296ms, setup 313ms, collect 1.65s, tests 2.62s, environment 1.73s, prepare 885ms)
+diff --git a/web/src/screens/data-health/download-now.test.tsx b/web/src/screens/data-health/download-now.test.tsx
+index b799864d..c2b7000a 100644
+--- a/web/src/screens/data-health/download-now.test.tsx
++++ b/web/src/screens/data-health/download-now.test.tsx
+@@ -82,6 +82,8 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
+     expect(status.textContent).toBe("Couldn't start the download: history depth isn't set.");
+     const link = screen.getByRole("link", { name: "Set history depth" });
+     expect(link.getAttribute("href")).toBe("/settings");
++    expect(link.getAttribute("data-variant")).toBe("outline");
++    expect(pressed().getAttribute("data-variant")).toBe("default");
+     expect(screen.queryByText(/no stocks are followed/)).toBeNull();
+     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBeNull();
+     await user.click(link);
+@@ -97,6 +99,7 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
+     expect(status.textContent).toBe("Couldn't start the download: no stocks are followed.");
+     const link = screen.getByRole("link", { name: "Follow stocks" });
+     expect(link.getAttribute("href")).toBe("/data/followed");
++    expect(link.getAttribute("data-variant")).toBe("outline");
+     expect(screen.queryByText(/history depth/)).toBeNull();
+     expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
+     await user.click(link);
+@@ -112,6 +115,7 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
+     expect(status.textContent).toBe("Couldn't start the download: FactorFlow is not answering.");
+     const again = screen.getByRole("button", { name: "Try again" });
+     expect(status.contains(again)).toBe(false);
++    expect(again.getAttribute("data-variant")).toBe("outline");
+     expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
+     expect(screen.queryByRole("link", { name: "Follow stocks" })).toBeNull();
+     startMock.mockResolvedValueOnce(ACCEPTED);
+diff --git a/web/src/screens/data-health/stop-following-dialog.test.tsx b/web/src/screens/data-health/stop-following-dialog.test.tsx
+index 5dd12a7e..1911f8e9 100644
+--- a/web/src/screens/data-health/stop-following-dialog.test.tsx
++++ b/web/src/screens/data-health/stop-following-dialog.test.tsx
+@@ -79,9 +79,11 @@ function NeedsFixingHarness({
+   const shown = rows.filter((s) => !gone.includes(s));
+   return (
+     <>
+-      <h2 ref={headingRef} tabIndex={-1}>
+-        Needs fixing
+-      </h2>
++      {shown.length > 0 ? (
++        <h2 ref={headingRef} tabIndex={-1}>
++          Needs fixing
++        </h2>
++      ) : null}
+       <ul>
+         {shown.map((s) => (
+           <li key={s}>
+@@ -369,6 +371,40 @@ describe("Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17)",
+     expect(heading).not.toHaveFocus();
+   });
+ 
++  it("(m2) with no heading when the row leaves, nothing is focused and a later heading is not grabbed", async () => {
++    const user = userEvent.setup();
++    retireMock.mockResolvedValue(RETIRED);
++    const view = render(<NeedsFixingHarness rows={["FBXX"]} />);
++    const dialog = await openDialog(user);
++    await confirm(user, dialog);
++    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
++    view.rerender(<NeedsFixingHarness rows={[]} />);
++    await settle();
++    expect(screen.queryByRole("heading", { name: "Needs fixing" })).toBeNull();
++    expect(document.body).toHaveFocus();
++    view.rerender(<NeedsFixingHarness rows={["NEW"]} />);
++    await settle();
++    expect(screen.getByRole("heading", { name: "Needs fixing" })).not.toHaveFocus();
++  });
++
++  it("(d2) a refusal does not follow the dialog to another symbol the caller sets", async () => {
++    const user = userEvent.setup();
++    retireMock.mockRejectedValue(ALREADY);
++    const heading = { current: null };
++    const props = { onClose: vi.fn(), onStopped: vi.fn(), onRefusalClosed: vi.fn() };
++    const view = render(
++      <StopFollowingDialog symbol="FBXX" fallbackFocusRef={heading} {...props} />,
++    );
++    const dialog = await screen.findByRole("dialog", { name: "Stop following FBXX" });
++    await confirm(user, dialog);
++    await within(dialog).findByRole("status");
++    view.rerender(<StopFollowingDialog symbol={null} fallbackFocusRef={heading} {...props} />);
++    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
++    view.rerender(<StopFollowingDialog symbol="GOOD" fallbackFocusRef={heading} {...props} />);
++    await screen.findByRole("dialog", { name: "Stop following GOOD" });
++    expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
++  });
++
+   it("(n) focus the owner placed elsewhere is not grabbed later either", async () => {
+     const user = userEvent.setup();
+     retireMock.mockResolvedValue(RETIRED);
+diff --git a/web/src/screens/data-health/stop-following-dialog.tsx b/web/src/screens/data-health/stop-following-dialog.tsx
+index fce3bbdb..041fef73 100644
+--- a/web/src/screens/data-health/stop-following-dialog.tsx
++++ b/web/src/screens/data-health/stop-following-dialog.tsx
+@@ -68,7 +68,7 @@ export function StopFollowingDialog({
+   if (symbol !== null) lastSymbol.current = symbol;
+   const shown = symbol ?? lastSymbol.current;
+ 
+-  // Runs before the dialog moves focus to Cancel, so the opener is the row's button.
++  // Fires before the dialog moves focus to Cancel, so the opener is the row's button.
+   useLayoutEffect(() => {
+     if (symbol !== null) {
+       opener.current =
+@@ -80,7 +80,7 @@ export function StopFollowingDialog({
+ 
+   // After every render: the caller re-renders when its rows change, so this sees each change.
+   // A row that leaves in the same update as the close can leave focus inside the closing
+-  // dialog until the next tick, and nothing renders after that, so the check runs once more then.
++  // dialog until the next tick, and nothing renders after that, so the check is repeated then.
+   useEffect(() => {
+     const settle = () => {
+       if (!watchRowExit.current) return;

@@ -1,0 +1,81 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w3/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 775ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 2 failed) 2689ms
+   × Stop following dialog (DAC-E6-12, AC-14, AC-25) > (e) in flight: busy, not closable, and the call carries exactly the symbol 61ms
+     → expected "spy" to be called with arguments: [ 'FBXX' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "FBXX",
++   "fbxx",
+  ]
+
+
+Number of calls: 1
+
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (j) a second stop announces again, in a fresh node 68ms
+     → expected last "spy" call to have been called with [ 'GOOD' ]
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (b) no state is conveyed by colour alone 491ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following dialog (DAC-E6-12, AC-14, AC-25) > (e) in flight: busy, not closable, and the call carries exactly the symbol
+AssertionError: expected "spy" to be called with arguments: [ 'FBXX' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "FBXX",
++   "fbxx",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:188:24
+    186|     expect(screen.getByRole("dialog", { name: "Stop following FBXX" })…
+    187|     expect(retireMock).toHaveBeenCalledTimes(1);
+    188|     expect(retireMock).toHaveBeenCalledWith("FBXX");
+       |                        ^
+    189|     await act(async () => {
+    190|       pending.resolve(RETIRED);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (j) a second stop announces again, in a fresh node
+AssertionError: expected last "spy" call to have been called with [ 'GOOD' ]
+
+- Expected
++ Received
+
+  Array [
+-   "GOOD",
++   "good",
+  ]
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:343:24
+    341|     expect(live?.textContent).toBe("Stopped following GOOD");
+    342|     expect(live?.firstElementChild).not.toBe(first);
+    343|     expect(retireMock).toHaveBeenLastCalledWith("GOOD");
+       |                        ^
+    344|   });
+    345| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 63 passed (65)
+   Start at  23:20:41
+   Duration  4.04s (transform 333ms, setup 169ms, collect 635ms, tests 3.46s, environment 785ms, prepare 379ms)
+

@@ -1,0 +1,89 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 646ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 4 failed) 1909ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (f) a 200 closes, re-reads, refreshes attention, announces politely and raises no toast 34ms
+     → expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g) when the row leaves after a stop, focus goes to the Needs fixing heading 35ms
+     → expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (j) a second stop announces again, in a fresh node 30ms
+     → expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+   × copy.ts, stop following strings (DEC-0377) > (d) the titles and sentences 1ms
+     → expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (f) a 200 closes, re-reads, refreshes attention, announces politely and raises no toast
+AssertionError: expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+
+Expected: "Stopped following FBXX"
+Received: "Stopped following FBXX."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:278:31
+    276|     expect(refresh).toHaveBeenCalledWith("attention");
+    277|     const live = document.body.querySelector('[aria-live="polite"]');
+    278|     expect(live?.textContent).toBe("Stopped following FBXX");
+       |                               ^
+    279|     expect(live?.closest('[role="dialog"]')).toBeNull();
+    280|     expect(toast.success).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g) when the row leaves after a stop, focus goes to the Needs fixing heading
+AssertionError: expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+
+Expected: "Stopped following FBXX"
+Received: "Stopped following FBXX."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:298:78
+    296|       expect(screen.getByRole("heading", { name: "Needs fixing" })).to…
+    297|     );
+    298|     expect(document.body.querySelector('[aria-live="polite"]')?.textCo…
+       |                                                                              ^
+    299|       "Stopped following FBXX",
+    300|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (j) a second stop announces again, in a fresh node
+AssertionError: expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+
+Expected: "Stopped following FBXX"
+Received: "Stopped following FBXX."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:337:32
+    335|     const live = document.body.querySelector('[aria-live="polite"]');
+    336|     const first = live?.firstElementChild;
+    337|     expect(first?.textContent).toBe("Stopped following FBXX");
+       |                                ^
+    338|     dialog = await openDialog(user, "GOOD");
+    339|     await confirm(user, dialog);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > copy.ts, stop following strings (DEC-0377) > (d) the titles and sentences
+AssertionError: expected 'Stopped following FBXX.' to be 'Stopped following FBXX' // Object.is equality
+
+Expected: "Stopped following FBXX"
+Received: "Stopped following FBXX."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:520:38
+    518|     expect(STOP_FOLLOWING).toBe("Stop following");
+    519|     expect(stopFollowingFailed("FBXX", "x")).toBe("Couldn't stop follo…
+    520|     expect(stoppedFollowing("FBXX")).toBe("Stopped following FBXX");
+       |                                      ^
+    521|   });
+    522| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 61 passed (65)
+   Start at  23:22:01
+   Duration  2.74s (transform 139ms, setup 97ms, collect 315ms, tests 2.56s, environment 496ms, prepare 270ms)
+

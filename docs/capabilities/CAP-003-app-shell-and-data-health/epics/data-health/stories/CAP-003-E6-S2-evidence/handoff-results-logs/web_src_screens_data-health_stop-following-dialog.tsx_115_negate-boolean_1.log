@@ -1,0 +1,71 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w3/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 974ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 3 failed) 2782ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row 43ms
+     → expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: you al…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way 29ms
+     → expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) a transport failure keeps the dialog open and closing it leaves the row alone 130ms
+     → expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row
+AssertionError: expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: you al…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: you already stopped following it."
+Received: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:205:32
+    203|     await confirm(user, dialog);
+    204|     const status = await within(dialog).findByRole("status");
+    205|     expect(status.textContent).toBe(
+       |                                ^
+    206|       "Couldn't stop following FBXX: you already stopped following it.…
+    207|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way
+AssertionError: expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow doesn't follow it."
+Received: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:226:32
+    224|     await confirm(user, dialog);
+    225|     const status = await within(dialog).findByRole("status");
+    226|     expect(status.textContent).toBe("Couldn't stop following FBXX: Fac…
+       |                                ^
+    227|     await user.click(within(dialog).getByRole("button", { name: "Cance…
+    228|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) a transport failure keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow is not answering."
+Received: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 62 passed (65)
+   Start at  23:19:21
+   Duration  3.88s (transform 156ms, setup 90ms, collect 443ms, tests 3.76s, environment 583ms, prepare 494ms)
+

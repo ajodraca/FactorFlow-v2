@@ -1,0 +1,485 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log
+new file mode 100644
+index 00000000..97020440
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/data-health/download-now.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/download-now.test.tsx [ src/screens/data-health/download-now.test.tsx ]
++Error: Failed to resolve import "./download-now" from "web/src/screens/data-health/download-now.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/download-now.test.tsx:17:38
++  15 |  const __vi_import_5__ = await import('../../components/ui/toast')
++  16 |  const __vi_import_6__ = await import('./copy')
++  17 |  const __vi_import_7__ = await import('./download-now')
++     |                                       ^
++  18 |  
++  19 |  
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  21:35:54
++   Duration  1.03s (transform 23ms, setup 62ms, collect 0ms, tests 0ms, environment 423ms, prepare 275ms)
++
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+index 8d75cfe3..4c1bb10b 100644
+--- a/web/src/screens/data-health/copy.ts
++++ b/web/src/screens/data-health/copy.ts
+@@ -158,3 +158,37 @@ export function showAsIncomplete(k: string): string {
+ export const SCORES_AT = "Scores";
+ export const FROM_DOWNLOAD_STARTED = "from the download started";
+ export const SCORES_NOT_SERVED = "FactorFlow can't read scores yet.";
++
++// CAP-003-E6-S2: Download now and Stop following (data-health-ui 2.7)
++
++export const DOWNLOAD_NOW = "Download now";
++export const QUEUED_NOTICE = "A download is running. This starts when it finishes.";
++
++/**
++ * The two refusals `POST /api/acquisition-runs` can answer, each with its fix.
++ * The keys are wire codes from the delivered route (`runs.py` l.86-97),
++ * selected by `ApiError.code`. The envelope `message`, which carries domain
++ * terms, is never rendered (ux-design 0.7; register C13; AC-19).
++ * `history_depth_not_set` wins when both preconditions fail (`runs.py` l.77-78).
++ */
++export const START_REFUSALS: Readonly<
++  Record<
++    "history_depth_not_set" | "no_active_instruments",
++    { sentence: string; fix: string; to: string }
++  >
++> = {
++  history_depth_not_set: {
++    sentence: "Couldn't start the download: history depth isn't set.",
++    fix: "Set history depth",
++    to: "/settings",
++  },
++  no_active_instruments: {
++    sentence: "Couldn't start the download: no stocks are followed.",
++    fix: "Follow stocks",
++    to: "/data/followed",
++  },
++};
++
++export function startFailed(reason: string): string {
++  return `Couldn't start the download: ${reason}.`;
++}
+diff --git a/web/src/screens/data-health/download-now.test.tsx b/web/src/screens/data-health/download-now.test.tsx
+new file mode 100644
+index 00000000..1d4106c0
+--- /dev/null
++++ b/web/src/screens/data-health/download-now.test.tsx
+@@ -0,0 +1,286 @@
++import { render, screen, waitFor } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import type { JSX } from "react";
++import { MemoryRouter, useLocation } from "react-router-dom";
++import { beforeEach, describe, expect, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError, startAcquisitionRun } from "../../api/client";
++import type { RunStartResult } from "../../api/types";
++import { toast } from "../../components/ui/toast";
++import { DOWNLOAD_NOW, QUEUED_NOTICE, START_REFUSALS, startFailed } from "./copy";
++import { DownloadNow } from "./download-now";
++
++vi.mock("../../api/client", async () => {
++  const actual = await vi.importActual<typeof import("../../api/client")>("../../api/client");
++  return { ...actual, startAcquisitionRun: vi.fn(), retireInstrument: vi.fn() };
++});
++
++const refresh = vi.fn();
++vi.mock("../../app/shell-context", () => ({ useShell: () => ({ refresh }) }));
++
++vi.mock("../../components/ui/toast", () => ({
++  toast: { success: vi.fn(), warning: vi.fn(), error: vi.fn() },
++  Toaster: () => null,
++}));
++
++const startMock = vi.mocked(startAcquisitionRun);
++
++const DEPTH = new ApiError(
++  "No history depth has been set. Configure it in Settings before running.",
++  "req-d1",
++  { code: "history_depth_not_set" },
++);
++const NONE = new ApiError(
++  "No active instruments exist. Add at least one instrument before running.",
++  "req-n1",
++  { code: "no_active_instruments" },
++);
++const INTERNAL = new ApiError("database said no", "req-9f3", { code: "internal_error" });
++const OTHER_409 = new ApiError("a refusal nobody has met", "req-o1", { code: "some_future_code" });
++const UNREACHABLE = new ApiUnreachableError("POST /api/acquisition-runs could not be reached");
++
++const ACCEPTED: RunStartResult = { runId: "r-9", state: "requested", queuedBehind: null };
++const QUEUED: RunStartResult = { runId: "r-10", state: "requested", queuedBehind: "r-1" };
++
++function LocationProbe(): JSX.Element {
++  return <div data-testid="location">{useLocation().pathname}</div>;
++}
++
++function renderDownload(label?: string) {
++  return render(
++    <MemoryRouter initialEntries={["/data"]}>
++      <DownloadNow {...(label === undefined ? {} : { label })} />
++      <LocationProbe />
++    </MemoryRouter>,
++  );
++}
++
++function deferred<T>() {
++  let resolve!: (value: T) => void;
++  let reject!: (reason: unknown) => void;
++  const promise = new Promise<T>((res, rej) => {
++    resolve = res;
++    reject = rej;
++  });
++  return { promise, resolve, reject };
++}
++
++const pressed = () => screen.getByRole("button", { name: "Download now" });
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  startMock.mockReset();
++});
++
++describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11)", () => {
++  // Implements TC-COMP-161
++  it("(a) history depth: its own sentence and its Settings link, never the other refusal", async () => {
++    const user = userEvent.setup();
++    startMock.mockRejectedValue(DEPTH);
++    renderDownload();
++    await user.click(pressed());
++    const status = await screen.findByRole("status");
++    expect(status.textContent).toBe("Couldn't start the download: history depth isn't set.");
++    const link = screen.getByRole("link", { name: "Set history depth" });
++    expect(link.getAttribute("href")).toBe("/settings");
++    expect(screen.queryByText(/no stocks are followed/)).toBeNull();
++    expect(screen.queryByRole("link", { name: "Follow stocks" })).toBeNull();
++    await user.click(link);
++    expect(screen.getByTestId("location").textContent).toBe("/settings");
++  });
++
++  it("(b) no stocks followed: its own sentence and its Follow stocks link", async () => {
++    const user = userEvent.setup();
++    startMock.mockRejectedValue(NONE);
++    renderDownload();
++    await user.click(pressed());
++    const status = await screen.findByRole("status");
++    expect(status.textContent).toBe("Couldn't start the download: no stocks are followed.");
++    const link = screen.getByRole("link", { name: "Follow stocks" });
++    expect(link.getAttribute("href")).toBe("/data/followed");
++    expect(screen.queryByText(/history depth/)).toBeNull();
++    expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
++    await user.click(link);
++    expect(screen.getByTestId("location").textContent).toBe("/data/followed");
++  });
++
++  it("(c) a transport failure: the reason and Try again outside the status, which posts again", async () => {
++    const user = userEvent.setup();
++    startMock.mockRejectedValueOnce(UNREACHABLE);
++    renderDownload();
++    await user.click(pressed());
++    const status = await screen.findByRole("status");
++    expect(status.textContent).toBe("Couldn't start the download: FactorFlow is not answering.");
++    const again = screen.getByRole("button", { name: "Try again" });
++    expect(status.contains(again)).toBe(false);
++    expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
++    expect(screen.queryByRole("link", { name: "Follow stocks" })).toBeNull();
++    startMock.mockResolvedValueOnce(ACCEPTED);
++    await user.click(again);
++    expect(startMock).toHaveBeenCalledTimes(2);
++    expect(refresh).toHaveBeenCalledTimes(1);
++    expect(refresh).toHaveBeenCalledWith("attention");
++    await waitFor(() => expect(screen.queryByText(/Couldn't start the download/)).toBeNull());
++  });
++
++  it.each([
++    ["an internal error", INTERNAL],
++    ["an unknown 409 code", OTHER_409],
++  ])(
++    "(d) %s reads as an unexpected problem with Try again, never as a refusal",
++    async (_n, error) => {
++      const user = userEvent.setup();
++      startMock.mockRejectedValue(error);
++      renderDownload();
++      await user.click(pressed());
++      const status = await screen.findByRole("status");
++      expect(status.textContent).toBe(
++        "Couldn't start the download: FactorFlow hit an unexpected problem.",
++      );
++      expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
++      expect(screen.queryByRole("link")).toBeNull();
++    },
++  );
++
++  it.each([
++    ["DEPTH", DEPTH],
++    ["NONE", NONE],
++    ["UNREACHABLE", UNREACHABLE],
++    ["INTERNAL", INTERNAL],
++    ["OTHER_409", OTHER_409],
++  ])("(e) %s: no envelope text reaches the page", async (_n, error) => {
++    const user = userEvent.setup();
++    startMock.mockRejectedValue(error);
++    renderDownload();
++    await user.click(pressed());
++    await screen.findByRole("status");
++    const text = document.body.textContent ?? "";
++    for (const leaked of [
++      error.message,
++      "req-",
++      "history_depth_not_set",
++      "no_active_instruments",
++    ]) {
++      expect(text).not.toContain(leaked);
++    }
++  });
++
++  it("(f) a new press clears the previous line", async () => {
++    const user = userEvent.setup();
++    startMock.mockRejectedValueOnce(DEPTH).mockRejectedValueOnce(NONE);
++    renderDownload();
++    await user.click(pressed());
++    await screen.findByRole("link", { name: "Set history depth" });
++    await user.click(pressed());
++    await screen.findByRole("link", { name: "Follow stocks" });
++    expect(screen.queryByRole("link", { name: "Set history depth" })).toBeNull();
++    expect(screen.queryByText(/history depth/)).toBeNull();
++    expect(screen.getAllByRole("status")).toHaveLength(1);
++  });
++});
++
++describe("Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15)", () => {
++  it("(a) 202 with nothing queued refreshes attention once and says nothing", async () => {
++    const user = userEvent.setup();
++    startMock.mockResolvedValue(ACCEPTED);
++    renderDownload();
++    await user.click(pressed());
++    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
++    expect(refresh).toHaveBeenCalledWith("attention");
++    expect(screen.queryByRole("status")).toBeNull();
++    expect(screen.getByTestId("location").textContent).toBe("/data");
++  });
++
++  it("(b) 202 queued behind a running download shows the helper line and refreshes nothing", async () => {
++    const user = userEvent.setup();
++    startMock.mockResolvedValue(QUEUED);
++    renderDownload();
++    await user.click(pressed());
++    const line = await screen.findByRole("status");
++    expect(line.textContent).toBe("A download is running. This starts when it finishes.");
++    expect(refresh).not.toHaveBeenCalled();
++    expect(pressed()).toBeTruthy();
++    expect(pressed().hasAttribute("disabled")).toBe(false);
++  });
++
++  it("(c) no confirmation: one click posts once, and no dialog ever appears", async () => {
++    const user = userEvent.setup();
++    startMock.mockResolvedValue(ACCEPTED);
++    renderDownload();
++    await user.click(pressed());
++    expect(startMock).toHaveBeenCalledTimes(1);
++    expect(screen.queryByRole("dialog")).toBeNull();
++    expect(screen.queryByRole("alertdialog")).toBeNull();
++  });
++
++  it("(d) always the whole followed list: the post carries no argument", async () => {
++    const user = userEvent.setup();
++    startMock.mockResolvedValue(ACCEPTED);
++    renderDownload();
++    await user.click(pressed());
++    expect(startMock.mock.calls[0]).toEqual([]);
++  });
++
++  it("(e) in flight: aria-busy, never disabled, and a second click does not post again", async () => {
++    const user = userEvent.setup();
++    const pending = deferred<RunStartResult>();
++    startMock.mockReturnValue(pending.promise);
++    renderDownload();
++    expect(pressed().hasAttribute("aria-busy")).toBe(false);
++    await user.click(pressed());
++    expect(pressed().getAttribute("aria-busy")).toBe("true");
++    expect(pressed().hasAttribute("disabled")).toBe(false);
++    await user.click(pressed());
++    expect(startMock).toHaveBeenCalledTimes(1);
++    pending.resolve(ACCEPTED);
++    await waitFor(() => expect(pressed().hasAttribute("aria-busy")).toBe(false));
++  });
++
++  it("(f) the empty state's label posts the same way", async () => {
++    const user = userEvent.setup();
++    startMock.mockResolvedValue(ACCEPTED);
++    renderDownload("Start the first download");
++    await user.click(screen.getByRole("button", { name: "Start the first download" }));
++    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
++    expect(refresh).toHaveBeenCalledWith("attention");
++  });
++
++  it("(g) no toast is raised on any outcome", async () => {
++    const user = userEvent.setup();
++    startMock
++      .mockResolvedValueOnce(ACCEPTED)
++      .mockResolvedValueOnce(QUEUED)
++      .mockRejectedValueOnce(INTERNAL);
++    renderDownload();
++    await user.click(pressed());
++    await user.click(pressed());
++    await user.click(pressed());
++    await screen.findByText(/Couldn't start the download/);
++    expect(toast.success).not.toHaveBeenCalled();
++    expect(toast.warning).not.toHaveBeenCalled();
++    expect(toast.error).not.toHaveBeenCalled();
++  });
++});
++
++describe("copy.ts, Download now strings (DEC-0378)", () => {
++  it("(a) the label and the queued notice", () => {
++    expect(DOWNLOAD_NOW).toBe("Download now");
++    expect(QUEUED_NOTICE).toBe("A download is running. This starts when it finishes.");
++  });
++
++  it("(b) each refusal names its sentence, its fix and its path", () => {
++    expect(START_REFUSALS.history_depth_not_set).toEqual({
++      sentence: "Couldn't start the download: history depth isn't set.",
++      fix: "Set history depth",
++      to: "/settings",
++    });
++    expect(START_REFUSALS.no_active_instruments).toEqual({
++      sentence: "Couldn't start the download: no stocks are followed.",
++      fix: "Follow stocks",
++      to: "/data/followed",
++    });
++  });
++
++  it("(c) a failure sentence", () => {
++    expect(startFailed("x")).toBe("Couldn't start the download: x.");
++  });
++});
+diff --git a/web/src/screens/data-health/download-now.tsx b/web/src/screens/data-health/download-now.tsx
+new file mode 100644
+index 00000000..ed7f7dbb
+--- /dev/null
++++ b/web/src/screens/data-health/download-now.tsx
+@@ -0,0 +1,107 @@
++import { type JSX, useRef, useState } from "react";
++import { Link } from "react-router-dom";
++import { ApiError, ApiUnreachableError, startAcquisitionRun } from "../../api/client";
++import { useShell } from "../../app/shell-context";
++import { Button } from "../../components/ui/button";
++import {
++  DOWNLOAD_NOW,
++  QUEUED_NOTICE,
++  START_REFUSALS,
++  TRY_AGAIN,
++  readFailureReason,
++  startFailed,
++} from "./copy";
++
++type Outcome =
++  | null
++  | { kind: "queued" }
++  | { kind: "refused"; code: keyof typeof START_REFUSALS }
++  | { kind: "failed"; reason: string };
++
++function isRefusalCode(code: string | null): code is keyof typeof START_REFUSALS {
++  return code !== null && Object.hasOwn(START_REFUSALS, code);
++}
++
++/**
++ * The one routine action that downloads everything again (component design
++ * data-health-ui 2.7 and 2.2; DAC-E6-11, DAC-E6-S2-1, AC-15, AC-17). The page
++ * header, Needs fixing and the empty state's first download all render it.
++ *
++ * It always covers the whole followed list: the post carries no argument, so
++ * there is no per-stock retry (D-9). It never asks for confirmation and never
++ * navigates. A `202` with nothing queued re-reads attention; a `202` queued
++ * behind a running download only says so, per data-health-ui 2.2's alt branch.
++ * Each refusal code names its own sentence and fix, and any other failure
++ * offers Try again. Neither the envelope's message nor its request id is shown.
++ *
++ * The one-tier rule of AC-20 does not apply: no status renders here
++ * (DAC-E6-S2-4). Data health renders no `blocked` pre-check while the history
++ * depth is unset; the refusal explains it after the post (Resolved Conflict 1).
++ */
++export function DownloadNow({ label = DOWNLOAD_NOW }: { label?: string }): JSX.Element {
++  const { refresh } = useShell();
++  const pending = useRef(false);
++  const [busy, setBusy] = useState(false);
++  const [outcome, setOutcome] = useState<Outcome>(null);
++
++  async function start(): Promise<void> {
++    pending.current = true;
++    setBusy(true);
++    setOutcome(null);
++    try {
++      const result = await startAcquisitionRun();
++      if (result.queuedBehind === null) {
++        refresh("attention");
++      } else {
++        setOutcome({ kind: "queued" });
++      }
++    } catch (cause: unknown) {
++      if (cause instanceof ApiError && isRefusalCode(cause.code)) {
++        setOutcome({ kind: "refused", code: cause.code });
++      } else {
++        // Anything but a transport failure reads as the unexpected-problem
++        // reason; no thrown value's own text is ever shown.
++        const known = cause instanceof ApiUnreachableError ? cause : new ApiError("", "");
++        setOutcome({ kind: "failed", reason: readFailureReason(known) });
++      }
++    } finally {
++      pending.current = false;
++      setBusy(false);
++    }
++  }
++
++  const refusal = outcome?.kind === "refused" ? START_REFUSALS[outcome.code] : null;
++
++  return (
++    <div className="flex flex-col gap-1">
++      <Button
++        variant="default"
++        aria-busy={busy || undefined}
++        onClick={() => {
++          if (!pending.current) void start();
++        }}
++      >
++        {label}
++      </Button>
++      {outcome?.kind === "queued" ? (
++        <output className="text-xs text-muted-foreground">{QUEUED_NOTICE}</output>
++      ) : null}
++      {refusal !== null ? (
++        <>
++          <output className="text-sm">{refusal.sentence}</output>
++          <Button variant="outline" asChild>
++            <Link to={refusal.to}>{refusal.fix}</Link>
++          </Button>
++        </>
++      ) : null}
++      {outcome?.kind === "failed" ? (
++        <>
++          <output className="text-sm">{startFailed(outcome.reason)}</output>
++          <Button variant="outline" onClick={() => void start()}>
++            {TRY_AGAIN}
++          </Button>
++        </>
++      ) : null}
++    </div>
++  );
++}

@@ -1,0 +1,377 @@
+===== mutant c5-m11: new tests against the mutated production code =====
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wr6qrtpy/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 1 failed) 792ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem 18ms
+     → expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 2121ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/download-now.test.tsx:190:32
+    188|     await user.click(pressed());
+    189|     const status = await screen.findByRole("status");
+    190|     expect(status.textContent).toBe(
+       |                                ^
+    191|       "Couldn't start the download: FactorFlow hit an unexpected probl…
+    192|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:16:09
+   Duration  4.00s (transform 228ms, setup 119ms, collect 565ms, tests 2.91s, environment 913ms, prepare 691ms)
+
+===== mutant c5-m29: new tests against the mutated production code =====
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wr6qrtpy/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 1 failed) 766ms
+   × Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15) > (b) 202 queued behind a running download shows the helper line and refreshes nothing 16ms
+     → expected +0 to be truthy
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 2026ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15) > (b) 202 queued behind a running download shows the helper line and refreshes nothing
+AssertionError: expected +0 to be truthy
+
+- Expected: 
+true
+
++ Received: 
+0
+
+ ❯ src/screens/data-health/download-now.test.tsx:216:88
+    214|     const line = await screen.findByRole("status");
+    215|     expect(line.textContent).toBe("A download is running. This starts …
+    216|     expect(pressed().compareDocumentPosition(line) & Node.DOCUMENT_POS…
+       |                                                                                        ^
+    217|     expect(refresh).not.toHaveBeenCalled();
+    218|     expect(pressed()).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:16:09
+   Duration  3.90s (transform 289ms, setup 247ms, collect 692ms, tests 2.79s, environment 831ms, prepare 590ms)
+
+===== mutant c5-m40: new tests against the mutated production code =====
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wr6qrtpy/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 784ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 2069ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (p) a failed stop does not start the row-exit watch, so a row that leaves later keeps focus where it is 64ms
+     → expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (p) a failed stop does not start the row-exit watch, so a row that leaves later keeps focus where it is
+Error: expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:435:71
+    433|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    434|     await settle();
+    435|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
+       |                                                                       ^
+    436|   });
+    437| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:16:09
+   Duration  4.00s (transform 225ms, setup 110ms, collect 672ms, tests 2.85s, environment 897ms, prepare 429ms)
+
+===== mutant c5-m42: new tests against the mutated production code =====
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wr6qrtpy/w3/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 778ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 2120ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (q) confirming again clears the previous refusal while the new request is in flight 38ms
+     → expected <output class="text-sm"></output> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (q) confirming again clears the previous refusal while the new request is in flight
+AssertionError: expected <output class="text-sm"></output> to be null
+
+- Expected: 
+null
+
++ Received: 
+<output
+  class="text-sm"
+>
+  Couldn't stop following FBXX: you already stopped following it.
+</output>
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:448:59
+    446|     await confirm(user, dialog);
+    447|     await waitFor(() => expect(retireMock).toHaveBeenCalledTimes(2));
+    448|     expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
+       |                                                           ^
+    449|     second.resolve(RETIRED);
+    450|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:16:09
+   Duration  3.95s (transform 267ms, setup 254ms, collect 628ms, tests 2.90s, environment 779ms, prepare 802ms)
+
+===== mutant c5-m51: new tests against the mutated production code =====
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wr6qrtpy/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 634ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 1823ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem 28ms
+     → expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:460:32
+    458|     await confirm(user, dialog);
+    459|     const status = await within(dialog).findByRole("status");
+    460|     expect(status.textContent).toBe(
+       |                                ^
+    461|       "Couldn't stop following FBXX: FactorFlow hit an unexpected prob…
+    462|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:16:13
+   Duration  2.79s (transform 148ms, setup 87ms, collect 404ms, tests 2.46s, environment 413ms, prepare 215ms)
+
+===== mutant c5-m62: new tests against the mutated production code =====
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wr6qrtpy/w3/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 642ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 2825ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g2) focus back on the row's button keeps the watch, so a row that leaves later hands focus on 1073ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <h2
+      tabindex="-1"
+    >
+      Needs fixing
+    </h2>
+    <ul>
+      <li>
+        <button
+          type="button"
+        >
+          Stop following·
+          GOOD
+        </button>
+      </li>
+    </ul>
+    <output
+      aria-live="polite"
+      class="sr-only"
+    >
+      <span>
+        Stopped following FBXX
+      </span>
+    </output>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mstyle[39m=[32m""[39m
+  [36m>[39m
+    [36m<div>[39m
+      [36m<h2[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [0mNeeds fixing[0m
+      [36m</h2>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<button[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mStop following [0m
+            [0mGOOD[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span>[39m
+          [0mStopped following FBXX[0m
+        [36m</span>[39m
+      [36m</output>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g2) focus back on the row's button keeps the watch, so a row that leaves later hands focus on
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <h2
+      tabindex="-1"
+    >
+      Needs fixing
+    </h2>
+    <ul>
+      <li>
+        <button
+          type="button"
+        >
+          Stop following·
+          GOOD
+        </button>
+      </li>
+    </ul>
+    <output
+      aria-live="polite"
+      class="sr-only"
+    >
+      <span>
+        Stopped following FBXX
+      </span>
+    </output>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mstyle[39m=[32m""[39m
+  [36m>[39m
+    [36m<div>[39m
+      [36m<h2[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [0mNeeds fixing[0m
+      [36m</h2>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<button[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mStop following [0m
+            [0mGOOD[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span>[39m
+          [0mStopped following FBXX[0m
+        [36m</span>[39m
+      [36m</output>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:420:69
+    418|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    419|     await waitFor(() =>
+    420|       expect(screen.getByRole("heading", { name: "Needs fixing" })).to…
+       |                                                                     ^
+    421|     );
+    422|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:16:13
+   Duration  3.77s (transform 139ms, setup 78ms, collect 386ms, tests 3.47s, environment 435ms, prepare 279ms)
+

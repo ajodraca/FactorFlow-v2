@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 1 failed) 1068ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem 19ms
+     → expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 3215ms
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (b) no term of the DAC-E7-3 list appears in any state, in the dialog or beside it 422ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/download-now.test.tsx:190:32
+    188|     await user.click(pressed());
+    189|     const status = await screen.findByRole("status");
+    190|     expect(status.textContent).toBe(
+       |                                ^
+    191|       "Couldn't start the download: FactorFlow hit an unexpected probl…
+    192|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:19:45
+   Duration  4.67s (transform 481ms, setup 285ms, collect 920ms, tests 4.28s, environment 707ms, prepare 307ms)
+

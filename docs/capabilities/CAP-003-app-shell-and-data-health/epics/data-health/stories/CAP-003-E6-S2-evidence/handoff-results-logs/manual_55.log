@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 1267ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 3075ms
+   × Stop following dialog (DAC-E6-12, AC-14, AC-25) > (a) is titled with the symbol and carries the blueprint sentence verbatim 225ms
+     → expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Stop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.
+Received:
+  Stop following FBXX
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (d) the dialog's buttons and links are Cancel and the copy.ts label 342ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following dialog (DAC-E6-12, AC-14, AC-25) > (a) is titled with the symbol and carries the blueprint sentence verbatim
+Error: expect(element).toHaveAccessibleDescription()
+
+Expected element to have accessible description:
+  Stop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.
+Received:
+  Stop following FBXX
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:133:20
+    131|     const dialog = await openDialog(user);
+    132|     expect(dialog).toHaveAccessibleName("Stop following FBXX");
+    133|     expect(dialog).toHaveAccessibleDescription(DESCRIPTION);
+       |                    ^
+    134|   });
+    135| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:21:12
+   Duration  4.43s (transform 239ms, setup 89ms, collect 753ms, tests 4.34s, environment 670ms, prepare 381ms)
+

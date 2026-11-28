@@ -1,11 +1,13 @@
-# Data health verdict and check cards (`web/src/screens/data-health/`)
+# Data health modules (`web/src/screens/data-health/`)
 
 The first modules of the Data health screen (component design `data-health-ui`
-2.1, 2.3 and 2.4; CAP-003-E6-S1; AC-8, AC-19, DAC-E6-1 to DAC-E6-5). Nothing
-mounts them yet: there is no screen `index.tsx` and no `/data` route
-registration, and the only importers today are the modules' own tests. The
-screen passes in the reads, the retries and the **Download now** control; no
-module here mounts a provider or calls a shell hook.
+2.1, 2.3, 2.4 and 2.7; CAP-003-E6-S1 and CAP-003-E6-S2; AC-8, AC-14, AC-15,
+AC-17, AC-19, DAC-E6-1 to DAC-E6-5, DAC-E6-11, DAC-E6-12). Nothing mounts them
+yet: there is no screen `index.tsx` and no `/data` route registration, and the
+only importers today are the modules' own tests. The verdict and the cards take
+the reads, the retries and the **Download now** node as props and call no shell
+hook; `DownloadNow` and `StopFollowingDialog` (E6-S2) read the shell context for
+`refresh`.
 
 | File | Holds |
 |---|---|
@@ -15,6 +17,8 @@ module here mounts a provider or calls a shell hook.
 | `daily-prices-card.tsx` | `DailyPricesCard` |
 | `financials-card.tsx` | `FinancialsCard` |
 | `scores-card.tsx` | `ScoresCard` |
+| `download-now.tsx` | `DownloadNow`, the **Download now** control |
+| `stop-following-dialog.tsx` | `StopFollowingDialog`, the confirmed **Stop following** recovery |
 
 ## `copy.ts`
 
@@ -47,6 +51,22 @@ functions take already-formatted counts, except `countClause` and `andMore`.
   `withFailedDownloads`, `FINANCIALS_TO`, `FINANCIALS_NOTE`.
 - Factor scores: `stocksCurrent`, `showAsIncomplete`, `SCORES_AT`,
   `FROM_DOWNLOAD_STARTED`, `SCORES_NOT_SERVED`.
+- Download now: `DOWNLOAD_NOW` (*Download now*), `QUEUED_NOTICE` (*A download is
+  running. This starts when it finishes.*), `startFailed(reason)` (*Couldn't
+  start the download: {reason}.*) and `START_REFUSALS`, keyed by the wire codes
+  of `POST /api/acquisition-runs`, each `{ sentence, fix, to }`:
+  `history_depth_not_set` (*Set history depth*, `/settings`) and
+  `no_active_instruments` (*Follow stocks*, `/data/followed`). The envelope
+  `message` is never rendered.
+- Stop following: `STOP_FOLLOWING`, `stopFollowingTitle(symbol)`,
+  `stopFollowingDescription(symbol)` (the blueprint section 9 sentence),
+  `stopFollowingFailed(symbol, reason)`, `stoppedFollowing(symbol)` and
+  `STOP_REFUSAL_REASONS` (DEC-0377): `instrument_not_found` is *FactorFlow
+  doesn't follow it*, `instrument_already_retired` is *you already stopped
+  following it*.
+- `isStaleRowRefusal(error)`: true only for an `ApiError` whose code is one of
+  those two. `stopFailureReason(error)`: the refusal's reason for them, else
+  `readFailureReason(error)`.
 
 ## `check-card.tsx`
 
@@ -164,4 +184,68 @@ yet* when it is `null`. The as-of line, only when `set` is non-null, is
 link to `/data/downloads/{run_id}`. When `F - C > 0`, the children carry *K
 stocks show as Incomplete until their data is complete*.
 
-Tests: `check-cards.test.tsx`, `verdict.test.tsx`.
+## `download-now.tsx`
+
+### `DownloadNow({ label? })`
+
+A `default` `Button` labelled `label` (default `DOWNLOAD_NOW`). The page header,
+Needs fixing and the empty state's first download all render it. The post
+carries no argument, so it always covers the whole followed list; there is no
+per-stock retry. It asks for no confirmation, navigates nowhere and renders no
+status.
+
+A click calls `startAcquisitionRun()`. A ref guard drops a click made while a
+start is in flight, and the button carries `aria-busy` meanwhile. Each start
+clears the previous outcome first. The outcomes:
+
+| Result | Renders |
+|---|---|
+| Started, `queuedBehind` is `null` | nothing; calls `refresh("attention")` |
+| Started, queued behind a running download | `QUEUED_NOTICE` in an `output` |
+| `ApiError` whose `code` is a `START_REFUSALS` key | the refusal's sentence in an `output`, and its `fix` as an `outline` link to `to` |
+| Anything else | `startFailed(readFailureReason(...))` in an `output`, and **Try again** (`outline`), which starts again |
+
+Only an `ApiUnreachableError` reads as *FactorFlow is not answering*; any other
+thrown value, an `ApiError` with another code included, reads as *FactorFlow hit
+an unexpected problem*. No thrown value's own text and no request id is shown.
+
+## `stop-following-dialog.tsx`
+
+### `StopFollowingDialog({ symbol, onClose, onStopped, onRefusalClosed, fallbackFocusRef })`
+
+The design system's `ConfirmDialog` (`confirm`, never `destructive`, because
+nothing is deleted), open while `symbol` is not `null`. Cancel is first and
+focused and focus is trapped, both from the shared dialog. The title and
+description come from `stopFollowingTitle` and `stopFollowingDescription`, the
+confirm button is **Stop following**, and the dialog keeps the last symbol so
+its text survives the close. Opening it clears any earlier failure.
+
+A confirm calls `retireInstrument(symbol)` with `pending` set:
+
+- **Success:** closes the dialog (`onClose`), calls `onStopped`, calls
+  `refresh("attention")` and announces `stoppedFollowing(symbol)` in a polite
+  screen-reader-only `output`. A new announcement remounts its `span` (keyed by
+  a serial) so a repeat is read again. No toast is raised.
+- **Failure:** the dialog stays open with `stopFollowingFailed(symbol, reason)`
+  in an `output`; `reason` is `stopFailureReason(error)`. Anything that is
+  neither an `ApiError` nor an `ApiUnreachableError` reads as the unexpected
+  problem.
+
+Closing the dialog while a `404` or `409` refusal shows calls `onRefusalClosed`
+once, because only those two mean the row is stale; any other failure leaves the
+row alone and the callback uncalled.
+
+Focus: the opener is the focused element when the dialog opens. After a
+successful stop, or after closing on a stale-row refusal, the dialog watches for
+the opener's row to leave. If the row has left and focus has fallen to the body,
+it moves focus to `fallbackFocusRef` (the Needs fixing heading), checking again
+after a tick because a row can leave in the same update as the close. Focus the
+owner has placed elsewhere is never moved; the closing dialog's own buttons do
+not count as elsewhere.
+
+Caller contract: render it beside the rows so it re-renders with them (do not
+wrap it in `memo`), give the heading `tabIndex={-1}`, and decide what
+`onRefusalClosed` re-reads.
+
+Tests: `check-cards.test.tsx`, `verdict.test.tsx`, `download-now.test.tsx`,
+`stop-following-dialog.test.tsx`.

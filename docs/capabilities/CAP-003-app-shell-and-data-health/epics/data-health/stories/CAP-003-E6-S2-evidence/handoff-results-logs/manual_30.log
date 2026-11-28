@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 1244ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 3404ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (f) a 200 closes, re-reads, refreshes attention, announces politely and raises no toast 142ms
+     → expected "spy" to be called 1 times, but got 0 times
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (a) no status or coverage badge renders in any state 314ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (f) a 200 closes, re-reads, refreshes attention, announces politely and raises no toast
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:275:21
+    273|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+    274|     expect(stopped).toHaveBeenCalledTimes(1);
+    275|     expect(refresh).toHaveBeenCalledTimes(1);
+       |                     ^
+    276|     expect(refresh).toHaveBeenCalledWith("attention");
+    277|     const live = document.body.querySelector('[aria-live="polite"]');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:20:21
+   Duration  4.95s (transform 224ms, setup 304ms, collect 718ms, tests 4.65s, environment 797ms, prepare 122ms)
+

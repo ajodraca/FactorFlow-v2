@@ -1,0 +1,77 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 1074ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 4 failed) 2488ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone 61ms
+     → expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone 36ms
+     → expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem 27ms
+     → expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × copy.ts, stop following strings (DEC-0377) > (e) the reason of a failed stop, never an envelope message or request id 1ms
+     → expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: undefined."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: undefined."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:460:32
+    458|     await confirm(user, dialog);
+    459|     const status = await within(dialog).findByRole("status");
+    460|     expect(status.textContent).toBe(
+       |                                ^
+    461|       "Couldn't stop following FBXX: FactorFlow hit an unexpected prob…
+    462|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > copy.ts, stop following strings (DEC-0377) > (e) the reason of a failed stop, never an envelope message or request id
+AssertionError: expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
+
+- Expected: 
+"FactorFlow hit an unexpected problem"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:526:41
+    524|     expect(stopFailureReason(ALREADY)).toBe("you already stopped follo…
+    525|     expect(stopFailureReason(NOT_FOUND)).toBe("FactorFlow doesn't foll…
+    526|     expect(stopFailureReason(INTERNAL)).toBe("FactorFlow hit an unexpe…
+       |                                         ^
+    527|     expect(stopFailureReason(UNREACHABLE)).toBe("FactorFlow is not ans…
+    528|     for (const error of [ALREADY, NOT_FOUND, INTERNAL, UNREACHABLE]) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 61 passed (65)
+   Start at  23:18:20
+   Duration  4.48s (transform 203ms, setup 260ms, collect 682ms, tests 3.56s, environment 1.06s, prepare 155ms)
+

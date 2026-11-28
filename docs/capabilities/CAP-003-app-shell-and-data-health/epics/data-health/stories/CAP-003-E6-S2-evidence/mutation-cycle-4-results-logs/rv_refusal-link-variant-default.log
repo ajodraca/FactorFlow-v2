@@ -1,0 +1,53 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zm5hwbe5/w3/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (26 tests | 2 failed) 973ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 86ms
+     → expected 'default' to be 'outline' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (b) no stocks followed: its own sentence and its Follow stocks link 22ms
+     → expected 'default' to be 'outline' // Object.is equality
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (34 tests) 2103ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+AssertionError: expected 'default' to be 'outline' // Object.is equality
+
+Expected: "outline"
+Received: "default"
+
+ ❯ src/screens/data-health/download-now.test.tsx:85:47
+     83|     const link = screen.getByRole("link", { name: "Set history depth" …
+     84|     expect(link.getAttribute("href")).toBe("/settings");
+     85|     expect(link.getAttribute("data-variant")).toBe("outline");
+       |                                               ^
+     86|     expect(pressed().getAttribute("data-variant")).toBe("default");
+     87|     expect(screen.queryByText(/no stocks are followed/)).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (b) no stocks followed: its own sentence and its Follow stocks link
+AssertionError: expected 'default' to be 'outline' // Object.is equality
+
+Expected: "outline"
+Received: "default"
+
+ ❯ src/screens/data-health/download-now.test.tsx:102:47
+    100|     const link = screen.getByRole("link", { name: "Follow stocks" });
+    101|     expect(link.getAttribute("href")).toBe("/data/followed");
+    102|     expect(link.getAttribute("data-variant")).toBe("outline");
+       |                                               ^
+    103|     expect(screen.queryByText(/history depth/)).toBeNull();
+    104|     expect(screen.queryByRole("link", { name: "Set history depth" })).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 58 passed (60)
+   Start at  23:01:28
+   Duration  4.14s (transform 258ms, setup 177ms, collect 646ms, tests 3.08s, environment 996ms, prepare 816ms)
+

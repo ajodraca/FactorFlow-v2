@@ -1,0 +1,169 @@
+{
+ "schema": 1,
+ "repo_head": "985e532eb464dcac465be6ecefa13fc609aa0560",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:22:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 22,
+   "original": "  return code !== null && Object.hasOwn(START_REFUSALS, code);",
+   "mutated": "  return code !== null || Object.hasOwn(START_REFUSALS, code);"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:43:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 43,
+   "original": "  const pending = useRef(false);",
+   "mutated": "  const pending = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:44:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 44,
+   "original": "  const [busy, setBusy] = useState(false);",
+   "mutated": "  const [busy, setBusy] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:48:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 48,
+   "original": "    pending.current = true;",
+   "mutated": "    pending.current = false;"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:49:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 49,
+   "original": "    setBusy(true);",
+   "mutated": "    setBusy(false);"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:59:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 59,
+   "original": "      if (cause instanceof ApiError && isRefusalCode(cause.code)) {",
+   "mutated": "      if (cause instanceof ApiError || isRefusalCode(cause.code)) {"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:68:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 68,
+   "original": "      pending.current = false;",
+   "mutated": "      pending.current = true;"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:69:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 69,
+   "original": "      setBusy(false);",
+   "mutated": "      setBusy(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:79:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 79,
+   "original": "        aria-busy={busy || undefined}",
+   "mutated": "        aria-busy={busy && undefined}"
+  },
+  {
+   "id": "web/src/screens/data-health/download-now.tsx:81:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 81,
+   "original": "          if (!pending.current) void start();",
+   "mutated": "          if (pending.current) void start();"
+  },
+  {
+   "id": "manual:queued-null",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 53,
+   "original": "      if (result.queuedBehind === null) {",
+   "mutated": "      if (result.queuedBehind !== null) {"
+  },
+  {
+   "id": "manual:refresh-scores",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 54,
+   "original": "        refresh(\"attention\");",
+   "mutated": "        refresh(\"scores\");"
+  },
+  {
+   "id": "manual:refresh-deleted",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 54,
+   "original": "        refresh(\"attention\");",
+   "mutated": "        void 0;"
+  },
+  {
+   "id": "manual:no-guard",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 81,
+   "original": "          if (!pending.current) void start();",
+   "mutated": "          void start();"
+  },
+  {
+   "id": "manual:message-shown",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 65,
+   "original": "        setOutcome({ kind: \"failed\", reason: readFailureReason(known) });",
+   "mutated": "        setOutcome({ kind: \"failed\", reason: known.message });"
+  },
+  {
+   "id": "manual:swap-link",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 183,
+   "original": "    to: \"/settings\",",
+   "mutated": "    to: \"/data/followed\","
+  },
+  {
+   "id": "manual:any-code",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 22,
+   "original": "  return code !== null && Object.hasOwn(START_REFUSALS, code);",
+   "mutated": "  return code !== null;"
+  },
+  {
+   "id": "manual:try-again-noop2",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "line": 100,
+   "original": "          <Button variant=\"outline\" onClick={() => void start()}>",
+   "mutated": "          <Button variant=\"outline\" onClick={() => void 0}>"
+  }
+ ]
+}
