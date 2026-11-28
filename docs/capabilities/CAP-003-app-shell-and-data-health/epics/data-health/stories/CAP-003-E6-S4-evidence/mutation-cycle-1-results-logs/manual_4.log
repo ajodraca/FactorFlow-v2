@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wbpe0woz/w0/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx (13 tests | 2 failed) 366ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 70ms
+     → expected '1,230 of 1,236 stocks' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 23ms
+     → expected '0 of 1,236 stocks, 0 failed' to be '0 of 1,236 stocks' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected '1,230 of 1,236 stocks' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+Expected: "1,230 of 1,236 stocks, 6 failed"
+Received: "1,230 of 1,236 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:122:42
+    120|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-war…
+    121|     expect(badgeOf(row).textContent).toBe("Partial");
+    122|     expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, …
+       |                                          ^
+    123|   });
+    124| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected '0 of 1,236 stocks, 0 failed' to be '0 of 1,236 stocks' // Object.is equality
+
+Expected: "0 of 1,236 stocks"
+Received: "0 of 1,236 stocks, 0 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:150:45
+    148|     expect(badgeOf(failed).getAttribute("data-variant")).toBe("status-…
+    149|     expect(badgeOf(failed).textContent).toBe("Failed");
+    150|     expect(cellsOf(failed)[2]?.textContent).toBe("0 of 1,236 stocks");
+       |                                             ^
+    151|     const cancelled = rowFor("r-2");
+    152|     expect(badgeOf(cancelled).getAttribute("data-variant")).toBe("stat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  01:11:12
+   Duration  1.46s (transform 89ms, setup 36ms, collect 442ms, tests 366ms, environment 208ms, prepare 121ms)
+

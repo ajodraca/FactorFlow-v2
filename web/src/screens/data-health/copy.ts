@@ -88,6 +88,7 @@ export const ABSENT = {
   noPrices: "no prices stored yet",
   noFinancials: "no financials stored yet",
   noScores: "no scores yet",
+  notEnded: "not ended yet",
 } as const;
 
 /** `and {k} more`, after the exception symbols a card shows. */
@@ -309,3 +310,35 @@ export function lastCompleteDownload(time: string): string {
 
 export const NO_COMPLETE_DOWNLOAD = "No complete download yet";
 export const LAST_COMPLETE_TARGET = "the last complete download";
+
+// CAP-003-E6-S4: Recent downloads and What you follow (data-health-ui 2.6)
+//
+// Counts arrive already formatted (`formatCount`). No string carries a DAC-E7-3
+// term (AC-19).
+
+export const RECENT_DOWNLOADS = "Recent downloads";
+
+/** ux-design 1.4 item 4: one sub-line, with *checked {time}* once the list has answered. */
+export function recentDownloadsSubline(time: string | null): string {
+  const base = "Starts when you press Download now";
+  return time === null ? base : `${base} · ${checked(time)}`;
+}
+
+export const DOWNLOAD_COLUMNS = {
+  started: "Started",
+  outcome: "Outcome",
+  ended: "Ended",
+  result: "Result",
+} as const;
+
+export function writtenOf(written: string, named: string): string {
+  return `${written} of ${named} stocks`;
+}
+
+export function partialResult(written: string, named: string, failed: string): string {
+  return `${written} of ${named} stocks, ${failed} failed`;
+}
+
+export function interruptedResult(written: string): string {
+  return `FactorFlow restarted mid-download; ${written} kept, the rest picked up next time`;
+}

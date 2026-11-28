@@ -1,0 +1,50 @@
+# TDD evidence for CAP-003-E6-S4 - Recent downloads and What you follow.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862).
+# Cycles per the plan's T017, with the deviations each names. Each cycle is committed as it ends with this file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/<file>'
+# as the command; generated mutants plus hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T011, T012, T013]
+    description: >
+      The downloads table rows. recent-downloads.test.tsx (new): TC-COMP-170 (T002 a-f), the Started and Ended cell
+      cases, the load read and sub-line of TC-COMP-171 (a), and the Recent downloads copy cases of T011 (a, c). Then the
+      Recent downloads strings of copy.ts (T012) and recent-downloads.tsx (columns, load read, sub-line).
+    deviations: >
+      (1) The plan's T004 (c) expects a queued row's link to read 2026-10-30 13:59 CDT for requestedAt 13:59Z; America/Chicago
+      renders 08:59 CDT, which the test pins. (2) Row ordering, the progress row, the re-read rule, the loading and error
+      bodies and useShell arrive in cycles 2 and 3 with their tests, so none is implemented untested. (3) The Started
+      fallback to requestedAt, the Ended dash and link encoding are pinned here by extra tests.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-1.log
+    red_log_sha256: 5c7c2c6ad048314e6ab2e36da8390b94a75df37c851811935b9f27a1b15a08ed
+    red_evidence: >
+      With recent-downloads.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests
+      (the import of ./recent-downloads did not resolve).
+    green_evidence: >
+      13 tests passed in recent-downloads.test.tsx; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-1.log
+        sha256: 5c7c2c6ad048314e6ab2e36da8390b94a75df37c851811935b9f27a1b15a08ed
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: the effect has no catch or stale-response guard and the loading body has no
+        accessible text (both arrive in cycles 2 and 3); test (f) gives every row the same end time.
+    diff_sha256: f282adacc03d4ad6cd5c6709a8a06365498121d2ddd259411c6a17092ef8b4c3
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 23d5f0dafb948fe9a8336e14448b0694aa1b2d63ae511801bea722c96c543252
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

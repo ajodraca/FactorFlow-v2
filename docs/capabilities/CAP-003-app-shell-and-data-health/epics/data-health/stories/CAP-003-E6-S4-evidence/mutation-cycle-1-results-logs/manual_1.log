@@ -1,0 +1,41 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wbpe0woz/w2/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx (13 tests | 1 failed) 209ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download 81ms
+     → expect(element).toHaveAccessibleName()
+
+Expected element to have accessible name:
+  2026-10-30 09:00 CDT
+Received:
+  2026-10-30 08:59 CDT
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+Error: expect(element).toHaveAccessibleName()
+
+Expected element to have accessible name:
+  2026-10-30 09:00 CDT
+Received:
+  2026-10-30 08:59 CDT
+ ❯ src/screens/data-health/recent-downloads.test.tsx:113:20
+    111|     rows.forEach((row, index) => {
+    112|       const link = within(within(row).getByRole("rowheader")).getByRol…
+    113|       expect(link).toHaveAccessibleName("2026-10-30 09:00 CDT");
+       |                    ^
+    114|       expect(link.getAttribute("href")).toBe(`/data/downloads/r-${5 - …
+    115|     });
+ ❯ src/screens/data-health/recent-downloads.test.tsx:111:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  01:11:10
+   Duration  1.45s (transform 91ms, setup 33ms, collect 411ms, tests 209ms, environment 343ms, prepare 45ms)
+

@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wbpe0woz/w2/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx (13 tests | 1 failed) 212ms
+   × Recent downloads Started and Ended cells > shows an em dash with hidden words, not a time, for a download that has not ended 10ms
+     → expected '' to be 'not ended yet' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads Started and Ended cells > shows an em dash with hidden words, not a time, for a download that has not ended
+AssertionError: expected '' to be 'not ended yet' // Object.is equality
+
+- Expected
++ Received
+
+- not ended yet
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:183:58
+    181|     const ended = cellsOf(rowFor("r-9"))[1] as HTMLElement;
+    182|     expect(ended.querySelector('[aria-hidden="true"]')?.textContent).t…
+    183|     expect(ended.querySelector(".sr-only")?.textContent).toBe("not end…
+       |                                                          ^
+    184|   });
+    185| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  01:11:16
+   Duration  1.28s (transform 81ms, setup 42ms, collect 349ms, tests 212ms, environment 201ms, prepare 98ms)
+

@@ -1,0 +1,462 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-1.log
+new file mode 100644
+index 00000000..cc17d2ad
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-1.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/data-health/recent-downloads.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/recent-downloads.test.tsx [ src/screens/data-health/recent-downloads.test.tsx ]
++Error: Failed to resolve import "./recent-downloads" from "web/src/screens/data-health/recent-downloads.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/recent-downloads.test.tsx:10:38
++  8  |  const __vi_import_3__ = await import('../../api/client')
++  9  |  const __vi_import_4__ = await import('./copy')
++  10 |  const __vi_import_5__ = await import('./recent-downloads')
++     |                                       ^
++  11 |  
++  12 |  
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  01:09:32
++   Duration  836ms (transform 21ms, setup 65ms, collect 0ms, tests 0ms, environment 360ms, prepare 204ms)
++
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+index 7c1147b4..eed819d4 100644
+--- a/web/src/screens/data-health/copy.ts
++++ b/web/src/screens/data-health/copy.ts
+@@ -88,6 +88,7 @@ export const ABSENT = {
+   noPrices: "no prices stored yet",
+   noFinancials: "no financials stored yet",
+   noScores: "no scores yet",
++  notEnded: "not ended yet",
+ } as const;
+ 
+ /** `and {k} more`, after the exception symbols a card shows. */
+@@ -309,3 +310,35 @@ export function lastCompleteDownload(time: string): string {
+ 
+ export const NO_COMPLETE_DOWNLOAD = "No complete download yet";
+ export const LAST_COMPLETE_TARGET = "the last complete download";
++
++// CAP-003-E6-S4: Recent downloads and What you follow (data-health-ui 2.6)
++//
++// Counts arrive already formatted (`formatCount`). No string carries a DAC-E7-3
++// term (AC-19).
++
++export const RECENT_DOWNLOADS = "Recent downloads";
++
++/** ux-design 1.4 item 4: one sub-line, with *checked {time}* once the list has answered. */
++export function recentDownloadsSubline(time: string | null): string {
++  const base = "Starts when you press Download now";
++  return time === null ? base : `${base} · ${checked(time)}`;
++}
++
++export const DOWNLOAD_COLUMNS = {
++  started: "Started",
++  outcome: "Outcome",
++  ended: "Ended",
++  result: "Result",
++} as const;
++
++export function writtenOf(written: string, named: string): string {
++  return `${written} of ${named} stocks`;
++}
++
++export function partialResult(written: string, named: string, failed: string): string {
++  return `${written} of ${named} stocks, ${failed} failed`;
++}
++
++export function interruptedResult(written: string): string {
++  return `FactorFlow restarted mid-download; ${written} kept, the rest picked up next time`;
++}
+diff --git a/web/src/screens/data-health/recent-downloads.test.tsx b/web/src/screens/data-health/recent-downloads.test.tsx
+new file mode 100644
+index 00000000..00d3e16d
+--- /dev/null
++++ b/web/src/screens/data-health/recent-downloads.test.tsx
+@@ -0,0 +1,230 @@
++import { render, screen, within } from "@testing-library/react";
++import { MemoryRouter } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { listAcquisitionRuns } from "../../api/client";
++import type { AcquisitionRun, AcquisitionRunPage } from "../../api/types";
++import { interruptedResult, partialResult, recentDownloadsSubline, writtenOf } from "./copy";
++import { RecentDownloads } from "./recent-downloads";
++
++vi.mock("../../api/client", async (importActual) => ({
++  ...(await importActual<typeof import("../../api/client")>()),
++  listAcquisitionRuns: vi.fn(),
++}));
++
++const listMock = vi.mocked(listAcquisitionRuns);
++
++beforeEach(() => {
++  listMock.mockReset();
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++/** An `AcquisitionRun` with the defaults of a complete download; independent of the code under test. */
++function RUN(over: Partial<AcquisitionRun> = {}): AcquisitionRun {
++  return {
++    runId: "r-1",
++    state: "succeeded",
++    historyDepthYears: 5,
++    requestedAt: "2026-10-30T13:59:00Z",
++    startedAt: "2026-10-30T14:00:00Z",
++    endedAt: "2026-10-30T16:30:00Z",
++    instrumentsNamed: 1236,
++    instrumentsWritten: 1236,
++    instrumentsFailed: 0,
++    failureReason: null,
++    ...over,
++  };
++}
++
++function PAGE(runs: AcquisitionRun[]): AcquisitionRunPage {
++  return { runs, nextCursor: null };
++}
++
++function renderRecent() {
++  return render(
++    <MemoryRouter>
++      <RecentDownloads />
++    </MemoryRouter>,
++  );
++}
++
++function regionTable(): HTMLElement {
++  return within(screen.getByRole("region", { name: "Recent downloads" })).getByRole("table");
++}
++
++/** The body rows, header row excluded. */
++function bodyRows(): HTMLElement[] {
++  return within(regionTable()).getAllByRole("row").slice(1);
++}
++
++/** The three `td` cells of a row: Outcome, Ended, Result. */
++function cellsOf(row: HTMLElement): HTMLElement[] {
++  return within(row).getAllByRole("cell");
++}
++
++function badgeOf(row: HTMLElement): HTMLElement {
++  const badge = row.querySelector<HTMLElement>('[data-variant^="status-"]');
++  expect(badge).not.toBeNull();
++  return badge as HTMLElement;
++}
++
++function rowFor(runId: string): HTMLElement {
++  const found = bodyRows().filter(
++    (row) => within(row).getByRole("link").getAttribute("href") === `/data/downloads/${runId}`,
++  );
++  expect(found).toHaveLength(1);
++  return found[0] as HTMLElement;
++}
++
++const FIVE = [
++  RUN({
++    runId: "r-5",
++    state: "partial",
++    instrumentsNamed: 1236,
++    instrumentsWritten: 1230,
++    instrumentsFailed: 6,
++  }),
++  RUN({ runId: "r-4", state: "abandoned", instrumentsWritten: 611 }),
++  RUN({ runId: "r-3", state: "failed", instrumentsWritten: 0, instrumentsFailed: 0 }),
++  RUN({ runId: "r-2", state: "cancelled", instrumentsWritten: 400 }),
++  RUN({ runId: "r-1" }),
++];
++
++describe("Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12)", () => {
++  // Implements TC-COMP-170
++  beforeEach(async () => {
++    listMock.mockResolvedValue(PAGE(FIVE));
++    renderRecent();
++    await screen.findByRole("table");
++  });
++
++  it("(a) the columns are Started, Outcome, Ended, Result, and each row header links to its download", () => {
++    expect(
++      within(regionTable())
++        .getAllByRole("columnheader")
++        .map((h) => h.textContent),
++    ).toEqual(["Started", "Outcome", "Ended", "Result"]);
++    const rows = bodyRows();
++    expect(rows).toHaveLength(5);
++    rows.forEach((row, index) => {
++      const link = within(within(row).getByRole("rowheader")).getByRole("link");
++      expect(link).toHaveAccessibleName("2026-10-30 09:00 CDT");
++      expect(link.getAttribute("href")).toBe(`/data/downloads/r-${5 - index}`);
++    });
++  });
++
++  it("(b) a partial download is a warning Partial with its failed count", () => {
++    const row = rowFor("r-5");
++    expect(badgeOf(row).getAttribute("data-variant")).toBe("status-warning");
++    expect(badgeOf(row).textContent).toBe("Partial");
++    expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, 6 failed");
++  });
++
++  it("(c) an abandoned download is a serious Interrupted with its sentence", () => {
++    const row = rowFor("r-4");
++    expect(badgeOf(row).getAttribute("data-variant")).toBe("status-serious");
++    expect(badgeOf(row).textContent).toBe("Interrupted");
++    expect(cellsOf(row)[2]?.textContent).toBe(
++      "FactorFlow restarted mid-download; 611 kept, the rest picked up next time",
++    );
++  });
++
++  it("(d) neither Partial nor Interrupted reads as complete", () => {
++    for (const id of ["r-5", "r-4"]) {
++      const row = rowFor(id);
++      expect(row.querySelector('[data-variant="status-good"]')).toBeNull();
++      expect(row.textContent).not.toContain("Complete");
++    }
++  });
++
++  it("(e) the other outcomes use the plain form", () => {
++    const complete = rowFor("r-1");
++    expect(badgeOf(complete).getAttribute("data-variant")).toBe("status-good");
++    expect(badgeOf(complete).textContent).toBe("Complete");
++    expect(cellsOf(complete)[2]?.textContent).toBe("1,236 of 1,236 stocks");
++    const failed = rowFor("r-3");
++    expect(badgeOf(failed).getAttribute("data-variant")).toBe("status-critical");
++    expect(badgeOf(failed).textContent).toBe("Failed");
++    expect(cellsOf(failed)[2]?.textContent).toBe("0 of 1,236 stocks");
++    const cancelled = rowFor("r-2");
++    expect(badgeOf(cancelled).getAttribute("data-variant")).toBe("status-neutral");
++    expect(badgeOf(cancelled).textContent).toBe("Cancelled by you");
++    expect(cellsOf(cancelled)[2]?.textContent).toBe("400 of 1,236 stocks");
++  });
++
++  it("(f) each ended download shows its end time", () => {
++    for (const row of bodyRows()) {
++      expect(cellsOf(row)[1]?.textContent).toBe("2026-10-30 11:30 CDT");
++    }
++  });
++});
++
++describe("Recent downloads Started and Ended cells", () => {
++  it("shows the request time for a download that has not started, still linking to it", async () => {
++    listMock.mockResolvedValue(
++      PAGE([RUN({ runId: "r-9", state: "requested", startedAt: null, endedAt: null })]),
++    );
++    renderRecent();
++    await screen.findByRole("table");
++    const link = within(rowFor("r-9")).getByRole("link");
++    expect(link).toHaveAccessibleName("2026-10-30 08:59 CDT");
++  });
++
++  it("shows an em dash with hidden words, not a time, for a download that has not ended", async () => {
++    listMock.mockResolvedValue(
++      PAGE([RUN({ runId: "r-9", state: "running", endedAt: null, instrumentsWritten: 700 })]),
++    );
++    renderRecent();
++    await screen.findByRole("table");
++    const ended = cellsOf(rowFor("r-9"))[1] as HTMLElement;
++    expect(ended.querySelector('[aria-hidden="true"]')?.textContent).toBe("—");
++    expect(ended.querySelector(".sr-only")?.textContent).toBe("not ended yet");
++  });
++
++  it("encodes a run id in the link target", async () => {
++    listMock.mockResolvedValue(PAGE([RUN({ runId: "a b/c" })]));
++    renderRecent();
++    await screen.findByRole("table");
++    const link = within(bodyRows()[0] as HTMLElement).getByRole("link");
++    expect(link.getAttribute("href")).toBe("/data/downloads/a%20b%2Fc");
++  });
++});
++
++describe("Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25)", () => {
++  // Implements TC-COMP-171
++  it("(a) reads once on load with exactly { limit: 5 } and says when the list answered", async () => {
++    vi.useFakeTimers({ toFake: ["Date"] });
++    vi.setSystemTime(new Date("2026-10-30T19:03:12Z"));
++    listMock.mockResolvedValue(PAGE([RUN({ runId: "r-9", state: "running", endedAt: null })]));
++    renderRecent();
++    await screen.findByText("Starts when you press Download now · checked 14:03:12 CDT");
++    expect(listMock).toHaveBeenCalledTimes(1);
++    expect(listMock).toHaveBeenNthCalledWith(1, { limit: 5 });
++  });
++
++  it("(a) says nothing of a check until the list has answered", () => {
++    listMock.mockReturnValue(new Promise(() => undefined));
++    renderRecent();
++    expect(screen.getByText("Starts when you press Download now")).toBeInTheDocument();
++    expect(screen.queryByText(/checked/)).toBeNull();
++  });
++});
++
++describe("copy.ts recent downloads and what you follow strings", () => {
++  it("(a) the result sentences", () => {
++    expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");
++    expect(partialResult("1,230", "1,236", "6")).toBe("1,230 of 1,236 stocks, 6 failed");
++    expect(interruptedResult("611")).toBe(
++      "FactorFlow restarted mid-download; 611 kept, the rest picked up next time",
++    );
++  });
++
++  it("(c) the sub-line", () => {
++    expect(recentDownloadsSubline(null)).toBe("Starts when you press Download now");
++    expect(recentDownloadsSubline("14:03:12 CDT")).toBe(
++      "Starts when you press Download now · checked 14:03:12 CDT",
++    );
++  });
++});
+diff --git a/web/src/screens/data-health/recent-downloads.tsx b/web/src/screens/data-health/recent-downloads.tsx
+new file mode 100644
+index 00000000..7fb7ca30
+--- /dev/null
++++ b/web/src/screens/data-health/recent-downloads.tsx
+@@ -0,0 +1,134 @@
++import type { ColumnDef } from "@tanstack/react-table";
++import { type JSX, useEffect, useId, useMemo, useState } from "react";
++import { Link } from "react-router-dom";
++import { listAcquisitionRuns } from "../../api/client";
++import type { AcquisitionRun } from "../../api/types";
++import { formatClock, formatCount, formatInstant } from "../../components/patterns/format";
++import { Absent } from "../../components/patterns/presence";
++import { StatusBadge } from "../../components/patterns/status-badge";
++import { labelOf, tierOf } from "../../components/patterns/tiers";
++import {
++  Card,
++  CardContent,
++  CardDescription,
++  CardHeader,
++  CardTitle,
++} from "../../components/ui/card";
++import { DataTable } from "../../components/ui/data-table";
++import { SkeletonLine } from "./check-card";
++import {
++  ABSENT,
++  DOWNLOAD_COLUMNS,
++  RECENT_DOWNLOADS,
++  interruptedResult,
++  partialResult,
++  recentDownloadsSubline,
++  writtenOf,
++} from "./copy";
++
++type ListState = { kind: "loading" } | { kind: "ok"; runs: AcquisitionRun[] };
++
++function rowId(run: AcquisitionRun): string {
++  return run.runId;
++}
++
++/** The *Result* sentence of a download that is not showing progress (data-health-ui 2.6; AC-12). */
++function resultOf(run: AcquisitionRun): string {
++  const written = formatCount(run.instrumentsWritten);
++  const named = formatCount(run.instrumentsNamed);
++  switch (run.state) {
++    case "partial":
++      return partialResult(written, named, formatCount(run.instrumentsFailed));
++    case "abandoned":
++      return interruptedResult(written);
++    default:
++      return writtenOf(written, named);
++  }
++}
++
++/**
++ * The Recent downloads card (component design data-health-ui 2.6; DAC-E6-14,
++ * DAC-E6-S4-1, AC-12, AC-25): the five newest downloads as a compact table with
++ * *Started* as the row header, and the time the list last answered beside the
++ * title. A *Partial* or *Interrupted* download is never worded as complete.
++ */
++export function RecentDownloads(): JSX.Element {
++  const headingId = useId();
++  const [list, setList] = useState<ListState>({ kind: "loading" });
++  const [answeredAt, setAnsweredAt] = useState<Date | null>(null);
++
++  useEffect(() => {
++    listAcquisitionRuns({ limit: 5 }).then((page) => {
++      setList({ kind: "ok", runs: page.runs });
++      setAnsweredAt(new Date());
++    });
++  }, []);
++
++  const columns = useMemo<ColumnDef<AcquisitionRun>[]>(
++    () => [
++      {
++        id: "started",
++        header: DOWNLOAD_COLUMNS.started,
++        cell: ({ row }) => (
++          <Link to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}>
++            {formatInstant(row.original.startedAt ?? row.original.requestedAt)}
++          </Link>
++        ),
++      },
++      {
++        id: "outcome",
++        header: DOWNLOAD_COLUMNS.outcome,
++        cell: ({ row }) => {
++          const status = { of: "download", state: row.original.state } as const;
++          return <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;
++        },
++      },
++      {
++        id: "ended",
++        header: DOWNLOAD_COLUMNS.ended,
++        cell: ({ row }) =>
++          row.original.endedAt === null ? (
++            <Absent label={ABSENT.notEnded} />
++          ) : (
++            formatInstant(row.original.endedAt)
++          ),
++      },
++      {
++        id: "result",
++        header: DOWNLOAD_COLUMNS.result,
++        cell: ({ row }) => resultOf(row.original),
++      },
++    ],
++    [],
++  );
++
++  return (
++    <section aria-labelledby={headingId}>
++      <Card variant="default">
++        <CardHeader>
++          <CardTitle id={headingId}>{RECENT_DOWNLOADS}</CardTitle>
++          <CardDescription className="text-xs">
++            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}
++          </CardDescription>
++        </CardHeader>
++        <CardContent>
++          {list.kind === "loading" ? (
++            <>
++              <SkeletonLine />
++              <SkeletonLine />
++              <SkeletonLine />
++            </>
++          ) : (
++            <DataTable
++              variant="compact"
++              rowHeader
++              columns={columns}
++              data={list.runs}
++              getRowId={rowId}
++            />
++          )}
++        </CardContent>
++      </Card>
++    </section>
++  );
++}
