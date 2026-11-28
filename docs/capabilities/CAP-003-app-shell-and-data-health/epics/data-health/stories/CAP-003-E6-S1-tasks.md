@@ -91,7 +91,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Confirm the baseline and the six hard dependencies' exports.
 
-- [ ] T001 From the repo root run `npm ci` and `npm run test`, and record the baseline as green. Confirm, without editing anything, that each hard dependency's deliverable exists. STOP and report if any is missing:
+- [x] T001 From the repo root run `npm ci` and `npm run test`, and record the baseline as green. Confirm, without editing anything, that each hard dependency's deliverable exists. STOP and report if any is missing:
   - (CAP-003-E1-S1) `web/src/components/ui/card.tsx` exports `Card` (`variant` `"default" | "metric" | "summary"`), `CardHeader`, `CardTitle` (an `h2`) and `CardContent`. `web/src/components/ui/button.tsx` exports `Button` with `variant` `outline` and `asChild`. `web/src/components/ui/badge.tsx` renders `data-variant`.
   - (CAP-003-E1-S5) `web/src/components/patterns/tiers.ts` exports `tierOf`, `labelOf` and `type Status`, with the `check` and `scores` members. `web/src/components/patterns/status-badge.tsx` exports the six-tier `StatusBadge({ tier, children })`.
   - (CAP-003-E1-S6) `web/src/components/patterns/presence.tsx` exports `Absent({ label })` and `NotDeterminable({ reason, label? })`. `web/src/components/patterns/format.ts` exports `formatInstant`, `formatClock`, `formatSessionDate` and `formatCount`.
@@ -122,7 +122,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement **TC-COMP-157 (card half)** and **TC-COMP-158** with the DAC-E6-3 label rows. Write them as `describe("Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3)")` in a new `web/src/screens/data-health/check-cards.test.tsx`, with `// Implements TC-COMP-157` and `// Implements TC-COMP-158`. Render `<DailyPricesCard check={…} followedCount={…} />`.
+- [x] T002 [P] Implement **TC-COMP-157 (card half)** and **TC-COMP-158** with the DAC-E6-3 label rows. Write them as `describe("Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3)")` in a new `web/src/screens/data-health/check-cards.test.tsx`, with `// Implements TC-COMP-157` and `// Implements TC-COMP-158`. Render `<DailyPricesCard check={…} followedCount={…} />`.
   - (a) **`ok`** (TC-COMP-157 edge), with `followedCount` 1236: the region named *Daily prices* has a `status-good` badge reading *No missing prices or gaps*. The result line reads exactly *All 1,236 stocks have prices to 2026-10-29*. The as-of line reads *Prices to 2026-10-29*, with no exception symbols and no *more*.
   - (b) **Gaps not determinable** (TC-COMP-157), with status `exceptions`, `absent_count` 2, `gap_stock_count` null, `behind_count` 1, `gap_detection { available false, reason "fewer_than_two_instruments_with_data" }`, `exception_count` 3 and symbols `["AAA","BBB","CCC"]`:
     - The header badge is `status-warning` *Needs attention*.
@@ -151,7 +151,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - a hand-written `k = exception_count - 5` (e: the three-symbol row with count 4 shows nothing instead of *and 1 more*)
   - drop-field-copy of `latest_session` (a)
   - remove-attribute of the scope note's link `to` (g)
-- [ ] T003 Implement **TC-COMP-149** (Company financials card labels, result line, as-of and note). Write it as `describe("Company financials card (TC-COMP-149, DAC-E6-4)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T002 in the same file, with `// Implements TC-COMP-149`.
+- [x] T003 Implement **TC-COMP-149** (Company financials card labels, result line, as-of and note). Write it as `describe("Company financials card (TC-COMP-149, DAC-E6-4)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T002 in the same file, with `// Implements TC-COMP-149`.
   - (a) **`ok`**, `followedCount` 30: `status-good` *All financials present*. The result line is exactly *All 30 stocks have financials*. The as-of line is exactly *Financials to 2026-10-30 13:00 CDT* (from `as_of "2026-10-30T18:00:00Z"`, with the zone).
   - (b) **`exceptions`**, with `absent_count` 2, `problem_count` 1, `exception_count` 3 and symbols `["AAA","BBB","CCC"]`: `status-warning` *Needs attention*. The result line is exactly *2 without financials, 1 with failed downloads*. The as-of line is *Financials to 2026-10-30 13:00 CDT · AAA, BBB, CCC*.
   - (c) **Zero part omitted**: `absent_count` 0 and `problem_count` 4 give exactly *4 with failed downloads*. `absent_count` 5 and `problem_count` 0 give exactly *5 without financials*.
@@ -163,7 +163,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - drop-field-copy of `problem_count` → `absent_count` (b: *2 with failed downloads*)
   - negate-boolean on the zero filter (c)
   - `formatInstant` replaced by `formatSessionDate` or raw text (a: the zone is missing)
-- [ ] T004 Write the check cards' null state, the rendering DAC-E6-7 requires and that CAP-003-E6-S5 composes. Write it as `describe("Check cards' null state (DAC-E6-7 support, AC-24)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T003. Render `DailyPricesCard` and `FinancialsCard` with `check={null}` and `followedCount` 10. For each:
+- [x] T004 Write the check cards' null state, the rendering DAC-E6-7 requires and that CAP-003-E6-S5 composes. Write it as `describe("Check cards' null state (DAC-E6-7 support, AC-24)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T003. Render `DailyPricesCard` and `FinancialsCard` with `check={null}` and `followedCount` 10. For each:
   - The region keeps its `h2` (*Daily prices*, *Company financials*).
   - No element carries a `data-variant` beginning `status-` and no `coverage-unknown` badge renders. The tier slot and the result line are each an `Absent` em dash (`aria-hidden` dash) with the hidden text *no data stored yet*.
   - The text contains neither *No missing prices or gaps*, *All financials present* nor *All 10 stocks*.
@@ -171,7 +171,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   Kills:
   - negate-boolean on the `check === null` guard (a passed check renders)
   - swap-case `Absent` → `NotDeterminable` (a `coverage-unknown` badge appears; Resolved Conflict 3)
-- [ ] T005 Implement **TC-COMP-150** (Factor scores card from the shell summary in every state), with the states the card table leaves open. Write it as `describe("Factor scores card (TC-COMP-150, DAC-E6-5, AC-8)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T004, with `// Implements TC-COMP-150`. Render `<ScoresCard scores={…} onRetryScores={spy} />`. `SUMMARY(over)` is a served `ScoreSummary` with these defaults: `never_classified false`; `set { set_id "s-1", run_id "run-42", run_started_at "2026-10-30T14:00:00Z", ended_at "2026-10-30T16:45:00Z", active_instruments 12, not_current false, … }`; `later null`; `stocks_current { current_count 9, followed_count 12 }`. It is wrapped as `{ kind: "served", data, checkedAt }`.
+- [x] T005 Implement **TC-COMP-150** (Factor scores card from the shell summary in every state), with the states the card table leaves open. Write it as `describe("Factor scores card (TC-COMP-150, DAC-E6-5, AC-8)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T004, with `// Implements TC-COMP-150`. Render `<ScoresCard scores={…} onRetryScores={spy} />`. `SUMMARY(over)` is a served `ScoreSummary` with these defaults: `never_classified false`; `set { set_id "s-1", run_id "run-42", run_started_at "2026-10-30T14:00:00Z", ended_at "2026-10-30T16:45:00Z", active_instruments 12, not_current false, … }`; `later null`; `stocks_current { current_count 9, followed_count 12 }`. It is wrapped as `{ kind: "served", data, checkedAt }`.
   - (a) **Not served** (`{ kind: "not_served" }`): `NotDeterminable`, a `coverage-unknown` badge *Not determinable* whose accessible description and visible reason are *FactorFlow can't read scores yet.*. The sentence appears exactly once. No `status-*` badge, no result line, no *Scores* line.
   - (b) **The five summary states**, each asserted as a `data-variant` literal plus the label:
     - `never_classified true`, `set null`, `stocks_current null`, `later null`: `status-neutral` *No scores yet*.
@@ -196,7 +196,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - drop-field-copy `set.run_id` → `set.set_id` in the link (e: `href` ends `s-1`)
   - `set.ended_at` swapped for `set.started_at` (e)
   - negate-boolean on the `last !== null` branch (h, i)
-- [ ] T006 [P] Implement **TC-COMP-156** (Verdict sentences: singular, all affected, failed download) with the whole DAC-E6-1 table. Write it as `describe("Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1)")` in a new `web/src/screens/data-health/verdict.test.tsx`, with `// Implements TC-COMP-156`. Render `<Verdict attention={ok(ATT(s))} dataHealth={ok(DH({ affected_count: n, followed_count: m }))} onRetryAttention={…} onRetryDataHealth={…} downloadNow={<button type="button">Download now</button>} />`. The verdict sentence is the element `getByTestId("verdict-sentence")`. `it.each` rows, each giving the badge's `data-variant` and the exact sentence text:
+- [x] T006 [P] Implement **TC-COMP-156** (Verdict sentences: singular, all affected, failed download) with the whole DAC-E6-1 table. Write it as `describe("Verdict sentence (TC-COMP-156, DAC-E6-1, DAC-E6-S1-1)")` in a new `web/src/screens/data-health/verdict.test.tsx`, with `// Implements TC-COMP-156`. Render `<Verdict attention={ok(ATT(s))} dataHealth={ok(DH({ affected_count: n, followed_count: m }))} onRetryAttention={…} onRetryDataHealth={…} downloadNow={<button type="button">Download now</button>} />`. The verdict sentence is the element `getByTestId("verdict-sentence")`. `it.each` rows, each giving the badge's `data-variant` and the exact sentence text:
   - `succeeded`, 0 of 10: `status-good`, *Yes. None of the 10 followed stocks needs attention.*
   - `partial`, 1 of 10 (step 1): `status-warning`, *Mostly yes. 1 of 10 followed stocks needs attention; its scores show as Incomplete until it's fixed.*
   - `succeeded`, 2 of 10: `status-warning`, *Mostly yes. 2 of 10 followed stocks need attention; their scores show as Incomplete until they're fixed.*
@@ -221,7 +221,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - drop-field-copy `affected_count` → attention's `problems.stock_count` (counts row)
   - drop-field-copy of `checked_at` from attention (checked-time row)
   - drop-defaulted-argument of `formatCount` (1,236 row)
-- [ ] T007 Implement **TC-COMP-148** (Verdict skeleton while attention loads; error with Try again while it fails), with the aggregate's states and the no-answer case. Write it as `describe("Verdict states (TC-COMP-148, DAC-E6-2, AC-24)")` in `web/src/screens/data-health/verdict.test.tsx`, after T006 in the same file, with `// Implements TC-COMP-148`.
+- [x] T007 Implement **TC-COMP-148** (Verdict skeleton while attention loads; error with Try again while it fails), with the aggregate's states and the no-answer case. Write it as `describe("Verdict states (TC-COMP-148, DAC-E6-2, AC-24)")` in `web/src/screens/data-health/verdict.test.tsx`, after T006 in the same file, with `// Implements TC-COMP-148`.
   - (a) **Step 1**: `attention={{ kind: "loading" }}` with an `ok` aggregate. The `h1`, *Full coverage table* and the `downloadNow` node render. An element inside the header carries `aria-busy="true"`. No `status-*` badge renders, and none of *Yes*, *Mostly yes* or *No.* appears.
   - (b) **Step 2**: `attention={{ kind: "error", error: INTERNAL, last: { data: ATT("failed"), checkedAt } }}` with an aggregate of 10 of 10. The `h1`, *Full coverage table* and the `downloadNow` node are still rendered. A `role="status"` element reads exactly *Couldn't read what needs attention: FactorFlow hit an unexpected problem.*. A button *Try again* calls `onRetryAttention` once and `onRetryDataHealth` never. No `status-*` badge renders, so no tier is computed, even from `last` or from the aggregate. *req-9f3* and *database said no* appear nowhere.
   - (c) The same, with `error: UNREACHABLE`: *Couldn't read what needs attention: FactorFlow is not answering.* (DEC-0373).
@@ -236,7 +236,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - swap-case of the two retry callbacks (b, e)
   - negate-boolean on the null-answer guard (g: a badge or *Yes* renders)
   - remove-attribute of `aria-busy` (a, d)
-- [ ] T008 Implement **TC-COMP-157 (verdict half)**: gaps not determinable named after the sentence. Write it as `describe("Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1)")` in `web/src/screens/data-health/verdict.test.tsx`, after T007, with `// Implements TC-COMP-157`.
+- [x] T008 Implement **TC-COMP-157 (verdict half)**: gaps not determinable named after the sentence. Write it as `describe("Verdict names a check whose gaps can't be checked (TC-COMP-157, DAC-E6-S1-2, DAC-E6-1)")` in `web/src/screens/data-health/verdict.test.tsx`, after T007, with `// Implements TC-COMP-157`.
   - (a) The aggregate's `daily_prices` has status `exceptions`, `absent_count` 2, `gap_stock_count` null, `behind_count` 1 and `gap_detection { available false, reason "fewer_than_two_instruments_with_data" }`, with `succeeded` and 0 affected. The verdict sentence is still *Yes. None of the 10 followed stocks needs attention.*, unchanged and with no tier change. A separate element after it reads exactly *Daily prices can't be checked for gaps: fewer than two followed stocks hold daily prices.*
   - (b) The same with status `not_determinable` and all counts 0: the same named sentence.
   - (c) An unknown code `"calendar_unavailable"` gives *Daily prices can't be checked for gaps: calendar_unavailable.* Reason `null` gives *Daily prices can't be checked for gaps: no reason was given.* (DEC-0374).
@@ -247,7 +247,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - negate-boolean on `gap_stock_count === null` (d)
   - drop-field-copy of `gap_detection.reason` (c)
   - a hand-written mutant keying on `status === "not_determinable"` instead (a: nothing is named)
-- [ ] T009 Implement **TC-COMP-159 and TC-COMP-160 (verdict half)**. Write them as `describe("Verdict vocabulary and badges (TC-COMP-159, TC-COMP-160, DAC-E6-S1-4, DAC-E6-S1-5)")` in `web/src/screens/data-health/verdict.test.tsx`, after T008, with `// Implements TC-COMP-159` and `// Implements TC-COMP-160`. A module-local `visibleAndAccessibleText(container)` joins `container.textContent` with every `aria-label`, `title` and `aria-describedby`-referenced text.
+- [x] T009 Implement **TC-COMP-159 and TC-COMP-160 (verdict half)**. Write them as `describe("Verdict vocabulary and badges (TC-COMP-159, TC-COMP-160, DAC-E6-S1-4, DAC-E6-S1-5)")` in `web/src/screens/data-health/verdict.test.tsx`, after T008, with `// Implements TC-COMP-159` and `// Implements TC-COMP-160`. A module-local `visibleAndAccessibleText(container)` joins `container.textContent` with every `aria-label`, `title` and `aria-describedby`-referenced text.
   - (a) Render every state from T006, T007 and T008. Assert the joined text never matches `/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i`. A planted case proves the regex is not vacuous: `"one run"` and `"Retired"` match, and `"downloads"` and `"fewer_than_two_instruments_with_data"` do not.
   - (b) For each tier row of T006, the badge element (`[data-variant^="status-"]`) has the word as its text content (*Yes*, *Mostly yes* or *No*) and contains an `svg[aria-hidden="true"]`. The badge and its icon carry no `aria-label` that would replace the words.
   - (c) The verdict's state words are the literals of `copy.ts`. The TC's "never the domain term beside it" is covered by (a).
@@ -257,7 +257,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - a hand-written mutant rendering the answer word in a bare `span` instead of `StatusBadge` (b: no `status-*` badge, no `svg[aria-hidden="true"]`)
 
   The raw-gap-code mutant is killed by T002 (b) and T008 (a), not by this scan: the planted case proves `\b` does not match inside the code.
-- [ ] T010 Implement **TC-COMP-159 and TC-COMP-160 (cards half)**. Write them as `describe("Check cards vocabulary and badges (TC-COMP-159, TC-COMP-160, DAC-E6-S1-4, DAC-E6-S1-5)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T005, with both `// Implements` comments and the same local helper as T009.
+- [x] T010 Implement **TC-COMP-159 and TC-COMP-160 (cards half)**. Write them as `describe("Check cards vocabulary and badges (TC-COMP-159, TC-COMP-160, DAC-E6-S1-4, DAC-E6-S1-5)")` in `web/src/screens/data-health/check-cards.test.tsx`, after T005, with both `// Implements` comments and the same local helper as T009.
   - (a) Render every state from T002 to T005. No DAC-E7-3 term appears. The download link's `href` contains `run-42`, but no visible text or accessible name does.
   - (b) Each `ok` and `exceptions` badge and each score-state badge is a `status-*` badge. Its text equals the literal label listed in T002, T003 and T005, and it contains an `svg[aria-hidden="true"]`.
   - (c) Every *Not determinable* rendering is a `coverage-unknown` badge with an accessible description. That covers the Daily prices header, the gap part and the scores card while not served. None of them is a `status-*` badge, an em dash or plain text.
@@ -269,7 +269,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 ### Additional Unit Tests
 
-- [ ] T011 Write the copy unit cases as `describe("copy.ts (DEC-0373, -2)")` in `web/src/screens/data-health/verdict.test.tsx`, after T009.
+- [x] T011 Write the copy unit cases as `describe("copy.ts (DEC-0373, -2)")` in `web/src/screens/data-health/verdict.test.tsx`, after T009.
   - (a) `readFailureReason(UNREACHABLE)` is *FactorFlow is not answering*. `readFailureReason(INTERNAL)` is *FactorFlow hit an unexpected problem*. A coded `ApiError` (`code "validation_error"`) and a code-less one (`code null`) give the same *FactorFlow hit an unexpected problem*. No result contains the error's `message` or `requestId`.
   - (b) `gapReason("fewer_than_two_instruments_with_data")` is *fewer than two followed stocks hold daily prices*. `gapReason("calendar_unavailable")` is *calendar_unavailable*. `gapReason(null)` is *no reason was given*.
   - (c) `readFailed("what needs attention", "x")` is exactly *Couldn't read what needs attention: x.*
@@ -287,7 +287,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: The copy catalogue, the card composition, the three cards and the verdict.
 
-- [ ] T012 Create `web/src/screens/data-health/copy.ts`. Its module doc comment states that this is every owner-facing string of the Data health screen (data-health-ui 2.1), that CAP-003-E6-S2 to S5 add their strings here, that no string carries a DAC-E7-3 term (AC-19), and that `{reason}` text is never an envelope `message` or `request_id` (UX design 0.7). Strings are verbatim from data-health-ui 2.3 and 2.4 and epic DAC-E6-1 to DAC-E6-5 unless marked. Exports:
+- [x] T012 Create `web/src/screens/data-health/copy.ts`. Its module doc comment states that this is every owner-facing string of the Data health screen (data-health-ui 2.1), that CAP-003-E6-S2 to S5 add their strings here, that no string carries a DAC-E7-3 term (AC-19), and that `{reason}` text is never an envelope `message` or `request_id` (UX design 0.7). Strings are verbatim from data-health-ui 2.3 and 2.4 and epic DAC-E6-1 to DAC-E6-5 unless marked. Exports:
   - `PAGE_TITLE` is *Is the data good enough to trust?*. `FULL_COVERAGE_TABLE` is *Full coverage table*. `TRY_AGAIN` is *Try again*.
   - `CHECK_TITLES` is `{ daily_prices: "Daily prices", company_financials: "Company financials", scores: "Factor scores" }`.
   - `countClause(n, m)` returns:
@@ -327,13 +327,13 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - `ABSENT` is `{ noData: "no data stored yet", noPrices: "no prices stored yet", noFinancials: "no financials stored yet", noScores: "no scores yet" }`. The first comes from DAC-E6-7. The other three are this plan's hidden words for the absent renderings STD-UI-4 requires (Other Notes).
 
   `ApiError` and `ApiUnreachableError` are imported from `../../api/client` (delivered), `formatCount` from `../../components/patterns/format`, and `type DataAnswer` from `../../components/patterns/worst-data-tier`. No unit or hex literal appears, comments included: S5 adds this directory to `token-literals.test.ts`. Makes T011 pass and supplies T002–T010.
-- [ ] T013 Create `web/src/screens/data-health/check-card.tsx`, the check-card composition (UX design §3, 1.4 item 2; data-health-ui 10). It has three exports:
+- [x] T013 Create `web/src/screens/data-health/check-card.tsx`, the check-card composition (UX design §3, 1.4 item 2; data-health-ui 10). It has three exports:
   - `CheckCard({ title, status, result, asOf, children }: { title: string; status?: ReactNode; result?: ReactNode; asOf?: ReactNode; children?: ReactNode })` renders `<section aria-labelledby={id}>`, with `id = useId()`, wrapping `<Card variant="metric">`. `CardHeader` lays out in a row (`flex-row items-center gap-2`) holding `<CardTitle id={id}>{title}</CardTitle>` (an `h2` at `--text-lg`, from E1-S1) and then `status`. `CardContent` holds the result as `<p className="text-base font-semibold">`, the as-of as `<p className="text-xs text-muted-foreground">` (each rendered only when given), and then `children`.
   - `ReadFailure({ sentence, onRetry })` renders `<p role="status">{sentence}</p>` followed, outside it, by `<Button variant="outline" onClick={onRetry}>{TRY_AGAIN}</Button>`. This is the error convention of CAP-003-E1-S9's `StateRegion` (DEC-0314), followed here without importing it (Other Notes).
   - `SkeletonLine()` renders `<div aria-busy="true" className="h-4 animate-pulse rounded bg-secondary" />`, the delivered `set-history-dialog.tsx` precedent with token classes.
 
   No literal appears, and nothing is styled by colour alone. Supplies T002–T010.
-- [ ] T014 [P] Create `web/src/screens/data-health/daily-prices-card.tsx` exporting `DailyPricesCard({ check, followedCount }: { check: DataHealth["checks"]["daily_prices"]; followedCount: number })`, using `CheckCard` and `CHECK_TITLES.daily_prices`.
+- [x] T014 [P] Create `web/src/screens/data-health/daily-prices-card.tsx` exporting `DailyPricesCard({ check, followedCount }: { check: DataHealth["checks"]["daily_prices"]; followedCount: number })`, using `CheckCard` and `CHECK_TITLES.daily_prices`.
   - **`check === null`**: `status` and `result` are each `<Absent label={ABSENT.noData} />`, with no as-of and no scope note (DAC-E6-7; T004).
   - **Status**:
     - `ok` and `exceptions` give `<StatusBadge tier={tierOf(s)}>{labelOf(s)}</StatusBadge>`, with `s = { of: "check", check: "daily_prices", status }`.
@@ -351,7 +351,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - **Children**: the `PRICES_SCOPE_NOTE` paragraph (`text-xs text-muted-foreground`) and `<Button variant="outline" asChild><Link to="/data/coverage">{FULL_COVERAGE_TABLE}</Link></Button>`.
 
   The module doc comment cites data-health-ui 2.4, DAC-E6-3, DEC-0201, DEC-0206, DEC-0213 and DEC-0220. Depends on T012 and T013, and makes T002, T004 (prices half) and T010 pass.
-- [ ] T015 [P] Create `web/src/screens/data-health/financials-card.tsx` exporting `FinancialsCard({ check, followedCount }: { check: DataHealth["checks"]["company_financials"]; followedCount: number })`, using `CheckCard` and `CHECK_TITLES.company_financials`.
+- [x] T015 [P] Create `web/src/screens/data-health/financials-card.tsx` exporting `FinancialsCard({ check, followedCount }: { check: DataHealth["checks"]["company_financials"]; followedCount: number })`, using `CheckCard` and `CHECK_TITLES.company_financials`.
   - `check === null` is handled as in T014.
   - Status: `StatusBadge` over `tierOf` and `labelOf` of `{ of: "check", check: "company_financials", status }`.
   - Result: `allFinancials(formatCount(followedCount))` when `ok`, otherwise the non-zero parts of `withoutFinancials(absent_count)` and `withFailedDownloads(problem_count)`, joined by `", "`.
@@ -359,7 +359,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - Children: the `FINANCIALS_NOTE` paragraph.
 
   The doc comment cites data-health-ui 2.4, DAC-E6-4 and STD-UI-18. Depends on T012 and T013, and makes T003, T004 (financials half) and T010 pass.
-- [ ] T016 [P] Create `web/src/screens/data-health/scores-card.tsx` exporting `ScoresCard({ scores, onRetryScores }: { scores: ScoreState; onRetryScores: () => void })`, using `CheckCard` and `CHECK_TITLES.scores`. By `scores.kind`:
+- [x] T016 [P] Create `web/src/screens/data-health/scores-card.tsx` exporting `ScoresCard({ scores, onRetryScores }: { scores: ScoreState; onRetryScores: () => void })`, using `CheckCard` and `CHECK_TITLES.scores`. By `scores.kind`:
   - **`loading`**: body `<SkeletonLine />`, with no badge (ui-components 2.4: a caller whose read has not answered renders its skeleton).
   - **`not_served`**: `status` is `<NotDeterminable reason={SCORES_NOT_SERVED} />`, with no result and no as-of.
   - **`error`**: when `last !== null`, render as `served` with `last` (owner-shell 2.4). Otherwise the body is `<ReadFailure sentence={readFailed(READ_TARGETS.scores, readFailureReason(error))} onRetry={onRetryScores} />` with no badge (DEC-0376).
@@ -379,7 +379,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
     - **As-of** (only when `d.set` is non-null): `${SCORES_AT} ${formatInstant(d.set.ended_at)} · ${FROM_DOWNLOAD_STARTED} `, then `<Link to={`/data/downloads/${d.set.run_id}`}>{formatInstant(d.set.run_started_at)}</Link>` (data-health-ui 3 assumption; home-ui 2.4 for `ended_at`).
 
   The doc comment cites data-health-ui 2.4 and 3, DAC-E6-5, AC-8, and Resolved Conflict 5 on the `not_current` branch. Depends on T012 and T013, and makes T005 and T010 (scores half) pass.
-- [ ] T017 Create `web/src/screens/data-health/verdict.tsx` exporting `Verdict(props: { attention: ReadState<Attention>; dataHealth: ReadState<DataHealth>; onRetryAttention: () => void; onRetryDataHealth: () => void; downloadNow: ReactNode })`.
+- [x] T017 Create `web/src/screens/data-health/verdict.tsx` exporting `Verdict(props: { attention: ReadState<Attention>; dataHealth: ReadState<DataHealth>; onRetryAttention: () => void; onRetryDataHealth: () => void; downloadNow: ReactNode })`.
   - **Header.** It renders `<header className="flex flex-col gap-3">`. The first row (`flex items-start justify-between gap-4`) holds `<h1 tabIndex={-1} className="text-xl font-semibold">{PAGE_TITLE}</h1>` (owner-shell: focus moves to the screen's `h1`) and, on the right, `<div className="flex gap-2">` with `<Button variant="outline" asChild><Link to="/data/coverage">{FULL_COVERAGE_TABLE}</Link></Button>` and `{props.downloadNow}`.
   - **Body**, in this order (DAC-E6-2; Resolved Conflict 6):
     1. Attention `loading` gives `<SkeletonLine />`.
@@ -401,7 +401,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Prove the new files sit cleanly in the delivered suite and the shared scans.
 
-- [ ] T018 Run the whole Vitest suite (`npm run test`) unchanged. It includes `web/src/api/render.test.tsx`, which walks all of `web/src` and forbids `dangerouslySetInnerHTML`, so provider reasons render as text (data-health-ui 4). It also includes, when present, `web/src/components/token-literals.test.ts` (CAP-003-E1-S1). This story does not widen that scan's directory list; S5 does (DAC-E6-S5-4). Run S5's future scan by hand now: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/*.ts web/src/screens/data-health/*.tsx | grep -v "\.test\."` prints nothing. Then confirm with `git status --short web/ package.json` that the only changes are the eight new files under `web/src/screens/data-health/`, and that no delivered file, sibling story file or `package.json` was touched (traces to AC-11, AC-24).
+- [x] T018 Run the whole Vitest suite (`npm run test`) unchanged. It includes `web/src/api/render.test.tsx`, which walks all of `web/src` and forbids `dangerouslySetInnerHTML`, so provider reasons render as text (data-health-ui 4). It also includes, when present, `web/src/components/token-literals.test.ts` (CAP-003-E1-S1). This story does not widen that scan's directory list; S5 does (DAC-E6-S5-4). Run S5's future scan by hand now: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/*.ts web/src/screens/data-health/*.tsx | grep -v "\.test\."` prints nothing. Then confirm with `git status --short web/ package.json` that the only changes are the eight new files under `web/src/screens/data-health/`, and that no delivered file, sibling story file or `package.json` was touched (traces to AC-11, AC-24).
 
 **Checkpoint**: The whole suite is green, the future literal scan is clean, and only this story's eight files were added.
 
@@ -411,8 +411,8 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Validation commands and TDD evidence.
 
-- [ ] T019 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root. Format the new files with `npx biome format --write web/src/screens/data-health/`, only those files. `tsc` checks the indexed `DataHealth["checks"][…]` prop types and that `ScoreState` is handled exhaustively. Then run `npm run build`. Finally, run the mutation pass: `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"` over the six production files, with the hand-written mutants listed in Other Notes. It must leave no surviving non-equivalent mutant (traces to AC-11, AC-24).
-- [ ] T020 After each TDD cycle, and not once at the end:
+- [x] T019 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root. Format the new files with `npx biome format --write web/src/screens/data-health/`, only those files. `tsc` checks the indexed `DataHealth["checks"][…]` prop types and that `ScoreState` is handled exhaustively. Then run `npm run build`. Finally, run the mutation pass: `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"` over the six production files, with the hand-written mutants listed in Other Notes. It must leave no surviving non-equivalent mutant (traces to AC-11, AC-24).
+- [x] T020 After each TDD cycle, and not once at the end:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `CAP-003-E6-S1-tdd-evidence.yaml` beside this story with:
