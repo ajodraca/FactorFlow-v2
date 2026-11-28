@@ -342,6 +342,67 @@ describe("Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, A
 
 // Implements TC-COMP-166
 // Implements TC-COMP-167
+describe("Needs fixing hand-off cases (DAC-E6-9, AC-16, AC-25)", () => {
+  it("names the rows list by the card heading", () => {
+    renderCard(ok(DH()));
+    expect(screen.getByRole("list", { name: "Needs fixing · 2" })).toBeInTheDocument();
+  });
+
+  it("reads the checked time from the aggregate, not from when it arrived", () => {
+    renderCard({
+      kind: "ok",
+      data: DH(),
+      checkedAt: new Date("2026-10-30T20:00:00Z"),
+    });
+    expect(
+      screen.getByText("From your most recent downloads · checked 14:03:12 CDT"),
+    ).toBeInTheDocument();
+  });
+
+  it("leaves focus where the owner put it when the last page loads", async () => {
+    const pending = deferred<ProblemPage>();
+    problemsMock.mockReturnValueOnce(pending.promise);
+    renderCard(ok(DH({ affected_count: 120, problems: PAGE(0, 50, "S049") })));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Show more" }));
+    const link = screen.getByRole("link", { name: "S000, show in the coverage table" });
+    act(() => link.focus());
+    await act(async () => {
+      pending.resolve(PAGE(50, 120, null));
+    });
+    await waitFor(() => expect(symbols()).toHaveLength(120));
+    expect(screen.getByRole("link", { name: "S000, show in the coverage table" })).toHaveFocus();
+  });
+
+  it("leaves focus where the owner put it when a page fails", async () => {
+    const pending = deferred<ProblemPage>();
+    problemsMock.mockReturnValueOnce(pending.promise);
+    renderCard(ok(DH({ affected_count: 120, problems: PAGE(0, 50, "S049") })));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Show more" }));
+    const link = screen.getByRole("link", { name: "S000, show in the coverage table" });
+    act(() => link.focus());
+    await act(async () => {
+      pending.reject(BAD_CURSOR);
+    });
+    await screen.findByText(/Couldn't read more problems/);
+    expect(screen.getByRole("link", { name: "S000, show in the coverage table" })).toHaveFocus();
+  });
+
+  it("moves focus once and does not pull it back on later renders", async () => {
+    problemsMock.mockResolvedValueOnce(PAGE(50, 120, null));
+    const state = ok(DH({ affected_count: 120, problems: PAGE(0, 50, "S049") }));
+    const { update } = renderCard(state);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Show more" }));
+    await waitFor(() => expect(screen.getByRole("list")).toHaveFocus());
+    const link = screen.getByRole("link", { name: "S000, show in the coverage table" });
+    act(() => link.focus());
+    update(state);
+    expect(link).toHaveFocus();
+  });
+});
+
 describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)", () => {
   async function failFirstMore(error: Error) {
     problemsMock.mockRejectedValueOnce(error);

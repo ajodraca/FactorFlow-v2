@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0z9_elc5/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 2 failed) 136ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the corporate_actions download as Downloading corporate actions failed 5ms
+     → expected 'KOFailedDownloading corporate_actions…' to contain 'Downloading corporate actions failed:…'
+   × copy.ts, Needs fixing strings (DEC-0382, -4) > formats the what-failed line 1ms
+     → expected 'Downloading corporate_actions failed:…' to be 'Downloading corporate actions failed:…' // Object.is equality
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/needs-fixing.test.tsx (46 tests) 1728ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the corporate_actions download as Downloading corporate actions failed
+AssertionError: expected 'KOFailedDownloading corporate_actions…' to contain 'Downloading corporate actions failed:…'
+
+Expected: "Downloading corporate actions failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading corporate_actions failed: provider timeout, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:172:32
+    170|   ] as const)("words the %s download as %s", (dataType, words) => {
+    171|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    172|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    173|   });
+    174| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > copy.ts, Needs fixing strings (DEC-0382, -4) > formats the what-failed line
+AssertionError: expected 'Downloading corporate_actions failed:…' to be 'Downloading corporate actions failed:…' // Object.is equality
+
+Expected: "Downloading corporate actions failed: x, 1,234 attempts"
+Received: "Downloading corporate_actions failed: x, 1,234 attempts"
+
+ ❯ src/screens/data-health/problem-row.test.tsx:321:60
+    319| 
+    320|   it("formats the what-failed line", () => {
+    321|     expect(downloadFailed("corporate_actions", "x", 1234)).toBe(
+       |                                                            ^
+    322|       "Downloading corporate actions failed: x, 1,234 attempts",
+    323|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 65 passed (67)
+   Start at  00:29:16
+   Duration  2.77s (transform 158ms, setup 64ms, collect 838ms, tests 1.86s, environment 644ms, prepare 159ms)
+

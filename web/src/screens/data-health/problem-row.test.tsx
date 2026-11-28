@@ -154,6 +154,22 @@ describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () =>
     expect(stop).not.toHaveBeenCalled();
   });
 
+  it("chooses each fix from the failures' outcomes, not from the served retryable flag", () => {
+    const failedOnly = renderRow(ROW("KO", [FAIL("prices")], false));
+    expect(screen.getAllByText(FAILED_FIX)).toHaveLength(1);
+    failedOnly.unmount();
+    renderRow(ROW("ZZZZ", [NF("reference")], true));
+    expect(screen.queryByText(FAILED_FIX)).toBeNull();
+    expect(screen.getAllByText(NOT_FOUND_FIX)).toHaveLength(1);
+  });
+
+  it("names the consequence on a row with only not-found failures", () => {
+    renderRow(ROW("ZZZZ", [NF("reference")], false));
+    const consequence = screen.getAllByText(CONSEQUENCE);
+    expect(consequence).toHaveLength(1);
+    expect(consequence[0]?.className).toContain("text-xs");
+  });
+
   it("never starts a download from the row's own controls", async () => {
     const stop = vi.fn();
     renderRow(ROW("FBXX", [FAIL("prices"), NF("reference")], true), stop);
@@ -328,6 +344,7 @@ describe("copy.ts, Needs fixing strings (DEC-0382, -4)", () => {
 
   it("formats the count announcement and the last complete download", () => {
     expect(showingOf(100, 1236)).toBe("Showing 100 of 1,236 stocks");
+    expect(showingOf(1100, 1236)).toBe("Showing 1,100 of 1,236 stocks");
     expect(lastCompleteDownload("2026-10-29 09:00 CDT")).toBe(
       "Last complete download 2026-10-29 09:00 CDT",
     );

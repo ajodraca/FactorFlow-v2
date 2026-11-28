@@ -225,3 +225,29 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-5
+    tasks: [T016]
+    description: >
+      Hand-off survivors. The first hand-off run (108 mutants: 27 catalogue and 81 hand-written by an independent
+      subagent) left 17 alive; nine are equivalent counter values (cycle 2 and 3's) and eight were real gaps. Tests only:
+      problem-row.test.tsx pins the fix keyed by the failures' outcomes, not by the served retryable flag, the
+      consequence on a not-found-only row, and showingOf with a thousands separator on the shown count;
+      needs-fixing.test.tsx pins the rows list's accessible name, the checked time read from the aggregate, focus left
+      where the owner put it when the last page loads or a page fails, and a focus move not repeating on later renders.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the surviving hand-off mutants
+      (manual:1, 12, 44, 49, 56, 61, 66, 81), which the full rerun on the committed tree records as killed. They are
+      probed by that run rather than by a separate red log.
+    red_cycle: cycle-4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups from the reviews, not adopted: two assertions read the text-xs class and a fixture's
+        default count; the focus-repeat test relies on a same-object re-render.
+    diff_sha256: b6104052b4ed86a901b15ffa03232a9b1036365554487ee0151c9846ad26cd00
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 4 already mutated, and the hand-off run scores it
