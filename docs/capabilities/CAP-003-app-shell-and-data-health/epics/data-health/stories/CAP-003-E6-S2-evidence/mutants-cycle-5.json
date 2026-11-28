@@ -1,0 +1,62 @@
+{
+ "schema": 1,
+ "repo_head": "63a7f8f944ceeef247d020b4764343c1f4a5a475",
+ "range": "HEAD..worktree",
+ "source": "985e532eb464dcac465be6ecefa13fc609aa0560",
+ "mutants": [
+  {
+   "id": "c5-m11",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "old": "cause instanceof ApiUnreachableError ? cause : new ApiError(\"\", \"\")",
+   "new": "cause instanceof ApiError ? cause : new ApiUnreachableError(\"\")",
+   "description": "A thrown value that is neither ApiError nor ApiUnreachableError reads 'not answering' instead of the ApiError sentence (T010 Catch: 'Anything else sets failed with the same function's ApiError sentence')"
+  },
+  {
+   "id": "c5-m29",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/download-now.tsx",
+   "old": "      <Button\n        variant=\"default\"\n        aria-busy={busy || undefined}\n        onClick={() => {\n          if (!pending.current) void start();\n        }}\n      >\n        {label}\n      </Button>\n      {outcome?.kind === \"queued\" ? (\n        <output className=\"text-xs text-muted-foreground\">{QUEUED_NOTICE}</output>\n      ) : null}\n",
+   "new": "      {outcome?.kind === \"queued\" ? (\n        <output className=\"text-xs text-muted-foreground\">{QUEUED_NOTICE}</output>\n      ) : null}\n      <Button\n        variant=\"default\"\n        aria-busy={busy || undefined}\n        onClick={() => {\n          if (!pending.current) void start();\n        }}\n      >\n        {label}\n      </Button>\n",
+   "description": "The queued helper line renders before the button instead of beneath it (T010 markup order; Other Notes caller contract; ux-design 1.4 helper line)"
+  },
+  {
+   "id": "c5-m40",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "old": "      await retireInstrument(target);\n      watchRowExit.current = true;",
+   "new": "      watchRowExit.current = true;\n      await retireInstrument(target);",
+   "description": "The row-exit watch starts before the answer, so after a 500 or transport failure a row that later leaves pulls focus to the heading (T011 'On success' step 1; Other Notes refusal-only; STD-UI-24)"
+  },
+  {
+   "id": "c5-m42",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "old": "    setPending(true);\n    setFailure(null);",
+   "new": "    setPending(true);",
+   "description": "Confirming again does not clear the previous refusal while the new request is in flight (T011 confirm() 'clear failure')"
+  },
+  {
+   "id": "c5-m51",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "old": "          : new ApiError(\"\", \"\");",
+   "new": "          : new ApiUnreachableError(\"\");",
+   "description": "A thrown value that is neither ApiError nor ApiUnreachableError reads 'not answering' instead of 'unexpected problem' (T011 via stopFailureReason -> readFailureReason; DEC-0377)"
+  },
+  {
+   "id": "c5-m62",
+   "cycle": "cycle-5",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+   "old": "} else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+   "new": "} else if (!focusOnBody && !active?.closest('[role=\"dialog\"]')) {",
+   "description": "Focus returned to the row's button ends the watch, so a row that leaves later does not hand focus to the heading (T011 'other than body and the opener'; T005 (g))"
+  }
+ ]
+}

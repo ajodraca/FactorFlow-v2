@@ -1,0 +1,1043 @@
+{
+  "schema": 1,
+  "repo_head": "63a7f8f944ceeef247d020b4764343c1f4a5a475",
+  "range": "985e532eb464dcac465be6ecefa13fc609aa0560..HEAD",
+  "source": "985e532eb464dcac465be6ecefa13fc609aa0560",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/copy.ts:229:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 229,
+      "original": "  return code !== null && Object.hasOwn(STOP_REFUSAL_REASONS, code);",
+      "mutated": "  return code !== null || Object.hasOwn(STOP_REFUSAL_REASONS, code);"
+    },
+    {
+      "id": "web/src/screens/data-health/copy.ts:234:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 234,
+      "original": "  return error instanceof ApiError && isStopRefusalCode(error.code);",
+      "mutated": "  return error instanceof ApiError || isStopRefusalCode(error.code);"
+    },
+    {
+      "id": "web/src/screens/data-health/copy.ts:238:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 238,
+      "original": "  if (error instanceof ApiError && isStopRefusalCode(error.code)) {",
+      "mutated": "  if (error instanceof ApiError || isStopRefusalCode(error.code)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:22:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 22,
+      "original": "  return code !== null && Object.hasOwn(START_REFUSALS, code);",
+      "mutated": "  return code !== null || Object.hasOwn(START_REFUSALS, code);"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:43:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 43,
+      "original": "  const pending = useRef(false);",
+      "mutated": "  const pending = useRef(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:44:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 44,
+      "original": "  const [busy, setBusy] = useState(false);",
+      "mutated": "  const [busy, setBusy] = useState(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:48:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 48,
+      "original": "    pending.current = true;",
+      "mutated": "    pending.current = false;"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:49:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 49,
+      "original": "    setBusy(true);",
+      "mutated": "    setBusy(false);"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:59:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 59,
+      "original": "      if (cause instanceof ApiError && isRefusalCode(cause.code)) {",
+      "mutated": "      if (cause instanceof ApiError || isRefusalCode(cause.code)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:68:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 68,
+      "original": "      pending.current = false;",
+      "mutated": "      pending.current = true;"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:69:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 69,
+      "original": "      setBusy(false);",
+      "mutated": "      setBusy(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:79:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 79,
+      "original": "        aria-busy={busy || undefined}",
+      "mutated": "        aria-busy={busy && undefined}"
+    },
+    {
+      "id": "web/src/screens/data-health/download-now.tsx:81:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "line": 81,
+      "original": "          if (!pending.current) void start();",
+      "mutated": "          if (pending.current) void start();"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:62:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 62,
+      "original": "  const [pending, setPending] = useState(false);",
+      "mutated": "  const [pending, setPending] = useState(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 64,
+      "original": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 0 });",
+      "mutated": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 1 });"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 66,
+      "original": "  const watchRowExit = useRef(false);",
+      "mutated": "  const watchRowExit = useRef(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:76:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 76,
+      "original": "      watchRowExit.current = false;",
+      "mutated": "      watchRowExit.current = true;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:86:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 86,
+      "original": "      if (!watchRowExit.current) return;",
+      "mutated": "      if (watchRowExit.current) return;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:88:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 88,
+      "original": "      const focusOnBody = active === null || active === document.body;",
+      "mutated": "      const focusOnBody = active === null && active === document.body;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:89:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 89,
+      "original": "      if (opener.current?.isConnected === false && focusOnBody) {",
+      "mutated": "      if (opener.current?.isConnected === true && focusOnBody) {"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:89:negate-boolean:2",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 89,
+      "original": "      if (opener.current?.isConnected === false && focusOnBody) {",
+      "mutated": "      if (opener.current?.isConnected === false || focusOnBody) {"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:91:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 91,
+      "original": "        watchRowExit.current = false;",
+      "mutated": "        watchRowExit.current = true;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 92,
+      "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+      "mutated": "      } else if (!focusOnBody || active !== opener.current && !active?.closest('[role=\"dialog\"]')) {"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:2",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 92,
+      "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+      "mutated": "      } else if (!focusOnBody && active !== opener.current || !active?.closest('[role=\"dialog\"]')) {"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:3",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 92,
+      "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+      "mutated": "      } else if (focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:92:negate-boolean:4",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 92,
+      "original": "      } else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+      "mutated": "      } else if (!focusOnBody && active !== opener.current && active?.closest('[role=\"dialog\"]')) {"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:94:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 94,
+      "original": "        watchRowExit.current = false;",
+      "mutated": "        watchRowExit.current = true;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:98:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 98,
+      "original": "    if (!watchRowExit.current) return;",
+      "mutated": "    if (watchRowExit.current) return;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 99,
+      "original": "    const timer = setTimeout(settle, 0);",
+      "mutated": "    const timer = setTimeout(settle, 1);"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:104:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 104,
+      "original": "    setPending(true);",
+      "mutated": "    setPending(false);"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:108:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 108,
+      "original": "      watchRowExit.current = true;",
+      "mutated": "      watchRowExit.current = false;"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 112,
+      "original": "      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 1 }));",
+      "mutated": "      setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 2 }));"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:115:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 115,
+      "original": "        cause instanceof ApiUnreachableError || cause instanceof ApiError",
+      "mutated": "        cause instanceof ApiUnreachableError && cause instanceof ApiError"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:123:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 123,
+      "original": "      setPending(false);",
+      "mutated": "      setPending(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/stop-following-dialog.tsx:130:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "line": 130,
+      "original": "      watchRowExit.current = true;",
+      "mutated": "      watchRowExit.current = false;"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "result.queuedBehind === null",
+      "new": "result.queuedBehind !== null",
+      "description": "A 202 with nothing queued shows the queued line and a queued 202 refreshes attention (story Description; DAC-E6-11; T003 (a), (b); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "refresh(\"attention\");",
+      "new": "void refresh;",
+      "description": "A 202 with nothing queued no longer re-reads attention (story Description; T003 (a); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "refresh(\"attention\");",
+      "new": "refresh(\"scores\");",
+      "description": "A 202 re-reads scores instead of attention (story Description refresh(\"attention\"); T003 swap-case)"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "refresh(\"attention\");",
+      "new": "refresh(\"health\");",
+      "description": "A 202 re-reads health instead of attention (story Description refresh(\"attention\"); T003 (a))"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "setOutcome({ kind: \"queued\" });",
+      "new": "setOutcome({ kind: \"queued\" });\n        refresh(\"attention\");",
+      "description": "A queued 202 also refreshes attention, which data-health-ui 2.2's alt branch and T003 (b) forbid"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "setOutcome({ kind: \"queued\" });",
+      "new": "void 0;",
+      "description": "A queued 202 no longer says the download starts when the running one finishes (AC-15; story Description; T003 (b))"
+    },
+    {
+      "id": "manual:7",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "if (!pending.current) void start();",
+      "new": "void start();",
+      "description": "A second press while a start is in flight posts again (T003 (e); T010 pending ref; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:8",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "    setBusy(true);\n    setOutcome(null);",
+      "new": "    setBusy(true);",
+      "description": "A new press no longer clears the previous refusal, failure or queued line (T010 start() 'Clear outcome'; T002 (f))"
+    },
+    {
+      "id": "manual:9",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "reason: readFailureReason(known)",
+      "new": "reason: (cause as Error).message || readFailureReason(known)",
+      "description": "A failure renders the thrown envelope message instead of the DEC-0378 reason (T002 (e); AC-19; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:10",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "cause instanceof ApiUnreachableError ? cause : new ApiError(\"\", \"\")",
+      "new": "cause instanceof ApiUnreachableError ? new ApiError(\"\", \"\") : new ApiError(\"\", \"\")",
+      "description": "A transport failure reads 'unexpected problem' instead of 'FactorFlow is not answering' (DEC-0378; T002 (c))"
+    },
+    {
+      "id": "manual:11",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "cause instanceof ApiUnreachableError ? cause : new ApiError(\"\", \"\")",
+      "new": "cause instanceof ApiError ? cause : new ApiUnreachableError(\"\")",
+      "description": "A thrown value that is neither ApiError nor ApiUnreachableError reads 'not answering' instead of the ApiError sentence (T010 Catch: 'Anything else sets failed with the same function's ApiError sentence')"
+    },
+    {
+      "id": "manual:12",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "  return code !== null && Object.hasOwn(START_REFUSALS, code);",
+      "new": "  return code !== null;",
+      "description": "An unknown 409 code is treated as a refusal instead of 'unexpected problem' with Try again (DEC-0378; T002 (d))"
+    },
+    {
+      "id": "manual:13",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "START_REFUSALS[outcome.code]",
+      "new": "START_REFUSALS[outcome.code === \"history_depth_not_set\" ? \"no_active_instruments\" : \"history_depth_not_set\"]",
+      "description": "The two 409 refusals are interchanged: each code shows the other's sentence and link (DAC-E6-S2-1; T002 (a), (b))"
+    },
+    {
+      "id": "manual:14",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "        variant=\"default\"",
+      "new": "        variant=\"outline\"",
+      "description": "Download now is no longer the default button (data-health-ui 10; T010 markup; review IR-003)"
+    },
+    {
+      "id": "manual:15",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<Button variant=\"outline\" asChild>",
+      "new": "<Button variant=\"default\" asChild>",
+      "description": "The refusal's fix link is a default button instead of outline (T010 markup; data-health-ui 10; review IR-003)"
+    },
+    {
+      "id": "manual:16",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<Button variant=\"outline\" onClick={() => void start()}>",
+      "new": "<Button variant=\"default\" onClick={() => void start()}>",
+      "description": "Try again is a default button instead of outline (T010 markup; data-health-ui 10; review IR-003)"
+    },
+    {
+      "id": "manual:17",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<Button variant=\"outline\" onClick={() => void start()}>",
+      "new": "<Button variant=\"outline\" onClick={() => undefined}>",
+      "description": "Try again does nothing instead of posting again (DAC-E6-S2-1; T002 (c); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:18",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "aria-busy={busy || undefined}",
+      "new": "aria-busy={busy || undefined}\n        disabled={busy}",
+      "description": "Download now becomes natively disabled in flight, where the button contract is blocked and never disabled (T003 (e); DAC-E1-15)"
+    },
+    {
+      "id": "manual:19",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "        {label}\n",
+      "new": "        {label === label ? DOWNLOAD_NOW : label}\n",
+      "description": "The caller's label is ignored, so the empty state's Start the first download reads Download now (DEC-0379; T003 (f))"
+    },
+    {
+      "id": "manual:20",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "label = DOWNLOAD_NOW",
+      "new": "label = TRY_AGAIN",
+      "description": "The default label is not Download now (DEC-0379; T006 (a); story Description)"
+    },
+    {
+      "id": "manual:21",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<output className=\"text-xs text-muted-foreground\">{QUEUED_NOTICE}</output>",
+      "new": "<p className=\"text-xs text-muted-foreground\">{QUEUED_NOTICE}</p>",
+      "description": "The queued helper line is no longer a polite status (T010 markup: <output>; T003 (b))"
+    },
+    {
+      "id": "manual:22",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<output className=\"text-sm\">{refusal.sentence}</output>",
+      "new": "<p className=\"text-sm\">{refusal.sentence}</p>",
+      "description": "The refusal sentence is no longer a status (T010 markup; DEC-0314; T002 (a))"
+    },
+    {
+      "id": "manual:23",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<output className=\"text-sm\">{startFailed(outcome.reason)}</output>",
+      "new": "<p className=\"text-sm\">{startFailed(outcome.reason)}</p>",
+      "description": "The failure sentence is no longer a status (T010 markup; DEC-0314; T002 (c))"
+    },
+    {
+      "id": "manual:24",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<output className=\"text-sm\">{startFailed(outcome.reason)}</output>\n          <Button variant=\"outline\" onClick={() => void start()}>\n            {TRY_AGAIN}\n          </Button>",
+      "new": "<output className=\"text-sm\">\n            {startFailed(outcome.reason)}\n            <Button variant=\"outline\" onClick={() => void start()}>\n              {TRY_AGAIN}\n            </Button>\n          </output>",
+      "description": "Try again moves inside the status element instead of following it (T010 markup; CAP-003-E1-S9 convention; T002 (c))"
+    },
+    {
+      "id": "manual:25",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "{startFailed(outcome.reason)}",
+      "new": "{outcome.reason}",
+      "description": "The failure line loses its 'Couldn't start the download: ...' sentence (DAC-E6-S2-1; T002 (c), (d))"
+    },
+    {
+      "id": "manual:26",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<Link to={refusal.to}>",
+      "new": "<Link to=\"/data\">",
+      "description": "The refusal's fix link no longer targets its path (/settings or /data/followed) (DAC-E6-S2-1; T002 (a), (b))"
+    },
+    {
+      "id": "manual:27",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "{refusal.fix}",
+      "new": "{TRY_AGAIN}",
+      "description": "The refusal's fix link is named Try again instead of Set history depth or Follow stocks (DAC-E6-S2-1; story Description)"
+    },
+    {
+      "id": "manual:28",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "<output className=\"text-sm\">{refusal.sentence}</output>",
+      "new": "<output className=\"text-sm text-status-critical\">{refusal.sentence}</output>",
+      "description": "The refusal is styled in a status colour, a state carried by colour (DAC-E6-S2-4; T008 (b); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:29",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/download-now.tsx",
+      "old": "      <Button\n        variant=\"default\"\n        aria-busy={busy || undefined}\n        onClick={() => {\n          if (!pending.current) void start();\n        }}\n      >\n        {label}\n      </Button>\n      {outcome?.kind === \"queued\" ? (\n        <output className=\"text-xs text-muted-foreground\">{QUEUED_NOTICE}</output>\n      ) : null}\n",
+      "new": "      {outcome?.kind === \"queued\" ? (\n        <output className=\"text-xs text-muted-foreground\">{QUEUED_NOTICE}</output>\n      ) : null}\n      <Button\n        variant=\"default\"\n        aria-busy={busy || undefined}\n        onClick={() => {\n          if (!pending.current) void start();\n        }}\n      >\n        {label}\n      </Button>\n",
+      "description": "The queued helper line renders before the button instead of beneath it (T010 markup order; Other Notes caller contract; ux-design 1.4 helper line)"
+    },
+    {
+      "id": "manual:30",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "refresh(\"attention\");",
+      "new": "void refresh;",
+      "description": "A 200 no longer refreshes attention (story Description; T005 (f); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:31",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "refresh(\"attention\");",
+      "new": "refresh(\"health\");",
+      "description": "A 200 refreshes health instead of attention (story Description; T005 (f))"
+    },
+    {
+      "id": "manual:32",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "      onStopped();",
+      "new": "      void onStopped;",
+      "description": "A 200 no longer calls the caller's aggregate re-read (story Description; T005 (f); DAC-E6-15)"
+    },
+    {
+      "id": "manual:33",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "      onClose();\n      onStopped();",
+      "new": "      onStopped();",
+      "description": "A 200 no longer closes the dialog (story Description '200 closes'; T005 (f))"
+    },
+    {
+      "id": "manual:34",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "setAnnouncement((prev) => ({ text: stoppedFollowing(target), serial: prev.serial + 1 }));",
+      "new": "void [setAnnouncement, stoppedFollowing];",
+      "description": "A 200 no longer announces 'Stopped following {SYMBOL}' (story Description; T005 (f))"
+    },
+    {
+      "id": "manual:35",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "text: stoppedFollowing(target)",
+      "new": "text: stoppedFollowing(\"\")",
+      "description": "The announcement loses the symbol (story Description 'Stopped following {SYMBOL}'; T005 (f), (j))"
+    },
+    {
+      "id": "manual:36",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "serial: prev.serial + 1",
+      "new": "serial: prev.serial",
+      "description": "A second stop does not re-key the announcement, so it is not announced again as a fresh node (T011; T005 (j))"
+    },
+    {
+      "id": "manual:37",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "<span key={announcement.serial}>",
+      "new": "<span>",
+      "description": "The announcement span is not keyed per stop (T011 markup; results-table precedent; T005 (j); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:38",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "<output aria-live=\"polite\" className=\"sr-only\">",
+      "new": "<output aria-live=\"assertive\" className=\"sr-only\">",
+      "description": "The stop is announced assertively instead of politely (story Description 'politely'; T005 (f))"
+    },
+    {
+      "id": "manual:39",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "        {failure !== null ? <output className=\"text-sm\">{failure.sentence}</output> : null}\n      </ConfirmDialog>\n      <output aria-live=\"polite\" className=\"sr-only\">\n        <span key={announcement.serial}>{announcement.text}</span>\n      </output>",
+      "new": "        {failure !== null ? <output className=\"text-sm\">{failure.sentence}</output> : null}\n        <output aria-live=\"polite\" className=\"sr-only\">\n          <span key={announcement.serial}>{announcement.text}</span>\n        </output>\n      </ConfirmDialog>",
+      "description": "The live region moves inside the dialog, so the announcement leaves with it (T011 markup 'always mounted outside the dialog'; DEC-0379; T005 (f), (g))"
+    },
+    {
+      "id": "manual:40",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "      await retireInstrument(target);\n      watchRowExit.current = true;",
+      "new": "      watchRowExit.current = true;\n      await retireInstrument(target);",
+      "description": "The row-exit watch starts before the answer, so after a 500 or transport failure a row that later leaves pulls focus to the heading (T011 'On success' step 1; Other Notes refusal-only; STD-UI-24)"
+    },
+    {
+      "id": "manual:41",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "await retireInstrument(target);",
+      "new": "await retireInstrument(target.toLowerCase());",
+      "description": "The stop is sent for a different symbol than the row's (AC-17; T004 (e))"
+    },
+    {
+      "id": "manual:42",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "    setPending(true);\n    setFailure(null);",
+      "new": "    setPending(true);",
+      "description": "Confirming again does not clear the previous refusal while the new request is in flight (T011 confirm() 'clear failure')"
+    },
+    {
+      "id": "manual:43",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "      watchRowExit.current = false;\n      setFailure(null);",
+      "new": "      watchRowExit.current = false;",
+      "description": "A refusal for one symbol carries into the dialog opened for another (T011 'reset to null whenever symbol changes'; review IR-002)"
+    },
+    {
+      "id": "manual:44",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "if (failure?.staleRow)",
+      "new": "if (true)",
+      "description": "Every close calls onRefusalClosed, Cancel without a refusal included (T004 (d); T005 (e); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:45",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "if (failure?.staleRow)",
+      "new": "if (failure !== null)",
+      "description": "A 500 or transport failure also calls onRefusalClosed on close, where only a 404 or 409 makes the row stale (Other Notes refusal-only refresh; T005 (e))"
+    },
+    {
+      "id": "manual:46",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "      onRefusalClosed();",
+      "new": "      void onRefusalClosed;",
+      "description": "Closing after a 404 or 409 no longer refreshes the row (DAC-E6-S2-2; T005 (b), (c))"
+    },
+    {
+      "id": "manual:47",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "    setFailure(null);\n    onClose();",
+      "new": "    setFailure(null);",
+      "description": "Esc or Cancel no longer closes the dialog (DAC-E6-S2-2 'Esc closes it'; AC-25; T005 (b))"
+    },
+    {
+      "id": "manual:48",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "staleRow: isStaleRowRefusal(cause)",
+      "new": "staleRow: isStaleRowRefusal(cause) || true",
+      "description": "Every failure is treated as a stale row, so a 500 close calls onRefusalClosed (Other Notes; T005 (e))"
+    },
+    {
+      "id": "manual:49",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "staleRow: isStaleRowRefusal(cause)",
+      "new": "staleRow: isStaleRowRefusal(cause) && false",
+      "description": "A 404 or 409 is not treated as a stale row, so closing it refreshes nothing (DAC-E6-S2-2; T005 (b), (c))"
+    },
+    {
+      "id": "manual:50",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "stopFollowingFailed(target, stopFailureReason(known))",
+      "new": "stopFollowingFailed(target, known.message || stopFailureReason(known))",
+      "description": "A refused stop renders the envelope message (with 'instrument') instead of the DEC-0377 reason (AC-19; T005 (k); T007 hand-written mutant)"
+    },
+    {
+      "id": "manual:51",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "          : new ApiError(\"\", \"\");",
+      "new": "          : new ApiUnreachableError(\"\");",
+      "description": "A thrown value that is neither ApiError nor ApiUnreachableError reads 'not answering' instead of 'unexpected problem' (T011 via stopFailureReason -> readFailureReason; DEC-0377)"
+    },
+    {
+      "id": "manual:52",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "pending={pending}",
+      "new": "pending={false}",
+      "description": "The dialog is closable and confirmable while the stop is in flight (T004 (e); plan negate-boolean on pending)"
+    },
+    {
+      "id": "manual:53",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "open={symbol !== null}",
+      "new": "open={true}",
+      "description": "The dialog is open while no symbol is set (T011 'open while symbol !== null'; DEC-0379)"
+    },
+    {
+      "id": "manual:54",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "title={stopFollowingTitle(shown)}",
+      "new": "title={stopFollowingDescription(shown) || stopFollowingTitle(shown)}",
+      "description": "The dialog is not titled 'Stop following {SYMBOL}' (story Description; T004 (a))"
+    },
+    {
+      "id": "manual:55",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "description={stopFollowingDescription(shown)}",
+      "new": "description={stopFollowingTitle(shown) || stopFollowingDescription(shown)}",
+      "description": "The dialog loses the blueprint section 9 sentence (story Description; T004 (a))"
+    },
+    {
+      "id": "manual:56",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "confirmLabel={STOP_FOLLOWING}",
+      "new": "confirmLabel={`${STOP_FOLLOWING} ${shown}`}",
+      "description": "The confirm button is not the copy.ts 'Stop following' label (story Description; DAC-E6-S2-3; T004 (c))"
+    },
+    {
+      "id": "manual:57",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "        {failure !== null ? <output className=\"text-sm\">{failure.sentence}</output> : null}\n      </ConfirmDialog>",
+      "new": "      </ConfirmDialog>\n      {failure !== null ? <output className=\"text-sm\">{failure.sentence}</output> : null}",
+      "description": "The refusal renders outside the dialog instead of keeping it in the open dialog (DAC-E6-S2-2; T005 (a))"
+    },
+    {
+      "id": "manual:58",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "<output className=\"text-sm\">{failure.sentence}</output>",
+      "new": "<p className=\"text-sm\">{failure.sentence}</p>",
+      "description": "The refusal in the dialog is no longer a status (T011 markup; T005 (a))"
+    },
+    {
+      "id": "manual:59",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "fallbackFocusRef.current?.focus();",
+      "new": "void fallbackFocusRef;",
+      "description": "When the row has left, focus is not returned to the Needs fixing heading (story Description; data-health-ui 10; T005 (g), (h))"
+    },
+    {
+      "id": "manual:60",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "const focusOnBody = active === null || active === document.body;",
+      "new": "const focusOnBody = true;",
+      "description": "Focus the owner placed elsewhere is moved to the heading when the row leaves (STD-UI-24; T011; T005 (i); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:61",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "if (opener.current?.isConnected === false && focusOnBody)",
+      "new": "if (focusOnBody)",
+      "description": "Focus moves to the heading when it falls to body while the row is still present (story Description 'when the row has left'; T011)"
+    },
+    {
+      "id": "manual:62",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "} else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+      "new": "} else if (!focusOnBody && !active?.closest('[role=\"dialog\"]')) {",
+      "description": "Focus returned to the row's button ends the watch, so a row that leaves later does not hand focus to the heading (T011 'other than body and the opener'; T005 (g))"
+    },
+    {
+      "id": "manual:63",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "} else if (!focusOnBody && active !== opener.current && !active?.closest('[role=\"dialog\"]')) {",
+      "new": "} else if (!focusOnBody && active !== opener.current) {",
+      "description": "Focus still inside the closing dialog ends the watch, so a row that leaves with the close does not hand focus to the heading (T005 (h); data-health-ui 10)"
+    },
+    {
+      "id": "manual:64",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "    const timer = setTimeout(settle, 0);\n    return () => clearTimeout(timer);",
+      "new": "    return;",
+      "description": "A row that leaves in the same update as the close leaves focus on body (T005 (h) 'never document.body'; data-health-ui 10)"
+    },
+    {
+      "id": "manual:65",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "    return () => clearTimeout(timer);\n  });",
+      "new": "    return () => clearTimeout(timer);\n  }, [symbol]);",
+      "description": "The fallback-focus effect no longer runs when the caller's rows change, so a row that leaves later never hands focus to the heading (T011 'no dependency list'; T005 (g))"
+    },
+    {
+      "id": "manual:66",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "  }, [symbol]);",
+      "new": "  }, []);",
+      "description": "The opener is never captured and the refusal never reset on a later open (T011 opener capture keyed on symbol; T005 (d), (g))"
+    },
+    {
+      "id": "manual:67",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/stop-following-dialog.tsx",
+      "old": "opener.current =\n        document.activeElement instanceof HTMLElement ? document.activeElement : null;",
+      "new": "opener.current = null;",
+      "description": "The row's button is not recorded as the opener, so the row leaving never moves focus to the heading (T011 opener capture; T005 (g))"
+    },
+    {
+      "id": "manual:68",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  instrument_not_found: \"FactorFlow doesn't follow it\",\n  instrument_already_retired: \"you already stopped following it\",",
+      "new": "  instrument_not_found: \"you already stopped following it\",\n  instrument_already_retired: \"FactorFlow doesn't follow it\",",
+      "description": "The 404 and 409 stop reasons are interchanged (DEC-0377; T005 (a), (c); plan hand-written mutant)"
+    },
+    {
+      "id": "manual:69",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "    to: \"/settings\",",
+      "new": "    to: \"/data/followed\",",
+      "description": "Set history depth links to /data/followed instead of /settings (DAC-E6-S2-1; story Description)"
+    },
+    {
+      "id": "manual:70",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "    to: \"/data/followed\",",
+      "new": "    to: \"/settings\",",
+      "description": "Follow stocks links to /settings instead of /data/followed (DAC-E6-S2-1; story Description)"
+    },
+    {
+      "id": "manual:71",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "    fix: \"Set history depth\",",
+      "new": "    fix: \"Follow stocks\",",
+      "description": "The history-depth refusal names the wrong fix (DAC-E6-S2-1; story Description)"
+    },
+    {
+      "id": "manual:72",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "    sentence: \"Couldn't start the download: history depth isn't set.\",",
+      "new": "    sentence: \"Couldn't start the download: no stocks are followed.\",",
+      "description": "The history-depth refusal reads the no-stocks sentence (DAC-E6-S2-1 'never interchanged'; story Description)"
+    },
+    {
+      "id": "manual:73",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "export const QUEUED_NOTICE = \"A download is running. This starts when it finishes.\";",
+      "new": "export const QUEUED_NOTICE = \"A run is in progress. This will start when it finishes.\";",
+      "description": "The queued line uses CAP-001's wording with 'run' (AC-15 wording; DAC-E6-S2-3; T007 hand-written mutant)"
+    },
+    {
+      "id": "manual:74",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  if (error instanceof ApiError && isStopRefusalCode(error.code)) {",
+      "new": "  if (error instanceof ApiError && isStopRefusalCode(error.code) && false) {",
+      "description": "A 404 or 409 stop reads 'unexpected problem' instead of its DEC-0377 reason (T006 (e); T005 (a), (c))"
+    },
+    {
+      "id": "manual:75",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  return code !== null && Object.hasOwn(STOP_REFUSAL_REASONS, code);",
+      "new": "  return code !== null;",
+      "description": "Any coded failure, a 500 included, counts as a stale-row refusal (T009 isStaleRowRefusal 'true exactly for' the two codes; T006 (f))"
+    },
+    {
+      "id": "manual:76",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": " Its history is kept, and strategies holding it keep holding it. You can follow it again later.",
+      "new": " Its history is kept, and strategies holding it keep holding it.",
+      "description": "The dialog sentence is no longer the blueprint section 9 wording verbatim (story Description; T004 (a))"
+    },
+    {
+      "id": "manual:77",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  return `Stop following ${symbol}`;",
+      "new": "  return `Stop following ${symbol}?`;",
+      "description": "The dialog title is not 'Stop following {SYMBOL}' (story Description; T006 (d))"
+    },
+    {
+      "id": "manual:78",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  return `Couldn't stop following ${symbol}: ${reason}.`;",
+      "new": "  return `Couldn't stop following ${symbol} (${reason}).`;",
+      "description": "A refused stop does not read 'Couldn't stop following {SYMBOL}: {reason}.' (story Description; DAC-E6-12)"
+    },
+    {
+      "id": "manual:79",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  return `Couldn't start the download: ${reason}.`;",
+      "new": "  return `Couldn't start the download: ${reason}`;",
+      "description": "A failed start does not read 'Couldn't start the download: {reason}.' (DAC-E6-S2-1; T006 (c))"
+    },
+    {
+      "id": "manual:80",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "old": "  return `Stopped following ${symbol}`;",
+      "new": "  return `Stopped following ${symbol}.`;",
+      "description": "The announcement does not read 'Stopped following {SYMBOL}' (story Description; T006 (d))"
+    }
+  ]
+}
