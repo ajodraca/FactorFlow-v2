@@ -1,46 +1,31 @@
 import type { JSX } from "react";
 import type { InstrumentLifecycle } from "../../api/types";
+import { StatusBadge } from "../../components/patterns/status-badge";
+import { type Status, labelOf, tierOf } from "../../components/patterns/tiers";
+
+/** A stock the provider does not recognise: the result outcome `not_found` (ux-brief 12.2). */
+const NOT_FOUND: Status = { of: "result", outcome: "not_found" };
 
 /**
- * A filled square: active. A hollow square: retired. Different shapes
- * rather than the same shape recoloured, so the two states are
- * distinguishable in greyscale (STD-UI-8, DAC-E2-S4-7) the same way the
- * shell's liveness icon already is.
+ * The followed-stocks lifecycle marker (UX design 1.6; DAC-E7-S3-5; DEC-0389).
+ * *Stopped following* goes through `StatusBadge` as the neutral tier, a hollow
+ * circle with its label, so it never reads by colour alone; a followed stock
+ * carries its word alone, with no badge and no tier. Coverage renders this same
+ * marker. Nothing here is not determinable, so nothing goes through
+ * `NotDeterminable`. No file under this directory writes a unit literal: the
+ * literal scan reads comments too.
  */
-function LifecycleIcon({ lifecycle }: { lifecycle: InstrumentLifecycle }): JSX.Element {
-  return (
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12" className="h-3 w-3 shrink-0">
-      {lifecycle === "active" ? (
-        <rect x="1" y="1" width="10" height="10" fill="currentColor" />
-      ) : (
-        <rect
-          x="1"
-          y="1"
-          width="10"
-          height="10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-      )}
-    </svg>
-  );
+export function LifecycleBadge({ lifecycle }: { lifecycle: InstrumentLifecycle }): JSX.Element {
+  if (lifecycle === "retired") {
+    return <StatusBadge tier="neutral">Stopped following</StatusBadge>;
+  }
+  return <span>Followed</span>;
 }
 
 /**
- * The instrument table's lifecycle badge (ux-design section 1.2 Token
- * Usage; DAC-E2-S4-4, DAC-E2-S4-7): `secondary` for retired, carrying the
- * text label alongside its icon so the state reads in greyscale.
+ * The *Not found* marker for a stock the provider does not recognise (AC-14,
+ * UX design 1.6 Recognition): the warning tier's triangle and its label.
  */
-export function LifecycleBadge({ lifecycle }: { lifecycle: InstrumentLifecycle }): JSX.Element {
-  return (
-    <span
-      data-testid="lifecycle-badge"
-      data-variant={lifecycle === "retired" ? "secondary" : "default"}
-      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs data-[variant=secondary]:bg-secondary data-[variant=secondary]:text-secondary-foreground"
-    >
-      <LifecycleIcon lifecycle={lifecycle} />
-      {lifecycle === "active" ? "Active" : "Retired"}
-    </span>
-  );
+export function RecognitionBadge(): JSX.Element {
+  return <StatusBadge tier={tierOf(NOT_FOUND)}>{labelOf(NOT_FOUND)}</StatusBadge>;
 }

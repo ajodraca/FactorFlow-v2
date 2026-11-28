@@ -1,6 +1,8 @@
 import { type JSX, useId, useState } from "react";
 import { addInstruments } from "../../api/client";
 import type { AddInstrumentsResult } from "../../api/types";
+import { Button } from "../../components/ui/button";
+import { Textarea } from "../../components/ui/textarea";
 import { type ParsedSymbol, parseBulkSymbols } from "./parse-bulk-symbols";
 
 /**
@@ -67,23 +69,17 @@ export function BulkAdd({ onAdded }: { onAdded: () => void }): JSX.Element {
     }
   }
 
+  // The blocked variant swallows the click itself and stays focusable, so its reason reaches the keyboard.
   return (
     <div className="flex flex-col gap-2">
       <label id={labelId} htmlFor="bulk-add-textarea" className="text-base">
-        Add many instruments
+        Follow many
       </label>
-      <textarea
+      <Textarea
         id="bulk-add-textarea"
+        variant="list"
         aria-labelledby={labelId}
         aria-describedby={parsed ? countId : undefined}
-        data-testid="bulk-add-textarea"
-        data-variant="list"
-        // Sized by the native `rows` attribute rather than a Tailwind
-        // min-height utility: no height value in `theme.css`'s scale fits
-        // a multi-row paste target, and introducing one outside the scale
-        // is what STD-UI-29 forbids.
-        rows={4}
-        className="rounded border border-input p-2 text-base"
         value={raw}
         onChange={(event) => setRaw(event.target.value)}
         onBlur={handleBlur}
@@ -106,31 +102,19 @@ export function BulkAdd({ onAdded }: { onAdded: () => void }): JSX.Element {
           ) : null}
           {submitError !== null ? (
             <p role="alert" className="text-status-critical">
-              Adding instruments failed: {submitError}
+              Following stocks failed: {submitError}
             </p>
           ) : null}
-          <button
+          <Button
             type="button"
-            data-variant={blocked ? "blocked" : "default"}
+            variant={blocked ? "blocked" : "default"}
             aria-describedby={blocked ? blockedReasonId : undefined}
-            // Never a bare `disabled` attribute for the blocked case: a
-            // plain disabled control is not focusable, so its reason never
-            // reaches a keyboard or screen-reader user (DAC-E2-S4-3). The
-            // transient `submitting` state below is the sub-second
-            // exception that rule's own remediation allows.
-            tabIndex={0}
             disabled={!blocked && submitting}
-            className="w-fit rounded bg-foreground px-3 py-2 text-background data-[variant=blocked]:border data-[variant=blocked]:border-border data-[variant=blocked]:bg-transparent data-[variant=blocked]:text-muted-foreground"
-            onClick={(event) => {
-              if (blocked) {
-                event.preventDefault();
-                return;
-              }
-              void handleSubmit();
-            }}
+            className="w-fit"
+            onClick={() => void handleSubmit()}
           >
-            Add {recognised.length} instrument{recognised.length === 1 ? "" : "s"}
-          </button>
+            Follow {recognised.length} stock{recognised.length === 1 ? "" : "s"}
+          </Button>
           {blocked ? (
             <p id={blockedReasonId} className="text-muted-foreground text-sm">
               Add at least one recognised symbol before submitting.
@@ -141,7 +125,7 @@ export function BulkAdd({ onAdded }: { onAdded: () => void }): JSX.Element {
       {submitResult !== null ? (
         <div data-testid="bulk-add-result" className="flex flex-col gap-1 text-sm">
           <p>
-            {submitResult.added.length} added, {submitResult.reactivated.length} reactivated,{" "}
+            {submitResult.added.length} followed, {submitResult.reactivated.length} followed again,{" "}
             {submitResult.rejected.length} rejected
           </p>
           {submitResult.rejected.length > 0 ? (

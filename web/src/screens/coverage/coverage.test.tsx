@@ -167,9 +167,8 @@ describe("TC-COMP-021: retired instruments keep their coverage, marked distinctl
     renderScreen();
     await screen.findByRole("table");
 
-    const badge = within(cell("MSFT", "Lifecycle")).getByTestId("lifecycle-badge");
-    expect(badge).toHaveAttribute("data-variant", "secondary");
-    expect(badge).toHaveTextContent("Retired");
+    const label = within(cell("MSFT", "Lifecycle")).getByText("Stopped following");
+    expect(label.closest("[data-variant]")).toHaveAttribute("data-variant", "status-neutral");
     expect(cell("MSFT", "Covered from")).toHaveTextContent("2024-01-02");
     expect(cell("MSFT", "Covered to")).toHaveTextContent("2024-01-05");
     const tr = cell("MSFT", "Symbol").closest("tr") as HTMLTableRowElement;

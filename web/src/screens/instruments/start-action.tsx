@@ -1,17 +1,16 @@
 import { type JSX, useId } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/ui/button";
 
 /**
- * The `button` `blocked` Start-action rendering (component design section
- * 2.5's load-bearing note; DAC-E2-9, DAC-E2-S4-3).
+ * The `button` `blocked` download action (component design section 2.5's
+ * load-bearing note; DAC-E2-9, DAC-E2-S4-3).
  *
- * Starting a run itself belongs to whichever story owns Coverage (1.1) —
- * this story's own tasks-file Notes record the ambiguity and take the
- * narrower reading: this component implements only the `blocked`-not-
- * `disabled` pattern for the precondition this story's own screens can
- * observe (history depth unset), so it stays focusable and exposes its
- * reason through `aria-describedby` rather than a bare `disabled`
- * attribute, which would hide the reason from keyboard and screen-reader
- * users entirely.
+ * As delivered, it gates on the precondition this screen can observe, history
+ * depth unset, and starts nothing itself: when unblocked its click does nothing
+ * (CAP-001's narrower reading, kept so no outcome changes, AC-17). Blocked, it
+ * stays focusable and exposes its reason through `aria-describedby` rather than
+ * a bare `disabled`, and the reason links to Settings directly (AC-18).
  */
 export function StartAction({
   historyDepthYears,
@@ -21,27 +20,18 @@ export function StartAction({
 
   return (
     <div className="flex flex-col gap-1">
-      <button
+      <Button
         type="button"
-        data-variant={blocked ? "blocked" : "default"}
+        variant={blocked ? "blocked" : "default"}
         aria-describedby={blocked ? reasonId : undefined}
-        // Never a bare `disabled` attribute: a plain disabled control is
-        // not focusable, so its reason never reaches a keyboard or
-        // screen-reader user (component design section 2.5).
-        tabIndex={0}
-        onClick={(event) => {
-          if (blocked) {
-            event.preventDefault();
-          }
-        }}
-        className="w-fit rounded border border-border px-3 py-2 text-base data-[variant=blocked]:text-muted-foreground"
+        className="w-fit"
       >
-        Start acquisition run
-      </button>
+        Download now
+      </Button>
       {blocked ? (
         <p id={reasonId} className="text-muted-foreground text-sm">
-          Start is blocked: history depth is not set. Set it on Settings before starting an
-          acquisition run.
+          History depth is not set. Set it in <Link to="/settings">Settings</Link> before
+          downloading.
         </p>
       ) : null}
     </div>

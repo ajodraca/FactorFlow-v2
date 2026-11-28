@@ -1,0 +1,64 @@
+# TDD evidence for CAP-003-E7-S3 - Followed stocks under the shell.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862).
+# The plan's cycles are run as two: the screen with its parts, tests and strings (T002, T003, T005-T019), then the scan widening (T004, T020).
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/instruments web/src/screens/coverage'; catalogue mutants plus the plan's six hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019]
+    description: >
+      The Followed stocks screen: the badges, the stop-following dialog over ConfirmDialog, the add field, Follow many and
+      the download action from ui-components, the virtualised table through StateRegion with Coverage links, the screen
+      with its entry hint and states, the vocabulary scan, and the one Coverage assertion that pins LifecycleBadge.
+    deviations: >
+      (1) The plan's cycles run as two (this one and the scan). (2) T002 case 1 also asserts the consumed hint was
+      replaced, not pushed, a mutant of the plan's hand-written list. (3) Radix Select needs the plan's jsdom gaps and the
+      :fullscreen and :modal answers of web/src/components/ui/select.test.tsx, or opening the list takes eight seconds.
+      (4) T005's accessible-name scan uses Testing Library's own name matching over every role, since dom-accessibility-api
+      ships no types under this package's exports. (5) The lifecycle and symbol-filter captions are a span and a label
+      with htmlFor, not wrapping labels, which Biome's noLabelWithoutControl rejects around a custom control. (6) The
+      loading state is a paragraph under StateRegion's busy wrapper, not a skeleton; the text and aria-busy are as T011 asks.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-1.log
+    red_log_sha256: 63c92a2e07e82a1a7ea8109176a2fc21c048b5ad1331dd4abebb42ff5ef3aaac
+    red_evidence: >
+      With the new tests staged and the delivered screen unchanged, 32 of 44 tests failed across six files (RecognitionBadge
+      missing, delivered labels and dialog, no virtualised table, no entry hint).
+    green_evidence: >
+      71 tests pass in web/src/screens/instruments and 105 with web/src/screens/coverage; npx tsc --noEmit, npm run lint and
+      npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-1.log
+        sha256: 63c92a2e07e82a1a7ea8109176a2fc21c048b5ad1331dd4abebb42ff5ef3aaac
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: a paging request in flight is not cancelled when a filter or refresh replaces
+        the first page (delivered behaviour, now reached by the table's own paging); the loading states are a paragraph
+        rather than a skeleton; the add field's focusOnMount comment names only the never-populated case.
+    diff_sha256: 264d28276dd1f49264eb36fdbe2e57bf4903baafef180f926f3f190ddf247501
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: d417173a7e20b3597cd388bbd178698e83963020989027e788021d8a3aab63a5
+      generated: 17
+      killed: 14
+      survived: 3
+      stillborn: 0
+      timeout: 0
+      score: 0.824
+      survivors:
+        - id: web/src/screens/instruments/index.tsx:104:off-by-one:1
+          disposition: equivalent
+          reason: "refresh is a re-fetch trigger: the screen reads reloadToken only to change it, so adding two instead of one changes no observable value."
+        - id: web/src/screens/instruments/instrument-table.tsx:67:off-by-one:1
+          disposition: equivalent
+          reason: "refreshToken is only an effect dependency that changes when the parent bumps it; its default is never compared, so 1 and 0 re-fetch alike."
+        - id: web/src/screens/instruments/instrument-table.tsx:305:off-by-one:1
+          disposition: equivalent
+          reason: "reloadToken is only an effect dependency; Try again re-reads once whether the token moves by one or two."
+

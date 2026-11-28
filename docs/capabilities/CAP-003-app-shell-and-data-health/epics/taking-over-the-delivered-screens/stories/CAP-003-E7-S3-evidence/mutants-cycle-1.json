@@ -1,0 +1,155 @@
+{
+ "schema": 1,
+ "repo_head": "9033ec3d3d8c48c164ec04f3d1a4feb24a29fae9",
+ "range": "HEAD..worktree",
+ "source": "9033ec3d3d8c48c164ec04f3d1a4feb24a29fae9",
+ "mutants": [
+  {
+   "id": "web/src/screens/instruments/add-field.tsx:67:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/instruments/add-field.tsx",
+   "line": 67,
+   "original": "        setNotice(`${result.reactivated[0].normalisedSymbol} is followed again.`);",
+   "mutated": "        setNotice(`${result.reactivated[1].normalisedSymbol} is followed again.`);"
+  },
+  {
+   "id": "web/src/screens/instruments/bulk-add.tsx:116:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/instruments/bulk-add.tsx",
+   "line": 116,
+   "original": "            Follow {recognised.length} stock{recognised.length === 1 ? \"\" : \"s\"}",
+   "mutated": "            Follow {recognised.length} stock{recognised.length === 2 ? \"\" : \"s\"}"
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:43:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/instruments/index.tsx",
+   "line": 43,
+   "original": "    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === true,",
+   "mutated": "    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === false,"
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:54:drop-field-copy:1",
+   "cycle": "cycle-1",
+   "operator": "drop-field-copy",
+   "file": "web/src/screens/instruments/index.tsx",
+   "line": 54,
+   "original": "        { pathname: location.pathname, search: location.search },",
+   "mutated": "        { pathname: nil, search: location.search },"
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:55:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/instruments/index.tsx",
+   "line": 55,
+   "original": "        { replace: true, state: null },",
+   "mutated": "        { replace: false, state: null },"
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:104:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/instruments/index.tsx",
+   "line": 104,
+   "original": "  const refresh = (): void => setReloadToken((token) => token + 1);",
+   "mutated": "  const refresh = (): void => setReloadToken((token) => token + 2);"
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:122:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/instruments/index.tsx",
+   "line": 122,
+   "original": "          <AddField focusOnMount={neverPopulated || focusAddRequested} onAdded={refresh} />",
+   "mutated": "          <AddField focusOnMount={neverPopulated && focusAddRequested} onAdded={refresh} />"
+  },
+  {
+   "id": "web/src/screens/instruments/instrument-table.tsx:67:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/instruments/instrument-table.tsx",
+   "line": 67,
+   "original": "  refreshToken = 0,",
+   "mutated": "  refreshToken = 1,"
+  },
+  {
+   "id": "web/src/screens/instruments/instrument-table.tsx:105:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/instruments/instrument-table.tsx",
+   "line": 105,
+   "original": "              page.rows.length === 0",
+   "mutated": "              page.rows.length === 1"
+  },
+  {
+   "id": "web/src/screens/instruments/instrument-table.tsx:305:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/instruments/instrument-table.tsx",
+   "line": 305,
+   "original": "        onRetry={() => setReloadToken((t) => t + 1)}",
+   "mutated": "        onRetry={() => setReloadToken((t) => t + 2)}"
+  },
+  {
+   "id": "web/src/screens/instruments/retire-dialog.tsx:30:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/instruments/retire-dialog.tsx",
+   "line": 30,
+   "original": "        if (!next) {",
+   "mutated": "        if (next) {"
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:manual:1",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/instruments/index.tsx",
+   "old": "      navigate(\n        { pathname: location.pathname, search: location.search },\n        { replace: true, state: null },\n      );\n",
+   "new": ""
+  },
+  {
+   "id": "web/src/screens/instruments/index.tsx:manual:2",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/instruments/index.tsx",
+   "old": "focusOnMount={neverPopulated || focusAddRequested}",
+   "new": "focusOnMount={neverPopulated}"
+  },
+  {
+   "id": "web/src/screens/instruments/badges.tsx:manual:3",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/instruments/badges.tsx",
+   "old": "<StatusBadge tier=\"neutral\">",
+   "new": "<StatusBadge tier=\"good\">"
+  },
+  {
+   "id": "web/src/screens/instruments/instrument-table.tsx:manual:4",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/instruments/instrument-table.tsx",
+   "old": "encodeURIComponent(row.original.symbol)",
+   "new": "row.original.symbol"
+  },
+  {
+   "id": "web/src/screens/instruments/instrument-table.tsx:manual:5",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/instruments/instrument-table.tsx",
+   "old": "variant=\"virtualised\"",
+   "new": "variant=\"compact\""
+  },
+  {
+   "id": "web/src/screens/instruments/instrument-table.tsx:manual:6",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/instruments/instrument-table.tsx",
+   "old": "setLifecycleFilter(value === ALL ? \"\" : (value as InstrumentLifecycle))",
+   "new": "setLifecycleFilter(value as InstrumentLifecycle)"
+  }
+ ]
+}
