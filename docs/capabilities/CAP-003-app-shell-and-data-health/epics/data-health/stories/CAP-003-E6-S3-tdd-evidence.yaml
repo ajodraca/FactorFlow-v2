@@ -117,3 +117,63 @@ cycles:
         - id: web/src/screens/data-health/needs-fixing.tsx:96:off-by-one:1
           disposition: equivalent
           reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each page, and it still does."
+
+  - id: cycle-3
+    tasks: [T009, T014]
+    description: >
+      The zero-count state. needs-fixing.test.tsx: TC-COMP-152 (T009 a-g) and four edge tests (internal failure text,
+      the busy placeholder on retry, a late failure and a late success after a newer answer). Then needs-fixing.tsx:
+      the affected_count 0 branch, with Nothing needs fixing. and a LastComplete child that reads
+      listAcquisitionRuns({ state: "succeeded", limit: 1 }) once per aggregate answer.
+    deviations: >
+      (1) LastComplete keys its re-read on the aggregate answer object through its effect, not on a React key, because an
+      object cannot be a key. (2) A thrown value that is not an API error is replaced by a plain ApiError, as in the Show
+      more failure. (3) Tests (f) busy placeholder on retry and (g) late failure were added after the first scoring left
+      those mutants alive (18 and 19 of 24).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-3.log
+    red_log_sha256: 15d0589b00a541d4e607f7e852f6ba33fb91918f0672eb63c71cfc9dbff4b12d
+    red_evidence: >
+      With the T009 tests added and no zero branch, 8 of the 28 tests in needs-fixing.test.tsx failed (the 20 earlier ones
+      passed): the card rendered rows and no Nothing needs fixing. line.
+    green_evidence: >
+      30 tests passed in needs-fixing.test.tsx; biome check and npx tsc --noEmit clean on the changed files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-3.log
+        sha256: 15d0589b00a541d4e607f7e852f6ba33fb91918f0672eb63c71cfc9dbff4b12d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift; the additions are the retry's pending state, the non-API error replacement and four edge tests.
+        Follow-ups from the reviews, not adopted: focus falls to the body when Try again swaps for the skeleton, and no
+        test unmounts the card while the read is pending.
+    diff_sha256: 41e4447194a9584ef3786d52b8daa85fb4bf92c6f9c6e0a74ee03d097dbe8e71
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 09ac8fe3a2a7c3341719d63838258a9237ce3bf8bb71e20877a378fe3b767ffc
+      generated: 24
+      killed: 19
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.792
+      survivors:
+        - id: web/src/screens/data-health/needs-fixing.tsx:41:off-by-one:1
+          disposition: equivalent
+          reason: "The read counter's starting value is only compared with itself."
+        - id: web/src/screens/data-health/needs-fixing.tsx:44:off-by-one:1
+          disposition: equivalent
+          reason: "The read counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
+        - id: web/src/screens/data-health/needs-fixing.tsx:79:off-by-one:1
+          disposition: equivalent
+          reason: "The cleanup advances the read counter by 2 instead of 1; it only has to differ, and it still does."
+        - id: manual:non-api-text
+          disposition: equivalent
+          reason: "A thrown value that is not an API error would be passed through instead of replaced, but readFailureReason reads only its class, so the sentence is the same."
+        - id: manual:pending-not-shown
+          disposition: equivalent
+          reason: "load's closure holds the first render's read, which is the pending state, so setting it back is the same as the pending state it is meant to set."

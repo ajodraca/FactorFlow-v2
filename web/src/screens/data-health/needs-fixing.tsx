@@ -1,16 +1,21 @@
-import { type JSX, useEffect, useId, useRef, useState } from "react";
-import { ApiError, ApiUnreachableError } from "../../api/client";
+import { type JSX, useCallback, useEffect, useId, useRef, useState } from "react";
+import { ApiError, ApiUnreachableError, listAcquisitionRuns } from "../../api/client";
 import { fetchProblems } from "../../app/shell-client";
 import type { DataHealth, ProblemRow as ProblemRowData, ReadState } from "../../app/shell-types";
-import { formatClock } from "../../components/patterns/format";
+import { formatClock, formatInstant } from "../../components/patterns/format";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { ReadFailure, SkeletonLine } from "./check-card";
 import {
   FROM_RECENT_DOWNLOADS,
+  LAST_COMPLETE_TARGET,
   MORE_PROBLEMS,
+  NOTHING_NEEDS_FIXING,
+  NO_COMPLETE_DOWNLOAD,
   SHOW_MORE,
   TRY_AGAIN,
   checked,
+  lastCompleteDownload,
   needsFixingTitle,
   readFailed,
   readFailureReason,
@@ -20,6 +25,72 @@ import { DownloadNow } from "./download-now";
 import { ProblemRow } from "./problem-row";
 
 const PAGE_SIZE = 50;
+
+type LastRead =
+  | { kind: "pending" }
+  | { kind: "done"; line: string }
+  | { kind: "failed"; reason: string };
+
+/**
+ * The line under *Nothing needs fixing.*: the start time of the last complete
+ * download (DAC-E6-10, register C3). It reads only here, once per aggregate
+ * answer (DEC-0383), and a read an answer has outdated is ignored.
+ */
+function LastComplete({ answer }: { answer: DataHealth }): JSX.Element {
+  const [read, setRead] = useState<LastRead>({ kind: "pending" });
+  const latest = useRef(0);
+
+  const load = useCallback(() => {
+    latest.current += 1;
+    const mine = latest.current;
+    setRead({ kind: "pending" });
+    listAcquisitionRuns({ state: "succeeded", limit: 1 }).then(
+      (page) => {
+        if (mine !== latest.current) {
+          return;
+        }
+        const run = page.runs[0];
+        setRead({
+          kind: "done",
+          line:
+            run === undefined
+              ? NO_COMPLETE_DOWNLOAD
+              : lastCompleteDownload(formatInstant(run.startedAt ?? run.requestedAt)),
+        });
+      },
+      (cause: unknown) => {
+        if (mine !== latest.current) {
+          return;
+        }
+        // A thrown value that is not an API error reads as the unexpected-problem reason.
+        const known =
+          cause instanceof ApiError || cause instanceof ApiUnreachableError
+            ? cause
+            : new ApiError("", "");
+        setRead({ kind: "failed", reason: readFailureReason(known) });
+      },
+    );
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new aggregate answer re-reads (DEC-0383)
+  useEffect(() => {
+    load();
+    return () => {
+      latest.current += 1;
+    };
+  }, [answer, load]);
+
+  switch (read.kind) {
+    case "pending":
+      return <SkeletonLine />;
+    case "done":
+      return <p className="text-xs text-muted-foreground">{read.line}</p>;
+    case "failed":
+      return (
+        <ReadFailure sentence={readFailed(LAST_COMPLETE_TARGET, read.reason)} onRetry={load} />
+      );
+  }
+}
 
 /**
  * The Needs fixing card (component design data-health-ui 2.5, 2.7, 3 and 10;
@@ -136,33 +207,42 @@ export function NeedsFixing({
           {rows.some((r) => r.retryable) ? <DownloadNow /> : null}
         </CardHeader>
         <CardContent>
-          <ul
-            ref={listRef}
-            tabIndex={-1}
-            aria-labelledby={titleId}
-            className="flex flex-col divide-y divide-border"
-          >
-            {rows.map((r) => (
-              <ProblemRow key={r.symbol} row={r} onStopFollowing={() => undefined} />
-            ))}
-          </ul>
-          {pageFailure !== null ? (
+          {dh.affected_count === 0 ? (
             <>
-              <output className="text-sm">{readFailed(MORE_PROBLEMS, pageFailure)}</output>
-              <Button ref={tryRef} variant="outline" onClick={onReread}>
-                {TRY_AGAIN}
-              </Button>
+              <p className="text-base font-semibold">{NOTHING_NEEDS_FIXING}</p>
+              <LastComplete answer={dh} />
             </>
-          ) : cursor !== null ? (
-            <Button
-              ref={moreRef}
-              variant="outline"
-              aria-busy={pagePending || undefined}
-              onClick={() => void showMore()}
-            >
-              {SHOW_MORE}
-            </Button>
-          ) : null}
+          ) : (
+            <>
+              <ul
+                ref={listRef}
+                tabIndex={-1}
+                aria-labelledby={titleId}
+                className="flex flex-col divide-y divide-border"
+              >
+                {rows.map((r) => (
+                  <ProblemRow key={r.symbol} row={r} onStopFollowing={() => undefined} />
+                ))}
+              </ul>
+              {pageFailure !== null ? (
+                <>
+                  <output className="text-sm">{readFailed(MORE_PROBLEMS, pageFailure)}</output>
+                  <Button ref={tryRef} variant="outline" onClick={onReread}>
+                    {TRY_AGAIN}
+                  </Button>
+                </>
+              ) : cursor !== null ? (
+                <Button
+                  ref={moreRef}
+                  variant="outline"
+                  aria-busy={pagePending || undefined}
+                  onClick={() => void showMore()}
+                >
+                  {SHOW_MORE}
+                </Button>
+              ) : null}
+            </>
+          )}
           <output aria-live="polite" className="sr-only">
             <span key={announcement.serial}>{announcement.text}</span>
           </output>

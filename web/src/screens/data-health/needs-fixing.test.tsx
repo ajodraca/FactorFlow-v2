@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, ApiUnreachableError, listAcquisitionRuns } from "../../api/client";
-import type { DataType } from "../../api/types";
+import type { AcquisitionRun, DataType } from "../../api/types";
 import { fetchProblems } from "../../app/shell-client";
 import type {
   DataHealth,
@@ -413,5 +413,164 @@ describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)", 
     for (const leaked of ["req-422", "req-9f3", "must be a stock symbol", "database said no"]) {
       expect(document.body.textContent).not.toContain(leaked);
     }
+  });
+});
+
+const ZERO = DH({ affected_count: 0, problems: { rows: [], next_cursor: null } });
+
+function RUN(over: Partial<AcquisitionRun> = {}): AcquisitionRun {
+  return {
+    runId: "r-9",
+    state: "succeeded",
+    historyDepthYears: 5,
+    requestedAt: "2026-10-29T13:59:00Z",
+    startedAt: "2026-10-29T14:00:00Z",
+    endedAt: "2026-10-29T15:10:00Z",
+    instrumentsNamed: 300,
+    instrumentsWritten: 300,
+    instrumentsFailed: 0,
+    failureReason: null,
+    ...over,
+  };
+}
+
+// Implements TC-COMP-152
+describe("Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13)", () => {
+  it("(a) names the last complete download by its start time", async () => {
+    runsMock.mockResolvedValueOnce({ runs: [RUN()], nextCursor: null });
+    renderCard(ok(ZERO));
+    expect(
+      await screen.findByText("Last complete download 2026-10-29 09:00 CDT"),
+    ).toBeInTheDocument();
+    expect(runsMock.mock.calls).toEqual([[{ state: "succeeded", limit: 1 }]]);
+    expect(screen.getByText("Nothing needs fixing.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Needs fixing · 0" })).toBeInTheDocument();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(screen.queryByRole("button", { name: "Show more" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Download now" })).toBeNull();
+  });
+
+  it("(b) says no complete download yet when there is none", async () => {
+    runsMock.mockResolvedValueOnce({ runs: [], nextCursor: null });
+    renderCard(ok(ZERO));
+    expect(await screen.findByText("No complete download yet")).toBeInTheDocument();
+    expect(screen.getByText("Nothing needs fixing.")).toBeInTheDocument();
+    expect(screen.queryByText(/Last complete download/)).toBeNull();
+  });
+
+  it("(c) falls back to the request time when the download has no start time", async () => {
+    runsMock.mockResolvedValueOnce({ runs: [RUN({ startedAt: null })], nextCursor: null });
+    renderCard(ok(ZERO));
+    expect(
+      await screen.findByText("Last complete download 2026-10-29 08:59 CDT"),
+    ).toBeInTheDocument();
+  });
+
+  it("(d) reads the last complete download only when nothing needs fixing", () => {
+    renderCard(ok(DH()));
+    expect(runsMock).not.toHaveBeenCalled();
+  });
+
+  it("(e) shows a busy placeholder, never the empty wording, while the read is pending", async () => {
+    const pending = deferred<{ runs: AcquisitionRun[]; nextCursor: string | null }>();
+    runsMock.mockReturnValueOnce(pending.promise);
+    const { container } = renderCard(ok(ZERO));
+    expect(screen.getByText("Nothing needs fixing.")).toBeInTheDocument();
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(screen.queryByText("No complete download yet")).toBeNull();
+    await act(async () => {
+      pending.resolve({ runs: [], nextCursor: null });
+    });
+    expect(await screen.findByText("No complete download yet")).toBeInTheDocument();
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull();
+  });
+
+  it("(f) names a failed read and retries only that read", async () => {
+    runsMock
+      .mockRejectedValueOnce(UNREACHABLE)
+      .mockResolvedValueOnce({ runs: [], nextCursor: null });
+    const onReread = vi.fn();
+    renderCard(ok(ZERO), onReread);
+    expect(
+      await screen.findByText(
+        "Couldn't read the last complete download: FactorFlow is not answering.",
+      ),
+    ).toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("No complete download yet")).toBeInTheDocument();
+    expect(runsMock.mock.calls).toEqual([
+      [{ state: "succeeded", limit: 1 }],
+      [{ state: "succeeded", limit: 1 }],
+    ]);
+    expect(onReread).not.toHaveBeenCalled();
+  });
+
+  it("(f) shows no envelope text for an internal failure", async () => {
+    runsMock.mockRejectedValueOnce(INTERNAL);
+    renderCard(ok(ZERO));
+    expect(
+      await screen.findByText(
+        "Couldn't read the last complete download: FactorFlow hit an unexpected problem.",
+      ),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("req-9f3");
+    expect(document.body.textContent).not.toContain("database said no");
+  });
+
+  it("(g) reads again when a new aggregate answer arrives at zero", async () => {
+    runsMock.mockResolvedValueOnce({ runs: [], nextCursor: null });
+    const { update } = renderCard(ok(ZERO));
+    await screen.findByText("No complete download yet");
+    runsMock.mockResolvedValueOnce({ runs: [RUN()], nextCursor: null });
+    update(ok(DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })));
+    expect(
+      await screen.findByText("Last complete download 2026-10-29 09:00 CDT"),
+    ).toBeInTheDocument();
+    expect(runsMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("(f) shows the busy placeholder again while Try again reads", async () => {
+    const retry = deferred<{ runs: AcquisitionRun[]; nextCursor: string | null }>();
+    runsMock.mockRejectedValueOnce(UNREACHABLE).mockReturnValueOnce(retry.promise);
+    const { container } = renderCard(ok(ZERO));
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Try again" }));
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(screen.queryByText(/Couldn't read the last complete download/)).toBeNull();
+    await act(async () => {
+      retry.resolve({ runs: [], nextCursor: null });
+    });
+    expect(await screen.findByText("No complete download yet")).toBeInTheDocument();
+  });
+
+  it("(g) ignores a failure that arrives after a newer answer", async () => {
+    const stale = deferred<{ runs: AcquisitionRun[]; nextCursor: string | null }>();
+    runsMock
+      .mockReturnValueOnce(stale.promise)
+      .mockResolvedValueOnce({ runs: [], nextCursor: null });
+    const { update } = renderCard(ok(ZERO));
+    update(ok(DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })));
+    await screen.findByText("No complete download yet");
+    await act(async () => {
+      stale.reject(UNREACHABLE);
+    });
+    expect(screen.getByText("No complete download yet")).toBeInTheDocument();
+    expect(screen.queryByText(/Couldn't read the last complete download/)).toBeNull();
+  });
+
+  it("(g) ignores a read that finishes after a newer answer", async () => {
+    const stale = deferred<{ runs: AcquisitionRun[]; nextCursor: string | null }>();
+    runsMock
+      .mockReturnValueOnce(stale.promise)
+      .mockResolvedValueOnce({ runs: [], nextCursor: null });
+    const { update } = renderCard(ok(ZERO));
+    update(ok(DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })));
+    await screen.findByText("No complete download yet");
+    await act(async () => {
+      stale.resolve({ runs: [RUN()], nextCursor: null });
+    });
+    expect(screen.getByText("No complete download yet")).toBeInTheDocument();
+    expect(screen.queryByText(/Last complete download/)).toBeNull();
   });
 });
