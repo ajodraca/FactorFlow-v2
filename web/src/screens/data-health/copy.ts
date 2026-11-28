@@ -342,3 +342,7 @@ export function partialResult(written: string, named: string, failed: string): s
 export function interruptedResult(written: string): string {
   return `FactorFlow restarted mid-download; ${written} kept, the rest picked up next time`;
 }
+
+export function progressOf(done: string, total: string): string {
+  return `${done} of ${total} stocks`;
+}

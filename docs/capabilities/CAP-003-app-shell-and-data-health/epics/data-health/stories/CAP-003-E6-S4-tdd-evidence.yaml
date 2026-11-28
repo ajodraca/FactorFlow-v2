@@ -48,3 +48,58 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-2
+    tasks: [T003, T004, T013]
+    description: >
+      The re-read rule, the progress row and the order. recent-downloads.test.tsx: TC-COMP-171 (b-g), the same-answer
+      and newest-read-wins cases, the progress and order cases of T004 (a, b, d, e, f) and the progress sentence of
+      T011 (a). Then useShell, the answer-keyed re-read, the stale-call guard, the progress cell and the rank sort in
+      recent-downloads.tsx, and progressOf in copy.ts.
+    deviations: >
+      (1) The plan keeps T004 (c) in cycle 2; it is pinned in cycle 1 with the Started cell. (2) Added: a case that an
+      answer already read is not read again when it turns unfinished, found by the mutation run, and an ordering case for
+      cancelling. (3) The shell mock and the afterEach AC-17 check on every listAcquisitionRuns call join the file.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-2.log
+    red_log_sha256: 56d63e489fd85f16726ee9245dd8d37aa4a66ca07826128d15f32343b5028270
+    red_evidence: >
+      With the new tests staged and no production change: 8 of 27 tests failed (the sub-line not advancing, no re-read
+      on a running answer, no progressbar, no ordering).
+    green_evidence: >
+      28 tests passed in recent-downloads.test.tsx; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-2.log
+        sha256: 56d63e489fd85f16726ee9245dd8d37aa4a66ca07826128d15f32343b5028270
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: a loading attention answer followed by a running one reads twice in a row
+        (the load read and the answer's), which the plan's rule allows; a running row with an unknown total is named
+        by its Downloading label, untested; the list stays as last read after the download ends (plan Open Gap 3).
+    diff_sha256: a51c0925f23de57e0f3a184346abc0afa1af98ebb457f88b935342e044dfe870
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: 741499dcf9d80587309a8121517fdab4279c44f27975d3850344765c5b0a4ec9
+      generated: 24
+      killed: 20
+      survived: 4
+      stillborn: 0
+      timeout: 0
+      score: 0.833
+      survivors:
+        - id: web/src/screens/data-health/recent-downloads.tsx:54:off-by-one:1
+          disposition: equivalent
+          reason: "Every finished state gets the same rank, so raising that rank from 2 to 3 changes no order."
+        - id: web/src/screens/data-health/recent-downloads.tsx:87:off-by-one:1
+          disposition: equivalent
+          reason: "The call counter is only compared with itself, so its starting value is unobservable."
+        - id: web/src/screens/data-health/recent-downloads.tsx:95:off-by-one:1
+          disposition: equivalent
+          reason: "The counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
+        - id: manual:16
+          disposition: equivalent
+          reason: "done is null exactly when runningId is null, so the first comparison already returns; the guard only narrows the type."

@@ -1,9 +1,17 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { listAcquisitionRuns } from "../../api/client";
-import type { AcquisitionRun, AcquisitionRunPage } from "../../api/types";
-import { interruptedResult, partialResult, recentDownloadsSubline, writtenOf } from "./copy";
+import { ApiError, listAcquisitionRuns } from "../../api/client";
+import type { AcquisitionRun, AcquisitionRunPage, RunState } from "../../api/types";
+import type { ShellContextValue } from "../../app/shell-context";
+import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
+import {
+  interruptedResult,
+  partialResult,
+  progressOf,
+  recentDownloadsSubline,
+  writtenOf,
+} from "./copy";
 import { RecentDownloads } from "./recent-downloads";
 
 vi.mock("../../api/client", async (importActual) => ({
@@ -13,12 +21,63 @@ vi.mock("../../api/client", async (importActual) => ({
 
 const listMock = vi.mocked(listAcquisitionRuns);
 
+const shell = vi.hoisted(() => ({ value: null as unknown as ShellContextValue }));
+vi.mock("../../app/shell-context", () => ({ useShell: () => shell.value }));
+
+/** Writes a full shell value; `attention` is loading unless a test gives one. */
+function setShell(over: Partial<ShellContextValue> = {}) {
+  shell.value = {
+    health: { liveness: "unknown", health: null, lastUpdated: null, lastAnsweredAt: null },
+    attention: { kind: "loading" },
+    scores: { kind: "loading" },
+    refresh: vi.fn(),
+    setTitleDetail: vi.fn(),
+    ...over,
+  };
+}
+
+function LATEST(state: RunState, over: Partial<LatestDownload> = {}): LatestDownload {
+  return {
+    run_id: "r-9",
+    state,
+    requested_at: "2026-10-30T18:59:00Z",
+    started_at: "2026-10-30T19:00:00Z",
+    ended_at: null,
+    progress: { done: 812, total: 1236 },
+    ...over,
+  };
+}
+
+function ATT(latest: LatestDownload | null): Attention {
+  return {
+    checked_at: "2026-10-30T19:03:10Z",
+    followed_count: 1236,
+    prices_as_of: null,
+    credential_present: true,
+    problems: { stock_count: 0, symbols: [], newest_completed_at: null },
+    latest_download: latest,
+    latest_terminal_download: null,
+    items: [],
+  };
+}
+
+function ok(data: Attention, iso: string): ReadState<Attention> {
+  return { kind: "ok", data, checkedAt: new Date(iso) };
+}
+
+const INTERNAL = new ApiError("instrument table said no", "req-9f3", { code: "internal_error" });
+
 beforeEach(() => {
   listMock.mockReset();
+  setShell();
 });
 
 afterEach(() => {
   vi.useRealTimers();
+  // AC-17: every read is the delivered endpoint unchanged, exactly { limit: 5 }.
+  for (const call of listMock.mock.calls) {
+    expect(call).toEqual([{ limit: 5 }]);
+  }
 });
 
 /** An `AcquisitionRun` with the defaults of a complete download; independent of the code under test. */
@@ -42,12 +101,40 @@ function PAGE(runs: AcquisitionRun[]): AcquisitionRunPage {
   return { runs, nextCursor: null };
 }
 
-function renderRecent() {
-  return render(
+function ui() {
+  return (
     <MemoryRouter>
       <RecentDownloads />
-    </MemoryRouter>,
+    </MemoryRouter>
   );
+}
+
+function renderRecent() {
+  return render(ui());
+}
+
+const SUBLINE = "Starts when you press Download now";
+const RUNNING_PAGE = PAGE([
+  RUN({ runId: "r-9", state: "running", endedAt: null, instrumentsWritten: 700 }),
+]);
+
+/** Mounts at 19:03:12Z with a running answer checked at 19:03:10Z, and waits for the load read. */
+async function mountRunning() {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-30T19:03:12Z"));
+  listMock.mockResolvedValue(RUNNING_PAGE);
+  setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+  const view = renderRecent();
+  await screen.findByText(`${SUBLINE} · checked 14:03:12 CDT`);
+  return view;
+}
+
+async function settle() {
+  await act(async () => {});
+}
+
+function hrefs(): (string | null)[] {
+  return bodyRows().map((row) => within(row).getByRole("link").getAttribute("href"));
 }
 
 function regionTable(): HTMLElement {
@@ -204,11 +291,253 @@ describe("Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC
     expect(listMock).toHaveBeenNthCalledWith(1, { limit: 5 });
   });
 
+  it("(b) three running answers give one read each and the time advances", async () => {
+    const view = await mountRunning();
+    const clocks = ["14:03:22", "14:03:32", "14:03:42"];
+    for (let i = 1; i <= 3; i++) {
+      vi.setSystemTime(new Date(Date.parse("2026-10-30T19:03:12Z") + 10_000 * i));
+      setShell({
+        attention: ok(
+          ATT(LATEST("running", { progress: { done: 812 + i, total: 1236 } })),
+          new Date(Date.parse("2026-10-30T19:03:10Z") + 10_000 * i).toISOString(),
+        ),
+      });
+      view.rerender(ui());
+      await screen.findByText(`${SUBLINE} · checked ${clocks[i - 1]} CDT`);
+      expect(listMock).toHaveBeenCalledTimes(1 + i);
+    }
+  });
+
+  it("(c) no new answer, no read", async () => {
+    const view = await mountRunning();
+    view.rerender(ui());
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(1);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    view.rerender(ui());
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("(d) a failed attention read is not an answer", async () => {
+    const view = await mountRunning();
+    setShell({
+      attention: {
+        kind: "error",
+        error: INTERNAL,
+        last: { data: ATT(LATEST("running")), checkedAt: new Date("2026-10-30T19:03:20Z") },
+      },
+    });
+    view.rerender(ui());
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("(e) terminal answers give no read and the time stays", async () => {
+    const view = await mountRunning();
+    const terminal = [
+      ["succeeded", "2026-10-30T19:03:20Z"],
+      ["partial", "2026-10-30T19:03:30Z"],
+    ] as const;
+    for (const [state, at] of terminal) {
+      vi.setSystemTime(new Date(at));
+      setShell({ attention: ok(ATT(LATEST(state, { ended_at: "2026-10-30T19:05:00Z" })), at) });
+      view.rerender(ui());
+      await settle();
+      expect(listMock).toHaveBeenCalledTimes(1);
+      expect(screen.getByText(`${SUBLINE} · checked 14:03:12 CDT`)).toBeInTheDocument();
+    }
+  });
+
+  it("(f) a terminal answer from the start reads once, however many answers follow", async () => {
+    listMock.mockResolvedValue(PAGE([RUN({ runId: "r-9" })]));
+    setShell({ attention: ok(ATT(LATEST("succeeded")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    const answers = [LATEST("succeeded"), LATEST("failed"), null];
+    for (const [i, latest] of answers.entries()) {
+      setShell({ attention: ok(ATT(latest), `2026-10-30T19:03:${20 + i}Z`) });
+      view.rerender(ui());
+      await settle();
+    }
+    expect(listMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("(g) a queued or stopping download counts as not finished", async () => {
+    listMock.mockResolvedValue(PAGE([RUN({ runId: "r-9" })]));
+    setShell({ attention: ok(ATT(LATEST("succeeded")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    setShell({
+      attention: ok(
+        ATT(LATEST("requested", { progress: { done: 0, total: null } })),
+        "2026-10-30T19:03:20Z",
+      ),
+    });
+    view.rerender(ui());
+    await settle();
+    setShell({ attention: ok(ATT(LATEST("cancelling")), "2026-10-30T19:03:30Z") });
+    view.rerender(ui());
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("(h) the same answer is never read twice, even when it turns unfinished", async () => {
+    listMock.mockResolvedValue(PAGE([RUN({ runId: "r-9" })]));
+    setShell({ attention: ok(ATT(LATEST("succeeded")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    setShell({ attention: ok(ATT(LATEST("succeeded")), "2026-10-30T19:03:20Z") });
+    view.rerender(ui());
+    await settle();
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:20Z") });
+    view.rerender(ui());
+    await settle();
+    expect(listMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the newest read when an older one answers last", async () => {
+    let answerOld: (page: AcquisitionRunPage) => void = () => undefined;
+    listMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answerOld = resolve;
+      }),
+    );
+    listMock.mockResolvedValueOnce(PAGE([RUN({ runId: "r-2" })]));
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:20Z") });
+    view.rerender(ui());
+    await screen.findByRole("table");
+    await act(async () => answerOld(PAGE([RUN({ runId: "r-1" })])));
+    expect(hrefs()).toEqual(["/data/downloads/r-2"]);
+  });
+
   it("(a) says nothing of a check until the list has answered", () => {
     listMock.mockReturnValue(new Promise(() => undefined));
     renderRecent();
     expect(screen.getByText("Starts when you press Download now")).toBeInTheDocument();
     expect(screen.queryByText(/checked/)).toBeNull();
+  });
+});
+
+const RUNNING_THEN_DONE = PAGE([
+  RUN({ runId: "r-9", state: "running", endedAt: null, instrumentsWritten: 700 }),
+  RUN({ runId: "r-8" }),
+]);
+
+describe("Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384)", () => {
+  it("(a) a running download shows determinate progress, not its stored count", async () => {
+    listMock.mockResolvedValue(RUNNING_THEN_DONE);
+    setShell({ attention: ok(ATT(LATEST("running", { run_id: "r-9" })), "2026-10-30T19:03:10Z") });
+    renderRecent();
+    await screen.findByRole("table");
+    const rows = bodyRows();
+    expect(hrefs()[0]).toBe("/data/downloads/r-9");
+    const running = rows[0] as HTMLElement;
+    expect(badgeOf(running).getAttribute("data-variant")).toBe("status-active");
+    expect(badgeOf(running).textContent).toBe("Downloading");
+    const ended = cellsOf(running)[1] as HTMLElement;
+    expect(ended.querySelector('[aria-hidden="true"]')?.textContent).toBe("—");
+    expect(ended.querySelector(".sr-only")?.textContent).toBe("not ended yet");
+    const result = cellsOf(running)[2] as HTMLElement;
+    const bar = within(result).getByRole("progressbar", { name: "812 of 1,236 stocks" });
+    expect(bar.getAttribute("aria-valuenow")).toBe("812");
+    expect(bar.getAttribute("aria-valuemin")).toBe("0");
+    expect(bar.getAttribute("aria-valuemax")).toBe("1236");
+    expect(result.textContent).not.toContain("700 of 1,236 stocks");
+    expect(result.querySelector('[aria-live="polite"]')?.textContent).toBe("812 of 1,236 stocks");
+    expect(within(rows[1] as HTMLElement).queryByRole("progressbar")).toBeNull();
+  });
+
+  it("(b) the bar is indeterminate while the total is not known, named by the outcome", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({
+          runId: "r-9",
+          state: "requested",
+          startedAt: null,
+          endedAt: null,
+          instrumentsNamed: 0,
+          instrumentsWritten: 0,
+        }),
+      ]),
+    );
+    const latest = LATEST("requested", {
+      run_id: "r-9",
+      started_at: null,
+      progress: { done: 0, total: null },
+    });
+    setShell({ attention: ok(ATT(latest), "2026-10-30T19:03:10Z") });
+    renderRecent();
+    await screen.findByRole("table");
+    const row = bodyRows()[0] as HTMLElement;
+    const bar = within(row).getByRole("progressbar", { name: "Queued" });
+    expect(bar.hasAttribute("aria-valuenow")).toBe(false);
+    expect(row.textContent).not.toContain("0 of 0");
+    expect(row.textContent).not.toContain("of null");
+  });
+
+  it("(d) progress belongs only to the matching, unfinished download", async () => {
+    listMock.mockResolvedValue(RUNNING_THEN_DONE);
+    setShell({ attention: ok(ATT(LATEST("running", { run_id: "r-7" })), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByRole("table");
+    expect(screen.queryByRole("progressbar")).toBeNull();
+    expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 stocks");
+    setShell({
+      attention: ok(ATT(LATEST("succeeded", { run_id: "r-9" })), "2026-10-30T19:03:20Z"),
+    });
+    view.rerender(ui());
+    await settle();
+    expect(screen.queryByRole("progressbar")).toBeNull();
+  });
+
+  it("(e) a running download heads the list, then a queued one, order otherwise kept", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({ runId: "r-6", state: "cancelled" }),
+        RUN({ runId: "r-5", state: "requested", startedAt: null, endedAt: null }),
+        RUN({ runId: "r-4", state: "running", endedAt: null }),
+        RUN({ runId: "r-3", state: "partial" }),
+        RUN({ runId: "r-2" }),
+      ]),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    expect(hrefs()).toEqual([
+      "/data/downloads/r-4",
+      "/data/downloads/r-5",
+      "/data/downloads/r-6",
+      "/data/downloads/r-3",
+      "/data/downloads/r-2",
+    ]);
+  });
+
+  it("(e) a stopping download ranks with the running one", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({ runId: "r-3", state: "requested", startedAt: null, endedAt: null }),
+        RUN({ runId: "r-2", state: "cancelling", endedAt: null }),
+        RUN({ runId: "r-1" }),
+      ]),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    expect(hrefs()).toEqual(["/data/downloads/r-2", "/data/downloads/r-3", "/data/downloads/r-1"]);
+  });
+
+  it("(e) an already ordered list renders unchanged", async () => {
+    listMock.mockResolvedValue(
+      PAGE([
+        RUN({ runId: "r-4", state: "running", endedAt: null }),
+        RUN({ runId: "r-3", state: "partial" }),
+        RUN({ runId: "r-2" }),
+      ]),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    expect(hrefs()).toEqual(["/data/downloads/r-4", "/data/downloads/r-3", "/data/downloads/r-2"]);
   });
 });
 
@@ -219,6 +548,10 @@ describe("copy.ts recent downloads and what you follow strings", () => {
     expect(interruptedResult("611")).toBe(
       "FactorFlow restarted mid-download; 611 kept, the rest picked up next time",
     );
+  });
+
+  it("(b) the progress sentence", () => {
+    expect(progressOf("812", "1,236")).toBe("812 of 1,236 stocks");
   });
 
   it("(c) the sub-line", () => {
