@@ -1,0 +1,113 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w3/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 789ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 7 failed) 2330ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row 38ms
+     → expected 'Couldn\'t stop following FBXX (you al…' to be 'Couldn\'t stop following FBXX: you al…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way 55ms
+     → expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone 110ms
+     → expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone 49ms
+     → expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) a transport failure keeps the dialog open and closing it leaves the row alone 32ms
+     → expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem 33ms
+     → expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × copy.ts, stop following strings (DEC-0377) > (d) the titles and sentences 0ms
+     → expected 'Couldn\'t stop following FBXX (x).' to be 'Couldn\'t stop following FBXX: x.' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row
+AssertionError: expected 'Couldn\'t stop following FBXX (you al…' to be 'Couldn\'t stop following FBXX: you al…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: you already stopped following it."
+Received: "Couldn't stop following FBXX (you already stopped following it)."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:205:32
+    203|     await confirm(user, dialog);
+    204|     const status = await within(dialog).findByRole("status");
+    205|     expect(status.textContent).toBe(
+       |                                ^
+    206|       "Couldn't stop following FBXX: you already stopped following it.…
+    207|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way
+AssertionError: expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow doesn't follow it."
+Received: "Couldn't stop following FBXX (FactorFlow doesn't follow it)."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:226:32
+    224|     await confirm(user, dialog);
+    225|     const status = await within(dialog).findByRole("status");
+    226|     expect(status.textContent).toBe("Couldn't stop following FBXX: Fac…
+       |                                ^
+    227|     await user.click(within(dialog).getByRole("button", { name: "Cance…
+    228|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) a transport failure keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX (FactorFlow hit an unexpected problem)."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t stop following FBXX (Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX (FactorFlow hit an unexpected problem)."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:460:32
+    458|     await confirm(user, dialog);
+    459|     const status = await within(dialog).findByRole("status");
+    460|     expect(status.textContent).toBe(
+       |                                ^
+    461|       "Couldn't stop following FBXX: FactorFlow hit an unexpected prob…
+    462|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > copy.ts, stop following strings (DEC-0377) > (d) the titles and sentences
+AssertionError: expected 'Couldn\'t stop following FBXX (x).' to be 'Couldn\'t stop following FBXX: x.' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: x."
+Received: "Couldn't stop following FBXX (x)."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:519:46
+    517|     expect(stopFollowingDescription("FBXX")).toBe(DESCRIPTION);
+    518|     expect(STOP_FOLLOWING).toBe("Stop following");
+    519|     expect(stopFollowingFailed("FBXX", "x")).toBe("Couldn't stop follo…
+       |                                              ^
+    520|     expect(stoppedFollowing("FBXX")).toBe("Stopped following FBXX");
+    521|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  7 failed | 58 passed (65)
+   Start at  23:22:00
+   Duration  3.10s (transform 141ms, setup 75ms, collect 313ms, tests 3.12s, environment 417ms, prepare 191ms)
+

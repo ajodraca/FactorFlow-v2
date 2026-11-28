@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 2 failed) 708ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 57ms
+     → expected 'Couldn\'t start the download: no stoc…' to be 'Couldn\'t start the download: history…' // Object.is equality
+   × copy.ts, Download now strings (DEC-0378) > (b) each refusal names its sentence, its fix and its path 5ms
+     → expected { …(3) } to deeply equal { …(3) }
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 2414ms
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (b) no term of the DAC-E7-3 list appears in any state, in the dialog or beside it 308ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+AssertionError: expected 'Couldn\'t start the download: no stoc…' to be 'Couldn\'t start the download: history…' // Object.is equality
+
+Expected: "Couldn't start the download: history depth isn't set."
+Received: "Couldn't start the download: no stocks are followed."
+
+ ❯ src/screens/data-health/download-now.test.tsx:82:32
+     80|     await user.click(pressed());
+     81|     const status = await screen.findByRole("status");
+     82|     expect(status.textContent).toBe("Couldn't start the download: hist…
+       |                                ^
+     83|     const link = screen.getByRole("link", { name: "Set history depth" …
+     84|     expect(link.getAttribute("href")).toBe("/settings");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > copy.ts, Download now strings (DEC-0378) > (b) each refusal names its sentence, its fix and its path
+AssertionError: expected { …(3) } to deeply equal { …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "fix": "Set history depth",
+-   "sentence": "Couldn't start the download: history depth isn't set.",
++   "sentence": "Couldn't start the download: no stocks are followed.",
+    "to": "/settings",
+  }
+
+ ❯ src/screens/data-health/download-now.test.tsx:288:50
+    286| 
+    287|   it("(b) each refusal names its sentence, its fix and its path", () =…
+    288|     expect(START_REFUSALS.history_depth_not_set).toEqual({
+       |                                                  ^
+    289|       sentence: "Couldn't start the download: history depth isn't set.…
+    290|       fix: "Set history depth",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 63 passed (65)
+   Start at  23:21:53
+   Duration  3.75s (transform 165ms, setup 97ms, collect 387ms, tests 3.12s, environment 637ms, prepare 650ms)
+

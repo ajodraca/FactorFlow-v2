@@ -1,0 +1,205 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 926ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 10 failed) 3637ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row 55ms
+     → expected 'Couldn\'t stop following FBXX: instru…' to be 'Couldn\'t stop following FBXX: you al…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way 38ms
+     → expected 'Couldn\'t stop following FBXX: no ins…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone 43ms
+     → expected 'Couldn\'t stop following FBXX: databa…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone 39ms
+     → expected 'Couldn\'t stop following FBXX: a refu…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) a transport failure keeps the dialog open and closing it leaves the row alone 45ms
+     → expected 'Couldn\'t stop following FBXX: DELETE…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) ALREADY: no envelope text reaches the page 50ms
+     → expected 'Needs fixingStop following FBXXStop f…' not to contain 'instrument \'FBXX\' is already retired'
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) NOT_FOUND: no envelope text reaches the page 48ms
+     → expected 'Needs fixingStop following FBXXStop f…' not to contain 'no instrument exists for symbol \'FBX…'
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) INTERNAL: no envelope text reaches the page 63ms
+     → expected 'Needs fixingStop following FBXXStop f…' not to contain 'database said no'
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) UNREACHABLE: no envelope text reaches the page 50ms
+     → expected 'Needs fixingStop following FBXXStop f…' not to contain 'DELETE /api/instruments/FBXX could no…'
+   × Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (b) no term of the DAC-E7-3 list appears in any state, in the dialog or beside it 110ms
+     → expected 'Needs fixingStop following FBXXStop f…' not to match /\b(instrument|acquisition|acquire|ru…/i
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (d) the dialog's buttons and links are Cancel and the copy.ts label 380ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (a) no status or coverage badge renders in any state 392ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (b) no state is conveyed by colour alone 557ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (a)(b) a 409 keeps the dialog open with the reason; Esc closes it and refreshes the row
+AssertionError: expected 'Couldn\'t stop following FBXX: instru…' to be 'Couldn\'t stop following FBXX: you al…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: you already stopped following it."
+Received: "Couldn't stop following FBXX: instrument 'FBXX' is already retired."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:205:32
+    203|     await confirm(user, dialog);
+    204|     const status = await within(dialog).findByRole("status");
+    205|     expect(status.textContent).toBe(
+       |                                ^
+    206|       "Couldn't stop following FBXX: you already stopped following it.…
+    207|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (c) a 404 follows the same path, and Cancel closes it the same way
+AssertionError: expected 'Couldn\'t stop following FBXX: no ins…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow doesn't follow it."
+Received: "Couldn't stop following FBXX: no instrument exists for symbol 'FBXX'."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:226:32
+    224|     await confirm(user, dialog);
+    225|     const status = await within(dialog).findByRole("status");
+    226|     expect(status.textContent).toBe("Couldn't stop following FBXX: Fac…
+       |                                ^
+    227|     await user.click(within(dialog).getByRole("button", { name: "Cance…
+    228|     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX: databa…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: database said no."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX: a refu…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: a refusal nobody has met."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) a transport failure keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX: DELETE…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow is not answering."
+Received: "Couldn't stop following FBXX: DELETE /api/instruments/FBXX could not be reached."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) ALREADY: no envelope text reaches the page
+AssertionError: expected 'Needs fixingStop following FBXXStop f…' not to contain 'instrument \'FBXX\' is already retired'
+
+Expected: "instrument 'FBXX' is already retired"
+Received: "Needs fixingStop following FBXXStop following GOODStop following FBXXStop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.Couldn't stop following FBXX: instrument 'FBXX' is already retired.CancelStop following"
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:509:24
+    507|     const text = document.body.textContent ?? "";
+    508|     for (const leaked of [error.message, "req-", "instrument_not_found…
+    509|       expect(text).not.toContain(leaked);
+       |                        ^
+    510|     }
+    511|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) NOT_FOUND: no envelope text reaches the page
+AssertionError: expected 'Needs fixingStop following FBXXStop f…' not to contain 'no instrument exists for symbol \'FBX…'
+
+Expected: "no instrument exists for symbol 'FBXX'"
+Received: "Needs fixingStop following FBXXStop following GOODStop following FBXXStop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.Couldn't stop following FBXX: no instrument exists for symbol 'FBXX'.CancelStop following"
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:509:24
+    507|     const text = document.body.textContent ?? "";
+    508|     for (const leaked of [error.message, "req-", "instrument_not_found…
+    509|       expect(text).not.toContain(leaked);
+       |                        ^
+    510|     }
+    511|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) INTERNAL: no envelope text reaches the page
+AssertionError: expected 'Needs fixingStop following FBXXStop f…' not to contain 'database said no'
+
+Expected: "database said no"
+Received: "Needs fixingStop following FBXXStop following GOODStop following FBXXStop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.Couldn't stop following FBXX: database said no.CancelStop following"
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:509:24
+    507|     const text = document.body.textContent ?? "";
+    508|     for (const leaked of [error.message, "req-", "instrument_not_found…
+    509|       expect(text).not.toContain(leaked);
+       |                        ^
+    510|     }
+    511|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (k) UNREACHABLE: no envelope text reaches the page
+AssertionError: expected 'Needs fixingStop following FBXXStop f…' not to contain 'DELETE /api/instruments/FBXX could no…'
+
+Expected: "DELETE /api/instruments/FBXX could not be reached"
+Received: "Needs fixingStop following FBXXStop following GOODStop following FBXXStop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.Couldn't stop following FBXX: DELETE /api/instruments/FBXX could not be reached.CancelStop following"
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:509:24
+    507|     const text = document.body.textContent ?? "";
+    508|     for (const leaked of [error.message, "req-", "instrument_not_found…
+    509|       expect(text).not.toContain(leaked);
+       |                        ^
+    510|     }
+    511|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (b) no term of the DAC-E7-3 list appears in any state, in the dialog or beside it
+AssertionError: expected 'Needs fixingStop following FBXXStop f…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+- Expected: 
+/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"Needs fixingStop following FBXXStop following GOODStop following FBXXStop following FBXX? Its history is kept, and strategies holding it keep holding it. You can follow it again later.Couldn't stop following FBXX: instrument 'FBXX' is already retired.CancelStop following"
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:608:46
+    606|   it("(b) no term of the DAC-E7-3 list appears in any state, in the di…
+    607|     await inEveryState(() => {
+    608|       expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+       |                                              ^
+    609|     });
+    610|   });
+ ❯ inEveryState src/screens/data-health/stop-following-dialog.test.tsx:599:5
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:607:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  10 failed | 55 passed (65)
+   Start at  23:21:02
+   Duration  5.43s (transform 314ms, setup 267ms, collect 1.01s, tests 4.56s, environment 909ms, prepare 439ms)
+

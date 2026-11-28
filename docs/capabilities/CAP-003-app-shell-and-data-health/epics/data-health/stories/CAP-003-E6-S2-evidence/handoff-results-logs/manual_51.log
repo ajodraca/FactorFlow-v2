@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 1490ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 4090ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem 39ms
+     → expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (d) the dialog's buttons and links are Cancel and the copy.ts label 327ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (a) no status or coverage badge renders in any state 443ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (r) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t stop following FBXX: Factor…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:460:32
+    458|     await confirm(user, dialog);
+    459|     const status = await within(dialog).findByRole("status");
+    460|     expect(status.textContent).toBe(
+       |                                ^
+    461|       "Couldn't stop following FBXX: FactorFlow hit an unexpected prob…
+    462|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:21:05
+   Duration  5.83s (transform 272ms, setup 248ms, collect 699ms, tests 5.58s, environment 896ms, prepare 546ms)
+

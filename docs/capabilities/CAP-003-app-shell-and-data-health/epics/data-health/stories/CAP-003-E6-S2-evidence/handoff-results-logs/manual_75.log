@@ -1,0 +1,108 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 773ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 5 failed) 2450ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone 36ms
+     → expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone 30ms
+     → expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (p) a failed stop does not start the row-exit watch, so a row that leaves later keeps focus where it is 72ms
+     → expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+   × copy.ts, stop following strings (DEC-0377) > (e) the reason of a failed stop, never an envelope message or request id 1ms
+     → expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
+   × copy.ts, stop following strings (DEC-0377) > (f) only a 404 or the already-stopped 409 makes the row stale 1ms
+     → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an internal error keeps the dialog open and closing it leaves the row alone
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (e) an unknown 409 code keeps the dialog open and closing it leaves the row alone
+AssertionError: expected 'Couldn\'t stop following FBXX: undefi…' to be 'Couldn\'t stop following FBXX: Factor…' // Object.is equality
+
+Expected: "Couldn't stop following FBXX: FactorFlow hit an unexpected problem."
+Received: "Couldn't stop following FBXX: undefined."
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:258:34
+    256|       await confirm(user, dialog);
+    257|       const status = await within(dialog).findByRole("status");
+    258|       expect(status.textContent).toBe(`Couldn't stop following FBXX: $…
+       |                                  ^
+    259|       expect(screen.getByRole("dialog", { name: "Stop following FBXX" …
+    260|       await user.keyboard("{Escape}");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (p) a failed stop does not start the row-exit watch, so a row that leaves later keeps focus where it is
+Error: expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:435:71
+    433|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    434|     await settle();
+    435|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
+       |                                                                       ^
+    436|   });
+    437| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > copy.ts, stop following strings (DEC-0377) > (e) the reason of a failed stop, never an envelope message or request id
+AssertionError: expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
+
+- Expected: 
+"FactorFlow hit an unexpected problem"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:526:41
+    524|     expect(stopFailureReason(ALREADY)).toBe("you already stopped follo…
+    525|     expect(stopFailureReason(NOT_FOUND)).toBe("FactorFlow doesn't foll…
+    526|     expect(stopFailureReason(INTERNAL)).toBe("FactorFlow hit an unexpe…
+       |                                         ^
+    527|     expect(stopFailureReason(UNREACHABLE)).toBe("FactorFlow is not ans…
+    528|     for (const error of [ALREADY, NOT_FOUND, INTERNAL, UNREACHABLE]) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > copy.ts, stop following strings (DEC-0377) > (f) only a 404 or the already-stopped 409 makes the row stale
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:538:41
+    536|     expect(isStaleRowRefusal(NOT_FOUND)).toBe(true);
+    537|     expect(isStaleRowRefusal(ALREADY)).toBe(true);
+    538|     expect(isStaleRowRefusal(INTERNAL)).toBe(false);
+       |                                         ^
+    539|     expect(isStaleRowRefusal(OTHER_409)).toBe(false);
+    540|     expect(isStaleRowRefusal(UNREACHABLE)).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 60 passed (65)
+   Start at  23:21:56
+   Duration  3.79s (transform 181ms, setup 77ms, collect 901ms, tests 3.22s, environment 608ms, prepare 330ms)
+

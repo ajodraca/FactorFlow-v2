@@ -1,0 +1,176 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w2/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 719ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 3085ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g2) focus back on the row's button keeps the watch, so a row that leaves later hands focus on 1084ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <h2
+      tabindex="-1"
+    >
+      Needs fixing
+    </h2>
+    <ul>
+      <li>
+        <button
+          type="button"
+        >
+          Stop following·
+          GOOD
+        </button>
+      </li>
+    </ul>
+    <output
+      aria-live="polite"
+      class="sr-only"
+    >
+      <span>
+        Stopped following FBXX
+      </span>
+    </output>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mstyle[39m=[32m""[39m
+  [36m>[39m
+    [36m<div>[39m
+      [36m<h2[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [0mNeeds fixing[0m
+      [36m</h2>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<button[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mStop following [0m
+            [0mGOOD[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span>[39m
+          [0mStopped following FBXX[0m
+        [36m</span>[39m
+      [36m</output>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (g2) focus back on the row's button keeps the watch, so a row that leaves later hands focus on
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+Received element with focus:
+  <body
+  style=""
+>
+  <div>
+    <h2
+      tabindex="-1"
+    >
+      Needs fixing
+    </h2>
+    <ul>
+      <li>
+        <button
+          type="button"
+        >
+          Stop following·
+          GOOD
+        </button>
+      </li>
+    </ul>
+    <output
+      aria-live="polite"
+      class="sr-only"
+    >
+      <span>
+        Stopped following FBXX
+      </span>
+    </output>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mstyle[39m=[32m""[39m
+  [36m>[39m
+    [36m<div>[39m
+      [36m<h2[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [0mNeeds fixing[0m
+      [36m</h2>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<button[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mStop following [0m
+            [0mGOOD[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<output[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"sr-only"[39m
+      [36m>[39m
+        [36m<span>[39m
+          [0mStopped following FBXX[0m
+        [36m</span>[39m
+      [36m</output>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:420:69
+    418|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    419|     await waitFor(() =>
+    420|       expect(screen.getByRole("heading", { name: "Needs fixing" })).to…
+       |                                                                     ^
+    421|     );
+    422|   });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:21:36
+   Duration  3.90s (transform 150ms, setup 80ms, collect 385ms, tests 3.80s, environment 423ms, prepare 155ms)
+

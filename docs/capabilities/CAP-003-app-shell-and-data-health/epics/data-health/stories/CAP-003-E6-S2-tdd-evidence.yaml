@@ -262,3 +262,27 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+handoff_mutation:
+  runner: scripts/mutation-run.py
+  results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/handoff-results.json
+  results_sha256: b70e5efe9142068a3a3a723f2ef9f2f417660447d70d08e9b2aa8e192d8ed236
+  generated: 115
+  killed: 111
+  survived: 4
+  stillborn: 0
+  timeout: 0
+  score: 0.965
+  survivors:
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:64:off-by-one:1
+      disposition: equivalent
+      reason: "The announcement serial's initial value only keys the span; it is first compared against the next value, so 0 and 1 are indistinguishable by any input."
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:66:negate-boolean:1
+      disposition: equivalent
+      reason: "The watchRowExit ref's initial true is reset to false by the layout effect on every open, and before the first open the opener is null so the effect has nothing to act on."
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:99:off-by-one:1
+      disposition: equivalent
+      reason: "The retry delay of 0 against 1 millisecond: the contract fixes only that the heading is focused after the close, and every observer polls (waitFor) rather than timing it."
+    - id: web/src/screens/data-health/stop-following-dialog.tsx:112:off-by-one:1
+      disposition: equivalent
+      reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each stop, and it still does."

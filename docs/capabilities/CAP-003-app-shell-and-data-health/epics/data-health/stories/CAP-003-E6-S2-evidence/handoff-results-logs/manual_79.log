@@ -1,0 +1,92 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 5 failed) 666ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again 23ms
+     → expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an internal error reads as an unexpected problem with Try again, never as a refusal 16ms
+     → expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an unknown 409 code reads as an unexpected problem with Try again, never as a refusal 14ms
+     → expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem 14ms
+     → expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × copy.ts, Download now strings (DEC-0378) > (c) a failure sentence 1ms
+     → expected 'Couldn\'t start the download: x' to be 'Couldn\'t start the download: x.' // Object.is equality
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 1982ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again
+AssertionError: expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow is not answering."
+Received: "Couldn't start the download: FactorFlow is not answering"
+
+ ❯ src/screens/data-health/download-now.test.tsx:115:32
+    113|     await user.click(pressed());
+    114|     const status = await screen.findByRole("status");
+    115|     expect(status.textContent).toBe("Couldn't start the download: Fact…
+       |                                ^
+    116|     const again = screen.getByRole("button", { name: "Try again" });
+    117|     expect(status.contains(again)).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an internal error reads as an unexpected problem with Try again, never as a refusal
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an unknown 409 code reads as an unexpected problem with Try again, never as a refusal
+AssertionError: expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: FactorFlow hit an unexpected problem"
+
+ ❯ src/screens/data-health/download-now.test.tsx:140:34
+    138|       await user.click(pressed());
+    139|       const status = await screen.findByRole("status");
+    140|       expect(status.textContent).toBe(
+       |                                  ^
+    141|         "Couldn't start the download: FactorFlow hit an unexpected pro…
+    142|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t start the download: FactorF…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: FactorFlow hit an unexpected problem"
+
+ ❯ src/screens/data-health/download-now.test.tsx:190:32
+    188|     await user.click(pressed());
+    189|     const status = await screen.findByRole("status");
+    190|     expect(status.textContent).toBe(
+       |                                ^
+    191|       "Couldn't start the download: FactorFlow hit an unexpected probl…
+    192|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > copy.ts, Download now strings (DEC-0378) > (c) a failure sentence
+AssertionError: expected 'Couldn\'t start the download: x' to be 'Couldn\'t start the download: x.' // Object.is equality
+
+Expected: "Couldn't start the download: x."
+Received: "Couldn't start the download: x"
+
+ ❯ src/screens/data-health/download-now.test.tsx:301:30
+    299| 
+    300|   it("(c) a failure sentence", () => {
+    301|     expect(startFailed("x")).toBe("Couldn't start the download: x.");
+       |                              ^
+    302|   });
+    303| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 60 passed (65)
+   Start at  23:22:01
+   Duration  3.02s (transform 207ms, setup 78ms, collect 784ms, tests 2.65s, environment 483ms, prepare 267ms)
+

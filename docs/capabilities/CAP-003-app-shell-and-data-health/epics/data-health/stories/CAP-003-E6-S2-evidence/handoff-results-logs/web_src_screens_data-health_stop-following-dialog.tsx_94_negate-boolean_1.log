@@ -1,0 +1,45 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 997ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 1 failed) 2544ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (n) focus the owner placed elsewhere is not grabbed later either 62ms
+     → expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (n) focus the owner placed elsewhere is not grabbed later either
+Error: expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:477:71
+    475|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    476|     await settle();
+    477|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
+       |                                                                       ^
+    478|   });
+    479| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:19:13
+   Duration  4.01s (transform 168ms, setup 107ms, collect 1.10s, tests 3.54s, environment 786ms, prepare 171ms)
+

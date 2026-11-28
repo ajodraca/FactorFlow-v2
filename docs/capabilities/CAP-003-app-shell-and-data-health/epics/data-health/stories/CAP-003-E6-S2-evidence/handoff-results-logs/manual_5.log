@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 1 failed) 1239ms
+   ✓ Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal 404ms
+   × Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15) > (b) 202 queued behind a running download shows the helper line and refreshes nothing 26ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      "attention",
+    ]
+
+
+Number of calls: 1
+
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 2980ms
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (d) the dialog's buttons and links are Cancel and the copy.ts label 396ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15) > (b) 202 queued behind a running download shows the helper line and refreshes nothing
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      "attention",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/data-health/download-now.test.tsx:217:25
+    215|     expect(line.textContent).toBe("A download is running. This starts …
+    216|     expect(pressed().compareDocumentPosition(line) & Node.DOCUMENT_POS…
+    217|     expect(refresh).not.toHaveBeenCalled();
+       |                         ^
+    218|     expect(pressed()).toBeTruthy();
+    219|     expect(pressed().hasAttribute("disabled")).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:19:36
+   Duration  4.52s (transform 224ms, setup 122ms, collect 821ms, tests 4.22s, environment 764ms, prepare 370ms)
+

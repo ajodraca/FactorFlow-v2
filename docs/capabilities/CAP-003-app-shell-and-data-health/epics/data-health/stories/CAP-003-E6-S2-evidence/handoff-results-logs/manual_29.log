@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 1 failed) 868ms
+   × Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15) > (b) 202 queued behind a running download shows the helper line and refreshes nothing 19ms
+     → expected +0 to be truthy
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 3320ms
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (d) the dialog's buttons and links are Cancel and the copy.ts label 458ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (a) no status or coverage badge renders in any state 411ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15) > (b) 202 queued behind a running download shows the helper line and refreshes nothing
+AssertionError: expected +0 to be truthy
+
+- Expected: 
+true
+
++ Received: 
+0
+
+ ❯ src/screens/data-health/download-now.test.tsx:216:88
+    214|     const line = await screen.findByRole("status");
+    215|     expect(line.textContent).toBe("A download is running. This starts …
+    216|     expect(pressed().compareDocumentPosition(line) & Node.DOCUMENT_POS…
+       |                                                                                        ^
+    217|     expect(refresh).not.toHaveBeenCalled();
+    218|     expect(pressed()).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 64 passed (65)
+   Start at  23:20:18
+   Duration  4.85s (transform 192ms, setup 127ms, collect 634ms, tests 4.19s, environment 887ms, prepare 521ms)
+

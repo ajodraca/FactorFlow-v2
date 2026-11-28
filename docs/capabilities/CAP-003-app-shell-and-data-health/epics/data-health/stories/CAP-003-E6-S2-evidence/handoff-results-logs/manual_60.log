@@ -1,0 +1,87 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w0/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/download-now.test.tsx (27 tests) 571ms
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx (38 tests | 2 failed) 1915ms
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (i) never steals focus the owner has placed elsewhere 34ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Stop following·
+  GOOD
+</button>
+Received element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+   × Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (n) focus the owner placed elsewhere is not grabbed later either 50ms
+     → expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (i) never steals focus the owner has placed elsewhere
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  type="button"
+>
+  Stop following·
+  GOOD
+</button>
+Received element with focus:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:325:31
+    323|     act(() => rowButton("GOOD").focus());
+    324|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    325|     expect(rowButton("GOOD")).toHaveFocus();
+       |                               ^
+    326|   });
+    327| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/stop-following-dialog.test.tsx > Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17) > (n) focus the owner placed elsewhere is not grabbed later either
+Error: expect(element).not.toHaveFocus()
+
+Received element is focused:
+  <h2
+  tabindex="-1"
+>
+  Needs fixing
+</h2>
+ ❯ src/screens/data-health/stop-following-dialog.test.tsx:477:71
+    475|     view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    476|     await settle();
+    477|     expect(screen.getByRole("heading", { name: "Needs fixing" })).not.…
+       |                                                                       ^
+    478|   });
+    479| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 63 passed (65)
+   Start at  23:21:26
+   Duration  2.64s (transform 126ms, setup 67ms, collect 319ms, tests 2.49s, environment 387ms, prepare 212ms)
+

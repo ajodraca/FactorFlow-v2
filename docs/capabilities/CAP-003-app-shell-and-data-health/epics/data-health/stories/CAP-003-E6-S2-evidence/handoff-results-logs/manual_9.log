@@ -1,0 +1,168 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-qvqdetwe/w1/web
+
+stderr | src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (a) history depth: its own sentence and its Settings link, never the other refusal
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/download-now.test.tsx (27 tests | 8 failed) 836ms
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again 26ms
+     → expected 'Couldn\'t start the download: POST /a…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an internal error reads as an unexpected problem with Try again, never as a refusal 19ms
+     → expected 'Couldn\'t start the download: databas…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an unknown 409 code reads as an unexpected problem with Try again, never as a refusal 15ms
+     → expected 'Couldn\'t start the download: a refus…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (e) UNREACHABLE: no envelope text reaches the page 18ms
+     → expected 'Download nowCouldn\'t start the downl…' not to contain 'POST /api/acquisition-runs could not …'
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (e) INTERNAL: no envelope text reaches the page 18ms
+     → expected 'Download nowCouldn\'t start the downl…' not to contain 'database said no'
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (e) OTHER_409: no envelope text reaches the page 14ms
+     → expected 'Download nowCouldn\'t start the downl…' not to contain 'a refusal nobody has met'
+   × Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem 16ms
+     → expected 'Couldn\'t start the download: boom.' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × Download now vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (a) no term of the DAC-E7-3 list appears in any state 74ms
+     → expected 'Download nowCouldn\'t start the downl…' not to match /\b(instrument|acquisition|acquire|ru…/i
+ ✓ src/screens/data-health/stop-following-dialog.test.tsx (38 tests) 2857ms
+   ✓ Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (b) no term of the DAC-E7-3 list appears in any state, in the dialog or beside it 348ms
+   ✓ No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20) > (b) no state is conveyed by colour alone 378ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (c) a transport failure: the reason and Try again outside the status, which posts again
+AssertionError: expected 'Couldn\'t start the download: POST /a…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow is not answering."
+Received: "Couldn't start the download: POST /api/acquisition-runs could not be reached."
+
+ ❯ src/screens/data-health/download-now.test.tsx:115:32
+    113|     await user.click(pressed());
+    114|     const status = await screen.findByRole("status");
+    115|     expect(status.textContent).toBe("Couldn't start the download: Fact…
+       |                                ^
+    116|     const again = screen.getByRole("button", { name: "Try again" });
+    117|     expect(status.contains(again)).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an internal error reads as an unexpected problem with Try again, never as a refusal
+AssertionError: expected 'Couldn\'t start the download: databas…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: database said no."
+
+ ❯ src/screens/data-health/download-now.test.tsx:140:34
+    138|       await user.click(pressed());
+    139|       const status = await screen.findByRole("status");
+    140|       expect(status.textContent).toBe(
+       |                                  ^
+    141|         "Couldn't start the download: FactorFlow hit an unexpected pro…
+    142|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (d) an unknown 409 code reads as an unexpected problem with Try again, never as a refusal
+AssertionError: expected 'Couldn\'t start the download: a refus…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: a refusal nobody has met."
+
+ ❯ src/screens/data-health/download-now.test.tsx:140:34
+    138|       await user.click(pressed());
+    139|       const status = await screen.findByRole("status");
+    140|       expect(status.textContent).toBe(
+       |                                  ^
+    141|         "Couldn't start the download: FactorFlow hit an unexpected pro…
+    142|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (e) UNREACHABLE: no envelope text reaches the page
+AssertionError: expected 'Download nowCouldn\'t start the downl…' not to contain 'POST /api/acquisition-runs could not …'
+
+Expected: "POST /api/acquisition-runs could not be reached"
+Received: "Download nowCouldn't start the download: POST /api/acquisition-runs could not be reached.Try again/data"
+
+ ❯ src/screens/data-health/download-now.test.tsx:167:24
+    165|       "no_active_instruments",
+    166|     ]) {
+    167|       expect(text).not.toContain(leaked);
+       |                        ^
+    168|     }
+    169|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (e) INTERNAL: no envelope text reaches the page
+AssertionError: expected 'Download nowCouldn\'t start the downl…' not to contain 'database said no'
+
+Expected: "database said no"
+Received: "Download nowCouldn't start the download: database said no.Try again/data"
+
+ ❯ src/screens/data-health/download-now.test.tsx:167:24
+    165|       "no_active_instruments",
+    166|     ]) {
+    167|       expect(text).not.toContain(leaked);
+       |                        ^
+    168|     }
+    169|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (e) OTHER_409: no envelope text reaches the page
+AssertionError: expected 'Download nowCouldn\'t start the downl…' not to contain 'a refusal nobody has met'
+
+Expected: "a refusal nobody has met"
+Received: "Download nowCouldn't start the download: a refusal nobody has met.Try again/data"
+
+ ❯ src/screens/data-health/download-now.test.tsx:167:24
+    165|       "no_active_instruments",
+    166|     ]) {
+    167|       expect(text).not.toContain(leaked);
+       |                        ^
+    168|     }
+    169|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11) > (g) a thrown value that is neither error class reads as an unexpected problem
+AssertionError: expected 'Couldn\'t start the download: boom.' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem."
+Received: "Couldn't start the download: boom."
+
+ ❯ src/screens/data-health/download-now.test.tsx:190:32
+    188|     await user.click(pressed());
+    189|     const status = await screen.findByRole("status");
+    190|     expect(status.textContent).toBe(
+       |                                ^
+    191|       "Couldn't start the download: FactorFlow hit an unexpected probl…
+    192|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/screens/data-health/download-now.test.tsx > Download now vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19) > (a) no term of the DAC-E7-3 list appears in any state
+AssertionError: expected 'Download nowCouldn\'t start the downl…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+- Expected: 
+/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"Download nowCouldn't start the download: POST /api/acquisition-runs could not be reached.Try again/data"
+
+ ❯ src/screens/data-health/download-now.test.tsx:374:46
+    372|   it("(a) no term of the DAC-E7-3 list appears in any state", async ()…
+    373|     await inEveryState(() => {
+    374|       expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+       |                                              ^
+    375|     });
+    376|   });
+ ❯ inEveryState src/screens/data-health/download-now.test.tsx:365:5
+ ❯ src/screens/data-health/download-now.test.tsx:373:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 57 passed (65)
+   Start at  23:19:42
+   Duration  4.37s (transform 559ms, setup 141ms, collect 983ms, tests 3.69s, environment 705ms, prepare 320ms)
+
