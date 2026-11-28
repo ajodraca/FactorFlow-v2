@@ -102,7 +102,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
 
 **Purpose**: Confirm the baseline and the four hard dependencies' exports.
 
-- [ ] T001 From the repo root, run `npm ci` and then `npm run test`, and record the baseline as green. Without editing anything, confirm that each hard dependency's deliverable exists. STOP and report if any is missing.
+- [x] T001 From the repo root, run `npm ci` and then `npm run test`, and record the baseline as green. Without editing anything, confirm that each hard dependency's deliverable exists. STOP and report if any is missing.
   - (CAP-003-E1-S1) `web/src/components/ui/button.tsx` exports `Button` with the variants `default`, `outline` and `ghost` and with `asChild`.
   - (CAP-003-E1-S3) `web/src/components/ui/dialog.tsx` exports `ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, onConfirm, pending?, children? })` (DEC-0301). `web/src/components/ui/toast.tsx` exports `toast`.
   - (CAP-003-E3-S3) `web/src/app/shell-context.tsx` exports `useShell`, whose value has `refresh(kind: "health" | "attention" | "scores")`.
@@ -141,7 +141,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement **TC-COMP-161** (the two `409` reasons are never interchanged, and a transport failure offers **Try again**). Write it in a new `web/src/screens/data-health/download-now.test.tsx` as `describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11)")`, with `// Implements TC-COMP-161`. Render `<DownloadNow />`.
+- [x] T002 [P] Implement **TC-COMP-161** (the two `409` reasons are never interchanged, and a transport failure offers **Try again**). Write it in a new `web/src/screens/data-health/download-now.test.tsx` as `describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-11)")`, with `// Implements TC-COMP-161`. Render `<DownloadNow />`.
   - **(a) Step 1, `DEPTH`.**
     - Click **Download now**. A `role="status"` element reads exactly *Couldn't start the download: history depth isn't set.*
     - A link named **Set history depth** has `href="/settings"`, and clicking it puts `/settings` in `location`.
@@ -164,7 +164,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   - drop-field-copy that renders `cause.message` in place of `readFailureReason` (e)
   - remove-attribute of the refusal link's `to` (a, b `href`)
   - a hand-written mutant whose **Try again** does nothing (c: call count stays 1)
-- [ ] T003 [P] Implement **TC-COMP-161's edge cases** (DAC-E6-11's `202` outcomes) and the routine-action rules. Write them in `web/src/screens/data-health/download-now.test.tsx` after T002, under `describe("Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15)")`.
+- [x] T003 [P] Implement **TC-COMP-161's edge cases** (DAC-E6-11's `202` outcomes) and the routine-action rules. Write them in `web/src/screens/data-health/download-now.test.tsx` after T002, under `describe("Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15)")`.
   - **(a) `202` with `queuedBehind` null.**
     - `refresh` is called exactly once, with exactly `"attention"`.
     - No helper line renders and no `role="status"` text appears.
@@ -190,7 +190,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   - negate-boolean / removal of the in-flight guard (e: two calls)
   - remove-attribute of `aria-busy` (e)
   - a hand-written mutant that navigates on `202` (a: `location` changes)
-- [ ] T004 [P] Write the stop-following dialog's own contract (DAC-E6-12, AC-14, AC-25), the parts TC-COMP-162 takes as given. Use a new `web/src/screens/data-health/stop-following-dialog.test.tsx`, under `describe("Stop following dialog (DAC-E6-12, AC-14, AC-25)")`.
+- [x] T004 [P] Write the stop-following dialog's own contract (DAC-E6-12, AC-14, AC-25), the parts TC-COMP-162 takes as given. Use a new `web/src/screens/data-health/stop-following-dialog.test.tsx`, under `describe("Stop following dialog (DAC-E6-12, AC-14, AC-25)")`.
 
   **Harness `NeedsFixingHarness({ rows })`.**
   - It renders `<h2 ref={headingRef} tabIndex={-1}>Needs fixing</h2>`.
@@ -222,7 +222,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   - drop-field-copy of `symbol` in `retireInstrument(symbol)` (e)
   - negate-boolean on the `pending` prop (e: Esc closes mid-request)
   - a hand-written mutant that calls `onRefusalClosed` on every close (d)
-- [ ] T005 Implement **TC-COMP-162** (a `409` keeps the dialog open; `Esc` closes it and refreshes the row) with its `200` edge case and the focus rules. Write it in `web/src/screens/data-health/stop-following-dialog.test.tsx` after T004 (same file), under `describe("Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17)")`, with `// Implements TC-COMP-162`.
+- [x] T005 Implement **TC-COMP-162** (a `409` keeps the dialog open; `Esc` closes it and refreshes the row) with its `200` edge case and the focus rules. Write it in `web/src/screens/data-health/stop-following-dialog.test.tsx` after T004 (same file), under `describe("Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17)")`, with `// Implements TC-COMP-162`.
   - **(a) Step 1, `ALREADY` (`409`).**
     - Confirm. The dialog is still open.
     - Inside it, a `role="status"` element reads exactly *Couldn't stop following FBXX: you already stopped following it.* (DEC-0377).
@@ -264,7 +264,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
 
 ### Additional Unit Tests
 
-- [ ] T006 Write the copy unit cases. In `web/src/screens/data-health/download-now.test.tsx`, after T003, add `describe("copy.ts, Download now strings (DEC-0378)")`. In `web/src/screens/data-health/stop-following-dialog.test.tsx`, after T005, add `describe("copy.ts, stop following strings (DEC-0377)")`.
+- [x] T006 Write the copy unit cases. In `web/src/screens/data-health/download-now.test.tsx`, after T003, add `describe("copy.ts, Download now strings (DEC-0378)")`. In `web/src/screens/data-health/stop-following-dialog.test.tsx`, after T005, add `describe("copy.ts, stop following strings (DEC-0377)")`.
   - **(a)** `DOWNLOAD_NOW` is *Download now*. `QUEUED_NOTICE` is *A download is running. This starts when it finishes.*
   - **(b)** `START_REFUSALS.history_depth_not_set` is `{ sentence: "Couldn't start the download: history depth isn't set.", fix: "Set history depth", to: "/settings" }`. `START_REFUSALS.no_active_instruments` is `{ sentence: "Couldn't start the download: no stocks are followed.", fix: "Follow stocks", to: "/data/followed" }`.
   - **(c)** `startFailed("x")` is exactly *Couldn't start the download: x.*
@@ -280,7 +280,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   - swap-case of the two stop reasons (e)
   - negate-boolean in `isStaleRowRefusal` (f)
   - drop-field-copy of `to` in either refusal entry (b)
-- [ ] T007 Implement **TC-COMP-163** (the display vocabulary) in both test files: `describe("Download now vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19)")` after T006 in `download-now.test.tsx`, and `describe("Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19)")` after T006 in `stop-following-dialog.test.tsx`. Each has `// Implements TC-COMP-163`.
+- [x] T007 Implement **TC-COMP-163** (the display vocabulary) in both test files: `describe("Download now vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19)")` after T006 in `download-now.test.tsx`, and `describe("Stop following vocabulary (TC-COMP-163, DAC-E6-S2-3, AC-19)")` after T006 in `stop-following-dialog.test.tsx`. Each has `// Implements TC-COMP-163`.
   - **(a) Download now.** Render it in each state this story defines: idle, in flight, queued, `DEPTH`, `NONE`, `UNREACHABLE`, `INTERNAL`, and with `label="Start the first download"`. `visibleAndAccessibleText` never matches `TERMS`.
   - **(b) The dialog.** Render it open, in flight, refused with `ALREADY`, refused with `NOT_FOUND`, failed with `INTERNAL`, and after `200` (the live region). The same assertion holds over `document.body`.
   - **(c) The regex is not vacuous.** A planted case in each file: `TERMS` matches `"one run"`, `"Retired"` and `"Provider credential"`, and does not match `"A download is running"`, `"downloads"` or `"instrument_not_found"`. `\b` treats `_` as a word character, so the code is never matched. The point is that wire codes in `copy.ts` map keys can never satisfy the scan by accident.
@@ -289,7 +289,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   Kills:
   - a hand-written mutant that renders the delivered `ApiError.message`. `NOT_FOUND`'s message (*no instrument exists for symbol 'FBXX'*) contains the whole word *instrument*, so (b) catches it; T002 (e) catches the Download now equivalent.
   - a hand-written `QUEUED_NOTICE` → CAP-001's *A run is in progress. This will start when it finishes.* (a: *run*)
-- [ ] T008 Implement **TC-COMP-164** (no status badge in these controls; the one-tier rule is not applicable) in both test files: `describe("No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20)")`, with `// Implements TC-COMP-164`, after T007 in each.
+- [x] T008 Implement **TC-COMP-164** (no status badge in these controls; the one-tier rule is not applicable) in both test files: `describe("No status badge here (TC-COMP-164, DAC-E6-S2-4, AC-20)")`, with `// Implements TC-COMP-164`, after T007 in each.
   - **(a)** Across every state rendered in T007, `document.body.querySelector('[data-variant^="status-"]')` and `querySelector('[data-variant="coverage-unknown"]')` are null. Only `confirm` and `default` (the dialog and its confirm button) and the `Button` variants appear as `data-variant` values.
   - **(b) Not by colour alone.**
     - No element carries a class matching `/(^|\s)(text|bg|border)-(status|destructive)-?/`.
@@ -308,7 +308,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
 
 **Purpose**: Add the strings, the routine action and the confirmed action.
 
-- [ ] T009 Extend `web/src/screens/data-health/copy.ts`, the catalogue CAP-003-E6-S1 created (its T012). Change nothing that S1 wrote; append a section headed `// CAP-003-E6-S2: Download now and Stop following (data-health-ui 2.7)`. Strings are verbatim from data-health-ui 2.7, ux-design 1.4 Interaction Flows and epic DAC-E6-11 and DAC-E6-12 unless marked.
+- [x] T009 Extend `web/src/screens/data-health/copy.ts`, the catalogue CAP-003-E6-S1 created (its T012). Change nothing that S1 wrote; append a section headed `// CAP-003-E6-S2: Download now and Stop following (data-health-ui 2.7)`. Strings are verbatim from data-health-ui 2.7, ux-design 1.4 Interaction Flows and epic DAC-E6-11 and DAC-E6-12 unless marked.
   - **Download now.**
     - `DOWNLOAD_NOW = "Download now"`
     - `QUEUED_NOTICE = "A download is running. This starts when it finishes."`
@@ -330,7 +330,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   - `history_depth_not_set` wins when both preconditions fail (`runs.py` l.77–78).
 
   No unit or hex literal appears, comments included. Makes T006 pass, and supplies T002–T008.
-- [ ] T010 Create `web/src/screens/data-health/download-now.tsx` exporting `DownloadNow({ label = DOWNLOAD_NOW }: { label?: string })` (DEC-0379).
+- [x] T010 Create `web/src/screens/data-health/download-now.tsx` exporting `DownloadNow({ label = DOWNLOAD_NOW }: { label?: string })` (DEC-0379).
   - **Reads.** `const { refresh } = useShell()` from `../../app/shell-context`. `startAcquisitionRun`, `ApiError` and `ApiUnreachableError` come from `../../api/client`, `Button` from `../../components/ui/button`, and `Link` from `react-router-dom`.
   - **State.**
     - `outcome: null | { kind: "queued" } | { kind: "refused"; code: keyof typeof START_REFUSALS } | { kind: "failed"; reason: string }`
@@ -351,7 +351,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
   - **Doc comment.** Cite data-health-ui 2.7 and 2.2, DAC-E6-11, DAC-E6-S2-1, AC-15, AC-17 and D-9. State that the AC-20 one-tier rule does not apply, because no status renders here (DAC-E6-S2-4). State that the queued branch does not refresh attention, per data-health-ui 2.2's alt branch. State that Data health renders no `blocked` pre-check, per Resolved Conflict 1.
 
   Depends on T009. Makes T002, T003, and the Download now halves of T007 and T008, pass.
-- [ ] T011 Create `web/src/screens/data-health/stop-following-dialog.tsx` exporting `StopFollowingDialog(props: { symbol: string | null; onClose: () => void; onStopped: () => void; onRefusalClosed: () => void; fallbackFocusRef: RefObject<HTMLElement | null> })` (DEC-0379).
+- [x] T011 Create `web/src/screens/data-health/stop-following-dialog.tsx` exporting `StopFollowingDialog(props: { symbol: string | null; onClose: () => void; onStopped: () => void; onRefusalClosed: () => void; fallbackFocusRef: RefObject<HTMLElement | null> })` (DEC-0379).
   - **Open state.** The dialog is open while `symbol !== null`. A `lastSymbol` ref keeps the most recent non-null symbol, so the title never renders `null` while Radix unmounts.
   - **State.**
     - `pending: boolean`
@@ -400,7 +400,7 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
 
 **Purpose**: Prove that the new files sit cleanly in the delivered suite and the shared scans.
 
-- [ ] T012 Run the whole Vitest suite (`npm run test`) unchanged. It includes `web/src/api/render.test.tsx`, which forbids `dangerouslySetInnerHTML` anywhere under `web/src`, so reasons render as text (data-health-ui 4). It also includes `web/src/components/token-literals.test.ts` (CAP-003-E1-S1), whose directory list CAP-003-E6-S5 widens to this directory (DAC-E6-S5-4).
+- [x] T012 Run the whole Vitest suite (`npm run test`) unchanged. It includes `web/src/api/render.test.tsx`, which forbids `dangerouslySetInnerHTML` anywhere under `web/src`, so reasons render as text (data-health-ui 4). It also includes `web/src/components/token-literals.test.ts` (CAP-003-E1-S1), whose directory list CAP-003-E6-S5 widens to this directory (DAC-E6-S5-4).
   - Run that future scan by hand now: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/download-now.tsx web/src/screens/data-health/stop-following-dialog.tsx web/src/screens/data-health/copy.ts` must print nothing.
   - `grep -nE "components/ui/toast|StatusBadge|NotDeterminable|navigate\(" web/src/screens/data-health/download-now.tsx web/src/screens/data-health/stop-following-dialog.tsx` must print nothing. These two files raise no toast, render no badge and never navigate programmatically (DAC-E6-12, DAC-E6-S2-4). The words appear in neither file's doc comment, so T010 and T011 must write *toast*, *status badge* and *not determinable* in prose without those identifiers.
   - Confirm with `git status --short web/ package.json` that the only changes are the four new files and the `copy.ts` edit, and that no delivered or sibling-story file and no `package.json` change appears (traces to AC-17, AC-26).
@@ -413,12 +413,12 @@ TC-INT-019 to TC-INT-024 exercise these components on the real stack, but they b
 
 **Purpose**: Run the validation commands and record the TDD evidence.
 
-- [ ] T013 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root.
+- [x] T013 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root.
   - Format only the changed files: `npx biome format --write web/src/screens/data-health/download-now.tsx web/src/screens/data-health/download-now.test.tsx web/src/screens/data-health/stop-following-dialog.tsx web/src/screens/data-health/stop-following-dialog.test.tsx web/src/screens/data-health/copy.ts`.
   - `tsc` checks that `START_REFUSALS` and `STOP_REFUSAL_REASONS` are indexed only by their literal key unions.
   - Then run `npm run build`.
   - Finally, run the mutation pass over the three production files, with the hand-written mutants in Other Notes: `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"`. It must leave no surviving non-equivalent mutant (traces to AC-15, AC-14).
-- [ ] T014 After each TDD cycle, and not once at the end, do the following before the next cycle begins:
+- [x] T014 After each TDD cycle, and not once at the end, do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `CAP-003-E6-S2-tdd-evidence.yaml` beside this story, with:
