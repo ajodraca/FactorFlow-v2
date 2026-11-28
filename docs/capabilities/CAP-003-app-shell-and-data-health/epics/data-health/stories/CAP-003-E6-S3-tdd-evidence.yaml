@@ -49,3 +49,71 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+  - id: cycle-2
+    tasks: [T006, T007, T014]
+    description: >
+      The Needs fixing card's rows and paging. needs-fixing.test.tsx (new): TC-COMP-166 (T006 a-e), the Show more
+      failure and TC-COMP-167 card half (T007 a-e) and three tests for outdated pages. Then needs-fixing.tsx
+      (NeedsFixing, ok state only: header, rows, Show more, page failure). The loading, error, zero-count and dialog
+      parts are cycles 3 and 4, so non-ok states render nothing and the rows' stop control is a no-op for now.
+    deviations: >
+      (1) The page-failure line is an output element (implicit role status), not p role=status, as in E6-S2.
+      (2) The reset effect also clears inFlight and pagePending, and the finally block clears them only for the
+      current generation: the first code review found a pending outdated request kept the new answer's Show more busy
+      and unclickable. Three tests pin it. (3) Tests added after mutation scoring: no initial aria-busy, a fresh
+      announcement node per page, and the cursor restarting after a reset. (4) The first code review also named
+      Safari not focusing a clicked button, the reset in an effect (one stale render) and a stale announcement after
+      a reset; the plan fixes the first two (T014, DEC-0381) and the third is outside it, so none is adopted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-2.log
+    red_log_sha256: 0dc2a27d78f69eebe1416618a62d083aab24bf14b8330b01da6ed6edf4fe3d5e
+    red_evidence: >
+      With needs-fixing.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests (the
+      import of ./needs-fixing did not resolve).
+    green_evidence: >
+      19 tests passed in needs-fixing.test.tsx; biome check and npx tsc --noEmit clean on the changed files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-2.log
+        sha256: 0dc2a27d78f69eebe1416618a62d083aab24bf14b8330b01da6ed6edf4fe3d5e
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The first code review rejected the patch (outdated-page handling untested and unguarded) and the patch was
+        revised and re-reviewed: the second code review approved it and the second spec-drift review found no drift
+        in the code. Its one finding, the missing // Implements TC-COMP-166 and 167 comments, was fixed afterwards by
+        two comment lines in the test file, the only change since those reviews. Follow-ups, not adopted: the non-ok
+        render is untested until cycle 4; a retry that returns the same aggregate object would keep the page failure
+        on screen (CAP-003-E6-S5 wires retry).
+    diff_sha256: 3ab6d6d7840a2533bbff5357242f196ed4cd78ec04c58f7c29c019132b1d1119
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: 4f0618720e7d587452734d4a27081efb4371a0879471d9d6bd32d725d0a1c364
+      generated: 42
+      killed: 36
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 0.857
+      survivors:
+        - id: web/src/screens/data-health/needs-fixing.tsx:45:negate-boolean:1
+          disposition: equivalent
+          reason: "The initial pagePending is overwritten by the reset effect, which runs on mount, before any interaction."
+        - id: web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1
+          disposition: equivalent
+          reason: "The announcement serial's initial value only keys the span; it is first compared against the next value."
+        - id: web/src/screens/data-health/needs-fixing.tsx:48:negate-boolean:1
+          disposition: equivalent
+          reason: "The initial inFlight is overwritten by the reset effect, which runs on mount, before any interaction."
+        - id: web/src/screens/data-health/needs-fixing.tsx:49:off-by-one:1
+          disposition: equivalent
+          reason: "The generation counter is only compared with itself, so its starting value is unobservable."
+        - id: web/src/screens/data-health/needs-fixing.tsx:61:off-by-one:1
+          disposition: equivalent
+          reason: "The generation advances by 2 instead of 1; it only has to differ after a reset, and it still does."
+        - id: web/src/screens/data-health/needs-fixing.tsx:96:off-by-one:1
+          disposition: equivalent
+          reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each page, and it still does."

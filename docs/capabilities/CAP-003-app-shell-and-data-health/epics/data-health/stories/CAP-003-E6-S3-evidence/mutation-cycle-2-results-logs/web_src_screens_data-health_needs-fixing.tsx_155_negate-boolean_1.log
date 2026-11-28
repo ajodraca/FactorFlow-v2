@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ghht4bj_/w2/web
+
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx (16 tests | 2 failed) 1071ms
+   × Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) Show more appends each page with the served cursor, keeps focus and announces the count 28ms
+     → expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="false"
+   × Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) marks Show more busy while a page is pending and ignores a second click 42ms
+     → expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+   ✓ Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3) > (c) drops the pages already loaded when a new aggregate answer arrives 331ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) Show more appends each page with the served cursor, keeps focus and announces the count
+Error: expect(element).not.toHaveAttribute("aria-busy") // element.hasAttribute("aria-busy")
+
+Expected the element not to have attribute:
+  aria-busy
+Received:
+  aria-busy="false"
+ ❯ src/screens/data-health/needs-fixing.test.tsx:184:22
+    182|     const more = screen.getByRole("button", { name: "Show more" });
+    183|     expect(more).toHaveAttribute("data-variant", "outline");
+    184|     expect(more).not.toHaveAttribute("aria-busy");
+       |                      ^
+    185|     await user.click(more);
+    186|     await waitFor(() => expect(symbols()).toEqual(SYMS.slice(0, 100)));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) marks Show more busy while a page is pending and ignores a second click
+Error: expect(element).toHaveAttribute("aria-busy", "true") // element.getAttribute("aria-busy") === "true"
+
+Expected the element to have attribute:
+  aria-busy="true"
+Received:
+  null
+ ❯ src/screens/data-health/needs-fixing.test.tsx:215:18
+    213|     await user.click(screen.getByRole("button", { name: "Show more" })…
+    214|     const more = screen.getByRole("button", { name: "Show more" });
+    215|     expect(more).toHaveAttribute("aria-busy", "true");
+       |                  ^
+    216|     expect(more).not.toHaveAttribute("disabled");
+    217|     await user.click(more);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 14 passed (16)
+   Start at  00:06:36
+   Duration  2.01s (transform 91ms, setup 54ms, collect 358ms, tests 1.07s, environment 263ms, prepare 84ms)
+
