@@ -120,7 +120,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
 
 **Purpose**: Confirm the baseline and every export this story composes.
 
-- [ ] T001 From the repo root, run `npm ci` and `npm run test` and record the baseline as green. Without editing anything, confirm that each dependency's deliverable exists. STOP and report if any is missing:
+- [x] T001 From the repo root, run `npm ci` and `npm run test` and record the baseline as green. Without editing anything, confirm that each dependency's deliverable exists. STOP and report if any is missing:
   - **CAP-003-E1-S1.** `web/src/components/ui/card.tsx` exports `Card` (`variant` `"default"`), `CardHeader`, `CardTitle` (an `h2`) and `CardContent`. `web/src/components/ui/button.tsx` exports `Button` with `variant` `default` and `asChild`. `web/src/components/token-literals.test.ts` exports `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn` (DEC-0296).
   - **CAP-003-E1-S6.** `web/src/components/patterns/format.ts` exports `formatCount`.
   - **CAP-003-E1-S9.** `web/src/components/patterns/state-region.tsx` exports `StateRegion` and `type StateRenderers` (DEC-0313).
@@ -195,7 +195,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
 
 ### Mandatory Component Tests
 
-- [ ] T002 Implement **TC-COMP-151**: after a download ended with nothing stored, the check cards show their null state and the empty card does not show. Write it in a new `web/src/screens/data-health/data-health.test.tsx` as `describe("never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24)")`, with `// Implements TC-COMP-151`.
+- [x] T002 Implement **TC-COMP-151**: after a download ended with nothing stored, the check cards show their null state and the empty card does not show. Write it in a new `web/src/screens/data-health/data-health.test.tsx` as `describe("never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24)")`, with `// Implements TC-COMP-151`.
 
   **Fixture:**
   - Attention is `ATT({ latest_terminal_download: { run_id: "r-9", state: "failed", ended_at: "2026-10-30T16:30:00Z", failure_reason: "provider_unavailable" }, problems: { stock_count: 3, … } })`.
@@ -218,7 +218,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   - **swap-case** of the empty-card predicate to `dh.never_acquired`: the empty card renders, so (f) fails.
   - **drop-field-copy**, replacing `check={dh.checks.daily_prices}` with a default `ok` check: (d) and (e) fail.
   - **negate-boolean** on the slot's empty test: the cards are replaced, so (d) fails.
-- [ ] T003 Implement **TC-COMP-175**: the empty card offers **Open setup** or **Start the first download**, and a running first download shows beneath it. Write it in `web/src/screens/data-health/data-health.test.tsx` after T002 as `describe("Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21)")`, with `// Implements TC-COMP-175`.
+- [x] T003 Implement **TC-COMP-175**: the empty card offers **Open setup** or **Start the first download**, and a running first download shows beneath it. Write it in `web/src/screens/data-health/data-health.test.tsx` after T002 as `describe("Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21)")`, with `// Implements TC-COMP-175`.
 
   Every case sets `latest_terminal_download: null`.
 
@@ -252,7 +252,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   - **negate-boolean** on the Recent downloads condition: (a) mounts it and calls `listAcquisitionRuns`, or (d) drops it.
   - **off-by-one** `affected_count > 0` → `>= 0` in the empty state: (e)'s zero case renders the region.
   - **negate-boolean** on What you follow's condition: (a) calls `listInstruments`.
-- [ ] T004 Implement **TC-COMP-176**: the aggregate is read once with no action, and once more after stop following. Write it in `web/src/screens/data-health/data-health.test.tsx` after T003 as `describe("Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28)")`, with `// Implements TC-COMP-176`.
+- [x] T004 Implement **TC-COMP-176**: the aggregate is read once with no action, and once more after stop following. Write it in `web/src/screens/data-health/data-health.test.tsx` after T003 as `describe("Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28)")`, with `// Implements TC-COMP-176`.
 
   **Fixture.** Attention stands at `ATT()`, which is terminal (`succeeded`) on every answer. The aggregate is `DH({ affected_count: 1, problems: { rows: [ROW("FBXX", [NF("reference")], false)], next_cursor: null } })`.
 
@@ -275,7 +275,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   - A hand-written mutant that calls `useDataHealth()` a second time, for example inside a child: (a) shows 2 on mount.
   - **swap-case** `onReread={retry}` → `onReread={() => {}}`: (b) stays at 1.
   - A hand-written mutant adding the screen's own terminal-transition effect: (c) shows 3.
-- [ ] T005 Implement **TC-COMP-177**: Data health's regions render the eight states or record why one does not apply. It includes the whole-screen run of **TC-COMP-155**. Write it in `web/src/screens/data-health/data-health.test.tsx` after T004 as `describe("Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24)")`, with `// Implements TC-COMP-177` and `// Implements TC-COMP-155 (whole screen)`.
+- [x] T005 Implement **TC-COMP-177**: Data health's regions render the eight states or record why one does not apply. It includes the whole-screen run of **TC-COMP-155**. Write it in `web/src/screens/data-health/data-health.test.tsx` after T004 as `describe("Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24)")`, with `// Implements TC-COMP-177` and `// Implements TC-COMP-155 (whole screen)`.
 
   Use one `it` per UX state (ux-design 1.4 States). Each asserts every region in the per-region record of Other Notes. For a cell recorded as not applicable, it asserts the specific absence named there.
 
@@ -330,7 +330,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   - **swap-case** of the check cards' error `onRetry` to `() => refresh("attention")`: (g)'s retry spy fails.
   - **swap-case** of `onRetryAttention` to `retry`: (f) calls `fetchDataHealth`.
   - A hand-written mutant rendering `dh.checks.*` from `error.last` while the aggregate fails: (g) shows the old cards.
-- [ ] T006 Write the layout and composition cases. Put them in `web/src/screens/data-health/data-health.test.tsx` after T005, as `describe("Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10)")`. Use `ATT()` and `DH()`.
+- [x] T006 Write the layout and composition cases. Put them in `web/src/screens/data-health/data-health.test.tsx` after T005, as `describe("Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10)")`. Use `ATT()` and `DH()`.
   - (a) **The width cap.** The screen's root element is the parent of the `h1`'s `header`. `root.style.maxWidth` is exactly `"1180px"`, which is `LAYOUT.contentMaxWidth`. A test file may hold the literal, since the layout rule scans non-test sources only.
   - (b) **The check grid.** The three check regions share one parent, and that parent's class list contains `grid-cols-4`. The parent has exactly three element children, in the order *Daily prices*, *Company financials*, *Factor scores*: the fourth column is empty, with no placeholder.
   - (c) **Region order.** In document order: the `header`, the check grid, *Needs fixing*, then the lower pair. The lower pair is *Recent downloads* then *What you follow*, inside one parent whose class list contains `grid-cols-2`.
@@ -341,13 +341,13 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   - **remove-attribute** of the `style` holding `maxWidth`: (a) fails.
   - **off-by-one**: a hand-written `grid-cols-4` → `grid-cols-3` fails (b).
   - **swap-case** `refresh("scores")` → `refresh("attention")`: (d) fails.
-- [ ] T007 Implement **TC-COMP-179**: the Data health screen uses the display vocabulary in every state. Write it in `web/src/screens/data-health/data-health.test.tsx` after T006 as `describe("Display vocabulary in every state (TC-COMP-179, DAC-E6-S5-5, AC-19)")`, with `// Implements TC-COMP-179`.
+- [x] T007 Implement **TC-COMP-179**: the Data health screen uses the display vocabulary in every state. Write it in `web/src/screens/data-health/data-health.test.tsx` after T006 as `describe("Display vocabulary in every state (TC-COMP-179, DAC-E6-S5-5, AC-19)")`, with `// Implements TC-COMP-179`.
   - (a) **The scan.** Render each fixture of T002, T003 (a), (b) and (d), and T005 (a) and (c)–(g), plus T004's *Stop following FBXX* dialog opened. For each, `visibleAndAccessibleText()` never matches `TERMS`.
   - (b) **The regex is not vacuous.** `TERMS` matches `"one run"`, `"Retired"` and `"Provider credential"`. It does not match `"Download"`, `"downloads"`, `"run_id"` or `"fewer_than_two_instruments_with_data"`.
   - (c) **The labels are this story's `copy.ts` literals.** The empty card's `h2`, its two sentences and its two action names equal the imported `NO_DATA_YET`, `downloadForFollowed("12")`, `FOLLOW_FIRST`, `START_FIRST_DOWNLOAD` and `OPEN_SETUP`. Every badge's text in T005 (c) and (d) is one of the `labelOf` labels or S1's verdict words.
 
   Kills: a hand-written mutant naming the empty card's action *Start the first run*, which (a) catches.
-- [ ] T008 Implement **TC-COMP-180**: every status on the screen carries its shape, and null check tiers go through `Absent`. Write it in `web/src/screens/data-health/data-health.test.tsx` after T007 as `describe("Statuses carry words and shape (TC-COMP-180, DAC-E6-S5-6, AC-20)")`, with `// Implements TC-COMP-180`.
+- [x] T008 Implement **TC-COMP-180**: every status on the screen carries its shape, and null check tiers go through `Absent`. Write it in `web/src/screens/data-health/data-health.test.tsx` after T007 as `describe("Statuses carry words and shape (TC-COMP-180, DAC-E6-S5-6, AC-20)")`, with `// Implements TC-COMP-180`.
   - (a) **The badges render.** Render T005 (d), the partial screen, with these additions:
     - a *Not found* row `ROW("FBXX", [NF("reference")], false)`
     - Recent downloads with *Complete*, *Partial*, *Interrupted* (`abandoned`) and *Failed* rows
@@ -367,7 +367,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
 
 ### Additional Unit Tests
 
-- [ ] T009 Implement **TC-COMP-178**: the literal scan is widened to `web/src/screens/data-health/`. Append it as a new `describe("data health screen is scanned (TC-COMP-178, DAC-E6-S5-4)")` block to `web/src/components/token-literals.test.ts`, CAP-003-E1-S1's file, with `// Implements TC-COMP-178`. This follows CAP-003-E4-S2's T007 for `web/src/screens/setup/`.
+- [x] T009 Implement **TC-COMP-178**: the literal scan is widened to `web/src/screens/data-health/`. Append it as a new `describe("data health screen is scanned (TC-COMP-178, DAC-E6-S5-4)")` block to `web/src/components/token-literals.test.ts`, CAP-003-E1-S1's file, with `// Implements TC-COMP-178`. This follows CAP-003-E4-S2's T007 for `web/src/screens/setup/`.
   - (a) **Step 1.** `SCANNED_DIRECTORIES` contains `"web/src/screens/data-health/"`.
   - (b) **Step 2.** Walking that directory with the file's own walker and `isScannedSource` finds at least these thirteen sources, and no `*.test.ts(x)` file:
     - `index.tsx`, `verdict.tsx`, `check-card.tsx`
@@ -383,7 +383,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   Change nothing else in the file.
 
   Kills: **drop-field-copy** of the appended `SCANNED_DIRECTORIES` entry: (a) fails, and the whole-tree case of CAP-003-E1-S1 stops visiting the directory.
-- [ ] T010 Write the copy cases. Put them in `web/src/screens/data-health/data-health.test.tsx` after T008, as `describe("copy.ts, empty card strings (DAC-E6-6)")`.
+- [x] T010 Write the copy cases. Put them in `web/src/screens/data-health/data-health.test.tsx` after T008, as `describe("copy.ts, empty card strings (DAC-E6-6)")`.
   - The constants are exact: `NO_DATA_YET` is *No data has been downloaded yet.*, `START_FIRST_DOWNLOAD` is *Start the first download*, `FOLLOW_FIRST` is *Follow some stocks first.* and `OPEN_SETUP` is *Open setup*.
   - `downloadForFollowed("12")` is exactly *Download data for your 12 followed stocks to see whether it can be trusted.*
   - No value matches `TERMS`.
@@ -398,7 +398,7 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
 
 **Purpose**: Add the empty card's strings and compose the screen.
 
-- [ ] T011 Extend `web/src/screens/data-health/copy.ts`, the catalogue CAP-003-E6-S1 created. Change nothing that S1, S2, S3 or S4 wrote. Append a section headed `// CAP-003-E6-S5: the never-downloaded empty card (data-health-ui 10; DAC-E6-6)`. The strings are verbatim from epic DAC-E6-6, data-health-ui 10 States and ux-design 1.4 States:
+- [x] T011 Extend `web/src/screens/data-health/copy.ts`, the catalogue CAP-003-E6-S1 created. Change nothing that S1, S2, S3 or S4 wrote. Append a section headed `// CAP-003-E6-S5: the never-downloaded empty card (data-health-ui 10; DAC-E6-6)`. The strings are verbatim from epic DAC-E6-6, data-health-ui 10 States and ux-design 1.4 States:
   - `NO_DATA_YET = "No data has been downloaded yet."`
   - `downloadForFollowed(n: string) => \`Download data for your ${n} followed stocks to see whether it can be trusted.\``, with `n` passed already formatted through `formatCount`, as S4's strings take it
   - `START_FIRST_DOWNLOAD = "Start the first download"`
@@ -406,13 +406,13 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
   - `OPEN_SETUP = "Open setup"`
 
   Write no unit or hex literal, comments included: this directory is now scanned (T016). This task makes T010 pass and supplies T003, T007 and T013.
-- [ ] T012 Write the empty card as a module-local `EmptyCard({ followedCount }: { followedCount: number })` in `web/src/screens/data-health/index.tsx`.
+- [x] T012 Write the empty card as a module-local `EmptyCard({ followedCount }: { followedCount: number })` in `web/src/screens/data-health/index.tsx`.
   - **Frame.** It renders `<section aria-labelledby={id}>`, with `id = useId()`, around `<Card variant="default">`. `CardHeader` holds `<CardTitle id={id}>{NO_DATA_YET}</CardTitle>`. `CardContent` uses `className="flex flex-col items-start gap-4"`.
   - **With stocks followed** (`followedCount > 0`): `<p className="text-base">{downloadForFollowed(formatCount(followedCount))}</p>`, then `<DownloadNow label={START_FIRST_DOWNLOAD} />`. That is CAP-003-E6-S2's one action, "the same post as Download now" (ux-design 1.4 States; DEC-0379).
   - **With none followed:** `<p className="text-base">{FOLLOW_FIRST}</p>`, then `<Button variant="default" asChild><Link to="/setup">{OPEN_SETUP}</Link></Button>`. The `default` variant follows ux-design's traceability row for AC-21 (l.1491: "`card` `default`; `button` `default`") and ux-brief's one `default` action per region (l.313).
 
   This task depends on T011, and T013 renders the card.
-- [ ] T013 Create the rest of `web/src/screens/data-health/index.tsx`, exporting `export default function DataHealthScreen(): JSX.Element`. The delivered screens default-export, so CAP-003-E6-S7's `React.lazy(() => import("../screens/data-health"))` resolves, following CAP-003-E3-S4's binding pattern.
+- [x] T013 Create the rest of `web/src/screens/data-health/index.tsx`, exporting `export default function DataHealthScreen(): JSX.Element`. The delivered screens default-export, so CAP-003-E6-S7's `React.lazy(() => import("../screens/data-health"))` resolves, following CAP-003-E3-S4's binding pattern.
 
   **Reads.** Each is called exactly once, here:
   - `const { attention, scores, refresh } = useShell()`
@@ -486,13 +486,13 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
 
 **Purpose**: Widen the shared literal scan and prove the screen sits cleanly in the delivered suite.
 
-- [ ] T014 Append `"web/src/screens/data-health/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts`, after the entries already there, without reordering or removing any. This follows DEC-0296's widening rule, with T009 RED first. Change nothing else in the file.
+- [x] T014 Append `"web/src/screens/data-health/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts`, after the entries already there, without reordering or removing any. This follows DEC-0296's widening rule, with T009 RED first. Change nothing else in the file.
   - Run `npx vitest run web/src/components/token-literals.test.ts`. T009 and CAP-003-E1-S1's whole-tree case must pass with the directory scanned.
   - If an offender is reported in a sibling story's file, STOP and report it against that story rather than editing its file here.
   - CAP-003-E3-S2's layout rule already covers the directory. `grep -rnE "1180px" web/src/screens/data-health` prints nothing.
 
   This task traces to DAC-E6-S5-4 and AC-26.
-- [ ] T015 Run the whole Vitest suite (`npm run test`) unchanged.
+- [x] T015 Run the whole Vitest suite (`npm run test`) unchanged.
   - It includes `web/src/app/use-data-health.test.tsx`. That file's importer rule allows `use-data-health` only under `web/src/screens/data-health/`, and `index.tsx` satisfies it.
   - It also includes `web/src/api/render.test.tsx`, which forbids `dangerouslySetInnerHTML`.
   - Then confirm with `git status --short web/ package.json` that the only changes are:
@@ -510,13 +510,13 @@ The empty card has the `h2` *No data has been downloaded yet.*. It offers either
 
 **Purpose**: Validation commands and TDD evidence.
 
-- [ ] T016 Run the validation commands and the mutation pass. This task traces to AC-26, AC-28 and DAC-E6-15.
+- [x] T016 Run the validation commands and the mutation pass. This task traces to AC-26, AC-28 and DAC-E6-15.
   - From the repo root, run `npm run lint`, `npm run format` and `npx tsc --noEmit`.
     - Format only this story's files with `npx biome format --write web/src/screens/data-health/index.tsx web/src/screens/data-health/data-health.test.tsx web/src/screens/data-health/copy.ts web/src/components/token-literals.test.ts`.
     - `tsc` judges T005 (h): the `StateRegion` renderer map must name all eight kinds, with `unreachable` as `notApplicable` (CAP-003-E1-S9).
   - Run `npm run build`.
   - Run the mutation pass, `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"`, over `index.tsx` and the S5 section of `copy.ts`, with the hand-written mutants in Other Notes. It must leave no surviving non-equivalent mutant.
-- [ ] T017 After each TDD cycle in T002–T016, and not once at the end:
+- [x] T017 After each TDD cycle in T002–T016, and not once at the end:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `CAP-003-E6-S5-tdd-evidence.yaml` beside this story, with:
