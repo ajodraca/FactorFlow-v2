@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-sq66xwas/w2/web
+
+stderr | src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/home.test.tsx (21 tests | 1 failed) 341ms
+   × empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup 46ms
+     → expected 'outline' to be 'default' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+AssertionError: expected 'outline' to be 'default' // Object.is equality
+
+Expected: "default"
+Received: "outline"
+
+ ❯ src/screens/home/home.test.tsx:319:48
+    317|     expect(setup.textContent).toBe("Start setup");
+    318|     expect(setup.getAttribute("href")).toBe("/setup");
+    319|     expect(setup.getAttribute("data-variant")).toBe("default");
+       |                                                ^
+    320| 
+    321|     expect(screen.queryByRole("region", { name: "Data" })).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  17:58:28
+   Duration  1.38s (transform 115ms, setup 32ms, collect 441ms, tests 341ms, environment 173ms, prepare 121ms)
+

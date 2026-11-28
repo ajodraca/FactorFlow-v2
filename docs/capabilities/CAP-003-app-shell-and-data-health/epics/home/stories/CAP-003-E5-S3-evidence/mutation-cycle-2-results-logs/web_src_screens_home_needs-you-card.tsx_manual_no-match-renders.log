@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w2/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 1 failed) 676ms
+   × attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > records why a kind does not apply, and renders the three that do 4ms
+     → expected [ 'empty-never-populated', …(3) ] to deeply equal [ 'empty-never-populated', …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > records why a kind does not apply, and renders the three that do
+AssertionError: expected [ 'empty-never-populated', …(3) ] to deeply equal [ 'empty-never-populated', …(4) ]
+
+- Expected
++ Received
+
+  Array [
+    "empty-never-populated",
+-   "empty-no-match",
+    "partial",
+    "unavailable",
+    "unreachable",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:823:44
+    821|   it("records why a kind does not apply, and renders the three that do…
+    822|     const records = Object.entries(NEEDS_YOU_STATES).filter(([, v]) =>…
+    823|     expect(records.map(([k]) => k).sort()).toEqual([
+       |                                            ^
+    824|       "empty-never-populated",
+    825|       "empty-no-match",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 43 passed (44)
+   Start at  17:54:34
+   Duration  1.79s (transform 148ms, setup 32ms, collect 494ms, tests 676ms, environment 196ms, prepare 133ms)
+

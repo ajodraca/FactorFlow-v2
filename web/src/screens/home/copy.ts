@@ -32,6 +32,12 @@ export const CHECKED = "checked";
 /** The retry action of a failed read (home-ui 2.4, 2.5). */
 export const TRY_AGAIN = "Try again";
 
+/**
+ * What a body says when the recorded failure reason is null. No design contains
+ * it; added by CAP-003-E5-S3 as DEC-0369.
+ */
+export const NO_REASON = "No reason was recorded";
+
 /** The header (home-ui 2.3; UX design 1.3 Page Layout 1). */
 export const HEADER = {
   /** The `h1`: weekday and date in America/Chicago (DEC-0209). */
@@ -88,6 +94,11 @@ export const READ_FAILURE = {
 /** The Needs you card (home-ui 2.5, section 10; UX design 1.3 Page Layout 3 and States). */
 export const NEEDS_YOU = {
   title: "Needs you",
+  /**
+   * The heading's words before an `Absent` count while the attention read
+   * fails. No design contains it; added by CAP-003-E5-S3 as DEC-0367.
+   */
+  headingPrefix: "Needs you ·",
   heading: (count: number): string => `Needs you · ${formatCount(count)}`,
   subLine: "Most important first. Nothing here is urgent unless marked.",
   nothingNeedsYou: "Nothing needs you right now.",
@@ -121,7 +132,18 @@ export const ITEMS = {
     body: (stockCount: number): string =>
       `${stockCount === 1 ? "Its" : "Their"} scores show as Incomplete until the data is complete.`,
     action: "Fix data",
-    actionName: (symbols: readonly string[]): string => `Fix data for ${listOf(symbols)}`,
+    /**
+     * Beyond the symbols the read names, the name repeats the title's subject so
+     * it covers every stock the item covers. No design contains that form; added
+     * by CAP-003-E5-S3 as DEC-0368.
+     */
+    actionName: (symbols: readonly string[], stockCount: number = symbols.length): string => {
+      if (stockCount > symbols.length) {
+        const more = stockCount - symbols.length;
+        return `Fix data for ${symbols.join(", ")} and ${formatCount(more)} more ${more === 1 ? "stock" : "stocks"}`;
+      }
+      return `Fix data for ${listOf(symbols)}`;
+    },
   },
   download_not_complete: {
     tag: "Download",
@@ -132,6 +154,8 @@ export const ITEMS = {
       `FactorFlow restarted mid-download. Download again to pick up the rest. Ended ${endedAt}.`,
     action: "See download",
     failedActionName: "See the download that failed",
+    /** No design contains it; added by CAP-003-E5-S3 as DEC-0368. */
+    interruptedActionName: "See the download that was interrupted",
   },
   credential_missing: {
     tag: "Setup",
@@ -149,12 +173,16 @@ export const ITEMS = {
         ? "Scores appear when it finishes."
         : `${formatCount(done)} of ${formatCount(total)} ${total === 1 ? "stock" : "stocks"} so far. Scores appear when it finishes.`,
     action: "See download",
+    /** No design contains it; added by CAP-003-E5-S3 as DEC-0368. */
+    actionName: "See your first download",
   },
   first_scores: {
     tag: "Scores",
     title: "Your first scores are being produced",
     body: "Scores appear when this finishes.",
     action: "See download",
+    /** No design contains it; added by CAP-003-E5-S3 as DEC-0368. */
+    actionName: "See the download your first scores come from",
   },
   score_failed: {
     tag: "Scores",
@@ -164,5 +192,7 @@ export const ITEMS = {
         ? `${reason}.`
         : `${reason}. Scores still show the set from the download started ${setStartedAt}.`,
     action: "See details",
+    /** No design contains it; added by CAP-003-E5-S3 as DEC-0368. */
+    actionName: "See why the score update failed",
   },
 } as const;

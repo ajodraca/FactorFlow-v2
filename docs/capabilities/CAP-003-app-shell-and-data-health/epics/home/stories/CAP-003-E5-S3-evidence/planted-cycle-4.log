@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/token-literals.test.ts (61 tests | 2 failed) 25ms
+   × literal scan (AC-26, DAC-E1-S1-2) > finds no literal in any scanned source, and scans some 6ms
+     → expected [ Array(1) ] to deeply equal []
+   × home screen is scanned (TC-COMP-144, DAC-E5-S3-4) > (b) scans every home source and no test file, and finds no literal in any 1ms
+     → expected [ Array(1) ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > literal scan (AC-26, DAC-E1-S1-2) > finds no literal in any scanned source, and scans some
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "web/src/screens/home/planted.tsx: 12px",
++ ]
+
+ ❯ src/components/token-literals.test.ts:202:23
+    200|       literalsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), …
+    201|     );
+    202|     expect(offenders).toEqual([]);
+       |                       ^
+    203|   });
+    204| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > home screen is scanned (TC-COMP-144, DAC-E5-S3-4) > (b) scans every home source and no test file, and finds no literal in any
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "web/src/screens/home/planted.tsx: 12px",
++ ]
+
+ ❯ src/components/token-literals.test.ts:493:89
+    491|     expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).t…
+    492|     for (const relPath of files) {
+    493|       expect(literalsIn(relPath, readFileSync(path.join(REPO_ROOT, rel…
+       |                                                                                         ^
+    494|     }
+    495|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 59 passed (61)
+   Start at  17:59:22
+   Duration  484ms (transform 32ms, setup 38ms, collect 22ms, tests 25ms, environment 167ms, prepare 61ms)
+

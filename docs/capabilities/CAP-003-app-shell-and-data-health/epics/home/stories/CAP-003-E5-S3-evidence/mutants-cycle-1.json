@@ -1,0 +1,97 @@
+{
+ "schema": 1,
+ "repo_head": "8b6b5d86b3f89b3ea78caf50b16a36fc4f2812c5",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/copy.ts:141:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 141,
+   "original": "      if (stockCount > symbols.length) {",
+   "mutated": "      if (stockCount >= symbols.length) {"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:143:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 143,
+   "original": "        return `Fix data for ${symbols.join(\", \")} and ${formatCount(more)} more ${more === 1 ? \"stock\" : \"stocks\"}`;",
+   "mutated": "        return `Fix data for ${symbols.join(\", \")} and ${formatCount(more)} more ${more === 2 ? \"stock\" : \"stocks\"}`;"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:no-reason-words",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "NO_REASON = \"No reason was recorded\"",
+   "new": "NO_REASON = \"Unknown reason\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:prefix-words",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "headingPrefix: \"Needs you \u00b7\"",
+   "new": "headingPrefix: \"Needs you\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:interrupted-name",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "interruptedActionName: \"See the download that was interrupted\"",
+   "new": "interruptedActionName: \"See the download that failed\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:first-dl-name",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "actionName: \"See your first download\"",
+   "new": "actionName: \"See download\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:first-scores-name",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "actionName: \"See the download your first scores come from\"",
+   "new": "actionName: \"See the run your first scores come from\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:score-failed-name",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "actionName: \"See why the score update failed\"",
+   "new": "actionName: \"See details\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:more-gt-ge",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "if (stockCount > symbols.length) {\n        const more = stockCount - symbols.length;\n        return `Fix data for",
+   "new": "if (stockCount >= symbols.length) {\n        const more = stockCount - symbols.length;\n        return `Fix data for",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:more-singular",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "return `Fix data for ${symbols.join(\", \")} and ${formatCount(more)} more ${more === 1 ? \"stock\" : \"stocks\"}`;",
+   "new": "return `Fix data for ${symbols.join(\", \")} and ${formatCount(more)} more ${more === 1 ? \"stocks\" : \"stock\"}`;",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:default-count",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "stockCount: number = symbols.length): string => {\n      if",
+   "new": "stockCount: number = symbols.length + 1): string => {\n      if",
+   "cycle": "cycle-1"
+  }
+ ]
+}

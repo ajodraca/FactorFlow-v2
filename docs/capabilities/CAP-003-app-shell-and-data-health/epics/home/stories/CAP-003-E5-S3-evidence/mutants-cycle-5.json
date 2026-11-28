@@ -1,0 +1,71 @@
+{
+ "schema": 1,
+ "repo_head": "2bc15145",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:cycle-5-skeleton-aria-hidden",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "<ul data-testid=\"needs-you-skeleton\" aria-hidden=\"true\" className=\"flex flex-col gap-3\">",
+   "new": "<ul data-testid=\"needs-you-skeleton\" className=\"flex flex-col gap-3\">",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:cycle-5-skeleton-row-classes",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "<li className=\"min-h-7 w-full animate-pulse rounded bg-secondary\" />\n      <li className=\"min-h-7 w-full animate-pulse rounded bg-secondary\" />\n      <li className=\"min-h-7 w-full animate-pulse rounded bg-secondary\" />",
+   "new": "<li className=\"w-full rounded bg-secondary\" />\n      <li className=\"w-full rounded bg-secondary\" />\n      <li className=\"w-full rounded bg-secondary\" />",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:cycle-5-skeleton-list-classes",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "aria-hidden=\"true\" className=\"flex flex-col gap-3\">",
+   "new": "aria-hidden=\"true\">",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:cycle-5-output-in-error",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "{items === null ? null : (\n            <output className=\"sr-only\">{NEEDS_YOU.heading(items.length)}</output>",
+   "new": "{attention.kind === \"loading\" ? null : (\n            <output className=\"sr-only\">{NEEDS_YOU.heading(items?.length ?? 0)}</output>",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:cycle-5-subline-classes",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "<p className=\"text-sm text-muted-foreground\">{NEEDS_YOU.subLine}</p>",
+   "new": "<p>{NEEDS_YOU.subLine}</p>",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/needs-you-card.tsx:manual:cycle-5-header-row-classes",
+   "operator": "manual",
+   "file": "web/src/screens/home/needs-you-card.tsx",
+   "old": "className=\"flex items-baseline justify-between gap-4\"",
+   "new": "className=\"flex justify-between\"",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:cycle-5-empty-content-classes",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "<CardContent className=\"flex flex-col items-start gap-4\">",
+   "new": "<CardContent>",
+   "cycle": "cycle-5"
+  },
+  {
+   "id": "web/src/screens/home/index.tsx:manual:cycle-5-never-on-error-last",
+   "operator": "manual",
+   "file": "web/src/screens/home/index.tsx",
+   "old": "const neverDownloaded = attention.kind === \"ok\" && attention.data.latest_download === null;",
+   "new": "const neverDownloaded = (attention.kind === \"ok\" && attention.data.latest_download === null) || (attention.kind === \"error\" && attention.last?.data.latest_download === null);",
+   "cycle": "cycle-5"
+  }
+ ]
+}

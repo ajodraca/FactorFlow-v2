@@ -1,0 +1,70 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w0/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 3 failed) 523ms
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > first_download with a total (AC-7) 9ms
+     → expected '12 of 12 stocks so far. Scores appear…' to be '12 of 30 stocks so far. Scores appear…' // Object.is equality
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > first_download drops its count clause while the total is null 4ms
+     → expected '12 of 12 stocks so far. Scores appear…' to be 'Scores appear when it finishes.' // Object.is equality
+   × attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > keeps the server items and the first-download item under a summary 404 (DEC-0216) 5ms
+     → expected '12 of 12 stocks so far. Scores appear…' to be '12 of 30 stocks so far. Scores appear…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > first_download with a total (AC-7)
+AssertionError: expected '12 of 12 stocks so far. Scores appear…' to be '12 of 30 stocks so far. Scores appear…' // Object.is equality
+
+Expected: "12 of 30 stocks so far. Scores appear when it finishes."
+Received: "12 of 12 stocks so far. Scores appear when it finishes."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:602:25
+    600|     mount(ok(FIRST(30)), NOT_SERVED);
+    601|     const row = rowByTitle("Your first download is running");
+    602|     expect(bodyOf(row)).toBe("12 of 30 stocks so far. Scores appear wh…
+       |                         ^
+    603|     expectAction(row, "See download", "See your first download", "/dat…
+    604|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > first_download drops its count clause while the total is null
+AssertionError: expected '12 of 12 stocks so far. Scores appear…' to be 'Scores appear when it finishes.' // Object.is equality
+
+Expected: "Scores appear when it finishes."
+Received: "12 of 12 stocks so far. Scores appear when it finishes."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:609:18
+    607|     mount(ok(FIRST(null)), NOT_SERVED);
+    608|     const body = bodyOf(rowByTitle("Your first download is running"));
+    609|     expect(body).toBe("Scores appear when it finishes.");
+       |                  ^
+    610|     expect(body).not.toContain(" of ");
+    611|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > keeps the server items and the first-download item under a summary 404 (DEC-0216)
+AssertionError: expected '12 of 12 stocks so far. Scores appear…' to be '12 of 30 stocks so far. Scores appear…' // Object.is equality
+
+Expected: "12 of 30 stocks so far. Scores appear when it finishes."
+Received: "12 of 12 stocks so far. Scores appear when it finishes."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:816:66
+    814|       "Your first download is running",
+    815|     ]);
+    816|     expect(bodyOf(rowByTitle("Your first download is running"))).toBe(
+       |                                                                  ^
+    817|       "12 of 30 stocks so far. Scores appear when it finishes.",
+    818|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 41 passed (44)
+   Start at  17:54:36
+   Duration  1.68s (transform 194ms, setup 43ms, collect 560ms, tests 523ms, environment 205ms, prepare 74ms)
+

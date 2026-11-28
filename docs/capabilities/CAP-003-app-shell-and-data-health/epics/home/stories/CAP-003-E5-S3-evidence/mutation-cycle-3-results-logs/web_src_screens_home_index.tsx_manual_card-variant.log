@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-sq66xwas/w3/web
+
+stderr | src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/home.test.tsx (21 tests | 1 failed) 382ms
+   × empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup 44ms
+     → expected 'metric' to be 'default' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+AssertionError: expected 'metric' to be 'default' // Object.is equality
+
+Expected: "default"
+Received: "metric"
+
+ ❯ src/screens/home/home.test.tsx:310:84
+    308|     expect(region.tagName).toBe("SECTION");
+    309|     expect(region.querySelector("h2")?.textContent).toBe("No data has …
+    310|     expect((region.firstElementChild as HTMLElement).getAttribute("dat…
+       |                                                                                    ^
+    311|     expect(squash(region)).toContain(
+    312|       "Set up FactorFlow to name the stocks to follow and start the fi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  17:58:30
+   Duration  1.71s (transform 142ms, setup 46ms, collect 516ms, tests 382ms, environment 156ms, prepare 151ms)
+

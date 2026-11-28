@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-sq66xwas/w3/web
+
+stderr | src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/home.test.tsx (21 tests | 2 failed) 362ms
+   × no strategy, paper or live element (TC-COMP-130; DAC-E5-10, AC-10) > leaves columns two and three of the summary row empty 8ms
+     → expected <section …(1)>…(1)</section>
+…(1) to have a length of 1 but got 2
+   × composition and layout (AC-10, AC-25, AC-26, DAC-E5-10) > renders inside the shell's main, capped, in the stated order 7ms
+     → expected [ <header>…(2)</header>, …(1) ] to have a length of 3 but got 2
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/home.test.tsx > no strategy, paper or live element (TC-COMP-130; DAC-E5-10, AC-10) > leaves columns two and three of the summary row empty
+AssertionError: expected <section …(1)>…(1)</section>
+…(1) to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/screens/home/home.test.tsx:383:26
+    381|     const row = screen.getByTestId("home-summary-row");
+    382|     expect(row.className).toContain("grid-cols-3");
+    383|     expect(row.children).toHaveLength(1);
+       |                          ^
+    384|     expect((row.children[0] as HTMLElement).getAttribute("aria-labelle…
+    385|     expect(within(row).getByRole("region", { name: "Data" })).toBe(row…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/home.test.tsx > composition and layout (AC-10, AC-25, AC-26, DAC-E5-10) > renders inside the shell's main, capped, in the stated order
+AssertionError: expected [ <header>…(2)</header>, …(1) ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ src/screens/home/home.test.tsx:581:22
+    579|     }
+    580|     const children = [...root.children];
+    581|     expect(children).toHaveLength(3);
+       |                      ^
+    582|     expect((children[0] as HTMLElement).tagName).toBe("HEADER");
+    583|     expect(children[1]).toBe(screen.getByTestId("home-summary-row"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  17:58:26
+   Duration  1.65s (transform 141ms, setup 34ms, collect 496ms, tests 362ms, environment 167ms, prepare 201ms)
+

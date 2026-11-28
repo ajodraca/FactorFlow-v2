@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cjc9w28i/w0/web
+
+ ❯ src/screens/home/copy.test.ts (25 tests | 1 failed) 7ms
+   × templates > data_problems.actionName lists the symbols 4ms
+     → expected 'Fix data for KO, TSLA, FBXX and 0 mor…' to be 'Fix data for KO, TSLA and FBXX' // Object.is equality
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/home/header.test.tsx (31 tests) 87ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.actionName lists the symbols
+AssertionError: expected 'Fix data for KO, TSLA, FBXX and 0 mor…' to be 'Fix data for KO, TSLA and FBXX' // Object.is equality
+
+Expected: "Fix data for KO, TSLA and FBXX"
+Received: "Fix data for KO, TSLA, FBXX and 0 more stocks"
+
+ ❯ src/screens/home/copy.test.ts:151:68
+    149| 
+    150|   it("data_problems.actionName lists the symbols", () => {
+    151|     expect(ITEMS.data_problems.actionName(["KO", "TSLA", "FBXX"])).toB…
+       |                                                                    ^
+    152|       "Fix data for KO, TSLA and FBXX",
+    153|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 55 passed (56)
+   Start at  17:47:07
+   Duration  1.43s (transform 107ms, setup 72ms, collect 434ms, tests 95ms, environment 580ms, prepare 181ms)
+

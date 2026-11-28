@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-28
+docs_synced_review: CAP-003-E5-S3-implementation-review-v2.md
+last_reworked_review: CAP-003-E5-S3-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -109,7 +111,7 @@ Mapped test cases (`tests/component/home-ui-tests.md` lines 33-52, 99-141 and 33
 
 **Purpose**: Confirm the hard dependencies are in the tree with the shapes their plans fix, and record a green baseline.
 
-- [ ] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix. Where a merged signature differs from the one named here, use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to AC-26).
+- [x] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix. Where a merged signature differs from the one named here, use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to AC-26).
   - CAP-003-E3-S3: `web/src/app/shell-context.tsx` exports `useShell` and `ShellContextValue` (`health`, `attention`, `scores`, `refresh(kind)`, `setTitleDetail`).
   - CAP-003-E3-S1: `web/src/app/shell-types.ts` exports `Attention`, `ReadState`, `ScoreState` and `ScoreSummary`, snake_case as served.
   - CAP-003-E3-S2: `web/src/app/layout.ts` exports `LAYOUT` with `contentMaxWidth: "1180px"` and `markerSize: "28px"`.
@@ -195,7 +197,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
 
 ### Mandatory Component Tests
 
-- [ ] T002 Implement TC-COMP-141 (Needs you order, action names and no mutating request) in a new `web/src/screens/home/needs-you-card.test.tsx`, with a `// Implements TC-COMP-141` comment, rendering `<NeedsYouCard />` with the shared harness.
+- [x] T002 Implement TC-COMP-141 (Needs you order, action names and no mutating request) in a new `web/src/screens/home/needs-you-card.test.tsx`, with a `// Implements TC-COMP-141` comment, rendering `<NeedsYouCard />` with the shared harness.
   - (a) Order, `ok(ATTENTION)` with `served(SUMMARY())`:
     - Each row's `p.font-semibold` text, in document order, `toEqual` `["The market data key is missing", "The last download failed", "KO, TSLA and FBXX are missing data"]`. This is critical (newest), critical (older), warning.
     - With `ok(INTERRUPTED)`, the order is `["The market data key is missing", "The last download was interrupted", "KO, TSLA and FBXX are missing data"]`: critical, serious, warning.
@@ -210,7 +212,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - a mutant listing `attention.items` in served order without `sortAttention` (order (a) reads data, download, setup);
     - drop-field-copy of `actionName` (names become the visible labels);
     - negate-boolean on the failed/interrupted choice ((a) second fixture).
-- [ ] T003 Implement TC-COMP-142 (An item leaves when its cause is gone; count announced without moving focus) in `needs-you-card.test.tsx` (after T002), with a `// Implements TC-COMP-142` comment.
+- [x] T003 Implement TC-COMP-142 (An item leaves when its cause is gone; count announced without moving focus) in `needs-you-card.test.tsx` (after T002), with a `// Implements TC-COMP-142` comment.
   - Render with `ok(ATTENTION)` and `served(SUMMARY())`.
   - Let `status = within(card()).getByRole("status")`. It is an `OUTPUT` element. Its text is `"Needs you · 3"`. It has no `aria-live="assertive"`. `within(card()).queryByRole("alert")` is null.
   - Focus the link named `"See the download that failed"` with `link.focus()`, and let `focused = document.activeElement`.
@@ -230,7 +232,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - a mutant keying the `output` on the count (`key={n}`, so `toBe(status)` fails on remount);
     - a mutant calling `.focus()` on the first row after a change (`activeElement` moves);
     - negate-boolean on the empty-list branch.
-- [ ] T004 Implement TC-COMP-146 (Item tag badges carry the tier and shape; severity tile hidden) in `needs-you-card.test.tsx` (after T003), with a `// Implements TC-COMP-146` comment.
+- [x] T004 Implement TC-COMP-146 (Item tag badges carry the tier and shape; severity tile hidden) in `needs-you-card.test.tsx` (after T003), with a `// Implements TC-COMP-146` comment.
   - `it.each` over the rows of these renders, each with a literal expectation `[title, variant, tag, shapeChild]`:
     - `ok(ATTENTION)`, `served(SUMMARY())`:
       - `["The market data key is missing", "status-critical", "Setup", "rect"]`
@@ -252,7 +254,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - a mutant passing a constant tier to the row (variants all equal).
 
   The shape and tag rendering itself is CAP-003-E1-S8's `NeedsYouItemRow`. This case proves the card hands it each derived item unchanged.
-- [ ] T005 Implement TC-COMP-127 (Home empty state before any download) in a new `web/src/screens/home/home.test.tsx`, with a `// Implements TC-COMP-127` comment, rendering `<HomeScreen />` (the default export of `./index`) with the shared harness, `ok(NEVER_DOWNLOADED)` and `NOT_SERVED`.
+- [x] T005 Implement TC-COMP-127 (Home empty state before any download) in a new `web/src/screens/home/home.test.tsx`, with a `// Implements TC-COMP-127` comment, rendering `<HomeScreen />` (the default export of `./index`) with the shared harness, `ok(NEVER_DOWNLOADED)` and `NOT_SERVED`.
   - `getByRole("heading", { level: 1 })` reads `"Thursday, 2026-10-15"`. The header is kept.
   - `getByRole("region", { name: "No data has been downloaded yet." })` is a `section`. It contains:
     - the `h2` with that text;
@@ -268,7 +270,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - negate-boolean on `latest_download === null`;
     - swap-case `latest_download` → `latest_terminal_download` (the edge case shows the empty card);
     - swap-case `variant="default"` → `"outline"` on **Start setup**.
-- [ ] T006 Implement TC-COMP-130 (No strategy, paper or live element on Home) in `home.test.tsx` (after T005), with a `// Implements TC-COMP-130` comment.
+- [x] T006 Implement TC-COMP-130 (No strategy, paper or live element on Home) in `home.test.tsx` (after T005), with a `// Implements TC-COMP-130` comment.
   - Define `const UNSHIPPED = /\b(?:strateg(?:y|ies)|paper|live|rebalance)\b/i`.
   - `it.each` over three renders: `ok(ATTENTION)` with `served(SUMMARY())`, `ok(FIRST(30))` with `NOT_SERVED`, and `ok(NEVER_DOWNLOADED)` with `NOT_SERVED`. From each, collect:
     - the container's `textContent`;
@@ -285,7 +287,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - a mutant placing `<NeedsYouCard />` inside the summary row (`children.length` becomes 2);
     - a mutant adding an empty `<div />` placeholder column;
     - a copy mutant `"Nothing needs you right now."` → `"No strategies need you right now."`, caught by `UNSHIPPED`.
-- [ ] T007 Implement TC-COMP-131, the Home half (attention failure keeps the header and shows card errors; `404` keeps server items), in `home.test.tsx` (after T006), with a `// Implements TC-COMP-131 (Home half; CAP-003-E5-S2 asserts the tile half)` comment.
+- [x] T007 Implement TC-COMP-131, the Home half (attention failure keeps the header and shows card errors; `404` keeps server items), in `home.test.tsx` (after T006), with a `// Implements TC-COMP-131 (Home half; CAP-003-E5-S2 asserts the tile half)` comment.
   - (a) `ATT_UNREACHABLE` with `served(SUMMARY())`:
     - The `h1` reads `"Thursday, 2026-10-15"`. `getByTestId("as-of-line")` contains `"checked 17:40:05 CDT"`: the header is kept and its time ages.
     - `card()` contains exactly `"Couldn't read what needs you: FactorFlow is not answering."`, and no `listitem`.
@@ -306,7 +308,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - swap-case `refresh("attention")` → `refresh("scores")`;
     - a mutant reading `attention.checkedAt` (client time) instead of `checked_at`;
     - a mutant hiding server items while the summary fails ((c) empty).
-- [ ] T008 Implement TC-COMP-143 (Home's regions render the eight states or record non-applicability) in `home.test.tsx` (after T007), with a `// Implements TC-COMP-143` comment. One `describe` with one `it` per state, rendering `HomeScreen`:
+- [x] T008 Implement TC-COMP-143 (Home's regions render the eight states or record non-applicability) in `home.test.tsx` (after T007), with a `// Implements TC-COMP-143` comment. One `describe` with one `it` per state, rendering `HomeScreen`:
   - **loading**: `ATT_LOADING` with `SCORES_LOADING`:
     - the `h1` renders and `getByTestId("home-as-of-skeleton")` exists (CAP-003-E5-S1);
     - `getByTestId("data-tile-skeleton")` exists (CAP-003-E5-S2);
@@ -332,7 +334,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - swap-case of one entry from renderer to `{ notApplicable }` or back (the key list changes);
     - a mutant mapping the zero-item read to `empty-no-match` (the populated case renders nothing);
     - remove-attribute of the skeleton's third row.
-- [ ] T009 Implement TC-COMP-145 (Needs you card, rows and Home use the display vocabulary) in `home.test.tsx` (after T008), with a `// Implements TC-COMP-145` comment.
+- [x] T009 Implement TC-COMP-145 (Needs you card, rows and Home use the display vocabulary) in `home.test.tsx` (after T008), with a `// Implements TC-COMP-145` comment.
   - Define `const TERMS = /\b(?:instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i`, the eight DAC-E7-3 terms, as CAP-003-E5-S1's T006 does.
   - Render `HomeScreen` in each of these states. From each, collect the container's `textContent` and every `aria-label`, `title` and `alt` value, so the action names are covered. Assert that `TERMS` matches none of them. The states:
     - every state of T005–T008;
@@ -345,7 +347,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
   - Scanner control, as CAP-003-E5-S1's T006 does: `TERMS` matches `"Next run"`, `"RUNS"`, `"Provider Credential"`, `"instrument"` and `"Retired"`. It does not match `"running"`, `"Downloads"` or `"rerun"`.
   - "Every label is from `labelOf` or `copy.ts`" is asserted because every expected label in T002–T008 and T011–T012 is a literal that `labelOf`'s table (CAP-003-E1-S5) or `copy.ts` (CAP-003-E5-S1; T013 here) pins.
   - Kills: a copy mutant `"See the download your first scores come from"` → `"See the run your first scores come from"`, caught by `TERMS` in the `NEVER_BUILDING` state.
-- [ ] T010 [P] Implement TC-COMP-144 (Literal scan widened to `web/src/screens/home/`) as a new `describe("home screen is scanned (TC-COMP-144, DAC-E5-S3-4)")` block appended to `web/src/components/token-literals.test.ts`, with a `// Implements TC-COMP-144` comment. This is CAP-003-E1-S1's file, which screen stories widen by design; CAP-003-E4-S2's T007 is the sibling precedent. Use the file's own `SCANNED_DIRECTORIES`, `isScannedSource`, `literalsIn` and recursive walker. Do not edit any existing case.
+- [x] T010 [P] Implement TC-COMP-144 (Literal scan widened to `web/src/screens/home/`) as a new `describe("home screen is scanned (TC-COMP-144, DAC-E5-S3-4)")` block appended to `web/src/components/token-literals.test.ts`, with a `// Implements TC-COMP-144` comment. This is CAP-003-E1-S1's file, which screen stories widen by design; CAP-003-E4-S2's T007 is the sibling precedent. Use the file's own `SCANNED_DIRECTORIES`, `isScannedSource`, `literalsIn` and recursive walker. Do not edit any existing case.
   - (a) `SCANNED_DIRECTORIES` contains `"web/src/screens/home/"`.
   - (b) Walking `web/src/screens/home/` recursively finds each of `index.tsx`, `needs-you-card.tsx`, `header.tsx`, `market-state.ts`, `copy.ts` and `data-tile.tsx` as a scanned source, and no `*.test.ts(x)` file as one. `literalsIn` over each returns `[]`.
   - (c) TC step 3, planted: `literalsIn("web/src/screens/home/planted.tsx", 'export const x = "p-[12px]";')` returns exactly `["web/src/screens/home/planted.tsx: 12px"]`.
@@ -354,7 +356,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
 
 ### Additional Unit Tests
 
-- [ ] T011 Catalogue copy per kind in `needs-you-card.test.tsx` (after T004) (traces to DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368 and -3).
+- [x] T011 Catalogue copy per kind in `needs-you-card.test.tsx` (after T004) (traces to DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368 and -3).
   - Each case renders the card. It finds the row by its `p.font-semibold` title and asserts the row's collapsed body text and its link's name, visible text and `href` against literals.
   - (a) `data_problems` (`ATTENTION`'s other items removed):
     - `symbols: ["KO"]`, `stock_count: 1` → title `"KO is missing data"`, body `"Its scores show as Incomplete until the data is complete."`, name `"Fix data for KO"`;
@@ -383,7 +385,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - swap-case `run_started_at` → `started_at` (`"17:41"`);
     - a mutant reading `failure_reason` from `latest_download` (absent on that type: a type error);
     - negate-boolean on the null-reason guard (renders `"null."`).
-- [ ] T012 Count, summary states, header, composition and no-read cases in `needs-you-card.test.tsx` (after T011) (traces to AC-16, AC-24, AC-25, AC-26, DAC-E5-9, DAC-E5-11, DAC-E5-S3-3; DEC-0367 and -4).
+- [x] T012 Count, summary states, header, composition and no-read cases in `needs-you-card.test.tsx` (after T011) (traces to AC-16, AC-24, AC-25, AC-26, DAC-E5-9, DAC-E5-11, DAC-E5-S3-3; DEC-0367 and -4).
   - (a) Same derivation as the chip (AC-16), which CAP-003-E3-S6's `count-chip.tsx` reads as `deriveNeedsYou(attention, scores).length`. Use `ok({ ...SCORED, credential_present: true, problems: ATTENTION.problems, items: [ATTENTION.items[0]] })`, which has one server item, with `served(FAILED)`:
     - the `h2` and the status both read `"Needs you · 2"`;
     - `rows()` has length 2: the server item plus `score_failed`. A count of `attention.items.length` would read 1;
@@ -403,7 +405,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
     - a mutant counting `attention.items.length` ((a));
     - a mutant rendering the count while loading as `0` ((c));
     - swap-case `variant="default"` → `"metric"` ((d)).
-- [ ] T013 [P] Extend `web/src/screens/home/copy.test.ts` (CAP-003-E5-S1's file) with the strings and the rule this story adds. Each assertion compares against a literal (traces to DAC-E5-7, DAC-E5-8, DAC-E5-S3-5; DEC-0367, -2 and -3).
+- [x] T013 [P] Extend `web/src/screens/home/copy.test.ts` (CAP-003-E5-S1's file) with the strings and the rule this story adds. Each assertion compares against a literal (traces to DAC-E5-7, DAC-E5-8, DAC-E5-S3-5; DEC-0367, -2 and -3).
   - `ITEMS.download_not_complete.interruptedActionName` is `"See the download that was interrupted"`.
   - `ITEMS.first_download.actionName` is `"See your first download"`.
   - `ITEMS.first_scores.actionName` is `"See the download your first scores come from"`.
@@ -419,7 +421,7 @@ Fixtures are independent literals typed `Attention` and `ScoreSummary`, never pr
   - Kills:
     - off-by-one on `stockCount > symbols.length` (the three-symbol call gains `"and 0 more"`);
     - off-by-one on the singular guard (`"1 more stocks"`).
-- [ ] T014 Home composition and layout cases in `home.test.tsx` (after T009) (traces to AC-10, AC-25, AC-26, DAC-E5-10).
+- [x] T014 Home composition and layout cases in `home.test.tsx` (after T009) (traces to AC-10, AC-25, AC-26, DAC-E5-10).
   - Use `ok(ATTENTION)` with `served(SUMMARY())`.
   - `container.querySelector("main")` is null: `HomeScreen` renders inside the shell's `main` and adds none (Resolved Conflict 2). `getAllByRole("heading", { level: 1 })` has length 1.
   - `container.firstElementChild` has `style.maxWidth === "1180px"` and classes `w-full`, `flex`, `flex-col` and `gap-5`. Its children, in order, are the `header`, the summary row and the *Needs you* region.
@@ -444,7 +446,7 @@ Every delivered and upstream test still passes.
 
 **Purpose**: Add the copy entries, build the card, then the screen.
 
-- [ ] T015 [P] Extend `web/src/screens/home/copy.ts` (CAP-003-E5-S1's file). This makes T013 pass. Each addition gets a doc comment saying no design contains it and naming its decision, per that catalogue's rule (CAP-003-E5-S1 Open Gap 2). No unit or hex literal is added.
+- [x] T015 [P] Extend `web/src/screens/home/copy.ts` (CAP-003-E5-S1's file). This makes T013 pass. Each addition gets a doc comment saying no design contains it and naming its decision, per that catalogue's rule (CAP-003-E5-S1 Open Gap 2). No unit or hex literal is added.
   - Plain strings, which CAP-003-E5-S1's T006 walk scans with no change to its `CALLS` map:
     - `ITEMS.download_not_complete.interruptedActionName: "See the download that was interrupted"`;
     - `ITEMS.first_download.actionName: "See your first download"`;
@@ -457,7 +459,7 @@ Every delivered and upstream test still passes.
   - `ITEMS.data_problems.actionName(symbols: readonly string[], stockCount: number = symbols.length)`. It is an additive, defaulted parameter, so CAP-003-E5-S1's existing calls are unchanged.
     - When `stockCount > symbols.length`, it returns `` `Fix data for ${symbols.join(", ")} and ${formatCount(k)} more ${k === 1 ? "stock" : "stocks"}` `` with `k = stockCount - symbols.length`. This is the same subject the title names (DEC-0368).
     - Otherwise it returns `` `Fix data for ${listOf(symbols)}` `` as before.
-- [ ] T016 Create `web/src/screens/home/needs-you-card.tsx` (depends on T015; T002–T004, T011, T012 exist first). This makes T002–T004, T011 and T012 pass.
+- [x] T016 Create `web/src/screens/home/needs-you-card.tsx` (depends on T015; T002–T004, T011, T012 exist first). This makes T002–T004, T011 and T012 pass.
   - **Imports:**
     - `useId` and `type JSX`, `type ReactNode` from `react`;
     - `useShell` from `../../app/shell-context`;
@@ -544,7 +546,7 @@ Every delivered and upstream test still passes.
 
     It says every action navigates and the card makes no read of its own.
   - **Forbidden words.** The words `fetch`, `method` and `data-health` appear nowhere in the file, comments included, so T012 (e) and the Validation Plan grep cannot contradict this task. No unit or hex literal, no `--gain` or `--loss`, and no inline `style` appear: the tile's size passes as a prop.
-- [ ] T017 Create `web/src/screens/home/index.tsx` (depends on T016; T005–T009 and T014 exist first). This makes T005–T009 and T014 pass.
+- [x] T017 Create `web/src/screens/home/index.tsx` (depends on T016; T005–T009 and T014 exist first). This makes T005–T009 and T014 pass.
   - **Imports:**
     - `useId` and `type JSX` from `react`;
     - `Link` from `react-router-dom`;
@@ -590,7 +592,7 @@ Every delivered and upstream test still passes.
 
 **Purpose**: Widen the shared literal scan and prove the screen sits inside the delivered and shared checks.
 
-- [ ] T018 Append `"web/src/screens/home/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts`, after the entries already there, without reordering or removing any (DEC-0296's widening rule; T010 RED first). Change nothing else in the file. This makes T010 pass (traces to DAC-E5-S3-4, AC-26).
+- [x] T018 Append `"web/src/screens/home/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts`, after the entries already there, without reordering or removing any (DEC-0296's widening rule; T010 RED first). Change nothing else in the file. This makes T010 pass (traces to DAC-E5-S3-4, AC-26).
   - Then plant `export const x = "12px";` in a temporary `web/src/screens/home/planted.tsx`. Confirm `npx vitest run src/components/token-literals.test.ts` fails, naming that file, and delete the file. Record both runs in the cycle's evidence (TC step 3).
   - Then run `npm run test` and confirm the whole suite is green, including these, unchanged:
     - CAP-003-E5-S1's `header.test.tsx` (its T006 walk scans T015's strings, and the defaulted `actionName` needs no new `CALLS` entry);
@@ -611,7 +613,7 @@ Every delivered and upstream test still passes.
 
 **Purpose**: Validation commands and TDD evidence.
 
-- [ ] T019 Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to AC-26).
+- [x] T019 Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root (traces to AC-26).
   - Fix format findings with `npx biome format --write web/src/screens/home/needs-you-card.tsx web/src/screens/home/needs-you-card.test.tsx web/src/screens/home/index.tsx web/src/screens/home/home.test.tsx web/src/screens/home/copy.ts web/src/screens/home/copy.test.ts web/src/components/token-literals.test.ts`.
   - `tsc` checks:
     - that `NEEDS_YOU_STATES` is a complete `StateRenderers<NeedsYouView>`;
@@ -619,7 +621,7 @@ Every delivered and upstream test still passes.
     - the fixtures against CAP-003-E3-S1's types.
   - Biome's `useSemanticElements` is why the live region is an `output`, not a `p` with `role="status"`, as the delivered `as-of-line.tsx` line 96 does.
   - Fix findings in this story's seven files only.
-- [ ] T020 After each TDD cycle in T002–T019 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E5-S3-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage`; no per-cycle commit is planned. T019 adds no behaviour and joins cycle 4's validation evidence (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles are:
+- [x] T020 After each TDD cycle in T002–T019 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E5-S3-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage`; no per-cycle commit is planned. T019 adds no behaviour and joins cycle 4's validation evidence (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles are:
   1. T013 + T015, the copy entries;
   2. T002–T004 + T011 + T012 + T016, the card;
   3. T005–T009 + T014 + T017, the screen;

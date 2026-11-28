@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w2/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 1 failed) 611ms
+   × catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > download_not_complete failed with no recorded reason (DEC-0369) 11ms
+     → expected '. Ended 2026-10-15 17:40 CDT.' to be 'No reason was recorded. Ended 2026-10…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DEC-0369) > download_not_complete failed with no recorded reason (DEC-0369)
+AssertionError: expected '. Ended 2026-10-15 17:40 CDT.' to be 'No reason was recorded. Ended 2026-10…' // Object.is equality
+
+Expected: "No reason was recorded. Ended 2026-10-15 17:40 CDT."
+Received: ". Ended 2026-10-15 17:40 CDT."
+
+ ❯ src/screens/home/needs-you-card.test.tsx:586:25
+    584|     );
+    585|     const row = rowByTitle("The last download failed");
+    586|     expect(bodyOf(row)).toBe("No reason was recorded. Ended 2026-10-15…
+       |                         ^
+    587|     expectAction(row, "See download", "See the download that failed", …
+    588|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 43 passed (44)
+   Start at  17:54:30
+   Duration  1.48s (transform 101ms, setup 34ms, collect 378ms, tests 611ms, environment 184ms, prepare 88ms)
+

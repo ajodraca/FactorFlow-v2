@@ -1,0 +1,210 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-q0g7oimt/w0/web
+
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 8 failed) 351ms
+   × order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency 63ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+   × order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > puts an interrupted download between critical and warning 14ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+   × order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > gives each row exactly one link, named for the item, styled outline 16ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+   × order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > completes each action by keyboard and never calls fetch 45ms
+     → expected '/data' to be '/settings' // Object.is equality
+   × count, summary states, composition and no reads (AC-16, AC-24, AC-26, DAC-E5-9, DAC-E5-11) > counts the same derivation as the rail chip 6ms
+     → expected [ Array(1) ] to have a length of 2 but got 1
+   × count, summary states, composition and no reads (AC-16, AC-24, AC-26, DAC-E5-9, DAC-E5-11) > lists the server items while the summary loads 6ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+   × attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > keeps the server items while the summary fails 4ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+   × attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > keeps the server items and the first-download item under a summary 404 (DEC-0216) 4ms
+     → expected [ …(3) ] to deeply equal [ …(3) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "The market data key is missing",
+-   "The last download failed",
+    "KO, TSLA and FBXX are missing data",
++   "The last download failed",
++   "The market data key is missing",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:257:33
+    255|   it("orders by tier then recency", () => {
+    256|     mount(ok(ATTENTION), served(SUMMARY()));
+    257|     expect(rows().map(titleOf)).toEqual([
+       |                                 ^
+    258|       "The market data key is missing",
+    259|       "The last download failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > puts an interrupted download between critical and warning
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "The market data key is missing",
+-   "The last download was interrupted",
+    "KO, TSLA and FBXX are missing data",
++   "The last download was interrupted",
++   "The market data key is missing",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:266:33
+    264|   it("puts an interrupted download between critical and warning", () =…
+    265|     mount(ok(INTERRUPTED), served(SUMMARY()));
+    266|     expect(rows().map(titleOf)).toEqual([
+       |                                 ^
+    267|       "The market data key is missing",
+    268|       "The last download was interrupted",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > gives each row exactly one link, named for the item, styled outline
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "Open Settings to set the market data key",
+-   "See the download that failed",
+    "Fix data for KO, TSLA and FBXX",
++   "See the download that failed",
++   "Open Settings to set the market data key",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:280:60
+    278|       return found[0] as HTMLElement;
+    279|     });
+    280|     expect(links.map((l) => l.getAttribute("aria-label"))).toEqual([
+       |                                                            ^
+    281|       "Open Settings to set the market data key",
+    282|       "See the download that failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > completes each action by keyboard and never calls fetch
+AssertionError: expected '/data' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/data"
+
+ ❯ src/screens/home/needs-you-card.test.tsx:307:58
+    305|       expect(document.activeElement).toBe(link);
+    306|       await user.keyboard("{Enter}");
+    307|       expect(screen.getByTestId("location").textContent).toBe(href);
+       |                                                          ^
+    308|       view.unmount();
+    309|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > count, summary states, composition and no reads (AC-16, AC-24, AC-26, DAC-E5-9, DAC-E5-11) > counts the same derivation as the rail chip
+AssertionError: expected [ Array(1) ] to have a length of 2 but got 1
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/screens/home/needs-you-card.test.tsx:695:59
+    693|     expect(within(card()).getByRole("status").textContent).toBe("Needs…
+    694|     expect(rows()).toHaveLength(2);
+    695|     expect(SOURCE.split("sortAttention(deriveNeedsYou(")).toHaveLength…
+       |                                                           ^
+    696|     expect(SOURCE).toMatch(
+    697|       /import \{[^}]*deriveNeedsYou[^}]*\} from "..\/..\/components\/p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > count, summary states, composition and no reads (AC-16, AC-24, AC-26, DAC-E5-9, DAC-E5-11) > lists the server items while the summary loads
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "The market data key is missing",
+-   "The last download failed",
+    "KO, TSLA and FBXX are missing data",
++   "The last download failed",
++   "The market data key is missing",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:706:33
+    704|   it("lists the server items while the summary loads", () => {
+    705|     mount(ok(ATTENTION), SCORES_LOADING);
+    706|     expect(rows().map(titleOf)).toEqual([
+       |                                 ^
+    707|       "The market data key is missing",
+    708|       "The last download failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > keeps the server items while the summary fails
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "The market data key is missing",
+-   "The last download failed",
+    "KO, TSLA and FBXX are missing data",
++   "The last download failed",
++   "The market data key is missing",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:793:33
+    791|   it("keeps the server items while the summary fails", () => {
+    792|     mount(ok(ATTENTION), SUMMARY_500);
+    793|     expect(rows().map(titleOf)).toEqual([
+       |                                 ^
+    794|       "The market data key is missing",
+    795|       "The last download failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > attention failure and the state records (DAC-E5-11, DAC-E5-S3-3) > keeps the server items and the first-download item under a summary 404 (DEC-0216)
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "The market data key is missing",
+    "KO, TSLA and FBXX are missing data",
++   "The market data key is missing",
+    "Your first download is running",
+  ]
+
+ ❯ src/screens/home/needs-you-card.test.tsx:811:33
+    809|       NOT_SERVED,
+    810|     );
+    811|     expect(rows().map(titleOf)).toEqual([
+       |                                 ^
+    812|       "The market data key is missing",
+    813|       "KO, TSLA and FBXX are missing data",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 36 passed (44)
+   Start at  17:54:28
+   Duration  1.34s (transform 102ms, setup 36ms, collect 387ms, tests 351ms, environment 234ms, prepare 112ms)
+

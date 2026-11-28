@@ -1,0 +1,43 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-cjc9w28i/w2/web
+
+ ❯ src/screens/home/copy.test.ts (25 tests | 1 failed) 9ms
+   × static strings > ITEMS, kind by kind 5ms
+     → expected { tag: 'Scores', …(3) } to deeply equal { tag: 'Scores', …(3) }
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/home/header.test.tsx (31 tests) 94ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > static strings > ITEMS, kind by kind
+AssertionError: expected { tag: 'Scores', …(3) } to deeply equal { tag: 'Scores', …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "action": "See details",
+-   "actionName": "See why the score update failed",
++   "actionName": "See details",
+    "tag": "Scores",
+    "title": "The latest score update failed",
+  }
+
+ ❯ src/screens/home/copy.test.ts:117:41
+    115|       actionName: "See the download your first scores come from",
+    116|     });
+    117|     expect(statics(ITEMS.score_failed)).toEqual({
+       |                                         ^
+    118|       tag: "Scores",
+    119|       title: "The latest score update failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 55 passed (56)
+   Start at  17:47:05
+   Duration  1.68s (transform 145ms, setup 109ms, collect 489ms, tests 103ms, environment 562ms, prepare 494ms)
+

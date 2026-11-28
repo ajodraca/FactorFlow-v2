@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/token-literals.test.ts (61 tests | 2 failed) 36ms
+   × home screen is scanned (TC-COMP-144, DAC-E5-S3-4) > (a) widens the scan to the home directory 3ms
+     → expected [ 'web/src/components/', …(2) ] to include 'web/src/screens/home/'
+   × home screen is scanned (TC-COMP-144, DAC-E5-S3-4) > (b) scans every home source and no test file, and finds no literal in any 0ms
+     → expected [] to include 'web/src/screens/home/index.tsx'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > home screen is scanned (TC-COMP-144, DAC-E5-S3-4) > (a) widens the scan to the home directory
+AssertionError: expected [ 'web/src/components/', …(2) ] to include 'web/src/screens/home/'
+ ❯ src/components/token-literals.test.ts:474:33
+    472| describe("home screen is scanned (TC-COMP-144, DAC-E5-S3-4)", () => {
+    473|   it("(a) widens the scan to the home directory", () => {
+    474|     expect(SCANNED_DIRECTORIES).toContain("web/src/screens/home/");
+       |                                 ^
+    475|   });
+    476| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > home screen is scanned (TC-COMP-144, DAC-E5-S3-4) > (b) scans every home source and no test file, and finds no literal in any
+AssertionError: expected [] to include 'web/src/screens/home/index.tsx'
+ ❯ src/components/token-literals.test.ts:488:21
+    486|       "data-tile.tsx",
+    487|     ]) {
+    488|       expect(files).toContain(`${directory}${name}`);
+       |                     ^
+    489|     }
+    490|     expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 59 passed (61)
+   Start at  17:59:16
+   Duration  725ms (transform 34ms, setup 54ms, collect 23ms, tests 36ms, environment 280ms, prepare 31ms)
+
