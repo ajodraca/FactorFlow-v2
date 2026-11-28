@@ -252,6 +252,34 @@ cycles:
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 4 already mutated, and the hand-off run scores it
 
+  - id: cycle-6
+    tasks: [T002, T004, T007, T009]
+    description: >
+      Review v1 rework (IR-001 to IR-004), tests only. Every Failed fixture in both test files now uses a reason
+      beginning [unavailable] or null, with attempts 1, 2 or 5 and never 3 (story v2; TC-COMP-226); the rate limited
+      fixture is replaced. A new test pins the row's document order: symbol link, each failure in served order, the
+      consequence, then the fixes. The Show more failure sentences and the last-complete failure sentence are found as
+      role=status elements. TC-COMP-226 and TC-COMP-227 carry Implements markers, and the TC-COMP-167 marker moves to
+      the Show more failure block.
+    deviations: >
+      The new tests pass on the unchanged production code, which the review found correct; the RED is the review's
+      reviewer mutants (rv:consequence-before-failures, rv:symbol-link-after-failures, rv:fix-before-consequence,
+      rv:page-failure-not-status), which the hand-off run on the committed tree records as killed. IR-005 (a local
+      variable name) and the task plan's stale v1 literals are not changed: the plan is the planner's to revise.
+    red_cycle: cycle-4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. The review's note that the task plan still states the v1 literals (provider timeout, 3 attempts) is
+        a follow-up for the planner, not adopted.
+    diff_sha256: 0e246d874e405da72513dd5061cd6b4c555c8611bfad8822ce6abc3bbe9d55ec
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over code cycles 1 to 4 already mutated, and the hand-off run scores it
+
 handoff_mutation:
   runner: scripts/mutation-run.py
   results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/handoff-results.json

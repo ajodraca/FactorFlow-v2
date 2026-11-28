@@ -37,8 +37,8 @@ afterEach(() => {
 
 function FAIL(
   dataType: DataType,
-  reason: string | null = "provider timeout",
-  attempts = 3,
+  reason: string | null = "[unavailable] gateway timeout",
+  attempts = 2,
 ): Failure {
   return {
     data_type: dataType,
@@ -128,7 +128,9 @@ describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () =>
     ]);
 
     const text = rowText(container);
-    expect(text).toContain("Downloading daily prices failed: provider timeout, 3 attempts");
+    expect(text).toContain(
+      "Downloading daily prices failed: [unavailable] gateway timeout, 2 attempts",
+    );
     expect(text).toContain(NOT_RECOGNISED);
     expect(text).not.toContain("no such ticker");
     expect(text).not.toContain("1 attempts");
@@ -154,6 +156,27 @@ describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () =>
     expect(stop).not.toHaveBeenCalled();
   });
 
+  it("lays a row out in order: symbol, each failure, the consequence, then the fixes", () => {
+    const { container } = renderRow(
+      ROW("FBXX", [FAIL("prices"), FAIL("fundamentals", null, 1), NF("reference")], true),
+    );
+    const li = container.querySelector("li") as HTMLElement;
+    const lines = Array.from(li.children).map((el) => el.textContent ?? "");
+    expect(lines).toEqual([
+      "FBXX",
+      "FailedDownloading daily prices failed: [unavailable] gateway timeout, 2 attempts",
+      "FailedDownloading company financials failed: no reason was recorded, 1 attempts",
+      `Not found${NOT_RECOGNISED}`,
+      CONSEQUENCE,
+      FAILED_FIX,
+      `Stop followingFollow a different symbol${NOT_FOUND_FIX}`,
+    ]);
+    expect(li.firstElementChild).toBe(
+      screen.getByRole("link", { name: "FBXX, show in the coverage table" }),
+    );
+  });
+
+  // Implements TC-COMP-227
   it("chooses each fix from the failures' outcomes, not from the served retryable flag", () => {
     const failedOnly = renderRow(ROW("KO", [FAIL("prices")], false));
     expect(screen.getAllByText(FAILED_FIX)).toHaveLength(1);
@@ -185,19 +208,19 @@ describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () =>
     ["reference", "Downloading reference data failed"],
   ] as const)("words the %s download as %s", (dataType, words) => {
     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
-    expect(rowText(container)).toContain(`${words}: provider timeout, 3 attempts`);
+    expect(rowText(container)).toContain(`${words}: [unavailable] gateway timeout, 2 attempts`);
   });
 
   it("shows the download-again sentence once for a row with only failed downloads", () => {
     const { container } = renderRow(
-      ROW("KO", [FAIL("prices"), FAIL("fundamentals", "rate limited", 5)], true),
+      ROW("KO", [FAIL("prices"), FAIL("fundamentals", "[unavailable] gone", 5)], true),
     );
     expect(badges(container).map((b) => b.getAttribute("data-variant"))).toEqual([
       "status-critical",
       "status-critical",
     ]);
     expect(rowText(container)).toContain(
-      "Downloading company financials failed: rate limited, 5 attempts",
+      "Downloading company financials failed: [unavailable] gone, 5 attempts",
     );
     expect(screen.getAllByText(FAILED_FIX)).toHaveLength(1);
     expect(screen.queryByRole("button", { name: /stop following/i })).toBeNull();
@@ -241,6 +264,7 @@ describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () =>
     );
   });
 
+  // Implements TC-COMP-226
   it("serves the attempts value unchanged, whatever it is (DAC-E6-S3-6)", () => {
     const { container } = renderRow(ROW("KO", [FAIL("prices", "[unavailable] gone", 1)], true));
     expect(rowText(container)).toContain(
@@ -296,9 +320,9 @@ describe("Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14)", () => {
 // Implements TC-COMP-167
 describe("Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24)", () => {
   it("renders markup in a reason as text", () => {
-    const reason = "<img src=x onerror=alert(1)><b>bold</b>";
-    const { container } = renderRow(ROW("FBXX", [FAIL("prices", reason, 3)], true));
-    expect(rowText(container)).toContain(`Downloading daily prices failed: ${reason}, 3 attempts`);
+    const reason = "[unavailable] <img src=x onerror=alert(1)><b>bold</b>";
+    const { container } = renderRow(ROW("FBXX", [FAIL("prices", reason, 2)], true));
+    expect(rowText(container)).toContain(`Downloading daily prices failed: ${reason}, 2 attempts`);
     expect(container.querySelector("img, b, script")).toBeNull();
   });
 

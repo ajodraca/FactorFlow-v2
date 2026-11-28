@@ -66,8 +66,8 @@ afterEach(() => {
 
 function FAIL(
   dataType: DataType,
-  reason: string | null = "provider timeout",
-  attempts = 3,
+  reason: string | null = "[unavailable] gateway timeout",
+  attempts = 2,
 ): Failure {
   return {
     data_type: dataType,
@@ -77,6 +77,14 @@ function FAIL(
     completed_at: "2026-10-30T18:20:00Z",
     run_id: "r-7",
   };
+}
+
+/** The one `role="status"` element whose text is exactly `text`. */
+async function statusReading(text: string): Promise<HTMLElement> {
+  await screen.findByText(text);
+  const found = screen.getAllByRole("status").filter((el) => el.textContent === text);
+  expect(found).toHaveLength(1);
+  return found[0] as HTMLElement;
 }
 
 function NF(dataType: DataType): Failure {
@@ -341,7 +349,6 @@ describe("Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, A
 });
 
 // Implements TC-COMP-166
-// Implements TC-COMP-167
 describe("Needs fixing hand-off cases (DAC-E6-9, AC-16, AC-25)", () => {
   it("names the rows list by the card heading", () => {
     renderCard(ok(DH()));
@@ -403,6 +410,7 @@ describe("Needs fixing hand-off cases (DAC-E6-9, AC-16, AC-25)", () => {
   });
 });
 
+// Implements TC-COMP-167
 describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)", () => {
   async function failFirstMore(error: Error) {
     problemsMock.mockRejectedValueOnce(error);
@@ -419,7 +427,7 @@ describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)", 
   it("(a) keeps the loaded rows, names the failure and moves focus to Try again", async () => {
     await failFirstMore(BAD_CURSOR);
     expect(
-      await screen.findByText("Couldn't read more problems: FactorFlow hit an unexpected problem."),
+      await statusReading("Couldn't read more problems: FactorFlow hit an unexpected problem."),
     ).toBeInTheDocument();
     expect(symbols()).toEqual(SYMS.slice(0, 50));
     expect(screen.queryByRole("button", { name: "Show more" })).toBeNull();
@@ -464,14 +472,14 @@ describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)", 
   it("(d) reads an unreachable server and any other failure the same way", async () => {
     await failFirstMore(UNREACHABLE);
     expect(
-      await screen.findByText("Couldn't read more problems: FactorFlow is not answering."),
+      await statusReading("Couldn't read more problems: FactorFlow is not answering."),
     ).toBeInTheDocument();
   });
 
   it("(d) reads an internal error as an unexpected problem", async () => {
     await failFirstMore(INTERNAL);
     expect(
-      await screen.findByText("Couldn't read more problems: FactorFlow hit an unexpected problem."),
+      await statusReading("Couldn't read more problems: FactorFlow hit an unexpected problem."),
     ).toBeInTheDocument();
   });
 
@@ -566,9 +574,7 @@ describe("Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13)", () => {
     const onReread = vi.fn();
     renderCard(ok(ZERO), onReread);
     expect(
-      await screen.findByText(
-        "Couldn't read the last complete download: FactorFlow is not answering.",
-      ),
+      await statusReading("Couldn't read the last complete download: FactorFlow is not answering."),
     ).toBeInTheDocument();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Try again" }));
