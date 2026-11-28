@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w3/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 342ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 2 failed) 633ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 23ms
+     → expected '1,230 of 1,236 stocks' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+   × copy.ts recent downloads and what you follow strings > (a) the result sentences 0ms
+     → expected '1,230 of 1,236 stocks' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected '1,230 of 1,236 stocks' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+Expected: "1,230 of 1,236 stocks, 6 failed"
+Received: "1,230 of 1,236 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:215:42
+    213|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-war…
+    214|     expect(badgeOf(row).textContent).toBe("Partial");
+    215|     expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, …
+       |                                          ^
+    216|   });
+    217| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (a) the result sentences
+AssertionError: expected '1,230 of 1,236 stocks' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+Expected: "1,230 of 1,236 stocks, 6 failed"
+Received: "1,230 of 1,236 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:872:50
+    870|   it("(a) the result sentences", () => {
+    871|     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");
+    872|     expect(partialResult("1,230", "1,236", "6")).toBe("1,230 of 1,236 …
+       |                                                  ^
+    873|     expect(interruptedResult("611")).toBe(
+    874|       "FactorFlow restarted mid-download; 611 kept, the rest picked up…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 64 passed (66)
+   Start at  01:35:33
+   Duration  2.09s (transform 199ms, setup 93ms, collect 1.50s, tests 975ms, environment 441ms, prepare 72ms)
+

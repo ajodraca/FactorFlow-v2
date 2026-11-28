@@ -1,0 +1,96 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 4 failed) 296ms
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again 8ms
+     → expected 'Couldn\'t read what you follow: instr…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (c) a failed depth read alone fails the card, naming an interface that is not answering 6ms
+     → expected 'Couldn\'t read what you follow: fetch…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (d) neither the request id nor the envelope message reaches the page 4ms
+     → expected 'What you followCouldn\'t read what yo…' not to contain 'instrument table said no'
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names 22ms
+     → internal failure: expected 'What you followCouldn\'t read what yo…' not to match /\b(instrument|acquisition|acquire|ru…/i
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 595ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again
+AssertionError: expected 'Couldn\'t read what you follow: instr…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+Expected: "Couldn't read what you follow: FactorFlow hit an unexpected problem."
+Received: "Couldn't read what you follow: instrument table said no."
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:212:32
+    210|     const { container } = renderOnly();
+    211|     const status = await screen.findByRole("status");
+    212|     expect(status.textContent).toBe(
+       |                                ^
+    213|       "Couldn't read what you follow: FactorFlow hit an unexpected pro…
+    214|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (c) a failed depth read alone fails the card, naming an interface that is not answering
+AssertionError: expected 'Couldn\'t read what you follow: fetch…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+Expected: "Couldn't read what you follow: FactorFlow is not answering."
+Received: "Couldn't read what you follow: fetch failed."
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:226:32
+    224|     renderOnly();
+    225|     const status = await screen.findByRole("status");
+    226|     expect(status.textContent).toBe("Couldn't read what you follow: Fa…
+       |                                ^
+    227|   });
+    228| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (d) neither the request id nor the envelope message reaches the page
+AssertionError: expected 'What you followCouldn\'t read what yo…' not to contain 'instrument table said no'
+
+Expected: "instrument table said no"
+Received: "What you followCouldn't read what you follow: instrument table said no.Try again"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:235:39
+    233|     await screen.findByRole("status");
+    234|     expect(container.textContent).not.toContain("req-9f3");
+    235|     expect(container.textContent).not.toContain("instrument table said…
+       |                                       ^
+    236|     for (const el of container.querySelectorAll("*")) {
+    237|       for (const attr of el.attributes) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names
+AssertionError: internal failure: expected 'What you followCouldn\'t read what yo…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+- Expected: 
+/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"What you followCouldn't read what you follow: instrument table said no.Try again What you follow"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:416:30
+    414|       await screen.findAllByRole(wait);
+    415|       const text = visibleAndAccessibleText(container);
+    416|       expect(text, name).not.toMatch(FORBIDDEN);
+       |                              ^
+    417|       if (wait === "term") {
+    418|         expect(text).toContain("Stopped following");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 62 passed (66)
+   Start at  01:35:19
+   Duration  1.73s (transform 158ms, setup 76ms, collect 1.21s, tests 891ms, environment 476ms, prepare 58ms)
+

@@ -1,0 +1,65 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 1 failed) 307ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (e) reads the delivered endpoints unchanged, once 14ms
+     → expected "spy" to be called with arguments: [ { limit: 1 } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+    Object {
+-     "limit": 1,
++     "limit": 2,
+    },
+  ]
+
+
+Number of calls: 1
+
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 734ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (e) reads the delivered endpoints unchanged, once
+AssertionError: expected "spy" to be called with arguments: [ { limit: 1 } ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+    Object {
+-     "limit": 1,
++     "limit": 2,
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:169:22
+    167|     await renderFollow();
+    168|     await waitFor(() => expect(listMock).toHaveBeenCalledTimes(1));
+    169|     expect(listMock).toHaveBeenCalledWith({ limit: 1 });
+       |                      ^
+    170|     expect(depthMock).toHaveBeenCalledTimes(1);
+    171|     expect(depthMock).toHaveBeenCalledWith();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 65 passed (66)
+   Start at  01:34:11
+   Duration  1.91s (transform 189ms, setup 111ms, collect 1.24s, tests 1.04s, environment 367ms, prepare 169ms)
+

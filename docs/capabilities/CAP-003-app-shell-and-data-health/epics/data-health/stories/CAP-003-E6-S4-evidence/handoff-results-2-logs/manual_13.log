@@ -1,0 +1,62 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w0/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 572ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 1 failed) 981ms
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value 10ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value
+AssertionError: expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-labelledby=":r5h:-progress"
+  aria-valuemax="1236"
+  aria-valuemin="0"
+  aria-valuenow="812"
+  aria-valuetext="66%"
+  class="relative h-2 w-full overflow-hidden rounded bg-seq-1"
+  data-max="1236"
+  data-state="loading"
+  data-value="812"
+  data-variant="determinate"
+  role="progressbar"
+>
+  <div
+    class="h-full w-full flex-1 bg-status-active transition-all"
+    data-max="1236"
+    data-state="loading"
+    data-value="812"
+    style="transform: translateX(-34.30420711974111%);"
+  />
+</div>
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:814:47
+    812|     renderRecent();
+    813|     await screen.findByRole("table");
+    814|     expect(screen.queryByRole("progressbar")).toBeNull();
+       |                                               ^
+    815|     expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 …
+    816|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 65 passed (66)
+   Start at  01:34:25
+   Duration  3.00s (transform 365ms, setup 169ms, collect 2.31s, tests 1.55s, environment 731ms, prepare 127ms)
+

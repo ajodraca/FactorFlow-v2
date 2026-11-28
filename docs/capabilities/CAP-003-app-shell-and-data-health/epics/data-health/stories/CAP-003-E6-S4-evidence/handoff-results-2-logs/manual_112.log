@@ -1,0 +1,97 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w3/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 1 failed) 521ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 114ms
+     → Unable to find an accessible element with the role "link" and name "5 years"
+
+Here are the accessible roles:
+
+  link:
+
+  Name "5":
+  [36m<a[39m
+    [33mhref[39m=[32m"/settings"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<dd>[39m
+  [36m<a[39m
+    [33mhref[39m=[32m"/settings"[39m
+  [36m>[39m
+    [0m5[0m
+  [36m</a>[39m
+[36m</dd>[39m
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 1 failed) 1060ms
+   × copy.ts recent downloads and what you follow strings > (d) the what-you-follow sentences 9ms
+     → expected '5' to be '5 years' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (d) the what-you-follow sentences
+AssertionError: expected '5' to be '5 years' // Object.is equality
+
+Expected: "5 years"
+Received: "5"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:891:29
+    889|   it("(d) the what-you-follow sentences", () => {
+    890|     expect(historyKept("2")).toBe("2 (history kept)");
+    891|     expect(depthYears("5")).toBe("5 years");
+       |                             ^
+    892|   });
+    893| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+TestingLibraryElementError: Unable to find an accessible element with the role "link" and name "5 years"
+
+Here are the accessible roles:
+
+  link:
+
+  Name "5":
+  [36m<a[39m
+    [33mhref[39m=[32m"/settings"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<dd>[39m
+  [36m<a[39m
+    [33mhref[39m=[32m"/settings"[39m
+  [36m>[39m
+    [0m5[0m
+  [36m</a>[39m
+[36m</dd>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/data-health/what-you-follow.test.tsx:121:57
+    119|     expect(definitionOf("Followed stocks").textContent).toBe("30");
+    120|     expect(definitionOf("Stopped following").textContent).toBe("2 (his…
+    121|     const depth = within(definitionOf("History depth")).getByRole("lin…
+       |                                                         ^
+    122|     expect(depth.getAttribute("href")).toBe("/settings");
+    123|     const badge = definitionOf("Market data key").querySelector('[data…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 64 passed (66)
+   Start at  01:35:39
+   Duration  2.70s (transform 519ms, setup 104ms, collect 1.89s, tests 1.58s, environment 461ms, prepare 274ms)
+

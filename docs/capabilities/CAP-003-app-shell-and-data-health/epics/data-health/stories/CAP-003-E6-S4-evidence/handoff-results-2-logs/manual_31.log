@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 320ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 3 failed) 947ms
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays 12ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow 10ms
+     → expected "spy" to be called 1 times, but got 4 times
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished 10ms
+     → expected "spy" to be called 1 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (e) terminal answers give no read and the time stays
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:353:24
+    351|       view.rerender(ui());
+    352|       await settle();
+    353|       expect(listMock).toHaveBeenCalledTimes(1);
+       |                        ^
+    354|       expect(screen.getByText(`${SUBLINE} · checked 14:03:12 CDT`)).to…
+    355|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (f) a terminal answer from the start reads once, however many answers follow
+AssertionError: expected "spy" to be called 1 times, but got 4 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:369:22
+    367|       await settle();
+    368|     }
+    369|     expect(listMock).toHaveBeenCalledTimes(1);
+       |                      ^
+    370|   });
+    371| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > (h) the same answer is never read twice, even when it turns unfinished
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/recent-downloads.test.tsx:402:22
+    400|     view.rerender(ui());
+    401|     await settle();
+    402|     expect(listMock).toHaveBeenCalledTimes(1);
+       |                      ^
+    403|   });
+    404| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 63 passed (66)
+   Start at  01:34:41
+   Duration  2.14s (transform 195ms, setup 89ms, collect 1.06s, tests 1.27s, environment 613ms, prepare 64ms)
+

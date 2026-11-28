@@ -1,0 +1,111 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 5 failed) 276ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 59ms
+     → expected '2' to be '30' // Object.is equality
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators 8ms
+     → expected '1,000' to be '1,236' // Object.is equality
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (e) Try again reads each once more and shows the list 22ms
+     → expected '2' to be '30' // Object.is equality
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > keeps the newest read when an older one answers last 20ms
+     → expected '0' to be '3' // Object.is equality
+   × What you follow hand-off cases (DAC-E6-16, DAC-E6-17) > ignores an older read's failure once a newer read has answered 21ms
+     → expected '0' to be '3' // Object.is equality
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 578ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected '2' to be '30' // Object.is equality
+
+Expected: "30"
+Received: "2"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:119:57
+    117|       "Market data key",
+    118|     ]);
+    119|     expect(definitionOf("Followed stocks").textContent).toBe("30");
+       |                                                         ^
+    120|     expect(definitionOf("Stopped following").textContent).toBe("2 (his…
+    121|     const depth = within(definitionOf("History depth")).getByRole("lin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators
+AssertionError: expected '1,000' to be '1,236' // Object.is equality
+
+Expected: "1,236"
+Received: "1,000"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:160:57
+    158|     depthMock.mockResolvedValue(DEPTH(5));
+    159|     await renderFollow();
+    160|     expect(definitionOf("Followed stocks").textContent).toBe("1,236");
+       |                                                         ^
+    161|     expect(definitionOf("Stopped following").textContent).toBe("1,000 …
+    162|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (e) Try again reads each once more and shows the list
+AssertionError: expected '2' to be '30' // Object.is equality
+
+Expected: "30"
+Received: "2"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:254:57
+    252|     expect(listMock).toHaveBeenCalledTimes(2);
+    253|     expect(depthMock).toHaveBeenCalledTimes(2);
+    254|     expect(definitionOf("Followed stocks").textContent).toBe("30");
+       |                                                         ^
+    255|   });
+    256| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > keeps the newest read when an older one answers last
+AssertionError: expected '0' to be '3' // Object.is equality
+
+Expected: "3"
+Received: "0"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:273:57
+    271|     await screen.findAllByRole("term");
+    272|     await act(async () => answerOld(COUNTS(9, 9)));
+    273|     expect(definitionOf("Followed stocks").textContent).toBe("3");
+       |                                                         ^
+    274|   });
+    275| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow hand-off cases (DAC-E6-16, DAC-E6-17) > ignores an older read's failure once a newer read has answered
+AssertionError: expected '0' to be '3' // Object.is equality
+
+Expected: "3"
+Received: "0"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:504:57
+    502|     await screen.findAllByRole("term");
+    503|     await act(async () => failOld(INTERNAL));
+    504|     expect(definitionOf("Followed stocks").textContent).toBe("3");
+       |                                                         ^
+    505|     expect(screen.queryByRole("status")).toBeNull();
+    506|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 61 passed (66)
+   Start at  01:35:22
+   Duration  1.62s (transform 259ms, setup 260ms, collect 1.02s, tests 854ms, environment 344ms, prepare 116ms)
+

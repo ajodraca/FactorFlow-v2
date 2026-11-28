@@ -1,0 +1,96 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 285ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 4 failed) 643ms
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a 500 keeps the heading and says what happened, with Try again 9ms
+     → expected 'Couldn\'t read recent downloads: inst…' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (c) neither the request id nor the envelope message reaches the page 4ms
+     → expected 'Recent downloadsStarts when you press…' not to contain 'instrument table said no'
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (d) an unreachable interface says it is not answering 4ms
+     → expected 'Couldn\'t read recent downloads: fetc…' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names 28ms
+     → internal failure: expected 'Recent downloadsStarts when you press…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a 500 keeps the heading and says what happened, with Try again
+AssertionError: expected 'Couldn\'t read recent downloads: inst…' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+
+Expected: "Couldn't read recent downloads: FactorFlow hit an unexpected problem."
+Received: "Couldn't read recent downloads: instrument table said no."
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:564:32
+    562|     renderRecent();
+    563|     const status = await screen.findByRole("status");
+    564|     expect(status.textContent).toBe(
+       |                                ^
+    565|       "Couldn't read recent downloads: FactorFlow hit an unexpected pr…
+    566|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (c) neither the request id nor the envelope message reaches the page
+AssertionError: expected 'Recent downloadsStarts when you press…' not to contain 'instrument table said no'
+
+Expected: "instrument table said no"
+Received: "Recent downloadsStarts when you press Download nowCouldn't read recent downloads: instrument table said no.Try again"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:577:39
+    575|     await screen.findByRole("status");
+    576|     expect(container.textContent).not.toContain("req-9f3");
+    577|     expect(container.textContent).not.toContain("instrument table said…
+       |                                       ^
+    578|     for (const el of container.querySelectorAll("*")) {
+    579|       for (const attr of el.attributes) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (d) an unreachable interface says it is not answering
+AssertionError: expected 'Couldn\'t read recent downloads: fetc…' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+
+Expected: "Couldn't read recent downloads: FactorFlow is not answering."
+Received: "Couldn't read recent downloads: fetch failed."
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:589:32
+    587|     renderRecent();
+    588|     const status = await screen.findByRole("status");
+    589|     expect(status.textContent).toBe("Couldn't read recent downloads: F…
+       |                                ^
+    590|   });
+    591| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names
+AssertionError: internal failure: expected 'Recent downloadsStarts when you press…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+- Expected: 
+/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"Recent downloadsStarts when you press Download nowCouldn't read recent downloads: instrument table said no.Try again Recent downloads"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:707:61
+    705|         name.startsWith("internal") || name === "unreachable" ? "statu…
+    706|       );
+    707|       expect(visibleAndAccessibleText(container), name).not.toMatch(FO…
+       |                                                             ^
+    708|       unmount();
+    709|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 62 passed (66)
+   Start at  01:34:59
+   Duration  1.91s (transform 203ms, setup 126ms, collect 1.07s, tests 928ms, environment 651ms, prepare 184ms)
+

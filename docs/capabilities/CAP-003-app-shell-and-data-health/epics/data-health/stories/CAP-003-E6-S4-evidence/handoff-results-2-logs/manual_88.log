@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 2 failed) 305ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 65ms
+     → expected '/data/followed' to be '/settings' // Object.is equality
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable 10ms
+     → expected '/data/followed' to be '/settings' // Object.is equality
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 883ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected '/data/followed' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/data/followed"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:122:40
+    120|     expect(definitionOf("Stopped following").textContent).toBe("2 (his…
+    121|     const depth = within(definitionOf("History depth")).getByRole("lin…
+    122|     expect(depth.getAttribute("href")).toBe("/settings");
+       |                                        ^
+    123|     const badge = definitionOf("Market data key").querySelector('[data…
+    124|     expect(badge?.textContent).toBe("Found");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable
+AssertionError: expected '/data/followed' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/data/followed"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:140:40
+    138|     await renderFollow();
+    139|     const depth = within(definitionOf("History depth")).getByRole("lin…
+    140|     expect(depth.getAttribute("href")).toBe("/settings");
+       |                                        ^
+    141|     const badge = definitionOf("Market data key").querySelector(
+    142|       '[data-variant="coverage-unknown"]',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 64 passed (66)
+   Start at  01:35:24
+   Duration  1.99s (transform 272ms, setup 86ms, collect 1.22s, tests 1.19s, environment 501ms, prepare 72ms)
+

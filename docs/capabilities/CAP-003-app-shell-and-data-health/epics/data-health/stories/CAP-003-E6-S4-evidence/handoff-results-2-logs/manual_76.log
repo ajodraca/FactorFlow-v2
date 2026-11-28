@@ -1,0 +1,130 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 4 failed) 277ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable 13ms
+     → expected undefined to be 'Not determinable' // Object.is equality
+   × Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (a) an unreachable interface never shows the stale value as Missing 6ms
+     → expected undefined to be 'Not determinable' // Object.is equality
+   × Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (b) before the first answer it reads the same 6ms
+     → expected undefined to be 'Not determinable' // Object.is equality
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) Not determinable is a described coverage-unknown badge, never a status badge or a dash 7ms
+     → expected <span …(2)>…(1)</span> to be null
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 659ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable
+AssertionError: expected undefined to be 'Not determinable' // Object.is equality
+
+- Expected: 
+"Not determinable"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:144:32
+    142|       '[data-variant="coverage-unknown"]',
+    143|     );
+    144|     expect(badge?.textContent).toBe("Not determinable");
+       |                                ^
+    145|   });
+    146| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (a) an unreachable interface never shows the stale value as Missing
+AssertionError: expected undefined to be 'Not determinable' // Object.is equality
+
+- Expected: 
+"Not determinable"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:295:32
+    293|       '[data-variant="coverage-unknown"]',
+    294|     );
+    295|     expect(badge?.textContent).toBe("Not determinable");
+       |                                ^
+    296|     expect(badge).toHaveAccessibleDescription("FactorFlow is not answe…
+    297|     expect(region().querySelector('[data-variant="status-critical"]'))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (b) before the first answer it reads the same
+AssertionError: expected undefined to be 'Not determinable' // Object.is equality
+
+- Expected: 
+"Not determinable"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:307:32
+    305|       '[data-variant="coverage-unknown"]',
+    306|     );
+    307|     expect(badge?.textContent).toBe("Not determinable");
+       |                                ^
+    308|     expect(badge).toHaveAccessibleDescription("FactorFlow is not answe…
+    309|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) Not determinable is a described coverage-unknown badge, never a status badge or a dash
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"
+  data-variant="status-neutral"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide lucide-circle h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+    />
+  </svg>
+  Not determinable
+</span>
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:458:60
+    456|     await renderFollow();
+    457|     const key = definitionOf("Market data key");
+    458|     expect(key.querySelector('[data-variant^="status-"]')).toBeNull();
+       |                                                            ^
+    459|     expect(key.textContent).not.toContain("—");
+    460|     expect(key.querySelector('[data-variant="coverage-unknown"]')).toH…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 62 passed (66)
+   Start at  01:35:14
+   Duration  1.79s (transform 156ms, setup 99ms, collect 1.03s, tests 936ms, environment 660ms, prepare 72ms)
+

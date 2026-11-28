@@ -1,0 +1,155 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w5/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 8 failed) 343ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 55ms
+     → expected [ 'Followed stocks', …(3) ] to deeply equal [ 'Followed stocks', …(3) ]
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable 21ms
+     → expected undefined to be defined
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing 15ms
+     → expected undefined to be defined
+   × Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (a) an unreachable interface never shows the stale value as Missing 5ms
+     → expected undefined to be defined
+   × Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (b) before the first answer it reads the same 5ms
+     → expected undefined to be defined
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names 7ms
+     → expected 'What you followFollowed stocks30Stopp…' to contain 'Market data key'
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape 5ms
+     → expected undefined to be defined
+   × What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) Not determinable is a described coverage-unknown badge, never a status badge or a dash 5ms
+     → expected undefined to be defined
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 927ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected [ 'Followed stocks', …(3) ] to deeply equal [ 'Followed stocks', …(3) ]
+
+- Expected
++ Received
+
+  Array [
+    "Followed stocks",
+    "Stopped following",
+    "History depth",
+-   "Market data key",
++   "Followed stocks",
+  ]
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:113:46
+    111|     );
+    112|     expect(region().querySelector('[data-variant="summary"]')).not.toB…
+    113|     expect(pairs().map((pair) => pair.term)).toEqual([
+       |                                              ^
+    114|       "Followed stocks",
+    115|       "Stopped following",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:141:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (c) a missing key is a critical Missing
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:152:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (a) an unreachable interface never shows the stale value as Missing
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:292:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385) > (b) before the first answer it reads the same
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:304:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names
+AssertionError: expected 'What you followFollowed stocks30Stopp…' to contain 'Market data key'
+
+Expected: "Market data key"
+Received: "What you followFollowed stocks30Stopped following2 (history kept)History depth5 yearsFollowed stocksFoundManage followed stocks What you follow"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:419:22
+    417|       if (wait === "term") {
+    418|         expect(text).toContain("Stopped following");
+    419|         expect(text).toContain("Market data key");
+       |                      ^
+    420|       }
+    421|       unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) Found and Missing are status badges with their word and a hidden shape
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:440:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) Not determinable is a described coverage-unknown badge, never a status badge or a dash
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:457:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 58 passed (66)
+   Start at  01:35:25
+   Duration  2.04s (transform 188ms, setup 77ms, collect 931ms, tests 1.27s, environment 437ms, prepare 267ms)
+

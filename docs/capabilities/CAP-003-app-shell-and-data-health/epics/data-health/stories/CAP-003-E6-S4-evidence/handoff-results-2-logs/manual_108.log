@@ -1,0 +1,107 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w5/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 5 failed) 490ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 63ms
+     → expected [ 'Followed instruments', …(3) ] to deeply equal [ 'Followed stocks', …(3) ]
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators 7ms
+     → expected undefined to be defined
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (e) Try again reads each once more and shows the list 24ms
+     → expected undefined to be defined
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > keeps the newest read when an older one answers last 30ms
+     → expected undefined to be defined
+   × What you follow hand-off cases (DAC-E6-16, DAC-E6-17) > ignores an older read's failure once a newer read has answered 50ms
+     → expected undefined to be defined
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 1105ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected [ 'Followed instruments', …(3) ] to deeply equal [ 'Followed stocks', …(3) ]
+
+- Expected
++ Received
+
+  Array [
+-   "Followed stocks",
++   "Followed instruments",
+    "Stopped following",
+    "History depth",
+    "Market data key",
+  ]
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:113:46
+    111|     );
+    112|     expect(region().querySelector('[data-variant="summary"]')).not.toB…
+    113|     expect(pairs().map((pair) => pair.term)).toEqual([
+       |                                              ^
+    114|       "Followed stocks",
+    115|       "Stopped following",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:160:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (e) Try again reads each once more and shows the list
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:254:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > keeps the newest read when an older one answers last
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:273:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow hand-off cases (DAC-E6-16, DAC-E6-17) > ignores an older read's failure once a newer read has answered
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:504:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 61 passed (66)
+   Start at  01:35:37
+   Duration  2.72s (transform 255ms, setup 82ms, collect 1.26s, tests 1.59s, environment 628ms, prepare 373ms)
+

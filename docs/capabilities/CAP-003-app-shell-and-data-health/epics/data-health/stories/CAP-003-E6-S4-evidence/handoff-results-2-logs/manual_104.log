@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 316ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 2 failed) 1038ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence 27ms
+     → expected '611 kept' to be 'FactorFlow restarted mid-download; 61…' // Object.is equality
+   ✓ Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (a) no state shows a domain term in its text or accessible names 310ms
+   × copy.ts recent downloads and what you follow strings > (a) the result sentences 2ms
+     → expected '611 kept' to be 'FactorFlow restarted mid-download; 61…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence
+AssertionError: expected '611 kept' to be 'FactorFlow restarted mid-download; 61…' // Object.is equality
+
+Expected: "FactorFlow restarted mid-download; 611 kept, the rest picked up next time"
+Received: "611 kept"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:222:42
+    220|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-ser…
+    221|     expect(badgeOf(row).textContent).toBe("Interrupted");
+    222|     expect(cellsOf(row)[2]?.textContent).toBe(
+       |                                          ^
+    223|       "FactorFlow restarted mid-download; 611 kept, the rest picked up…
+    224|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (a) the result sentences
+AssertionError: expected '611 kept' to be 'FactorFlow restarted mid-download; 61…' // Object.is equality
+
+Expected: "FactorFlow restarted mid-download; 611 kept, the rest picked up next time"
+Received: "611 kept"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:873:38
+    871|     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");
+    872|     expect(partialResult("1,230", "1,236", "6")).toBe("1,230 of 1,236 …
+    873|     expect(interruptedResult("611")).toBe(
+       |                                      ^
+    874|       "FactorFlow restarted mid-download; 611 kept, the rest picked up…
+    875|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 64 passed (66)
+   Start at  01:35:35
+   Duration  2.38s (transform 318ms, setup 63ms, collect 1.68s, tests 1.35s, environment 361ms, prepare 154ms)
+
