@@ -655,9 +655,7 @@ describe("catalogue copy per kind (DAC-E5-7, DAC-E5-8, AC-7, AC-12; DEC-0368, DE
     });
     afterEach(() => {
       if (saved === undefined) {
-        process.env.TZ = undefined;
-        // biome-ignore lint/performance/noDelete: an unset TZ must be absent, not the string "undefined".
-        delete process.env.TZ;
+        Reflect.deleteProperty(process.env, "TZ");
       } else {
         process.env.TZ = saved;
       }
@@ -727,7 +725,14 @@ describe("count, summary states, composition and no reads (AC-16, AC-24, AC-26, 
     const checked = [...region.querySelectorAll("p")].find((p) => squash(p).startsWith("checked"));
     expect(checked?.className).toContain("text-xs");
     expect(checked?.className).toContain("text-muted-foreground");
-    expect(heading.parentElement?.className).toContain("justify-between");
+    for (const name of ["flex", "items-baseline", "justify-between", "gap-4"]) {
+      expect(heading.parentElement?.classList.contains(name)).toBe(true);
+    }
+    const subLine = [...region.querySelectorAll("p")].find((p) =>
+      squash(p).startsWith("Most important first."),
+    );
+    expect(subLine?.classList.contains("text-sm")).toBe(true);
+    expect(subLine?.classList.contains("text-muted-foreground")).toBe(true);
     expect(heading.parentElement?.contains(checked as Element)).toBe(true);
     const list = region.querySelector("ul") as HTMLElement;
     expect(list.tagName).toBe("UL");
@@ -772,6 +777,8 @@ describe("attention failure and the state records (DAC-E5-11, DAC-E5-S3-3)", () 
     const heading = card().querySelector("h2") as HTMLElement;
     expect(heading.querySelector('[aria-hidden="true"]')?.textContent).toBe("—");
     expect(heading.querySelector(".sr-only")?.textContent).toBe("not determinable");
+    expect(within(card()).getAllByRole("status")).toHaveLength(1);
+    expect(squash(card())).not.toMatch(/Needs you · \d/);
     await user.click(within(card()).getByRole("button", { name: "Try again" }));
     expect(shell.value.refresh).toHaveBeenCalledTimes(1);
     expect(shell.value.refresh).toHaveBeenCalledWith("attention");

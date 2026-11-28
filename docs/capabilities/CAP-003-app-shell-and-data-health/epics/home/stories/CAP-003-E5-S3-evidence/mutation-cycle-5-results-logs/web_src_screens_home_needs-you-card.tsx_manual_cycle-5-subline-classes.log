@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/tmp/claude-501/-Users-alvarodejodra-Projects-ai-agents--claude-worktrees-factorflow-v2-cap-003-run-85e85a/770817f1-e0ed-4d74-881b-210c90339dce/scratchpad/work/mutation-run-9dkot7rl/w0/web
+
+ ✓ src/screens/home/copy.test.ts (25 tests) 5ms
+ ✓ src/components/token-literals.test.ts (61 tests) 171ms
+ ✓ src/screens/home/market-state.test.ts (72 tests) 1187ms
+stderr | src/screens/home/home.test.tsx > empty state before any download (TC-COMP-127; DAC-E5-1, AC-21) > states that nothing has been downloaded and offers setup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/home/header.test.tsx (31 tests) 563ms
+stderr | src/screens/home/needs-you-card.test.tsx > order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > orders by tier then recency
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/home/home.test.tsx (23 tests) 1493ms
+ ❯ src/screens/home/needs-you-card.test.tsx (44 tests | 1 failed) 1510ms
+   ✓ order, names and no mutation (TC-COMP-141; DAC-E5-S3-1, DAC-E5-7, DAC-E5-8) > completes each action by keyboard and never calls fetch 344ms
+   × count, summary states, composition and no reads (AC-16, AC-24, AC-26, DAC-E5-9, DAC-E5-11) > is composed from the card, with only the tiles styled inline 70ms
+     → expected false to be true // Object.is equality
+ ✓ src/screens/home/data-tile.test.tsx (66 tests) 1864ms
+   ✓ DataTile link (TC-COMP-138; DAC-E5-S2-3) > (d) never reads the aggregate, and imports no reader 578ms
+   ✓ DataTile display vocabulary (TC-COMP-139; DAC-E5-S2-4, AC-19) > uses none of the eight DAC-E7-3 terms in any state 424ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/needs-you-card.test.tsx > count, summary states, composition and no reads (AC-16, AC-24, AC-26, DAC-E5-9, DAC-E5-11) > is composed from the card, with only the tiles styled inline
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/screens/home/needs-you-card.test.tsx:734:52
+    732|       squash(p).startsWith("Most important first."),
+    733|     );
+    734|     expect(subLine?.classList.contains("text-sm")).toBe(true);
+       |                                                    ^
+    735|     expect(subLine?.classList.contains("text-muted-foreground")).toBe(…
+    736|     expect(heading.parentElement?.contains(checked as Element)).toBe(t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 321 passed (322)
+   Start at  18:19:27
+   Duration  6.61s (transform 1.92s, setup 1.50s, collect 10.52s, tests 6.79s, environment 7.57s, prepare 3.52s)
+

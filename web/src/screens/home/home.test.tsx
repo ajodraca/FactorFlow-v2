@@ -317,6 +317,9 @@ describe("empty state before any download (TC-COMP-127; DAC-E5-1, AC-21)", () =>
     expect(setup.textContent).toBe("Start setup");
     expect(setup.getAttribute("href")).toBe("/setup");
     expect(setup.getAttribute("data-variant")).toBe("default");
+    for (const name of ["flex", "flex-col", "items-start", "gap-4"]) {
+      expect(setup.parentElement?.classList.contains(name)).toBe(true);
+    }
 
     expect(screen.queryByRole("region", { name: "Data" })).toBeNull();
     expect(screen.queryByRole("region", { name: /^Needs you/ })).toBeNull();
@@ -417,6 +420,31 @@ describe("attention failure on Home (TC-COMP-131 Home half; DAC-E5-11)", () => {
     expect(shell.value.refresh).toHaveBeenCalledWith("attention");
   });
 
+  it("holds no count status while attention fails, so the error is the card's one status", () => {
+    for (const attention of [ATT_UNREACHABLE, ATT_500]) {
+      const view = show(attention, served(SUMMARY()));
+      expect(within(card()).getAllByRole("status")).toHaveLength(1);
+      expect(within(card()).getByRole("status").textContent).toContain("Couldn't read");
+      expect(squash(card())).not.toMatch(/Needs you · \d/);
+      view.unmount();
+    }
+  });
+
+  it("shows the card's error and Try again when a failed read follows a never-downloaded one", () => {
+    show(
+      {
+        kind: "error",
+        error: new ApiUnreachableError("GET /api/attention could not be reached"),
+        last: { data: NEVER_DOWNLOADED, checkedAt: new Date("2026-10-15T22:40:06Z") },
+      },
+      served(SUMMARY()),
+    );
+    expect(screen.queryByRole("region", { name: "No data has been downloaded yet." })).toBeNull();
+    expect(document.body.textContent).not.toContain("No data has been downloaded yet.");
+    expect(squash(card())).toContain("Couldn't read what needs you: FactorFlow is not answering.");
+    expect(within(card()).getByRole("button", { name: "Try again" })).not.toBeNull();
+  });
+
   it("says an unexpected problem without the server's words", () => {
     show(ATT_500, served(SUMMARY()));
     expect(squash(card())).toContain(
@@ -474,6 +502,15 @@ describe("the eight states (TC-COMP-143; DAC-E5-S3-3, AC-24)", () => {
     const skeleton = screen.getByTestId("needs-you-skeleton");
     expect(skeleton.children).toHaveLength(3);
     expect(skeleton.closest('[aria-busy="true"]')).not.toBeNull();
+    expect(skeleton.getAttribute("aria-hidden")).toBe("true");
+    for (const name of ["flex", "flex-col", "gap-3"]) {
+      expect(skeleton.classList.contains(name)).toBe(true);
+    }
+    for (const row of skeleton.children) {
+      for (const name of ["min-h-7", "w-full", "animate-pulse", "rounded", "bg-secondary"]) {
+        expect(row.classList.contains(name)).toBe(true);
+      }
+    }
     expect(card().querySelector("h2")?.textContent).toBe("Needs you");
     expect(document.body.textContent).not.toContain("Couldn't read");
   });
