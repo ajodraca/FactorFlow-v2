@@ -144,6 +144,7 @@ export const SCANNED_DIRECTORIES: readonly string[] = [
   "web/src/components/",
   "web/src/app/command-palette/",
   "web/src/screens/setup/",
+  "web/src/screens/home/",
 ];
 
 /** The one module that holds approved-specification widths (system design constraint 12). */
@@ -464,6 +465,37 @@ describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)", () => {
 
   it("(c) finds a literal planted in a setup source", () => {
     const planted = "web/src/screens/setup/planted.tsx";
+    expect(literalsIn(planted, 'export const x = "p-[12px]";')).toEqual([`${planted}: 12px`]);
+  });
+});
+
+// Implements TC-COMP-144
+describe("home screen is scanned (TC-COMP-144, DAC-E5-S3-4)", () => {
+  it("(a) widens the scan to the home directory", () => {
+    expect(SCANNED_DIRECTORIES).toContain("web/src/screens/home/");
+  });
+
+  it("(b) scans every home source and no test file, and finds no literal in any", () => {
+    const directory = "web/src/screens/home/";
+    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
+    for (const name of [
+      "index.tsx",
+      "needs-you-card.tsx",
+      "header.tsx",
+      "market-state.ts",
+      "copy.ts",
+      "data-tile.tsx",
+    ]) {
+      expect(files).toContain(`${directory}${name}`);
+    }
+    expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).toEqual([]);
+    for (const relPath of files) {
+      expect(literalsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8"))).toEqual([]);
+    }
+  });
+
+  it("(c) finds a literal planted in a home source", () => {
+    const planted = "web/src/screens/home/planted.tsx";
     expect(literalsIn(planted, 'export const x = "p-[12px]";')).toEqual([`${planted}: 12px`]);
   });
 });

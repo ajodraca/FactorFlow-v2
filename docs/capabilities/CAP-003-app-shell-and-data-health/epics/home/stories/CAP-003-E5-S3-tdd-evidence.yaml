@@ -92,3 +92,23 @@ cycles:
       timeout: 0
       score: 1.0
       survivors: []
+
+  - id: cycle-4
+    tasks: [T010, T018, T019]
+    description: >
+      The widened literal scan (TC-COMP-144; DAC-E5-S3-4, AC-26): token-literals.test.ts gains a describe that scans web/src/screens/home/ (the six sources by name, no test file, no literal, a planted literal found) and the directory is appended to SCANNED_DIRECTORIES. The planted-literal run failed naming web/src/screens/home/planted.tsx and the file was deleted (planted-cycle-4.log). T019 adds no behaviour and joins this cycle: npm run test (131 files, 3700 tests), lint, format, tsc --noEmit and build all pass (validation-cycle-4.log), the plan's greps print nothing, sortAttention(deriveNeedsYou( occurs once, and no producer or delivered file changed. Test-only cycle. Both reviews approved with no drift.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/red-cycle-4-scan.log
+    red_log_sha256: 936ea8b7bd10a43500fd67f0f913a7234e05ab8b900c8baa15dfb85b27abf0e0
+    red_evidence: >
+      2 of the 61 token-literals tests failed before the entry was appended (cases (a) and (b) of the new describe).
+    green_evidence: >
+      token-literals.test.ts, 61 tests, passes in green-cycle-4-scan.log; the full validation passes in validation-cycle-4.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 5e553ae98aeb71efe323fa4577fd42bb5d58d42688be00aa688f44ba304ec98d
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: "test-only cycle: token-literals.test.ts gains a scanned directory"
