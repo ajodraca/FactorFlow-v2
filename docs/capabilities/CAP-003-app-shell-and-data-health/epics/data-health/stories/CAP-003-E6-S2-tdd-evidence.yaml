@@ -218,3 +218,47 @@ cycles:
         - id: rv:no-last-symbol
           disposition: equivalent
           reason: "ConfirmDialog has no exit animation, so the closing content unmounts in the same commit; T011 asks only that the title never render null, and the mutant renders an empty symbol in content that is no longer mounted (implementation review v1 judged it equivalent)."
+  - id: cycle-5
+    tasks: [T002, T005, T008, T011, T013]
+    description: >
+      Hand-off mutation survivors (six hand-written mutants from the mutant-writer run, manual:11, 29, 40, 42, 51, 62).
+      Tests only: download-now.test.tsx gains (g), a thrown value of neither error class reads as an unexpected problem,
+      and, in the queued case, the helper line follows the button; stop-following-dialog.test.tsx gains (g2) focus on the
+      opener keeps the row-exit watch, (p) a failed stop starts no watch, (q) confirming again clears the previous
+      refusal while in flight, and (r) the unexpected-problem fallback for a stop.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the six hand-written mutants,
+      each applied by hand to the runner's clone: the tests fail against each (red log) and pass with it reverted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-5.log
+    red_log_sha256: 5c0ce9daadc78aaeb454b52dd2cd7f283739f3e0c956b1f3a4c784e0d58d593e
+    red_evidence: >
+      Against each of the six mutants one new test failed: download-now (g) and (b), stop-following-dialog (p), (q), (r)
+      and (g2).
+    green_evidence: >
+      151 tests passed in web/src/screens/data-health; biome check clean on both test files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-5.log
+        sha256: 5c0ce9daadc78aaeb454b52dd2cd7f283739f3e0c956b1f3a4c784e0d58d593e
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        Independent code review and spec-drift review both approved. Nits left as they are: the new letters (g2), (p), (q),
+        (r) extend the plan's lettering, and the assertions on the DEC-0377 and DEC-0378 wording move with the owner's
+        review of those provisional decisions.
+    diff_sha256: 4fe57698053caa795f22ce6fee26c3ebc5f3559c4ebaa6bf100a0a01e539d75b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-5.patch
+    index_tree: 40e1e9b2933e6ea94e4d254f52a4b698bf15fc28
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 17149bae1ba1e4b06cd7f7a4e7e8e21c2bf2f2c3b42610376d292fb7523e8c4b
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

@@ -180,6 +180,18 @@ describe("Download now refusals and failures (TC-COMP-161, DAC-E6-S2-1, DAC-E6-1
     expect(screen.queryByText(/history depth/)).toBeNull();
     expect(screen.getAllByRole("status")).toHaveLength(1);
   });
+
+  it("(g) a thrown value that is neither error class reads as an unexpected problem", async () => {
+    const user = userEvent.setup();
+    startMock.mockRejectedValue(new Error("boom"));
+    renderDownload();
+    await user.click(pressed());
+    const status = await screen.findByRole("status");
+    expect(status.textContent).toBe(
+      "Couldn't start the download: FactorFlow hit an unexpected problem.",
+    );
+    expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
+  });
 });
 
 describe("Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 edge, DAC-E6-11, AC-15)", () => {
@@ -201,6 +213,7 @@ describe("Download now 202 outcomes, no confirmation, whole list (TC-COMP-161 ed
     await user.click(pressed());
     const line = await screen.findByRole("status");
     expect(line.textContent).toBe("A download is running. This starts when it finishes.");
+    expect(pressed().compareDocumentPosition(line) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(refresh).not.toHaveBeenCalled();
     expect(pressed()).toBeTruthy();
     expect(pressed().hasAttribute("disabled")).toBe(false);

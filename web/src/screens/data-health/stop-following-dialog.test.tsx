@@ -405,6 +405,63 @@ describe("Stop following outcomes (TC-COMP-162, DAC-E6-S2-2, DAC-E6-12, AC-17)",
     expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
   });
 
+  it("(g2) focus back on the row's button keeps the watch, so a row that leaves later hands focus on", async () => {
+    const user = userEvent.setup();
+    retireMock.mockResolvedValue(RETIRED);
+    const view = render(<NeedsFixingHarness />);
+    const dialog = await openDialog(user);
+    await confirm(user, dialog);
+    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
+    await settle();
+    view.rerender(<NeedsFixingHarness />);
+    await settle();
+    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Needs fixing" })).toHaveFocus(),
+    );
+  });
+
+  it("(p) a failed stop does not start the row-exit watch, so a row that leaves later keeps focus where it is", async () => {
+    const user = userEvent.setup();
+    retireMock.mockRejectedValue(INTERNAL);
+    const view = render(<NeedsFixingHarness />);
+    const dialog = await openDialog(user);
+    await confirm(user, dialog);
+    await within(dialog).findByRole("status");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(rowButton("FBXX")).toHaveFocus());
+    view.rerender(<NeedsFixingHarness rows={["GOOD"]} />);
+    await settle();
+    expect(screen.getByRole("heading", { name: "Needs fixing" })).not.toHaveFocus();
+  });
+
+  it("(q) confirming again clears the previous refusal while the new request is in flight", async () => {
+    const user = userEvent.setup();
+    const second = deferred<typeof RETIRED>();
+    retireMock.mockRejectedValueOnce(ALREADY).mockReturnValueOnce(second.promise);
+    render(<NeedsFixingHarness />);
+    const dialog = await openDialog(user);
+    await confirm(user, dialog);
+    await within(dialog).findByRole("status");
+    await confirm(user, dialog);
+    await waitFor(() => expect(retireMock).toHaveBeenCalledTimes(2));
+    expect(screen.queryByText(/Couldn't stop following/)).toBeNull();
+    second.resolve(RETIRED);
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("(r) a thrown value that is neither error class reads as an unexpected problem", async () => {
+    const user = userEvent.setup();
+    retireMock.mockRejectedValue(new Error("boom"));
+    render(<NeedsFixingHarness />);
+    const dialog = await openDialog(user);
+    await confirm(user, dialog);
+    const status = await within(dialog).findByRole("status");
+    expect(status.textContent).toBe(
+      "Couldn't stop following FBXX: FactorFlow hit an unexpected problem.",
+    );
+  });
+
   it("(n) focus the owner placed elsewhere is not grabbed later either", async () => {
     const user = userEvent.setup();
     retireMock.mockResolvedValue(RETIRED);
