@@ -1,0 +1,150 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-faxe01st/w3/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 7 failed) 847ms
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (c) empty, nothing found 20ms
+     → expected undefined to be 'No missing prices or gaps' // Object.is equality
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (d) partial 11ms
+     → expected undefined to be 'Needs attention' // Object.is equality
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (e) stale: scores render it, the check cards record it as not rendered 15ms
+     → expected undefined to be 'No missing prices or gaps' // Object.is equality
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (f) unavailable: a failed attention read keeps the cards from their own reads 11ms
+     → expected undefined to be 'Gaps not determinable' // Object.is equality
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > gives each check card its own result line and the follow count 14ms
+     → expected 'Daily prices—no data stored yet—no da…' to contain 'All 12 stocks have prices to 2026-10-…'
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails 11ms
+     → expected 'Daily prices—no data stored yet—no da…' to contain 'All 12 stocks have prices'
+   × Review v1 rework > shows the exceptions badge, a determined and an undetermined gap part, with shape 10ms
+     → expected [ 'Mostly yes', …(6) ] to include 'Needs attention'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (c) empty, nothing found
+AssertionError: expected undefined to be 'No missing prices or gaps' // Object.is equality
+
+- Expected: 
+"No missing prices or gaps"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/data-health.test.tsx:690:95
+    688|     expect(within(needs).getByText("Nothing needs fixing.")).toBeTruth…
+    689|     expect(needs.textContent).toContain("Last complete download 2026-1…
+    690|     expect(region("Daily prices").querySelector('[data-variant="status…
+       |                                                                                               ^
+    691|       "No missing prices or gaps",
+    692|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (d) partial
+AssertionError: expected undefined to be 'Needs attention' // Object.is equality
+
+- Expected: 
+"Needs attention"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/data-health.test.tsx:725:82
+    723|     expect(verdict?.getAttribute("data-variant")).toBe("status-warning…
+    724|     const prices = region("Daily prices");
+    725|     expect(prices.querySelector('[data-variant="status-warning"]')?.te…
+       |                                                                                  ^
+    726|       "Needs attention",
+    727|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (e) stale: scores render it, the check cards record it as not rendered
+AssertionError: expected undefined to be 'No missing prices or gaps' // Object.is equality
+
+- Expected: 
+"No missing prices or gaps"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/data-health.test.tsx:752:95
+    750|       expect(region(name).textContent).not.toMatch(/stale|out of date|…
+    751|     }
+    752|     expect(region("Daily prices").querySelector('[data-variant="status…
+       |                                                                                               ^
+    753|       "No missing prices or gaps",
+    754|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (f) unavailable: a failed attention read keeps the cards from their own reads
+AssertionError: expected undefined to be 'Gaps not determinable' // Object.is equality
+
+- Expected: 
+"Gaps not determinable"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/data-health.test.tsx:781:7
+    779|     expect(
+    780|       region("Daily prices").querySelector('[data-variant="coverage-un…
+    781|     ).toBe("Gaps not determinable");
+       |       ^
+    782|     expect(
+    783|       region("Factor scores").querySelector('[data-variant="coverage-u…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > gives each check card its own result line and the follow count
+AssertionError: expected 'Daily prices—no data stored yet—no da…' to contain 'All 12 stocks have prices to 2026-10-…'
+
+Expected: "All 12 stocks have prices to 2026-10-29"
+Received: "Daily prices—no data stored yet—no data stored yet"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1211:48
+    1209|   it("gives each check card its own result line and the follow count",…
+    1210|     await renderScreen();
+    1211|     expect(region("Daily prices").textContent).toContain("All 12 stock…
+       |                                                ^
+    1212|     expect(region("Company financials").textContent).toContain("All 12…
+    1213|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails
+AssertionError: expected 'Daily prices—no data stored yet—no da…' to contain 'All 12 stocks have prices'
+
+Expected: "All 12 stocks have prices"
+Received: "Daily prices—no data stored yet—no data stored yet"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1235:48
+    1233|     healthReadMock.mockResolvedValueOnce(DH()).mockRejectedValue(INTER…
+    1234|     await renderScreen();
+    1235|     expect(region("Daily prices").textContent).toContain("All 12 stock…
+       |                                                ^
+    1236|     await act(() => vi.advanceTimersByTimeAsync(61_000));
+    1237|     await act(() => vi.advanceTimersByTimeAsync(11_000));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Review v1 rework > shows the exceptions badge, a determined and an undetermined gap part, with shape
+AssertionError: expected [ 'Mostly yes', …(6) ] to include 'Needs attention'
+ ❯ src/screens/data-health/data-health.test.tsx:1411:21
+    1409|     );
+    1410|     for (const word of ["Needs attention", "Found", "Not found", "Fail…
+    1411|       expect(words).toContain(word);
+       |                     ^
+    1412|     }
+    1413|     for (const badge of document.querySelectorAll(BADGE)) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 58 passed (65)
+   Start at  03:33:24
+   Duration  2.50s (transform 211ms, setup 52ms, collect 680ms, tests 847ms, environment 214ms, prepare 118ms)
+

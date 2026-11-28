@@ -150,6 +150,37 @@ cycles:
     mutation:
       not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 1 mutated, and the hand-off run scores it
 
+  - id: cycle-5
+    tasks: [T016]
+    description: >
+      Hand-off survivors of the rework. The first run of the rework's hand-off (105 hand-written mutants, no catalogue
+      mutant in the range) left 2 alive: the root and the empty card's body losing flex-col. Tests only: the two class
+      assertions added in cycle 4 now also require flex and flex-col.
+    deviations: >
+      The new assertions pass on the unchanged production code, which was correct; the RED is the two surviving
+      hand-off mutants (manual:13 and manual:75 of handoff-mutants-4.json), each of which the amended cases kill when
+      applied by hand to index.tsx.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/handoff-results-4.json
+    red_log_sha256: e383625753ca7080ad8eef0a5ecc0bcbe8450ee32b5e65ee9055af1a6f203a60
+    red_evidence: >
+      The first run of the rework's hand-off left 2 of 105 mutants alive (handoff-results-4.json).
+    green_evidence: >
+      65 tests pass in data-health.test.tsx; each survivor fails 1 of 65 when applied by hand.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/handoff-results-4.json
+        sha256: e383625753ca7080ad8eef0a5ecc0bcbe8450ee32b5e65ee9055af1a6f203a60
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. The assertions pin the stack direction T012 and T013 prescribe.
+    diff_sha256: b02a31027b6339ae3d8c04364426347bbb1a8b96fe050c635bb8a40d07cf0819
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds assertions over code cycle 1 mutated, and the hand-off run scores it
+
 handoff_mutation:
   runner: scripts/mutation-run.py
   results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/handoff-results-3.json

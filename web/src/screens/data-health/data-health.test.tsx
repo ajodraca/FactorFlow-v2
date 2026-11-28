@@ -1311,7 +1311,7 @@ describe("Review v1 rework", () => {
   it("pins the spacing tokens and full width of the layout", async () => {
     await renderScreen();
     const root = screenRoot();
-    expect(classes(root)).toEqual(expect.arrayContaining(["w-full", "gap-5"]));
+    expect(classes(root)).toEqual(expect.arrayContaining(["flex", "flex-col", "w-full", "gap-5"]));
     expect(classes(region("Daily prices").parentElement)).toContain("gap-5");
     expect(classes(region("Recent downloads").parentElement)).toContain("gap-5");
   });
@@ -1320,7 +1320,9 @@ describe("Review v1 rework", () => {
     standing({ attention: ATT({ latest_download: null, latest_terminal_download: null }) });
     await renderScreen();
     const sentence = within(region(NO_DATA_YET)).getByText(downloadForFollowed("12"));
-    expect(classes(sentence.parentElement)).toContain("gap-4");
+    expect(classes(sentence.parentElement)).toEqual(
+      expect.arrayContaining(["flex", "flex-col", "gap-4"]),
+    );
   });
 
   // IR-004: TC-COMP-179 (c), second half.

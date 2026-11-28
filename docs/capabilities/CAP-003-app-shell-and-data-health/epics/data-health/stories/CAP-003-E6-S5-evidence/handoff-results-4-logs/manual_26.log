@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-faxe01st/w0/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 747ms
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way 12ms
+     → expected '/data' to be '/setup' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way
+AssertionError: expected '/data' to be '/setup' // Object.is equality
+
+Expected: "/setup"
+Received: "/data"
+
+ ❯ src/screens/data-health/data-health.test.tsx:441:39
+    439|     expect(within(card).getByText(FOLLOW_FIRST)).toBeTruthy();
+    440|     const link = within(card).getByRole("link", { name: OPEN_SETUP });
+    441|     expect(link.getAttribute("href")).toBe("/setup");
+       |                                       ^
+    442|     expect(link.getAttribute("data-variant")).toBe("default");
+    443|     expect(within(card).queryByRole("button", { name: START_FIRST_DOWN…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:33:18
+   Duration  2.43s (transform 210ms, setup 50ms, collect 647ms, tests 747ms, environment 263ms, prepare 431ms)
+
