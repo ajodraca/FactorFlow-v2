@@ -62,3 +62,33 @@ cycles:
           disposition: equivalent
           reason: "reloadToken is only an effect dependency; Try again re-reads once whether the token moves by one or two."
 
+  - id: cycle-2
+    tasks: [T004, T020]
+    description: >
+      The literal scan is widened to web/src/screens/instruments/: the TC-COMP-200 block of token-literals.test.ts (RED
+      first, with the directory absent), then the directory appended to SCANNED_DIRECTORIES.
+    deviations: >
+      Case (c) loops over the instruments sources only, since the file's own whole-tree case already covers every scanned
+      file. The planted-literal validation of the plan was run by hand: a planted 12px in badges.tsx failed the scan naming
+      that file, and was reverted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log
+    red_log_sha256: e7c0d7a683094093b0eafc49149689b9697bc077e9f6ccf65eadea5cdf7d8dae
+    red_evidence: >
+      With the new block and the directory not yet appended: 2 tests failed (the directory is absent from
+      SCANNED_DIRECTORIES, and parse-bulk-symbols.ts is not among the scanned files).
+    green_evidence: >
+      69 tests pass in token-literals.test.ts, including the whole-tree scan over the instruments sources.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log
+        sha256: e7c0d7a683094093b0eafc49149689b9697bc077e9f6ccf65eadea5cdf7d8dae
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Case (c) narrows T004's "every scanned file" to the instruments directory, which the whole-tree case covers.
+    diff_sha256: 4a6525536b0c1096f376a94757e1827647aa0bb24e986f995e22d67bd0a9cba5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes only a test file; removing its one appended entry fails the cycle's own (a) and (b), as the RED run shows

@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/components/token-literals.test.ts (69 tests | 2 failed) 50ms
+   × Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (a) widens the scan to the instruments directory 3ms
+     → expected [ 'web/src/components/', …(4) ] to include 'web/src/screens/instruments/'
+   × Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (b) scans its sources, parser included, and no test file 1ms
+     → expected 0 to be greater than 0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/token-literals.test.ts > Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (a) widens the scan to the instruments directory
+AssertionError: expected [ 'web/src/components/', …(4) ] to include 'web/src/screens/instruments/'
+ ❯ src/components/token-literals.test.ts:552:33
+    550| 
+    551|   it("(a) widens the scan to the instruments directory", () => {
+    552|     expect(SCANNED_DIRECTORIES).toContain(directory);
+       |                                 ^
+    553|   });
+    554| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/token-literals.test.ts > Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (b) scans its sources, parser included, and no test file
+AssertionError: expected 0 to be greater than 0
+ ❯ src/components/token-literals.test.ts:557:26
+    555|   it("(b) scans its sources, parser included, and no test file", () =>…
+    556|     const files = scannedFiles().filter((relPath) => relPath.startsWit…
+    557|     expect(files.length).toBeGreaterThan(0);
+       |                          ^
+    558|     expect(files).toContain(`${directory}parse-bulk-symbols.ts`);
+    559|     expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 67 passed (69)
+   Start at  04:08:25
+   Duration  967ms (transform 45ms, setup 62ms, collect 28ms, tests 50ms, environment 369ms, prepare 43ms)
+
