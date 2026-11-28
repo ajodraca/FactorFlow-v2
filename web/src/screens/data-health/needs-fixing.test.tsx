@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import type { JSX } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, ApiUnreachableError, listAcquisitionRuns } from "../../api/client";
+import {
+  ApiError,
+  ApiUnreachableError,
+  listAcquisitionRuns,
+  retireInstrument,
+} from "../../api/client";
 import type { AcquisitionRun, DataType } from "../../api/types";
 import { fetchProblems } from "../../app/shell-client";
 import type {
@@ -13,6 +18,7 @@ import type {
   ProblemRow,
   ReadState,
 } from "../../app/shell-types";
+import { DOWNLOAD_NOW, FOLLOW_DIFFERENT, SHOW_MORE, STOP_FOLLOWING, TRY_AGAIN } from "./copy";
 import { NeedsFixing } from "./needs-fixing";
 
 vi.mock("../../app/shell-client", async () => {
@@ -31,16 +37,23 @@ vi.mock("../../api/client", async () => {
   };
 });
 
+vi.mock("../../components/ui/toast", () => ({
+  toast: { success: vi.fn(), warning: vi.fn(), error: vi.fn() },
+  Toaster: () => null,
+}));
+
 const refresh = vi.fn();
 vi.mock("../../app/shell-context", () => ({ useShell: () => ({ refresh }) }));
 
 const fetchSpy = vi.fn();
 const problemsMock = vi.mocked(fetchProblems);
 const runsMock = vi.mocked(listAcquisitionRuns);
+const retireMock = vi.mocked(retireInstrument);
 
 beforeEach(() => {
   problemsMock.mockReset();
   runsMock.mockReset();
+  retireMock.mockReset();
   refresh.mockReset();
   fetchSpy.mockReset();
   vi.stubGlobal("fetch", fetchSpy);
@@ -572,5 +585,230 @@ describe("Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13)", () => {
     });
     expect(screen.getByText("No complete download yet")).toBeInTheDocument();
     expect(screen.queryByText(/Last complete download/)).toBeNull();
+  });
+});
+
+describe("Needs fixing states and stop following (DAC-E6-9, DAC-E6-12 wiring, DAC-E6-17, AC-24)", () => {
+  it("(a) keeps the heading without a count and shows busy placeholders while loading", () => {
+    const { container } = renderCard({ kind: "loading" });
+    expect(screen.getByRole("heading", { level: 2, name: "Needs fixing" })).toBeInTheDocument();
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(container.querySelector('[data-variant^="status-"]')).toBeNull();
+    expect(screen.queryByRole("button", { name: "Download now" })).toBeNull();
+  });
+
+  it("(b) replaces the body with the checks' failure sentence and re-reads on Try again", async () => {
+    const onReread = vi.fn();
+    renderCard(
+      {
+        kind: "error",
+        error: INTERNAL,
+        last: { data: DH(), checkedAt: new Date("2026-10-30T19:03:12Z") },
+      },
+      onReread,
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "Needs fixing" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Couldn't read the data health checks: FactorFlow hit an unexpected problem.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(document.body.textContent).not.toContain("req-9f3");
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(onReread).toHaveBeenCalledTimes(1);
+  });
+
+  it("(b) reads an unreachable server in the failure sentence", () => {
+    renderCard({ kind: "error", error: UNREACHABLE, last: null });
+    expect(
+      screen.getByText("Couldn't read the data health checks: FactorFlow is not answering."),
+    ).toBeInTheDocument();
+  });
+
+  it("(c) opens the one dialog from a row and re-reads once the stop is confirmed", async () => {
+    retireMock.mockResolvedValueOnce({ lifecycle: "retired", retiredAt: "2026-10-30T19:10:00Z" });
+    const onReread = vi.fn();
+    renderCard(ok(DH()), onReread);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Stop following FBXX" }));
+    const dialog = screen.getByRole("dialog", { name: "Stop following FBXX" });
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    await user.click(within(dialog).getByRole("button", { name: "Stop following" }));
+    await waitFor(() => expect(onReread).toHaveBeenCalledTimes(1));
+    expect(retireMock).toHaveBeenCalledWith("FBXX");
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(refresh).toHaveBeenCalledWith("attention");
+  });
+
+  it("(d) moves focus to the heading when the stopped row leaves", async () => {
+    retireMock.mockResolvedValueOnce({ lifecycle: "retired", retiredAt: "2026-10-30T19:10:00Z" });
+    const { update } = renderCard(ok(DH()));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Stop following FBXX" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Stop following" }),
+    );
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
+    update(
+      ok(
+        DH({
+          affected_count: 1,
+          problems: { rows: [ROW("KO", [FAIL("prices")], true)], next_cursor: null },
+        }),
+      ),
+    );
+    await waitFor(() => expect(symbols()).toEqual(["KO"]));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 2, name: "Needs fixing · 1" })).toHaveFocus(),
+    );
+  });
+
+  it("(c) does not reopen an abandoned dialog when the next answer arrives after a failed read", async () => {
+    const { update } = renderCard(ok(DH()));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Stop following FBXX" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    update({ kind: "error", error: UNREACHABLE, last: null });
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    update(ok(DH()));
+    expect(await screen.findByRole("button", { name: "Stop following FBXX" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("(e) keeps a refused dialog open and re-reads once when it closes", async () => {
+    retireMock.mockRejectedValueOnce(
+      new ApiError("instrument 'FBXX' is already retired", "req-409", {
+        code: "instrument_already_retired",
+      }),
+    );
+    const onReread = vi.fn();
+    renderCard(ok(DH()), onReread);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Stop following FBXX" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Stop following" }),
+    );
+    await screen.findByText(/you already stopped following it/);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(onReread).not.toHaveBeenCalled();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(onReread).toHaveBeenCalledTimes(1);
+  });
+
+  it("(e) does not re-read when an internal failure's dialog closes", async () => {
+    retireMock.mockRejectedValueOnce(INTERNAL);
+    const onReread = vi.fn();
+    renderCard(ok(DH()), onReread);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Stop following FBXX" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Stop following" }),
+    );
+    await screen.findByText(/Couldn't stop following FBXX/);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(onReread).not.toHaveBeenCalled();
+  });
+});
+
+const TERMS = /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
+
+/** Everything a person or a screen reader meets: the page's text and every accessible name written as an attribute. */
+function visibleAndAccessibleText(): string {
+  const names = Array.from(document.body.querySelectorAll("[aria-label], [title]")).flatMap(
+    (el) => [el.getAttribute("aria-label") ?? "", el.getAttribute("title") ?? ""],
+  );
+  return [document.body.textContent ?? "", ...names].join("\n");
+}
+
+// Implements TC-COMP-168
+describe("Needs fixing vocabulary (TC-COMP-168, DAC-E6-S3-4, AC-19)", () => {
+  const MIXED = DH({
+    affected_count: 120,
+    problems: {
+      rows: [
+        ROW("FBXX", [FAIL("prices"), NF("reference")], true),
+        ROW("KO", [FAIL("corporate_actions"), FAIL("fundamentals")], true),
+        ...PAGE(2, 50, "S049").rows,
+      ],
+      next_cursor: "S049",
+    },
+  });
+
+  it("(b) the term scan is not vacuous", () => {
+    expect(TERMS.test("one run")).toBe(true);
+    expect(TERMS.test("Retired")).toBe(true);
+    expect(TERMS.test("Provider credential")).toBe(true);
+    expect(TERMS.test("Downloading")).toBe(false);
+    expect(TERMS.test("downloads")).toBe(false);
+    expect(TERMS.test("corporate_actions")).toBe(false);
+  });
+
+  it.each([
+    ["loading", { kind: "loading" } as ReadState<DataHealth>],
+    ["error", { kind: "error", error: INTERNAL, last: null } as ReadState<DataHealth>],
+    ["unreachable", { kind: "error", error: UNREACHABLE, last: null } as ReadState<DataHealth>],
+    ["populated", ok(MIXED)],
+  ])("(a) uses no domain term in the %s state", (_name, state) => {
+    renderCard(state);
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+  });
+
+  it("(a) uses no domain term after Show more, after its failure or in the dialog", async () => {
+    problemsMock.mockResolvedValueOnce(PAGE(50, 100, "S099")).mockRejectedValueOnce(BAD_CURSOR);
+    renderCard(ok(MIXED));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Show more" }));
+    await screen.findByText("Showing 100 of 120 stocks");
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    await user.click(screen.getByRole("button", { name: "Show more" }));
+    await screen.findByText(/Couldn't read more problems/);
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    await user.click(
+      screen.getAllByRole("button", { name: "Stop following FBXX" })[0] as HTMLElement,
+    );
+    expect(screen.getByRole("dialog", { name: "Stop following FBXX" })).toBeInTheDocument();
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+  });
+
+  it("(a) uses no domain term when nothing needs fixing, pending, with one download, with none or failed", async () => {
+    const pending = deferred<{ runs: AcquisitionRun[]; nextCursor: string | null }>();
+    runsMock.mockReturnValueOnce(pending.promise);
+    const { update } = renderCard(ok(ZERO));
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    await act(async () => {
+      pending.resolve({ runs: [RUN()], nextCursor: null });
+    });
+    await screen.findByText(/Last complete download/);
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    runsMock.mockResolvedValueOnce({ runs: [], nextCursor: null });
+    update(ok(DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })));
+    await screen.findByText("No complete download yet");
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+    runsMock.mockRejectedValueOnce(UNREACHABLE);
+    update(ok(DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })));
+    await screen.findByText(/Couldn't read the last complete download/);
+    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+  });
+
+  it("(c) labels every control with a copy.ts constant or a name built from the symbol", () => {
+    renderCard(ok(DH({ affected_count: 120, problems: { ...DH().problems, next_cursor: "KO" } })));
+    const buttons = screen.getAllByRole("button").map((b) => b.textContent);
+    expect(buttons).toEqual(expect.arrayContaining([STOP_FOLLOWING, DOWNLOAD_NOW, SHOW_MORE]));
+    for (const text of buttons) {
+      expect([STOP_FOLLOWING, DOWNLOAD_NOW, SHOW_MORE, TRY_AGAIN]).toContain(text);
+    }
+    const links = screen.getAllByRole("link").map((l) => l.textContent);
+    for (const text of links) {
+      expect(["FBXX", "KO", FOLLOW_DIFFERENT]).toContain(text);
+    }
+    const badges = Array.from(document.querySelectorAll('[data-variant^="status-"]')).map(
+      (b) => b.textContent,
+    );
+    expect(badges.sort()).toEqual(["Failed", "Not found"]);
   });
 });

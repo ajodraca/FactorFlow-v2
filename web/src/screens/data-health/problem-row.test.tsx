@@ -109,6 +109,7 @@ function badges(container: HTMLElement): HTMLElement[] {
   return Array.from(container.querySelectorAll<HTMLElement>('[data-variant^="status-"]'));
 }
 
+// Implements TC-COMP-165
 describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () => {
   it("renders the symbol, both badges, both fixes and the consequence for a mixed row", async () => {
     const stop = vi.fn();
@@ -232,6 +233,7 @@ describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)", () =>
   });
 });
 
+// Implements TC-COMP-153
 describe("Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14)", () => {
   function renderFollow() {
     return render(
@@ -275,6 +277,7 @@ describe("Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14)", () => {
   });
 });
 
+// Implements TC-COMP-167
 describe("Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24)", () => {
   it("renders markup in a reason as text", () => {
     const reason = "<img src=x onerror=alert(1)><b>bold</b>";
@@ -291,6 +294,7 @@ describe("Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24)", () => {
   });
 });
 
+// Implements TC-COMP-169
 describe("Outcome badges (TC-COMP-169, DAC-E6-S3-5, AC-20)", () => {
   it("renders each badge through StatusBadge with its words, a hidden shape and no aria-label", () => {
     const { container } = renderRow(ROW("FBXX", [FAIL("prices"), NF("reference")], true));

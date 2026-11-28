@@ -10,8 +10,10 @@ import {
   FROM_RECENT_DOWNLOADS,
   LAST_COMPLETE_TARGET,
   MORE_PROBLEMS,
+  NEEDS_FIXING,
   NOTHING_NEEDS_FIXING,
   NO_COMPLETE_DOWNLOAD,
+  READ_TARGETS,
   SHOW_MORE,
   TRY_AGAIN,
   checked,
@@ -23,6 +25,7 @@ import {
 } from "./copy";
 import { DownloadNow } from "./download-now";
 import { ProblemRow } from "./problem-row";
+import { StopFollowingDialog } from "./stop-following-dialog";
 
 const PAGE_SIZE = 50;
 
@@ -94,12 +97,16 @@ function LastComplete({ answer }: { answer: DataHealth }): JSX.Element {
 
 /**
  * The Needs fixing card (component design data-health-ui 2.5, 2.7, 3 and 10;
- * DAC-E6-9, AC-16, AC-25, DEC-0201, DEC-0380 to -2). The header count is the
+ * DAC-E6-9, DAC-E6-10, DAC-E6-15, DAC-E6-17, AC-16, AC-25, DEC-0201, DEC-0380 to
+ * -4). While the aggregate loads or fails the heading stays, without a count,
+ * and the body is placeholders or the checks' failure sentence; the last
+ * answer's rows are never shown beside a failure. The header count is the
  * aggregate's `affected_count`, the set the rail chip counts. The rows are the
  * aggregate's first page, then the pages **Show more** appends with the cursor
  * as served; each new aggregate answer restarts from its first page, so a header
- * count and its rows always come from one response (DEC-0381). The card calls no
- * shell hook itself (its children do), and CAP-003-E6-S5 passes
+ * count and its rows always come from one response (DEC-0381). The one stop
+ * dialog sits beside the rows, with this heading as its focus fallback. The
+ * card calls no shell hook itself (its children do), and CAP-003-E6-S5 passes
  * `useDataHealth().state` and `retry`.
  */
 export function NeedsFixing({
@@ -108,7 +115,7 @@ export function NeedsFixing({
 }: {
   dataHealth: ReadState<DataHealth>;
   onReread: () => void;
-}): JSX.Element | null {
+}): JSX.Element {
   const titleId = useId();
   const dh = dataHealth.kind === "ok" ? dataHealth.data : null;
   const [extraRows, setExtraRows] = useState<ProblemRowData[]>([]);
@@ -122,6 +129,8 @@ export function NeedsFixing({
   const tryRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const pendingFocus = useRef<"list" | "try" | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const [openFor, setOpenFor] = useState<string | null>(null);
 
   useEffect(() => {
     setExtraRows([]);
@@ -130,6 +139,10 @@ export function NeedsFixing({
     setPagePending(false);
     inFlight.current = false;
     generation.current += 1;
+    // The dialog is rendered only with an answer, so an abandoned one must not reopen with the next.
+    if (dh === null) {
+      setOpenFor(null);
+    }
   }, [dh]);
 
   useEffect(() => {
@@ -141,11 +154,7 @@ export function NeedsFixing({
     pendingFocus.current = null;
   });
 
-  if (dh === null) {
-    return null;
-  }
-
-  const rows = [...dh.problems.rows, ...extraRows];
+  const rows = dh === null ? [] : [...dh.problems.rows, ...extraRows];
 
   async function showMore(): Promise<void> {
     if (inFlight.current || dh === null) {
@@ -197,55 +206,81 @@ export function NeedsFixing({
       <Card variant="default">
         <CardHeader className="flex-row flex-wrap items-start justify-between gap-2">
           <div className="flex flex-col gap-1">
-            <CardTitle id={titleId} tabIndex={-1}>
-              {needsFixingTitle(dh.affected_count)}
+            <CardTitle id={titleId} ref={headingRef} tabIndex={-1}>
+              {dh === null ? NEEDS_FIXING : needsFixingTitle(dh.affected_count)}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              {`${FROM_RECENT_DOWNLOADS} · ${checked(formatClock(dh.checked_at))}`}
-            </p>
+            {dh === null ? null : (
+              <p className="text-xs text-muted-foreground">
+                {`${FROM_RECENT_DOWNLOADS} · ${checked(formatClock(dh.checked_at))}`}
+              </p>
+            )}
           </div>
           {rows.some((r) => r.retryable) ? <DownloadNow /> : null}
         </CardHeader>
         <CardContent>
-          {dh.affected_count === 0 ? (
+          {dataHealth.kind === "loading" ? (
             <>
-              <p className="text-base font-semibold">{NOTHING_NEEDS_FIXING}</p>
-              <LastComplete answer={dh} />
+              <SkeletonLine />
+              <SkeletonLine />
+              <SkeletonLine />
             </>
-          ) : (
+          ) : null}
+          {dataHealth.kind === "error" ? (
+            <ReadFailure
+              sentence={readFailed(READ_TARGETS.checks, readFailureReason(dataHealth.error))}
+              onRetry={onReread}
+            />
+          ) : null}
+          {dh === null ? null : (
             <>
-              <ul
-                ref={listRef}
-                tabIndex={-1}
-                aria-labelledby={titleId}
-                className="flex flex-col divide-y divide-border"
-              >
-                {rows.map((r) => (
-                  <ProblemRow key={r.symbol} row={r} onStopFollowing={() => undefined} />
-                ))}
-              </ul>
-              {pageFailure !== null ? (
+              {dh.affected_count === 0 ? (
                 <>
-                  <output className="text-sm">{readFailed(MORE_PROBLEMS, pageFailure)}</output>
-                  <Button ref={tryRef} variant="outline" onClick={onReread}>
-                    {TRY_AGAIN}
-                  </Button>
+                  <p className="text-base font-semibold">{NOTHING_NEEDS_FIXING}</p>
+                  <LastComplete answer={dh} />
                 </>
-              ) : cursor !== null ? (
-                <Button
-                  ref={moreRef}
-                  variant="outline"
-                  aria-busy={pagePending || undefined}
-                  onClick={() => void showMore()}
-                >
-                  {SHOW_MORE}
-                </Button>
-              ) : null}
+              ) : (
+                <>
+                  <ul
+                    ref={listRef}
+                    tabIndex={-1}
+                    aria-labelledby={titleId}
+                    className="flex flex-col divide-y divide-border"
+                  >
+                    {rows.map((r) => (
+                      <ProblemRow key={r.symbol} row={r} onStopFollowing={setOpenFor} />
+                    ))}
+                  </ul>
+                  {pageFailure !== null ? (
+                    <>
+                      <output className="text-sm">{readFailed(MORE_PROBLEMS, pageFailure)}</output>
+                      <Button ref={tryRef} variant="outline" onClick={onReread}>
+                        {TRY_AGAIN}
+                      </Button>
+                    </>
+                  ) : cursor !== null ? (
+                    <Button
+                      ref={moreRef}
+                      variant="outline"
+                      aria-busy={pagePending || undefined}
+                      onClick={() => void showMore()}
+                    >
+                      {SHOW_MORE}
+                    </Button>
+                  ) : null}
+                </>
+              )}
+              <output aria-live="polite" className="sr-only">
+                <span key={announcement.serial}>{announcement.text}</span>
+              </output>
+              <StopFollowingDialog
+                symbol={openFor}
+                onClose={() => setOpenFor(null)}
+                onStopped={onReread}
+                onRefusalClosed={onReread}
+                fallbackFocusRef={headingRef}
+              />
             </>
           )}
-          <output aria-live="polite" className="sr-only">
-            <span key={announcement.serial}>{announcement.text}</span>
-          </output>
         </CardContent>
       </Card>
     </section>

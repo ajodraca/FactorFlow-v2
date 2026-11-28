@@ -1,0 +1,188 @@
+{
+ "schema": 1,
+ "repo_head": "40749d5d9027c229ac552ee4d88db02cd29688c5",
+ "range": "HEAD..worktree",
+ "source": "40749d5d9027c229ac552ee4d88db02cd29688c5",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:209:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 209,
+   "original": "            <CardTitle id={titleId} ref={headingRef} tabIndex={-1}>",
+   "mutated": "            <CardTitle id={titleId} ref={headingRef} tabIndex={-2}>"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:236:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 236,
+   "original": "              {dh.affected_count === 0 ? (",
+   "mutated": "              {dh.affected_count === 1 ? ("
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:245:off-by-one:1",
+   "cycle": "cycle-4",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 245,
+   "original": "                    tabIndex={-1}",
+   "mutated": "                    tabIndex={-2}"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:264:negate-boolean:1",
+   "cycle": "cycle-4",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 264,
+   "original": "                      aria-busy={pagePending || undefined}",
+   "mutated": "                      aria-busy={pagePending && undefined}"
+  },
+  {
+   "id": "manual:error-branch-negated",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 228,
+   "original": "          {dataHealth.kind === \"error\" ? (",
+   "mutated": "          {dataHealth.kind !== \"error\" ? ("
+  },
+  {
+   "id": "manual:loading-branch-negated",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 221,
+   "original": "          {dataHealth.kind === \"loading\" ? (",
+   "mutated": "          {dataHealth.kind !== \"loading\" ? ("
+  },
+  {
+   "id": "manual:title-count-in-loading",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 210,
+   "original": "              {dh === null ? NEEDS_FIXING : needsFixingTitle(dh.affected_count)}",
+   "mutated": "              {needsFixingTitle(0)}"
+  },
+  {
+   "id": "manual:error-target-wrong",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 230,
+   "original": "              sentence={readFailed(READ_TARGETS.checks, readFailureReason(dataHealth.error))}",
+   "mutated": "              sentence={readFailed(READ_TARGETS.scores, readFailureReason(dataHealth.error))}"
+  },
+  {
+   "id": "manual:error-retry-noop",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 231,
+   "original": "              onRetry={onReread}",
+   "mutated": "              onRetry={() => undefined}"
+  },
+  {
+   "id": "manual:stopped-noop",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 278,
+   "original": "                onStopped={onReread}",
+   "mutated": "                onStopped={() => undefined}"
+  },
+  {
+   "id": "manual:refusal-noop",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 279,
+   "original": "                onRefusalClosed={onReread}",
+   "mutated": "                onRefusalClosed={() => undefined}"
+  },
+  {
+   "id": "manual:no-fallback-ref",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 280,
+   "original": "                fallbackFocusRef={headingRef}",
+   "mutated": "                fallbackFocusRef={listRef}"
+  },
+  {
+   "id": "manual:heading-ref-dropped",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 209,
+   "original": "            <CardTitle id={titleId} ref={headingRef} tabIndex={-1}>",
+   "mutated": "            <CardTitle id={titleId} tabIndex={-1}>"
+  },
+  {
+   "id": "manual:close-noop",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 277,
+   "original": "                onClose={() => setOpenFor(null)}",
+   "mutated": "                onClose={() => undefined}"
+  },
+  {
+   "id": "manual:row-stop-noop",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 250,
+   "original": "                      <ProblemRow key={r.symbol} row={r} onStopFollowing={setOpenFor} />",
+   "mutated": "                      <ProblemRow key={r.symbol} row={r} onStopFollowing={() => undefined} />"
+  },
+  {
+   "id": "manual:dialog-symbol-fixed",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 276,
+   "original": "                symbol={openFor}",
+   "mutated": "                symbol={null}"
+  },
+  {
+   "id": "manual:open-for-kept-on-failure",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 143,
+   "original": "    if (dh === null) {",
+   "mutated": "    if (false) {"
+  },
+  {
+   "id": "manual:recent-downloads-run-word",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 214,
+   "original": "                {`${FROM_RECENT_DOWNLOADS} \u00b7 ${checked(formatClock(dh.checked_at))}`}",
+   "mutated": "                {`${FROM_RECENT_DOWNLOADS.replace('downloads','runs')} \u00b7 ${checked(formatClock(dh.checked_at))}`}"
+  },
+  {
+   "id": "manual:last-target-run-word",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 93,
+   "original": "        <ReadFailure sentence={readFailed(LAST_COMPLETE_TARGET, read.reason)} onRetry={load} />",
+   "mutated": "        <ReadFailure sentence={readFailed(\"the last run\", read.reason)} onRetry={load} />"
+  },
+  {
+   "id": "manual:announce-run-word",
+   "cycle": "cycle-4",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 273,
+   "original": "                <span key={announcement.serial}>{announcement.text}</span>",
+   "mutated": "                <span key={announcement.serial}>{announcement.text} run</span>"
+  }
+ ]
+}

@@ -177,3 +177,51 @@ cycles:
         - id: manual:pending-not-shown
           disposition: equivalent
           reason: "load's closure holds the first render's read, which is the pending state, so setting it back is the same as the pending state it is meant to set."
+  - id: cycle-4
+    tasks: [T008, T010, T014]
+    description: >
+      The card's states and the dialog, with the vocabulary scans. needs-fixing.test.tsx: T010 (a-e) and one test that an
+      abandoned dialog does not reopen, then T008 (TC-COMP-168 a-c). Then needs-fixing.tsx: the loading and error
+      states, the heading ref and the one StopFollowingDialog wired to the rows. T008 is tests only and joins this cycle
+      as the plan's T017 allows. Four // Implements markers were added to problem-row.test.tsx (cycle 1's tests).
+    deviations: >
+      (1) The first code review rejected the patch: the dialog is rendered only with an answer but its symbol outlived
+      it, so a dialog abandoned during a failed read would reopen with the next answer. The [dh] effect now clears it
+      when the answer leaves ok, with a test, and both reviews were repeated. (2) The T008 scans read the page text and
+      every aria-label and title; they pass on arrival, so they were probed with three hand-made mutants that put a
+      domain word into the card's text (all killed). (3) The badge labels are compared to the literals Failed and Not
+      found, not to labelOf values.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-4.log
+    red_log_sha256: 212a0ea6c5a22c6d2b1ff7920c967989f27cabf88c3fb4429784e3e22335b680
+    red_evidence: >
+      With the T010 tests added and no loading, error or dialog wiring, 7 of the 37 tests in needs-fixing.test.tsx
+      failed (the 30 earlier ones passed).
+    green_evidence: >
+      46 tests passed in needs-fixing.test.tsx and 226 in web/src/screens/data-health; biome check and npx tsc --noEmit
+      clean on the changed files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-4.log
+        sha256: 212a0ea6c5a22c6d2b1ff7920c967989f27cabf88c3fb4429784e3e22335b680
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The first code review rejected the patch (finding in deviations); the revised patch was approved by a second code
+        review and found free of drift by a second spec-drift review. Follow-ups, not adopted: when the re-read after a
+        stop fails, the rows and the dialog leave together and focus falls to the body; an in-flight stop that fails
+        after the dialog unmounted shows no refusal.
+    diff_sha256: 944f4b0327de0aba76eb234df39b8fc78e52e44a4befdb3e7beaad85604918fb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: 47984ac591788cf68557663a6c12ec9cf6b288c6b5204e24ec4858a0f0d7fda4
+      generated: 20
+      killed: 20
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
