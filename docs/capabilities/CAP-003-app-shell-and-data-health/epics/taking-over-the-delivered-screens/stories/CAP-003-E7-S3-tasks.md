@@ -4,7 +4,7 @@ artifact_id: CAP-003-E7-S3-tasks
 artifact_type: story-tasks
 artifact_version: 1
 status: draft
-last_reworked_review: CAP-003-E7-S3-implementation-review-v1.md
+last_reworked_review: CAP-003-E7-S3-implementation-review-v2.md
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07

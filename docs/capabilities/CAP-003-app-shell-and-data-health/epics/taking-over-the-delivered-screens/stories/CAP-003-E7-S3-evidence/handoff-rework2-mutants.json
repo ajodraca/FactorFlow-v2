@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "repo_head": "1b49b15cbaea44fb7898937ce62cfceebdbc77aa",
+  "range": "c10102d8a4f8c6a09c69bd6bdc0ecc40ee8c05fe..HEAD",
+  "source": "c10102d8a4f8c6a09c69bd6bdc0ecc40ee8c05fe",
+  "mutants": [
+    {
+      "id": "manual:w2-1",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "import { formatInstant } from \"../../components/patterns/format\";",
+      "new": "import { formatTimestamp as formatInstant } from \"../../app/status-region\";",
+      "description": "Formats the last-updated time with the shell's delivered formatTimestamp (YYYY-MM-DD HH:MM:SS America/Chicago) and re-adds an importer of status-region.tsx: the review v2 IR-001 defect (ui-components design 2.5 'every CAP-003 surface uses formatInstant'; UX design 0.7; DAC-E3-15)"
+    },
+    {
+      "id": "manual:w2-2",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "import { formatInstant } from \"../../components/patterns/format\";",
+      "new": "import { formatClock as formatInstant } from \"../../components/patterns/format\";",
+      "description": "Renders the last-updated time as formatClock's HH:MM:SS zone, without the date, on a line that carries no date (UX design 0.7 'YYYY-MM-DD HH:MM zone, or HH:MM zone where the date is already on the line'; ui-components design 2.5 formatClock only for 'checked {time}')"
+    },
+    {
+      "id": "manual:w2-3",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "formatInstant(new Date(populated.fetchedAt))",
+      "new": "formatInstant(new Date(populated.fetchedAt), { seconds: true })",
+      "description": "Adds seconds to the last-updated time (UX design 0.7 form YYYY-MM-DD HH:MM zone; ui-components design 2.5 keeps seconds for the unreachable state's Last answered only)"
+    },
+    {
+      "id": "manual:w2-4",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "formatInstant(new Date(populated.fetchedAt))",
+      "new": "formatInstant(new Date())",
+      "description": "Shows the time of rendering instead of the time the list was read (fetchedAt), so a redraw moves the time without a re-read (UX design 1.6 States last-updated time; review v1 IR-001 remediation 'from fetchedAt')"
+    },
+    {
+      "id": "manual:w2-5",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "        <p className=\"font-numeric text-xs text-muted-foreground\">\n          Last updated {formatInstant(new Date(populated.fetchedAt))}\n        </p>\n",
+      "new": "",
+      "description": "Removes the populated table's last-updated line: the Stale row of the state table (UX design 1.6 States 'last-updated time'; capability AC-24; review v1 IR-001)"
+    },
+    {
+      "id": "manual:w2-6",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {populated.fetchedAt}",
+      "description": "Renders the raw ISO-8601 UTC string instead of UX design 0.7's America/Chicago form with the zone shown (AC-24; review v2 IR-001)"
+    },
+    {
+      "id": "manual:w2-7",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {formatInstant(new Date(populated.fetchedAt)).slice(0, 10)}",
+      "description": "Drops the time of day from the last-updated time, leaving only the date (UX design 0.7 YYYY-MM-DD HH:MM zone)"
+    },
+    {
+      "id": "manual:w2-8",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {formatInstant(new Date(populated.fetchedAt)).slice(0, 16)}",
+      "description": "Drops the zone from the last-updated time (UX design 0.7 'timestamps are America/Chicago with the zone shown, CDT or CST'; STD-UI-5)"
+    },
+    {
+      "id": "manual:w2-9",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {formatInstant(new Date(populated.fetchedAt)).slice(11)}",
+      "description": "Renders only HH:MM zone, the short form UX design 0.7 allows only where the date is already on the line, which it is not here"
+    },
+    {
+      "id": "manual:w2-10",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {formatInstant(new Date(populated.fetchedAt)).replace(\"CDT\", \"CST\")}",
+      "description": "Labels every instant CST, also in daylight time (UX design 0.7 'CDT or CST as the instant falls'; ui-components design 2.5)"
+    },
+    {
+      "id": "manual:w2-11",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {formatInstant(new Date(populated.fetchedAt)).replace(\"CST\", \"CDT\")}",
+      "description": "Labels every instant CDT, also in standard time (UX design 0.7 'CDT or CST as the instant falls'; ui-components design 2.5)"
+    },
+    {
+      "id": "manual:w2-12",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {formatInstant(new Date(populated.fetchedAt)).replace(/C[DS]T$/, \"America/Chicago\")}",
+      "description": "Writes the zone as the IANA name America/Chicago rather than its abbreviation (UX design 0.7 'CDT or CST'; review v2 IR-001)"
+    },
+    {
+      "id": "manual:w2-13",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {new Date(populated.fetchedAt).toISOString().slice(0, 16).replace(\"T\", \" \")} CST",
+      "description": "Renders the UTC wall-clock time under a Chicago zone label instead of converting to America/Chicago (UX design 0.7; STD-UI-5)"
+    },
+    {
+      "id": "manual:w2-14",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated {new Date(populated.fetchedAt).toLocaleString()}",
+      "description": "Renders the last-updated time in the viewer's locale and machine zone (UX design 0.7 'never a locale format'; STD-UI-5; ui-components design 2.5)"
+    },
+    {
+      "id": "manual:w2-15",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "          Last updated {formatInstant",
+      "new": "          Updated {formatInstant",
+      "description": "Changes the line's words away from 'Last updated' (UX design 1.6 States last-updated time; review v1 IR-001 'Last updated {time}')"
+    },
+    {
+      "id": "manual:w2-16",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "Last updated {formatInstant(new Date(populated.fetchedAt))}",
+      "new": "Last updated",
+      "description": "Drops the time from the last-updated line, leaving only its label (UX design 1.6 States last-updated time; capability AC-24)"
+    }
+  ]
+}
