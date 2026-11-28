@@ -298,9 +298,18 @@ describe("InstrumentTable — followed stocks", () => {
       vi.setSystemTime(first);
       const { rerender } = renderTable({ refreshToken: 0 });
       await screen.findByRole("table");
-      expect(screen.getByText(`Last updated ${formatTimestamp(first)}`)).toBeInTheDocument();
+      const stamp = screen.getByText(`Last updated ${formatTimestamp(first)}`);
+      expect(stamp).toHaveClass("font-numeric", "text-xs");
 
+      // The time is the read's, not the moment of a later redraw.
       vi.setSystemTime(second);
+      await userEvent
+        .setup({ advanceTimers: () => undefined })
+        .click(screen.getByRole("button", { name: "Stop following AAPL" }));
+      await screen.findByRole("dialog");
+      expect(screen.getByText(`Last updated ${formatTimestamp(first)}`)).toBeInTheDocument();
+      await userEvent.setup().keyboard("{Escape}");
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
       rerender(
         <MemoryRouter>
           <InstrumentTable refreshToken={1} />
@@ -356,6 +365,48 @@ describe("InstrumentTable — followed stocks", () => {
     await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
     await screen.findByRole("dialog");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("clears a refusal as the next attempt goes out, and opens the next stock's dialog not held", async () => {
+    const user = userEvent.setup();
+    vi.mocked(client.listInstruments).mockResolvedValue({
+      rows: [
+        { instrumentId: 1, symbol: "AAPL", lifecycle: "active" as const },
+        { instrumentId: 3, symbol: "GOOG", lifecycle: "active" as const },
+      ],
+      activeCount: 2,
+      retiredCount: 0,
+      nextCursor: null,
+    });
+    let settle: () => void = () => undefined;
+    vi.mocked(client.retireInstrument)
+      .mockRejectedValueOnce(new Error("service unavailable"))
+      .mockReturnValueOnce(
+        new Promise<never>((resolve) => {
+          settle = () => resolve(undefined as never);
+        }),
+      );
+    renderTable();
+    await screen.findByRole("table");
+
+    await user.click(screen.getByRole("button", { name: "Stop following AAPL" }));
+    const confirm = within(await screen.findByRole("dialog")).getByRole("button", {
+      name: "Stop following",
+    });
+    await user.click(confirm);
+    await screen.findByRole("alert");
+    expect(confirm).not.toHaveAttribute("aria-disabled");
+
+    await user.click(confirm);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    settle();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "Stop following GOOG" }));
+    const next = within(await screen.findByRole("dialog")).getByRole("button", {
+      name: "Stop following",
+    });
+    expect(next).not.toHaveAttribute("aria-disabled");
   });
 
   // IR-006, AC-25: focus returns to the row action on cancel.
