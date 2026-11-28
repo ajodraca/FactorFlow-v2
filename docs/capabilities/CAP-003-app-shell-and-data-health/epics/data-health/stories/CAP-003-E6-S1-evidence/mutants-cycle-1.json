@@ -1,0 +1,160 @@
+{
+ "schema": 1,
+ "repo_head": "c276899ff9d3e59a880a534827e53a9f84ba8a8d",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:67:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 67,
+   "original": "  if (check.absent_count > 0) {",
+   "mutated": "  if (check.absent_count >= 0) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:67:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 67,
+   "original": "  if (check.absent_count > 0) {",
+   "mutated": "  if (check.absent_count > 1) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:78:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 78,
+   "original": "  } else if (check.gap_stock_count > 0) {",
+   "mutated": "  } else if (check.gap_stock_count >= 0) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:78:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 78,
+   "original": "  } else if (check.gap_stock_count > 0) {",
+   "mutated": "  } else if (check.gap_stock_count > 1) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:81:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 81,
+   "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
+   "mutated": "  if (check.behind_count > 0 || check.latest_session !== null) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:81:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 81,
+   "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
+   "mutated": "  if (check.behind_count >= 0 && check.latest_session !== null) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:81:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 81,
+   "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
+   "mutated": "  if (check.behind_count > 1 && check.latest_session !== null) {"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:96:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 96,
+   "original": "            {index > 0 ? \", \" : null}",
+   "mutated": "            {index >= 0 ? \", \" : null}"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:96:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 96,
+   "original": "            {index > 0 ? \", \" : null}",
+   "mutated": "            {index > 1 ? \", \" : null}"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:103:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 103,
+   "original": "    check.exception_symbols.length === 0",
+   "mutated": "    check.exception_symbols.length === 1"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:105:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 105,
+   "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
+   "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more >= 0 ? ` ${andMore(more)}` : \"\"}`;"
+  },
+  {
+   "id": "web/src/screens/data-health/daily-prices-card.tsx:105:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 105,
+   "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
+   "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 1 ? ` ${andMore(more)}` : \"\"}`;"
+  },
+  {
+   "id": "manual:gap-null",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 70,
+   "original": "  if (check.gap_stock_count === null) {",
+   "mutated": "  if (!check.gap_stock_count) {"
+  },
+  {
+   "id": "manual:more-5",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 101,
+   "original": "  const more = check.exception_count - check.exception_symbols.length;",
+   "mutated": "  const more = check.exception_count - 5;"
+  },
+  {
+   "id": "manual:status-neg",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 58,
+   "original": "    check.status === \"not_determinable\" ? (",
+   "mutated": "    check.status !== \"not_determinable\" ? ("
+  },
+  {
+   "id": "manual:ok-neg",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 90,
+   "original": "    check.status === \"ok\"",
+   "mutated": "    check.status !== \"ok\""
+  },
+  {
+   "id": "manual:session-neg",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/daily-prices-card.tsx",
+   "line": 51,
+   "original": "    check.latest_session === null ? (",
+   "mutated": "    check.latest_session !== null ? ("
+  }
+ ]
+}

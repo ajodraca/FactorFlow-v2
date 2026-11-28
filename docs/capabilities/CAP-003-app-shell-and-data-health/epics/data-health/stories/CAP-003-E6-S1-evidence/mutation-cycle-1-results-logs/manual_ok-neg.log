@@ -1,0 +1,179 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 7 failed) 180ms
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session 87ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^All 1,236 stocks have prices to 2026-10-29$/
+Received:
+
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 15ms
+     → expected [] to have a length of 1 but got +0
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 5ms
+     → expected 'Daily pricesNot determinablefewer tha…' not to match /All \d+ stocks have prices/
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 12ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 with gaps$/
+Received:
+  All 10 stocks have prices to 2026-10-29
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 3ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^3 without prices$/
+Received:
+  All 10 stocks have prices to 2026-10-29
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 1ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
+Received:
+  All 10 stocks have prices to 2026-10-29
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date 1ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  no prices stored yet
+Received:
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^All 1,236 stocks have prices to 2026-10-29$/
+Received:
+
+ ❯ src/screens/data-health/check-cards.test.tsx:77:30
+     75|     const badge = badgeWith(card, "status-good");
+     76|     expect(badge).toHaveTextContent("No missing prices or gaps");
+     77|     expect(resultLine(card)).toHaveTextContent(/^All 1,236 stocks have…
+       |                              ^
+     78|     expect(asOfLine(card)).toHaveTextContent(/^Prices to 2026-10-29$/);
+     79|     expect(card.textContent).not.toMatch(/more/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:45:17
+     43| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
+     44|   const found = badges(root).filter((element) => element.dataset.varia…
+     45|   expect(found).toHaveLength(1);
+       |                 ^
+     46|   return found[0] as HTMLElement;
+     47| }
+ ❯ src/screens/data-health/check-cards.test.tsx:97:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
+AssertionError: expected 'Daily pricesNot determinablefewer tha…' not to match /All \d+ stocks have prices/
+
+- Expected: 
+/All \d+ stocks have prices/
+
++ Received: 
+"Daily pricesNot determinablefewer than two followed stocks hold daily pricesAll 10 stocks have prices to 2026-10-29Prices to 2026-10-29Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.Full coverage table"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:122:34
+    120|       "fewer than two followed stocks hold daily prices",
+    121|     );
+    122|     expect(card.textContent).not.toMatch(/All \d+ stocks have prices/);
+       |                                  ^
+    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
+    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 with gaps$/
+Received:
+  All 10 stocks have prices to 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:133:35
+    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
+    132|     );
+    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
+       |                                   ^
+    134|   });
+    135| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^3 without prices$/
+Received:
+  All 10 stocks have prices to 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:141:35
+    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
+    140|     );
+    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
+       |                                   ^
+    142|     expect(container.textContent).not.toContain("0 with gaps");
+    143|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
+Received:
+  All 10 stocks have prices to 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:150:35
+    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
+    149|     );
+    150|     expect(resultLine(container)).toHaveTextContent(
+       |                                   ^
+    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
+    152|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  no prices stored yet
+Received:
+
+ ❯ src/screens/data-health/check-cards.test.tsx:199:35
+    197|     const { container } = renderPrices(prices({ latest_session: null }…
+    198|     expect(resultLine(container).textContent).not.toMatch(/All|null|\b…
+    199|     expect(resultLine(container)).toHaveTextContent("no prices stored …
+       |                                   ^
+    200|   });
+    201| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 8 passed (15)
+   Start at  20:37:43
+   Duration  2.24s (transform 153ms, setup 154ms, collect 894ms, tests 180ms, environment 393ms, prepare 201ms)
+

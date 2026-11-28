@@ -1,0 +1,2552 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-1.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-1.json
+new file mode 100644
+index 00000000..14efa65b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-1.json
+@@ -0,0 +1,160 @@
++{
++ "schema": 1,
++ "repo_head": "c276899ff9d3e59a880a534827e53a9f84ba8a8d",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:67:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 67,
++   "original": "  if (check.absent_count > 0) {",
++   "mutated": "  if (check.absent_count >= 0) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:67:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 67,
++   "original": "  if (check.absent_count > 0) {",
++   "mutated": "  if (check.absent_count > 1) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:78:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 78,
++   "original": "  } else if (check.gap_stock_count > 0) {",
++   "mutated": "  } else if (check.gap_stock_count >= 0) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:78:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 78,
++   "original": "  } else if (check.gap_stock_count > 0) {",
++   "mutated": "  } else if (check.gap_stock_count > 1) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:81:negate-boolean:1",
++   "cycle": "cycle-1",
++   "operator": "negate-boolean",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 81,
++   "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
++   "mutated": "  if (check.behind_count > 0 || check.latest_session !== null) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:81:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 81,
++   "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
++   "mutated": "  if (check.behind_count >= 0 && check.latest_session !== null) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:81:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 81,
++   "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
++   "mutated": "  if (check.behind_count > 1 && check.latest_session !== null) {"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:96:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 96,
++   "original": "            {index > 0 ? \", \" : null}",
++   "mutated": "            {index >= 0 ? \", \" : null}"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:96:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 96,
++   "original": "            {index > 0 ? \", \" : null}",
++   "mutated": "            {index > 1 ? \", \" : null}"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:103:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 103,
++   "original": "    check.exception_symbols.length === 0",
++   "mutated": "    check.exception_symbols.length === 1"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:105:off-by-one:1",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 105,
++   "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
++   "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more >= 0 ? ` ${andMore(more)}` : \"\"}`;"
++  },
++  {
++   "id": "web/src/screens/data-health/daily-prices-card.tsx:105:off-by-one:2",
++   "cycle": "cycle-1",
++   "operator": "off-by-one",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 105,
++   "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
++   "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 1 ? ` ${andMore(more)}` : \"\"}`;"
++  },
++  {
++   "id": "manual:gap-null",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 70,
++   "original": "  if (check.gap_stock_count === null) {",
++   "mutated": "  if (!check.gap_stock_count) {"
++  },
++  {
++   "id": "manual:more-5",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 101,
++   "original": "  const more = check.exception_count - check.exception_symbols.length;",
++   "mutated": "  const more = check.exception_count - 5;"
++  },
++  {
++   "id": "manual:status-neg",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 58,
++   "original": "    check.status === \"not_determinable\" ? (",
++   "mutated": "    check.status !== \"not_determinable\" ? ("
++  },
++  {
++   "id": "manual:ok-neg",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 90,
++   "original": "    check.status === \"ok\"",
++   "mutated": "    check.status !== \"ok\""
++  },
++  {
++   "id": "manual:session-neg",
++   "cycle": "cycle-1",
++   "operator": "manual",
++   "file": "web/src/screens/data-health/daily-prices-card.tsx",
++   "line": 51,
++   "original": "    check.latest_session === null ? (",
++   "mutated": "    check.latest_session !== null ? ("
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..9a2304af
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (15 tests) 157ms
++
++ Test Files  1 passed (1)
++      Tests  15 passed (15)
++   Start at  20:37:29
++   Duration  2.98s (transform 187ms, setup 84ms, collect 1.25s, tests 157ms, environment 489ms, prepare 448ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..19e31460
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (15 tests) 167ms
++
++ Test Files  1 passed (1)
++      Tests  15 passed (15)
++   Start at  20:37:29
++   Duration  2.99s (transform 175ms, setup 81ms, collect 1.25s, tests 167ms, environment 485ms, prepare 484ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..f4883e16
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (15 tests) 102ms
++
++ Test Files  1 passed (1)
++      Tests  15 passed (15)
++   Start at  20:37:29
++   Duration  2.94s (transform 229ms, setup 103ms, collect 1.21s, tests 102ms, environment 413ms, prepare 522ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..ddcba10c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log
+@@ -0,0 +1,14 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/data-health/check-cards.test.tsx (15 tests) 159ms
++
++ Test Files  1 passed (1)
++      Tests  15 passed (15)
++   Start at  20:37:29
++   Duration  2.98s (transform 155ms, setup 82ms, collect 1.23s, tests 159ms, environment 449ms, prepare 409ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_gap-null.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_gap-null.log
+new file mode 100644
+index 00000000..12164aa8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_gap-null.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 132ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 19ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, Gaps not determinableno reason was given
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, Gaps not determinableno reason was given
++ ❯ src/screens/data-health/check-cards.test.tsx:141:35
++    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
++    140|     );
++    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
++       |                                   ^
++    142|     expect(container.textContent).not.toContain("0 with gaps");
++    143|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 14 passed (15)
++   Start at  20:37:42
++   Duration  2.81s (transform 138ms, setup 279ms, collect 820ms, tests 132ms, environment 817ms, prepare 454ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_more-5.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_more-5.log
+new file mode 100644
+index 00000000..289bf747
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_more-5.log
+@@ -0,0 +1,34 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 256ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 4 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC and 1 more 28ms
++     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC' to be 'Prices to 2026-10-29 · AAA, BBB, CCC …' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 4 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC and 1 more
++AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC' to be 'Prices to 2026-10-29 · AAA, BBB, CCC …' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC and 1 more"
++Received: "Prices to 2026-10-29 · AAA, BBB, CCC"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 14 passed (15)
++   Start at  20:37:43
++   Duration  2.86s (transform 157ms, setup 66ms, collect 981ms, tests 256ms, environment 602ms, prepare 537ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_ok-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_ok-neg.log
+new file mode 100644
+index 00000000..60ca0735
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_ok-neg.log
+@@ -0,0 +1,179 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 7 failed) 180ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session 87ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^All 1,236 stocks have prices to 2026-10-29$/
++Received:
++
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 15ms
++     → expected [] to have a length of 1 but got +0
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 5ms
++     → expected 'Daily pricesNot determinablefewer tha…' not to match /All \d+ stocks have prices/
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 12ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  All 10 stocks have prices to 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 3ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  All 10 stocks have prices to 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 1ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  All 10 stocks have prices to 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date 1ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  no prices stored yet
++Received:
++
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^All 1,236 stocks have prices to 2026-10-29$/
++Received:
++
++ ❯ src/screens/data-health/check-cards.test.tsx:77:30
++     75|     const badge = badgeWith(card, "status-good");
++     76|     expect(badge).toHaveTextContent("No missing prices or gaps");
++     77|     expect(resultLine(card)).toHaveTextContent(/^All 1,236 stocks have…
++       |                              ^
++     78|     expect(asOfLine(card)).toHaveTextContent(/^Prices to 2026-10-29$/);
++     79|     expect(card.textContent).not.toMatch(/more/);
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:45:17
++     43| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++     44|   const found = badges(root).filter((element) => element.dataset.varia…
++     45|   expect(found).toHaveLength(1);
++       |                 ^
++     46|   return found[0] as HTMLElement;
++     47| }
++ ❯ src/screens/data-health/check-cards.test.tsx:97:17
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++AssertionError: expected 'Daily pricesNot determinablefewer tha…' not to match /All \d+ stocks have prices/
++
++- Expected: 
++/All \d+ stocks have prices/
++
+++ Received: 
++"Daily pricesNot determinablefewer than two followed stocks hold daily pricesAll 10 stocks have prices to 2026-10-29Prices to 2026-10-29Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.Full coverage table"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:122:34
++    120|       "fewer than two followed stocks hold daily prices",
++    121|     );
++    122|     expect(card.textContent).not.toMatch(/All \d+ stocks have prices/);
++       |                                  ^
++    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
++    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  All 10 stocks have prices to 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:133:35
++    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
++    132|     );
++    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
++       |                                   ^
++    134|   });
++    135| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  All 10 stocks have prices to 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:141:35
++    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
++    140|     );
++    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
++       |                                   ^
++    142|     expect(container.textContent).not.toContain("0 with gaps");
++    143|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  All 10 stocks have prices to 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:150:35
++    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
++    149|     );
++    150|     expect(resultLine(container)).toHaveTextContent(
++       |                                   ^
++    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    152|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  no prices stored yet
++Received:
++
++ ❯ src/screens/data-health/check-cards.test.tsx:199:35
++    197|     const { container } = renderPrices(prices({ latest_session: null }…
++    198|     expect(resultLine(container).textContent).not.toMatch(/All|null|\b…
++    199|     expect(resultLine(container)).toHaveTextContent("no prices stored …
++       |                                   ^
++    200|   });
++    201| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
++
++ Test Files  1 failed (1)
++      Tests  7 failed | 8 passed (15)
++   Start at  20:37:43
++   Duration  2.24s (transform 153ms, setup 154ms, collect 894ms, tests 180ms, environment 393ms, prepare 201ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_session-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_session-neg.log
+new file mode 100644
+index 00000000..ebc79cf9
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_session-neg.log
+@@ -0,0 +1,230 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) a null latest_session renders an absent em dash, never null or 0
++Error: Uncaught [RangeError: Not an ISO-8601 date: null]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: null
++    at Module.formatSessionDate (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/components/patterns/format.ts:65:11)
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/screens/data-health/daily-prices-card.tsx:54:7)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [RangeError: Not an ISO-8601 date: null]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: null
++    at Module.formatSessionDate (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/components/patterns/format.ts:65:11)
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/screens/data-health/daily-prices-card.tsx:54:7)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <DailyPricesCard> component:
++
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/screens/data-health/daily-prices-card.tsx:22:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date
++Error: Uncaught [RangeError: Not an ISO-8601 date: null]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: null
++    at Module.formatSessionDate (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/components/patterns/format.ts:65:11)
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/screens/data-health/daily-prices-card.tsx:54:7)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++Error: Uncaught [RangeError: Not an ISO-8601 date: null]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) RangeError: Not an ISO-8601 date: null
++    at Module.formatSessionDate (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/components/patterns/format.ts:65:11)
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/screens/data-health/daily-prices-card.tsx:54:7)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++The above error occurred in the <DailyPricesCard> component:
++
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web/src/screens/data-health/daily-prices-card.tsx:22:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 8 failed) 131ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session 45ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Prices to 2026-10-29$/
++Received:
++  Prices to —no prices stored yet
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 7 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 2 more 3ms
++     → expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 6 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 1 more 2ms
++     → expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE 3ms
++     → expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 4 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC and 1 more 1ms
++     → expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC …' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 3 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC 1ms
++     → expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) a null latest_session renders an absent em dash, never null or 0 6ms
++     → Not an ISO-8601 date: null
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date 1ms
++     → Not an ISO-8601 date: null
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Prices to 2026-10-29$/
++Received:
++  Prices to —no prices stored yet
++ ❯ src/screens/data-health/check-cards.test.tsx:78:28
++     76|     expect(badge).toHaveTextContent("No missing prices or gaps");
++     77|     expect(resultLine(card)).toHaveTextContent(/^All 1,236 stocks have…
++     78|     expect(asOfLine(card)).toHaveTextContent(/^Prices to 2026-10-29$/);
++       |                            ^
++     79|     expect(card.textContent).not.toMatch(/more/);
++     80|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 7 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 2 more
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 6 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 1 more
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE
++AssertionError: expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 2 more"
++Received: "Prices to —no prices stored yet · AAA, BBB, CCC, DDD, EEE and 2 more"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 4 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC and 1 more
++AssertionError: expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC …' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC and 1 more"
++Received: "Prices to —no prices stored yet · AAA, BBB, CCC and 1 more"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 3 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC
++AssertionError: expected 'Prices to —no prices stored yet · AAA…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC"
++Received: "Prices to —no prices stored yet · AAA, BBB, CCC"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) a null latest_session renders an absent em dash, never null or 0
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (f) an ok check with no stored session keeps the absent dash in the result, never a date
++RangeError: Not an ISO-8601 date: null
++ ❯ Module.formatSessionDate src/components/patterns/format.ts:65:11
++     63| export function formatSessionDate(value: string): string {
++     64|   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
++     65|     throw new RangeError(`Not an ISO-8601 date: ${JSON.stringify(value…
++       |           ^
++     66|   }
++     67|   return value;
++ ❯ DailyPricesCard src/screens/data-health/daily-prices-card.tsx:54:7
++ ❯ renderWithHooks ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26473:7
++ ❯ recoverFromConcurrentError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:25889:20
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
++
++ Test Files  1 failed (1)
++      Tests  8 failed | 7 passed (15)
++   Start at  20:37:46
++   Duration  1.38s (transform 246ms, setup 59ms, collect 512ms, tests 131ms, environment 257ms, prepare 181ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_status-neg.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_status-neg.log
+new file mode 100644
+index 00000000..2e95d7eb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_status-neg.log
+@@ -0,0 +1,135 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++Error: Uncaught [Error: Unhandled status: "not_determinable"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: Unhandled status: "not_determinable"
++    at assertNever (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/components/patterns/tiers.ts:39:9)
++    at Module.tierOf (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/components/patterns/tiers.ts:96:18)
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/screens/data-health/daily-prices-card.tsx:61:26)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++Error: Uncaught [Error: Unhandled status: "not_determinable"]
++    at reportException (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/helpers/runtime-script-errors.js:66:24)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:353:9)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++    at HTMLUnknownElementImpl._dispatch (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
++    at HTMLUnknownElementImpl.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
++    at HTMLUnknownElement.dispatchEvent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
++    at Object.invokeGuardedCallbackDev (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
++    at invokeGuardedCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
++    at beginWork$1 (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27490:7)
++    at performUnitOfWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12) Error: Unhandled status: "not_determinable"
++    at assertNever (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/components/patterns/tiers.ts:39:9)
++    at Module.tierOf (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/components/patterns/tiers.ts:96:18)
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/screens/data-health/daily-prices-card.tsx:61:26)
++    at renderWithHooks (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
++    at mountIndeterminateComponent (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
++    at beginWork (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
++    at HTMLUnknownElement.callCallback (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
++    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
++    at innerInvokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
++    at invokeEventListeners (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
++The above error occurred in the <DailyPricesCard> component:
++
++    at DailyPricesCard (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web/src/screens/data-health/daily-prices-card.tsx:22:3)
++    at Router (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
++    at MemoryRouter (/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
++
++Consider adding an error boundary to your tree to customize error handling behavior.
++Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 3 failed) 228ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session 126ms
++     → expected [] to have a length of 1 but got +0
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 9ms
++     → expected [] to have a length of 1 but got +0
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 33ms
++     → Unhandled status: "not_determinable"
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:45:17
++     43| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++     44|   const found = badges(root).filter((element) => element.dataset.varia…
++     45|   expect(found).toHaveLength(1);
++       |                 ^
++     46|   return found[0] as HTMLElement;
++     47| }
++ ❯ src/screens/data-health/check-cards.test.tsx:75:19
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
++AssertionError: expected [] to have a length of 1 but got +0
++
++- Expected
+++ Received
++
++- 1
+++ 0
++
++ ❯ badgeWith src/screens/data-health/check-cards.test.tsx:45:17
++     43| function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++     44|   const found = badges(root).filter((element) => element.dataset.varia…
++     45|   expect(found).toHaveLength(1);
++       |                 ^
++     46|   return found[0] as HTMLElement;
++     47| }
++ ❯ src/screens/data-health/check-cards.test.tsx:96:12
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++Error: Unhandled status: "not_determinable"
++ ❯ assertNever src/components/patterns/tiers.ts:39:9
++     37| 
++     38| function assertNever(value: never): never {
++     39|   throw new Error(`Unhandled status: ${JSON.stringify(value)}`);
++       |         ^
++     40| }
++     41| 
++ ❯ Module.tierOf src/components/patterns/tiers.ts:96:18
++ ❯ DailyPricesCard src/screens/data-health/daily-prices-card.tsx:61:26
++ ❯ renderWithHooks ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:15486:18
++ ❯ mountIndeterminateComponent ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:20103:13
++ ❯ beginWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:21626:16
++ ❯ beginWork$1 ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:27465:14
++ ❯ performUnitOfWork ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26599:12
++ ❯ workLoopSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26505:5
++ ❯ renderRootSync ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/react-dom/cjs/react-dom.development.js:26473:7
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 12 passed (15)
++   Start at  20:37:43
++   Duration  2.76s (transform 142ms, setup 65ms, collect 805ms, tests 228ms, environment 538ms, prepare 469ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_103_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_103_off-by-one_1.log
+new file mode 100644
+index 00000000..6cb48d67
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_103_off-by-one_1.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 133ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session 67ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Prices to 2026-10-29$/
++Received:
++  Prices to 2026-10-29 ·
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Prices to 2026-10-29$/
++Received:
++  Prices to 2026-10-29 ·
++ ❯ src/screens/data-health/check-cards.test.tsx:78:28
++     76|     expect(badge).toHaveTextContent("No missing prices or gaps");
++     77|     expect(resultLine(card)).toHaveTextContent(/^All 1,236 stocks have…
++     78|     expect(asOfLine(card)).toHaveTextContent(/^Prices to 2026-10-29$/);
++       |                            ^
++     79|     expect(card.textContent).not.toMatch(/more/);
++     80|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 14 passed (15)
++   Start at  20:37:39
++   Duration  1.99s (transform 136ms, setup 94ms, collect 786ms, tests 133ms, environment 345ms, prepare 400ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_1.log
+new file mode 100644
+index 00000000..f293b946
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_1.log
+@@ -0,0 +1,52 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 288ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE 26ms
++     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC,…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 3 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC 1ms
++     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC …' to be 'Prices to 2026-10-29 · AAA, BBB, CCC' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 5 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE
++AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC,…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE"
++Received: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 0 more"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 3 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC
++AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC …' to be 'Prices to 2026-10-29 · AAA, BBB, CCC' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC"
++Received: "Prices to 2026-10-29 · AAA, BBB, CCC and 0 more"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 13 passed (15)
++   Start at  20:37:39
++   Duration  2.06s (transform 140ms, setup 96ms, collect 749ms, tests 288ms, environment 311ms, prepare 298ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_2.log
+new file mode 100644
+index 00000000..57ac141c
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_2.log
+@@ -0,0 +1,52 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 333ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 6 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 1 more 9ms
++     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC,…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 4 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC and 1 more 3ms
++     → expected 'Prices to 2026-10-29 · AAA, BBB, CCC' to be 'Prices to 2026-10-29 · AAA, BBB, CCC …' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 6 with ["AAA","BBB","CCC","DDD","EEE"] reads Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 1 more
++AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC,…' to be 'Prices to 2026-10-29 · AAA, BBB, CCC,…' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 1 more"
++Received: "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (e) exception_count 4 with ["AAA","BBB","CCC"] reads Prices to 2026-10-29 · AAA, BBB, CCC and 1 more
++AssertionError: expected 'Prices to 2026-10-29 · AAA, BBB, CCC' to be 'Prices to 2026-10-29 · AAA, BBB, CCC …' // Object.is equality
++
++Expected: "Prices to 2026-10-29 · AAA, BBB, CCC and 1 more"
++Received: "Prices to 2026-10-29 · AAA, BBB, CCC"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:179:53
++    177|       }),
++    178|     );
++    179|     expect(asOfLine(container).textContent?.trim()).toBe(expected);
++       |                                                     ^
++    180|   });
++    181| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 13 passed (15)
++   Start at  20:37:39
++   Duration  2.06s (transform 147ms, setup 124ms, collect 830ms, tests 333ms, environment 297ms, prepare 232ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_1.log
+new file mode 100644
+index 00000000..decb92c2
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_1.log
+@@ -0,0 +1,64 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 114ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 21ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Gaps not determinable/
++Received:
++  0 without prices, Gaps not determinablefewer than two followed stocks hold daily prices
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 4ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  0 without prices, 2 with gaps
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Gaps not determinable/
++Received:
++  0 without prices, Gaps not determinablefewer than two followed stocks hold daily prices
++ ❯ src/screens/data-health/check-cards.test.tsx:124:30
++    122|     expect(card.textContent).not.toMatch(/All \d+ stocks have prices/);
++    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
++    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
++       |                              ^
++    125|     expect(resultLine(card).textContent).not.toMatch(/without prices|b…
++    126|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  0 without prices, 2 with gaps
++ ❯ src/screens/data-health/check-cards.test.tsx:133:35
++    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
++    132|     );
++    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
++       |                                   ^
++    134|   });
++    135| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 13 passed (15)
++   Start at  20:37:33
++   Duration  2.20s (transform 132ms, setup 83ms, collect 730ms, tests 114ms, environment 408ms, prepare 356ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_2.log
+new file mode 100644
+index 00000000..892e15c8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_2.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 127ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 4ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 with gaps, 1 behind 2026-10-29
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 with gaps, 1 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:150:35
++    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
++    149|     );
++    150|     expect(resultLine(container)).toHaveTextContent(
++       |                                   ^
++    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    152|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 14 passed (15)
++   Start at  20:37:33
++   Duration  2.26s (transform 195ms, setup 81ms, collect 770ms, tests 127ms, environment 313ms, prepare 491ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_1.log
+new file mode 100644
+index 00000000..3024d857
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_1.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 123ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 7ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, 0 with gaps
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, 0 with gaps
++ ❯ src/screens/data-health/check-cards.test.tsx:141:35
++    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
++    140|     );
++    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
++       |                                   ^
++    142|     expect(container.textContent).not.toContain("0 with gaps");
++    143|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 14 passed (15)
++   Start at  20:37:33
++   Duration  2.23s (transform 161ms, setup 88ms, collect 686ms, tests 123ms, environment 378ms, prepare 480ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_2.log
+new file mode 100644
+index 00000000..09a7a86b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_2.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 1 failed) 144ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 4ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 without prices, 1 behind 2026-10-29
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 without prices, 1 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:150:35
++    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
++    149|     );
++    150|     expect(resultLine(container)).toHaveTextContent(
++       |                                   ^
++    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    152|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  1 failed | 14 passed (15)
++   Start at  20:37:33
++   Duration  2.12s (transform 165ms, setup 69ms, collect 685ms, tests 144ms, environment 347ms, prepare 79ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_negate-boolean_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_negate-boolean_1.log
+new file mode 100644
+index 00000000..fa773e54
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_negate-boolean_1.log
+@@ -0,0 +1,85 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 3 failed) 212ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 35ms
++     → expected 'Gaps not determinablefewer than two f…' not to match /without prices|behind/
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 5ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  2 with gaps, 0 behind 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 3ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, 0 behind 2026-10-29
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++AssertionError: expected 'Gaps not determinablefewer than two f…' not to match /without prices|behind/
++
++- Expected: 
++/without prices|behind/
++
+++ Received: 
++"Gaps not determinablefewer than two followed stocks hold daily prices, 0 behind 2026-10-29"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:125:46
++    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
++    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
++    125|     expect(resultLine(card).textContent).not.toMatch(/without prices|b…
++       |                                              ^
++    126|   });
++    127| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  2 with gaps, 0 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:133:35
++    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
++    132|     );
++    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
++       |                                   ^
++    134|   });
++    135| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, 0 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:141:35
++    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
++    140|     );
++    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
++       |                                   ^
++    142|     expect(container.textContent).not.toContain("0 with gaps");
++    143|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 12 passed (15)
++   Start at  20:37:36
++   Duration  2.27s (transform 119ms, setup 54ms, collect 857ms, tests 212ms, environment 305ms, prepare 405ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_1.log
+new file mode 100644
+index 00000000..a638d153
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_1.log
+@@ -0,0 +1,85 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w2/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 3 failed) 128ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 20ms
++     → expected 'Gaps not determinablefewer than two f…' not to match /without prices|behind/
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 3ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  2 with gaps, 0 behind 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 3ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, 0 behind 2026-10-29
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++AssertionError: expected 'Gaps not determinablefewer than two f…' not to match /without prices|behind/
++
++- Expected: 
++/without prices|behind/
++
+++ Received: 
++"Gaps not determinablefewer than two followed stocks hold daily prices, 0 behind 2026-10-29"
++
++ ❯ src/screens/data-health/check-cards.test.tsx:125:46
++    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
++    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
++    125|     expect(resultLine(card).textContent).not.toMatch(/without prices|b…
++       |                                              ^
++    126|   });
++    127| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  2 with gaps, 0 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:133:35
++    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
++    132|     );
++    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
++       |                                   ^
++    134|   });
++    135| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  3 without prices, 0 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:141:35
++    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
++    140|     );
++    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
++       |                                   ^
++    142|     expect(container.textContent).not.toContain("0 with gaps");
++    143|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
++
++ Test Files  1 failed (1)
++      Tests  3 failed | 12 passed (15)
++   Start at  20:37:36
++   Duration  2.14s (transform 201ms, setup 93ms, collect 858ms, tests 128ms, environment 290ms, prepare 318ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_2.log
+new file mode 100644
+index 00000000..7782d9c4
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_2.log
+@@ -0,0 +1,64 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 120ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 17ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
++Received:
++  2 without prices, Gaps not determinablefewer than two followed stocks hold daily prices
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 2ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 without prices, 1 with gaps
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
++Received:
++  2 without prices, Gaps not determinablefewer than two followed stocks hold daily prices
++ ❯ src/screens/data-health/check-cards.test.tsx:100:30
++     98|     expect(gap).toHaveTextContent("Gaps not determinable");
++     99|     expect(gap).toHaveAccessibleDescription("fewer than two followed s…
++    100|     expect(resultLine(card)).toHaveTextContent(
++       |                              ^
++    101|       /^2 without prices, Gaps not determinable\s*fewer than two follo…
++    102|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 without prices, 1 with gaps
++ ❯ src/screens/data-health/check-cards.test.tsx:150:35
++    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
++    149|     );
++    150|     expect(resultLine(container)).toHaveTextContent(
++       |                                   ^
++    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    152|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 13 passed (15)
++   Start at  20:37:36
++   Duration  2.12s (transform 166ms, setup 68ms, collect 825ms, tests 120ms, environment 302ms, prepare 357ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_1.log
+new file mode 100644
+index 00000000..17970e64
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_1.log
+@@ -0,0 +1,136 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w3/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 5 failed) 130ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 12ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
++Received:
++  , 2 without prices, Gaps not determinablefewer than two followed stocks hold daily prices, 1 behind 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 14ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Gaps not determinable/
++Received:
++  , Gaps not determinablefewer than two followed stocks hold daily prices
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 3ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  , 2 with gaps
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 3ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  , 3 without prices
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 2ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  , 1 without prices, 1 with gaps, 1 behind 2026-10-29
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
++Received:
++  , 2 without prices, Gaps not determinablefewer than two followed stocks hold daily prices, 1 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:100:30
++     98|     expect(gap).toHaveTextContent("Gaps not determinable");
++     99|     expect(gap).toHaveAccessibleDescription("fewer than two followed s…
++    100|     expect(resultLine(card)).toHaveTextContent(
++       |                              ^
++    101|       /^2 without prices, Gaps not determinable\s*fewer than two follo…
++    102|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^Gaps not determinable/
++Received:
++  , Gaps not determinablefewer than two followed stocks hold daily prices
++ ❯ src/screens/data-health/check-cards.test.tsx:124:30
++    122|     expect(card.textContent).not.toMatch(/All \d+ stocks have prices/);
++    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
++    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
++       |                              ^
++    125|     expect(resultLine(card).textContent).not.toMatch(/without prices|b…
++    126|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 with gaps$/
++Received:
++  , 2 with gaps
++ ❯ src/screens/data-health/check-cards.test.tsx:133:35
++    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
++    132|     );
++    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
++       |                                   ^
++    134|   });
++    135| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^3 without prices$/
++Received:
++  , 3 without prices
++ ❯ src/screens/data-health/check-cards.test.tsx:141:35
++    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
++    140|     );
++    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
++       |                                   ^
++    142|     expect(container.textContent).not.toContain("0 with gaps");
++    143|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  , 1 without prices, 1 with gaps, 1 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:150:35
++    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
++    149|     );
++    150|     expect(resultLine(container)).toHaveTextContent(
++       |                                   ^
++    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    152|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
++
++ Test Files  1 failed (1)
++      Tests  5 failed | 10 passed (15)
++   Start at  20:37:36
++   Duration  1.70s (transform 149ms, setup 78ms, collect 749ms, tests 130ms, environment 255ms, prepare 219ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_2.log
+new file mode 100644
+index 00000000..c71e5f98
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_2.log
+@@ -0,0 +1,64 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
++
++stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 107ms
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 11ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
++Received:
++  2 without pricesGaps not determinablefewer than two followed stocks hold daily prices, 1 behind 2026-10-29
++   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 2ms
++     → expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 without prices1 with gaps, 1 behind 2026-10-29
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
++Received:
++  2 without pricesGaps not determinablefewer than two followed stocks hold daily prices, 1 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:100:30
++     98|     expect(gap).toHaveTextContent("Gaps not determinable");
++     99|     expect(gap).toHaveAccessibleDescription("fewer than two followed s…
++    100|     expect(resultLine(card)).toHaveTextContent(
++       |                              ^
++    101|       /^2 without prices, Gaps not determinable\s*fewer than two follo…
++    102|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
++Error: expect(element).toHaveTextContent()
++
++Expected element to have text content:
++  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
++Received:
++  1 without prices1 with gaps, 1 behind 2026-10-29
++ ❯ src/screens/data-health/check-cards.test.tsx:150:35
++    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
++    149|     );
++    150|     expect(resultLine(container)).toHaveTextContent(
++       |                                   ^
++    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    152|     );
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 13 passed (15)
++   Start at  20:37:39
++   Duration  2.03s (transform 157ms, setup 130ms, collect 776ms, tests 107ms, environment 286ms, prepare 395ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results.json
+new file mode 100644
+index 00000000..d54807b4
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results.json
+@@ -0,0 +1,299 @@
++{
++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules node_modules && npx vitest run src/screens/data-health",
++  "repo_head": "c276899ff9d3e59a880a534827e53a9f84ba8a8d",
++  "tree_patch_sha256": "1ec8b6e1105f70ffdb1f05161e6991a678e44875abe2ebd9b22c44bcfbc1112d",
++  "mutants_sha256": "6ee9213d0c488568e7be8995affd029649fec9e30b9eff1e8fa26c2e80ff5d86",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutants-cycle-1.json",
++  "jobs": 4,
++  "planned": 17,
++  "started": "2026-11-28T02:37:28Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 4.1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w2.log",
++      "log_sha256": "ad403d159e7d62ac43ae00ec46a699596f22fb2dd30c853f3ef12495047b3418"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 4.2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w1.log",
++      "log_sha256": "848fccceda185d42617110aedb2bedba1f3a5d2c55fa195aefbf90eb3ac40b2a"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 4.2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w0.log",
++      "log_sha256": "581a9607fcef167c6b9a571aa9d98c4430506cd7a7ddc99e74c78e0638d32f3c"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 4.2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/baseline-w3.log",
++      "log_sha256": "347dc34f7f934b92f4463afa2f4a08d35821b3123569112b3b065d2b9f9a1808"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:67:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 67,
++      "original": "  if (check.absent_count > 0) {",
++      "mutated": "  if (check.absent_count >= 0) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_1.log",
++      "log_sha256": "f98908cdfb4be3954921646e7e3697700f1ea8835f313c9513489cbb422ddc51"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:67:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 67,
++      "original": "  if (check.absent_count > 0) {",
++      "mutated": "  if (check.absent_count > 1) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_67_off-by-one_2.log",
++      "log_sha256": "d981ceb89836fcc44df9001179004d2445e3baf1811f36309c6dd02678113a0e"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:78:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 78,
++      "original": "  } else if (check.gap_stock_count > 0) {",
++      "mutated": "  } else if (check.gap_stock_count >= 0) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_1.log",
++      "log_sha256": "41e74ba59cfacaefd4f748ace0161a47acae983115493086bc1b7161c1d1b3dc"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:78:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 78,
++      "original": "  } else if (check.gap_stock_count > 0) {",
++      "mutated": "  } else if (check.gap_stock_count > 1) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.1,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_78_off-by-one_2.log",
++      "log_sha256": "3e4ad5441abb04f0f7ad8eb6bd06050aee5ed4823250fb3e42c6923f0b568c40"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:81:negate-boolean:1",
++      "cycle": "cycle-1",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 81,
++      "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
++      "mutated": "  if (check.behind_count > 0 || check.latest_session !== null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_negate-boolean_1.log",
++      "log_sha256": "5477d6c214345280fa0d56001d32a590fc5426d4c93b90eb7cce972e72350da4"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:81:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 81,
++      "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
++      "mutated": "  if (check.behind_count >= 0 && check.latest_session !== null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.9,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_1.log",
++      "log_sha256": "9f93483f5bf9552a920f24efd50a777c4d0a90b752cf66ef80276e41fc4cda3c"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:81:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 81,
++      "original": "  if (check.behind_count > 0 && check.latest_session !== null) {",
++      "mutated": "  if (check.behind_count > 1 && check.latest_session !== null) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_81_off-by-one_2.log",
++      "log_sha256": "42c4f5d68da96f9572374827f2dc3fbe1ae7e701a9dd4f410112e36769182efd"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:96:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 96,
++      "original": "            {index > 0 ? \", \" : null}",
++      "mutated": "            {index >= 0 ? \", \" : null}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.8,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_1.log",
++      "log_sha256": "99ea3f7e84551af0613df1172196a107906d6a335536a5186fbd6c9ea67942ea"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:96:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 96,
++      "original": "            {index > 0 ? \", \" : null}",
++      "mutated": "            {index > 1 ? \", \" : null}",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.8,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_96_off-by-one_2.log",
++      "log_sha256": "84f586b30901194bad0f4473916efeae7c33aeda63cffbd642f56a7be3814053"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:103:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 103,
++      "original": "    check.exception_symbols.length === 0",
++      "mutated": "    check.exception_symbols.length === 1",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.8,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_103_off-by-one_1.log",
++      "log_sha256": "41b94a09794e81dc871aae43776a3b0e5b7f576acca9edb1aca8d9fbc980fe58"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:105:off-by-one:1",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 105,
++      "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
++      "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more >= 0 ? ` ${andMore(more)}` : \"\"}`;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.0,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_1.log",
++      "log_sha256": "821945c11e6519ab43a04e63cadc07ef0553b151f0bae3b30723e692aa52da83"
++    },
++    {
++      "id": "web/src/screens/data-health/daily-prices-card.tsx:105:off-by-one:2",
++      "cycle": "cycle-1",
++      "operator": "off-by-one",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 105,
++      "original": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 0 ? ` ${andMore(more)}` : \"\"}`;",
++      "mutated": "      : ` \u00b7 ${check.exception_symbols.join(\", \")}${more > 1 ? ` ${andMore(more)}` : \"\"}`;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 3.2,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/web_src_screens_data-health_daily-prices-card.tsx_105_off-by-one_2.log",
++      "log_sha256": "44d9d05c81398914f83430a7306ed230f3a293e1e4cdb862a9f88bcfebd35647"
++    },
++    {
++      "id": "manual:gap-null",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 70,
++      "original": "  if (check.gap_stock_count === null) {",
++      "mutated": "  if (!check.gap_stock_count) {",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.1,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_gap-null.log",
++      "log_sha256": "d68e734d2f98b543441ee780e96fb1d7cf1e9b3ba0dc830e74125259f9f0c2ee"
++    },
++    {
++      "id": "manual:more-5",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 101,
++      "original": "  const more = check.exception_count - check.exception_symbols.length;",
++      "mutated": "  const more = check.exception_count - 5;",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.6,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_more-5.log",
++      "log_sha256": "a2d512f33f1d77a33ae00eb64e2c32f52238fecfc703ff0ab2ea657f1e1c642e"
++    },
++    {
++      "id": "manual:status-neg",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 58,
++      "original": "    check.status === \"not_determinable\" ? (",
++      "mutated": "    check.status !== \"not_determinable\" ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_status-neg.log",
++      "log_sha256": "27cea35f31eb8e1ac01bde582d82784078ccdf51709e9f5cdb1897caa654e528"
++    },
++    {
++      "id": "manual:ok-neg",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 90,
++      "original": "    check.status === \"ok\"",
++      "mutated": "    check.status !== \"ok\"",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 4.3,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_ok-neg.log",
++      "log_sha256": "ae409f17fa7b23654f0d5185b3b383bbb508175e21edc4c332a6a9838dc4a8d3"
++    },
++    {
++      "id": "manual:session-neg",
++      "cycle": "cycle-1",
++      "operator": "manual",
++      "file": "web/src/screens/data-health/daily-prices-card.tsx",
++      "line": 51,
++      "original": "    check.latest_session === null ? (",
++      "mutated": "    check.latest_session !== null ? (",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.3,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results-logs/manual_session-neg.log",
++      "log_sha256": "80587dbae83dfdf74986a0105af79b94aedee55cf64d976d7fcfb388b87a7671"
++    }
++  ],
++  "finished": "2026-11-28T02:37:47Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log
+new file mode 100644
+index 00000000..447143fb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log
+@@ -0,0 +1,32 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/data-health/check-cards.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/check-cards.test.tsx [ src/screens/data-health/check-cards.test.tsx ]
++Error: Failed to resolve import "./daily-prices-card" from "web/src/screens/data-health/check-cards.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/check-cards.test.tsx:5:32
++  3  |  import { MemoryRouter } from "react-router-dom";
++  4  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++  5  |  import { DailyPricesCard } from "./daily-prices-card";
++     |                                   ^
++  6  |  const OK_PRICES = {
++  7  |    status: "ok",
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  20:33:16
++   Duration  606ms (transform 22ms, setup 57ms, collect 0ms, tests 0ms, environment 332ms, prepare 46ms)
++
+diff --git a/web/src/screens/data-health/check-card.tsx b/web/src/screens/data-health/check-card.tsx
+new file mode 100644
+index 00000000..4db16054
+--- /dev/null
++++ b/web/src/screens/data-health/check-card.tsx
+@@ -0,0 +1,39 @@
++import { type ReactNode, useId } from "react";
++import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
++
++/**
++ * The check-card composition (UX design 3; data-health-ui 10): a region named by
++ * its `h2`, the status beside the title, then the result, the as-of line and the
++ * card's own children. Each of `status`, `result` and `asOf` renders only when
++ * given.
++ */
++export function CheckCard({
++  title,
++  status,
++  result,
++  asOf,
++  children,
++}: {
++  title: string;
++  status?: ReactNode;
++  result?: ReactNode;
++  asOf?: ReactNode;
++  children?: ReactNode;
++}) {
++  const id = useId();
++  return (
++    <section aria-labelledby={id}>
++      <Card variant="metric">
++        <CardHeader className="flex-row items-center gap-2">
++          <CardTitle id={id}>{title}</CardTitle>
++          {status}
++        </CardHeader>
++        <CardContent>
++          {result === undefined ? null : <p className="text-base font-semibold">{result}</p>}
++          {asOf === undefined ? null : <p className="text-xs text-muted-foreground">{asOf}</p>}
++          {children}
++        </CardContent>
++      </Card>
++    </section>
++  );
++}
+diff --git a/web/src/screens/data-health/check-cards.test.tsx b/web/src/screens/data-health/check-cards.test.tsx
+new file mode 100644
+index 00000000..d10c8d49
+--- /dev/null
++++ b/web/src/screens/data-health/check-cards.test.tsx
+@@ -0,0 +1,227 @@
++import { render, screen, within } from "@testing-library/react";
++import { MemoryRouter } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import type { DataHealth } from "../../app/shell-types";
++import { DailyPricesCard } from "./daily-prices-card";
++
++type Prices = NonNullable<DataHealth["checks"]["daily_prices"]>;
++
++const OK_PRICES: Prices = {
++  status: "ok",
++  absent_count: 0,
++  gap_stock_count: 0,
++  behind_count: 0,
++  latest_session: "2026-10-29",
++  gap_detection: { available: true, reason: null },
++  exception_count: 0,
++  exception_symbols: [],
++};
++
++const NO_GAPS_REASON = "fewer_than_two_instruments_with_data";
++
++function prices(over: Partial<Prices> = {}): Prices {
++  return { ...OK_PRICES, ...over };
++}
++
++function renderPrices(check: Prices | null, followedCount = 10): { container: HTMLElement } {
++  const view = render(
++    <MemoryRouter>
++      <DailyPricesCard check={check} followedCount={followedCount} />
++    </MemoryRouter>,
++  );
++  return { container: view.container };
++}
++
++function region(name: string): HTMLElement {
++  return screen.getByRole("region", { name });
++}
++
++function badges(root: HTMLElement): HTMLElement[] {
++  return Array.from(root.querySelectorAll<HTMLElement>("[data-variant]"));
++}
++
++function badgeWith(root: HTMLElement, variant: string): HTMLElement {
++  const found = badges(root).filter((element) => element.dataset.variant === variant);
++  expect(found).toHaveLength(1);
++  return found[0] as HTMLElement;
++}
++
++beforeEach(() => {
++  vi.stubGlobal("fetch", vi.fn());
++});
++
++afterEach(() => {
++  expect(fetch).not.toHaveBeenCalled();
++  vi.unstubAllGlobals();
++});
++
++function resultLine(root: HTMLElement): HTMLElement {
++  const line = root.querySelector<HTMLElement>("p.text-base");
++  if (!line) throw new Error("no result line rendered");
++  return line;
++}
++
++function asOfLine(root: HTMLElement): HTMLElement {
++  const line = root.querySelector<HTMLElement>("p.text-xs");
++  if (!line) throw new Error("no as-of line rendered");
++  return line;
++}
++
++describe("Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3)", () => {
++  // Implements TC-COMP-157
++  it("(a) ok: a good badge, the all-stocks result line and the newest session", () => {
++    renderPrices(prices(), 1236);
++    const card = region("Daily prices");
++    const badge = badgeWith(card, "status-good");
++    expect(badge).toHaveTextContent("No missing prices or gaps");
++    expect(resultLine(card)).toHaveTextContent(/^All 1,236 stocks have prices to 2026-10-29$/);
++    expect(asOfLine(card)).toHaveTextContent(/^Prices to 2026-10-29$/);
++    expect(card.textContent).not.toMatch(/more/);
++  });
++
++  // Implements TC-COMP-157
++  it("(b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept", () => {
++    const { container } = renderPrices(
++      prices({
++        status: "exceptions",
++        absent_count: 2,
++        gap_stock_count: null,
++        behind_count: 1,
++        gap_detection: { available: false, reason: NO_GAPS_REASON },
++        exception_count: 3,
++        exception_symbols: ["AAA", "BBB", "CCC"],
++      }),
++    );
++    const card = region("Daily prices");
++    expect(badgeWith(card, "status-warning")).toHaveTextContent("Needs attention");
++    const gap = badgeWith(card, "coverage-unknown");
++    expect(gap).toHaveTextContent("Gaps not determinable");
++    expect(gap).toHaveAccessibleDescription("fewer than two followed stocks hold daily prices");
++    expect(resultLine(card)).toHaveTextContent(
++      /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/,
++    );
++    expect(container.textContent).not.toContain(NO_GAPS_REASON);
++    expect(container.textContent).not.toMatch(/\b0 (with|without|behind)/);
++  });
++
++  // Implements TC-COMP-157
++  it("(c) not_determinable status: a Not determinable header and only the gap part", () => {
++    renderPrices(
++      prices({
++        status: "not_determinable",
++        gap_stock_count: null,
++        gap_detection: { available: false, reason: NO_GAPS_REASON },
++      }),
++    );
++    const card = region("Daily prices");
++    const headerBadge = card.querySelector<HTMLElement>('[data-variant="coverage-unknown"]');
++    expect(headerBadge).toHaveTextContent("Not determinable");
++    expect(headerBadge).toHaveAccessibleDescription(
++      "fewer than two followed stocks hold daily prices",
++    );
++    expect(card.textContent).not.toMatch(/All \d+ stocks have prices/);
++    expect(card.querySelector('[data-variant="status-good"]')).toBeNull();
++    expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable/);
++    expect(resultLine(card).textContent).not.toMatch(/without prices|behind/);
++  });
++
++  // Implements TC-COMP-157
++  it("(d) omits zero parts and never shows a null as 0", () => {
++    const { container } = renderPrices(
++      prices({ status: "exceptions", absent_count: 0, gap_stock_count: 2, behind_count: 0 }),
++    );
++    expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
++  });
++
++  // Implements TC-COMP-157
++  it("(d) a count of absent prices alone reads as without prices, never 0 with gaps", () => {
++    const { container } = renderPrices(
++      prices({ status: "exceptions", absent_count: 3, gap_stock_count: 0, behind_count: 0 }),
++    );
++    expect(resultLine(container)).toHaveTextContent(/^3 without prices$/);
++    expect(container.textContent).not.toContain("0 with gaps");
++  });
++
++  // Implements TC-COMP-157
++  it("(d) a single absent stock and a single gap each count, joined in order", () => {
++    const { container } = renderPrices(
++      prices({ status: "exceptions", absent_count: 1, gap_stock_count: 1, behind_count: 1 }),
++    );
++    expect(resultLine(container)).toHaveTextContent(
++      /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
++    );
++  });
++
++  // Implements TC-COMP-158
++  it.each([
++    [
++      7,
++      ["AAA", "BBB", "CCC", "DDD", "EEE"],
++      "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 2 more",
++    ],
++    [
++      6,
++      ["AAA", "BBB", "CCC", "DDD", "EEE"],
++      "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE and 1 more",
++    ],
++    [5, ["AAA", "BBB", "CCC", "DDD", "EEE"], "Prices to 2026-10-29 · AAA, BBB, CCC, DDD, EEE"],
++    [4, ["AAA", "BBB", "CCC"], "Prices to 2026-10-29 · AAA, BBB, CCC and 1 more"],
++    [3, ["AAA", "BBB", "CCC"], "Prices to 2026-10-29 · AAA, BBB, CCC"],
++  ])("(e) exception_count %i with %j reads %s", (count, symbols, expected) => {
++    const { container } = renderPrices(
++      prices({
++        status: "exceptions",
++        absent_count: 1,
++        exception_count: count,
++        exception_symbols: symbols,
++      }),
++    );
++    expect(asOfLine(container).textContent?.trim()).toBe(expected);
++  });
++
++  // Implements TC-COMP-157
++  it("(f) a null latest_session renders an absent em dash, never null or 0", () => {
++    const { container } = renderPrices(
++      prices({ status: "exceptions", absent_count: 10, latest_session: null }),
++    );
++    const line = asOfLine(container);
++    expect(line.textContent).toMatch(/^Prices to/);
++    const dash = within(line).getByText("—");
++    expect(dash).toHaveAttribute("aria-hidden", "true");
++    expect(line).toHaveTextContent("no prices stored yet");
++    expect(line.textContent).not.toMatch(/null|undefined|\b0\b/);
++  });
++
++  // Implements TC-COMP-157
++  it("(f) an ok check with no stored session keeps the absent dash in the result, never a date", () => {
++    const { container } = renderPrices(prices({ latest_session: null }));
++    expect(resultLine(container).textContent).not.toMatch(/All|null|\b0\b/);
++    expect(resultLine(container)).toHaveTextContent("no prices stored yet");
++  });
++
++  // Implements TC-COMP-157
++  it("(g) carries the scope note and the Full coverage table link", () => {
++    renderPrices(prices());
++    const card = region("Daily prices");
++    expect(card).toHaveTextContent(
++      "Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.",
++    );
++    expect(within(card).getByRole("link", { name: "Full coverage table" })).toHaveAttribute(
++      "href",
++      "/data/coverage",
++    );
++  });
++});
++
++describe("Check cards' null state (DAC-E6-7 support, AC-24)", () => {
++  it("Daily prices with check null keeps its heading and renders absent dashes, no status badge", () => {
++    const { container } = renderPrices(null);
++    const card = region("Daily prices");
++    expect(within(card).getByRole("heading", { level: 2, name: "Daily prices" })).toBeTruthy();
++    expect(card.querySelector('[data-variant^="status-"]')).toBeNull();
++    expect(card.querySelector('[data-variant="coverage-unknown"]')).toBeNull();
++    expect(within(card).getAllByText("—")).toHaveLength(2);
++    expect(within(card).getAllByText("no data stored yet")).toHaveLength(2);
++    expect(container.textContent).not.toMatch(/No missing prices or gaps|All \d+ stocks/);
++  });
++});
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+new file mode 100644
+index 00000000..66023e17
+--- /dev/null
++++ b/web/src/screens/data-health/copy.ts
+@@ -0,0 +1,65 @@
++/**
++ * Every owner-facing string of the Data health screen (component design
++ * data-health-ui 2.1). CAP-003-E6-S2 to S5 add theirs here. No string carries a
++ * DAC-E7-3 term (AC-19), and a `{reason}` is never an envelope `message` or
++ * `request_id` (UX design 0.7). Strings are verbatim from data-health-ui 2.3 and
++ * 2.4 and epic DAC-E6-1 to DAC-E6-5 unless the plan marks them.
++ */
++
++export const FULL_COVERAGE_TABLE = "Full coverage table";
++
++export const CHECK_TITLES = {
++  daily_prices: "Daily prices",
++  company_financials: "Company financials",
++  scores: "Factor scores",
++} as const;
++
++/** Hidden words for an absent value (STD-UI-4); `noData` is DAC-E6-7's. */
++export const ABSENT = {
++  noData: "no data stored yet",
++  noPrices: "no prices stored yet",
++  noFinancials: "no financials stored yet",
++  noScores: "no scores yet",
++} as const;
++
++/** `and {k} more`, after the exception symbols a card shows. */
++export function andMore(k: number): string {
++  return `and ${k} more`;
++}
++
++/**
++ * The display clause of `gap_detection.reason` (DEC-0374). The key is the wire
++ * code `coverage-service` serves and is never rendered.
++ */
++export const GAP_REASONS: Readonly<Record<string, string>> = {
++  fewer_than_two_instruments_with_data: "fewer than two followed stocks hold daily prices",
++};
++
++/** An unknown code is shown as itself, never dropped; `null` has its own words. */
++export function gapReason(code: string | null): string {
++  if (code === null) {
++    return "no reason was given";
++  }
++  return GAP_REASONS[code] ?? code;
++}
++
++export function allPrices(m: string, date: string): string {
++  return `All ${m} stocks have prices to ${date}`;
++}
++
++export function withoutPrices(n: string): string {
++  return `${n} without prices`;
++}
++
++export function withGaps(n: string): string {
++  return `${n} with gaps`;
++}
++
++export function behind(n: string, date: string): string {
++  return `${n} behind ${date}`;
++}
++
++export const GAPS_NOT_DETERMINABLE = "Gaps not determinable";
++export const PRICES_TO = "Prices to";
++export const PRICES_SCOPE_NOTE =
++  "Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.";
+diff --git a/web/src/screens/data-health/daily-prices-card.tsx b/web/src/screens/data-health/daily-prices-card.tsx
+new file mode 100644
+index 00000000..650884b7
+--- /dev/null
++++ b/web/src/screens/data-health/daily-prices-card.tsx
+@@ -0,0 +1,125 @@
++import { Fragment } from "react";
++import { Link } from "react-router-dom";
++import type { DataHealth } from "../../app/shell-types";
++import { NotDeterminable, Absent } from "../../components/patterns/presence";
++import { StatusBadge } from "../../components/patterns/status-badge";
++import { formatCount, formatSessionDate } from "../../components/patterns/format";
++import { labelOf, tierOf } from "../../components/patterns/tiers";
++import { Button } from "../../components/ui/button";
++import { CheckCard } from "./check-card";
++import {
++  ABSENT,
++  CHECK_TITLES,
++  FULL_COVERAGE_TABLE,
++  GAPS_NOT_DETERMINABLE,
++  PRICES_SCOPE_NOTE,
++  PRICES_TO,
++  allPrices,
++  andMore,
++  behind,
++  gapReason,
++  withGaps,
++  withoutPrices,
++} from "./copy";
++
++/**
++ * The Daily prices check card (data-health-ui 2.4; DAC-E6-3; DEC-0201, DEC-0206,
++ * DEC-0213, DEC-0220). Zero parts are omitted and a null is never `0`: a null
++ * `gap_stock_count` is the not-determinable gap part, the absent and behind parts
++ * still render. A null `check` is DAC-E6-7's null state, an absent dash for the
++ * tier and the result.
++ */
++export function DailyPricesCard({
++  check,
++  followedCount,
++}: {
++  check: DataHealth["checks"]["daily_prices"];
++  followedCount: number;
++}) {
++  const title = CHECK_TITLES.daily_prices;
++  if (check === null) {
++    return (
++      <CheckCard
++        title={title}
++        status={<Absent label={ABSENT.noData} />}
++        result={<Absent label={ABSENT.noData} />}
++      />
++    );
++  }
++
++  const date =
++    check.latest_session === null ? (
++      <Absent label={ABSENT.noPrices} />
++    ) : (
++      formatSessionDate(check.latest_session)
++    );
++
++  const status =
++    check.status === "not_determinable" ? (
++      <NotDeterminable reason={gapReason(check.gap_detection.reason)} />
++    ) : (
++      <StatusBadge tier={tierOf({ of: "check", check: "daily_prices", status: check.status })}>
++        {labelOf({ of: "check", check: "daily_prices", status: check.status })}
++      </StatusBadge>
++    );
++
++  const parts: JSX.Element[] = [];
++  if (check.absent_count > 0) {
++    parts.push(<Fragment key="absent">{withoutPrices(formatCount(check.absent_count))}</Fragment>);
++  }
++  if (check.gap_stock_count === null) {
++    parts.push(
++      <NotDeterminable
++        key="gaps"
++        label={GAPS_NOT_DETERMINABLE}
++        reason={gapReason(check.gap_detection.reason)}
++      />,
++    );
++  } else if (check.gap_stock_count > 0) {
++    parts.push(<Fragment key="gaps">{withGaps(formatCount(check.gap_stock_count))}</Fragment>);
++  }
++  if (check.behind_count > 0 && check.latest_session !== null) {
++    parts.push(
++      <Fragment key="behind">
++        {behind(formatCount(check.behind_count), formatSessionDate(check.latest_session))}
++      </Fragment>,
++    );
++  }
++
++  const result =
++    check.status === "ok"
++      ? check.latest_session === null
++        ? date
++        : allPrices(formatCount(followedCount), formatSessionDate(check.latest_session))
++      : parts.map((part, index) => (
++          <Fragment key={part.key}>
++            {index > 0 ? ", " : null}
++            {part}
++          </Fragment>
++        ));
++
++  const more = check.exception_count - check.exception_symbols.length;
++  const exceptions =
++    check.exception_symbols.length === 0
++      ? null
++      : ` · ${check.exception_symbols.join(", ")}${more > 0 ? ` ${andMore(more)}` : ""}`;
++
++  return (
++    <CheckCard
++      title={title}
++      status={status}
++      result={result}
++      asOf={
++        <>
++          {PRICES_TO} {date}
++          {exceptions}
++        </>
++      }
++    >
++      <p className="text-xs text-muted-foreground">{PRICES_SCOPE_NOTE}</p>
++      <Button variant="outline" asChild>
++        <Link to="/data/coverage">{FULL_COVERAGE_TABLE}</Link>
++      </Button>
++    </CheckCard>
++  );
++}

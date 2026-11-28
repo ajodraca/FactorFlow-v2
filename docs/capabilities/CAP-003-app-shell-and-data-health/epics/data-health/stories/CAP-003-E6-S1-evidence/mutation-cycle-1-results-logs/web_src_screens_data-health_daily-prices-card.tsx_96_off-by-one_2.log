@@ -1,0 +1,64 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w1/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 2 failed) 107ms
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept 11ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
+Received:
+  2 without pricesGaps not determinablefewer than two followed stocks hold daily prices, 1 behind 2026-10-29
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order 2ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
+Received:
+  1 without prices1 with gaps, 1 behind 2026-10-29
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (b) gaps not determinable: a warning header, the gap part as coverage-unknown, the other parts kept
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 without prices, Gaps not determinable\s*fewer than two followed stocks hold daily prices, 1 behind 2026-10-29$/
+Received:
+  2 without pricesGaps not determinablefewer than two followed stocks hold daily prices, 1 behind 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:100:30
+     98|     expect(gap).toHaveTextContent("Gaps not determinable");
+     99|     expect(gap).toHaveAccessibleDescription("fewer than two followed s…
+    100|     expect(resultLine(card)).toHaveTextContent(
+       |                              ^
+    101|       /^2 without prices, Gaps not determinable\s*fewer than two follo…
+    102|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a single absent stock and a single gap each count, joined in order
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/
+Received:
+  1 without prices1 with gaps, 1 behind 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:150:35
+    148|       prices({ status: "exceptions", absent_count: 1, gap_stock_count:…
+    149|     );
+    150|     expect(resultLine(container)).toHaveTextContent(
+       |                                   ^
+    151|       /^1 without prices, 1 with gaps, 1 behind 2026-10-29$/,
+    152|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  20:37:39
+   Duration  2.03s (transform 157ms, setup 130ms, collect 776ms, tests 107ms, environment 286ms, prepare 395ms)
+

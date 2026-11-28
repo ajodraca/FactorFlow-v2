@@ -1,0 +1,85 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-84d7bb1c/w0/web
+
+stderr | src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (a) ok: a good badge, the all-stocks result line and the newest session
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/check-cards.test.tsx (15 tests | 3 failed) 212ms
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part 35ms
+     → expected 'Gaps not determinablefewer than two f…' not to match /without prices|behind/
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0 5ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 with gaps$/
+Received:
+  2 with gaps, 0 behind 2026-10-29
+   × Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps 3ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^3 without prices$/
+Received:
+  3 without prices, 0 behind 2026-10-29
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (c) not_determinable status: a Not determinable header and only the gap part
+AssertionError: expected 'Gaps not determinablefewer than two f…' not to match /without prices|behind/
+
+- Expected: 
+/without prices|behind/
+
++ Received: 
+"Gaps not determinablefewer than two followed stocks hold daily prices, 0 behind 2026-10-29"
+
+ ❯ src/screens/data-health/check-cards.test.tsx:125:46
+    123|     expect(card.querySelector('[data-variant="status-good"]')).toBeNul…
+    124|     expect(resultLine(card)).toHaveTextContent(/^Gaps not determinable…
+    125|     expect(resultLine(card).textContent).not.toMatch(/without prices|b…
+       |                                              ^
+    126|   });
+    127| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) omits zero parts and never shows a null as 0
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^2 with gaps$/
+Received:
+  2 with gaps, 0 behind 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:133:35
+    131|       prices({ status: "exceptions", absent_count: 0, gap_stock_count:…
+    132|     );
+    133|     expect(resultLine(container)).toHaveTextContent(/^2 with gaps$/);
+       |                                   ^
+    134|   });
+    135| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/check-cards.test.tsx > Daily prices card (TC-COMP-157, TC-COMP-158, DAC-E6-3, DAC-E6-S1-2, DAC-E6-S1-3) > (d) a count of absent prices alone reads as without prices, never 0 with gaps
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^3 without prices$/
+Received:
+  3 without prices, 0 behind 2026-10-29
+ ❯ src/screens/data-health/check-cards.test.tsx:141:35
+    139|       prices({ status: "exceptions", absent_count: 3, gap_stock_count:…
+    140|     );
+    141|     expect(resultLine(container)).toHaveTextContent(/^3 without prices…
+       |                                   ^
+    142|     expect(container.textContent).not.toContain("0 with gaps");
+    143|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 12 passed (15)
+   Start at  20:37:36
+   Duration  2.27s (transform 119ms, setup 54ms, collect 857ms, tests 212ms, environment 305ms, prepare 405ms)
+

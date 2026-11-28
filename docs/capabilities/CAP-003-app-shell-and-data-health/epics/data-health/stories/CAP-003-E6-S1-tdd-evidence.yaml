@@ -1,0 +1,55 @@
+# TDD evidence for CAP-003-E6-S1 - The Verdict and the Three Check Cards.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T021153Z (c276899f).
+# Five cycles per the plan's T020: (1) Daily prices card, (2) Company financials card, (3) Factor scores card,
+# (4) cards' vocabulary and badges (tests only), (5) the verdict. Each cycle is committed as it ends with this
+# file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run src/screens/data-health'
+# as the command (the clones hold no node_modules); generated mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+# Two earlier scorings of cycle 1 (13/15 with two survivors at a count of exactly 1, then 15/15) were superseded after
+# the code review's rework of the null-session handling; only the final run is kept.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T004, T013, T012, T014]
+    description: >
+      Daily prices card. web/src/screens/data-health/check-cards.test.tsx (new): the TC-COMP-157 and TC-COMP-158 rows
+      (T002 a-g, plus a single-absent/single-gap row and an ok-with-no-session row) and the Daily prices half of the
+      null state (T004). Then copy.ts (card strings, GAP_REASONS, gapReason, andMore), check-card.tsx (CheckCard) and
+      daily-prices-card.tsx (DailyPricesCard).
+    deviations: >
+      (1) The shared test harness is smaller than the plan's list for this cycle: only the Daily prices fixtures
+      exist; DH/ATT/ok/INTERNAL arrive with the cycles that use them. (2) A check with status ok and no stored session
+      renders the absent dash alone as its result, and the behind part is omitted when there is no session; the plan
+      does not state these two unreachable-on-real-data cases and both reviewers read them as faithful to T014.
+      (3) Task checkboxes are marked in the story stage commit, not per cycle, because the tasks file is inside the
+      staged diff the cycle's reviews judged.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log
+    red_log_sha256: 3fcee3ab913eb29e918a1ddd555fe030ddcd53e62bbf51dd33325e15d3863f85
+    red_evidence: >
+      With check-cards.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests
+      (the import of ./daily-prices-card did not resolve).
+    green_evidence: >
+      15 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/red-cycle-1.log
+        sha256: 3fcee3ab913eb29e918a1ddd555fe030ddcd53e62bbf51dd33325e15d3863f85
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: b49466034b66f4264c6bc8bc201adbc685485697d761a1605e7b9c1f1405fd57
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/cycle-1.patch
+    index_tree: 3fc34fa965f7b0e24b40ddd616a0e2ade0fd1372
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S1-evidence/mutation-cycle-1-results.json
+      results_sha256: 21ef294e8693594a275ca6e9178bf92748130bdcfe132c7c7eee1ebc4ec33925
+      generated: 17
+      killed: 17
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
