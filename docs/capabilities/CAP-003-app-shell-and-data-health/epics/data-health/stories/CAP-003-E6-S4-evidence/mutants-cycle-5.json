@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "repo_head": "62cbe082f19a995daffc2cb5ca7cc091facb8a06",
+  "range": "HEAD..worktree",
+  "source": "62cbe082f19a995daffc2cb5ca7cc091facb8a06",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:54:off-by-one:1",
+      "cycle": "cycle-5",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 54,
+      "original": "  const latestCall = useRef(0);",
+      "mutated": "  const latestCall = useRef(1);"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:57:off-by-one:1",
+      "cycle": "cycle-5",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 57,
+      "original": "    latestCall.current += 1;",
+      "mutated": "    latestCall.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:59:off-by-one:1",
+      "cycle": "cycle-5",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(",
+      "mutated": "    Promise.all([listInstruments({ limit: 2 }), getHistoryDepth()]).then("
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:70:negate-boolean:1",
+      "cycle": "cycle-5",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 70,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiError && cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:70:negate-boolean:2",
+      "cycle": "cycle-5",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 70,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if ((cause instanceof ApiError || cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 106,
+      "original": "              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.whatYouFollow, state.error.message)}",
+      "description": "reason taken from the envelope message"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 107,
+      "original": "              onRetry={read}",
+      "mutated": "              onRetry={() => undefined}",
+      "description": "Try again does nothing"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 106,
+      "original": "              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(state.error))}",
+      "description": "error names the other card"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 88,
+      "original": "    key = <NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} />;",
+      "mutated": "    key = <NotDeterminable reason=\"\" />;",
+      "description": "no reason beside Not determinable"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 97,
+      "original": "        {state.kind === \"loading\" ? (",
+      "mutated": "        {state.kind !== \"loading\" ? (",
+      "description": "loading and body swapped"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 103,
+      "original": "        ) : state.kind === \"error\" ? (",
+      "mutated": "        ) : state.kind !== \"error\" ? (",
+      "description": "error body never reached"
+    },
+    {
+      "id": "manual:7",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(",
+      "mutated": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth().catch(() => ({ years: null, updatedAt: null }))]).then(",
+      "description": "a failed depth read swallowed"
+    },
+    {
+      "id": "manual:8",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 84,
+      "original": "  if (health.liveness === \"answering\" && health.health !== null) {",
+      "mutated": "  if (health.health !== null) {",
+      "description": "stale key value shown while unreachable"
+    },
+    {
+      "id": "manual:9",
+      "cycle": "cycle-5",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 373,
+      "original": "export const KEY_NOT_DETERMINABLE_REASON = \"FactorFlow is not answering\";",
+      "mutated": "export const KEY_NOT_DETERMINABLE_REASON = \"\";",
+      "description": "empty reason"
+    }
+  ]
+}

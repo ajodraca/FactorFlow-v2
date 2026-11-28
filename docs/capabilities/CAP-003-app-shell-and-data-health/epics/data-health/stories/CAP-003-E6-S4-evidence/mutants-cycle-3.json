@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "repo_head": "6410565a1c76010d8e33162166ec6e6c02c25ada",
+  "range": "HEAD..worktree",
+  "source": "6410565a1c76010d8e33162166ec6e6c02c25ada",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:103:off-by-one:1",
+      "cycle": "cycle-3",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 103,
+      "original": "    listAcquisitionRuns({ limit: 5 }).then(",
+      "mutated": "    listAcquisitionRuns({ limit: 6 }).then("
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:115:negate-boolean:1",
+      "cycle": "cycle-3",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiError && cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:115:negate-boolean:2",
+      "cycle": "cycle-3",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if ((cause instanceof ApiError || cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 224,
+      "original": "              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(list.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.recentDownloads, list.error.message)}",
+      "description": "reason taken from the envelope message"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 225,
+      "original": "              onRetry={read}",
+      "mutated": "              onRetry={() => undefined}",
+      "description": "Try again does nothing"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 224,
+      "original": "              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(list.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(list.error))}",
+      "description": "error names the other card"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 119,
+      "original": "        setList({ kind: \"error\", error: cause });",
+      "mutated": "        setList({ kind: \"loading\" });",
+      "description": "a failed read looks like loading"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 222,
+      "original": "          ) : list.kind === \"error\" ? (",
+      "mutated": "          ) : list.kind === \"loading\" ? (",
+      "description": "error body never reached"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "cycle-3",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 71,
+      "original": "  recentDownloads: \"recent downloads\",",
+      "mutated": "  recentDownloads: \"downloads\",",
+      "description": "wrong read target wording"
+    }
+  ]
+}

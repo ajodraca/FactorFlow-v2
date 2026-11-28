@@ -1,0 +1,61 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-faxe01st/w5/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 2 failed) 702ms
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (g) error: every region keeps its title and says what failed, with no leak 16ms
+     → expected 'Daily pricesCouldn\'t read the data h…' to contain 'Couldn\'t read the data health checks…'
+   × Display vocabulary in every state (TC-COMP-179, DAC-E6-S5-5, AC-19) > (a) every read failing never names a forbidden term 3ms
+     → expected 'Is the data good enough to trust?Full…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (g) error: every region keeps its title and says what failed, with no leak
+AssertionError: expected 'Daily pricesCouldn\'t read the data h…' to contain 'Couldn\'t read the data health checks…'
+
+Expected: "Couldn't read the data health checks: FactorFlow hit an unexpected problem."
+Received: "Daily pricesCouldn't read the data health checks: instrument table said no.Try again"
+
+ ❯ src/screens/data-health/data-health.test.tsx:810:40
+    808|     for (const name of ["Daily prices", "Company financials"]) {
+    809|       expect(within(region(name)).getByRole("heading", { level: 2 })).…
+    810|       expect(region(name).textContent).toContain(sentence);
+       |                                        ^
+    811|       expect(within(region(name)).getByRole("button", { name: "Try aga…
+    812|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Display vocabulary in every state (TC-COMP-179, DAC-E6-S5-5, AC-19) > (a) every read failing never names a forbidden term
+AssertionError: expected 'Is the data good enough to trust?Full…' not to match /\b(instrument|acquisition|acquire|ru…/i
+
+- Expected: 
+/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i
+
++ Received: 
+"Is the data good enough to trust?Full coverage tableDownload nowCouldn't read what needs attention: FactorFlow hit an unexpected problem.Try againDaily pricesCouldn't read the data health checks: instrument table said no.Try againCompany financialsCouldn't read the data health checks: instrument table said no.Try againFactor scoresCouldn't read the factor scores: FactorFlow hit an unexpected problem.Try againNeeds fixingCouldn't read the data health checks: FactorFlow hit an unexpected problem.Try againRecent downloadsStarts when you press Download nowCouldn't read recent downloads: FactorFlow hit an unexpected problem.Try againWhat you followCouldn't read what you follow: FactorFlow hit an unexpected problem.Try again
+Daily prices
+Company financials
+Factor scores
+Needs fixing
+Recent downloads
+What you follow"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1040:44
+    1038|     setup();
+    1039|     await renderScreen();
+    1040|     expect(visibleAndAccessibleText()).not.toMatch(TERMS);
+       |                                            ^
+    1041|   });
+    1042| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 63 passed (65)
+   Start at  03:33:23
+   Duration  2.24s (transform 436ms, setup 304ms, collect 702ms, tests 702ms, environment 312ms, prepare 30ms)
+

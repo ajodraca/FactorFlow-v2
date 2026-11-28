@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-28
+last_reworked_review: CAP-003-E6-S3-implementation-review-v1.md
+docs_synced_review: CAP-003-E6-S3-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -96,7 +98,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Confirm the baseline and the hard dependencies' exports.
 
-- [ ] T001 From the repo root run `npm ci` and `npm run test` and record the baseline as green. Confirm, without editing anything, that each hard dependency's deliverable exists; STOP and report if any is missing:
+- [x] T001 From the repo root run `npm ci` and `npm run test` and record the baseline as green. Confirm, without editing anything, that each hard dependency's deliverable exists; STOP and report if any is missing:
   - (CAP-003-E1-S1) `web/src/components/ui/card.tsx` exports `Card` (`variant` `"default"`), `CardHeader`, `CardTitle` (an `h2` that forwards its `ref`: `grep -n "forwardRef" web/src/components/ui/card.tsx`), `CardContent`; `web/src/components/ui/button.tsx` exports `Button` with `variant` `outline` and `ghost`, `asChild`, and forwards its `ref`.
   - (CAP-003-E1-S5) `web/src/components/patterns/tiers.ts` exports `tierOf`, `labelOf` and `Status` with the `{ of: "result"; outcome: "failed" | "not_found" }` member; `web/src/components/patterns/status-badge.tsx` exports the six-tier `StatusBadge({ tier, children })`.
   - (CAP-003-E1-S6) `web/src/components/patterns/format.ts` exports `formatInstant`, `formatClock` and `formatCount`.
@@ -135,7 +137,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement **TC-COMP-165** (a row with `failed` and `not_found` failures renders both fixes correctly) with the full DAC-E6-8 row. Write it in a new `web/src/screens/data-health/problem-row.test.tsx` as `describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)")`, with `// Implements TC-COMP-165`. Render `<ul><ProblemRow row={…} onStopFollowing={spy} /></ul>`.
+- [x] T002 [P] Implement **TC-COMP-165** (a row with `failed` and `not_found` failures renders both fixes correctly) with the full DAC-E6-8 row. Write it in a new `web/src/screens/data-health/problem-row.test.tsx` as `describe("Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14)")`, with `// Implements TC-COMP-165`. Render `<ul><ProblemRow row={…} onStopFollowing={spy} /></ul>`.
   - (a) **Step 1, mixed row** `ROW("FBXX", [FAIL("prices"), NF("reference")])` with `retryable: true`:
     - Exactly one `li`. A link with accessible name *FBXX, show in the coverage table*, visible text *FBXX*, class containing `font-semibold`, `href="/data/coverage?symbol=FBXX"`.
     - Two badges in failure order: `status-critical` *Failed* then `status-warning` *Not found*.
@@ -158,21 +160,21 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - drop-field-copy of `attempts` / `reason` in the failed sentence (a, c)
   - a hand-written mutant rendering the fix once per failure instead of once per outcome (c: the sentence twice)
   - drop-field-copy of `symbol` in `onStopFollowing(symbol)` (f)
-- [ ] T003 [P] Implement **TC-COMP-153** (Follow a different symbol navigates to Followed stocks with `focusAdd`). Write it in `web/src/screens/data-health/problem-row.test.tsx` after T002 as `describe("Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14)")`, with `// Implements TC-COMP-153`. Render the *Not found* row `ROW("FBXX", [NF("reference")])` in the memory router with the `LocationProbe` and a `<Route path="/data/followed">` rendering *followed page*.
+- [x] T003 [P] Implement **TC-COMP-153** (Follow a different symbol navigates to Followed stocks with `focusAdd`). Write it in `web/src/screens/data-health/problem-row.test.tsx` after T002 as `describe("Follow a different symbol (TC-COMP-153, DAC-E6-13, AC-14)")`, with `// Implements TC-COMP-153`. Render the *Not found* row `ROW("FBXX", [NF("reference")])` in the memory router with the `LocationProbe` and a `<Route path="/data/followed">` rendering *followed page*.
   - Step 1: click the link named *Follow a different symbol than FBXX*.
   - Step 2: `JSON.parse(getByTestId("location").textContent)` equals exactly `{ path: "/data/followed", state: { focusAdd: true } }`, and *followed page* renders.
   - The symbol link instead goes to `{ path: "/data/coverage?symbol=FBXX", state: null }`.
   - Kills: drop-field-copy of the `state` prop (`state` null); negate-boolean `focusAdd: true` → `false`; swap-case of the two link targets.
-- [ ] T004 Implement **TC-COMP-167, row half** (provider reason renders as text). Write it in `web/src/screens/data-health/problem-row.test.tsx` after T003 as `describe("Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24)")`, with `// Implements TC-COMP-167`. Render `ROW("FBXX", [FAIL("prices", "<img src=x onerror=alert(1)><b>bold</b>", 3)])`.
+- [x] T004 Implement **TC-COMP-167, row half** (provider reason renders as text). Write it in `web/src/screens/data-health/problem-row.test.tsx` after T003 as `describe("Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24)")`, with `// Implements TC-COMP-167`. Render `ROW("FBXX", [FAIL("prices", "<img src=x onerror=alert(1)><b>bold</b>", 3)])`.
   - The row's text contains the literal *Downloading daily prices failed: <img src=x onerror=alert(1)><b>bold</b>, 3 attempts*.
   - `container.querySelector("img, b, script")` is null.
   - Kills: a hand-written mutant rendering the reason through `dangerouslySetInnerHTML` (an `img` appears; the delivered `web/src/api/render.test.tsx` walk also rejects it).
-- [ ] T005 Implement **TC-COMP-169** (failure outcome badges carry shape). Write it in `web/src/screens/data-health/problem-row.test.tsx` after T004 as `describe("Outcome badges (TC-COMP-169, DAC-E6-S3-5, AC-20)")`, with `// Implements TC-COMP-169`. Render the mixed row of T002 (a).
+- [x] T005 Implement **TC-COMP-169** (failure outcome badges carry shape). Write it in `web/src/screens/data-health/problem-row.test.tsx` after T004 as `describe("Outcome badges (TC-COMP-169, DAC-E6-S3-5, AC-20)")`, with `// Implements TC-COMP-169`. Render the mixed row of T002 (a).
   - Each `[data-variant^="status-"]` badge's text content is exactly its label (*Failed*, *Not found*), contains an `svg[aria-hidden="true"]`, and carries no `aria-label` replacing the words.
   - The two shapes differ: the `svg` of the *Failed* badge and of the *Not found* badge have different `data-shape` / markup (CAP-003-E1-S5's square vs triangle), so greyscale tells them apart.
   - No `coverage-unknown` badge renders: nothing in a row is undeterminable (the absent reason has words, T002 (e)); this records the NotDeterminable clause as not applicable here, as coverage-matrix note 7 does for DAC-E6-S2-4.
   - Kills: a hand-written mutant rendering the label in a bare `span` with a colour class instead of `StatusBadge` (no `status-*` badge, no `svg`); swap-case `labelOf` → the raw `outcome` (*not_found* as text).
-- [ ] T006 Implement **TC-COMP-166** (Show more appends pages with served cursors and keeps focus) with the header, the count and the **Download now** condition. Write it in a new `web/src/screens/data-health/needs-fixing.test.tsx` as `describe("Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25)")`, with `// Implements TC-COMP-166`. Render `<NeedsFixing dataHealth={ok(DH(…))} onReread={reread} />`.
+- [x] T006 Implement **TC-COMP-166** (Show more appends pages with served cursors and keeps focus) with the header, the count and the **Download now** condition. Write it in a new `web/src/screens/data-health/needs-fixing.test.tsx` as `describe("Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25)")`, with `// Implements TC-COMP-166`. Render `<NeedsFixing dataHealth={ok(DH(…))} onReread={reread} />`.
   - (a) **Header and count (AC-16)** with `affected_count 120` and `problems PAGE(0, 50, "S049")`:
     - A `region` named by its `h2`; the `h2` text is exactly *Needs fixing · 120* (never *50*, the loaded row count) and has `tabIndex` -1.
     - The sub-line is exactly *From your most recent downloads · checked 14:03:12 CDT*.
@@ -197,7 +199,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - a hand-written mutant computing the condition over the first page only (c, third case)
   - negate-boolean on the in-flight guard (b: two calls)
   - remove-attribute of `aria-live` (b)
-- [ ] T007 Implement **TC-COMP-166 edge** (`422` reads *Couldn't read more problems* with **Try again** restarting from the first page) and **TC-COMP-167, card half**. Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T006 as `describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)")`, with `// Implements TC-COMP-166` and `// Implements TC-COMP-167`.
+- [x] T007 Implement **TC-COMP-166 edge** (`422` reads *Couldn't read more problems* with **Try again** restarting from the first page) and **TC-COMP-167, card half**. Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T006 as `describe("Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3)")`, with `// Implements TC-COMP-166` and `// Implements TC-COMP-167`.
   - (a) `affected_count 120`, `PAGE(0, 50, "S049")`; `fetchProblems` rejects `BAD_CURSOR`. After clicking *Show more*: the 50 rows are kept; a `role="status"` element reads exactly *Couldn't read more problems: FactorFlow hit an unexpected problem.* (CAP-003-E6-S1's `readFailureReason`, DEC-0373); *Show more* is gone and a *Try again* button (`outline`) has focus.
   - (b) Click *Try again*: `reread` is called exactly once; `fetchProblems` is not called again (the first page comes with the aggregate's answer, DEC-0381).
   - (c) `rerender` with a **new** `ok(DH({ affected_count: 120, problems: PAGE(0, 50, "S049") }))` object (the aggregate's answer): the failure line is gone, 50 rows, *Show more* is back.
@@ -206,12 +208,12 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - Kills: a hand-written mutant rendering `error.message` (a, e); swap-case of the Try again handler to `fetchProblems(cursor, 50)` (b: `fetchProblems` called again); a hand-written mutant that does not reset pages on a new aggregate answer (c: the failure line stays).
 
   (The `422` case's `{reason}` reuses S1's `readFailureReason`, whose own unit test already maps `validation_error` to the unexpected-problem clause.)
-- [ ] T008 Implement **TC-COMP-168** (Needs fixing card, rows, Show more, empty and error states use the display vocabulary). Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T007 as `describe("Needs fixing vocabulary (TC-COMP-168, DAC-E6-S3-4, AC-19)")`, with `// Implements TC-COMP-168`.
+- [x] T008 Implement **TC-COMP-168** (Needs fixing card, rows, Show more, empty and error states use the display vocabulary). Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T007 as `describe("Needs fixing vocabulary (TC-COMP-168, DAC-E6-S3-4, AC-19)")`, with `// Implements TC-COMP-168`.
   - (a) Render, one at a time, every state this story defines: `loading`; aggregate `error`; populated with the T002 (a) mixed row plus a failed-only row and *Show more*; after a Show more page with its announcement; the Show more failure (T007 (a)); `affected_count` 0 while the last complete read is pending, with one run, with none, and failed (T009); and the *Stop following FBXX* dialog opened from a row. For each, `visibleAndAccessibleText` never matches `TERMS`.
   - (b) A planted case proves the regex is not vacuous: `TERMS` matches `"one run"`, `"Retired"` and `"Provider credential"` and does not match `"Downloading"`, `"downloads"` or `"corporate_actions"`.
   - (c) Every badge label is a `labelOf` value (*Failed*, *Not found*), and every other label is a `copy.ts` literal (`SHOW_MORE`, `TRY_AGAIN`, `STOP_FOLLOWING`, `FOLLOW_DIFFERENT`, `DOWNLOAD_NOW`): asserted by comparing each button's and link's visible text against the imported constants and the symbol.
   - Kills: swap-case of a data-type word to the wire value (`corporate_actions` rendered: the planted case shows `\b` would not catch it, so (c) and T002 (b) do); a hand-written mutant labelling the row's stop button *Retire* (a).
-- [ ] T009 Implement **TC-COMP-152** (Nothing needs fixing with the last complete download line). Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T008 as `describe("Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13)")`, with `// Implements TC-COMP-152`. `DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })`.
+- [x] T009 Implement **TC-COMP-152** (Nothing needs fixing with the last complete download line). Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T008 as `describe("Nothing needs fixing (TC-COMP-152, DAC-E6-10, AC-13)")`, with `// Implements TC-COMP-152`. `DH({ affected_count: 0, problems: { rows: [], next_cursor: null } })`.
   - (a) **Step 1**: `listAcquisitionRuns` resolves `{ runs: [{ runId: "r-9", state: "succeeded", historyDepthYears: 5, requestedAt: "2026-10-29T13:59:00Z", startedAt: "2026-10-29T14:00:00Z", endedAt: "2026-10-29T15:10:00Z", instrumentsNamed: 300, instrumentsWritten: 300, instrumentsFailed: 0, failureReason: null }], nextCursor: null }`. It is called exactly once with exactly `{ state: "succeeded", limit: 1 }`. The card reads *Nothing needs fixing.* and *Last complete download 2026-10-29 09:00 CDT*. The `h2` is *Needs fixing · 0*; no `li`, no *Show more*, no *Download now*.
   - (b) **Step 2**: `{ runs: [], nextCursor: null }` gives *Nothing needs fixing.* and *No complete download yet*.
   - (c) **`startedAt` null** (`requestedAt "2026-10-29T13:59:00Z"`): *Last complete download 2026-10-29 08:59 CDT* (CAP-003-E1-S6's `formatDownloadName` rule, Other Notes).
@@ -220,7 +222,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - (f) **Failed** (`UNREACHABLE`): a `role="status"` reads exactly *Couldn't read the last complete download: FactorFlow is not answering.* with *Try again*, which calls `listAcquisitionRuns` a second time with the same filter and not `reread` (DEC-0383).
   - (g) **New aggregate answer at 0**: a `rerender` with a new `ok(DH({ affected_count: 0, … }))` object calls `listAcquisitionRuns` once more (DEC-0383).
   - Kills: negate-boolean on `affected_count === 0` (d: read called; a: rows path); drop-field-copy of the `state: "succeeded"` filter (a: called with `{ limit: 1 }`); swap-case `startedAt` → `endedAt` (a: *10:10*); negate-boolean on `runs.length === 0` (a, b swap); a hand-written mutant reading the line from the aggregate's rows (b).
-- [ ] T010 Write the aggregate's states and the dialog wiring for the card. Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T009 as `describe("Needs fixing states and stop following (DAC-E6-9, DAC-E6-12 wiring, DAC-E6-17, AC-24)")`. (DAC-E6-12 is CAP-003-E6-S2's; this pins only this card's side of the S2 caller contract.)
+- [x] T010 Write the aggregate's states and the dialog wiring for the card. Write it in `web/src/screens/data-health/needs-fixing.test.tsx` after T009 as `describe("Needs fixing states and stop following (DAC-E6-9, DAC-E6-12 wiring, DAC-E6-17, AC-24)")`. (DAC-E6-12 is CAP-003-E6-S2's; this pins only this card's side of the S2 caller contract.)
   - (a) **Loading** (`{ kind: "loading" }`): the region keeps an `h2` reading exactly *Needs fixing* (no count), an element carries `aria-busy="true"`, and no `li`, badge or *Download now* renders (ux-design 1.4 Loading: skeleton rows in the lower cards; DEC-0380).
   - (b) **Error** (`{ kind: "error", error: INTERNAL, last: { data: DH(), checkedAt } }`): the `h2` *Needs fixing* is kept; the body is exactly *Couldn't read the data health checks: FactorFlow hit an unexpected problem.* (S1's `READ_TARGETS.checks`, DAC-E6-17) with *Try again* calling `reread` once; `last`'s rows are not rendered (DAC-E6-17: body replaced); no *req-9f3*.
   - (c) **Stop following opens the one dialog**: with the default `DH`, click *Stop following FBXX*; `getByRole("dialog", { name: "Stop following FBXX" })` is present and exactly one `dialog` exists. Confirm with `retireInstrument` resolving `{ lifecycle: "retired", retiredAt: "2026-10-30T19:10:00Z" }`: `reread` is called exactly once (S2's `onStopped`, DAC-E6-15), `refresh` once with `"attention"`.
@@ -230,7 +232,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 ### Additional Unit Tests
 
-- [ ] T011 Write the copy unit cases as `describe("copy.ts, Needs fixing strings (DEC-0382, -4)")` in `web/src/screens/data-health/problem-row.test.tsx` after T005.
+- [x] T011 Write the copy unit cases as `describe("copy.ts, Needs fixing strings (DEC-0382, -4)")` in `web/src/screens/data-health/problem-row.test.tsx` after T005.
   - `needsFixingTitle(1236)` is *Needs fixing · 1,236*; `needsFixingTitle(0)` is *Needs fixing · 0*.
   - `downloadFailed("corporate_actions", "x", 1234)` is *Downloading corporate actions failed: x, 1,234 attempts*; with reason `null` it is *Downloading corporate actions failed: no reason was recorded, 1,234 attempts*.
   - `showingOf(100, 1236)` is *Showing 100 of 1,236 stocks*.
@@ -246,7 +248,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: The strings, the row composition and the card.
 
-- [ ] T012 Extend `web/src/screens/data-health/copy.ts`, the catalogue CAP-003-E6-S1 created. Change nothing S1 or S2 wrote; append a section headed `// CAP-003-E6-S3: Needs fixing (data-health-ui 2.5)`. Strings are verbatim from data-health-ui 2.5, ux-design 1.4 item 3 and epic DAC-E6-8 to DAC-E6-10 unless marked. Exports:
+- [x] T012 Extend `web/src/screens/data-health/copy.ts`, the catalogue CAP-003-E6-S1 created. Change nothing S1 or S2 wrote; append a section headed `// CAP-003-E6-S3: Needs fixing (data-health-ui 2.5)`. Strings are verbatim from data-health-ui 2.5, ux-design 1.4 item 3 and epic DAC-E6-8 to DAC-E6-10 unless marked. Exports:
   - `NEEDS_FIXING = "Needs fixing"`; `needsFixingTitle(n)` → `` `${NEEDS_FIXING} · ${formatCount(n)}` ``.
   - `FROM_RECENT_DOWNLOADS = "From your most recent downloads"` (joined to S1's `checked(time)` with `" · "`).
   - `DATA_TYPE_WORDS: Readonly<Record<DataType, string>>` = `{ prices: "daily prices", fundamentals: "company financials", corporate_actions: "corporate actions", reference: "reference data" }` (`DataType` from `../../api/types`; story *Implementation*).
@@ -259,7 +261,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - `NOTHING_NEEDS_FIXING = "Nothing needs fixing."`; `lastCompleteDownload(time)` → `` `Last complete download ${time}` ``; `NO_COMPLETE_DOWNLOAD = "No complete download yet"`; `LAST_COMPLETE_TARGET = "the last complete download"` (DEC-0383).
 
   The section's doc comment states that the `DATA_TYPE_WORDS` keys are wire values never rendered, that `{reason}` in `downloadFailed` is provider text rendered as text, and that read-failure reasons come only from S1's `readFailureReason`. No unit or hex literal appears, comments included. Makes T011 pass; supplies T002–T010.
-- [ ] T013 Create `web/src/screens/data-health/problem-row.tsx` exporting `ProblemRow({ row, onStopFollowing }: { row: ProblemPage["rows"][number]; onStopFollowing: (symbol: string) => void })` (DEC-0380), the problem-row composition (UX design §3; data-health-ui 2.5, 10). It renders `<li className="flex flex-col gap-3 py-3">` (`--space-3` between a row's lines) holding, in order:
+- [x] T013 Create `web/src/screens/data-health/problem-row.tsx` exporting `ProblemRow({ row, onStopFollowing }: { row: ProblemPage["rows"][number]; onStopFollowing: (symbol: string) => void })` (DEC-0380), the problem-row composition (UX design §3; data-health-ui 2.5, 10). It renders `<li className="flex flex-col gap-3 py-3">` (`--space-3` between a row's lines) holding, in order:
   1. `<Link to={`/data/coverage?symbol=${encodeURIComponent(row.symbol)}`} aria-label={symbolLinkName(row.symbol)} className="font-semibold">{row.symbol}</Link>`.
   2. Per failure, in served order (`data_type` order, data-health-reader l.294), a `<p className="flex items-center gap-2 text-sm">` with `<StatusBadge tier={tierOf(st)}>{labelOf(st)}</StatusBadge>` (`st = { of: "result", outcome: f.outcome }`) then, as a text child, `downloadFailed(f.data_type, f.reason, f.attempts)` for `failed` or `NOT_RECOGNISED` for `not_found`. The reason is a React text child only.
   3. `<p className="text-xs text-muted-foreground">{CONSEQUENCE}</p>`.
@@ -267,7 +269,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   5. When any failure is `not_found`: `<div className="flex flex-wrap items-center gap-2">` with `<Button variant="ghost" aria-label={stopFollowingName(row.symbol)} onClick={() => onStopFollowing(row.symbol)}>{STOP_FOLLOWING}</Button>`, `<Button variant="outline" asChild><Link to="/data/followed" state={{ focusAdd: true }} aria-label={followDifferentName(row.symbol)}>{FOLLOW_DIFFERENT}</Link></Button>` and `<p className="text-sm">{NOT_FOUND_FIX}</p>`.
 
   The doc comment cites data-health-ui 2.5, 2.7 and 10, DAC-E6-8, DAC-E6-13, AC-13, AC-14, D-9 owner-web-app's `focusAdd` entry hint (consumed by CAP-003-E7-S3) and the `?symbol=` seeding of Coverage (CAP-003-E7-S2), and states that each fix renders once per row per outcome present. Depends on T012; makes T002–T005 pass.
-- [ ] T014 Create `web/src/screens/data-health/needs-fixing.tsx` exporting `NeedsFixing({ dataHealth, onReread }: { dataHealth: ReadState<DataHealth>; onReread: () => void })` (DEC-0380).
+- [x] T014 Create `web/src/screens/data-health/needs-fixing.tsx` exporting `NeedsFixing({ dataHealth, onReread }: { dataHealth: ReadState<DataHealth>; onReread: () => void })` (DEC-0380).
   - **Frame (every state).** `<section aria-labelledby={titleId}>` (`useId`) wrapping `<Card variant="default">`. `CardHeader` is a row (`flex-row flex-wrap items-start justify-between gap-2`) holding a column with `<CardTitle id={titleId} ref={headingRef} tabIndex={-1}>` and, when `ok`, the sub-line `<p className="text-xs text-muted-foreground">` `` `${FROM_RECENT_DOWNLOADS} · ${checked(formatClock(dh.checked_at))}` ``, then, when `ok` and `rows.some((r) => r.retryable)`, `<DownloadNow />` (CAP-003-E6-S2). The title is `NEEDS_FIXING` while loading or failed, otherwise `needsFixingTitle(dh.affected_count)`.
   - **`loading`.** `CardContent` holds three `<SkeletonLine />` (S1).
   - **`error`.** `CardContent` holds `<ReadFailure sentence={readFailed(READ_TARGETS.checks, readFailureReason(error))} onRetry={onReread} />` (S1; DAC-E6-17). `last` is never read.
@@ -288,7 +290,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Prove the new files sit cleanly in the delivered suite and the shared scans.
 
-- [ ] T015 Run `npm run test` unchanged. It includes `web/src/api/render.test.tsx`, which walks `web/src` and forbids `dangerouslySetInnerHTML` (data-health-ui 4), and, when present, `web/src/components/token-literals.test.ts` (CAP-003-E1-S1; S5 adds this directory). Run S5's future literal scan by hand: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/problem-row.tsx web/src/screens/data-health/needs-fixing.tsx web/src/screens/data-health/copy.ts` prints nothing. Confirm with `git status --short web/ package.json` that the only changes are the four new files and the `copy.ts` append (traces to AC-13, AC-24).
+- [x] T015 Run `npm run test` unchanged. It includes `web/src/api/render.test.tsx`, which walks `web/src` and forbids `dangerouslySetInnerHTML` (data-health-ui 4), and, when present, `web/src/components/token-literals.test.ts` (CAP-003-E1-S1; S5 adds this directory). Run S5's future literal scan by hand: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/problem-row.tsx web/src/screens/data-health/needs-fixing.tsx web/src/screens/data-health/copy.ts` prints nothing. Confirm with `git status --short web/ package.json` that the only changes are the four new files and the `copy.ts` append (traces to AC-13, AC-24).
 
 **Checkpoint**: Whole suite green; literal scan clean; only this story's files changed.
 
@@ -298,8 +300,8 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Validation commands, mutation pass and TDD evidence.
 
-- [ ] T016 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root, formatting only the changed files with `npx biome format --write web/src/screens/data-health/problem-row.tsx web/src/screens/data-health/problem-row.test.tsx web/src/screens/data-health/needs-fixing.tsx web/src/screens/data-health/needs-fixing.test.tsx web/src/screens/data-health/copy.ts`. Then `npm run build`. Then the mutation pass: `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"` over `problem-row.tsx`, `needs-fixing.tsx` and the S3 section of `copy.ts`, with the hand-written mutants in Other Notes; no surviving non-equivalent mutant (traces to AC-13, AC-14).
-- [ ] T017 After each TDD cycle in T002–T016 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E6-S3-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage` and no per-cycle commit is planned (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles:
+- [x] T016 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root, formatting only the changed files with `npx biome format --write web/src/screens/data-health/problem-row.tsx web/src/screens/data-health/problem-row.test.tsx web/src/screens/data-health/needs-fixing.tsx web/src/screens/data-health/needs-fixing.test.tsx web/src/screens/data-health/copy.ts`. Then `npm run build`. Then the mutation pass: `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"` over `problem-row.tsx`, `needs-fixing.tsx` and the S3 section of `copy.ts`, with the hand-written mutants in Other Notes; no surviving non-equivalent mutant (traces to AC-13, AC-14).
+- [x] T017 After each TDD cycle in T002–T016 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E6-S3-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage` and no per-cycle commit is planned (INV-TDD-002, TEST-TDD-008; traces to no AC). The cycles:
   1. T002–T005, T011, T012 and T013 (the row and its strings).
   2. T006, T007 and the rows/Show more parts of T014.
   3. T009 and the zero-state part of T014.

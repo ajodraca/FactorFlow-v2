@@ -1,0 +1,485 @@
+{
+  "schema": 1,
+  "repo_head": "acec7e42addfffac24a074c66a9ef5fcc90d7e1c",
+  "range": "9033ec3d3d8c48c164ec04f3d1a4feb24a29fae9..HEAD",
+  "source": "9033ec3d3d8c48c164ec04f3d1a4feb24a29fae9",
+  "mutants": [
+    {
+      "id": "web/src/screens/instruments/add-field.tsx:67:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/instruments/add-field.tsx",
+      "line": 67,
+      "original": "        setNotice(`${result.reactivated[0].normalisedSymbol} is followed again.`);",
+      "mutated": "        setNotice(`${result.reactivated[1].normalisedSymbol} is followed again.`);"
+    },
+    {
+      "id": "web/src/screens/instruments/bulk-add.tsx:116:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/instruments/bulk-add.tsx",
+      "line": 116,
+      "original": "            Follow {recognised.length} stock{recognised.length === 1 ? \"\" : \"s\"}",
+      "mutated": "            Follow {recognised.length} stock{recognised.length === 2 ? \"\" : \"s\"}"
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:43:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/instruments/index.tsx",
+      "line": 43,
+      "original": "    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === true,",
+      "mutated": "    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === false,"
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:54:drop-field-copy:1",
+      "cycle": "handoff",
+      "operator": "drop-field-copy",
+      "file": "web/src/screens/instruments/index.tsx",
+      "line": 54,
+      "original": "        { pathname: location.pathname, search: location.search },",
+      "mutated": "        { pathname: nil, search: location.search },"
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:55:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/instruments/index.tsx",
+      "line": 55,
+      "original": "        { replace: true, state: null },",
+      "mutated": "        { replace: false, state: null },"
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:104:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/instruments/index.tsx",
+      "line": 104,
+      "original": "  const refresh = (): void => setReloadToken((token) => token + 1);",
+      "mutated": "  const refresh = (): void => setReloadToken((token) => token + 2);"
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:122:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/instruments/index.tsx",
+      "line": 122,
+      "original": "          <AddField focusOnMount={neverPopulated || focusAddRequested} onAdded={refresh} />",
+      "mutated": "          <AddField focusOnMount={neverPopulated && focusAddRequested} onAdded={refresh} />"
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:67:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "line": 67,
+      "original": "  refreshToken = 0,",
+      "mutated": "  refreshToken = 1,"
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:105:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "line": 105,
+      "original": "              page.rows.length === 0",
+      "mutated": "              page.rows.length === 1"
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:305:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "line": 305,
+      "original": "        onRetry={() => setReloadToken((t) => t + 1)}",
+      "mutated": "        onRetry={() => setReloadToken((t) => t + 2)}"
+    },
+    {
+      "id": "web/src/screens/instruments/retire-dialog.tsx:30:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/instruments/retire-dialog.tsx",
+      "line": 30,
+      "original": "        if (!next) {",
+      "mutated": "        if (next) {"
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h1",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "<h1 className=\"text-xl\">Followed stocks</h1>",
+      "new": "<h1 className=\"text-xl\">Instruments</h1>",
+      "description": "The h1 reverts to the delivered *Instruments*; UX design 1.6 / DAC-E7-4 / DAC-E7-S3-4 fix it as *Followed stocks* (task plan T005 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h2",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "const [focusAddRequested] = useState(\n    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === true,\n  );",
+      "new": "const focusAddRequested =\n    (location.state as { focusAdd?: boolean } | null)?.focusAdd === true;",
+      "description": "The hint is read from the live location on every render instead of captured once on mount, so consuming it (state: null) withdraws the focus before the add field mounts; DAC-E7-6 / DAC-E7-S3-1 and task plan T019(2) (useState initialiser) require the field focused once when opened with focusAdd."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h3",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "if (focusAddRequested) {",
+      "new": "if (true) {",
+      "description": "The guard on consuming the hint is lost: every open, hint or not, replaces its history entry (dropping the hash and any other router state); task plan T019(2) calls navigate only when focusAddRequested."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h4",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "{ pathname: location.pathname, search: location.search },",
+      "new": "{ pathname: location.pathname },",
+      "description": "Consuming the hint drops the URL's query string; task plan T019(2) / Resolved Conflict 3 replace the entry with the same pathname and search, changing only the state."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h5",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "{ replace: true, state: null },",
+      "new": "{ replace: true, state: location.state },",
+      "description": "The replaced history entry keeps the focusAdd hint, so a reload of that entry re-focuses the add field; DAC-E7-6 'a reload MUST NOT re-focus', task plan T019(2) state: null."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h6",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "focusOnMount={neverPopulated || focusAddRequested}",
+      "new": "focusOnMount={focusAddRequested}",
+      "description": "The never-populated autofocus is lost (clause dropped): with nothing followed the add field no longer takes focus; UX design 1.6 States, task plan T011 and Other Notes 'Focus and the never-populated state'."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h7",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "focusAddRequested} onAdded={refresh} />",
+      "new": "focusAddRequested} onAdded={() => undefined} />",
+      "description": "Following a stock through the add field no longer re-reads the screen and table, so the new stock does not appear; AC-17 (same outcome as delivered), task plan T019 'reload-token pattern'."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h8",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "<BulkAdd onAdded={refresh} />",
+      "new": "<BulkAdd onAdded={() => undefined} />",
+      "description": "Following many no longer re-reads the screen and table, so the followed stocks do not appear; AC-5 / AC-17, task plan T019 'reload-token pattern'."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h9",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "<InstrumentTable refreshToken={reloadToken} />",
+      "new": "<InstrumentTable />",
+      "description": "The table no longer receives the reload token, so after a follow the screen re-reads but the table keeps its stale rows and counts; AC-17, task plan T019(3) populated renderer <InstrumentTable refreshToken={reloadToken} />."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h10",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "\"empty-never-populated\": () => <p>No stocks followed yet.</p>,",
+      "new": "\"empty-never-populated\": () => <p>No stock matches this filter.</p>,",
+      "description": "The never-populated state renders the no-match copy; UX design 1.6 / DAC-E7-4 'No stocks followed yet.', distinct from no-match (task plan T011 kills note, TC-COMP-133)."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h11",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "{screenState.kind === \"loading\" || screenState.kind === \"unreachable\" ? null : (",
+      "new": "{screenState.kind === \"unreachable\" ? null : (",
+      "description": "The add region renders while the first read is pending (clause dropped); task plan T019(4) renders it for every kind except loading and unreachable, as delivered."
+    },
+    {
+      "id": "web/src/screens/instruments/index.tsx:manual:h12",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/index.tsx",
+      "old": "<StateRegion state={screenState} renderers={renderers} onRetry={refresh} />",
+      "new": "<StateRegion state={screenState} renderers={renderers} onRetry={() => undefined} />",
+      "description": "Try again on the screen's read error does nothing; task plan T019(3) / T011 onRetry bumps reloadToken and re-reads listInstruments once (AC-24, UX design 1.6 States)."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h13",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "          lifecycle: lifecycleFilter || undefined,\n        })",
+      "new": "        })",
+      "description": "The first-page request drops the lifecycle filter, so choosing Stopped following sends no lifecycle; AC-17 / DAC-E7-S3-6 same query parameters (task plan T007 kills note, case d)."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h14",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "lifecycle: lifecycleFilter || undefined,\n        cursor: nextCursor,",
+      "new": "cursor: nextCursor,",
+      "description": "The next keyset page is requested without the lifecycle filter, so paging a filtered list appends unfiltered stocks; task plan T018 'handleLoadMore keeps the delivered cursor request', DAC-E7-11, AC-17."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h15",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "symbol: symbolFilter || undefined,\n        lifecycle: lifecycleFilter || undefined,\n        cursor",
+      "new": "lifecycle: lifecycleFilter || undefined,\n        cursor",
+      "description": "The next keyset page is requested without the symbol filter, so paging a filtered list appends non-matching stocks; task plan T018 same cursor request, DAC-E7-11, AC-17."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h16",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "data: [...current.data, ...page.rows]",
+      "new": "data: [...page.rows, ...current.data]",
+      "description": "The next page is prepended instead of appended, so the keyset order breaks; task plan T018 'appends with [...current, ...page.rows]', CAP-003-E1-S4 Other Notes."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h17",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "    } catch (cause) {\n      setState({\n        kind: \"error\",\n        message: cause instanceof Error ? cause.message : \"the request could not be completed\",\n        requestId: \"unknown\",\n      });\n    } finally {",
+      "new": "    } catch {\n    } finally {",
+      "description": "A failed next-page read is swallowed: no error state renders and the list looks complete; AC-17 (the delivered paging reported its failure), AC-24 error through StateRegion."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h18",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "hasMore={nextCursor !== null}",
+      "new": "hasMore={nextCursor === null}",
+      "description": "The table asks for more when there is none and never when there is, so the second keyset page is never requested; DAC-E7-11 / task plan T007 kills note (case e)."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h19",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "busy={loadingMore}",
+      "new": "busy={false}",
+      "description": "The table is not marked busy while the next page loads (no aria-busy, onEndReached not held back); task plan T018 busy={loadingMore}, CAP-003-E1-S4 DEC-0306/DEC-0307."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h20",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "variant=\"virtualised\"\n          rowHeader\n",
+      "new": "variant=\"virtualised\"\n",
+      "description": "The symbol cell is no longer the row header, so rows lose their accessible row name; task plan T018 prescribes `DataTable variant=\"virtualised\" rowHeader`."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h21",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "onRetry={() => setReloadToken((t) => t + 1)}",
+      "new": "onRetry={() => undefined}",
+      "description": "Try again on the table's read error does nothing; task plan T007(m) / T018(1) onRetry bumps reloadToken and re-reads once (task plan T007 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h22",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "setSymbolFilter(\"\");\n            setLifecycleFilter(\"\");",
+      "new": "setSymbolFilter(\"\");",
+      "description": "Reset filter clears only the symbol filter, leaving the lifecycle filter applied; task plan T007(l) / T018(1) 'Reset filter clearing both filters'."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h23",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "variant=\"outline\"",
+      "new": "variant=\"default\"",
+      "description": "Reset filter renders as the primary button instead of `Button variant=\"outline\"` (task plan T018(1)), AC-26."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h24",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "variant=\"ghost\"",
+      "new": "variant=\"outline\"",
+      "description": "The row action Stop following renders as an outline button instead of `Button variant=\"ghost\"` (task plan T018(3)), AC-26."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h25",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "{activeCount} followed, {retiredCount} stopped following",
+      "new": "{retiredCount} followed, {activeCount} stopped following",
+      "description": "The count names the followed and stopped-following totals the wrong way round; UX design 1.6 / DAC-E7-4 '{n} followed, {m} stopped following' (task plan T018(2))."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h26",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "{retiredCount} stopped following",
+      "new": "{retiredCount} retired",
+      "description": "The count reverts to the delivered *retired*; DAC-E7-4 / DAC-E7-S3-4 (task plan T005 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h27",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "value={lifecycleFilter === \"\" ? ALL : lifecycleFilter}",
+      "new": "value={lifecycleFilter}",
+      "description": "With no lifecycle filter (initially and after Reset filter) the Select shows no current value instead of *All*; task plan T018(2) maps 'all' to the delivered empty filter both ways (Other Notes, Radix Select and the empty filter)."
+    },
+    {
+      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h28",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/retire-dialog.tsx",
+      "old": "      <p data-testid=\"retire-dialog-in-flight-notice\">\n        A download is running and will still download {symbol} this time. Stopping takes effect from\n        the next download.\n      </p>\n",
+      "new": "",
+      "description": "The running-download sentence is gone from the dialog; DAC-E7-S3-2 / CAP-001 AC-25, DEC-0390 (task plan T003 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h29",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/retire-dialog.tsx",
+      "old": "confirmLabel=\"Stop following\"",
+      "new": "confirmLabel=\"Stop acquiring\"",
+      "description": "The confirm button reverts to the delivered *Stop acquiring*; DAC-E7-9 **Stop following** (task plan T003 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h30",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/retire-dialog.tsx",
+      "old": "onOpenChange={(next) => {\n        if (!next) {\n          onCancel();\n        }\n      }}",
+      "new": "onOpenChange={() => undefined}",
+      "description": "Escape and Cancel no longer call onCancel, so the dialog cannot be dismissed and focus never returns; AC-25, DAC-E7-9 (task plan T003 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h31",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/retire-dialog.tsx",
+      "old": "{error !== null ? (",
+      "new": "{true ? (",
+      "description": "The dialog shows a 'Stopping following {SYMBOL} failed' alert with no failure; task plan T003 'with no error, no alert', IR-004."
+    },
+    {
+      "id": "web/src/screens/instruments/badges.tsx:manual:h32",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/badges.tsx",
+      "old": "outcome: \"not_found\"",
+      "new": "outcome: \"failed\"",
+      "description": "The recognition marker renders the failed outcome (Failed, status-critical) instead of Not found / status-warning; AC-14, DAC-E7-S3-5, ux-brief 12.2 (task plan T006 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/badges.tsx:manual:h33",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/badges.tsx",
+      "old": "return <span>Followed</span>;",
+      "new": "return <StatusBadge tier=\"good\">Followed</StatusBadge>;",
+      "description": "A followed stock gets a good-tier badge instead of its word alone; DEC-0389 (no badge, no tier), task plan T013."
+    },
+    {
+      "id": "web/src/screens/instruments/add-field.tsx:manual:h34",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/add-field.tsx",
+      "old": "rejection.disposition === \"duplicate_active\"",
+      "new": "rejection.disposition !== \"duplicate_active\"",
+      "description": "The duplicate and malformed field errors swap; task plan T008 kills note ('{SYM} is already a followed stock.' vs '{input} does not match the required symbol shape.')."
+    },
+    {
+      "id": "web/src/screens/instruments/add-field.tsx:manual:h35",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/add-field.tsx",
+      "old": "if (focusOnMount) {",
+      "new": "if (!focusOnMount) {",
+      "description": "The add field focuses on mount when not asked to and not when asked; DAC-E7-S3-1, UX design 1.6 States (task plan T008 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/add-field.tsx:manual:h36",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/add-field.tsx",
+      "old": "disabled={submitting}",
+      "new": "disabled={false}",
+      "description": "Follow a stock stays enabled while the request is in flight; task plan T015 keeps the delivered native disabled={submitting} (IR-003)."
+    },
+    {
+      "id": "web/src/screens/instruments/add-field.tsx:manual:h37",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/add-field.tsx",
+      "old": "<Button type=\"submit\"",
+      "new": "<Button type=\"button\"",
+      "description": "Clicking Follow a stock no longer submits the form (only Enter does); AC-17 same outcome, task plan T015 `Button ... with type=\"submit\"`."
+    },
+    {
+      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h38",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/bulk-add.tsx",
+      "old": "const blocked = parsed !== null && recognised.length === 0;",
+      "new": "const blocked = parsed !== null && recognised.length !== 0;",
+      "description": "Follow many is blocked when symbols are recognised and usable when none are; IR-003 / TC-COMP-130 (task plan T009 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h39",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/bulk-add.tsx",
+      "old": "const recognised = parsed?.filter((entry) => entry.valid) ?? [];",
+      "new": "const recognised = parsed ?? [];",
+      "description": "Rejected entries are counted as recognised and sent; AC-5 (task plan T009 kills note)."
+    },
+    {
+      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h40",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/bulk-add.tsx",
+      "old": "disabled={!blocked && submitting}",
+      "new": "disabled={false}",
+      "description": "The Follow many submit stays enabled while its request is in flight; task plan T016 disabled={!blocked && submitting} (IR-003)."
+    },
+    {
+      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h41",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/bulk-add.tsx",
+      "old": "{submitResult.added.length} followed,",
+      "new": "{submitResult.rejected.length} followed,",
+      "description": "The result line reports the rejected count as followed; task plan T016 '{a} followed, {r} followed again, {j} rejected' (IR-008)."
+    },
+    {
+      "id": "web/src/screens/instruments/start-action.tsx:manual:h42",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/start-action.tsx",
+      "old": "const blocked = historyDepthYears === null;",
+      "new": "const blocked = historyDepthYears !== null;",
+      "description": "Download now is blocked when history depth is set and usable when it is not; DAC-E2-S4-3, AC-17 (task plan T010 kills note)."
+    }
+  ]
+}

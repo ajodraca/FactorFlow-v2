@@ -1,0 +1,75 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 516ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 3 failed) 1150ms
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a 500 keeps the heading and says what happened, with Try again 21ms
+     → expected 'Couldn\'t read the recent downloads: …' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (d) an unreachable interface says it is not answering 5ms
+     → expected 'Couldn\'t read the recent downloads: …' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+   × copy.ts recent downloads and what you follow strings > (b) the failed-read sentences 0ms
+     → expected 'Couldn\'t read the recent downloads: …' to be 'Couldn\'t read recent downloads: x.' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a 500 keeps the heading and says what happened, with Try again
+AssertionError: expected 'Couldn\'t read the recent downloads: …' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+
+Expected: "Couldn't read recent downloads: FactorFlow hit an unexpected problem."
+Received: "Couldn't read the recent downloads: FactorFlow hit an unexpected problem."
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:564:32
+    562|     renderRecent();
+    563|     const status = await screen.findByRole("status");
+    564|     expect(status.textContent).toBe(
+       |                                ^
+    565|       "Couldn't read recent downloads: FactorFlow hit an unexpected pr…
+    566|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (d) an unreachable interface says it is not answering
+AssertionError: expected 'Couldn\'t read the recent downloads: …' to be 'Couldn\'t read recent downloads: Fact…' // Object.is equality
+
+Expected: "Couldn't read recent downloads: FactorFlow is not answering."
+Received: "Couldn't read the recent downloads: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:589:32
+    587|     renderRecent();
+    588|     const status = await screen.findByRole("status");
+    589|     expect(status.textContent).toBe("Couldn't read recent downloads: F…
+       |                                ^
+    590|   });
+    591| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (b) the failed-read sentences
+AssertionError: expected 'Couldn\'t read the recent downloads: …' to be 'Couldn\'t read recent downloads: x.' // Object.is equality
+
+Expected: "Couldn't read recent downloads: x."
+Received: "Couldn't read the recent downloads: x."
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:879:59
+    877| 
+    878|   it("(b) the failed-read sentences", () => {
+    879|     expect(readFailed(READ_TARGETS.recentDownloads, "x")).toBe(
+       |                                                           ^
+    880|       "Couldn't read recent downloads: x.",
+    881|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 63 passed (66)
+   Start at  01:35:26
+   Duration  2.46s (transform 539ms, setup 214ms, collect 1.48s, tests 1.67s, environment 359ms, prepare 123ms)
+

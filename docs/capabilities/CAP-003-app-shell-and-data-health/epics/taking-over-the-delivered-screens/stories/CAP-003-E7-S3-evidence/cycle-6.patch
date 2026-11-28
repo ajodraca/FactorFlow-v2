@@ -1,0 +1,1060 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutants-cycle-6.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutants-cycle-6.json
+new file mode 100644
+index 00000000..ce08c524
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutants-cycle-6.json
+@@ -0,0 +1,26 @@
++{
++  "schema": 1,
++  "repo_head": "2132ee50da40b6de53fc8d1cfced4a06fc7a5ec3",
++  "range": "HEAD..worktree",
++  "source": "2132ee50da40b6de53fc8d1cfced4a06fc7a5ec3",
++  "mutants": [
++    {
++      "id": "manual:c6-seconds",
++      "cycle": "cycle-6",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "formatInstant(new Date(populated.fetchedAt))",
++      "new": "formatInstant(new Date(populated.fetchedAt), { seconds: true })",
++      "description": "Adds seconds to the last-updated time: UX design 0.7 form is YYYY-MM-DD HH:MM zone"
++    },
++    {
++      "id": "manual:c6-now",
++      "cycle": "cycle-6",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "formatInstant(new Date(populated.fetchedAt))",
++      "new": "formatInstant(new Date())",
++      "description": "Uses the render time, not the read's fetchedAt"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log
+new file mode 100644
+index 00000000..46ef138d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log
+@@ -0,0 +1,942 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++stderr | src/screens/instruments/instrument-table.test.tsx > InstrumentTable — followed stocks > renders followed and stopped-following stocks in one virtualised table, stopped ones marked
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/instruments/instrument-table.test.tsx (30 tests | 2 failed) 1503ms
++   ✓ InstrumentTable — followed stocks > issues a server-side request, after the debounce, when the symbol filter changes 301ms
++   × InstrumentTable — followed stocks > shows when the list was last read, and moves it on when the list is read again 12ms
++     → Unable to find an element with the text: Last updated 2026-03-02 09:04 CST. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++<body
++  style=""
++>
++  <div>
++    <div
++      class="flex flex-col gap-3"
++    >
++      <div
++        class="flex items-center gap-3"
++      >
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <label
++            for="followed-symbol-filter"
++          >
++            Filter by symbol
++          </label>
++          <input
++            class="h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"
++            data-variant="text"
++            id="followed-symbol-filter"
++            value=""
++          />
++        </div>
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <span>
++            Lifecycle
++          </span>
++          <button
++            aria-autocomplete="none"
++            aria-expanded="false"
++            aria-label="Lifecycle"
++            class="flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
++            data-state="closed"
++            data-variant="inline"
++            dir="ltr"
++            role="combobox"
++            type="button"
++          >
++            <span
++              style="pointer-events: none;"
++            >
++              All
++            </span>
++            <svg
++              aria-hidden="true"
++              class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground"
++              fill="none"
++              height="24"
++              stroke="currentColor"
++              stroke-linecap="round"
++              stroke-linejoin="round"
++              stroke-width="2"
++              viewBox="0 0 24 24"
++              width="24"
++              xmlns="http://www.w3.org/2000/svg"
++            >
++              <path
++                d="m6 9 6 6 6-6"
++              />
++            </svg>
++          </button>
++        </div>
++        <p
++          class="font-numeric text-sm"
++        >
++          1
++           followed, 
++          1
++           stopped following
++        </p>
++      </div>
++      <section
++        aria-label="Followed stocks"
++      >
++        <p
++          class="font-numeric text-xs text-muted-foreground"
++        >
++          Last updated 
++          2026-03-02 09:04:05 America/Chicago
++        </p>
++        <div
++          class="overflow-y-auto"
++          data-slot="data-table-scroller"
++          style="height: calc(var(--row-height) * 16);"
++          tabindex="0"
++        >
++          <table
++            aria-rowcount="3"
++            class="w-full caption-bottom text-sm"
++            data-variant="virtualised"
++          >
++            <thead>
++              <tr
++                class="h-row border-b border-border sticky top-0 bg-background"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Symbol
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Lifecycle
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Actions
++                </th>
++              </tr>
++            </thead>
++            <tbody>
++              <tr
++                aria-rowindex="2"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="1"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      href="/data/coverage?symbol=AAPL"
++                    >
++                      AAPL
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span>
++                    Followed
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <button
++                    aria-label="Stop following AAPL"
++                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++                    data-variant="ghost"
++                    type="button"
++                  >
++                    Stop following
++                  </button>
++                </td>
++              </tr>
++              <tr
++                aria-rowindex="3"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="2"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      class="text-muted-foreground"
++                      href="/data/coverage?symbol=MSFT"
++                    >
++                      MSFT
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span
++                    class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"
++                    data-variant="status-neutral"
++                  >
++                    <svg
++                      aria-hidden="true"
++                      class="lucide lucide-circle h-3 w-3 shrink-0"
++                      fill="none"
++                      focusable="false"
++                      height="24"
++                      stroke="currentColor"
++                      stroke-linecap="round"
++                      stroke-linejoin="round"
++                      stroke-width="2"
++                      viewBox="0 0 24 24"
++                      width="24"
++                      xmlns="http://www.w3.org/2000/svg"
++                    >
++                      <circle
++                        cx="12"
++                        cy="12"
++                        r="10"
++                      />
++                    </svg>
++                    Stopped following
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                />
++              </tr>
++            </tbody>
++          </table>
++        </div>
++      </section>
++    </div>
++  </div>
++</body>
++   × InstrumentTable — followed stocks > writes the last-updated time as YYYY-MM-DD HH:MM zone, CDT in summer 9ms
++     → Unable to find an element with the text: Last updated 2026-10-15 17:46 CDT. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++<body
++  style=""
++>
++  <div>
++    <div
++      class="flex flex-col gap-3"
++    >
++      <div
++        class="flex items-center gap-3"
++      >
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <label
++            for="followed-symbol-filter"
++          >
++            Filter by symbol
++          </label>
++          <input
++            class="h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"
++            data-variant="text"
++            id="followed-symbol-filter"
++            value=""
++          />
++        </div>
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <span>
++            Lifecycle
++          </span>
++          <button
++            aria-autocomplete="none"
++            aria-expanded="false"
++            aria-label="Lifecycle"
++            class="flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
++            data-state="closed"
++            data-variant="inline"
++            dir="ltr"
++            role="combobox"
++            type="button"
++          >
++            <span
++              style="pointer-events: none;"
++            >
++              All
++            </span>
++            <svg
++              aria-hidden="true"
++              class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground"
++              fill="none"
++              height="24"
++              stroke="currentColor"
++              stroke-linecap="round"
++              stroke-linejoin="round"
++              stroke-width="2"
++              viewBox="0 0 24 24"
++              width="24"
++              xmlns="http://www.w3.org/2000/svg"
++            >
++              <path
++                d="m6 9 6 6 6-6"
++              />
++            </svg>
++          </button>
++        </div>
++        <p
++          class="font-numeric text-sm"
++        >
++          1
++           followed, 
++          1
++           stopped following
++        </p>
++      </div>
++      <section
++        aria-label="Followed stocks"
++      >
++        <p
++          class="font-numeric text-xs text-muted-foreground"
++        >
++          Last updated 
++          2026-10-15 17:46:10 America/Chicago
++        </p>
++        <div
++          class="overflow-y-auto"
++          data-slot="data-table-scroller"
++          style="height: calc(var(--row-height) * 16);"
++          tabindex="0"
++        >
++          <table
++            aria-rowcount="3"
++            class="w-full caption-bottom text-sm"
++            data-variant="virtualised"
++          >
++            <thead>
++              <tr
++                class="h-row border-b border-border sticky top-0 bg-background"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Symbol
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Lifecycle
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Actions
++                </th>
++              </tr>
++            </thead>
++            <tbody>
++              <tr
++                aria-rowindex="2"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="1"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      href="/data/coverage?symbol=AAPL"
++                    >
++                      AAPL
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span>
++                    Followed
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <button
++                    aria-label="Stop following AAPL"
++                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++                    data-variant="ghost"
++                    type="button"
++                  >
++                    Stop following
++                  </button>
++                </td>
++              </tr>
++              <tr
++                aria-rowindex="3"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="2"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      class="text-muted-foreground"
++                      href="/data/coverage?symbol=MSFT"
++                    >
++                      MSFT
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span
++                    class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"
++                    data-variant="status-neutral"
++                  >
++                    <svg
++                      aria-hidden="true"
++                      class="lucide lucide-circle h-3 w-3 shrink-0"
++                      fill="none"
++                      focusable="false"
++                      height="24"
++                      stroke="currentColor"
++                      stroke-linecap="round"
++                      stroke-linejoin="round"
++                      stroke-width="2"
++                      viewBox="0 0 24 24"
++                      width="24"
++                      xmlns="http://www.w3.org/2000/svg"
++                    >
++                      <circle
++                        cx="12"
++                        cy="12"
++                        r="10"
++                      />
++                    </svg>
++                    Stopped following
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                />
++              </tr>
++            </tbody>
++          </table>
++        </div>
++      </section>
++    </div>
++  </div>
++</body>
++   ✓ InstrumentTable — followed stocks > carries both filters on the next page's request 309ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/instruments/instrument-table.test.tsx > InstrumentTable — followed stocks > shows when the list was last read, and moves it on when the list is read again
++TestingLibraryElementError: Unable to find an element with the text: Last updated 2026-03-02 09:04 CST. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++<body
++  style=""
++>
++  <div>
++    <div
++      class="flex flex-col gap-3"
++    >
++      <div
++        class="flex items-center gap-3"
++      >
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <label
++            for="followed-symbol-filter"
++          >
++            Filter by symbol
++          </label>
++          <input
++            class="h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"
++            data-variant="text"
++            id="followed-symbol-filter"
++            value=""
++          />
++        </div>
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <span>
++            Lifecycle
++          </span>
++          <button
++            aria-autocomplete="none"
++            aria-expanded="false"
++            aria-label="Lifecycle"
++            class="flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
++            data-state="closed"
++            data-variant="inline"
++            dir="ltr"
++            role="combobox"
++            type="button"
++          >
++            <span
++              style="pointer-events: none;"
++            >
++              All
++            </span>
++            <svg
++              aria-hidden="true"
++              class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground"
++              fill="none"
++              height="24"
++              stroke="currentColor"
++              stroke-linecap="round"
++              stroke-linejoin="round"
++              stroke-width="2"
++              viewBox="0 0 24 24"
++              width="24"
++              xmlns="http://www.w3.org/2000/svg"
++            >
++              <path
++                d="m6 9 6 6 6-6"
++              />
++            </svg>
++          </button>
++        </div>
++        <p
++          class="font-numeric text-sm"
++        >
++          1
++           followed, 
++          1
++           stopped following
++        </p>
++      </div>
++      <section
++        aria-label="Followed stocks"
++      >
++        <p
++          class="font-numeric text-xs text-muted-foreground"
++        >
++          Last updated 
++          2026-03-02 09:04:05 America/Chicago
++        </p>
++        <div
++          class="overflow-y-auto"
++          data-slot="data-table-scroller"
++          style="height: calc(var(--row-height) * 16);"
++          tabindex="0"
++        >
++          <table
++            aria-rowcount="3"
++            class="w-full caption-bottom text-sm"
++            data-variant="virtualised"
++          >
++            <thead>
++              <tr
++                class="h-row border-b border-border sticky top-0 bg-background"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Symbol
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Lifecycle
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Actions
++                </th>
++              </tr>
++            </thead>
++            <tbody>
++              <tr
++                aria-rowindex="2"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="1"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      href="/data/coverage?symbol=AAPL"
++                    >
++                      AAPL
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span>
++                    Followed
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <button
++                    aria-label="Stop following AAPL"
++                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++                    data-variant="ghost"
++                    type="button"
++                  >
++                    Stop following
++                  </button>
++                </td>
++              </tr>
++              <tr
++                aria-rowindex="3"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="2"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      class="text-muted-foreground"
++                      href="/data/coverage?symbol=MSFT"
++                    >
++                      MSFT
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span
++                    class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"
++                    data-variant="status-neutral"
++                  >
++                    <svg
++                      aria-hidden="true"
++                      class="lucide lucide-circle h-3 w-3 shrink-0"
++                      fill="none"
++                      focusable="false"
++                      height="24"
++                      stroke="currentColor"
++                      stroke-linecap="round"
++                      stroke-linejoin="round"
++                      stroke-width="2"
++                      viewBox="0 0 24 24"
++                      width="24"
++                      xmlns="http://www.w3.org/2000/svg"
++                    >
++                      <circle
++                        cx="12"
++                        cy="12"
++                        r="10"
++                      />
++                    </svg>
++                    Stopped following
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                />
++              </tr>
++            </tbody>
++          </table>
++        </div>
++      </section>
++    </div>
++  </div>
++</body>
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/instruments/instrument-table.test.tsx:300:28
++    298|       const { rerender } = renderTable({ refreshToken: 0 });
++    299|       await screen.findByRole("table");
++    300|       const stamp = screen.getByText("Last updated 2026-03-02 09:04 CS…
++       |                            ^
++    301|       expect(stamp).toHaveClass("font-numeric", "text-xs");
++    302| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/screens/instruments/instrument-table.test.tsx > InstrumentTable — followed stocks > writes the last-updated time as YYYY-MM-DD HH:MM zone, CDT in summer
++TestingLibraryElementError: Unable to find an element with the text: Last updated 2026-10-15 17:46 CDT. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
++
++Ignored nodes: comments, script, style
++<body
++  style=""
++>
++  <div>
++    <div
++      class="flex flex-col gap-3"
++    >
++      <div
++        class="flex items-center gap-3"
++      >
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <label
++            for="followed-symbol-filter"
++          >
++            Filter by symbol
++          </label>
++          <input
++            class="h-7 w-full rounded border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"
++            data-variant="text"
++            id="followed-symbol-filter"
++            value=""
++          />
++        </div>
++        <div
++          class="flex flex-col gap-1 text-sm"
++        >
++          <span>
++            Lifecycle
++          </span>
++          <button
++            aria-autocomplete="none"
++            aria-expanded="false"
++            aria-label="Lifecycle"
++            class="flex h-7 w-full items-center justify-between gap-2 rounded border border-input bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
++            data-state="closed"
++            data-variant="inline"
++            dir="ltr"
++            role="combobox"
++            type="button"
++          >
++            <span
++              style="pointer-events: none;"
++            >
++              All
++            </span>
++            <svg
++              aria-hidden="true"
++              class="lucide lucide-chevron-down h-4 w-4 text-muted-foreground"
++              fill="none"
++              height="24"
++              stroke="currentColor"
++              stroke-linecap="round"
++              stroke-linejoin="round"
++              stroke-width="2"
++              viewBox="0 0 24 24"
++              width="24"
++              xmlns="http://www.w3.org/2000/svg"
++            >
++              <path
++                d="m6 9 6 6 6-6"
++              />
++            </svg>
++          </button>
++        </div>
++        <p
++          class="font-numeric text-sm"
++        >
++          1
++           followed, 
++          1
++           stopped following
++        </p>
++      </div>
++      <section
++        aria-label="Followed stocks"
++      >
++        <p
++          class="font-numeric text-xs text-muted-foreground"
++        >
++          Last updated 
++          2026-10-15 17:46:10 America/Chicago
++        </p>
++        <div
++          class="overflow-y-auto"
++          data-slot="data-table-scroller"
++          style="height: calc(var(--row-height) * 16);"
++          tabindex="0"
++        >
++          <table
++            aria-rowcount="3"
++            class="w-full caption-bottom text-sm"
++            data-variant="virtualised"
++          >
++            <thead>
++              <tr
++                class="h-row border-b border-border sticky top-0 bg-background"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Symbol
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Lifecycle
++                </th>
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"
++                  scope="col"
++                >
++                  Actions
++                </th>
++              </tr>
++            </thead>
++            <tbody>
++              <tr
++                aria-rowindex="2"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="1"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      href="/data/coverage?symbol=AAPL"
++                    >
++                      AAPL
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span>
++                    Followed
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <button
++                    aria-label="Stop following AAPL"
++                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++                    data-variant="ghost"
++                    type="button"
++                  >
++                    Stop following
++                  </button>
++                </td>
++              </tr>
++              <tr
++                aria-rowindex="3"
++                class="h-row border-b border-border hover:bg-muted"
++                data-row-id="2"
++              >
++                <th
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle text-left font-medium"
++                  scope="row"
++                >
++                  <span
++                    class="flex items-center gap-2"
++                  >
++                    <a
++                      class="text-muted-foreground"
++                      href="/data/coverage?symbol=MSFT"
++                    >
++                      MSFT
++                    </a>
++                  </span>
++                </th>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                >
++                  <span
++                    class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-neutral-muted text-status-neutral"
++                    data-variant="status-neutral"
++                  >
++                    <svg
++                      aria-hidden="true"
++                      class="lucide lucide-circle h-3 w-3 shrink-0"
++                      fill="none"
++                      focusable="false"
++                      height="24"
++                      stroke="currentColor"
++                      stroke-linecap="round"
++                      stroke-linejoin="round"
++                      stroke-width="2"
++                      viewBox="0 0 24 24"
++                      width="24"
++                      xmlns="http://www.w3.org/2000/svg"
++                    >
++                      <circle
++                        cx="12"
++                        cy="12"
++                        r="10"
++                      />
++                    </svg>
++                    Stopped following
++                  </span>
++                </td>
++                <td
++                  class="px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] align-middle"
++                />
++              </tr>
++            </tbody>
++          </table>
++        </div>
++      </section>
++    </div>
++  </div>
++</body>
++ ❯ Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
++ ❯ ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
++ ❯ src/screens/instruments/instrument-table.test.tsx:333:21
++    331|       renderTable({ refreshToken: 0 });
++    332|       await screen.findByRole("table");
++    333|       expect(screen.getByText("Last updated 2026-10-15 17:46 CDT")).to…
++       |                     ^
++    334|     } finally {
++    335|       vi.useRealTimers();
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 28 passed (30)
++   Start at  05:16:53
++   Duration  3.06s (transform 115ms, setup 92ms, collect 666ms, tests 1.50s, environment 322ms, prepare 229ms)
++
+diff --git a/web/src/screens/instruments/instrument-table.test.tsx b/web/src/screens/instruments/instrument-table.test.tsx
+index f947239f..293605c7 100644
+--- a/web/src/screens/instruments/instrument-table.test.tsx
++++ b/web/src/screens/instruments/instrument-table.test.tsx
+@@ -4,7 +4,6 @@ import { MemoryRouter } from "react-router-dom";
+ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+ import * as client from "../../api/client";
+ import type { Instrument } from "../../api/types";
+-import { formatTimestamp } from "../../app/status-region";
+ import { InstrumentTable } from "./instrument-table";
+ 
+ vi.mock("../../api/client", async () => {
+@@ -298,7 +297,7 @@ describe("InstrumentTable — followed stocks", () => {
+       vi.setSystemTime(first);
+       const { rerender } = renderTable({ refreshToken: 0 });
+       await screen.findByRole("table");
+-      const stamp = screen.getByText(`Last updated ${formatTimestamp(first)}`);
++      const stamp = screen.getByText("Last updated 2026-03-02 09:04 CST");
+       expect(stamp).toHaveClass("font-numeric", "text-xs");
+ 
+       // The time is the read's, not the moment of a later redraw.
+@@ -307,7 +306,7 @@ describe("InstrumentTable — followed stocks", () => {
+         .setup({ advanceTimers: () => undefined })
+         .click(screen.getByRole("button", { name: "Stop following AAPL" }));
+       await screen.findByRole("dialog");
+-      expect(screen.getByText(`Last updated ${formatTimestamp(first)}`)).toBeInTheDocument();
++      expect(screen.getByText("Last updated 2026-03-02 09:04 CST")).toBeInTheDocument();
+       await userEvent.setup().keyboard("{Escape}");
+       await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+       rerender(
+@@ -315,10 +314,21 @@ describe("InstrumentTable — followed stocks", () => {
+           <InstrumentTable refreshToken={1} />
+         </MemoryRouter>,
+       );
+-      expect(
+-        await screen.findByText(`Last updated ${formatTimestamp(second)}`),
+-      ).toBeInTheDocument();
+-      expect(screen.queryByText(`Last updated ${formatTimestamp(first)}`)).not.toBeInTheDocument();
++      expect(await screen.findByText("Last updated 2026-03-02 09:09 CST")).toBeInTheDocument();
++      expect(screen.queryByText("Last updated 2026-03-02 09:04 CST")).not.toBeInTheDocument();
++    } finally {
++      vi.useRealTimers();
++    }
++  });
++
++  // IR-001, AC-26: UX design 0.7's form, with the zone as CDT when the instant falls in daylight time.
++  it("writes the last-updated time as YYYY-MM-DD HH:MM zone, CDT in summer", async () => {
++    vi.useFakeTimers({ toFake: ["Date"] });
++    try {
++      vi.setSystemTime(new Date("2026-10-15T22:46:10Z"));
++      renderTable({ refreshToken: 0 });
++      await screen.findByRole("table");
++      expect(screen.getByText("Last updated 2026-10-15 17:46 CDT")).toBeInTheDocument();
+     } finally {
+       vi.useRealTimers();
+     }
+diff --git a/web/src/screens/instruments/instrument-table.tsx b/web/src/screens/instruments/instrument-table.tsx
+index 3d01d2fe..c040d56a 100644
+--- a/web/src/screens/instruments/instrument-table.tsx
++++ b/web/src/screens/instruments/instrument-table.tsx
+@@ -2,8 +2,8 @@ import type { ColumnDef } from "@tanstack/react-table";
+ import { type JSX, useEffect, useMemo, useState } from "react";
+ import { Link } from "react-router-dom";
+ import { listInstruments, retireInstrument } from "../../api/client";
+-import { formatTimestamp } from "../../app/status-region";
+ import type { Instrument, InstrumentLifecycle, ScreenState } from "../../api/types";
++import { formatInstant } from "../../components/patterns/format";
+ import { StateRegion, type StateRenderers } from "../../components/patterns/state-region";
+ import { Button } from "../../components/ui/button";
+ import { DataTable } from "../../components/ui/data-table";
+@@ -253,7 +253,7 @@ export function InstrumentTable({
+     populated: (populated) => (
+       <section aria-label="Followed stocks">
+         <p className="font-numeric text-xs text-muted-foreground">
+-          Last updated {formatTimestamp(new Date(populated.fetchedAt))}
++          Last updated {formatInstant(new Date(populated.fetchedAt))}
+         </p>
+         <DataTable
+           variant="virtualised"

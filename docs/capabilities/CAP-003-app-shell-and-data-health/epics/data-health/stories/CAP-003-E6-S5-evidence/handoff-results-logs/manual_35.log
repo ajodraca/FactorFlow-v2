@@ -1,0 +1,72 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xgvgnqob/w2/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (51 tests | 4 failed) 752ms
+   × Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (a) reads the aggregate once while attention keeps polling 10ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (b) reads once more after a successful stop following 33ms
+     → expected "spy" to be called 2 times, but got 3 times
+   × Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (c) leaves the terminal transition to the hook: one read for one transition 20ms
+     → expected "spy" to be called 2 times, but got 4 times
+   × Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (d) Try again is a read, and only that 22ms
+     → expected "spy" to be called 2 times, but got 3 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (a) reads the aggregate once while attention keeps polling
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/data-health/data-health.test.tsx:585:28
+    583|     standing({ dh: FBXX });
+    584|     await renderScreen();
+    585|     expect(healthReadMock).toHaveBeenCalledTimes(1);
+       |                            ^
+    586|     await act(() => vi.advanceTimersByTimeAsync(600_000));
+    587|     expect(attentionMock.mock.calls.length).toBeGreaterThanOrEqual(10);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (b) reads once more after a successful stop following
+AssertionError: expected "spy" to be called 2 times, but got 3 times
+ ❯ src/screens/data-health/data-health.test.tsx:598:28
+    596|     await click(within(screen.getByRole("dialog")).getByRole("button",…
+    597|     await flush();
+    598|     expect(healthReadMock).toHaveBeenCalledTimes(2);
+       |                            ^
+    599|     expect(retireMock).toHaveBeenCalledTimes(1);
+    600|     expect(retireMock).toHaveBeenCalledWith("FBXX");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (c) leaves the terminal transition to the hook: one read for one transition
+AssertionError: expected "spy" to be called 2 times, but got 4 times
+ ❯ src/screens/data-health/data-health.test.tsx:620:28
+    618|     await act(() => vi.advanceTimersByTimeAsync(11_000));
+    619|     // Stepped, so React renders the running answer before the termina…
+    620|     expect(healthReadMock).toHaveBeenCalledTimes(2);
+       |                            ^
+    621|     await act(() => vi.advanceTimersByTimeAsync(600_000));
+    622|     expect(healthReadMock).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (d) Try again is a read, and only that
+AssertionError: expected "spy" to be called 2 times, but got 3 times
+ ❯ src/screens/data-health/data-health.test.tsx:632:28
+    630|     await click(within(region("Daily prices")).getByRole("button", { n…
+    631|     await flush();
+    632|     expect(healthReadMock).toHaveBeenCalledTimes(2);
+       |                            ^
+    633|     expect(attentionMock.mock.calls.length).toBe(before);
+    634|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 47 passed (51)
+   Start at  02:51:39
+   Duration  1.75s (transform 194ms, setup 31ms, collect 499ms, tests 752ms, environment 167ms, prepare 114ms)
+

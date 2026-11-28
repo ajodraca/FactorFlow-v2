@@ -1,0 +1,1330 @@
+{
+  "schema": 1,
+  "repo_head": "5684f3aabcbfd58e5f713de218a0307e9161f6aa",
+  "range": "7b5b42669f44590970d1515d9ba0855d5a80c7ef..HEAD",
+  "source": "7b5b42669f44590970d1515d9ba0855d5a80c7ef",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:56:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 56,
+      "original": "      return 0;",
+      "mutated": "      return 1;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:58:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 58,
+      "original": "      return 1;",
+      "mutated": "      return 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:60:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 60,
+      "original": "      return 2;",
+      "mutated": "      return 3;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:93:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 93,
+      "original": "  const latestCall = useRef(0);",
+      "mutated": "  const latestCall = useRef(1);"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:96:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 96,
+      "original": "  const active = latest !== null && NON_TERMINAL.has(latest.state);",
+      "mutated": "  const active = latest !== null || NON_TERMINAL.has(latest.state);"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:101:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 101,
+      "original": "    latestCall.current += 1;",
+      "mutated": "    latestCall.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:103:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 103,
+      "original": "    listAcquisitionRuns({ limit: 5 }).then(",
+      "mutated": "    listAcquisitionRuns({ limit: 6 }).then("
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:115:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiError && cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:115:negate-boolean:2",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if ((cause instanceof ApiError || cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:129:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 129,
+      "original": "    if (answerKey === null || answerKey === seenKey.current) {",
+      "mutated": "    if (answerKey === null && answerKey === seenKey.current) {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:181:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 181,
+      "original": "          if (runningId !== row.original.runId || done === null) {",
+      "mutated": "          if (runningId !== row.original.runId && done === null) {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:212:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 212,
+      "original": "            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}",
+      "mutated": "            {recentDownloadsSubline(answeredAt || formatClock(answeredAt))}"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:54:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 54,
+      "original": "  const latestCall = useRef(0);",
+      "mutated": "  const latestCall = useRef(1);"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:57:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 57,
+      "original": "    latestCall.current += 1;",
+      "mutated": "    latestCall.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:59:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(",
+      "mutated": "    Promise.all([listInstruments({ limit: 2 }), getHistoryDepth()]).then("
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:70:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 70,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if (!(cause instanceof ApiError && cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:70:negate-boolean:2",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 70,
+      "original": "        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {",
+      "mutated": "        if ((cause instanceof ApiError || cause instanceof ApiUnreachableError)) {"
+    },
+    {
+      "id": "web/src/screens/data-health/what-you-follow.tsx:84:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 84,
+      "original": "  if (health.liveness === \"answering\" && health.health !== null) {",
+      "mutated": "  if (health.liveness === \"answering\" || health.health !== null) {"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 42,
+      "original": "  \"requested\",",
+      "mutated": "  // \"requested\",",
+      "description": "A queued (requested) latest download no longer counts as non-terminal, so its answers trigger no re-read (DAC-E6-S4-2; task plan T013 NON_TERMINAL, T003 (g))."
+    },
+    {
+      "id": "manual:2",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 44,
+      "original": "  \"cancelling\",",
+      "mutated": "  // \"cancelling\",",
+      "description": "A stopping (cancelling) latest download no longer counts as non-terminal, so no re-read and no progress (DAC-E6-14; task plan T013 NON_TERMINAL, T003 (g))."
+    },
+    {
+      "id": "manual:3",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 55,
+      "original": "    case \"cancelling\":",
+      "mutated": "    case \"cancelled\":",
+      "description": "A stopping download no longer ranks with the running one at the head of the list, and a cancelled one does (task plan T013 Order, Resolved Conflict 3)."
+    },
+    {
+      "id": "manual:4",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 56,
+      "original": "      return 0;",
+      "mutated": "      return 2;",
+      "description": "A running download ranks with the outcomes instead of heading the list (DAC-E6-14 \"a running download heading the list\"; Resolved Conflict 3)."
+    },
+    {
+      "id": "manual:5",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 58,
+      "original": "      return 1;",
+      "mutated": "      return 0;",
+      "description": "A queued download ranks with the running one instead of after it (task plan Other Notes hand-written mutant rank requested 1 -> 0; T004 (e))."
+    },
+    {
+      "id": "manual:6",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 60,
+      "original": "      return 2;",
+      "mutated": "      return 0;",
+      "description": "Terminal downloads rank with the running one, so a running download no longer heads the list (DAC-E6-14; Resolved Conflict 3)."
+    },
+    {
+      "id": "manual:7",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 66,
+      "original": "  const written = formatCount(run.instrumentsWritten);",
+      "mutated": "  const written = formatCount(run.instrumentsNamed);",
+      "description": "The Result written count shows the named count, so a partial reads as all written (DAC-E6-S4-1, AC-12)."
+    },
+    {
+      "id": "manual:8",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 67,
+      "original": "  const named = formatCount(run.instrumentsNamed);",
+      "mutated": "  const named = formatCount(run.instrumentsWritten);",
+      "description": "The Result named count shows the written count, e.g. *1,230 of 1,230 stocks* (DAC-E6-S4-1; task plan T002 drop-field-copy instrumentsNamed)."
+    },
+    {
+      "id": "manual:9",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 69,
+      "original": "    case \"partial\":",
+      "mutated": "    case \"failed\":",
+      "description": "A partial download gets the plain *{written} of {named} stocks* form without *, {failed} failed* (DAC-E6-S4-1, AC-12; task plan T002 swap-case partial)."
+    },
+    {
+      "id": "manual:10",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 70,
+      "original": "      return partialResult(written, named, formatCount(run.instrumentsFailed));",
+      "mutated": "      return partialResult(written, named, formatCount(run.instrumentsWritten));",
+      "description": "The Partial failed count shows the written count (*1,230 failed*) (DAC-E6-S4-1; task plan T002 drop-field-copy instrumentsFailed)."
+    },
+    {
+      "id": "manual:11",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 71,
+      "original": "    case \"abandoned\":",
+      "mutated": "    case \"cancelled\":",
+      "description": "An abandoned download loses the *Interrupted* sentence and gets the plain form (DAC-E6-S4-1, AC-12; task plan T002 swap-case abandoned)."
+    },
+    {
+      "id": "manual:12",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 72,
+      "original": "      return interruptedResult(written);",
+      "mutated": "      return writtenOf(written, formatCount(run.instrumentsNamed));",
+      "description": "The Interrupted row shows *{written} of {named} stocks* instead of the FactorFlow restarted sentence (DAC-E6-S4-1; data-health-ui 2.6)."
+    },
+    {
+      "id": "manual:13",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 95,
+      "original": "  const latest = attention.kind === \"ok\" ? attention.data.latest_download : null;",
+      "mutated": "  const latest = attention.kind === \"ok\" ? attention.data.latest_download : attention.kind === \"error\" ? (attention.last?.data.latest_download ?? null) : null;",
+      "description": "Progress and the active flag are taken from a failed attention read's stale last value (task plan T013 Inputs: latest only from an ok answer; Other Notes hand-written mutant reading attention.last on error)."
+    },
+    {
+      "id": "manual:14",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 97,
+      "original": "  const answerKey = attention.kind === \"ok\" ? attention.checkedAt.getTime() : null;",
+      "mutated": "  const answerKey = attention.kind === \"ok\" ? attention : null;",
+      "description": "The re-read effect keys on the attention object's identity rather than its checkedAt, so a re-render with the same answer re-reads (task plan Other Notes hand-written mutant; T003 (c))."
+    },
+    {
+      "id": "manual:15",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 98,
+      "original": "  const seenKey = useRef(answerKey);",
+      "mutated": "  const seenKey = useRef<number | null>(null);",
+      "description": "The seen-key is not initialised to the mount-time answer, so the mount answer is read twice (task plan T013 When it reads; DAC-E6-S4-2 one read per answer)."
+    },
+    {
+      "id": "manual:16",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 101,
+      "original": "    latestCall.current += 1;",
+      "mutated": "    // latestCall.current += 1;",
+      "description": "The request counter never advances, so an older list answer can overwrite a newer one (task plan T013 List state latest-call guard; Other Notes Request ordering)."
+    },
+    {
+      "id": "manual:17",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 103,
+      "original": "    listAcquisitionRuns({ limit: 5 }).then(",
+      "mutated": "    listAcquisitionRuns().then(",
+      "description": "The list read drops `{ limit: 5 }` (story API Contract GET /api/acquisition-runs?limit=5; AC-17; task plan T003 drop-defaulted-argument)."
+    },
+    {
+      "id": "manual:18",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 105,
+      "original": "        if (mine !== latestCall.current) {",
+      "mutated": "        if (false) {",
+      "description": "The success handler ignores the latest-call guard, so a stale answer overwrites a newer one (task plan T013 List state; Other Notes Request ordering)."
+    },
+    {
+      "id": "manual:19",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 108,
+      "original": "        setList({ kind: \"ok\", runs: page.runs });",
+      "mutated": "        setList({ kind: \"ok\", runs: [] });",
+      "description": "The answered runs are replaced by an empty list (DAC-E6-14 the five most recent downloads)."
+    },
+    {
+      "id": "manual:20",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 109,
+      "original": "        setAnsweredAt(new Date());",
+      "mutated": "        setAnsweredAt(attention.kind === \"ok\" ? attention.checkedAt : new Date());",
+      "description": "checked {time} shows attention's answer time instead of the time the list answered (AC-25; task plan Other Notes hand-written mutant answeredAt = attention.checkedAt; T003 (a))."
+    },
+    {
+      "id": "manual:21",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 109,
+      "original": "        setAnsweredAt(new Date());",
+      "mutated": "        // setAnsweredAt(new Date());",
+      "description": "The list's answer time is never recorded, so checked {time} never appears or advances (AC-25, DAC-E6-S4-2)."
+    },
+    {
+      "id": "manual:22",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 112,
+      "original": "        if (mine !== latestCall.current) {",
+      "mutated": "        if (false) {",
+      "description": "The failure handler ignores the latest-call guard, so a stale failure replaces a newer answer (task plan T013 List state; Other Notes Request ordering)."
+    },
+    {
+      "id": "manual:23",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 116,
+      "original": "          throw cause;",
+      "mutated": "          return;",
+      "description": "A non-API failure is swallowed (leaving the card loading) instead of rethrown (task plan T013 List state: any other thrown value is rethrown)."
+    },
+    {
+      "id": "manual:24",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 119,
+      "original": "        setList({ kind: \"error\", error: cause });",
+      "mutated": "        // setList({ kind: \"error\", error: cause });",
+      "description": "A failed read leaves the loading skeleton or the previous table instead of the error and Try again (DAC-E6-17; Resolved Conflict 7; T005 (b), (f))."
+    },
+    {
+      "id": "manual:25",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 125,
+      "original": "    read();",
+      "mutated": "    // read();",
+      "description": "The list is not read on load (DAC-E6-14 \"otherwise only on load\"; task plan T013 one useEffect reads once on mount)."
+    },
+    {
+      "id": "manual:26",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 129,
+      "original": "    if (answerKey === null || answerKey === seenKey.current) {",
+      "mutated": "    if (attention.kind === \"error\" && attention.last !== null && attention.last.data.latest_download !== null && NON_TERMINAL.has(attention.last.data.latest_download.state)) { read(); return; } if (answerKey === null || answerKey === seenKey.current) {",
+      "description": "A failed attention read whose last value is non-terminal triggers a list re-read (DAC-E6-S4-2 re-read per answer; task plan Other Notes hand-written mutant; T003 (d))."
+    },
+    {
+      "id": "manual:27",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 129,
+      "original": "    if (answerKey === null || answerKey === seenKey.current) {",
+      "mutated": "    if (answerKey === null) {",
+      "description": "The same answer is re-read on every re-render because the seen-key check is lost (DAC-E6-S4-2 once per answer; T003 (c))."
+    },
+    {
+      "id": "manual:28",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 129,
+      "original": "    if (answerKey === null || answerKey === seenKey.current) {",
+      "mutated": "    if (answerKey === seenKey.current) {",
+      "description": "A null key (loading or failed attention) is recorded as seen, so an answer seen before the failure is read again when it returns (task plan T013: reads only when answerKey is non-null and differs from the last key seen)."
+    },
+    {
+      "id": "manual:29",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 132,
+      "original": "    seenKey.current = answerKey;",
+      "mutated": "    // seenKey.current = answerKey;",
+      "description": "The seen answer is never recorded, so every re-render of a running answer re-reads (DAC-E6-S4-2 once per answer; task plan T013)."
+    },
+    {
+      "id": "manual:30",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 132,
+      "original": "    seenKey.current = answerKey;",
+      "mutated": "    if (active) seenKey.current = answerKey;",
+      "description": "A terminal answer is not recorded as seen, so the same answer re-read once it turns non-terminal (task plan T013 \"it records the key either way\"; T003 (h))."
+    },
+    {
+      "id": "manual:31",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 133,
+      "original": "    if (active) {",
+      "mutated": "    if (true) {",
+      "description": "Terminal answers also trigger a re-read (DAC-E6-14 \"otherwise only on load\"; DAC-E6-S4-2 no re-read follows a terminal answer; Resolved Conflict 2)."
+    },
+    {
+      "id": "manual:32",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 181,
+      "original": "          if (runningId !== row.original.runId || done === null) {",
+      "mutated": "          if (runningId === null || done === null) {",
+      "description": "Progress shows on every row while a download is active instead of only the row matching latest_download.run_id (task plan Other Notes hand-written mutant run_id match -> true; T004 (a), (d))."
+    },
+    {
+      "id": "manual:33",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 184,
+      "original": "          if (total === null) {",
+      "mutated": "          if (true) {",
+      "description": "A running download with a known total shows the indeterminate bar with no *{done} of {total} stocks* (DAC-E6-14 progress determinate; T004 (a))."
+    },
+    {
+      "id": "manual:34",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 186,
+      "original": "            return <Progress value={null} max={null} aria-labelledby={outcomeId(row.original)} />;",
+      "mutated": "            return <Progress value={null} max={null} aria-labelledby={labelId} />;",
+      "description": "The indeterminate bar is labelled by a non-existent element instead of the row's outcome label (DEC-0384; T004 (b))."
+    },
+    {
+      "id": "manual:35",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 190,
+      "original": "              <span id={labelId} aria-live=\"polite\">",
+      "mutated": "              <span id={labelId}>",
+      "description": "The progress text is no longer a polite live region (data-health-ui 10 \"polling updates announce politely\"; task plan T013, T004 (a))."
+    },
+    {
+      "id": "manual:36",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 191,
+      "original": "                {progressOf(formatCount(done), formatCount(total))}",
+      "mutated": "                {progressOf(formatCount(total), formatCount(done))}",
+      "description": "The progress text swaps done and total (DAC-E6-14 *{done} of {total} stocks*)."
+    },
+    {
+      "id": "manual:37",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 193,
+      "original": "              <Progress value={done} max={total} aria-labelledby={labelId} />",
+      "mutated": "              <Progress value={done} max={done} aria-labelledby={labelId} />",
+      "description": "The bar's max is done rather than total (DAC-E6-14 determinate progress; task plan T004 swap-case total -> done)."
+    },
+    {
+      "id": "manual:38",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 193,
+      "original": "              <Progress value={done} max={total} aria-labelledby={labelId} />",
+      "mutated": "              <Progress value={null} max={total} aria-labelledby={labelId} />",
+      "description": "A running download with a known total renders an indeterminate bar (DAC-E6-14 progress determinate; T004 (a) aria-valuenow)."
+    },
+    {
+      "id": "manual:39",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 150,
+      "original": "          <Link to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}>",
+      "mutated": "          <Link to={`/runs/${encodeURIComponent(row.original.runId)}`}>",
+      "description": "The Started link targets the delivered /runs/ path instead of /data/downloads/{id} (story Description; task plan T002 swap-case link target)."
+    },
+    {
+      "id": "manual:40",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 150,
+      "original": "          <Link to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}>",
+      "mutated": "          <Link to={`/data/downloads/${row.original.runId}`}>",
+      "description": "The run id is not URL-encoded in the link target (task plan T013 Started cell encodeURIComponent)."
+    },
+    {
+      "id": "manual:41",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 151,
+      "original": "            {formatInstant(row.original.startedAt ?? row.original.requestedAt)}",
+      "mutated": "            {formatInstant(row.original.requestedAt)}",
+      "description": "Started shows the request time even when the download has started (task plan T002 drop-field-copy startedAt; Resolved Conflict 4)."
+    },
+    {
+      "id": "manual:42",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 148,
+      "original": "        header: DOWNLOAD_COLUMNS.started,",
+      "mutated": "        header: DOWNLOAD_COLUMNS.ended,",
+      "description": "The first column is headed Ended instead of Started (story Description; T002 (a) column headers)."
+    },
+    {
+      "id": "manual:43",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 161,
+      "original": "            <span id={outcomeId(row.original)}>",
+      "mutated": "            <span>",
+      "description": "The outcome label loses its id, so the indeterminate bar has no name (DEC-0384; T004 (b))."
+    },
+    {
+      "id": "manual:44",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 162,
+      "original": "              <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>",
+      "mutated": "              <StatusBadge tier={tierOf(status)}>{row.original.state}</StatusBadge>",
+      "description": "The Outcome badge shows the raw state (e.g. abandoned, requested) instead of labelOf (DAC-E6-S4-4, DAC-E6-S4-5; task plan T006 swap-case labelOf)."
+    },
+    {
+      "id": "manual:45",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 162,
+      "original": "              <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>",
+      "mutated": "              <span>{labelOf(status)}</span>",
+      "description": "The outcome is rendered in a bare span, not StatusBadge, losing its tier and hidden shape (DAC-E6-S4-5; task plan T006 hand-written mutant)."
+    },
+    {
+      "id": "manual:46",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 162,
+      "original": "              <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>",
+      "mutated": "              <StatusBadge tier=\"good\">{labelOf(status)}</StatusBadge>",
+      "description": "Every outcome, including Partial and Interrupted, carries the good tier, reading as complete (AC-12, DAC-E6-S4-1 warning/serious)."
+    },
+    {
+      "id": "manual:47",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 172,
+      "original": "            <Absent label={ABSENT.notEnded} />",
+      "mutated": "            \"\"",
+      "description": "A not-ended download shows an empty Ended cell instead of an Absent em dash (DAC-E6-S4-5; task plan T006 swap-case Absent -> empty string)."
+    },
+    {
+      "id": "manual:48",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 174,
+      "original": "            formatInstant(row.original.endedAt)",
+      "mutated": "            formatInstant(row.original.requestedAt)",
+      "description": "Ended shows the request time instead of the end time (story Description *Ended*; T002 (f))."
+    },
+    {
+      "id": "manual:49",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 202,
+      "original": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(a.state) - rank(b.state)) : []),",
+      "mutated": "    () => (list.kind === \"ok\" ? [...list.runs] : []),",
+      "description": "Rows keep the served order, so a running download does not head the list (DAC-E6-14; Resolved Conflict 3)."
+    },
+    {
+      "id": "manual:50",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 202,
+      "original": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(a.state) - rank(b.state)) : []),",
+      "mutated": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(b.state) - rank(a.state)) : []),",
+      "description": "Rows sort outcomes first and the running download last (DAC-E6-14 a running download heads the list)."
+    },
+    {
+      "id": "manual:51",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 207,
+      "original": "    <section aria-labelledby={headingId}>",
+      "mutated": "    <section>",
+      "description": "The section, and so the table, is no longer named Recent downloads (task plan T013 Render; DEC-0307)."
+    },
+    {
+      "id": "manual:52",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 208,
+      "original": "      <Card variant=\"default\">",
+      "mutated": "      <Card variant=\"summary\">",
+      "description": "The card is not the default variant (task plan T013 Render Card variant default)."
+    },
+    {
+      "id": "manual:53",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 210,
+      "original": "          <CardTitle id={headingId}>{RECENT_DOWNLOADS}</CardTitle>",
+      "mutated": "          <CardTitle id={headingId}>{READ_TARGETS.recentDownloads}</CardTitle>",
+      "description": "The h2 reads lower-case *recent downloads* instead of *Recent downloads* (story Description card title; DAC-E6-17 header kept)."
+    },
+    {
+      "id": "manual:54",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 212,
+      "original": "            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}",
+      "mutated": "            {recentDownloadsSubline(null)}",
+      "description": "The header never shows checked {time} (AC-25; DAC-E6-S4-2 checked {time} advances)."
+    },
+    {
+      "id": "manual:55",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 216,
+      "original": "          {list.kind === \"loading\" ? (",
+      "mutated": "          {false ? (",
+      "description": "While loading, an empty table renders instead of the busy skeleton (task plan T013 Render loading; T005 (a))."
+    },
+    {
+      "id": "manual:56",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 222,
+      "original": "          ) : list.kind === \"error\" ? (",
+      "mutated": "          ) : false ? (",
+      "description": "A failed read renders an empty table instead of its error and Try again (DAC-E6-17; task plan T005 negate-boolean kind === \"error\")."
+    },
+    {
+      "id": "manual:57",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 224,
+      "original": "              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(list.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.recentDownloads, list.error.message)}",
+      "description": "The failure sentence shows the envelope message instead of the owner-facing reason (DAC-E6-17; task plan Other Notes hand-written mutant error.message; T005 (c))."
+    },
+    {
+      "id": "manual:58",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 224,
+      "original": "              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(list.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(list.error))}",
+      "description": "The failure sentence names *what you follow* instead of *recent downloads* (DAC-E6-17; story Description)."
+    },
+    {
+      "id": "manual:59",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 225,
+      "original": "              onRetry={read}",
+      "mutated": "              onRetry={() => {}}",
+      "description": "Try again does not re-read the list (DAC-E6-17; task plan T005 drop-field-copy of the retry callback)."
+    },
+    {
+      "id": "manual:60",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 229,
+      "original": "              variant=\"compact\"",
+      "mutated": "              variant=\"history\"",
+      "description": "The table is not the compact variant (story Description data-table compact; task plan T013 Render)."
+    },
+    {
+      "id": "manual:61",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 230,
+      "original": "              rowHeader",
+      "mutated": "              rowHeader={false}",
+      "description": "Started is no longer the row header (story Description *Started* as row header; T002 (a))."
+    },
+    {
+      "id": "manual:62",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 57,
+      "original": "    latestCall.current += 1;",
+      "mutated": "    // latestCall.current += 1;",
+      "description": "The request counter never advances, so an older answer can overwrite a newer one (task plan T014 the same latest-call guard as T013)."
+    },
+    {
+      "id": "manual:63",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(",
+      "mutated": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth().catch(() => ({ years: null, updatedAt: null }) as HistoryDepth)]).then(",
+      "description": "A failed depth read alone no longer fails the card (DAC-E6-17; task plan Other Notes hand-written mutant depth read not awaited; T008 (c))."
+    },
+    {
+      "id": "manual:64",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(",
+      "mutated": "    Promise.all([listInstruments(), getHistoryDepth()]).then(",
+      "description": "The instrument read drops `{ limit: 1 }` (story API Contract GET /api/instruments?limit=1; AC-17; task plan T007 drop-defaulted-argument)."
+    },
+    {
+      "id": "manual:65",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 61,
+      "original": "        if (mine !== latestCall.current) {",
+      "mutated": "        if (false) {",
+      "description": "The success handler ignores the latest-call guard, so a stale answer overwrites a newer one (task plan T014)."
+    },
+    {
+      "id": "manual:66",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 64,
+      "original": "        setState({ kind: \"ok\", counts, depth });",
+      "mutated": "        // setState({ kind: \"ok\", counts, depth });",
+      "description": "A successful read never replaces the loading body (DAC-E6-16 renders as stated)."
+    },
+    {
+      "id": "manual:67",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 67,
+      "original": "        if (mine !== latestCall.current) {",
+      "mutated": "        if (false) {",
+      "description": "The failure handler ignores the latest-call guard, so a stale failure replaces a newer answer (task plan T014)."
+    },
+    {
+      "id": "manual:68",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 71,
+      "original": "          throw cause;",
+      "mutated": "          return;",
+      "description": "A non-API failure is swallowed instead of rethrown (task plan T013/T014: any other thrown value is rethrown)."
+    },
+    {
+      "id": "manual:69",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 74,
+      "original": "        setState({ kind: \"error\", error: cause });",
+      "mutated": "        // setState({ kind: \"error\", error: cause });",
+      "description": "A failed read leaves the loading body instead of the error and Try again (DAC-E6-17; T008 (b))."
+    },
+    {
+      "id": "manual:70",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 80,
+      "original": "    read();",
+      "mutated": "    // read();",
+      "description": "The card is never read on mount (task plan T014: runs once on mount)."
+    },
+    {
+      "id": "manual:71",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 84,
+      "original": "  if (health.liveness === \"answering\" && health.health !== null) {",
+      "mutated": "  if (health.health !== null) {",
+      "description": "The key badge follows the stale last health while unreachable, showing Missing (DAC-E6-S4-3; Resolved Conflict 6; task plan Other Notes hand-written mutant; T009 (a))."
+    },
+    {
+      "id": "manual:72",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 85,
+      "original": "    const status = { of: \"credential\", present: health.health.credential_present } as const;",
+      "mutated": "    const status = { of: \"credential\", present: !health.health.credential_present } as const;",
+      "description": "Found and Missing are inverted (AC-4; task plan T007 negate-boolean on credential_present)."
+    },
+    {
+      "id": "manual:73",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 85,
+      "original": "    const status = { of: \"credential\", present: health.health.credential_present } as const;",
+      "mutated": "    const status = { of: \"credential\", present: true } as const;",
+      "description": "The key always reads Found regardless of credential_present (AC-4, DAC-E6-16)."
+    },
+    {
+      "id": "manual:74",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 86,
+      "original": "    key = <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;",
+      "mutated": "    key = <span>{labelOf(status)}</span>;",
+      "description": "Found/Missing render as plain text, not a StatusBadge with a hidden shape (DAC-E6-S4-5; T010 (b))."
+    },
+    {
+      "id": "manual:75",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 86,
+      "original": "    key = <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;",
+      "mutated": "    key = <StatusBadge tier=\"good\">{labelOf(status)}</StatusBadge>;",
+      "description": "Missing carries the good tier (DAC-E6-16 Missing critical; DAC-E6-S4-5)."
+    },
+    {
+      "id": "manual:76",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 88,
+      "original": "    key = <NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} />;",
+      "mutated": "    key = <StatusBadge tier=\"neutral\">Not determinable</StatusBadge>;",
+      "description": "Not determinable renders as a neutral status badge instead of coverage-unknown NotDeterminable (DAC-E6-S4-3, DAC-E6-S4-5; task plan T010 swap-case)."
+    },
+    {
+      "id": "manual:77",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 88,
+      "original": "    key = <NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} />;",
+      "mutated": "    key = <NotDeterminable reason=\"\" />;",
+      "description": "Not determinable loses its reason, so it has no accessible description (DEC-0385; T009 (a))."
+    },
+    {
+      "id": "manual:78",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 92,
+      "original": "    <section aria-labelledby={headingId}>",
+      "mutated": "    <section>",
+      "description": "The section is no longer named What you follow (task plan T014 Render; T007 (a) region)."
+    },
+    {
+      "id": "manual:79",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 93,
+      "original": "      <Card variant=\"summary\">",
+      "mutated": "      <Card variant=\"default\">",
+      "description": "The card is not the summary variant (story Description card summary; T007 (a))."
+    },
+    {
+      "id": "manual:80",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 95,
+      "original": "          <CardTitle id={headingId}>{WHAT_YOU_FOLLOW}</CardTitle>",
+      "mutated": "          <CardTitle id={headingId}>{READ_TARGETS.whatYouFollow}</CardTitle>",
+      "description": "The h2 reads lower-case *what you follow* (story Description; DAC-E6-17 header kept)."
+    },
+    {
+      "id": "manual:81",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 97,
+      "original": "        {state.kind === \"loading\" ? (",
+      "mutated": "        {false ? (",
+      "description": "While loading, the body is not the busy skeleton (task plan T014 Render; T008 (a))."
+    },
+    {
+      "id": "manual:82",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 103,
+      "original": "        ) : state.kind === \"error\" ? (",
+      "mutated": "        ) : false ? (",
+      "description": "A failed read is rendered as the loaded list (crash or wrong body) instead of its error and Try again (DAC-E6-17)."
+    },
+    {
+      "id": "manual:83",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 106,
+      "original": "              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.whatYouFollow, state.error.message)}",
+      "description": "The failure sentence shows the envelope message instead of the owner-facing reason (DAC-E6-17; task plan T008 hand-written mutant error.message)."
+    },
+    {
+      "id": "manual:84",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 106,
+      "original": "              sentence={readFailed(READ_TARGETS.whatYouFollow, readFailureReason(state.error))}",
+      "mutated": "              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(state.error))}",
+      "description": "The failure sentence names *recent downloads* instead of *what you follow* (DAC-E6-17)."
+    },
+    {
+      "id": "manual:85",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 107,
+      "original": "              onRetry={read}",
+      "mutated": "              onRetry={() => {}}",
+      "description": "Try again does not re-read (DAC-E6-17; task plan T008 drop-field-copy of the retry callback)."
+    },
+    {
+      "id": "manual:86",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 115,
+      "original": "                <dd>{formatCount(state.counts.activeCount)}</dd>",
+      "mutated": "                <dd>{formatCount(state.counts.retiredCount)}</dd>",
+      "description": "Followed stocks shows the stopped-following count (DAC-E6-16 *Followed stocks {active_count}*)."
+    },
+    {
+      "id": "manual:87",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 117,
+      "original": "                <dd>{historyKept(formatCount(state.counts.retiredCount))}</dd>",
+      "mutated": "                <dd>{historyKept(formatCount(state.counts.activeCount))}</dd>",
+      "description": "Stopped following shows the active count (DAC-E6-16; task plan Other Notes hand-written mutant retiredCount -> activeCount)."
+    },
+    {
+      "id": "manual:88",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 120,
+      "original": "                  <Link to=\"/settings\">",
+      "mutated": "                  <Link to=\"/data/followed\">",
+      "description": "History depth no longer links to /settings (DAC-E6-16; task plan T007 remove-attribute of the depth link to)."
+    },
+    {
+      "id": "manual:89",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 132,
+      "original": "                <Link to=\"/data/followed\">{MANAGE_FOLLOWED_STOCKS}</Link>",
+      "mutated": "                <Link to=\"/settings\">{MANAGE_FOLLOWED_STOCKS}</Link>",
+      "description": "Manage followed stocks no longer goes to /data/followed (task plan T014; T007 (a))."
+    },
+    {
+      "id": "manual:90",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 131,
+      "original": "              <Button variant=\"outline\" asChild>",
+      "mutated": "              <Button variant=\"outline\">",
+      "description": "Manage followed stocks becomes a link nested in a button instead of a button-styled link (task plan T014 Button outline asChild)."
+    },
+    {
+      "id": "manual:91",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 126,
+      "original": "                <dt className=\"text-muted-foreground\">{MARKET_DATA_KEY}</dt>",
+      "mutated": "                <dt className=\"text-muted-foreground\">{FOLLOWED_STOCKS}</dt>",
+      "description": "The key row is labelled Followed stocks instead of Market data key (DAC-E6-16; AC-4)."
+    },
+    {
+      "id": "manual:92",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 71,
+      "original": "  recentDownloads: \"recent downloads\",",
+      "mutated": "  recentDownloads: \"the recent downloads\",",
+      "description": "The failure sentence wording changes from *Couldn't read recent downloads* (DAC-E6-17; T011 (b))."
+    },
+    {
+      "id": "manual:93",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 72,
+      "original": "  whatYouFollow: \"what you follow\",",
+      "mutated": "  whatYouFollow: \"the followed stocks\",",
+      "description": "The failure sentence wording changes from *Couldn't read what you follow* (DAC-E6-17; T011 (b))."
+    },
+    {
+      "id": "manual:94",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 93,
+      "original": "  notEnded: \"not ended yet\",",
+      "mutated": "  notEnded: \"\",",
+      "description": "The Ended em dash loses its hidden words (DAC-E6-S4-5 Absent; task plan Other Notes Hidden words)."
+    },
+    {
+      "id": "manual:95",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 325,
+      "original": "  const base = \"Starts when you press Download now\";",
+      "mutated": "  const base = \"Starts when you press Download\";",
+      "description": "The sub-line wording differs from *Starts when you press Download now* (ux-design 1.4 item 4; Resolved Conflict 5)."
+    },
+    {
+      "id": "manual:96",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 326,
+      "original": "  return time === null ? base : `${base} \u00b7 ${checked(time)}`;",
+      "mutated": "  return base;",
+      "description": "The sub-line never carries checked {time} (AC-25; task plan T011 (c))."
+    },
+    {
+      "id": "manual:97",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 326,
+      "original": "  return time === null ? base : `${base} \u00b7 ${checked(time)}`;",
+      "mutated": "  return time === null ? base : `${base} \u00b7 ${time}`;",
+      "description": "The sub-line drops the word *checked* before the time (AC-25; ux-design 1.4 item 4)."
+    },
+    {
+      "id": "manual:98",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 330,
+      "original": "  started: \"Started\",",
+      "mutated": "  started: \"Start\",",
+      "description": "The Started column header is reworded (story Description; T002 (a))."
+    },
+    {
+      "id": "manual:99",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 331,
+      "original": "  outcome: \"Outcome\",",
+      "mutated": "  outcome: \"Status\",",
+      "description": "The Outcome column header is reworded (story Description; T002 (a))."
+    },
+    {
+      "id": "manual:100",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 332,
+      "original": "  ended: \"Ended\",",
+      "mutated": "  ended: \"Finished\",",
+      "description": "The Ended column header is reworded (story Description; T002 (a))."
+    },
+    {
+      "id": "manual:101",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 333,
+      "original": "  result: \"Result\",",
+      "mutated": "  result: \"Stocks\",",
+      "description": "The Result column header is reworded (story Description; T002 (a))."
+    },
+    {
+      "id": "manual:102",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 337,
+      "original": "  return `${written} of ${named} stocks`;",
+      "mutated": "  return `${named} of ${written} stocks`;",
+      "description": "The plain Result form swaps written and named (data-health-ui 2.6; T011 (a))."
+    },
+    {
+      "id": "manual:103",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 341,
+      "original": "  return `${written} of ${named} stocks, ${failed} failed`;",
+      "mutated": "  return `${written} of ${named} stocks`;",
+      "description": "Partial loses *, {failed} failed*, reading like a plain result (DAC-E6-S4-1, AC-12; T011 (a))."
+    },
+    {
+      "id": "manual:104",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 345,
+      "original": "  return `FactorFlow restarted mid-download; ${written} kept, the rest picked up next time`;",
+      "mutated": "  return `${written} kept`;",
+      "description": "The Interrupted sentence loses *FactorFlow restarted mid-download; ... the rest picked up next time* (DAC-E6-S4-1; data-health-ui 2.6)."
+    },
+    {
+      "id": "manual:105",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 349,
+      "original": "  return `${done} of ${total} stocks`;",
+      "mutated": "  return `${done} of ${total}`;",
+      "description": "The progress text drops *stocks* (DAC-E6-14 *{done} of {total} stocks*)."
+    },
+    {
+      "id": "manual:106",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 321,
+      "original": "export const RECENT_DOWNLOADS = \"Recent downloads\";",
+      "mutated": "export const RECENT_DOWNLOADS = \"Recent runs\";",
+      "description": "The card title becomes *Recent runs*, a DAC-E7-3 term (story Description; DAC-E6-S4-4)."
+    },
+    {
+      "id": "manual:107",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 352,
+      "original": "export const WHAT_YOU_FOLLOW = \"What you follow\";",
+      "mutated": "export const WHAT_YOU_FOLLOW = \"What you track\";",
+      "description": "The card title differs from *What you follow* (story Description; T007 (a))."
+    },
+    {
+      "id": "manual:108",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 353,
+      "original": "export const FOLLOWED_STOCKS = \"Followed stocks\";",
+      "mutated": "export const FOLLOWED_STOCKS = \"Followed instruments\";",
+      "description": "The followed label uses the forbidden term *instruments* (DAC-E6-16; DAC-E6-S4-4)."
+    },
+    {
+      "id": "manual:109",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 354,
+      "original": "export const STOPPED_FOLLOWING = \"Stopped following\";",
+      "mutated": "export const STOPPED_FOLLOWING = \"Retired\";",
+      "description": "The stopped-following label uses the forbidden term *Retired* (DAC-E6-16; DAC-E6-S4-4; T010 (a))."
+    },
+    {
+      "id": "manual:110",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 357,
+      "original": "  return `${count} (history kept)`;",
+      "mutated": "  return `${count}`;",
+      "description": "Stopped following loses *(history kept)* (DAC-E6-16; T011 (d))."
+    },
+    {
+      "id": "manual:111",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 360,
+      "original": "export const HISTORY_DEPTH = \"History depth\";",
+      "mutated": "export const HISTORY_DEPTH = \"History\";",
+      "description": "The History depth label is reworded (DAC-E6-16; T007 (a))."
+    },
+    {
+      "id": "manual:112",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 363,
+      "original": "  return `${years} years`;",
+      "mutated": "  return `${years}`;",
+      "description": "History depth loses *years* (DAC-E6-16 *{y} years*; T011 (d))."
+    },
+    {
+      "id": "manual:113",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 366,
+      "original": "export const DEPTH_NOT_SET = \"not set\";",
+      "mutated": "export const DEPTH_NOT_SET = \"\";",
+      "description": "An unset History depth shows nothing instead of *not set* (DAC-E6-16; T007 (b))."
+    },
+    {
+      "id": "manual:114",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 367,
+      "original": "export const MARKET_DATA_KEY = \"Market data key\";",
+      "mutated": "export const MARKET_DATA_KEY = \"Provider credential\";",
+      "description": "The key label uses the forbidden *Provider credential* (DAC-E6-16; DAC-E6-S4-4; T010 (a))."
+    },
+    {
+      "id": "manual:115",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 373,
+      "original": "export const KEY_NOT_DETERMINABLE_REASON = \"FactorFlow is not answering\";",
+      "mutated": "export const KEY_NOT_DETERMINABLE_REASON = \"Unknown\";",
+      "description": "The Not determinable reason differs from *FactorFlow is not answering* (DEC-0385; T009 (a))."
+    },
+    {
+      "id": "manual:116",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 375,
+      "original": "export const MANAGE_FOLLOWED_STOCKS = \"Manage followed stocks\";",
+      "mutated": "export const MANAGE_FOLLOWED_STOCKS = \"Manage\";",
+      "description": "The Manage followed stocks action is reworded (DAC-E6-16; T007 (a))."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zukt77nf/w1/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 1 failed) 857ms
+   × Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (c) orders the regions 20ms
+     → expected 'grid grid-cols-1 items-start gap-5' to contain 'grid-cols-2'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (c) orders the regions
+AssertionError: expected 'grid grid-cols-1 items-start gap-5' to contain 'grid-cols-2'
+
+Expected: "grid-cols-2"
+Received: "grid grid-cols-1 items-start gap-5"
+
+ ❯ src/screens/data-health/data-health.test.tsx:877:61
+    875|     expect(precedes(recent, follow)).toBe(true);
+    876|     expect(recent.parentElement).toBe(follow.parentElement);
+    877|     expect((recent.parentElement as HTMLElement).className).toContain(…
+       |                                                             ^
+    878|   });
+    879| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 58 passed (59)
+   Start at  02:56:01
+   Duration  2.18s (transform 235ms, setup 44ms, collect 680ms, tests 857ms, environment 282ms, prepare 107ms)
+

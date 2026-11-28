@@ -1,82 +1,68 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { RetireDialog } from "./retire-dialog";
 
-// TC-COMP-109, TC-COMP-129 (T008): the retire confirmation uses `dialog`
-// `confirm`, never `destructive`; its copy says "Stop acquiring", not
-// "Delete" or "Remove"; and states that a run already under way still
-// finishes with the instrument included (AC-25, DAC-E2-11, DAC-E2-S4-2).
-//
-// IR-002: no production path can determine whether a run is actually in
-// progress (no run-status source exists on these screens yet), so the
-// component renders the sentence unconditionally rather than behind a
-// literal that can never be reached from production. This is disclosed as
-// a deviation and is one of the two options the review itself authorized.
-describe("RetireDialog", () => {
-  it("renders via the confirm variant, not destructive, with retirement wording and initial focus on cancel", () => {
+// Implements TC-COMP-199
+// The stop-following confirmation is `dialog` `confirm`, never `destructive`; it
+// carries the blueprint section 9 wording, states that a download under way still
+// finishes with the stock included, and traps and returns focus (DAC-E7-S3-2,
+// DAC-E7-9, AC-17, AC-25). The delivered cases (TC-COMP-109, TC-COMP-129, IR-004,
+// IR-006) are carried, relabelled. DEC-0390: the running-download sentence renders
+// every time, as delivered.
+describe("RetireDialog — stop following", () => {
+  it("renders the confirm variant with the stop-following wording and Cancel first and focused", async () => {
     render(<RetireDialog symbol="AAPL" onConfirm={vi.fn()} onCancel={vi.fn()} />);
 
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveAttribute("data-variant", "confirm");
-
-    expect(dialog.textContent).toContain("Stop acquiring");
-    expect(dialog.textContent).not.toMatch(/delete|remove/i);
-
-    const cancelButton = screen.getByRole("button", { name: /cancel/i });
-    expect(cancelButton).toHaveFocus();
-
-    expect(screen.getByRole("button", { name: "Stop acquiring" })).toBeInTheDocument();
-  });
-
-  it("always states that an in-flight run still finishes with the instrument included", () => {
-    render(<RetireDialog symbol="AAPL" onConfirm={vi.fn()} onCancel={vi.fn()} />);
-
-    expect(
-      screen.getByText(/a run is in progress and will still acquire aapl this time/i),
-    ).toBeInTheDocument();
-  });
-
-  it("calls onConfirm when the confirm action is activated", async () => {
-    const user = userEvent.setup();
-    const onConfirm = vi.fn();
-    render(<RetireDialog symbol="AAPL" onConfirm={onConfirm} onCancel={vi.fn()} />);
-
-    await user.click(screen.getByRole("button", { name: "Stop acquiring" }));
-
-    expect(onConfirm).toHaveBeenCalled();
-  });
-
-  // IR-004: a failed retirement must be visible in the dialog itself,
-  // naming the operation and the symbol, rather than the dialog closing as
-  // though the call had succeeded.
-  it("renders a visible error naming the operation and symbol when retirement fails", () => {
-    render(
-      <RetireDialog symbol="AAPL" error="already retired" onConfirm={vi.fn()} onCancel={vi.fn()} />,
+    expect(dialog.textContent).not.toMatch(/destructive|delete|remove/i);
+    expect(screen.getByRole("heading", { name: "Stop following AAPL?" })).toBeInTheDocument();
+    expect(dialog).toHaveTextContent(
+      "Its history is kept, and strategies holding it keep holding it. You can follow it again later.",
     );
 
-    const alert = screen.getByRole("alert");
-    expect(alert.textContent).toMatch(/stopping acquisition for aapl failed/i);
-    expect(alert.textContent).toMatch(/already retired/i);
+    const names = within(dialog)
+      .getAllByRole("button")
+      .map((button) => button.textContent);
+    expect(names).toEqual(["Cancel", "Stop following"]);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus());
   });
 
-  it("renders no error when none is passed", () => {
+  it("always states that a download under way still finishes with the stock included", () => {
     render(<RetireDialog symbol="AAPL" onConfirm={vi.fn()} onCancel={vi.fn()} />);
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "A download is running and will still download AAPL this time. Stopping takes effect from the next download.",
+    );
   });
 
-  // IR-006: the dialog traps focus rather than letting Tab escape it.
-  it("traps focus, wrapping Tab from confirm back to cancel", async () => {
+  it("calls onConfirm, and not onCancel, when Stop following is activated", async () => {
     const user = userEvent.setup();
-    render(<RetireDialog symbol="AAPL" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+    const onConfirm = vi.fn();
+    const onCancel = vi.fn();
+    render(<RetireDialog symbol="AAPL" onConfirm={onConfirm} onCancel={onCancel} />);
 
-    const cancelButton = screen.getByRole("button", { name: /cancel/i });
-    const confirmButton = screen.getByRole("button", { name: "Stop acquiring" });
+    await user.click(screen.getByRole("button", { name: "Stop following" }));
 
-    confirmButton.focus();
-    await user.tab();
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onCancel).not.toHaveBeenCalled();
+  });
 
-    expect(cancelButton).toHaveFocus();
+  // IR-002: the confirmation is held while the stop is in flight.
+  it("holds the confirmation while pending: no second onConfirm, and Escape does not cancel", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    const onCancel = vi.fn();
+    render(<RetireDialog symbol="AAPL" pending onConfirm={onConfirm} onCancel={onCancel} />);
+
+    const confirm = screen.getByRole("button", { name: "Stop following" });
+    expect(confirm).toHaveAttribute("aria-disabled", "true");
+    await user.click(confirm);
+    await user.keyboard("{Escape}");
+
+    expect(onConfirm).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
   it("calls onCancel when Escape is pressed", async () => {
@@ -86,6 +72,50 @@ describe("RetireDialog", () => {
 
     await user.keyboard("{Escape}");
 
-    expect(onCancel).toHaveBeenCalled();
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onCancel when Cancel is clicked", async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    const onConfirm = vi.fn();
+    render(<RetireDialog symbol="AAPL" onConfirm={onConfirm} onCancel={onCancel} />);
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  // IR-004: a failed stop is visible in the dialog itself, which stays open.
+  it("renders a visible error naming the operation and symbol, and stays open", () => {
+    render(
+      <RetireDialog
+        symbol="AAPL"
+        error="service unavailable"
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Stopping following AAPL failed: service unavailable");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("renders no error when none is passed", () => {
+    render(<RetireDialog symbol="AAPL" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  // IR-006 / AC-25: the dialog traps focus rather than letting Tab escape it.
+  it("traps focus, wrapping Tab from Stop following back to Cancel", async () => {
+    const user = userEvent.setup();
+    render(<RetireDialog symbol="AAPL" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+
+    screen.getByRole("button", { name: "Stop following" }).focus();
+    await user.tab();
+
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
   });
 });

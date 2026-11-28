@@ -1,0 +1,93 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 328ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 4 failed) 614ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 28ms
+     → expected '1,236 of 0 stocks' to be '0 of 1,236 stocks' // Object.is equality
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 11ms
+     → expected '1,236 of 700 stocks' to be '700 of 1,236 stocks' // Object.is equality
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value 9ms
+     → expected '1,236 of 700 stocks' to be '700 of 1,236 stocks' // Object.is equality
+   × copy.ts recent downloads and what you follow strings > (a) the result sentences 0ms
+     → expected '1,236 of 1,230 stocks' to be '1,230 of 1,236 stocks' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected '1,236 of 0 stocks' to be '0 of 1,236 stocks' // Object.is equality
+
+Expected: "0 of 1,236 stocks"
+Received: "1,236 of 0 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:243:45
+    241|     expect(badgeOf(failed).getAttribute("data-variant")).toBe("status-…
+    242|     expect(badgeOf(failed).textContent).toBe("Failed");
+    243|     expect(cellsOf(failed)[2]?.textContent).toBe("0 of 1,236 stocks");
+       |                                             ^
+    244|     const cancelled = rowFor("r-2");
+    245|     expect(badgeOf(cancelled).getAttribute("data-variant")).toBe("stat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download
+AssertionError: expected '1,236 of 700 stocks' to be '700 of 1,236 stocks' // Object.is equality
+
+Expected: "700 of 1,236 stocks"
+Received: "1,236 of 700 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:493:52
+    491|     await screen.findByRole("table");
+    492|     expect(screen.queryByRole("progressbar")).toBeNull();
+    493|     expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 …
+       |                                                    ^
+    494|     setShell({
+    495|       attention: ok(ATT(LATEST("succeeded", { run_id: "r-9" })), "2026…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value
+AssertionError: expected '1,236 of 700 stocks' to be '700 of 1,236 stocks' // Object.is equality
+
+Expected: "700 of 1,236 stocks"
+Received: "1,236 of 700 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:815:52
+    813|     await screen.findByRole("table");
+    814|     expect(screen.queryByRole("progressbar")).toBeNull();
+    815|     expect(cellsOf(rowFor("r-9"))[2]?.textContent).toBe("700 of 1,236 …
+       |                                                    ^
+    816|   });
+    817| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (a) the result sentences
+AssertionError: expected '1,236 of 1,230 stocks' to be '1,230 of 1,236 stocks' // Object.is equality
+
+Expected: "1,230 of 1,236 stocks"
+Received: "1,236 of 1,230 stocks"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:871:41
+    869| describe("copy.ts recent downloads and what you follow strings", () =>…
+    870|   it("(a) the result sentences", () => {
+    871|     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");
+       |                                         ^
+    872|     expect(partialResult("1,230", "1,236", "6")).toBe("1,230 of 1,236 …
+    873|     expect(interruptedResult("611")).toBe(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 62 passed (66)
+   Start at  01:35:33
+   Duration  2.06s (transform 231ms, setup 89ms, collect 1.46s, tests 942ms, environment 424ms, prepare 83ms)
+

@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oubjogrb/w3/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 2 failed) 1790ms
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (g) error: every region keeps its title and says what failed, with no leak 32ms
+     → expected 'Daily pricesCouldn\'t read what needs…' to contain 'Couldn\'t read the data health checks…'
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails 66ms
+     → expected 'Daily pricesCouldn\'t read what needs…' to contain 'Couldn\'t read the data health checks'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (g) error: every region keeps its title and says what failed, with no leak
+AssertionError: expected 'Daily pricesCouldn\'t read what needs…' to contain 'Couldn\'t read the data health checks…'
+
+Expected: "Couldn't read the data health checks: FactorFlow hit an unexpected problem."
+Received: "Daily pricesCouldn't read what needs attention: FactorFlow hit an unexpected problem.Try again"
+
+ ❯ src/screens/data-health/data-health.test.tsx:810:40
+    808|     for (const name of ["Daily prices", "Company financials"]) {
+    809|       expect(within(region(name)).getByRole("heading", { level: 2 })).…
+    810|       expect(region(name).textContent).toContain(sentence);
+       |                                        ^
+    811|       expect(within(region(name)).getByRole("button", { name: "Try aga…
+    812|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails
+AssertionError: expected 'Daily pricesCouldn\'t read what needs…' to contain 'Couldn\'t read the data health checks'
+
+Expected: "Couldn't read the data health checks"
+Received: "Daily pricesCouldn't read what needs attention: FactorFlow hit an unexpected problem.Try again"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1239:40
+    1237|     await act(() => vi.advanceTimersByTimeAsync(11_000));
+    1238|     for (const name of ["Daily prices", "Company financials"]) {
+    1239|       expect(region(name).textContent).toContain("Couldn't read the da…
+       |                                        ^
+    1240|       expect(region(name).textContent).not.toContain("stocks have");
+    1241|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 57 passed (59)
+   Start at  02:53:49
+   Duration  6.18s (transform 1.16s, setup 256ms, collect 3.29s, tests 1.79s, environment 373ms, prepare 114ms)
+

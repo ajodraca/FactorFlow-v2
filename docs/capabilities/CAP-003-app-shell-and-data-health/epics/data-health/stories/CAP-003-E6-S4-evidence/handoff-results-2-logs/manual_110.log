@@ -1,0 +1,75 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 2 failed) 661ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 62ms
+     → expected '2' to be '2 (history kept)' // Object.is equality
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators 11ms
+     → expected '1,000' to be '1,000 (history kept)' // Object.is equality
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 1 failed) 1189ms
+   × copy.ts recent downloads and what you follow strings > (d) the what-you-follow sentences 4ms
+     → expected '2' to be '2 (history kept)' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (d) the what-you-follow sentences
+AssertionError: expected '2' to be '2 (history kept)' // Object.is equality
+
+Expected: "2 (history kept)"
+Received: "2"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:890:30
+    888| 
+    889|   it("(d) the what-you-follow sentences", () => {
+    890|     expect(historyKept("2")).toBe("2 (history kept)");
+       |                              ^
+    891|     expect(depthYears("5")).toBe("5 years");
+    892|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected '2' to be '2 (history kept)' // Object.is equality
+
+Expected: "2 (history kept)"
+Received: "2"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:120:59
+    118|     ]);
+    119|     expect(definitionOf("Followed stocks").textContent).toBe("30");
+    120|     expect(definitionOf("Stopped following").textContent).toBe("2 (his…
+       |                                                           ^
+    121|     const depth = within(definitionOf("History depth")).getByRole("lin…
+    122|     expect(depth.getAttribute("href")).toBe("/settings");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (d) counts use thousands separators
+AssertionError: expected '1,000' to be '1,000 (history kept)' // Object.is equality
+
+Expected: "1,000 (history kept)"
+Received: "1,000"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:161:59
+    159|     await renderFollow();
+    160|     expect(definitionOf("Followed stocks").textContent).toBe("1,236");
+    161|     expect(definitionOf("Stopped following").textContent).toBe("1,000 …
+       |                                                           ^
+    162|   });
+    163| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 63 passed (66)
+   Start at  01:35:38
+   Duration  2.79s (transform 255ms, setup 122ms, collect 1.52s, tests 1.85s, environment 602ms, prepare 311ms)
+

@@ -1,0 +1,176 @@
+diff --git a/web/src/screens/data-health/data-health.test.tsx b/web/src/screens/data-health/data-health.test.tsx
+index eafee386..b97ad60c 100644
+--- a/web/src/screens/data-health/data-health.test.tsx
++++ b/web/src/screens/data-health/data-health.test.tsx
+@@ -14,6 +14,7 @@ import {
+ import type { AcquisitionRun, DataType, HealthResponse, RunState } from "../../api/types";
+ import { HealthProvider } from "../../app/health";
+ import { LAYOUT } from "../../app/layout";
++import { labelOf } from "../../components/patterns/tiers";
+ import {
+   fetchAttention,
+   fetchDataHealth,
+@@ -732,7 +733,6 @@ describe("Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6
+   });
+ 
+   it("(e) stale: scores render it, the check cards record it as not rendered", async () => {
+-    summaryMock.mockResolvedValue({ ...SUMMARY, set: { ...SUMMARY_SET, not_current: true } });
+     standing({
+       dh: DH({
+         checks: {
+@@ -1276,3 +1276,155 @@ describe("Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15)", () => {
+     );
+   });
+ });
++
++// Review v1 rework (IR-001 to IR-005): the survivors the adversarial review wrote by hand.
++describe("Review v1 rework", () => {
++  const classes = (el: Element | null) => (el?.getAttribute("class") ?? "").split(/\s+/);
++  const screenRoot = () => document.querySelector("header")?.parentElement as HTMLElement;
++
++  // IR-001, DEC-0405: the lower regions mount while attention loads and read once.
++  it("reads Recent downloads and What you follow once per load, across attention's first answer", async () => {
++    const pending = defer<Attention>();
++    attentionMock.mockReturnValue(pending.promise);
++    await renderScreen();
++    await act(async () => {
++      pending.resolve(ATT());
++      await vi.advanceTimersByTimeAsync(0);
++    });
++    await act(() => vi.advanceTimersByTimeAsync(600_000));
++    expect(region("Recent downloads")).toBeTruthy();
++    expect(runsMock.mock.calls.filter(([arg]) => arg?.limit === 5)).toHaveLength(1);
++    expect(instrumentsMock).toHaveBeenCalledTimes(1);
++    expect(depthMock).toHaveBeenCalledTimes(1);
++  });
++
++  // IR-002: each check region holds its own skeleton, not only the slot's busy wrapper.
++  it("holds a skeleton inside each of the three check cards while attention loads", async () => {
++    attentionMock.mockReturnValue(defer<never>().promise);
++    await renderScreen();
++    for (const name of ["Daily prices", "Company financials", "Factor scores"]) {
++      expect(region(name).querySelector('[aria-busy="true"]')).not.toBeNull();
++    }
++  });
++
++  // IR-003: spacing tokens (data-health-ui 10) and the full width.
++  it("pins the spacing tokens and full width of the layout", async () => {
++    await renderScreen();
++    const root = screenRoot();
++    expect(classes(root)).toEqual(expect.arrayContaining(["w-full", "gap-5"]));
++    expect(classes(region("Daily prices").parentElement)).toContain("gap-5");
++    expect(classes(region("Recent downloads").parentElement)).toContain("gap-5");
++  });
++
++  it("pins the empty card's inner spacing", async () => {
++    standing({ attention: ATT({ latest_download: null, latest_terminal_download: null }) });
++    await renderScreen();
++    const sentence = within(region(NO_DATA_YET)).getByText(downloadForFollowed("12"));
++    expect(classes(sentence.parentElement)).toContain("gap-4");
++  });
++
++  // IR-004: TC-COMP-179 (c), second half.
++  it("labels every badge with a labelOf label or a verdict word", async () => {
++    const statuses = [
++      ...(
++        [
++          "requested",
++          "running",
++          "cancelling",
++          "succeeded",
++          "partial",
++          "failed",
++          "cancelled",
++          "abandoned",
++        ] as const
++      ).map((state) => labelOf({ of: "download", state })),
++      ...(["failed", "not_found"] as const).map((outcome) => labelOf({ of: "result", outcome })),
++      ...(["never_classified", "building", "not_current", "failed", "current"] as const).map(
++        (state) => labelOf({ of: "scores", state }),
++      ),
++      ...(["ok", "exceptions"] as const).flatMap((status) =>
++        (["daily_prices", "company_financials"] as const).map((check) =>
++          labelOf({ of: "check", check, status }),
++        ),
++      ),
++      labelOf({ of: "credential", present: true }),
++      labelOf({ of: "credential", present: false }),
++    ];
++    const allowed = new Set([...statuses, "Yes", "Mostly yes", "No"]);
++    const partial = () =>
++      standing({
++        attention: ATT({ latest_terminal_download: TERMINAL("partial") }),
++        dh: DH({
++          affected_count: 1,
++          checks: {
++            daily_prices: {
++              ...DAILY_PRICES,
++              status: "exceptions",
++              exception_count: 1,
++              exception_symbols: ["AAA"],
++            },
++            company_financials: DH().checks.company_financials,
++          },
++          problems: { rows: [ROW("AAA", [FAIL("prices")], true)], next_cursor: null },
++        }),
++        runs: [RUN({ state: "partial", instrumentsWritten: 10, instrumentsFailed: 2 })],
++      });
++    for (const setup of [() => standing(), partial]) {
++      setup();
++      const view = await renderScreen();
++      const badges = Array.from(document.querySelectorAll(BADGE));
++      expect(badges.length).toBeGreaterThan(3);
++      for (const badge of badges) {
++        expect(allowed.has((badge.textContent ?? "").trim())).toBe(true);
++      }
++      view.unmount();
++    }
++  });
++
++  // IR-005: TC-COMP-180 over the planned fixtures.
++  it("shows the exceptions badge, a determined and an undetermined gap part, with shape", async () => {
++    standing({
++      dh: DH({
++        affected_count: 1,
++        checks: {
++          daily_prices: {
++            ...DAILY_PRICES,
++            status: "exceptions",
++            exception_count: 1,
++            exception_symbols: ["AAA"],
++            gap_stock_count: null,
++            gap_detection: { available: false, reason: "fewer_than_two_instruments_with_data" },
++          },
++          company_financials: DH().checks.company_financials,
++        },
++        problems: {
++          rows: [ROW("AAA", [FAIL("prices")], true), ROW("FBXX", [NF("reference")], false)],
++          next_cursor: null,
++        },
++      }),
++    });
++    await renderScreen();
++    const words = Array.from(document.querySelectorAll(BADGE)).map((b) =>
++      (b.textContent ?? "").trim(),
++    );
++    for (const word of ["Needs attention", "Found", "Not found", "Failed"]) {
++      expect(words).toContain(word);
++    }
++    for (const badge of document.querySelectorAll(BADGE)) {
++      expect(badge.querySelectorAll("svg")).toHaveLength(1);
++      expect(badge.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
++    }
++    const unknown = Array.from(
++      region("Daily prices").querySelectorAll('[data-variant="coverage-unknown"]'),
++    );
++    expect(unknown.length).toBeGreaterThan(0);
++    for (const el of unknown) {
++      expect(el).toHaveAccessibleDescription(expect.stringMatching(/\S/));
++    }
++    for (const el of document.querySelectorAll("*")) {
++      if (/\b(text|bg|border)-status-/.test(el.getAttribute("class") ?? "")) {
++        expect(el.matches(BADGE) || el.closest(BADGE) !== null).toBe(true);
++      }
++    }
++  });
++});

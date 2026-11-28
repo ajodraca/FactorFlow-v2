@@ -1,0 +1,41 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zukt77nf/w3/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 1 failed) 577ms
+   × Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (b) holds the three checks in a four-column grid with the fourth column empty 16ms
+     → expected [ 'Company financials', …(2) ] to deeply equal [ 'Daily prices', …(2) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10) > (b) holds the three checks in a four-column grid with the fourth column empty
+AssertionError: expected [ 'Company financials', …(2) ] to deeply equal [ 'Daily prices', …(2) ]
+
+- Expected
++ Received
+
+  Array [
+-   "Daily prices",
+    "Company financials",
++   "Daily prices",
+    "Factor scores",
+  ]
+
+ ❯ src/screens/data-health/data-health.test.tsx:858:7
+    856|         (c) => within(c as HTMLElement).getByRole("heading").textConte…
+    857|       ),
+    858|     ).toEqual(["Daily prices", "Company financials", "Factor scores"]);
+       |       ^
+    859|     expect(region("Company financials").parentElement).toBe(grid);
+    860|     expect(region("Factor scores").parentElement).toBe(grid);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 58 passed (59)
+   Start at  02:55:43
+   Duration  1.84s (transform 163ms, setup 34ms, collect 515ms, tests 577ms, environment 189ms, prepare 172ms)
+

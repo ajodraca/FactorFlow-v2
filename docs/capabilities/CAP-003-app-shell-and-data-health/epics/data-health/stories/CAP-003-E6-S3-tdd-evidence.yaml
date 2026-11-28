@@ -1,0 +1,320 @@
+# TDD evidence for CAP-003-E6-S3 - Needs Fixing: problem rows, the header action, Show more and Nothing needs fixing.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862).
+# Cycles per the plan's T017. Each cycle is committed as it ends with this file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/<file>'
+# as the command; generated mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T004, T005, T011, T012, T013]
+    description: >
+      The row and its strings. problem-row.test.tsx (new): TC-COMP-165 (T002 a-f), TC-COMP-153 (T003), TC-COMP-167 row
+      half (T004), TC-COMP-169 (T005) and the copy cases (T011). Then the copy.ts Needs fixing section (T012) and
+      problem-row.tsx (T013).
+    deviations: >
+      (1) Assertions read the row list's text, not the container's, because the location probe renders beside it.
+      (2) Added after the first mutation scoring left the symbol-link encoding mutant alive (22 of 23): a test with a
+      symbol that needs encoding. (3) Extra tests pin DAC-E6-S3-6 (attempts served unchanged) and a request_id inside a
+      reason shown verbatim (DAC-E6-S3-3).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-1.log
+    red_log_sha256: 9a66017ddeb9476a9bdb1ab8a0e740a87abc984eb066f1295a47b6adaa8a6065
+    red_evidence: >
+      With problem-row.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests (the
+      import of ./problem-row did not resolve).
+    green_evidence: >
+      21 tests passed in problem-row.test.tsx; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-1.log
+        sha256: 9a66017ddeb9476a9bdb1ab8a0e740a87abc984eb066f1295a47b6adaa8a6065
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups from the reviews, outside the plan and not adopted: the card's copy exports are pinned by
+        later cycles; the row does not read retryable (the header's Download now does, DAC-E6-9); long unbroken
+        reasons are not wrapped; 1 attempts has no singular form (register G11).
+    diff_sha256: b8a5c10bbea43196cc2547c25196c987b27b7ed060c7b7e69870364851a9a80b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: e234483725fe48231d5d56bfea45c1a144c4f5ac4c53abb76e7e569e952f2e75
+      generated: 23
+      killed: 23
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-2
+    tasks: [T006, T007, T014]
+    description: >
+      The Needs fixing card's rows and paging. needs-fixing.test.tsx (new): TC-COMP-166 (T006 a-e), the Show more
+      failure and TC-COMP-167 card half (T007 a-e) and three tests for outdated pages. Then needs-fixing.tsx
+      (NeedsFixing, ok state only: header, rows, Show more, page failure). The loading, error, zero-count and dialog
+      parts are cycles 3 and 4, so non-ok states render nothing and the rows' stop control is a no-op for now.
+    deviations: >
+      (1) The page-failure line is an output element (implicit role status), not p role=status, as in E6-S2.
+      (2) The reset effect also clears inFlight and pagePending, and the finally block clears them only for the
+      current generation: the first code review found a pending outdated request kept the new answer's Show more busy
+      and unclickable. Three tests pin it. (3) Tests added after mutation scoring: no initial aria-busy, a fresh
+      announcement node per page, and the cursor restarting after a reset. (4) The first code review also named
+      Safari not focusing a clicked button, the reset in an effect (one stale render) and a stale announcement after
+      a reset; the plan fixes the first two (T014, DEC-0381) and the third is outside it, so none is adopted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-2.log
+    red_log_sha256: 0dc2a27d78f69eebe1416618a62d083aab24bf14b8330b01da6ed6edf4fe3d5e
+    red_evidence: >
+      With needs-fixing.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests (the
+      import of ./needs-fixing did not resolve).
+    green_evidence: >
+      19 tests passed in needs-fixing.test.tsx; biome check and npx tsc --noEmit clean on the changed files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-2.log
+        sha256: 0dc2a27d78f69eebe1416618a62d083aab24bf14b8330b01da6ed6edf4fe3d5e
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The first code review rejected the patch (outdated-page handling untested and unguarded) and the patch was
+        revised and re-reviewed: the second code review approved it and the second spec-drift review found no drift
+        in the code. Its one finding, the missing // Implements TC-COMP-166 and 167 comments, was fixed afterwards by
+        two comment lines in the test file, the only change since those reviews. Follow-ups, not adopted: the non-ok
+        render is untested until cycle 4; a retry that returns the same aggregate object would keep the page failure
+        on screen (CAP-003-E6-S5 wires retry).
+    diff_sha256: 3ab6d6d7840a2533bbff5357242f196ed4cd78ec04c58f7c29c019132b1d1119
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: 4f0618720e7d587452734d4a27081efb4371a0879471d9d6bd32d725d0a1c364
+      generated: 42
+      killed: 36
+      survived: 6
+      stillborn: 0
+      timeout: 0
+      score: 0.857
+      survivors:
+        - id: web/src/screens/data-health/needs-fixing.tsx:45:negate-boolean:1
+          disposition: equivalent
+          reason: "The initial pagePending is overwritten by the reset effect, which runs on mount, before any interaction."
+        - id: web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1
+          disposition: equivalent
+          reason: "The announcement serial's initial value only keys the span; it is first compared against the next value."
+        - id: web/src/screens/data-health/needs-fixing.tsx:48:negate-boolean:1
+          disposition: equivalent
+          reason: "The initial inFlight is overwritten by the reset effect, which runs on mount, before any interaction."
+        - id: web/src/screens/data-health/needs-fixing.tsx:49:off-by-one:1
+          disposition: equivalent
+          reason: "The generation counter is only compared with itself, so its starting value is unobservable."
+        - id: web/src/screens/data-health/needs-fixing.tsx:61:off-by-one:1
+          disposition: equivalent
+          reason: "The generation advances by 2 instead of 1; it only has to differ after a reset, and it still does."
+        - id: web/src/screens/data-health/needs-fixing.tsx:96:off-by-one:1
+          disposition: equivalent
+          reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each page, and it still does."
+
+  - id: cycle-3
+    tasks: [T009, T014]
+    description: >
+      The zero-count state. needs-fixing.test.tsx: TC-COMP-152 (T009 a-g) and four edge tests (internal failure text,
+      the busy placeholder on retry, a late failure and a late success after a newer answer). Then needs-fixing.tsx:
+      the affected_count 0 branch, with Nothing needs fixing. and a LastComplete child that reads
+      listAcquisitionRuns({ state: "succeeded", limit: 1 }) once per aggregate answer.
+    deviations: >
+      (1) LastComplete keys its re-read on the aggregate answer object through its effect, not on a React key, because an
+      object cannot be a key. (2) A thrown value that is not an API error is replaced by a plain ApiError, as in the Show
+      more failure. (3) Tests (f) busy placeholder on retry and (g) late failure were added after the first scoring left
+      those mutants alive (18 and 19 of 24).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-3.log
+    red_log_sha256: 15d0589b00a541d4e607f7e852f6ba33fb91918f0672eb63c71cfc9dbff4b12d
+    red_evidence: >
+      With the T009 tests added and no zero branch, 8 of the 28 tests in needs-fixing.test.tsx failed (the 20 earlier ones
+      passed): the card rendered rows and no Nothing needs fixing. line.
+    green_evidence: >
+      30 tests passed in needs-fixing.test.tsx; biome check and npx tsc --noEmit clean on the changed files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-3.log
+        sha256: 15d0589b00a541d4e607f7e852f6ba33fb91918f0672eb63c71cfc9dbff4b12d
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift; the additions are the retry's pending state, the non-API error replacement and four edge tests.
+        Follow-ups from the reviews, not adopted: focus falls to the body when Try again swaps for the skeleton, and no
+        test unmounts the card while the read is pending.
+    diff_sha256: 41e4447194a9584ef3786d52b8daa85fb4bf92c6f9c6e0a74ee03d097dbe8e71
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: 09ac8fe3a2a7c3341719d63838258a9237ce3bf8bb71e20877a378fe3b767ffc
+      generated: 24
+      killed: 19
+      survived: 5
+      stillborn: 0
+      timeout: 0
+      score: 0.792
+      survivors:
+        - id: web/src/screens/data-health/needs-fixing.tsx:41:off-by-one:1
+          disposition: equivalent
+          reason: "The read counter's starting value is only compared with itself."
+        - id: web/src/screens/data-health/needs-fixing.tsx:44:off-by-one:1
+          disposition: equivalent
+          reason: "The read counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
+        - id: web/src/screens/data-health/needs-fixing.tsx:79:off-by-one:1
+          disposition: equivalent
+          reason: "The cleanup advances the read counter by 2 instead of 1; it only has to differ, and it still does."
+        - id: manual:non-api-text
+          disposition: equivalent
+          reason: "A thrown value that is not an API error would be passed through instead of replaced, but readFailureReason reads only its class, so the sentence is the same."
+        - id: manual:pending-not-shown
+          disposition: equivalent
+          reason: "load's closure holds the first render's read, which is the pending state, so setting it back is the same as the pending state it is meant to set."
+  - id: cycle-4
+    tasks: [T008, T010, T014]
+    description: >
+      The card's states and the dialog, with the vocabulary scans. needs-fixing.test.tsx: T010 (a-e) and one test that an
+      abandoned dialog does not reopen, then T008 (TC-COMP-168 a-c). Then needs-fixing.tsx: the loading and error
+      states, the heading ref and the one StopFollowingDialog wired to the rows. T008 is tests only and joins this cycle
+      as the plan's T017 allows. Four // Implements markers were added to problem-row.test.tsx (cycle 1's tests).
+    deviations: >
+      (1) The first code review rejected the patch: the dialog is rendered only with an answer but its symbol outlived
+      it, so a dialog abandoned during a failed read would reopen with the next answer. The [dh] effect now clears it
+      when the answer leaves ok, with a test, and both reviews were repeated. (2) The T008 scans read the page text and
+      every aria-label and title; they pass on arrival, so they were probed with three hand-made mutants that put a
+      domain word into the card's text (all killed). (3) The badge labels are compared to the literals Failed and Not
+      found, not to labelOf values.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-4.log
+    red_log_sha256: 212a0ea6c5a22c6d2b1ff7920c967989f27cabf88c3fb4429784e3e22335b680
+    red_evidence: >
+      With the T010 tests added and no loading, error or dialog wiring, 7 of the 37 tests in needs-fixing.test.tsx
+      failed (the 30 earlier ones passed).
+    green_evidence: >
+      46 tests passed in needs-fixing.test.tsx and 226 in web/src/screens/data-health; biome check and npx tsc --noEmit
+      clean on the changed files.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/red-cycle-4.log
+        sha256: 212a0ea6c5a22c6d2b1ff7920c967989f27cabf88c3fb4429784e3e22335b680
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The first code review rejected the patch (finding in deviations); the revised patch was approved by a second code
+        review and found free of drift by a second spec-drift review. Follow-ups, not adopted: when the re-read after a
+        stop fails, the rows and the dialog leave together and focus falls to the body; an in-flight stop that fails
+        after the dialog unmounted shows no refusal.
+    diff_sha256: 944f4b0327de0aba76eb234df39b8fc78e52e44a4befdb3e7beaad85604918fb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: 47984ac591788cf68557663a6c12ec9cf6b288c6b5204e24ec4858a0f0d7fda4
+      generated: 20
+      killed: 20
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+  - id: cycle-5
+    tasks: [T016]
+    description: >
+      Hand-off survivors. The first hand-off run (108 mutants: 27 catalogue and 81 hand-written by an independent
+      subagent) left 17 alive; nine are equivalent counter values (cycle 2 and 3's) and eight were real gaps. Tests only:
+      problem-row.test.tsx pins the fix keyed by the failures' outcomes, not by the served retryable flag, the
+      consequence on a not-found-only row, and showingOf with a thousands separator on the shown count;
+      needs-fixing.test.tsx pins the rows list's accessible name, the checked time read from the aggregate, focus left
+      where the owner put it when the last page loads or a page fails, and a focus move not repeating on later renders.
+    deviations: >
+      The new tests pass on the unchanged production code, which was correct; the RED is the surviving hand-off mutants
+      (manual:1, 12, 44, 49, 56, 61, 66, 81), which the full rerun on the committed tree records as killed. They are
+      probed by that run rather than by a separate red log.
+    red_cycle: cycle-4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups from the reviews, not adopted: two assertions read the text-xs class and a fixture's
+        default count; the focus-repeat test relies on a same-object re-render.
+    diff_sha256: b6104052b4ed86a901b15ffa03232a9b1036365554487ee0151c9846ad26cd00
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over the code cycles 1 to 4 already mutated, and the hand-off run scores it
+
+  - id: cycle-6
+    tasks: [T002, T004, T007, T009]
+    description: >
+      Review v1 rework (IR-001 to IR-004), tests only. Every Failed fixture in both test files now uses a reason
+      beginning [unavailable] or null, with attempts 1, 2 or 5 and never 3 (story v2; TC-COMP-226); the rate limited
+      fixture is replaced. A new test pins the row's document order: symbol link, each failure in served order, the
+      consequence, then the fixes. The Show more failure sentences and the last-complete failure sentence are found as
+      role=status elements. TC-COMP-226 and TC-COMP-227 carry Implements markers, and the TC-COMP-167 marker moves to
+      the Show more failure block.
+    deviations: >
+      The new tests pass on the unchanged production code, which the review found correct; the RED is the review's
+      reviewer mutants (rv:consequence-before-failures, rv:symbol-link-after-failures, rv:fix-before-consequence,
+      rv:page-failure-not-status), which the hand-off run on the committed tree records as killed. IR-005 (a local
+      variable name) and the task plan's stale v1 literals are not changed: the plan is the planner's to revise.
+    red_cycle: cycle-4
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. The review's note that the task plan still states the v1 literals (provider timeout, 3 attempts) is
+        a follow-up for the planner, not adopted.
+    diff_sha256: 0e246d874e405da72513dd5061cd6b4c555c8611bfad8822ce6abc3bbe9d55ec
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over code cycles 1 to 4 already mutated, and the hand-off run scores it
+
+handoff_mutation:
+  runner: scripts/mutation-run.py
+  results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S3-evidence/handoff-results.json
+  results_sha256: 27ee265d6bd259ca4968f887c74f9e878cc564bc969d1103abbdb81718403361
+  generated: 108
+  killed: 99
+  survived: 9
+  stillborn: 0
+  timeout: 0
+  score: 0.917
+  survivors:
+    - id: web/src/screens/data-health/needs-fixing.tsx:44:off-by-one:1
+      disposition: equivalent
+      reason: "The read counter's starting value is only compared with itself."
+    - id: web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1
+      disposition: equivalent
+      reason: "The read counter advances by 2 instead of 1; it only has to differ after each read, and it still does."
+    - id: web/src/screens/data-health/needs-fixing.tsx:82:off-by-one:1
+      disposition: equivalent
+      reason: "The cleanup advances the read counter by 2 instead of 1; it only has to differ, and it still does."
+    - id: web/src/screens/data-health/needs-fixing.tsx:123:negate-boolean:1
+      disposition: equivalent
+      reason: "The initial pagePending is overwritten by the reset effect, which runs on mount, before any interaction."
+    - id: web/src/screens/data-health/needs-fixing.tsx:125:off-by-one:1
+      disposition: equivalent
+      reason: "The announcement serial's initial value only keys the span; it is first compared against the next value."
+    - id: web/src/screens/data-health/needs-fixing.tsx:126:negate-boolean:1
+      disposition: equivalent
+      reason: "The initial inFlight is overwritten by the reset effect, which runs on mount, before any interaction."
+    - id: web/src/screens/data-health/needs-fixing.tsx:127:off-by-one:1
+      disposition: equivalent
+      reason: "The generation counter is only compared with itself, so its starting value is unobservable."
+    - id: web/src/screens/data-health/needs-fixing.tsx:141:off-by-one:1
+      disposition: equivalent
+      reason: "The generation advances by 2 instead of 1; it only has to differ after a reset, and it still does."
+    - id: web/src/screens/data-health/needs-fixing.tsx:176:off-by-one:1
+      disposition: equivalent
+      reason: "The serial advances by 2 instead of 1; the span's key only needs to change on each page, and it still does."

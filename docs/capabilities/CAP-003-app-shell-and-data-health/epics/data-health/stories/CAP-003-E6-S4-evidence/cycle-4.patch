@@ -1,0 +1,401 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-4.log
+new file mode 100644
+index 00000000..5eea7a86
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-4.log
+@@ -0,0 +1,53 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/screens/data-health/what-you-follow.test.tsx (0 test)
++stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/data-health/recent-downloads.test.tsx (41 tests | 1 failed) 472ms
++   × copy.ts recent downloads and what you follow strings > (d) the what-you-follow sentences 3ms
++     → historyKept is not a function
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/what-you-follow.test.tsx [ src/screens/data-health/what-you-follow.test.tsx ]
++Error: Failed to resolve import "./what-you-follow" from "web/src/screens/data-health/what-you-follow.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/what-you-follow.test.tsx:12:38
++  10 |  const __vi_import_2__ = await import('react-router-dom')
++  11 |  const __vi_import_3__ = await import('../../api/client')
++  12 |  const __vi_import_4__ = await import('./what-you-follow')
++     |                                       ^
++  13 |  
++  14 |  
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/recent-downloads.test.tsx > copy.ts recent downloads and what you follow strings > (d) the what-you-follow sentences
++TypeError: historyKept is not a function
++ ❯ src/screens/data-health/recent-downloads.test.tsx:799:12
++    797| 
++    798|   it("(d) the what-you-follow sentences", () => {
++    799|     expect(historyKept("2")).toBe("2 (history kept)");
++       |            ^
++    800|     expect(depthYears("5")).toBe("5 years");
++    801|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  2 failed (2)
++      Tests  1 failed | 40 passed (41)
++   Start at  01:20:52
++   Duration  1.90s (transform 111ms, setup 124ms, collect 543ms, tests 472ms, environment 667ms, prepare 82ms)
++
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+index 46e96496..3bdac6e0 100644
+--- a/web/src/screens/data-health/copy.ts
++++ b/web/src/screens/data-health/copy.ts
+@@ -348,3 +348,28 @@ export function interruptedResult(written: string): string {
+ export function progressOf(done: string, total: string): string {
+   return `${done} of ${total} stocks`;
+ }
++
++export const WHAT_YOU_FOLLOW = "What you follow";
++export const FOLLOWED_STOCKS = "Followed stocks";
++export const STOPPED_FOLLOWING = "Stopped following";
++
++export function historyKept(count: string): string {
++  return `${count} (history kept)`;
++}
++
++export const HISTORY_DEPTH = "History depth";
++
++export function depthYears(years: string): string {
++  return `${years} years`;
++}
++
++export const DEPTH_NOT_SET = "not set";
++export const MARKET_DATA_KEY = "Market data key";
++
++/**
++ * Why the key's presence cannot be told while health is not answering (DEC-0385):
++ * the same clause as `readFailureReason`'s unreachable case (DEC-0373).
++ */
++export const KEY_NOT_DETERMINABLE_REASON = "FactorFlow is not answering";
++
++export const MANAGE_FOLLOWED_STOCKS = "Manage followed stocks";
+diff --git a/web/src/screens/data-health/recent-downloads.test.tsx b/web/src/screens/data-health/recent-downloads.test.tsx
+index 2734e218..a9d26a6e 100644
+--- a/web/src/screens/data-health/recent-downloads.test.tsx
++++ b/web/src/screens/data-health/recent-downloads.test.tsx
+@@ -8,6 +8,8 @@ import type { ShellContextValue } from "../../app/shell-context";
+ import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
+ import {
+   READ_TARGETS,
++  depthYears,
++  historyKept,
+   interruptedResult,
+   partialResult,
+   progressOf,
+@@ -793,6 +795,11 @@ describe("copy.ts recent downloads and what you follow strings", () => {
+     expect(progressOf("812", "1,236")).toBe("812 of 1,236 stocks");
+   });
+ 
++  it("(d) the what-you-follow sentences", () => {
++    expect(historyKept("2")).toBe("2 (history kept)");
++    expect(depthYears("5")).toBe("5 years");
++  });
++
+   it("(c) the sub-line", () => {
+     expect(recentDownloadsSubline(null)).toBe("Starts when you press Download now");
+     expect(recentDownloadsSubline("14:03:12 CDT")).toBe(
+diff --git a/web/src/screens/data-health/what-you-follow.test.tsx b/web/src/screens/data-health/what-you-follow.test.tsx
+new file mode 100644
+index 00000000..d7862f8b
+--- /dev/null
++++ b/web/src/screens/data-health/what-you-follow.test.tsx
+@@ -0,0 +1,169 @@
++import { render, screen, waitFor, within } from "@testing-library/react";
++import { MemoryRouter } from "react-router-dom";
++import { beforeEach, describe, expect, it, vi } from "vitest";
++import { getHistoryDepth, listInstruments } from "../../api/client";
++import type { HealthResponse, HistoryDepth, InstrumentListResult } from "../../api/types";
++import type { ShellContextValue } from "../../app/shell-context";
++import { WhatYouFollow } from "./what-you-follow";
++
++vi.mock("../../api/client", async (importActual) => ({
++  ...(await importActual<typeof import("../../api/client")>()),
++  listInstruments: vi.fn(),
++  getHistoryDepth: vi.fn(),
++}));
++
++const shell = vi.hoisted(() => ({ value: null as unknown as ShellContextValue }));
++vi.mock("../../app/shell-context", () => ({ useShell: () => shell.value }));
++
++const listMock = vi.mocked(listInstruments);
++const depthMock = vi.mocked(getHistoryDepth);
++
++/** A delivered `HealthResponse` literal; independent of the code under test. */
++function HEALTH(present: boolean): HealthResponse {
++  return {
++    status: "ok",
++    database: "reachable",
++    credential_present: present,
++    schema_version: 4,
++    most_recent_run: null,
++  };
++}
++
++const ANSWERED = new Date("2026-10-30T19:03:10Z");
++
++/** Writes a full shell value; health answers with the key found unless a test says otherwise. */
++function setShell(health: ShellContextValue["health"] = ANSWERING(true)) {
++  shell.value = {
++    health,
++    attention: { kind: "loading" },
++    scores: { kind: "loading" },
++    refresh: vi.fn(),
++    setTitleDetail: vi.fn(),
++  };
++}
++
++function ANSWERING(present: boolean): ShellContextValue["health"] {
++  return {
++    liveness: "answering",
++    health: HEALTH(present),
++    lastUpdated: ANSWERED,
++    lastAnsweredAt: ANSWERED,
++  };
++}
++
++function COUNTS(activeCount: number, retiredCount: number): InstrumentListResult {
++  return { rows: [], activeCount, retiredCount, nextCursor: null };
++}
++
++function DEPTH(years: number | null): HistoryDepth {
++  return { years, updatedAt: "2026-10-01T12:00:00Z" };
++}
++
++beforeEach(() => {
++  listMock.mockReset();
++  depthMock.mockReset();
++  setShell();
++});
++
++async function renderFollow() {
++  const view = render(
++    <MemoryRouter>
++      <WhatYouFollow />
++    </MemoryRouter>,
++  );
++  await screen.findAllByRole("term");
++  return view;
++}
++
++function region(): HTMLElement {
++  return screen.getByRole("region", { name: "What you follow" });
++}
++
++/** The `dt` / `dd` pairs of the summary list, in order. */
++function pairs(): { term: string; definition: HTMLElement }[] {
++  const list = region().querySelector("dl") as HTMLElement;
++  const terms = [...list.querySelectorAll("dt")];
++  const definitions = [...list.querySelectorAll<HTMLElement>("dd")];
++  return terms.map((term, index) => ({
++    term: term.textContent ?? "",
++    definition: definitions[index] as HTMLElement,
++  }));
++}
++
++function definitionOf(term: string): HTMLElement {
++  const found = pairs().find((pair) => pair.term === term);
++  expect(found).toBeDefined();
++  return (found as { definition: HTMLElement }).definition;
++}
++
++describe("What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17)", () => {
++  // Implements TC-COMP-154
++  it("(a) states the counts, the depth and whether the key was found, with a way to manage", async () => {
++    listMock.mockResolvedValue(COUNTS(30, 2));
++    depthMock.mockResolvedValue(DEPTH(5));
++    await renderFollow();
++    expect(within(region()).getByRole("heading", { level: 2 })).toHaveTextContent(
++      "What you follow",
++    );
++    expect(region().querySelector('[data-variant="summary"]')).not.toBeNull();
++    expect(pairs().map((pair) => pair.term)).toEqual([
++      "Followed stocks",
++      "Stopped following",
++      "History depth",
++      "Market data key",
++    ]);
++    expect(definitionOf("Followed stocks").textContent).toBe("30");
++    expect(definitionOf("Stopped following").textContent).toBe("2 (history kept)");
++    const depth = within(definitionOf("History depth")).getByRole("link", { name: "5 years" });
++    expect(depth.getAttribute("href")).toBe("/settings");
++    const badge = definitionOf("Market data key").querySelector('[data-variant="status-good"]');
++    expect(badge?.textContent).toBe("Found");
++    const manage = screen.getByRole("link", { name: "Manage followed stocks" });
++    expect(manage.getAttribute("href")).toBe("/data/followed");
++  });
++
++  it("(b) an unset depth reads not set and still links to settings; an unreachable key is not determinable", async () => {
++    listMock.mockResolvedValue(COUNTS(30, 2));
++    depthMock.mockResolvedValue(DEPTH(null));
++    setShell({
++      liveness: "unreachable",
++      health: HEALTH(true),
++      lastUpdated: ANSWERED,
++      lastAnsweredAt: ANSWERED,
++    });
++    await renderFollow();
++    const depth = within(definitionOf("History depth")).getByRole("link", { name: "not set" });
++    expect(depth.getAttribute("href")).toBe("/settings");
++    const badge = definitionOf("Market data key").querySelector(
++      '[data-variant="coverage-unknown"]',
++    );
++    expect(badge?.textContent).toBe("Not determinable");
++  });
++
++  it("(c) a missing key is a critical Missing", async () => {
++    listMock.mockResolvedValue(COUNTS(30, 2));
++    depthMock.mockResolvedValue(DEPTH(5));
++    setShell(ANSWERING(false));
++    await renderFollow();
++    const badge = definitionOf("Market data key").querySelector('[data-variant="status-critical"]');
++    expect(badge?.textContent).toBe("Missing");
++  });
++
++  it("(d) counts use thousands separators", async () => {
++    listMock.mockResolvedValue(COUNTS(1236, 1000));
++    depthMock.mockResolvedValue(DEPTH(5));
++    await renderFollow();
++    expect(definitionOf("Followed stocks").textContent).toBe("1,236");
++    expect(definitionOf("Stopped following").textContent).toBe("1,000 (history kept)");
++  });
++
++  it("(e) reads the delivered endpoints unchanged, once", async () => {
++    listMock.mockResolvedValue(COUNTS(30, 2));
++    depthMock.mockResolvedValue(DEPTH(5));
++    await renderFollow();
++    await waitFor(() => expect(listMock).toHaveBeenCalledTimes(1));
++    expect(listMock).toHaveBeenCalledWith({ limit: 1 });
++    expect(depthMock).toHaveBeenCalledTimes(1);
++    expect(depthMock).toHaveBeenCalledWith();
++  });
++});
+diff --git a/web/src/screens/data-health/what-you-follow.tsx b/web/src/screens/data-health/what-you-follow.tsx
+new file mode 100644
+index 00000000..07f404d7
+--- /dev/null
++++ b/web/src/screens/data-health/what-you-follow.tsx
+@@ -0,0 +1,103 @@
++import { type JSX, useCallback, useEffect, useId, useState } from "react";
++import { Link } from "react-router-dom";
++import { getHistoryDepth, listInstruments } from "../../api/client";
++import type { HistoryDepth, InstrumentListResult } from "../../api/types";
++import { useShell } from "../../app/shell-context";
++import { formatCount } from "../../components/patterns/format";
++import { NotDeterminable } from "../../components/patterns/presence";
++import { StatusBadge } from "../../components/patterns/status-badge";
++import { labelOf, tierOf } from "../../components/patterns/tiers";
++import { Button } from "../../components/ui/button";
++import {
++  Card,
++  CardContent,
++  CardFooter,
++  CardHeader,
++  CardSummaryList,
++  CardTitle,
++} from "../../components/ui/card";
++import {
++  DEPTH_NOT_SET,
++  FOLLOWED_STOCKS,
++  HISTORY_DEPTH,
++  KEY_NOT_DETERMINABLE_REASON,
++  MANAGE_FOLLOWED_STOCKS,
++  MARKET_DATA_KEY,
++  STOPPED_FOLLOWING,
++  WHAT_YOU_FOLLOW,
++  depthYears,
++  historyKept,
++} from "./copy";
++
++type FollowState =
++  | { kind: "loading" }
++  | { kind: "ok"; counts: InstrumentListResult; depth: HistoryDepth };
++
++/**
++ * The What you follow card (component design data-health-ui 2.6 and 4;
++ * DAC-E6-16, DAC-E6-S4-3, AC-4, AC-17, DEC-0385): how many stocks are followed
++ * and stopped, the history depth, and whether the market data key was found,
++ * never its value. The key's badge keys on whether health is answering, because
++ * `health` keeps its last answer while unreachable (Resolved Conflict 6); no
++ * field of it but `credential_present` is read.
++ */
++export function WhatYouFollow(): JSX.Element {
++  const headingId = useId();
++  const { health } = useShell();
++  const [state, setState] = useState<FollowState>({ kind: "loading" });
++
++  const read = useCallback(() => {
++    Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()]).then(([counts, depth]) => {
++      setState({ kind: "ok", counts, depth });
++    });
++  }, []);
++
++  useEffect(() => {
++    read();
++  }, [read]);
++
++  let key: JSX.Element;
++  if (health.liveness === "answering" && health.health !== null) {
++    const status = { of: "credential", present: health.health.credential_present } as const;
++    key = <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;
++  } else {
++    key = <NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} />;
++  }
++
++  return (
++    <section aria-labelledby={headingId}>
++      <Card variant="summary">
++        <CardHeader>
++          <CardTitle id={headingId}>{WHAT_YOU_FOLLOW}</CardTitle>
++        </CardHeader>
++        {state.kind === "ok" ? (
++          <>
++            <CardContent>
++              <CardSummaryList className="grid-cols-[auto_1fr]">
++                <dt className="text-muted-foreground">{FOLLOWED_STOCKS}</dt>
++                <dd>{formatCount(state.counts.activeCount)}</dd>
++                <dt className="text-muted-foreground">{STOPPED_FOLLOWING}</dt>
++                <dd>{historyKept(formatCount(state.counts.retiredCount))}</dd>
++                <dt className="text-muted-foreground">{HISTORY_DEPTH}</dt>
++                <dd>
++                  <Link to="/settings">
++                    {state.depth.years === null
++                      ? DEPTH_NOT_SET
++                      : depthYears(formatCount(state.depth.years))}
++                  </Link>
++                </dd>
++                <dt className="text-muted-foreground">{MARKET_DATA_KEY}</dt>
++                <dd>{key}</dd>
++              </CardSummaryList>
++            </CardContent>
++            <CardFooter>
++              <Button variant="outline" asChild>
++                <Link to="/data/followed">{MANAGE_FOLLOWED_STOCKS}</Link>
++              </Button>
++            </CardFooter>
++          </>
++        ) : null}
++      </Card>
++    </section>
++  );
++}

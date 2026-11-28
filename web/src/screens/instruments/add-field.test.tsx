@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as client from "../../api/client";
@@ -10,17 +10,22 @@ vi.mock("../../api/client", async () => {
   return { ...actual, addInstruments: vi.fn() };
 });
 
-describe("AddField — single-symbol inline add (AC-1)", () => {
+const FIELD = { name: "Symbol of the stock to follow" };
+
+describe("AddField — follow a stock (AC-1, AC-17, DAC-E7-4)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("has an accessible name stating what is being added, not a bare 'Symbol'", () => {
-    render(<AddField onAdded={vi.fn()} />);
-    expect(screen.getByRole("textbox", { name: /instrument symbol/i })).toBeInTheDocument();
+  it("names the field and its button in the product's words, inside an inline form", () => {
+    const { container } = render(<AddField onAdded={vi.fn()} />);
+
+    expect(screen.getByRole("textbox", FIELD)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Follow a stock" })).toBeInTheDocument();
+    expect(container.querySelector("form")).toHaveAttribute("data-variant", "inline");
   });
 
-  it("submits one symbol on Enter and reports it added", async () => {
+  it("submits the trimmed, upper-cased symbol once on Enter and clears the field", async () => {
     vi.mocked(client.addInstruments).mockResolvedValue({
       added: [
         { inputSymbol: "AAPL", normalisedSymbol: "AAPL", disposition: "added", reason: null },
@@ -32,16 +37,48 @@ describe("AddField — single-symbol inline add (AC-1)", () => {
     const onAdded = vi.fn();
     render(<AddField onAdded={onAdded} />);
 
-    const field = screen.getByRole("textbox", { name: /instrument symbol/i });
-    await user.type(field, "aapl{Enter}");
+    const field = screen.getByRole("textbox", FIELD);
+    await user.type(field, " aapl {Enter}");
 
+    expect(client.addInstruments).toHaveBeenCalledTimes(1);
     expect(client.addInstruments).toHaveBeenCalledWith(["AAPL"]);
-    expect(onAdded).toHaveBeenCalled();
+    expect(onAdded).toHaveBeenCalledTimes(1);
+    expect(field).toHaveValue("");
   });
 
-  // T017 (DAC-E2-S4-1 sibling): duplicate-of-active is a field error;
-  // duplicate-of-retired is distinguished as a reactivation, not an error.
-  it("renders a field error for a duplicate-of-active symbol", async () => {
+  it("submits when the button is clicked, and holds it disabled while the request is in flight", async () => {
+    let resolve: (value: Awaited<ReturnType<typeof client.addInstruments>>) => void = () =>
+      undefined;
+    vi.mocked(client.addInstruments).mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const user = userEvent.setup();
+    render(<AddField onAdded={vi.fn()} />);
+
+    await user.type(screen.getByRole("textbox", FIELD), "msft");
+    const button = screen.getByRole("button", { name: "Follow a stock" });
+    expect(button).toHaveAttribute("type", "submit");
+    expect(button).not.toBeDisabled();
+    await user.click(button);
+
+    expect(client.addInstruments).toHaveBeenCalledWith(["MSFT"]);
+    expect(button).toBeDisabled();
+    resolve({ added: [], reactivated: [], rejected: [] });
+    await waitFor(() => expect(button).not.toBeDisabled());
+  });
+
+  it("sends nothing for an empty field", async () => {
+    const user = userEvent.setup();
+    render(<AddField onAdded={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Follow a stock" }));
+
+    expect(client.addInstruments).not.toHaveBeenCalled();
+  });
+
+  it("renders a field error for a stock that is already followed", async () => {
     vi.mocked(client.addInstruments).mockResolvedValue({
       added: [],
       reactivated: [],
@@ -57,15 +94,39 @@ describe("AddField — single-symbol inline add (AC-1)", () => {
     const user = userEvent.setup();
     render(<AddField onAdded={vi.fn()} />);
 
-    const field = screen.getByRole("textbox", { name: /instrument symbol/i });
+    const field = screen.getByRole("textbox", FIELD);
     await user.type(field, "aapl{Enter}");
 
-    const error = await screen.findByText(/already an active instrument/i);
-    expect(error).toBeInTheDocument();
+    const error = await screen.findByText("AAPL is already a followed stock.");
     expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(field.getAttribute("aria-describedby")).toBe(error.id);
   });
 
-  it("distinguishes a duplicate-of-retired symbol as a reactivation, not an error", async () => {
+  it("renders a malformed symbol as the shape error, not the duplicate one", async () => {
+    vi.mocked(client.addInstruments).mockResolvedValue({
+      added: [],
+      reactivated: [],
+      rejected: [
+        {
+          inputSymbol: "1BAD",
+          normalisedSymbol: null,
+          disposition: "malformed",
+          reason: "bad shape",
+        },
+      ],
+    });
+    const user = userEvent.setup();
+    render(<AddField onAdded={vi.fn()} />);
+
+    await user.type(screen.getByRole("textbox", FIELD), "1bad{Enter}");
+
+    expect(
+      await screen.findByText("1BAD does not match the required symbol shape."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/already a followed stock/)).not.toBeInTheDocument();
+  });
+
+  it("reports a stock followed again as a notice, not an error", async () => {
     vi.mocked(client.addInstruments).mockResolvedValue({
       added: [],
       reactivated: [
@@ -76,24 +137,33 @@ describe("AddField — single-symbol inline add (AC-1)", () => {
     const user = userEvent.setup();
     render(<AddField onAdded={vi.fn()} />);
 
-    const field = screen.getByRole("textbox", { name: /instrument symbol/i });
+    const field = screen.getByRole("textbox", FIELD);
     await user.type(field, "aapl{Enter}");
 
-    const notice = await screen.findByText(/reactivated/i);
-    expect(notice).toBeInTheDocument();
+    expect(await screen.findByText("AAPL is followed again.")).toBeInTheDocument();
     expect(field).not.toHaveAttribute("aria-invalid", "true");
   });
 
-  it("names the operation, resource and reason when the request itself fails", async () => {
+  it("names the operation, stock and reason when the request itself fails", async () => {
     vi.mocked(client.addInstruments).mockRejectedValue(
-      new ApiError("the store is unavailable", "req-1"),
+      new ApiError("service unavailable", "req-1"),
     );
     const user = userEvent.setup();
     render(<AddField onAdded={vi.fn()} />);
 
-    const field = screen.getByRole("textbox", { name: /instrument symbol/i });
-    await user.type(field, "aapl{Enter}");
+    await user.type(screen.getByRole("textbox", FIELD), "aapl{Enter}");
 
-    expect(await screen.findByText(/adding instrument aapl failed/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText("Following AAPL failed: service unavailable"),
+    ).toBeInTheDocument();
+  });
+
+  it("focuses the field on mount when asked to, and not otherwise", () => {
+    const { unmount } = render(<AddField onAdded={vi.fn()} focusOnMount />);
+    expect(screen.getByRole("textbox", FIELD)).toHaveFocus();
+    unmount();
+
+    render(<AddField onAdded={vi.fn()} />);
+    expect(screen.getByRole("textbox", FIELD)).not.toHaveFocus();
   });
 });

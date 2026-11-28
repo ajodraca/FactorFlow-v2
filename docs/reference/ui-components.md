@@ -21,7 +21,7 @@ keys, each bound as `hsl(var(--<same name>) / <alpha-value>)`: `primary`,
 
 Two tests hold this in place: `web/src/components/token-literals.test.ts`
 checks the Tailwind keys resolve, and scans the component sources for spacing,
-size or colour literals (`literalsIn`), including the six form-control files and the five overlay and feedback files;
+size or colour literals (`literalsIn`), including the six form-control files and the five overlay and feedback files, and, through `SCANNED_DIRECTORIES`, the screen directories that took over the product's words, `web/src/screens/instruments/` among them (CAP-003-E7-S3);
 `ui/vendoring.test.ts` checks the no-alias rule and that every package below
 carries an approved licence (MIT, for the form packages) in `package-lock.json`.
 

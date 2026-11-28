@@ -1,0 +1,70 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wbpe0woz/w0/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx (13 tests | 3 failed) 230ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 20ms
+     → expected 'status-neutral' to be 'status-warning' // Object.is equality
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence 15ms
+     → expected 'status-neutral' to be 'status-serious' // Object.is equality
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 19ms
+     → expected 'status-neutral' to be 'status-good' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected 'status-neutral' to be 'status-warning' // Object.is equality
+
+Expected: "status-warning"
+Received: "status-neutral"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:120:55
+    118|   it("(b) a partial download is a warning Partial with its failed coun…
+    119|     const row = rowFor("r-5");
+    120|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-war…
+       |                                                       ^
+    121|     expect(badgeOf(row).textContent).toBe("Partial");
+    122|     expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence
+AssertionError: expected 'status-neutral' to be 'status-serious' // Object.is equality
+
+Expected: "status-serious"
+Received: "status-neutral"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:127:55
+    125|   it("(c) an abandoned download is a serious Interrupted with its sent…
+    126|     const row = rowFor("r-4");
+    127|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-ser…
+       |                                                       ^
+    128|     expect(badgeOf(row).textContent).toBe("Interrupted");
+    129|     expect(cellsOf(row)[2]?.textContent).toBe(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected 'status-neutral' to be 'status-good' // Object.is equality
+
+Expected: "status-good"
+Received: "status-neutral"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:144:60
+    142|   it("(e) the other outcomes use the plain form", () => {
+    143|     const complete = rowFor("r-1");
+    144|     expect(badgeOf(complete).getAttribute("data-variant")).toBe("statu…
+       |                                                            ^
+    145|     expect(badgeOf(complete).textContent).toBe("Complete");
+    146|     expect(cellsOf(complete)[2]?.textContent).toBe("1,236 of 1,236 sto…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 10 passed (13)
+   Start at  01:11:14
+   Duration  1.39s (transform 79ms, setup 34ms, collect 372ms, tests 230ms, environment 199ms, prepare 165ms)
+

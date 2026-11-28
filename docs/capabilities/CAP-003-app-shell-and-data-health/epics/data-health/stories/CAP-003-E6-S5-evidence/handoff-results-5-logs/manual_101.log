@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9w198npb/w5/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 2 failed) 965ms
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (b) offers Start the first download with the count from attention while the aggregate is pending 12ms
+     → expected 'Download data for your followed stock…' to be 'Download data for your 12 followed st…' // Object.is equality
+   × copy.ts, empty card strings (DAC-E6-6) > formats the follow count into the sentence it is given 1ms
+     → expected 'Download data for your followed stock…' to be 'Download data for your 12 followed st…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (b) offers Start the first download with the count from attention while the aggregate is pending
+AssertionError: expected 'Download data for your followed stock…' to be 'Download data for your 12 followed st…' // Object.is equality
+
+Expected: "Download data for your 12 followed stocks to see whether it can be trusted."
+Received: "Download data for your followed stocks to see whether it can be trusted."
+
+ ❯ src/screens/data-health/data-health.test.tsx:472:75
+    470|     await renderScreen();
+    471|     const card = region(NO_DATA_YET);
+    472|     expect(within(card).getByText(downloadForFollowed("12")).textConte…
+       |                                                                           ^
+    473|       "Download data for your 12 followed stocks to see whether it can…
+    474|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > copy.ts, empty card strings (DAC-E6-6) > formats the follow count into the sentence it is given
+AssertionError: expected 'Download data for your followed stock…' to be 'Download data for your 12 followed st…' // Object.is equality
+
+Expected: "Download data for your 12 followed stocks to see whether it can be trusted."
+Received: "Download data for your followed stocks to see whether it can be trusted."
+
+ ❯ src/screens/data-health/data-health.test.tsx:1163:39
+    1161| 
+    1162|   it("formats the follow count into the sentence it is given", () => {
+    1163|     expect(downloadForFollowed("12")).toBe(
+       |                                       ^
+    1164|       "Download data for your 12 followed stocks to see whether it can…
+    1165|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 63 passed (65)
+   Start at  03:36:12
+   Duration  3.01s (transform 211ms, setup 71ms, collect 656ms, tests 965ms, environment 587ms, prepare 133ms)
+

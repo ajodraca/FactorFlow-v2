@@ -1,0 +1,386 @@
+{
+ "schema": 1,
+ "repo_head": "f0563ea2bde6a8336f34276fbd58fd1a4894a762",
+ "range": "HEAD..worktree",
+ "source": "f0563ea2bde6a8336f34276fbd58fd1a4894a762",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:22:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 22,
+   "original": "const PAGE_SIZE = 50;",
+   "mutated": "const PAGE_SIZE = 51;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:45:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 45,
+   "original": "  const [pagePending, setPagePending] = useState(false);",
+   "mutated": "  const [pagePending, setPagePending] = useState(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 47,
+   "original": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 0 });",
+   "mutated": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 1 });"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:48:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 48,
+   "original": "  const inFlight = useRef(false);",
+   "mutated": "  const inFlight = useRef(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:49:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 49,
+   "original": "  const generation = useRef(0);",
+   "mutated": "  const generation = useRef(1);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:59:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 59,
+   "original": "    setPagePending(false);",
+   "mutated": "    setPagePending(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:60:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 60,
+   "original": "    inFlight.current = false;",
+   "mutated": "    inFlight.current = true;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:61:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 61,
+   "original": "    generation.current += 1;",
+   "mutated": "    generation.current += 2;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:80:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 80,
+   "original": "    if (inFlight.current || dh === null) {",
+   "mutated": "    if (inFlight.current && dh === null) {"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:83:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 83,
+   "original": "    inFlight.current = true;",
+   "mutated": "    inFlight.current = false;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:84:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 84,
+   "original": "    setPagePending(true);",
+   "mutated": "    setPagePending(false);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:96:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 96,
+   "original": "        serial: previous.serial + 1,",
+   "mutated": "        serial: previous.serial + 2,"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:98:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 98,
+   "original": "      if (page.next_cursor === null && hadFocus) {",
+   "mutated": "      if (page.next_cursor === null || hadFocus) {"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:108:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 108,
+   "original": "        cause instanceof ApiError || cause instanceof ApiUnreachableError",
+   "mutated": "        cause instanceof ApiError && cause instanceof ApiUnreachableError"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:118:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 118,
+   "original": "        inFlight.current = false;",
+   "mutated": "        inFlight.current = true;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:119:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 119,
+   "original": "        setPagePending(false);",
+   "mutated": "        setPagePending(true);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:129:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 129,
+   "original": "            <CardTitle id={titleId} tabIndex={-1}>",
+   "mutated": "            <CardTitle id={titleId} tabIndex={-2}>"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:141:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 141,
+   "original": "            tabIndex={-1}",
+   "mutated": "            tabIndex={-2}"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:160:negate-boolean:1",
+   "cycle": "cycle-2",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 160,
+   "original": "              aria-busy={pagePending || undefined}",
+   "mutated": "              aria-busy={pagePending && undefined}"
+  },
+  {
+   "id": "manual:title-from-loaded-rows",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 130,
+   "original": "              {needsFixingTitle(dh.affected_count)}",
+   "mutated": "              {needsFixingTitle(rows.length)}"
+  },
+  {
+   "id": "manual:retryable-first-page-only",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 136,
+   "original": "          {rows.some((r) => r.retryable) ? <DownloadNow /> : null}",
+   "mutated": "          {dh.problems.rows.some((r) => r.retryable) ? <DownloadNow /> : null}"
+  },
+  {
+   "id": "manual:prepend-pages",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 92,
+   "original": "      setExtraRows((previous) => [...previous, ...page.rows]);",
+   "mutated": "      setExtraRows((previous) => [...page.rows, ...previous]);"
+  },
+  {
+   "id": "manual:try-again-fetches",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 152,
+   "original": "              <Button ref={tryRef} variant=\"outline\" onClick={onReread}>",
+   "mutated": "              <Button ref={tryRef} variant=\"outline\" onClick={() => void showMore()}>"
+  },
+  {
+   "id": "manual:reread-noop",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 152,
+   "original": "              <Button ref={tryRef} variant=\"outline\" onClick={onReread}>",
+   "mutated": "              <Button ref={tryRef} variant=\"outline\" onClick={() => undefined}>"
+  },
+  {
+   "id": "manual:cursor-repeated",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 93,
+   "original": "      setCursor(page.next_cursor);",
+   "mutated": "      setCursor(cursor);"
+  },
+  {
+   "id": "manual:cursor-not-passed",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 87,
+   "original": "      const page = await fetchProblems(cursor, PAGE_SIZE);",
+   "mutated": "      const page = await fetchProblems(null, PAGE_SIZE);"
+  },
+  {
+   "id": "manual:limit-off",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 87,
+   "original": "      const page = await fetchProblems(cursor, PAGE_SIZE);",
+   "mutated": "      const page = await fetchProblems(cursor, 100);"
+  },
+  {
+   "id": "manual:busy-always",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 160,
+   "original": "              aria-busy={pagePending || undefined}",
+   "mutated": "              aria-busy"
+  },
+  {
+   "id": "manual:busy-never",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 160,
+   "original": "              aria-busy={pagePending || undefined}",
+   "mutated": "              aria-busy={undefined}"
+  },
+  {
+   "id": "manual:announce-loaded-count",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 95,
+   "original": "        text: showingOf(rows.length + page.rows.length, dh.affected_count),",
+   "mutated": "        text: showingOf(rows.length, dh.affected_count),"
+  },
+  {
+   "id": "manual:announce-total",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 95,
+   "original": "        text: showingOf(rows.length + page.rows.length, dh.affected_count),",
+   "mutated": "        text: showingOf(rows.length + page.rows.length, rows.length),"
+  },
+  {
+   "id": "manual:no-in-flight-guard",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 80,
+   "original": "    if (inFlight.current || dh === null) {",
+   "mutated": "    if (dh === null) {"
+  },
+  {
+   "id": "manual:no-live-region",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 166,
+   "original": "          <output aria-live=\"polite\" className=\"sr-only\">",
+   "mutated": "          <output  className=\"sr-only\">"
+  },
+  {
+   "id": "manual:serial-frozen",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 96,
+   "original": "        serial: previous.serial + 1,",
+   "mutated": "        serial: previous.serial,"
+  },
+  {
+   "id": "manual:stale-success-applied",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 88,
+   "original": "      if (g !== generation.current) {",
+   "mutated": "      if (false) {"
+  },
+  {
+   "id": "manual:stale-failure-applied",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 102,
+   "original": "      if (g !== generation.current) {",
+   "mutated": "      if (false) {"
+  },
+  {
+   "id": "manual:finally-unguarded",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 117,
+   "original": "      if (g === generation.current) {",
+   "mutated": "      if (true) {"
+  },
+  {
+   "id": "manual:reset-keeps-inflight",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 60,
+   "original": "    inFlight.current = false;",
+   "mutated": "    inFlight.current = inFlight.current;"
+  },
+  {
+   "id": "manual:reset-keeps-pending",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 59,
+   "original": "    setPagePending(false);",
+   "mutated": "    setPagePending(pagePending);"
+  },
+  {
+   "id": "manual:reset-keeps-extra",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 56,
+   "original": "    setExtraRows([]);",
+   "mutated": "    setExtraRows(extraRows);"
+  },
+  {
+   "id": "manual:reset-keeps-failure",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 58,
+   "original": "    setPageFailure(null);",
+   "mutated": "    setPageFailure(pageFailure);"
+  },
+  {
+   "id": "manual:reset-keeps-cursor",
+   "cycle": "cycle-2",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 57,
+   "original": "    setCursor(dh?.problems.next_cursor ?? null);",
+   "mutated": "    setCursor(cursor);"
+  }
+ ]
+}

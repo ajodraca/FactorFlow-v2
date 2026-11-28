@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w2/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 170ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > encodes the symbol in the coverage link 7ms
+     → expect(element).toHaveAttribute("href", "/data/coverage?symbol=A%26B%2FC") // element.getAttribute("href") === "/data/coverage?symbol=A%26B%2FC"
+
+Expected the element to have attribute:
+  href="/data/coverage?symbol=A%26B%2FC"
+Received:
+  href="/data/coverage?symbol=A&B/C"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > encodes the symbol in the coverage link
+Error: expect(element).toHaveAttribute("href", "/data/coverage?symbol=A%26B%2FC") // element.getAttribute("href") === "/data/coverage?symbol=A%26B%2FC"
+
+Expected the element to have attribute:
+  href="/data/coverage?symbol=A%26B%2FC"
+Received:
+  href="/data/coverage?symbol=A&B/C"
+ ❯ src/screens/data-health/problem-row.test.tsx:221:85
+    219|   it("encodes the symbol in the coverage link", () => {
+    220|     renderRow(ROW("A&B/C", [FAIL("prices")], true));
+    221|     expect(screen.getByRole("link", { name: "A&B/C, show in the covera…
+       |                                                                                     ^
+    222|       "href",
+    223|       "/data/coverage?symbol=A%26B%2FC",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  00:02:27
+   Duration  2.04s (transform 150ms, setup 64ms, collect 772ms, tests 170ms, environment 256ms, prepare 141ms)
+

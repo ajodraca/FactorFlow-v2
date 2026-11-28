@@ -145,6 +145,8 @@ export const SCANNED_DIRECTORIES: readonly string[] = [
   "web/src/app/command-palette/",
   "web/src/screens/setup/",
   "web/src/screens/home/",
+  "web/src/screens/data-health/",
+  "web/src/screens/instruments/",
 ];
 
 /** The one module that holds approved-specification widths (system design constraint 12). */
@@ -497,5 +499,76 @@ describe("home screen is scanned (TC-COMP-144, DAC-E5-S3-4)", () => {
   it("(c) finds a literal planted in a home source", () => {
     const planted = "web/src/screens/home/planted.tsx";
     expect(literalsIn(planted, 'export const x = "p-[12px]";')).toEqual([`${planted}: 12px`]);
+  });
+});
+
+// Implements TC-COMP-178
+describe("data health screen is scanned (TC-COMP-178, DAC-E6-S5-4)", () => {
+  const directory = "web/src/screens/data-health/";
+
+  it("(a) widens the scan to the data health directory", () => {
+    expect(SCANNED_DIRECTORIES).toContain(directory);
+  });
+
+  it("(b) scans every data health source and no test file, and finds no literal in any", () => {
+    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
+    for (const name of [
+      "index.tsx",
+      "verdict.tsx",
+      "check-card.tsx",
+      "daily-prices-card.tsx",
+      "financials-card.tsx",
+      "scores-card.tsx",
+      "needs-fixing.tsx",
+      "problem-row.tsx",
+      "stop-following-dialog.tsx",
+      "download-now.tsx",
+      "recent-downloads.tsx",
+      "what-you-follow.tsx",
+      "copy.ts",
+    ]) {
+      expect(files).toContain(`${directory}${name}`);
+    }
+    expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).toEqual([]);
+    for (const relPath of files) {
+      expect(literalsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8"))).toEqual([]);
+    }
+  });
+
+  it("(c) finds a literal planted in a data health source", () => {
+    const planted = `${directory}planted.tsx`;
+    expect(literalsIn(planted, 'const x = "12px";')).toEqual([`${planted}: 12px`]);
+  });
+
+  it("(d) leaves the directory's own test files out of the scan", () => {
+    expect(isScannedSource(`${directory}data-health.test.tsx`)).toBe(false);
+  });
+});
+
+// Implements TC-COMP-200
+describe("Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3)", () => {
+  const directory = "web/src/screens/instruments/";
+
+  it("(a) widens the scan to the instruments directory", () => {
+    expect(SCANNED_DIRECTORIES).toContain(directory);
+  });
+
+  it("(b) scans its sources, parser included, and no test file", () => {
+    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
+    expect(files.length).toBeGreaterThan(0);
+    expect(files).toContain(`${directory}parse-bulk-symbols.ts`);
+    expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).toEqual([]);
+  });
+
+  it("(c) finds no literal in any of them", () => {
+    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
+    for (const relPath of files) {
+      expect(literalsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8"))).toEqual([]);
+    }
+  });
+
+  it("(d) finds a literal planted in an instruments source", () => {
+    const planted = `${directory}planted.tsx`;
+    expect(literalsIn(planted, 'className="p-[12px]"')).toEqual([`${planted}: 12px`]);
   });
 });

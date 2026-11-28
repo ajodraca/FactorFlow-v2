@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "repo_head": "022dc61af7ef47dae7fb264684f2aed3a2eea332",
+  "range": "HEAD..worktree",
+  "source": "022dc61af7ef47dae7fb264684f2aed3a2eea332",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:50:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 50,
+      "original": "      return 0;",
+      "mutated": "      return 1;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:52:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 52,
+      "original": "      return 1;",
+      "mutated": "      return 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:54:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 54,
+      "original": "      return 2;",
+      "mutated": "      return 3;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:87:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 87,
+      "original": "  const latestCall = useRef(0);",
+      "mutated": "  const latestCall = useRef(1);"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:90:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 90,
+      "original": "  const active = latest !== null && NON_TERMINAL.has(latest.state);",
+      "mutated": "  const active = latest !== null || NON_TERMINAL.has(latest.state);"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:95:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 95,
+      "original": "    latestCall.current += 1;",
+      "mutated": "    latestCall.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:111:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 111,
+      "original": "    if (answerKey === null || answerKey === seenKey.current) {",
+      "mutated": "    if (answerKey === null && answerKey === seenKey.current) {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:163:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 163,
+      "original": "          if (runningId !== row.original.runId || done === null) {",
+      "mutated": "          if (runningId !== row.original.runId && done === null) {"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 91,
+      "original": "  const answerKey = attention.kind === \"ok\" ? attention.checkedAt.getTime() : null;",
+      "mutated": "  const answerKey = attention.kind === \"ok\" ? attention.data : null;",
+      "description": "effect keyed on the attention object, not the answer instant"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 102,
+      "original": "      setAnsweredAt(new Date());",
+      "mutated": "      setAnsweredAt(attention.kind === \"ok\" ? attention.checkedAt : new Date());",
+      "description": "list answer time taken from attention's answer"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 163,
+      "original": "          if (runningId !== row.original.runId || done === null) {",
+      "mutated": "          if (runningId === null || done === null) {",
+      "description": "progress on every row while a download is unfinished"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 52,
+      "original": "      return 1;",
+      "mutated": "      return 0;",
+      "description": "queued ranks with running"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 184,
+      "original": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(a.state) - rank(b.state)) : []),",
+      "mutated": "    () => (list.kind === \"ok\" ? [...list.runs].sort((a, b) => rank(b.state) - rank(a.state)) : []),",
+      "description": "reversed rank order"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 98,
+      "original": "      if (mine !== latestCall.current) {",
+      "mutated": "      if (false) {",
+      "description": "older read may overwrite a newer one"
+    },
+    {
+      "id": "manual:7",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 115,
+      "original": "    if (active) {",
+      "mutated": "    if (true) {",
+      "description": "re-read on every answer"
+    },
+    {
+      "id": "manual:8",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 111,
+      "original": "    if (answerKey === null || answerKey === seenKey.current) {",
+      "mutated": "    if (answerKey === null) {",
+      "description": "mount answer read twice"
+    },
+    {
+      "id": "manual:9",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 114,
+      "original": "    seenKey.current = answerKey;",
+      "mutated": "    seenKey.current = null;",
+      "description": "last key never remembered"
+    },
+    {
+      "id": "manual:10",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 38,
+      "original": "  \"cancelling\",",
+      "mutated": "",
+      "description": "stopping not counted as unfinished"
+    },
+    {
+      "id": "manual:11",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 36,
+      "original": "  \"requested\",",
+      "mutated": "",
+      "description": "queued not counted as unfinished"
+    },
+    {
+      "id": "manual:12",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 166,
+      "original": "          if (total === null) {",
+      "mutated": "          if (total !== null) {",
+      "description": "indeterminate and determinate swapped"
+    },
+    {
+      "id": "manual:13",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 175,
+      "original": "              <Progress value={done} max={total} aria-labelledby={labelId} />",
+      "mutated": "              <Progress value={done} max={done} aria-labelledby={labelId} />",
+      "description": "max is the done count"
+    },
+    {
+      "id": "manual:14",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 168,
+      "original": "            return <Progress value={null} max={null} aria-labelledby={outcomeId(row.original)} />;",
+      "mutated": "            return <Progress value={null} max={null} aria-labelledby={labelId} />;",
+      "description": "indeterminate bar named by a missing label"
+    },
+    {
+      "id": "manual:15",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 172,
+      "original": "              <span id={labelId} aria-live=\"polite\">",
+      "mutated": "              <span id={labelId}>",
+      "description": "progress text not polite"
+    },
+    {
+      "id": "manual:16",
+      "cycle": "cycle-2",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 163,
+      "original": "          if (runningId !== row.original.runId || done === null) {",
+      "mutated": "          if (runningId !== row.original.runId || false) {",
+      "description": "progress guard on done dropped"
+    }
+  ]
+}

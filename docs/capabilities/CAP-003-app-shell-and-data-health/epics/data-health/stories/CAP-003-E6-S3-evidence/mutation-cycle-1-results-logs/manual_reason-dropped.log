@@ -1,0 +1,178 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w2/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 9 failed) 141ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row 46ms
+     → expected 'FBXXFailedDownloading daily prices fa…' to contain 'Downloading daily prices failed: prov…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the prices download as Downloading daily prices failed 3ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading daily prices failed: prov…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the fundamentals download as Downloading company financials failed 3ms
+     → expected 'KOFailedDownloading company financial…' to contain 'Downloading company financials failed…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the corporate_actions download as Downloading corporate actions failed 2ms
+     → expected 'KOFailedDownloading corporate actions…' to contain 'Downloading corporate actions failed:…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the reference download as Downloading reference data failed 2ms
+     → expected 'KOFailedDownloading reference data fa…' to contain 'Downloading reference data failed: pr…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > shows the download-again sentence once for a row with only failed downloads 3ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading company financials failed…'
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > serves the attempts value unchanged, whatever it is (DAC-E6-S3-6) 2ms
+     → expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading daily prices failed: [una…'
+   × Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24) > renders markup in a reason as text 2ms
+     → expected 'FBXXFailedDownloading daily prices fa…' to contain 'Downloading daily prices failed: <img…'
+   × Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24) > shows a leading kind and a request_id inside the reason verbatim and nothing beyond it 2ms
+     → expected 'FBXXFailedDownloading daily prices fa…' to contain 'failed: [unavailable] gateway said no…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+AssertionError: expected 'FBXXFailedDownloading daily prices fa…' to contain 'Downloading daily prices failed: prov…'
+
+Expected: "Downloading daily prices failed: provider timeout, 3 attempts"
+Received: "FBXXFailedDownloading daily prices failed: no reason was recorded, 3 attemptsNot foundThe provider doesn't recognise this symbol.Its scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten.Stop followingFollow a different symbolProbably a typo or a delisted ticker. Downloading again won't help."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:130:18
+    128| 
+    129|     const text = rowText(container);
+    130|     expect(text).toContain("Downloading daily prices failed: provider …
+       |                  ^
+    131|     expect(text).toContain(NOT_RECOGNISED);
+    132|     expect(text).not.toContain("no such ticker");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the prices download as Downloading daily prices failed
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading daily prices failed: prov…'
+
+Expected: "Downloading daily prices failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading daily prices failed: no reason was recorded, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the fundamentals download as Downloading company financials failed
+AssertionError: expected 'KOFailedDownloading company financial…' to contain 'Downloading company financials failed…'
+
+Expected: "Downloading company financials failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading company financials failed: no reason was recorded, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the corporate_actions download as Downloading corporate actions failed
+AssertionError: expected 'KOFailedDownloading corporate actions…' to contain 'Downloading corporate actions failed:…'
+
+Expected: "Downloading corporate actions failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading corporate actions failed: no reason was recorded, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > words the reference download as Downloading reference data failed
+AssertionError: expected 'KOFailedDownloading reference data fa…' to contain 'Downloading reference data failed: pr…'
+
+Expected: "Downloading reference data failed: provider timeout, 3 attempts"
+Received: "KOFailedDownloading reference data failed: no reason was recorded, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:171:32
+    169|   ] as const)("words the %s download as %s", (dataType, words) => {
+    170|     const { container } = renderRow(ROW("KO", [FAIL(dataType)], true));
+    171|     expect(rowText(container)).toContain(`${words}: provider timeout, …
+       |                                ^
+    172|   });
+    173| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > shows the download-again sentence once for a row with only failed downloads
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading company financials failed…'
+
+Expected: "Downloading company financials failed: rate limited, 5 attempts"
+Received: "KOFailedDownloading daily prices failed: no reason was recorded, 3 attemptsFailedDownloading company financials failed: no reason was recorded, 5 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:182:32
+    180|       "status-critical",
+    181|     ]);
+    182|     expect(rowText(container)).toContain(
+       |                                ^
+    183|       "Downloading company financials failed: rate limited, 5 attempts…
+    184|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > serves the attempts value unchanged, whatever it is (DAC-E6-S3-6)
+AssertionError: expected 'KOFailedDownloading daily prices fail…' to contain 'Downloading daily prices failed: [una…'
+
+Expected: "Downloading daily prices failed: [unavailable] gone, 1 attempts"
+Received: "KOFailedDownloading daily prices failed: no reason was recorded, 1 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:229:32
+    227|   it("serves the attempts value unchanged, whatever it is (DAC-E6-S3-6…
+    228|     const { container } = renderRow(ROW("KO", [FAIL("prices", "[unavai…
+    229|     expect(rowText(container)).toContain(
+       |                                ^
+    230|       "Downloading daily prices failed: [unavailable] gone, 1 attempts…
+    231|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24) > renders markup in a reason as text
+AssertionError: expected 'FBXXFailedDownloading daily prices fa…' to contain 'Downloading daily prices failed: <img…'
+
+Expected: "Downloading daily prices failed: <img src=x onerror=alert(1)><b>bold</b>, 3 attempts"
+Received: "FBXXFailedDownloading daily prices failed: no reason was recorded, 3 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:282:32
+    280|     const reason = "<img src=x onerror=alert(1)><b>bold</b>";
+    281|     const { container } = renderRow(ROW("FBXX", [FAIL("prices", reason…
+    282|     expect(rowText(container)).toContain(`Downloading daily prices fai…
+       |                                ^
+    283|     expect(container.querySelector("img, b, script")).toBeNull();
+    284|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Provider reason is text (TC-COMP-167, DAC-E6-S3-3, AC-24) > shows a leading kind and a request_id inside the reason verbatim and nothing beyond it
+AssertionError: expected 'FBXXFailedDownloading daily prices fa…' to contain 'failed: [unavailable] gateway said no…'
+
+Expected: "failed: [unavailable] gateway said no request_id=abc123, 1 attempts"
+Received: "FBXXFailedDownloading daily prices failed: no reason was recorded, 1 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:289:32
+    287|     const reason = "[unavailable] gateway said no request_id=abc123";
+    288|     const { container } = renderRow(ROW("FBXX", [FAIL("prices", reason…
+    289|     expect(rowText(container)).toContain(`failed: ${reason}, 1 attempt…
+       |                                ^
+    290|     expect(rowText(container).match(/request_id/g)).toHaveLength(1);
+    291|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 12 passed (21)
+   Start at  00:02:22
+   Duration  1.75s (transform 119ms, setup 64ms, collect 618ms, tests 141ms, environment 250ms, prepare 294ms)
+

@@ -1,0 +1,112 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (26 tests) 406ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (60 tests | 4 failed) 862ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download 34ms
+     → expected [ …(4) ] to have a length of 5 but got 4
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 31ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a running download heads the list, then a queued one, order otherwise kept 13ms
+     → expected [ '/data/downloads/r-4', …(3) ] to deeply equal [ '/data/downloads/r-4', …(4) ]
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape 24ms
+     → expected [] to have a length of 1 but got +0
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+AssertionError: expected [ …(4) ] to have a length of 5 but got 4
+
+- Expected
++ Received
+
+- 5
++ 4
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:211:18
+    209|     ).toEqual(["Started", "Outcome", "Ended", "Result"]);
+    210|     const rows = bodyRows();
+    211|     expect(rows).toHaveLength(5);
+       |                  ^
+    212|     rows.forEach((row, index) => {
+    213|       const link = within(within(row).getByRole("rowheader")).getByRol…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:244:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a running download heads the list, then a queued one, order otherwise kept
+AssertionError: expected [ '/data/downloads/r-4', …(3) ] to deeply equal [ '/data/downloads/r-4', …(4) ]
+
+- Expected
++ Received
+
+  Array [
+    "/data/downloads/r-4",
+    "/data/downloads/r-5",
+    "/data/downloads/r-6",
+    "/data/downloads/r-3",
+-   "/data/downloads/r-2",
+  ]
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:522:21
+    520|     renderRecent();
+    521|     await screen.findByRole("table");
+    522|     expect(hrefs()).toEqual([
+       |                     ^
+    523|       "/data/downloads/r-4",
+    524|       "/data/downloads/r-5",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:742:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 82 passed (86)
+   Start at  02:09:07
+   Duration  3.08s (transform 293ms, setup 120ms, collect 1.75s, tests 1.27s, environment 754ms, prepare 155ms)
+

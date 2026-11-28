@@ -1,5 +1,8 @@
 import { type FormEvent, type JSX, useEffect, useId, useRef, useState } from "react";
 import { addInstruments } from "../../api/client";
+import { Button } from "../../components/ui/button";
+import { FormRoot } from "../../components/ui/form";
+import { Input } from "../../components/ui/input";
 
 /**
  * The single-symbol inline `form` + `input` `text` add (component design
@@ -55,39 +58,39 @@ export function AddField({
         const [rejection] = result.rejected;
         setFieldError(
           rejection.disposition === "duplicate_active"
-            ? `${rejection.normalisedSymbol ?? trimmed} is already an active instrument.`
+            ? `${rejection.normalisedSymbol ?? trimmed} is already a followed stock.`
             : `${rejection.inputSymbol} does not match the required symbol shape.`,
         );
         return;
       }
       if (result.reactivated.length > 0) {
-        setNotice(`${result.reactivated[0].normalisedSymbol} reactivated — it is active again.`);
+        setNotice(`${result.reactivated[0].normalisedSymbol} is followed again.`);
       }
       setSymbol("");
       onAdded();
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : "the request could not be completed";
-      setFieldError(`Adding instrument ${trimmed} failed: ${message}`);
+      setFieldError(`Following ${trimmed} failed: ${message}`);
     } finally {
       setSubmitting(false);
     }
   }
 
+  // `submitting` is a native `disabled`, not `blocked`: a single in-flight request, sub-second.
   return (
-    <form onSubmit={(event) => void handleSubmit(event)} className="flex items-end gap-2">
+    <FormRoot variant="inline" onSubmit={(event) => void handleSubmit(event)}>
       <div className="flex flex-col gap-1">
         <label htmlFor="add-instrument-field" className="text-base">
-          Instrument symbol
+          Symbol of the stock to follow
         </label>
-        <input
+        <Input
           id="add-instrument-field"
           ref={inputRef}
-          type="text"
+          variant="text"
           value={symbol}
           onChange={(event) => setSymbol(event.target.value)}
           aria-invalid={fieldError !== null ? "true" : undefined}
           aria-describedby={fieldError !== null ? errorId : notice !== null ? noticeId : undefined}
-          className="rounded border border-input p-2 text-base"
           placeholder="e.g. AAPL"
         />
         {fieldError !== null ? (
@@ -101,18 +104,9 @@ export function AddField({
           </p>
         ) : null}
       </div>
-      <button
-        type="submit"
-        // `submitting` is a native `disabled`, not `blocked` (IR-003):
-        // it is a single in-flight POST, resolving in well under a second,
-        // which DAC-E2-S4-3's own remediation permits to remain disabled
-        // rather than requiring the `blocked` treatment reserved for a
-        // persistent, reachable "cannot currently be used" state.
-        disabled={submitting}
-        className="rounded bg-foreground px-3 py-2 text-background"
-      >
-        Add
-      </button>
-    </form>
+      <Button type="submit" disabled={submitting}>
+        Follow a stock
+      </Button>
+    </FormRoot>
   );
 }

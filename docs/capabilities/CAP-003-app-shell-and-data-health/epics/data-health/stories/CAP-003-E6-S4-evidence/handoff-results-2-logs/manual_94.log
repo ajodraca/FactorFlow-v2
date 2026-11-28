@@ -1,0 +1,81 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w3/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 526ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 3 failed) 799ms
+   × Recent downloads Started and Ended cells > shows an em dash with hidden words, not a time, for a download that has not ended 15ms
+     → expected '' to be 'not ended yet' // Object.is equality
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count 13ms
+     → expected '' to be 'not ended yet' // Object.is equality
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) every dash is a hidden-word absence and no cell is empty or null 14ms
+     → expected '' to be 'not ended yet' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads Started and Ended cells > shows an em dash with hidden words, not a time, for a download that has not ended
+AssertionError: expected '' to be 'not ended yet' // Object.is equality
+
+- Expected
++ Received
+
+- not ended yet
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:276:58
+    274|     const ended = cellsOf(rowFor("r-9"))[1] as HTMLElement;
+    275|     expect(ended.querySelector('[aria-hidden="true"]')?.textContent).t…
+    276|     expect(ended.querySelector(".sr-only")?.textContent).toBe("not end…
+       |                                                          ^
+    277|   });
+    278| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count
+AssertionError: expected '' to be 'not ended yet' // Object.is equality
+
+- Expected
++ Received
+
+- not ended yet
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:448:58
+    446|     const ended = cellsOf(running)[1] as HTMLElement;
+    447|     expect(ended.querySelector('[aria-hidden="true"]')?.textContent).t…
+    448|     expect(ended.querySelector(".sr-only")?.textContent).toBe("not end…
+       |                                                          ^
+    449|     const result = cellsOf(running)[2] as HTMLElement;
+    450|     const bar = within(result).getByRole("progressbar", { name: "812 o…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) every dash is a hidden-word absence and no cell is empty or null
+AssertionError: expected '' to be 'not ended yet' // Object.is equality
+
+- Expected
++ Received
+
+- not ended yet
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:755:60
+    753|       const ended = cellsOf(row)[1] as HTMLElement;
+    754|       expect(ended.querySelector('[aria-hidden="true"]')?.textContent)…
+    755|       expect(ended.querySelector(".sr-only")?.textContent).toBe("not e…
+       |                                                            ^
+    756|     }
+    757|     for (const dash of screen.getAllByText("—")) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 63 passed (66)
+   Start at  01:35:26
+   Duration  2.40s (transform 294ms, setup 71ms, collect 1.63s, tests 1.33s, environment 452ms, prepare 210ms)
+

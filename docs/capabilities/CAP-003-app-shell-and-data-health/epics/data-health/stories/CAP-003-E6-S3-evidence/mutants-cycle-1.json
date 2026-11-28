@@ -1,0 +1,215 @@
+{
+ "schema": 1,
+ "repo_head": "114b486292d4dc11bb1faa3e4de0ad363f744068",
+ "range": "HEAD..worktree",
+ "source": "114b486292d4dc11bb1faa3e4de0ad363f744068",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/problem-row.tsx:73:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 73,
+   "original": "              state={{ focusAdd: true }}",
+   "mutated": "              state={{ focusAdd: false }}"
+  },
+  {
+   "id": "manual:anyfailed-negated",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 37,
+   "original": "  const anyFailed = row.failures.some((f) => f.outcome === \"failed\");",
+   "mutated": "  const anyFailed = row.failures.some((f) => f.outcome !== \"failed\");"
+  },
+  {
+   "id": "manual:anynotfound-negated",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 38,
+   "original": "  const anyNotFound = row.failures.some((f) => f.outcome === \"not_found\");",
+   "mutated": "  const anyNotFound = row.failures.some((f) => f.outcome !== \"not_found\");"
+  },
+  {
+   "id": "manual:anynotfound-as-failed",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 38,
+   "original": "  const anyNotFound = row.failures.some((f) => f.outcome === \"not_found\");",
+   "mutated": "  const anyNotFound = row.failures.some((f) => f.outcome === \"failed\");"
+  },
+  {
+   "id": "manual:badge-outcome-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 49,
+   "original": "        const status = { of: \"result\", outcome: f.outcome } as const;",
+   "mutated": "        const status = { of: \"result\", outcome: \"failed\" } as const;"
+  },
+  {
+   "id": "manual:failed-branch-negated",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 53,
+   "original": "            {f.outcome === \"failed\"",
+   "mutated": "            {f.outcome !== \"failed\""
+  },
+  {
+   "id": "manual:attempts-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 54,
+   "original": "              ? downloadFailed(f.data_type, f.reason, f.attempts)",
+   "mutated": "              ? downloadFailed(f.data_type, f.reason, 1)"
+  },
+  {
+   "id": "manual:reason-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 54,
+   "original": "              ? downloadFailed(f.data_type, f.reason, f.attempts)",
+   "mutated": "              ? downloadFailed(f.data_type, null, f.attempts)"
+  },
+  {
+   "id": "manual:datatype-fixed",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 54,
+   "original": "              ? downloadFailed(f.data_type, f.reason, f.attempts)",
+   "mutated": "              ? downloadFailed(\"prices\", f.reason, f.attempts)"
+  },
+  {
+   "id": "manual:fix-failed-always",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 60,
+   "original": "      {anyFailed ? <p className=\"text-sm\">{FAILED_FIX}</p> : null}",
+   "mutated": "      {true ? <p className=\"text-sm\">{FAILED_FIX}</p> : null}"
+  },
+  {
+   "id": "manual:stop-symbol-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 66,
+   "original": "            onClick={() => onStopFollowing(row.symbol)}",
+   "mutated": "            onClick={() => onStopFollowing(\"\")}"
+  },
+  {
+   "id": "manual:focusadd-removed",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 73,
+   "original": "              state={{ focusAdd: true }}",
+   "mutated": "              "
+  },
+  {
+   "id": "manual:follow-target-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 72,
+   "original": "              to=\"/data/followed\"",
+   "mutated": "              to=\"/data/coverage\""
+  },
+  {
+   "id": "manual:stop-variant",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 64,
+   "original": "            variant=\"ghost\"",
+   "mutated": "            variant=\"outline\""
+  },
+  {
+   "id": "manual:symbol-link-encode-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 42,
+   "original": "        to={`/data/coverage?symbol=${encodeURIComponent(row.symbol)}`}",
+   "mutated": "        to={`/data/coverage?symbol=${row.symbol}`}"
+  },
+  {
+   "id": "manual:symbol-label-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/problem-row.tsx",
+   "line": 43,
+   "original": "        aria-label={symbolLinkName(row.symbol)}",
+   "mutated": "        aria-label={row.symbol}"
+  },
+  {
+   "id": "manual:title-uncounted",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 254,
+   "original": "  return `${NEEDS_FIXING} \u00b7 ${formatCount(n)}`;",
+   "mutated": "  return `${NEEDS_FIXING} \u00b7 ${n}`;"
+  },
+  {
+   "id": "manual:attempts-uncounted",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 273,
+   "original": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${formatCount(attempts)} attempts`;",
+   "mutated": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${attempts} attempts`;"
+  },
+  {
+   "id": "manual:null-reason-literal",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 273,
+   "original": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${formatCount(attempts)} attempts`;",
+   "mutated": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason}, ${formatCount(attempts)} attempts`;"
+  },
+  {
+   "id": "manual:follow-name-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 286,
+   "original": "  return `${FOLLOW_DIFFERENT} than ${symbol}`;",
+   "mutated": "  return `${FOLLOW_DIFFERENT} than`;"
+  },
+  {
+   "id": "manual:stop-name-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 290,
+   "original": "  return `${STOP_FOLLOWING} ${symbol}`;",
+   "mutated": "  return `${STOP_FOLLOWING}`;"
+  },
+  {
+   "id": "manual:symbol-name-dropped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 294,
+   "original": "  return `${symbol}, show in the coverage table`;",
+   "mutated": "  return `show in the coverage table`;"
+  },
+  {
+   "id": "manual:showing-swapped",
+   "cycle": "cycle-1",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/copy.ts",
+   "line": 301,
+   "original": "  return `Showing ${formatCount(shown)} of ${formatCount(n)} stocks`;",
+   "mutated": "  return `Showing ${formatCount(n)} of ${formatCount(shown)} stocks`;"
+  }
+ ]
+}

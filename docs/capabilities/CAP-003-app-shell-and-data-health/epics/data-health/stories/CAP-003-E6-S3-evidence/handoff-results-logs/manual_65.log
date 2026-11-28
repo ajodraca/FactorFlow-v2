@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/problem-row.test.tsx (23 tests) 141ms
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx (51 tests | 1 failed) 2294ms
+   × Needs fixing states and stop following (DAC-E6-9, DAC-E6-12 wiring, DAC-E6-17, AC-24) > (b) replaces the body with the checks' failure sentence and re-reads on Try again 17ms
+     → expected "spy" to be called 1 times, but got 0 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/needs-fixing.test.tsx > Needs fixing states and stop following (DAC-E6-9, DAC-E6-12 wiring, DAC-E6-17, AC-24) > (b) replaces the body with the checks' failure sentence and re-reads on Try again
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/screens/data-health/needs-fixing.test.tsx:682:22
+    680|     const user = userEvent.setup();
+    681|     await user.click(screen.getByRole("button", { name: "Try again" })…
+    682|     expect(onReread).toHaveBeenCalledTimes(1);
+       |                      ^
+    683|   });
+    684| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 73 passed (74)
+   Start at  00:33:08
+   Duration  3.15s (transform 152ms, setup 68ms, collect 802ms, tests 2.44s, environment 360ms, prepare 130ms)
+

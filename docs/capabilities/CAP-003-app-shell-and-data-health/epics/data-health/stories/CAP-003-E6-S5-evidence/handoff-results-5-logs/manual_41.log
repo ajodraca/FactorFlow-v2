@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9w198npb/w2/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 856ms
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails 27ms
+     → expected 'Daily pricesNo missing prices or gaps…' to contain 'Couldn\'t read the data health checks'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails
+AssertionError: expected 'Daily pricesNo missing prices or gaps…' to contain 'Couldn\'t read the data health checks'
+
+Expected: "Couldn't read the data health checks"
+Received: "Daily pricesNo missing prices or gapsAll 12 stocks have prices to 2026-10-29Prices to 2026-10-29Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.Full coverage table"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1239:40
+    1237|     await act(() => vi.advanceTimersByTimeAsync(11_000));
+    1238|     for (const name of ["Daily prices", "Company financials"]) {
+    1239|       expect(region(name).textContent).toContain("Couldn't read the da…
+       |                                        ^
+    1240|       expect(region(name).textContent).not.toContain("stocks have");
+    1241|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:35:37
+   Duration  2.92s (transform 230ms, setup 47ms, collect 836ms, tests 856ms, environment 320ms, prepare 221ms)
+

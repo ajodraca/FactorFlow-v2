@@ -1,0 +1,265 @@
+# TDD evidence for CAP-003-E7-S3 - Followed stocks under the shell.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T055831Z (114b4862); the cycles, the hand-off run and the reviews measure from the review base 9033ec3d (the integration head when the story was cut).
+# The plan's cycles are run as two: the screen with its parts, tests and strings (T002, T003, T005-T019), then the scan widening (T004, T020).
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/instruments web/src/screens/coverage'; catalogue mutants plus the plan's six hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T017, T018, T019]
+    description: >
+      The Followed stocks screen: the badges, the stop-following dialog over ConfirmDialog, the add field, Follow many and
+      the download action from ui-components, the virtualised table through StateRegion with Coverage links, the screen
+      with its entry hint and states, the vocabulary scan, and the one Coverage assertion that pins LifecycleBadge.
+    deviations: >
+      (1) The plan's cycles run as two (this one and the scan). (2) T002 case 1 also asserts the consumed hint was
+      replaced, not pushed, a mutant of the plan's hand-written list. (3) Radix Select needs the plan's jsdom gaps and the
+      :fullscreen and :modal answers of web/src/components/ui/select.test.tsx, or opening the list takes eight seconds.
+      (4) T005's accessible-name scan uses Testing Library's own name matching over every role, since dom-accessibility-api
+      ships no types under this package's exports. (5) The lifecycle and symbol-filter captions are a span and a label
+      with htmlFor, not wrapping labels, which Biome's noLabelWithoutControl rejects around a custom control. (6) The
+      loading state is a paragraph under StateRegion's busy wrapper, not a skeleton; the text and aria-busy are as T011 asks.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-1.log
+    red_log_sha256: 63c92a2e07e82a1a7ea8109176a2fc21c048b5ad1331dd4abebb42ff5ef3aaac
+    red_evidence: >
+      With the new tests staged and the delivered screen unchanged, 32 of 44 tests failed across six files (RecognitionBadge
+      missing, delivered labels and dialog, no virtualised table, no entry hint).
+    green_evidence: >
+      71 tests pass in web/src/screens/instruments and 105 with web/src/screens/coverage; npx tsc --noEmit, npm run lint and
+      npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-1.log
+        sha256: 63c92a2e07e82a1a7ea8109176a2fc21c048b5ad1331dd4abebb42ff5ef3aaac
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: a paging request in flight is not cancelled when a filter or refresh replaces
+        the first page (delivered behaviour, now reached by the table's own paging); the loading states are a paragraph
+        rather than a skeleton; the add field's focusOnMount comment names only the never-populated case.
+    diff_sha256: 264d28276dd1f49264eb36fdbe2e57bf4903baafef180f926f3f190ddf247501
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: d417173a7e20b3597cd388bbd178698e83963020989027e788021d8a3aab63a5
+      generated: 17
+      killed: 14
+      survived: 3
+      stillborn: 0
+      timeout: 0
+      score: 0.824
+      survivors:
+        - id: web/src/screens/instruments/index.tsx:104:off-by-one:1
+          disposition: equivalent
+          reason: "refresh is a re-fetch trigger: the screen reads reloadToken only to change it, so adding two instead of one changes no observable value."
+        - id: web/src/screens/instruments/instrument-table.tsx:67:off-by-one:1
+          disposition: equivalent
+          reason: "refreshToken is only an effect dependency that changes when the parent bumps it; its default is never compared, so 1 and 0 re-fetch alike."
+        - id: web/src/screens/instruments/instrument-table.tsx:305:off-by-one:1
+          disposition: equivalent
+          reason: "reloadToken is only an effect dependency; Try again re-reads once whether the token moves by one or two."
+
+  - id: cycle-2
+    tasks: [T004, T020]
+    description: >
+      The literal scan is widened to web/src/screens/instruments/: the TC-COMP-200 block of token-literals.test.ts (RED
+      first, with the directory absent), then the directory appended to SCANNED_DIRECTORIES.
+    deviations: >
+      Case (c) loops over the instruments sources only, since the file's own whole-tree case already covers every scanned
+      file. The planted-literal validation of the plan was run by hand: a planted 12px in badges.tsx failed the scan naming
+      that file, and was reverted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log
+    red_log_sha256: e7c0d7a683094093b0eafc49149689b9697bc077e9f6ccf65eadea5cdf7d8dae
+    red_evidence: >
+      With the new block and the directory not yet appended: 2 tests failed (the directory is absent from
+      SCANNED_DIRECTORIES, and parse-bulk-symbols.ts is not among the scanned files).
+    green_evidence: >
+      69 tests pass in token-literals.test.ts, including the whole-tree scan over the instruments sources.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log
+        sha256: e7c0d7a683094093b0eafc49149689b9697bc077e9f6ccf65eadea5cdf7d8dae
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Case (c) narrows T004's "every scanned file" to the instruments directory, which the whole-tree case covers.
+    diff_sha256: 4a6525536b0c1096f376a94757e1827647aa0bb24e986f995e22d67bd0a9cba5
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes only a test file; removing its one appended entry fails the cycle's own (a) and (b), as the RED run shows
+  - id: cycle-3
+    tasks: [T007, T019, T021]
+    description: >
+      Tests for the 20 hand-off survivors that were not equivalent (T021 mutation pass): the entry hint replaces the
+      history entry and keeps the query string, a follow refreshes the screen and the table, the add field and Follow many
+      hold their submit disabled in flight and the add button submits, the counts read against their own words, All is
+      shown, symbols are row headers and the row action a ghost button, the next page carries both filters, is appended
+      and marks the table busy, a failed next page is a read error, and Reset filter clears both filters.
+    deviations: >
+      Test-only; no production line changes. The three counter survivors of the per-cycle run (refresh, refreshToken and
+      onRetry) are equivalent and stay recorded in cycle-1.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-results.json
+    red_log_sha256: 46958206d3aeceeccfb2b12092082863bbb61e19e629dc4e3921b752ae8a0176
+    red_evidence: >
+      The first hand-off run left 23 of 53 mutants alive (handoff-results.json), 3 of them the equivalent counters; each of
+      the other 20 is killed by a case added here.
+    green_evidence: >
+      83 tests pass in web/src/screens/instruments; npx tsc --noEmit, npm run lint and npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-results.json
+        sha256: 46958206d3aeceeccfb2b12092082863bbb61e19e629dc4e3921b752ae8a0176
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: the refresh cases pin exact read counts (two before a follow, four after);
+        the failed-next-page case follows delivered behaviour, which the plan does not state.
+    diff_sha256: 0f8fb25a3b31fcecfee5e47193d5b1100f3d7d2b9f046568a54990da371fc902
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 1 mutated, and the hand-off run scores it
+
+  - id: cycle-4
+    tasks: [T018, T019, T014, T007, T021]
+    description: >
+      Review v1 rework (IR-001, IR-002, IR-003, IR-006): the table's populated state renders Last updated from its
+      read's fetchedAt, in the timestamp form the Coverage and Downloads screens use; Stop following is held while the
+      stop is in flight (RetireDialog passes pending to ConfirmDialog), so one confirmation sends one DELETE; the screen
+      h1's text-xl is pinned; the TC-COMP-184 markers sit on the cases asserting the Followed label deltas.
+    deviations: >
+      (1) IR-006, recorded: T021's role="alert" grep lists three paragraphs, not two, because bulk-add.tsx keeps the
+      delivered Following stocks failed alert, which AC-17 requires; the plan's count was wrong. (2) IR-002's
+      "a dialog never shows another stock's refusal" is pinned by a case that already passed (onCancel clears the error);
+      with the confirmation held while in flight no other path reaches it. (3) IR-004 (carry Open Gap 1 to the owning
+      design) is for doc sync or the owner, and IR-005 (skeleton) stays the recorded paragraph deviation (6) of cycle 1:
+      neither is code in this story.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log
+    red_log_sha256: c539cdcb6c8543efc1d85ef4449c35e31a21e94f25b6c8bd046c4926d49e36c0
+    red_evidence: >
+      With the new tests staged and the screen unchanged, 3 tests failed: the last-updated time was absent, a double
+      activation sent two stops, and the dialog did not hold its confirmation while pending. The text-xl pin and the
+      reopen case pass against the unchanged code, as they pin behaviour that was already right.
+    green_evidence: >
+      121 tests pass in web/src/screens/instruments and web/src/screens/coverage; npx tsc --noEmit, npm run lint and
+      npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-4.log
+        sha256: c539cdcb6c8543efc1d85ef4449c35e31a21e94f25b6c8bd046c4926d49e36c0
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: Last updated keeps the first page's read time when a further page is
+        appended; the reopen case does not distinguish stocks.
+    diff_sha256: 23b3daa189ca6510b8101ea0049d8e0c24f47bdae30521b7d5ab7561cc295b1c
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: f557d5f8b7e57ed9899a27f6a637d5acc99380052e3a2d1aa99d7f2c0e5ce1ee
+      generated: 4
+      killed: 4
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T007, T019, T021]
+    description: >
+      Tests for the five survivors of the rework's first hand-off run that were not equivalent: the last-updated time is
+      the read's, not a later redraw's, and carries font-numeric and text-xs; a refusal clears as the next attempt goes
+      out; the held confirmation is released after a stop succeeds, so the next stock's dialog opens not held.
+    deviations: >
+      Test-only; no production line changes. The hand-off run that scored these survivors was made with the cycle's
+      files staged, not committed, so it is the RED here and the final run is made again on the committed tree.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-rework-results.json
+    red_log_sha256: 8bf5284ea95b758129013ac5e9de20ed8d64c0c9ef11d444ac1fda0c2ee84157
+    red_evidence: >
+      The first rework hand-off run left 5 of 21 mutants alive (manual:2, manual:6, manual:7, manual:8, manual:11); each
+      is killed by a case added or extended here.
+    green_evidence: >
+      88 tests pass in web/src/screens/instruments; npx tsc --noEmit, npm run lint and npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-rework-results.json
+        sha256: 8bf5284ea95b758129013ac5e9de20ed8d64c0c9ef11d444ac1fda0c2ee84157
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-up, not adopted: the cleared-refusal assertion is stricter than CAP-001's delivered retry
+        behaviour, which no artifact states either way.
+    diff_sha256: aa2751486d2079a5942688d30e172fcc83a18d08cd233520b874468717287fe8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 4 changed, and the hand-off run scores it
+
+  - id: cycle-6
+    tasks: [T018, T007]
+    description: >
+      Review v2 rework (IR-001): the last-updated time renders through ui-components' formatInstant
+      (YYYY-MM-DD HH:MM zone, CST or CDT), not the shell's delivered formatTimestamp; the app/status-region import is
+      gone; the tests pin the designed text as literals, with a CDT case beside the CST ones.
+    deviations: >
+      (1) The screen now imports formatInstant from components/patterns/format (CAP-003-E1-S6, implemented at the review
+      base), so E1-S6 is a direct dependency, not context only; the task plan's note that this story imports nothing from
+      E1-S6 is stale on that point and is left as written (a governed text, not edited here). (2) IR-002 (Not found data
+      source) is for doc sync or the owner. (3) IR-003 (loading skeleton) stays the recorded paragraph deviation of
+      cycle 1; it is optional in the review and is not built in this cycle.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log
+    red_log_sha256: 3bbd427ecfdaca103efc23b91572df8e9e5cce408b84270b26275191d919418b
+    red_evidence: >
+      With the literal-text tests staged and the screen unchanged, 2 tests failed: the last-updated line read the
+      delivered form (seconds and America/Chicago), so neither the CST literals nor the new CDT literal were found.
+    green_evidence: >
+      192 tests pass in web/src/screens/instruments, web/src/screens/coverage and token-literals; npx tsc --noEmit,
+      npm run lint and npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-6.log
+        sha256: 3bbd427ecfdaca103efc23b91572df8e9e5cce408b84270b26275191d919418b
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The spec-drift review found the code and tests match IR-001; the one gap, recording E1-S6 as a direct
+        dependency, is recorded in this cycle's deviations (1). Follow-up, not adopted: the CDT case is an addition
+        in the spirit of the 0.7 form.
+    diff_sha256: 265183e42a96925808d4fa426ea5ec0c18ce6f2c6b0c6c20b75422a81d181dba
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/mutation-cycle-6-results.json
+      results_sha256: 78f367b0970614b850c82f519476a46da7d9b08a4bec0a9775a96ddc2f6b6027
+      generated: 2
+      killed: 2
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+handoff_mutation:
+  runner: scripts/mutation-run.py
+  results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-rework2-results-2.json
+  results_sha256: 96bdcd218786b891f3c4481b4a656ea3f48624c053da0a617dff651cde4a03f0
+  generated: 16
+  killed: 16
+  survived: 0
+  stillborn: 0
+  timeout: 0
+  score: 1.0
+  survivors: []

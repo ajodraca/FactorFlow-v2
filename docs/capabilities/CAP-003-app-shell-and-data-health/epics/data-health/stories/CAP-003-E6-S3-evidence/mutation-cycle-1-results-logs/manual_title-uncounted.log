@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ryiyg0nt/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (21 tests | 1 failed) 152ms
+   × copy.ts, Needs fixing strings (DEC-0382, -4) > formats the card title with a thousands separator 3ms
+     → expected 'Needs fixing · 1236' to be 'Needs fixing · 1,236' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > copy.ts, Needs fixing strings (DEC-0382, -4) > formats the card title with a thousands separator
+AssertionError: expected 'Needs fixing · 1236' to be 'Needs fixing · 1,236' // Object.is equality
+
+Expected: "Needs fixing · 1,236"
+Received: "Needs fixing · 1236"
+
+ ❯ src/screens/data-health/problem-row.test.tsx:312:36
+    310| describe("copy.ts, Needs fixing strings (DEC-0382, -4)", () => {
+    311|   it("formats the card title with a thousands separator", () => {
+    312|     expect(needsFixingTitle(1236)).toBe("Needs fixing · 1,236");
+       |                                    ^
+    313|     expect(needsFixingTitle(0)).toBe("Needs fixing · 0");
+    314|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  00:02:30
+   Duration  1.90s (transform 111ms, setup 108ms, collect 527ms, tests 152ms, environment 273ms, prepare 32ms)
+

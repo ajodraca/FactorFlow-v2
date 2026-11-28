@@ -7,6 +7,7 @@
  */
 
 import { ApiError, ApiUnreachableError } from "../../api/client";
+import type { DataType } from "../../api/types";
 import { formatCount } from "../../components/patterns/format";
 import type { DataAnswer } from "../../components/patterns/worst-data-tier";
 
@@ -67,6 +68,8 @@ export const READ_TARGETS = {
   attention: "what needs attention",
   checks: "the data health checks",
   scores: "the factor scores",
+  recentDownloads: "recent downloads",
+  whatYouFollow: "what you follow",
 } as const;
 
 /**
@@ -87,6 +90,7 @@ export const ABSENT = {
   noPrices: "no prices stored yet",
   noFinancials: "no financials stored yet",
   noScores: "no scores yet",
+  notEnded: "not ended yet",
 } as const;
 
 /** `and {k} more`, after the exception symbols a card shows. */
@@ -240,3 +244,145 @@ export function stopFailureReason(error: ApiError | ApiUnreachableError): string
   }
   return readFailureReason(error);
 }
+
+// CAP-003-E6-S3: Needs fixing (data-health-ui 2.5)
+//
+// The `DATA_TYPE_WORDS` keys are wire values and are never rendered. The
+// `{reason}` of `downloadFailed` is provider text, rendered as text; the reasons
+// of failed reads come only from `readFailureReason`.
+
+export const NEEDS_FIXING = "Needs fixing";
+
+export function needsFixingTitle(n: number): string {
+  return `${NEEDS_FIXING} · ${formatCount(n)}`;
+}
+
+export const FROM_RECENT_DOWNLOADS = "From your most recent downloads";
+
+export const DATA_TYPE_WORDS: Readonly<Record<DataType, string>> = {
+  prices: "daily prices",
+  fundamentals: "company financials",
+  corporate_actions: "corporate actions",
+  reference: "reference data",
+};
+
+export const NO_REASON_RECORDED = "no reason was recorded";
+
+export function downloadFailed(
+  dataType: DataType,
+  reason: string | null,
+  attempts: number,
+): string {
+  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${formatCount(attempts)} attempts`;
+}
+
+export const NOT_RECOGNISED = "The provider doesn't recognise this symbol.";
+export const CONSEQUENCE =
+  "Its scores show as Incomplete until this is fixed, and so does every universe holding it.";
+export const FAILED_FIX =
+  "Download again to retry; data already stored is never duplicated or overwritten.";
+export const NOT_FOUND_FIX = "Probably a typo or a delisted ticker. Downloading again won't help.";
+
+export const FOLLOW_DIFFERENT = "Follow a different symbol";
+
+export function followDifferentName(symbol: string): string {
+  return `${FOLLOW_DIFFERENT} than ${symbol}`;
+}
+
+export function stopFollowingName(symbol: string): string {
+  return `${STOP_FOLLOWING} ${symbol}`;
+}
+
+export function symbolLinkName(symbol: string): string {
+  return `${symbol}, show in the coverage table`;
+}
+
+export const SHOW_MORE = "Show more";
+export const MORE_PROBLEMS = "more problems";
+
+export function showingOf(shown: number, n: number): string {
+  return `Showing ${formatCount(shown)} of ${formatCount(n)} stocks`;
+}
+
+export const NOTHING_NEEDS_FIXING = "Nothing needs fixing.";
+
+export function lastCompleteDownload(time: string): string {
+  return `Last complete download ${time}`;
+}
+
+export const NO_COMPLETE_DOWNLOAD = "No complete download yet";
+export const LAST_COMPLETE_TARGET = "the last complete download";
+
+// CAP-003-E6-S4: Recent downloads and What you follow (data-health-ui 2.6)
+//
+// Counts arrive already formatted (`formatCount`). No string carries a DAC-E7-3
+// term (AC-19).
+
+export const RECENT_DOWNLOADS = "Recent downloads";
+
+/** ux-design 1.4 item 4: one sub-line, with *checked {time}* once the list has answered. */
+export function recentDownloadsSubline(time: string | null): string {
+  const base = "Starts when you press Download now";
+  return time === null ? base : `${base} · ${checked(time)}`;
+}
+
+export const DOWNLOAD_COLUMNS = {
+  started: "Started",
+  outcome: "Outcome",
+  ended: "Ended",
+  result: "Result",
+} as const;
+
+export function writtenOf(written: string, named: string): string {
+  return `${written} of ${named} stocks`;
+}
+
+export function partialResult(written: string, named: string, failed: string): string {
+  return `${written} of ${named} stocks, ${failed} failed`;
+}
+
+export function interruptedResult(written: string): string {
+  return `FactorFlow restarted mid-download; ${written} kept, the rest picked up next time`;
+}
+
+export function progressOf(done: string, total: string): string {
+  return `${done} of ${total} stocks`;
+}
+
+export const WHAT_YOU_FOLLOW = "What you follow";
+export const FOLLOWED_STOCKS = "Followed stocks";
+export const STOPPED_FOLLOWING = "Stopped following";
+
+export function historyKept(count: string): string {
+  return `${count} (history kept)`;
+}
+
+export const HISTORY_DEPTH = "History depth";
+
+export function depthYears(years: string): string {
+  return `${years} years`;
+}
+
+export const DEPTH_NOT_SET = "not set";
+export const MARKET_DATA_KEY = "Market data key";
+
+/**
+ * Why the key's presence cannot be told while health is not answering (DEC-0385):
+ * the same clause as `readFailureReason`'s unreachable case (DEC-0373).
+ */
+export const KEY_NOT_DETERMINABLE_REASON = "FactorFlow is not answering";
+
+export const MANAGE_FOLLOWED_STOCKS = "Manage followed stocks";
+
+// CAP-003-E6-S5: the never-downloaded empty card (data-health-ui 10; DAC-E6-6)
+
+export const NO_DATA_YET = "No data has been downloaded yet.";
+
+/** `n` arrives already formatted (`formatCount`), as the other strings take it. */
+export function downloadForFollowed(n: string): string {
+  return `Download data for your ${n} followed stocks to see whether it can be trusted.`;
+}
+
+export const START_FIRST_DOWNLOAD = "Start the first download";
+export const FOLLOW_FIRST = "Follow some stocks first.";
+export const OPEN_SETUP = "Open setup";

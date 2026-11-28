@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "repo_head": "7b5b42669f44590970d1515d9ba0855d5a80c7ef",
+  "range": "HEAD..worktree",
+  "source": "7b5b42669f44590970d1515d9ba0855d5a80c7ef",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:61:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 61,
+      "original": "    listAcquisitionRuns({ limit: 5 }).then((page) => {",
+      "mutated": "    listAcquisitionRuns({ limit: 6 }).then((page) => {"
+    },
+    {
+      "id": "web/src/screens/data-health/recent-downloads.tsx:111:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 111,
+      "original": "            {recentDownloadsSubline(answeredAt && formatClock(answeredAt))}",
+      "mutated": "            {recentDownloadsSubline(answeredAt || formatClock(answeredAt))}"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 74,
+      "original": "            {formatInstant(row.original.startedAt ?? row.original.requestedAt)}",
+      "mutated": "            {formatInstant(row.original.requestedAt)}",
+      "description": "Started always from the request time"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 74,
+      "original": "            {formatInstant(row.original.startedAt ?? row.original.requestedAt)}",
+      "mutated": "            {formatInstant(row.original.startedAt)}",
+      "description": "Started never falls back to the request time"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 73,
+      "original": "          <Link to={`/data/downloads/${encodeURIComponent(row.original.runId)}`}>",
+      "mutated": "          <Link to={`/data/downloads/${row.original.runId}`}>",
+      "description": "link target unencoded"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 40,
+      "original": "    case \"partial\":",
+      "mutated": "    case \"failed\":",
+      "description": "partial uses the plain form"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 42,
+      "original": "    case \"abandoned\":",
+      "mutated": "    case \"cancelled\":",
+      "description": "abandoned uses the plain form"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 41,
+      "original": "      return partialResult(written, named, formatCount(run.instrumentsFailed));",
+      "mutated": "      return partialResult(written, named, formatCount(run.instrumentsWritten));",
+      "description": "partial result prints the written count as failed"
+    },
+    {
+      "id": "manual:7",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 90,
+      "original": "          row.original.endedAt === null ? (",
+      "mutated": "          row.original.endedAt !== null ? (",
+      "description": "Ended dash and time swapped"
+    },
+    {
+      "id": "manual:8",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 83,
+      "original": "          return <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;",
+      "mutated": "          return <StatusBadge tier={\"neutral\"}>{labelOf(status)}</StatusBadge>;",
+      "description": "outcome tier fixed neutral"
+    },
+    {
+      "id": "manual:9",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 83,
+      "original": "          return <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>;",
+      "mutated": "          return <StatusBadge tier={tierOf(status)}>{row.original.state}</StatusBadge>;",
+      "description": "outcome badge shows the raw state"
+    },
+    {
+      "id": "manual:10",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 63,
+      "original": "      setAnsweredAt(new Date());",
+      "mutated": "      setAnsweredAt(null);",
+      "description": "list answer time never recorded"
+    },
+    {
+      "id": "manual:11",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 124,
+      "original": "              rowHeader",
+      "mutated": "",
+      "description": "no row header"
+    },
+    {
+      "id": "manual:12",
+      "cycle": "cycle-1",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 91,
+      "original": "  notEnded: \"not ended yet\",",
+      "mutated": "  notEnded: \"\",",
+      "description": "empty hidden words for an absent end time"
+    }
+  ]
+}

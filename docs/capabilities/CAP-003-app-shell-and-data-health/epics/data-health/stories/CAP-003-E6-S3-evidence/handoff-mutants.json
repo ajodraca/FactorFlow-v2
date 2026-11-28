@@ -1,0 +1,1061 @@
+{
+  "schema": 1,
+  "repo_head": "5afd4578778518cfcbe9acb0eb6028e95c3bfdf2",
+  "range": "114b486292d4dc11bb1faa3e4de0ad363f744068..HEAD",
+  "source": "114b486292d4dc11bb1faa3e4de0ad363f744068",
+  "mutants": [
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:30:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 30,
+      "original": "const PAGE_SIZE = 50;",
+      "mutated": "const PAGE_SIZE = 51;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:44:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 44,
+      "original": "  const latest = useRef(0);",
+      "mutated": "  const latest = useRef(1);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 47,
+      "original": "    latest.current += 1;",
+      "mutated": "    latest.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:50:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 50,
+      "original": "    listAcquisitionRuns({ state: \"succeeded\", limit: 1 }).then(",
+      "mutated": "    listAcquisitionRuns({ state: \"succeeded\", limit: 2 }).then("
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:55:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 55,
+      "original": "        const run = page.runs[0];",
+      "mutated": "        const run = page.runs[1];"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:70:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 70,
+      "original": "          cause instanceof ApiError || cause instanceof ApiUnreachableError",
+      "mutated": "          cause instanceof ApiError && cause instanceof ApiUnreachableError"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:82:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 82,
+      "original": "      latest.current += 1;",
+      "mutated": "      latest.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:123:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 123,
+      "original": "  const [pagePending, setPagePending] = useState(false);",
+      "mutated": "  const [pagePending, setPagePending] = useState(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:125:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 125,
+      "original": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 0 });",
+      "mutated": "  const [announcement, setAnnouncement] = useState({ text: \"\", serial: 1 });"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:126:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 126,
+      "original": "  const inFlight = useRef(false);",
+      "mutated": "  const inFlight = useRef(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:127:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 127,
+      "original": "  const generation = useRef(0);",
+      "mutated": "  const generation = useRef(1);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:139:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 139,
+      "original": "    setPagePending(false);",
+      "mutated": "    setPagePending(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:140:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 140,
+      "original": "    inFlight.current = false;",
+      "mutated": "    inFlight.current = true;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:141:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 141,
+      "original": "    generation.current += 1;",
+      "mutated": "    generation.current += 2;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:160:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 160,
+      "original": "    if (inFlight.current || dh === null) {",
+      "mutated": "    if (inFlight.current && dh === null) {"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:163:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 163,
+      "original": "    inFlight.current = true;",
+      "mutated": "    inFlight.current = false;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:164:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 164,
+      "original": "    setPagePending(true);",
+      "mutated": "    setPagePending(false);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:176:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 176,
+      "original": "        serial: previous.serial + 1,",
+      "mutated": "        serial: previous.serial + 2,"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:178:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 178,
+      "original": "      if (page.next_cursor === null && hadFocus) {",
+      "mutated": "      if (page.next_cursor === null || hadFocus) {"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:188:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 188,
+      "original": "        cause instanceof ApiError || cause instanceof ApiUnreachableError",
+      "mutated": "        cause instanceof ApiError && cause instanceof ApiUnreachableError"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:198:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 198,
+      "original": "        inFlight.current = false;",
+      "mutated": "        inFlight.current = true;"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:199:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 199,
+      "original": "        setPagePending(false);",
+      "mutated": "        setPagePending(true);"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:209:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 209,
+      "original": "            <CardTitle id={titleId} ref={headingRef} tabIndex={-1}>",
+      "mutated": "            <CardTitle id={titleId} ref={headingRef} tabIndex={-2}>"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:236:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 236,
+      "original": "              {dh.affected_count === 0 ? (",
+      "mutated": "              {dh.affected_count === 1 ? ("
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:245:off-by-one:1",
+      "cycle": "handoff",
+      "operator": "off-by-one",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 245,
+      "original": "                    tabIndex={-1}",
+      "mutated": "                    tabIndex={-2}"
+    },
+    {
+      "id": "web/src/screens/data-health/needs-fixing.tsx:264:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 264,
+      "original": "                      aria-busy={pagePending || undefined}",
+      "mutated": "                      aria-busy={pagePending && undefined}"
+    },
+    {
+      "id": "web/src/screens/data-health/problem-row.tsx:73:negate-boolean:1",
+      "cycle": "handoff",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 73,
+      "original": "              state={{ focusAdd: true }}",
+      "mutated": "              state={{ focusAdd: false }}"
+    },
+    {
+      "id": "manual:1",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 37,
+      "original": "  const anyFailed = row.failures.some((f) => f.outcome === \"failed\");",
+      "mutated": "  const anyFailed = row.retryable;",
+      "description": "Failed fix line chosen from the served retryable flag instead of the failures' outcomes (DAC-E6-S3-7: the fix is keyed by the failure's outcome; plan Other Notes 'Retryable': the row's fix lines read the failure outcomes)"
+    },
+    {
+      "id": "manual:2",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 38,
+      "original": "  const anyNotFound = row.failures.some((f) => f.outcome === \"not_found\");",
+      "mutated": "  const anyNotFound = row.failures.every((f) => f.outcome === \"not_found\");",
+      "description": "Not-found controls only when every failure is not found: a mixed row loses Stop following / Follow a different symbol (DAC-E6-S3-1, DAC-E6-8, AC-14)"
+    },
+    {
+      "id": "manual:3",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 42,
+      "original": "        to={`/data/coverage?symbol=${encodeURIComponent(row.symbol)}`}",
+      "mutated": "        to={`/data/coverage?symbol=${row.symbol}`}",
+      "description": "Symbol link query no longer encoded, so a symbol with & or / breaks the /data/coverage?symbol= seed (DAC-E6-8; plan T013 item 1)"
+    },
+    {
+      "id": "manual:4",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 43,
+      "original": "        aria-label={symbolLinkName(row.symbol)}",
+      "mutated": "        aria-label={row.symbol}",
+      "description": "Symbol link loses its accessible name '{SYMBOL}, show in the coverage table' (data-health-ui 10; plan T002 a, T011)"
+    },
+    {
+      "id": "manual:5",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 44,
+      "original": "        className=\"font-semibold\"",
+      "mutated": "        className=\"\"",
+      "description": "Symbol no longer at weight 600 (DAC-E6-8, data-health-ui 2.5)"
+    },
+    {
+      "id": "manual:6",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 52,
+      "original": "            <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>",
+      "mutated": "            <StatusBadge tier={tierOf({ of: \"result\", outcome: \"failed\" })}>{labelOf(status)}</StatusBadge>",
+      "description": "Every badge rendered critical: Not found loses its warning tier (DAC-E6-8, DAC-E6-S3-5)"
+    },
+    {
+      "id": "manual:7",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 52,
+      "original": "            <StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>",
+      "mutated": "            <StatusBadge tier={tierOf(status)}>{f.outcome}</StatusBadge>",
+      "description": "Badge label is the raw wire outcome (failed / not_found) instead of the labelOf display label (DAC-E6-S3-4, DAC-E6-S3-5; plan T005 kills)"
+    },
+    {
+      "id": "manual:8",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 53,
+      "original": "            {f.outcome === \"failed\"",
+      "mutated": "            {anyFailed",
+      "description": "What-failed line chosen per row instead of per failure: a not_found failure in a mixed row reads 'Downloading ... failed: no such ticker' instead of 'The provider doesn't recognise this symbol.' (DAC-E6-8, DAC-E6-S3-7)"
+    },
+    {
+      "id": "manual:9",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 54,
+      "original": "              ? downloadFailed(f.data_type, f.reason, f.attempts)",
+      "mutated": "              ? downloadFailed(f.data_type, f.reason, 1)",
+      "description": "Attempt count no longer the served value (DAC-E6-S3-6: {attempts} is the served value unchanged)"
+    },
+    {
+      "id": "manual:10",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 54,
+      "original": "              ? downloadFailed(f.data_type, f.reason, f.attempts)",
+      "mutated": "              ? downloadFailed(\"prices\", f.reason, f.attempts)",
+      "description": "Data-type words ignore the failure's data_type: every failure reads 'daily prices' (DAC-E6-8, story Implementation)"
+    },
+    {
+      "id": "manual:11",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 55,
+      "original": "              : NOT_RECOGNISED}",
+      "mutated": "              : f.reason}",
+      "description": "A not_found failure renders its provider reason instead of 'The provider doesn't recognise this symbol.' (DAC-E6-8; plan Other Notes: a not-found reason is not rendered)"
+    },
+    {
+      "id": "manual:12",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 59,
+      "original": "      <p className=\"text-xs text-muted-foreground\">{CONSEQUENCE}</p>",
+      "mutated": "      {anyFailed ? <p className=\"text-xs text-muted-foreground\">{CONSEQUENCE}</p> : null}",
+      "description": "Consequence sentence dropped from rows with only Not found failures (DAC-E6-8, AC-13: each row names the consequence)"
+    },
+    {
+      "id": "manual:13",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 59,
+      "original": "      <p className=\"text-xs text-muted-foreground\">{CONSEQUENCE}</p>",
+      "mutated": "      <p className=\"text-sm text-muted-foreground\">{CONSEQUENCE}</p>",
+      "description": "Consequence no longer at --text-xs (data-health-ui 2.5; plan T002 a)"
+    },
+    {
+      "id": "manual:14",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 60,
+      "original": "      {anyFailed ? <p className=\"text-sm\">{FAILED_FIX}</p> : null}",
+      "mutated": "      {row.failures.filter((f) => f.outcome === \"failed\").map((f) => <p key={f.data_type} className=\"text-sm\">{FAILED_FIX}</p>)}",
+      "description": "Download-again fix rendered once per failed failure instead of once per row (plan Other Notes 'Fix once per outcome per row'; plan hand-written mutant 'per-row fix -> one fix per failure')"
+    },
+    {
+      "id": "manual:15",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 61,
+      "original": "      {anyNotFound ? (",
+      "mutated": "      {anyNotFound && !anyFailed ? (",
+      "description": "Not-found fix suppressed when the row also has a Failed failure: a mixed row shows only one fix (DAC-E6-S3-1: both fixes render)"
+    },
+    {
+      "id": "manual:16",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 64,
+      "original": "            variant=\"ghost\"",
+      "mutated": "            variant=\"outline\"",
+      "description": "Stop following no longer a ghost button (DAC-E6-8)"
+    },
+    {
+      "id": "manual:17",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 65,
+      "original": "            aria-label={stopFollowingName(row.symbol)}",
+      "mutated": "            aria-label={STOP_FOLLOWING}",
+      "description": "Stop following no longer names the symbol (AC-25: row actions name the symbol)"
+    },
+    {
+      "id": "manual:18",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 66,
+      "original": "            onClick={() => onStopFollowing(row.symbol)}",
+      "mutated": "            onClick={() => onStopFollowing(\"\")}",
+      "description": "Stop following opens the dialog without the row's symbol (DAC-E6-8: opens E6-S2's dialog for this stock; plan T002 f)"
+    },
+    {
+      "id": "manual:19",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 68,
+      "original": "            {STOP_FOLLOWING}",
+      "mutated": "            Retire",
+      "description": "Stop button labelled with the domain term Retire (DAC-E6-S3-4, AC-19; plan T008 kills)"
+    },
+    {
+      "id": "manual:20",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 70,
+      "original": "          <Button variant=\"outline\" asChild>",
+      "mutated": "          <Button variant=\"ghost\" asChild>",
+      "description": "Follow a different symbol no longer an outline button (DAC-E6-8)"
+    },
+    {
+      "id": "manual:21",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 72,
+      "original": "              to=\"/data/followed\"",
+      "mutated": "              to=\"/data/coverage\"",
+      "description": "Follow a different symbol navigates somewhere other than /data/followed (DAC-E6-13)"
+    },
+    {
+      "id": "manual:22",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 73,
+      "original": "              state={{ focusAdd: true }}",
+      "mutated": "              state={undefined}",
+      "description": "Router state { focusAdd: true } removed from Follow a different symbol (DAC-E6-13; plan hand-written mutant 'state removed')"
+    },
+    {
+      "id": "manual:23",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 74,
+      "original": "              aria-label={followDifferentName(row.symbol)}",
+      "mutated": "              aria-label={FOLLOW_DIFFERENT}",
+      "description": "Follow a different symbol no longer named 'than {SYMBOL}' (AC-25, DAC-E6-13)"
+    },
+    {
+      "id": "manual:24",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/problem-row.tsx",
+      "line": 79,
+      "original": "          <p className=\"text-sm\">{NOT_FOUND_FIX}</p>",
+      "mutated": "",
+      "description": "Not-found sentence 'Probably a typo or a delisted ticker. Downloading again won't help.' deleted (DAC-E6-8, AC-14)"
+    },
+    {
+      "id": "manual:25",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 49,
+      "original": "    setRead({ kind: \"pending\" });",
+      "mutated": "",
+      "description": "Try again on the last-complete read no longer returns to the pending skeleton: the failure line stays while it re-reads (DEC-0383)"
+    },
+    {
+      "id": "manual:26",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 50,
+      "original": "    listAcquisitionRuns({ state: \"succeeded\", limit: 1 }).then(",
+      "mutated": "    listAcquisitionRuns({ limit: 1 }).then(",
+      "description": "Last complete download read without the succeeded filter, so a failed or running download can be named (DAC-E6-10; plan T009 kills)"
+    },
+    {
+      "id": "manual:27",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 52,
+      "original": "        if (mine !== latest.current) {",
+      "mutated": "        if (false) {",
+      "description": "A last-complete answer an aggregate answer has outdated overwrites the newer line (DEC-0383)"
+    },
+    {
+      "id": "manual:28",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 59,
+      "original": "            run === undefined",
+      "mutated": "            run !== undefined",
+      "description": "Branches swapped: a run reads 'No complete download yet' and none crashes (DAC-E6-10)"
+    },
+    {
+      "id": "manual:29",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 61,
+      "original": "              : lastCompleteDownload(formatInstant(run.startedAt ?? run.requestedAt)),",
+      "mutated": "              : lastCompleteDownload(formatInstant(run.endedAt ?? run.requestedAt)),",
+      "description": "Last complete download named by its end time, not its start time (DAC-E6-10; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:30",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 61,
+      "original": "              : lastCompleteDownload(formatInstant(run.startedAt ?? run.requestedAt)),",
+      "mutated": "              : lastCompleteDownload(formatInstant(run.startedAt ?? run.endedAt)),",
+      "description": "A run without a start time named by its end time instead of its request time (plan Other Notes: formatDownloadName rule startedAt ?? requestedAt)"
+    },
+    {
+      "id": "manual:31",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 65,
+      "original": "        if (mine !== latest.current) {",
+      "mutated": "        if (false) {",
+      "description": "A last-complete failure an aggregate answer has outdated replaces the newer line (DEC-0383)"
+    },
+    {
+      "id": "manual:32",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 73,
+      "original": "        setRead({ kind: \"failed\", reason: readFailureReason(known) });",
+      "mutated": "        setRead({ kind: \"failed\", reason: known.message });",
+      "description": "Last-complete failure shows the thrown message instead of readFailureReason (DAC-E6-S3-3, AC-24; plan hand-written mutant readFailureReason(e) -> e.message)"
+    },
+    {
+      "id": "manual:33",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 80,
+      "original": "    load();",
+      "mutated": "",
+      "description": "Last complete download never read at affected_count 0 (DAC-E6-10)"
+    },
+    {
+      "id": "manual:34",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 84,
+      "original": "  }, [answer, load]);",
+      "mutated": "  }, [load]);",
+      "description": "A new aggregate answer at 0 no longer re-reads the last complete download (DEC-0383; plan T009 g)"
+    },
+    {
+      "id": "manual:35",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 88,
+      "original": "      return <SkeletonLine />;",
+      "mutated": "      return <p className=\"text-xs text-muted-foreground\">{NO_COMPLETE_DOWNLOAD}</p>;",
+      "description": "Pending last-complete read reads 'No complete download yet' instead of a skeleton (DEC-0383; plan T009 e)"
+    },
+    {
+      "id": "manual:36",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 93,
+      "original": "        <ReadFailure sentence={readFailed(LAST_COMPLETE_TARGET, read.reason)} onRetry={load} />",
+      "mutated": "        <ReadFailure sentence={readFailed(LAST_COMPLETE_TARGET, read.reason)} onRetry={() => {}} />",
+      "description": "Try again on the last-complete failure does nothing (DEC-0383; plan T009 f)"
+    },
+    {
+      "id": "manual:37",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 136,
+      "original": "    setExtraRows([]);",
+      "mutated": "",
+      "description": "New aggregate answer keeps the pages Show more appended instead of restarting from its first page (DEC-0381; plan hand-written mutant 'reset effect deleted')"
+    },
+    {
+      "id": "manual:38",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 137,
+      "original": "    setCursor(dh?.problems.next_cursor ?? null);",
+      "mutated": "",
+      "description": "New aggregate answer keeps the old cursor, so the next Show more skips the first page's successor (DEC-0381, DAC-E6-9 cursor as served)"
+    },
+    {
+      "id": "manual:39",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 138,
+      "original": "    setPageFailure(null);",
+      "mutated": "",
+      "description": "New aggregate answer keeps the Show more failure line (DAC-E6-9 Try again restarts from the first page; plan T007 c)"
+    },
+    {
+      "id": "manual:40",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 141,
+      "original": "    generation.current += 1;",
+      "mutated": "",
+      "description": "Generation not bumped on a new answer: an outdated page is appended to the new answer's rows (DEC-0381)"
+    },
+    {
+      "id": "manual:41",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 143,
+      "original": "    if (dh === null) {",
+      "mutated": "    if (false) {",
+      "description": "An abandoned stop dialog reopens with the next answer after a failed read (DEC-0379 caller contract: the dialog opens from Stop following)"
+    },
+    {
+      "id": "manual:42",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 150,
+      "original": "      listRef.current?.focus();",
+      "mutated": "",
+      "description": "Focus not moved to the rows list when the last page removes Show more: it falls to body (AC-25, plan Resolved Conflict 2)"
+    },
+    {
+      "id": "manual:43",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 152,
+      "original": "      tryRef.current?.focus();",
+      "mutated": "",
+      "description": "Focus not moved to Try again when a page failure replaces Show more (AC-25, plan Resolved Conflict 2; plan T007 a)"
+    },
+    {
+      "id": "manual:44",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 154,
+      "original": "    pendingFocus.current = null;",
+      "mutated": "",
+      "description": "Focus request never cleared: every later render pulls focus back to the list or Try again, e.g. away from the stop dialog's focused Cancel (AC-25; data-health-ui 2.7 cancel focused)"
+    },
+    {
+      "id": "manual:45",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 157,
+      "original": "  const rows = dh === null ? [] : [...dh.problems.rows, ...extraRows];",
+      "mutated": "  const rows = dh === null ? [] : [...extraRows, ...dh.problems.rows];",
+      "description": "Show more pages prepended instead of appended (DAC-E6-S3-2; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:46",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 167,
+      "original": "      const page = await fetchProblems(cursor, PAGE_SIZE);",
+      "mutated": "      const page = await fetchProblems(null, PAGE_SIZE);",
+      "description": "Show more fetches without the served cursor (DAC-E6-S3-2)"
+    },
+    {
+      "id": "manual:47",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 167,
+      "original": "      const page = await fetchProblems(cursor, PAGE_SIZE);",
+      "mutated": "      const page = await fetchProblems(cursor);",
+      "description": "Show more drops the limit 50 argument (DAC-E6-9, DAC-E6-S3-2)"
+    },
+    {
+      "id": "manual:48",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 168,
+      "original": "      if (g !== generation.current) {",
+      "mutated": "      if (false) {",
+      "description": "A page an aggregate answer has outdated is appended to the new answer (DEC-0381)"
+    },
+    {
+      "id": "manual:49",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 171,
+      "original": "      const hadFocus = document.activeElement === moreRef.current;",
+      "mutated": "      const hadFocus = true;",
+      "description": "Focus moved to the list after the last page even when it was no longer on Show more (plan T014 showMore: only when Show more had focus; AC-25)"
+    },
+    {
+      "id": "manual:50",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 172,
+      "original": "      setExtraRows((previous) => [...previous, ...page.rows]);",
+      "mutated": "      setExtraRows((previous) => page.rows);",
+      "description": "Each Show more page replaces the pages already appended instead of adding to them (DAC-E6-9 append, DAC-E6-S3-2)"
+    },
+    {
+      "id": "manual:51",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 173,
+      "original": "      setCursor(page.next_cursor);",
+      "mutated": "",
+      "description": "Cursor not advanced: the second Show more repeats the first cursor (DAC-E6-S3-2 served cursors)"
+    },
+    {
+      "id": "manual:52",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 175,
+      "original": "        text: showingOf(rows.length + page.rows.length, dh.affected_count),",
+      "mutated": "        text: showingOf(page.rows.length, dh.affected_count),",
+      "description": "Announcement counts the new page only, not the rows now shown (DAC-E6-9 new row count; DEC-0382)"
+    },
+    {
+      "id": "manual:53",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 175,
+      "original": "        text: showingOf(rows.length + page.rows.length, dh.affected_count),",
+      "mutated": "        text: showingOf(rows.length + page.rows.length, rows.length + page.rows.length),",
+      "description": "Announcement total is the loaded rows instead of affected_count (DEC-0382, AC-16)"
+    },
+    {
+      "id": "manual:54",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 176,
+      "original": "        serial: previous.serial + 1,",
+      "mutated": "        serial: previous.serial,",
+      "description": "Announcement serial frozen, so a repeated announcement is not re-announced (DAC-E6-9 announce politely; plan T014 keyed output)"
+    },
+    {
+      "id": "manual:55",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 182,
+      "original": "      if (g !== generation.current) {",
+      "mutated": "      if (false) {",
+      "description": "A page failure an aggregate answer has outdated shows on the new answer (DEC-0381)"
+    },
+    {
+      "id": "manual:56",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 191,
+      "original": "      if (document.activeElement === moreRef.current) {",
+      "mutated": "      if (true) {",
+      "description": "Focus moved to Try again after a page failure even when it was not on Show more (plan T014; AC-25)"
+    },
+    {
+      "id": "manual:57",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 194,
+      "original": "      setPageFailure(readFailureReason(known));",
+      "mutated": "      setPageFailure(known.message);",
+      "description": "Show more failure shows the thrown message instead of readFailureReason (DAC-E6-S3-3, AC-24; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:58",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 197,
+      "original": "      if (g === generation.current) {",
+      "mutated": "      if (true) {",
+      "description": "An outdated request's finally clears the new request's in-flight and busy flags (DEC-0381)"
+    },
+    {
+      "id": "manual:59",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 210,
+      "original": "              {dh === null ? NEEDS_FIXING : needsFixingTitle(dh.affected_count)}",
+      "mutated": "              {dh === null ? NEEDS_FIXING : needsFixingTitle(rows.length)}",
+      "description": "Header count is the loaded row count instead of affected_count (AC-16, DAC-E6-9; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:60",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 210,
+      "original": "              {dh === null ? NEEDS_FIXING : needsFixingTitle(dh.affected_count)}",
+      "mutated": "              {needsFixingTitle(dh?.affected_count ?? 0)}",
+      "description": "Loading and failed headings read 'Needs fixing \u00b7 0' instead of no count (DEC-0380; plan T010 a, b)"
+    },
+    {
+      "id": "manual:61",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 214,
+      "original": "                {`${FROM_RECENT_DOWNLOADS} \u00b7 ${checked(formatClock(dh.checked_at))}`}",
+      "mutated": "                {`${FROM_RECENT_DOWNLOADS} \u00b7 ${checked(formatClock((dataHealth as { checkedAt: Date }).checkedAt))}`}",
+      "description": "Sub-line time is the client's receipt time instead of the aggregate's checked_at (plan T014 frame: checked(formatClock(dh.checked_at)); DAC-E6-9)"
+    },
+    {
+      "id": "manual:62",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 218,
+      "original": "          {rows.some((r) => r.retryable) ? <DownloadNow /> : null}",
+      "mutated": "          {dh?.problems.rows.some((r) => r.retryable) ? <DownloadNow /> : null}",
+      "description": "Download now condition computed over the first page only, not every loaded row (DAC-E6-9; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:63",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 221,
+      "original": "          {dataHealth.kind === \"loading\" ? (",
+      "mutated": "          {false ? (",
+      "description": "Loading state shows no skeleton lines (DEC-0380; plan T010 a)"
+    },
+    {
+      "id": "manual:64",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 228,
+      "original": "          {dataHealth.kind === \"error\" ? (",
+      "mutated": "          {false ? (",
+      "description": "Aggregate failure shows no failure sentence or Try again (DAC-E6-17; plan T010 b)"
+    },
+    {
+      "id": "manual:65",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 231,
+      "original": "              onRetry={onReread}",
+      "mutated": "              onRetry={() => {}}",
+      "description": "Try again on the aggregate failure does not re-read (DAC-E6-17; plan T010 b)"
+    },
+    {
+      "id": "manual:66",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 246,
+      "original": "                    aria-labelledby={titleId}",
+      "mutated": "",
+      "description": "Rows list no longer named by the card heading (plan T014: ul aria-labelledby={titleId})"
+    },
+    {
+      "id": "manual:67",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 250,
+      "original": "                      <ProblemRow key={r.symbol} row={r} onStopFollowing={setOpenFor} />",
+      "mutated": "                      <ProblemRow key={r.symbol} row={r} onStopFollowing={() => {}} />",
+      "description": "Stop following on a row never opens the dialog (DAC-E6-8: opens E6-S2's dialog; plan T010 c)"
+    },
+    {
+      "id": "manual:68",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 253,
+      "original": "                  {pageFailure !== null ? (",
+      "mutated": "                  {false ? (",
+      "description": "Show more failure never shows 'Couldn't read more problems' or Try again (DAC-E6-9)"
+    },
+    {
+      "id": "manual:69",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 256,
+      "original": "                      <Button ref={tryRef} variant=\"outline\" onClick={onReread}>",
+      "mutated": "                      <Button ref={tryRef} variant=\"outline\" onClick={() => void showMore()}>",
+      "description": "Show more Try again fetches the next page instead of restarting from the first page (DAC-E6-9, DEC-0381; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:70",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 260,
+      "original": "                  ) : cursor !== null ? (",
+      "mutated": "                  ) : true ? (",
+      "description": "Show more shown when next_cursor is null (DAC-E6-9)"
+    },
+    {
+      "id": "manual:71",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 272,
+      "original": "              <output aria-live=\"polite\" className=\"sr-only\">",
+      "mutated": "              <output aria-live=\"assertive\" className=\"sr-only\">",
+      "description": "New row count announced assertively instead of politely (AC-25, DAC-E6-9)"
+    },
+    {
+      "id": "manual:72",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 273,
+      "original": "                <span key={announcement.serial}>{announcement.text}</span>",
+      "mutated": "                <span>{announcement.text}</span>",
+      "description": "Announcement span not re-keyed, so an unchanged count is not re-announced (plan T014 keyed output; DEC-0382)"
+    },
+    {
+      "id": "manual:73",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 277,
+      "original": "                onClose={() => setOpenFor(null)}",
+      "mutated": "                onClose={() => {}}",
+      "description": "Dialog close leaves it open (data-health-ui 2.7; S2 caller contract DEC-0379)"
+    },
+    {
+      "id": "manual:74",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 278,
+      "original": "                onStopped={onReread}",
+      "mutated": "                onStopped={() => {}}",
+      "description": "Confirmed stop does not re-read the aggregate (data-health-ui 2.7, DAC-E6-15; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:75",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 279,
+      "original": "                onRefusalClosed={onReread}",
+      "mutated": "                onRefusalClosed={() => {}}",
+      "description": "Closing a 404/409 refusal does not refresh the row (DAC-E6-12, DEC-0381; plan hand-written mutant)"
+    },
+    {
+      "id": "manual:76",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/needs-fixing.tsx",
+      "line": 280,
+      "original": "                fallbackFocusRef={headingRef}",
+      "mutated": "                fallbackFocusRef={undefined}",
+      "description": "No heading focus fallback when the stopped row leaves (DEC-0379; plan T010 d)"
+    },
+    {
+      "id": "manual:77",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 254,
+      "original": "  return `${NEEDS_FIXING} \u00b7 ${formatCount(n)}`;",
+      "mutated": "  return `${NEEDS_FIXING} \u00b7 ${n}`;",
+      "description": "Header count without thousands separator (DEC-0382; plan T011)"
+    },
+    {
+      "id": "manual:78",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 262,
+      "original": "  corporate_actions: \"corporate actions\",",
+      "mutated": "  corporate_actions: \"corporate_actions\",",
+      "description": "Wire value rendered as the data-type words (DAC-E6-S3-4; plan T008 kills)"
+    },
+    {
+      "id": "manual:79",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 273,
+      "original": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${formatCount(attempts)} attempts`;",
+      "mutated": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason}, ${formatCount(attempts)} attempts`;",
+      "description": "Null reason renders 'null' instead of 'no reason was recorded' (plan Other Notes; T002 e)"
+    },
+    {
+      "id": "manual:80",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 273,
+      "original": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${formatCount(attempts)} attempts`;",
+      "mutated": "  return `Downloading ${DATA_TYPE_WORDS[dataType]} failed: ${reason ?? NO_REASON_RECORDED}, ${attempts} attempts`;",
+      "description": "Attempts without thousands separator (plan T011)"
+    },
+    {
+      "id": "manual:81",
+      "cycle": "handoff",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/copy.ts",
+      "line": 301,
+      "original": "  return `Showing ${formatCount(shown)} of ${formatCount(n)} stocks`;",
+      "mutated": "  return `Showing ${shown} of ${formatCount(n)} stocks`;",
+      "description": "Announcement count without thousands separator (DEC-0382; plan T011)"
+    }
+  ]
+}

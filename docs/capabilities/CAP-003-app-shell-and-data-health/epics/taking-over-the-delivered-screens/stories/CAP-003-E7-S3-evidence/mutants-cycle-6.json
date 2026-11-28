@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "repo_head": "2132ee50da40b6de53fc8d1cfced4a06fc7a5ec3",
+  "range": "HEAD..worktree",
+  "source": "2132ee50da40b6de53fc8d1cfced4a06fc7a5ec3",
+  "mutants": [
+    {
+      "id": "manual:c6-seconds",
+      "cycle": "cycle-6",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "formatInstant(new Date(populated.fetchedAt))",
+      "new": "formatInstant(new Date(populated.fetchedAt), { seconds: true })",
+      "description": "Adds seconds to the last-updated time: UX design 0.7 form is YYYY-MM-DD HH:MM zone"
+    },
+    {
+      "id": "manual:c6-now",
+      "cycle": "cycle-6",
+      "operator": "manual",
+      "file": "web/src/screens/instruments/instrument-table.tsx",
+      "old": "formatInstant(new Date(populated.fetchedAt))",
+      "new": "formatInstant(new Date())",
+      "description": "Uses the render time, not the read's fetchedAt"
+    }
+  ]
+}

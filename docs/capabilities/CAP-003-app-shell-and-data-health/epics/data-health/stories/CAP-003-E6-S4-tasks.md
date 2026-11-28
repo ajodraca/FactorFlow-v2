@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-28
+last_reworked_review: CAP-003-E6-S4-implementation-review-v1.md
+docs_synced_review: CAP-003-E6-S4-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -98,7 +100,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Confirm the baseline and every hard dependency's export.
 
-- [ ] T001 From the repo root run `npm ci` and `npm run test`, and record the baseline as green. Confirm, without editing anything, that each dependency's deliverable exists, and STOP and report if any is missing:
+- [x] T001 From the repo root run `npm ci` and `npm run test`, and record the baseline as green. Confirm, without editing anything, that each dependency's deliverable exists, and STOP and report if any is missing:
   - (CAP-003-E1-S1) `web/src/components/ui/card.tsx` exports `Card` (`variant` `"default" | "metric" | "summary"`), `CardHeader`, `CardTitle` (an `h2`), `CardDescription`, `CardContent`, `CardFooter` and `CardSummaryList` (a `dl`); `web/src/components/ui/button.tsx` exports `Button` with `variant` `outline` and `asChild`.
   - (CAP-003-E1-S3) `web/src/components/ui/progress.tsx` exports `Progress({ value: number | null; max?: number | null; "aria-labelledby": string })` (DEC-0303).
   - (CAP-003-E1-S4) `web/src/components/ui/data-table.tsx` exports `DataTable` taking `variant: "compact"`, `rowHeader`, `columns`, `data` and `getRowId`, with no `label` prop (DEC-0307).
@@ -135,7 +137,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement **TC-COMP-170** (Partial and Interrupted never read as complete in Recent downloads) with the DAC-E6-14 column rows. Write it as `describe("Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12)")` in a new `web/src/screens/data-health/recent-downloads.test.tsx`, with `// Implements TC-COMP-170`. Attention is `ok(ATT(null))` throughout, and `listAcquisitionRuns` resolves `PAGE([...])` with these five runs in served order:
+- [x] T002 [P] Implement **TC-COMP-170** (Partial and Interrupted never read as complete in Recent downloads) with the DAC-E6-14 column rows. Write it as `describe("Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12)")` in a new `web/src/screens/data-health/recent-downloads.test.tsx`, with `// Implements TC-COMP-170`. Attention is `ok(ATT(null))` throughout, and `listAcquisitionRuns` resolves `PAGE([...])` with these five runs in served order:
   - `RUN({ runId "r-5", state "partial", instrumentsNamed 1236, instrumentsWritten 1230, instrumentsFailed 6 })`
   - `RUN({ runId "r-4", state "abandoned", instrumentsWritten 611 })`
   - `RUN({ runId "r-3", state "failed", instrumentsWritten 0, instrumentsFailed 0 })`
@@ -157,7 +159,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - drop-field-copy `instrumentsNamed` → `instrumentsWritten` (b: *1,230 of 1,230*)
   - drop-field-copy `startedAt` in the link text (a)
   - swap-case of the link target to the delivered `/runs/` path (a)
-- [ ] T003 Implement **TC-COMP-171** (Recent downloads re-read per attention answer only while running). Write it as `describe("Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T002, with `// Implements TC-COMP-171`. `listAcquisitionRuns` is the spied `vi.fn()`, resolving `PAGE([RUN({ runId "r-9", state "running", endedAt null, instrumentsWritten 700 })])`.
+- [x] T003 Implement **TC-COMP-171** (Recent downloads re-read per attention answer only while running). Write it as `describe("Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T002, with `// Implements TC-COMP-171`. `listAcquisitionRuns` is the spied `vi.fn()`, resolving `PAGE([RUN({ runId "r-9", state "running", endedAt null, instrumentsWritten 700 })])`.
   - (a) **Load**: mount at `19:03:12Z` with `ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z")`. After the answer lands, `listAcquisitionRuns` has been called exactly once, with exactly `{ limit: 5 }` (`toHaveBeenNthCalledWith(1, { limit: 5 })`), and the sub-line reads exactly *Starts when you press Download now · checked 14:03:12 CDT*.
   - (b) **Step 1, three running answers**: for `i` in 1..3, set the system time to `19:03:12Z + 10·i s`, `setShell({ attention: ok(ATT(LATEST("running", { progress { done 812 + i, total 1236 } })), <a new checkedAt 10·i s later>) })`, `rerender`, and await. After each, the call count is `1 + i`, and the sub-line reads *… checked 14:03:22 CDT*, *14:03:32 CDT*, *14:03:42 CDT* in turn (expected 1: once per answer, and the time advances).
   - (c) **No new answer, no read**: `rerender` with the same `shell.value` object, and then with a new object carrying the same `checkedAt` instant; the count stays 4.
@@ -173,7 +175,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - a hand-written mutant reading on an `error` attention whose `last` is non-terminal (d)
   - drop-field-copy of the list's answer time, writing attention's `checkedAt` instead (b: attention's instant is 2 s earlier than the list's in (a), so *14:03:10 CDT* would show)
   - drop-defaulted-argument `{ limit: 5 }` (a)
-- [ ] T004 Implement the **progress row and ordering** half of DAC-E6-14 and the AC-17 call shape. Write it as `describe("Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T003.
+- [x] T004 Implement the **progress row and ordering** half of DAC-E6-14 and the AC-17 call shape. Write it as `describe("Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T003.
   - (a) **Determinate**: list `[RUN({ runId "r-9", state "running", endedAt null, instrumentsWritten 700 }), RUN({ runId "r-8" })]` with attention `ok(ATT(LATEST("running", { run_id "r-9", progress { done 812, total 1236 } })))`. Row `r-9` is the first body row; its *Outcome* is `status-active` *Downloading*; its *Ended* cell is an `Absent` em dash (`aria-hidden` *—* and the hidden text *not ended yet*); its *Result* cell holds `getByRole("progressbar", { name: "812 of 1,236 stocks" })` with `aria-valuenow="812"`, `aria-valuemin="0"` and `aria-valuemax="1236"`, and it does not contain *700 of 1,236 stocks*. The visible label carries `aria-live="polite"`. Row `r-8` has no progressbar.
   - (b) **Indeterminate while the total is null** (DEC-0384): list `[RUN({ runId "r-9", state "requested", startedAt null, endedAt null, instrumentsNamed 0, instrumentsWritten 0 })]` with `LATEST("requested", { run_id "r-9", started_at null, progress { done 0, total null } })`. The row's progressbar has no `aria-valuenow` attribute and its accessible name is exactly *Queued*, the row's outcome label. The row's text contains no *0 of 0* and no *of null*.
   - (c) **Started for a queued row** (Resolved Conflict 4): in (b), the row header link reads *2026-10-30 13:59 CDT* (`requestedAt`), never a dash, and still links to `/data/downloads/r-9`.
@@ -188,7 +190,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - drop-field-copy of `aria-labelledby` to the outcome label (b: the progressbar has no name)
   - swap-case of the order rank between `running` and `requested` (e: `r-5` first)
   - negate-boolean on `startedAt ?? requestedAt` (c: a crash or *null*)
-- [ ] T005 Implement **TC-COMP-155 (Recent downloads half)**. Write it as `describe("Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T004, with `// Implements TC-COMP-155`.
+- [x] T005 Implement **TC-COMP-155 (Recent downloads half)**. Write it as `describe("Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T004, with `// Implements TC-COMP-155`.
   - (a) **Loading**: while `listAcquisitionRuns` is a pending promise, the `h2` *Recent downloads* is present, a descendant of the section carries `aria-busy="true"`, and no `table` renders.
   - (b) **Step 1, a `500` envelope**: `listAcquisitionRuns` rejects with `INTERNAL`. The `h2` is kept, a `role="status"` element reads exactly *Couldn't read recent downloads: FactorFlow hit an unexpected problem.*, a button *Try again* is present, and no `table` renders.
   - (c) **Step 2**: `container.textContent` contains neither *req-9f3* nor *instrument table said no*, and no attribute value in the section contains *req-9f3*.
@@ -201,7 +203,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - a hand-written mutant rendering `error.message` as the reason (c)
   - negate-boolean on the error branch's `kind === "error"` (b: an empty table renders)
   - drop-field-copy of the retry callback (e)
-- [ ] T006 Implement **TC-COMP-173 and TC-COMP-174 (Recent downloads half)**. Write them as `describe("Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T005, with both `// Implements` comments. A module-local `visibleAndAccessibleText(container)` joins `container.textContent` with every `aria-label`, `title` and `aria-describedby`/`aria-labelledby`-referenced text.
+- [x] T006 Implement **TC-COMP-173 and TC-COMP-174 (Recent downloads half)**. Write them as `describe("Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T005, with both `// Implements` comments. A module-local `visibleAndAccessibleText(container)` joins `container.textContent` with every `aria-label`, `title` and `aria-describedby`/`aria-labelledby`-referenced text.
   - (a) Render every state of T002 to T005 (the five outcome rows, all eight run states including `cancelling`, the determinate and indeterminate progress rows, loading, both errors). The joined text never matches `/\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i`. A planted case proves the regex is not vacuous: `"one run"` and `"Retired"` match, and `"downloads"` does not.
   - (b) For each of the eight states, the *Outcome* cell's `[data-variant^="status-"]` badge has exactly the literal label of the CAP-003-E1-S5 table (*Queued*, *Downloading*, *Stopping*, *Complete*, *Partial*, *Failed*, *Cancelled by you*, *Interrupted*) as its text and contains an `svg[aria-hidden="true"]`; no badge or icon carries an `aria-label` that replaces the words.
   - (c) Every em dash in the table is inside an `Absent` (`[aria-hidden="true"]` *—* with a sibling `.sr-only` *not ended yet*); no cell is empty and no cell reads `null` or `0` for a missing time.
@@ -211,7 +213,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - swap-case `labelOf` → the raw `state` as badge text (a: *abandoned* passes, but (b) fails; *requested* etc.)
   - a hand-written mutant rendering the outcome in a bare `span` without `StatusBadge` (b)
   - swap-case `Absent` → an empty string for a null `endedAt` (c)
-- [ ] T007 [P] Implement **TC-COMP-154** (What you follow lines, key badge and Manage link). Write it as `describe("What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17)")` in a new `web/src/screens/data-health/what-you-follow.test.tsx`, with `// Implements TC-COMP-154`. `listInstruments` resolves `{ rows: [], activeCount, retiredCount, nextCursor: null }` and `getHistoryDepth` resolves `{ years, updatedAt: "2026-10-01T12:00:00Z" }`.
+- [x] T007 [P] Implement **TC-COMP-154** (What you follow lines, key badge and Manage link). Write it as `describe("What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17)")` in a new `web/src/screens/data-health/what-you-follow.test.tsx`, with `// Implements TC-COMP-154`. `listInstruments` resolves `{ rows: [], activeCount, retiredCount, nextCursor: null }` and `getHistoryDepth` resolves `{ years, updatedAt: "2026-10-01T12:00:00Z" }`.
   - (a) **Step 1** (`activeCount` 30, `retiredCount` 2, `years` 5, health answering with `credential_present: true`): the region named *What you follow* is a `section` whose `h2` is *What you follow* and whose card has `data-variant="summary"`. Its `dl` pairs are, in order, `term` *Followed stocks* with `definition` *30*; *Stopped following* with *2 (history kept)*; *History depth* with *5 years*, which is a link with `href="/settings"`; *Market data key* with a `status-good` badge *Found*. A link named *Manage followed stocks* has `href="/data/followed"`.
   - (b) **Step 2** (`years` null, health `{ liveness: "unreachable", health: HEALTH(true), … }`): *History depth* reads *not set*, a link with `href="/settings"`; the key definition holds a `coverage-unknown` badge *Not determinable* (T009 asserts the rest).
   - (c) **TC edge, key missing**: health answering with `credential_present: false` gives a `status-critical` badge *Missing*.
@@ -224,7 +226,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - negate-boolean on `credential_present` (a, c)
   - drop-defaulted-argument `{ limit: 1 }` (e)
   - remove-attribute of the depth link's `to` (a, b)
-- [ ] T008 Implement **TC-COMP-155 (What you follow half)**. Write it as `describe("What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24)")` in `web/src/screens/data-health/what-you-follow.test.tsx`, after T007, with `// Implements TC-COMP-155`.
+- [x] T008 Implement **TC-COMP-155 (What you follow half)**. Write it as `describe("What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24)")` in `web/src/screens/data-health/what-you-follow.test.tsx`, after T007, with `// Implements TC-COMP-155`.
   - (a) **Loading**: while either read is pending, the `h2` is present, a descendant carries `aria-busy="true"`, and no `dl` renders.
   - (b) **Step 1**: `listInstruments` rejects with `INTERNAL` (and `getHistoryDepth` resolves). The `h2` is kept, a `role="status"` element reads exactly *Couldn't read what you follow: FactorFlow hit an unexpected problem.*, a *Try again* button is present, and no `dl` and no *Manage followed stocks* link render.
   - (c) The same with only `getHistoryDepth` rejecting with `UNREACHABLE`: *Couldn't read what you follow: FactorFlow is not answering.*
@@ -235,7 +237,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - a hand-written mutant awaiting only `listInstruments` (c: no error renders)
   - a hand-written mutant rendering `error.message` (d)
   - drop-field-copy of the retry callback (e)
-- [ ] T009 Implement **TC-COMP-172** (What you follow key badge while unreachable is Not determinable, never the value). Write it as `describe("Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385)")` in `web/src/screens/data-health/what-you-follow.test.tsx`, after T008, with `// Implements TC-COMP-172`.
+- [x] T009 Implement **TC-COMP-172** (What you follow key badge while unreachable is Not determinable, never the value). Write it as `describe("Market data key while health is not answering (TC-COMP-172, DAC-E6-S4-3, AC-4, DEC-0385)")` in `web/src/screens/data-health/what-you-follow.test.tsx`, after T008, with `// Implements TC-COMP-172`.
   - (a) **Step 1**: health `{ liveness: "unreachable", health: HEALTH(false), … }`, so the stale last value says the key is absent. The key definition holds a `coverage-unknown` badge *Not determinable* whose accessible description is *FactorFlow is not answering*, and the section contains no `status-critical` badge and no *Missing*.
   - (b) The same with `liveness: "unknown"` and `health: null` (before the first answer): the same `NotDeterminable` rendering.
   - (c) **Step 2, no key value**: the `HEALTH` fixture is extended with a planted `credential: "sk-live-PLANTED"` field via a cast (simulating a server that leaked one); in (a), (b) and T007 (a), neither `container.innerHTML` nor any attribute contains *PLANTED*. A source check reads `what-you-follow.tsx` as text and asserts the only `health.health` field it names is `credential_present` (`/health\.health\??\.(\w+)/g` matches only `credential_present`).
@@ -244,7 +246,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - negate-boolean on `liveness === "answering"` (a: *Missing* from the stale value)
   - a hand-written mutant keying on `health.health !== null` alone (a: the stale `false` gives *Missing*)
   - a hand-written mutant spreading `health.health` into the badge's props (c)
-- [ ] T010 Implement **TC-COMP-173 and TC-COMP-174 (What you follow half)**. Write them as `describe("What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)")` in `web/src/screens/data-health/what-you-follow.test.tsx`, after T009, with both `// Implements` comments and the same local helper and planted case as T006.
+- [x] T010 Implement **TC-COMP-173 and TC-COMP-174 (What you follow half)**. Write them as `describe("What you follow vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)")` in `web/src/screens/data-health/what-you-follow.test.tsx`, after T009, with both `// Implements` comments and the same local helper and planted case as T006.
   - (a) Render every state of T007 to T009 (loaded with the key found, missing and not determinable; depth set and not set; loading; both errors). The joined text never matches the DAC-E7-3 regex. In particular *Stopped following* appears and *Retired* does not, and *Market data key* appears and *Provider credential* does not.
   - (b) *Found* and *Missing* are `status-good` and `status-critical` badges whose text is exactly the label and which contain an `svg[aria-hidden="true"]`.
   - (c) *Not determinable* is a `coverage-unknown` badge with an accessible description, never a `status-*` badge, an em dash or plain text.
@@ -255,7 +257,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 ### Additional Unit Tests
 
-- [ ] T011 Write the copy cases as `describe("copy.ts recent downloads and what you follow strings")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T006.
+- [x] T011 Write the copy cases as `describe("copy.ts recent downloads and what you follow strings")` in `web/src/screens/data-health/recent-downloads.test.tsx`, after T006.
   - (a) `writtenOf("1,230", "1,236")` is *1,230 of 1,236 stocks*; `partialResult("1,230", "1,236", "6")` is *1,230 of 1,236 stocks, 6 failed*; `interruptedResult("611")` is *FactorFlow restarted mid-download; 611 kept, the rest picked up next time*; `progressOf("812", "1,236")` is *812 of 1,236 stocks*.
   - (b) `readFailed(READ_TARGETS.recentDownloads, "x")` is exactly *Couldn't read recent downloads: x.* and `readFailed(READ_TARGETS.whatYouFollow, "x")` is exactly *Couldn't read what you follow: x.*, the DAC-E6-17 wording.
   - (c) `recentDownloadsSubline(null)` is *Starts when you press Download now* and `recentDownloadsSubline("14:03:12 CDT")` is *Starts when you press Download now · checked 14:03:12 CDT*.
@@ -273,7 +275,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: The strings, the downloads table with its re-read rule, and the follow summary.
 
-- [ ] T012 Extend CAP-003-E6-S1's `web/src/screens/data-health/copy.ts` (append only; S1's exports are unchanged). Strings are verbatim from data-health-ui 2.6, ux-design 1.4 and epic DAC-E6-14, DAC-E6-16 and DAC-E6-17 unless marked:
+- [x] T012 Extend CAP-003-E6-S1's `web/src/screens/data-health/copy.ts` (append only; S1's exports are unchanged). Strings are verbatim from data-health-ui 2.6, ux-design 1.4 and epic DAC-E6-14, DAC-E6-16 and DAC-E6-17 unless marked:
   - `READ_TARGETS` gains `recentDownloads: "recent downloads"` and `whatYouFollow: "what you follow"`.
   - Recent downloads:
     - `RECENT_DOWNLOADS`: *Recent downloads* (the `h2`, which names the section and so the table, DEC-0307)
@@ -293,7 +295,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
     - `MANAGE_FOLLOWED_STOCKS`: *Manage followed stocks*
   
   Counts are passed in already formatted (`formatCount`), so the functions take strings. No string carries a DAC-E7-3 term, and no unit or hex literal appears, comments included (CAP-003-E6-S5 adds this directory to `token-literals.test.ts`). Makes T011 pass and supplies T002–T010.
-- [ ] T013 Create `web/src/screens/data-health/recent-downloads.tsx` exporting `RecentDownloads(): JSX.Element`. Module doc comment cites data-health-ui 2.6 and 10, DAC-E6-14, DAC-E6-17, DAC-E6-S4-1, DAC-E6-S4-2, AC-12, AC-25, DEC-0213 (f), and Resolved Conflicts 2–4.
+- [x] T013 Create `web/src/screens/data-health/recent-downloads.tsx` exporting `RecentDownloads(): JSX.Element`. Module doc comment cites data-health-ui 2.6 and 10, DAC-E6-14, DAC-E6-17, DAC-E6-S4-1, DAC-E6-S4-2, AC-12, AC-25, DEC-0213 (f), and Resolved Conflicts 2–4.
   - **Inputs.** `const { attention } = useShell()`. A module-local `NON_TERMINAL: ReadonlySet<RunState> = new Set(["requested", "running", "cancelling"])` (owner-shell 2.4; the same set CAP-003-E3-S3 keeps private). `latest = attention.kind === "ok" ? attention.data.latest_download : null`; `active = latest !== null && NON_TERMINAL.has(latest.state)`.
   - **List state.** `useState<{ kind: "loading" } | { kind: "ok"; runs: AcquisitionRun[] } | { kind: "error"; error: ApiError | ApiUnreachableError }>` plus `answeredAt: Date | null`. `read()` calls `listAcquisitionRuns({ limit: 5 })`; a `useRef` request counter makes only the latest call's settlement apply. On success it sets `{ kind: "ok", runs }` and `answeredAt = new Date()` (the time the list answered, AC-25); on failure it sets `{ kind: "error", error }` and leaves `answeredAt` as it was. Any other thrown value is rethrown.
   - **When it reads** (DAC-E6-14, DAC-E6-S4-2). One `useEffect` with `[]` reads once on mount. A second `useEffect` keyed on `answerKey = attention.kind === "ok" ? attention.checkedAt.getTime() : null` reads when `answerKey` is non-null, differs from a `useRef` holding the last key it has seen (initialised to the mount-time key, so the mount answer is not read twice), and `active` is true; it records the key either way. No timer and no other trigger exists.
@@ -307,7 +309,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
   - **Imports.** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` from `../../components/ui/card`; `DataTable` from `../../components/ui/data-table`; `Progress` from `../../components/ui/progress`; `StatusBadge` from `../../components/patterns/status-badge`; `tierOf`, `labelOf` from `../../components/patterns/tiers`; `Absent` from `../../components/patterns/presence`; `formatInstant`, `formatClock`, `formatCount` from `../../components/patterns/format`; `useShell` from `../../app/shell-context`; `type { RunState, AcquisitionRun }` from `../../api/types`; `listAcquisitionRuns`, `ApiError`, `ApiUnreachableError` from `../../api/client`; `ReadFailure`, `SkeletonLine` from `./check-card`; the strings from `./copy`.
   
   Depends on T012. Makes T002–T006 pass.
-- [ ] T014 [P] Create `web/src/screens/data-health/what-you-follow.tsx` exporting `WhatYouFollow(): JSX.Element`. Module doc comment cites data-health-ui 2.6 and 4 ("the key's value never appears"), DAC-E6-16, DAC-E6-17, DAC-E6-S4-3, AC-4 and AC-17, and DEC-0385.
+- [x] T014 [P] Create `web/src/screens/data-health/what-you-follow.tsx` exporting `WhatYouFollow(): JSX.Element`. Module doc comment cites data-health-ui 2.6 and 4 ("the key's value never appears"), DAC-E6-16, DAC-E6-17, DAC-E6-S4-3, AC-4 and AC-17, and DEC-0385.
   - **Reads.** `useState<{ kind: "loading" } | { kind: "ok"; counts: InstrumentListResult; depth: HistoryDepth } | { kind: "error"; error: ApiError | ApiUnreachableError }>`. `read()` sets `loading` and awaits `Promise.all([listInstruments({ limit: 1 }), getHistoryDepth()])`, with the same latest-call guard as T013; a rejection of either sets `error`. It runs once on mount and on **Try again**, never otherwise.
   - **Key.** `const { health } = useShell()`. When `health.liveness === "answering" && health.health !== null`, `present = health.health.credential_present` and the badge is `<StatusBadge tier={tierOf({ of: "credential", present })}>{labelOf({ of: "credential", present })}</StatusBadge>`. Otherwise it is `<NotDeterminable reason={KEY_NOT_DETERMINABLE_REASON} />`, never derived from the last value that `health` keeps while unreachable (Resolved Conflict 6). No other field of `health.health` is read.
   - **Render.** `<section aria-labelledby={headingId}>` around `<Card variant="summary">`, with `CardHeader` and `<CardTitle id={headingId}>{WHAT_YOU_FOLLOW}</CardTitle>`. `CardContent` holds, by state: `loading`, three `SkeletonLine`s; `error`, `ReadFailure` with `readFailed(READ_TARGETS.whatYouFollow, readFailureReason(error))` and `onRetry={read}`; `ok`, a `CardSummaryList` (`grid grid-cols-[auto_1fr] gap-x-4 gap-y-2`, token classes) of four `dt`/`dd` pairs in this order: `FOLLOWED_STOCKS` / `formatCount(activeCount)`; `STOPPED_FOLLOWING` / `historyKept(formatCount(retiredCount))`; `HISTORY_DEPTH` / `<Link to="/settings">{years === null ? DEPTH_NOT_SET : depthYears(formatCount(years))}</Link>` (Resolved Conflict 1); `MARKET_DATA_KEY` / the key badge. When `ok`, `CardFooter` holds `<Button variant="outline" asChild><Link to="/data/followed">{MANAGE_FOLLOWED_STOCKS}</Link></Button>`.
@@ -323,7 +325,7 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Prove the new files sit cleanly in the delivered suite and the shared scans.
 
-- [ ] T015 Run the whole Vitest suite (`npm run test`) unchanged. It includes `web/src/api/render.test.tsx`, which forbids `dangerouslySetInnerHTML` under `web/src` (data-health-ui 4), and, when present, `web/src/components/token-literals.test.ts` (CAP-003-E1-S1). This story does not widen that scan's directory list; CAP-003-E6-S5 does (DAC-E6-S5-4). Run that future scan by hand now: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/recent-downloads.tsx web/src/screens/data-health/what-you-follow.tsx web/src/screens/data-health/copy.ts` prints nothing. Then confirm with `git status --short web/ package.json` that the only changes are `copy.ts` (modified) and the four new files under `web/src/screens/data-health/`, and that `web/src/api/client.ts`, `web/src/api/types.ts` and `package.json` are untouched (AC-17; traces to DAC-E6-14, DAC-E6-16).
+- [x] T015 Run the whole Vitest suite (`npm run test`) unchanged. It includes `web/src/api/render.test.tsx`, which forbids `dangerouslySetInnerHTML` under `web/src` (data-health-ui 4), and, when present, `web/src/components/token-literals.test.ts` (CAP-003-E1-S1). This story does not widen that scan's directory list; CAP-003-E6-S5 does (DAC-E6-S5-4). Run that future scan by hand now: `grep -nE "[0-9](px|rem|em|vh|vw)\b|#[0-9a-fA-F]{3,8}\b|rgb\(|hsl\(" web/src/screens/data-health/recent-downloads.tsx web/src/screens/data-health/what-you-follow.tsx web/src/screens/data-health/copy.ts` prints nothing. Then confirm with `git status --short web/ package.json` that the only changes are `copy.ts` (modified) and the four new files under `web/src/screens/data-health/`, and that `web/src/api/client.ts`, `web/src/api/types.ts` and `package.json` are untouched (AC-17; traces to DAC-E6-14, DAC-E6-16).
 
 **Checkpoint**: The whole suite is green, the future literal scan is clean, and only this story's five files changed.
 
@@ -333,8 +335,8 @@ Mapped test cases (from `tests/component/data-health-ui-tests.md`, confirmed in 
 
 **Purpose**: Validation commands and TDD evidence.
 
-- [ ] T016 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root. Format only this story's files with `npx biome format --write web/src/screens/data-health/recent-downloads.tsx web/src/screens/data-health/recent-downloads.test.tsx web/src/screens/data-health/what-you-follow.tsx web/src/screens/data-health/what-you-follow.test.tsx web/src/screens/data-health/copy.ts`. Then run `npm run build`. Finally run the mutation pass, `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"`, over `recent-downloads.tsx`, `what-you-follow.tsx` and the lines this story adds to `copy.ts`, with the hand-written mutants in Other Notes. It must leave no surviving non-equivalent mutant (traces to DAC-E6-14, DAC-E6-16, DAC-E6-17).
-- [ ] T017 After each TDD cycle, and not once at the end:
+- [x] T016 Run `npm run lint`, `npm run format` and `npx tsc --noEmit` from the repo root. Format only this story's files with `npx biome format --write web/src/screens/data-health/recent-downloads.tsx web/src/screens/data-health/recent-downloads.test.tsx web/src/screens/data-health/what-you-follow.tsx web/src/screens/data-health/what-you-follow.test.tsx web/src/screens/data-health/copy.ts`. Then run `npm run build`. Finally run the mutation pass, `python3 scripts/mutation-run.py run --command "npx vitest run web/src/screens/data-health && npx tsc --noEmit"`, over `recent-downloads.tsx`, `what-you-follow.tsx` and the lines this story adds to `copy.ts`, with the hand-written mutants in Other Notes. It must leave no surviving non-equivalent mutant (traces to DAC-E6-14, DAC-E6-16, DAC-E6-17).
+- [x] T017 After each TDD cycle, and not once at the end:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against it.
   - Append the cycle to `CAP-003-E6-S4-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block that `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256`, the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch`.

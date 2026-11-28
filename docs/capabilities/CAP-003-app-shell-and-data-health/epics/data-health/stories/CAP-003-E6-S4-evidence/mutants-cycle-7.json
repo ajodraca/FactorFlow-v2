@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "repo_head": "67604efa0049475cc819cc50ac11342990a95b42",
+  "range": "HEAD..worktree",
+  "source": "67604efa0049475cc819cc50ac11342990a95b42",
+  "mutants": [
+    {
+      "id": "manual:1",
+      "cycle": "cycle-7",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/what-you-follow.tsx",
+      "line": 59,
+      "original": "    setState({ kind: \"loading\" });",
+      "mutated": "",
+      "description": "Try again no longer returns to the loading body (IR-002, T014 Reads)."
+    },
+    {
+      "id": "manual:2",
+      "cycle": "cycle-7",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 202,
+      "original": "  }, [idPrefix, runningId, done, total]);",
+      "mutated": "  }, [idPrefix, runningId, total]);",
+      "description": "The columns memo ignores a new count, so the bar freezes at its first value (IR-001, rv:1)."
+    },
+    {
+      "id": "manual:3",
+      "cycle": "cycle-7",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 202,
+      "original": "  }, [idPrefix, runningId, done, total]);",
+      "mutated": "  }, [idPrefix, runningId, done]);",
+      "description": "The columns memo ignores the total arriving, so an indeterminate bar stays so (IR-001, rv:2)."
+    },
+    {
+      "id": "manual:4",
+      "cycle": "cycle-7",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 202,
+      "original": "  }, [idPrefix, runningId, done, total]);",
+      "mutated": "  }, [idPrefix, done, total]);",
+      "description": "The columns memo ignores a changed latest run, so progress stays on the old row (IR-001, rv:3)."
+    },
+    {
+      "id": "manual:5",
+      "cycle": "cycle-7",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 152,
+      "original": "            className=\"font-numeric\"",
+      "mutated": "",
+      "description": "The Started link loses the numeric face (IR-003)."
+    },
+    {
+      "id": "manual:6",
+      "cycle": "cycle-7",
+      "operator": "manual",
+      "file": "web/src/screens/data-health/recent-downloads.tsx",
+      "line": 177,
+      "original": "            <span className=\"font-numeric\">{formatInstant(row.original.endedAt)}</span>",
+      "mutated": "            <span>{formatInstant(row.original.endedAt)}</span>",
+      "description": "The Ended time loses the numeric face (IR-003)."
+    }
+  ]
+}

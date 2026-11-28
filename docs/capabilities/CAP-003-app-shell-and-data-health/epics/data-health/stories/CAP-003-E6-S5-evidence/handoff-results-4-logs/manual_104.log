@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-faxe01st/w0/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 660ms
+   × copy.ts, empty card strings (DAC-E6-6) > holds the exact strings 4ms
+     → expected 'Follow some stocks.' to be 'Follow some stocks first.' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > copy.ts, empty card strings (DAC-E6-6) > holds the exact strings
+AssertionError: expected 'Follow some stocks.' to be 'Follow some stocks first.' // Object.is equality
+
+Expected: "Follow some stocks first."
+Received: "Follow some stocks."
+
+ ❯ src/screens/data-health/data-health.test.tsx:1158:26
+    1156|     expect(NO_DATA_YET).toBe("No data has been downloaded yet.");
+    1157|     expect(START_FIRST_DOWNLOAD).toBe("Start the first download");
+    1158|     expect(FOLLOW_FIRST).toBe("Follow some stocks first.");
+       |                          ^
+    1159|     expect(OPEN_SETUP).toBe("Open setup");
+    1160|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:34:01
+   Duration  1.61s (transform 150ms, setup 28ms, collect 443ms, tests 660ms, environment 154ms, prepare 100ms)
+

@@ -1,0 +1,109 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w3/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/problem-row.test.tsx (23 tests) 203ms
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx (51 tests | 1 failed) 1826ms
+   × Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3) > (a) keeps the loaded rows, names the failure and moves focus to Try again 63ms
+     → expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+  data-variant="outline"
+>
+  Try again
+</button>
+Received element with focus:
+  <body>
+  <div>
+    <section
+      aria-labelledby=":r20:"
+    >
+      <div
+        class="rounded border border-border bg-card text-card-foreground"
+        data-variant="default"
+      >
+        <div
+          class="flex space-y-1 p-6 flex-row flex-wrap items-start justify-between gap-2"
+        >
+          <div … />
+          <div … />
+        </div>
+        <div
+          class="p-6 pt-0"
+        >
+          <ul … />
+          <output … />
+          <button … />
+          <output … />
+          <output … />
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/needs-fixing.test.tsx > Show more failure (TC-COMP-166, TC-COMP-167, DAC-E6-9, DAC-E6-S3-3) > (a) keeps the loaded rows, names the failure and moves focus to Try again
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+  data-variant="outline"
+>
+  Try again
+</button>
+Received element with focus:
+  <body>
+  <div>
+    <section
+      aria-labelledby=":r20:"
+    >
+      <div
+        class="rounded border border-border bg-card text-card-foreground"
+        data-variant="default"
+      >
+        <div
+          class="flex space-y-1 p-6 flex-row flex-wrap items-start justify-between gap-2"
+        >
+          <div … />
+          <div … />
+        </div>
+        <div
+          class="p-6 pt-0"
+        >
+          <ul … />
+          <output … />
+          <button … />
+          <output … />
+          <output … />
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+ ❯ src/screens/data-health/needs-fixing.test.tsx:428:19
+    426|     const again = screen.getByRole("button", { name: "Try again" });
+    427|     expect(again).toHaveAttribute("data-variant", "outline");
+    428|     expect(again).toHaveFocus();
+       |                   ^
+    429|   });
+    430| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 73 passed (74)
+   Start at  00:32:47
+   Duration  3.03s (transform 280ms, setup 67ms, collect 1.15s, tests 2.03s, environment 423ms, prepare 193ms)
+

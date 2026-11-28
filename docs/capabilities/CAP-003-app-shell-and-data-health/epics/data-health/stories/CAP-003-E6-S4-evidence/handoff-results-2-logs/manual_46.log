@@ -1,0 +1,140 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 411ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 5 failed) 631ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 24ms
+     → expected 'status-good' to be 'status-warning' // Object.is equality
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence 16ms
+     → expected 'status-good' to be 'status-serious' // Object.is equality
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (d) neither Partial nor Interrupted reads as complete 19ms
+     → expected <span …(2)>…(1)</span> to be null
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 23ms
+     → expected 'status-good' to be 'status-critical' // Object.is equality
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count 11ms
+     → expected 'status-good' to be 'status-active' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected 'status-good' to be 'status-warning' // Object.is equality
+
+Expected: "status-warning"
+Received: "status-good"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:213:55
+    211|   it("(b) a partial download is a warning Partial with its failed coun…
+    212|     const row = rowFor("r-5");
+    213|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-war…
+       |                                                       ^
+    214|     expect(badgeOf(row).textContent).toBe("Partial");
+    215|     expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence
+AssertionError: expected 'status-good' to be 'status-serious' // Object.is equality
+
+Expected: "status-serious"
+Received: "status-good"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:220:55
+    218|   it("(c) an abandoned download is a serious Interrupted with its sent…
+    219|     const row = rowFor("r-4");
+    220|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-ser…
+       |                                                       ^
+    221|     expect(badgeOf(row).textContent).toBe("Interrupted");
+    222|     expect(cellsOf(row)[2]?.textContent).toBe(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (d) neither Partial nor Interrupted reads as complete
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  Partial
+</span>
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:230:65
+    228|     for (const id of ["r-5", "r-4"]) {
+    229|       const row = rowFor(id);
+    230|       expect(row.querySelector('[data-variant="status-good"]')).toBeNu…
+       |                                                                 ^
+    231|       expect(row.textContent).not.toContain("Complete");
+    232|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected 'status-good' to be 'status-critical' // Object.is equality
+
+Expected: "status-critical"
+Received: "status-good"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:241:58
+    239|     expect(cellsOf(complete)[2]?.textContent).toBe("1,236 of 1,236 sto…
+    240|     const failed = rowFor("r-3");
+    241|     expect(badgeOf(failed).getAttribute("data-variant")).toBe("status-…
+       |                                                          ^
+    242|     expect(badgeOf(failed).textContent).toBe("Failed");
+    243|     expect(cellsOf(failed)[2]?.textContent).toBe("0 of 1,236 stocks");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count
+AssertionError: expected 'status-good' to be 'status-active' // Object.is equality
+
+Expected: "status-active"
+Received: "status-good"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:444:59
+    442|     expect(hrefs()[0]).toBe("/data/downloads/r-9");
+    443|     const running = rows[0] as HTMLElement;
+    444|     expect(badgeOf(running).getAttribute("data-variant")).toBe("status…
+       |                                                           ^
+    445|     expect(badgeOf(running).textContent).toBe("Downloading");
+    446|     const ended = cellsOf(running)[1] as HTMLElement;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 61 passed (66)
+   Start at  01:34:51
+   Duration  2.54s (transform 226ms, setup 86ms, collect 1.81s, tests 1.04s, environment 527ms, prepare 274ms)
+

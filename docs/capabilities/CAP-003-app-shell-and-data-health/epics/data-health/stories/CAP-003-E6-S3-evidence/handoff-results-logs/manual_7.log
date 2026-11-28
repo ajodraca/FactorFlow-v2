@@ -1,0 +1,103 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w1/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (23 tests | 2 failed) 139ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row 44ms
+     → expected [ …(2) ] to deeply equal [ …(2) ]
+   × Outcome badges (TC-COMP-169, DAC-E6-S3-5, AC-20) > renders each badge through StatusBadge with its words, a hidden shape and no aria-label 4ms
+     → expected [ 'failed', 'not_found' ] to deeply equal [ 'Failed', 'Not found' ]
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx (51 tests | 1 failed) 2128ms
+   ✓ Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) Show more appends each page with the served cursor, keeps focus and announces the count 312ms
+   × Needs fixing vocabulary (TC-COMP-168, DAC-E6-S3-4, AC-19) > (c) labels every control with a copy.ts constant or a name built from the symbol 15ms
+     → expected [ 'failed', 'not_found' ] to deeply equal [ 'Failed', 'Not found' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/needs-fixing.test.tsx > Needs fixing vocabulary (TC-COMP-168, DAC-E6-S3-4, AC-19) > (c) labels every control with a copy.ts constant or a name built from the symbol
+AssertionError: expected [ 'failed', 'not_found' ] to deeply equal [ 'Failed', 'Not found' ]
+
+- Expected
++ Received
+
+  Array [
+-   "Failed",
+-   "Not found",
++   "failed",
++   "not_found",
+  ]
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx:873:27
+    871|       (b) => b.textContent,
+    872|     );
+    873|     expect(badges.sort()).toEqual(["Failed", "Not found"]);
+       |                           ^
+    874|   });
+    875| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      "status-critical",
+-     "Failed",
++     "failed",
+    ],
+    Array [
+      "status-warning",
+-     "Not found",
++     "not_found",
+    ],
+  ]
+
+ ❯ src/screens/data-health/problem-row.test.tsx:125:79
+    123| 
+    124|     const found = badges(container);
+    125|     expect(found.map((b) => [b.getAttribute("data-variant"), b.textCon…
+       |                                                                               ^
+    126|       ["status-critical", "Failed"],
+    127|       ["status-warning", "Not found"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Outcome badges (TC-COMP-169, DAC-E6-S3-5, AC-20) > renders each badge through StatusBadge with its words, a hidden shape and no aria-label
+AssertionError: expected [ 'failed', 'not_found' ] to deeply equal [ 'Failed', 'Not found' ]
+
+- Expected
++ Received
+
+  Array [
+-   "Failed",
+-   "Not found",
++   "failed",
++   "not_found",
+  ]
+
+ ❯ src/screens/data-health/problem-row.test.tsx:319:45
+    317|     const found = badges(container);
+    318|     expect(found).toHaveLength(2);
+    319|     expect(found.map((b) => b.textContent)).toEqual(["Failed", "Not fo…
+       |                                             ^
+    320|     for (const badge of found) {
+    321|       expect(badge.querySelector('svg[aria-hidden="true"]')).not.toBeN…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 71 passed (74)
+   Start at  00:32:05
+   Duration  3.12s (transform 143ms, setup 70ms, collect 817ms, tests 2.27s, environment 409ms, prepare 140ms)
+

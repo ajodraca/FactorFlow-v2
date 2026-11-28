@@ -1,0 +1,90 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log
+new file mode 100644
+index 00000000..0aa77914
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/red-cycle-2.log
+@@ -0,0 +1,40 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/token-literals.test.ts (69 tests | 2 failed) 50ms
++   × Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (a) widens the scan to the instruments directory 3ms
++     → expected [ 'web/src/components/', …(4) ] to include 'web/src/screens/instruments/'
++   × Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (b) scans its sources, parser included, and no test file 1ms
++     → expected 0 to be greater than 0
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/token-literals.test.ts > Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (a) widens the scan to the instruments directory
++AssertionError: expected [ 'web/src/components/', …(4) ] to include 'web/src/screens/instruments/'
++ ❯ src/components/token-literals.test.ts:552:33
++    550| 
++    551|   it("(a) widens the scan to the instruments directory", () => {
++    552|     expect(SCANNED_DIRECTORIES).toContain(directory);
++       |                                 ^
++    553|   });
++    554| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/components/token-literals.test.ts > Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3) > (b) scans its sources, parser included, and no test file
++AssertionError: expected 0 to be greater than 0
++ ❯ src/components/token-literals.test.ts:557:26
++    555|   it("(b) scans its sources, parser included, and no test file", () =>…
++    556|     const files = scannedFiles().filter((relPath) => relPath.startsWit…
++    557|     expect(files.length).toBeGreaterThan(0);
++       |                          ^
++    558|     expect(files).toContain(`${directory}parse-bulk-symbols.ts`);
++    559|     expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).t…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 67 passed (69)
++   Start at  04:08:25
++   Duration  967ms (transform 45ms, setup 62ms, collect 28ms, tests 50ms, environment 369ms, prepare 43ms)
++
+diff --git a/web/src/components/token-literals.test.ts b/web/src/components/token-literals.test.ts
+index aa799867..72a8f653 100644
+--- a/web/src/components/token-literals.test.ts
++++ b/web/src/components/token-literals.test.ts
+@@ -146,6 +146,7 @@ export const SCANNED_DIRECTORIES: readonly string[] = [
+   "web/src/screens/setup/",
+   "web/src/screens/home/",
+   "web/src/screens/data-health/",
++  "web/src/screens/instruments/",
+ ];
+ 
+ /** The one module that holds approved-specification widths (system design constraint 12). */
+@@ -543,3 +544,31 @@ describe("data health screen is scanned (TC-COMP-178, DAC-E6-S5-4)", () => {
+     expect(isScannedSource(`${directory}data-health.test.tsx`)).toBe(false);
+   });
+ });
++
++// Implements TC-COMP-200
++describe("Followed stocks sources are scanned (TC-COMP-200, DAC-E7-S3-3)", () => {
++  const directory = "web/src/screens/instruments/";
++
++  it("(a) widens the scan to the instruments directory", () => {
++    expect(SCANNED_DIRECTORIES).toContain(directory);
++  });
++
++  it("(b) scans its sources, parser included, and no test file", () => {
++    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
++    expect(files.length).toBeGreaterThan(0);
++    expect(files).toContain(`${directory}parse-bulk-symbols.ts`);
++    expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).toEqual([]);
++  });
++
++  it("(c) finds no literal in any of them", () => {
++    const files = scannedFiles().filter((relPath) => relPath.startsWith(directory));
++    for (const relPath of files) {
++      expect(literalsIn(relPath, readFileSync(path.join(REPO_ROOT, relPath), "utf-8"))).toEqual([]);
++    }
++  });
++
++  it("(d) finds a literal planted in an instruments source", () => {
++    const planted = `${directory}planted.tsx`;
++    expect(literalsIn(planted, 'className="p-[12px]"')).toEqual([`${planted}: 12px`]);
++  });
++});

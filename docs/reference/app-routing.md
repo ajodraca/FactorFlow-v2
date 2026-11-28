@@ -22,7 +22,7 @@ copy and no length.
 |---|---|
 | `/` | `RootRedirect` |
 | `/data/coverage` | Coverage screen |
-| `/data/followed` | Instruments screen |
+| `/data/followed` | Followed stocks screen, see [`followed-stocks-screen.md`](followed-stocks-screen.md) |
 | `/data/downloads` | Runs screen |
 | `/data/downloads/:runId` | Run detail screen |
 | `/settings` | Settings screen |

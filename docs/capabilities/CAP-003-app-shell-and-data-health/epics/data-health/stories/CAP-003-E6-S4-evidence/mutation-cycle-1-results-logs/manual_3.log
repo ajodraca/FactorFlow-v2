@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wbpe0woz/w1/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx (13 tests | 1 failed) 270ms
+   × Recent downloads Started and Ended cells > encodes a run id in the link target 14ms
+     → expected '/data/downloads/a b/c' to be '/data/downloads/a%20b%2Fc' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads Started and Ended cells > encodes a run id in the link target
+AssertionError: expected '/data/downloads/a b/c' to be '/data/downloads/a%20b%2Fc' // Object.is equality
+
+Expected: "/data/downloads/a%20b%2Fc"
+Received: "/data/downloads/a b/c"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:191:39
+    189|     await screen.findByRole("table");
+    190|     const link = within(bodyRows()[0] as HTMLElement).getByRole("link"…
+    191|     expect(link.getAttribute("href")).toBe("/data/downloads/a%20b%2Fc"…
+       |                                       ^
+    192|   });
+    193| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  01:11:12
+   Duration  1.38s (transform 84ms, setup 42ms, collect 380ms, tests 270ms, environment 444ms, prepare 42ms)
+

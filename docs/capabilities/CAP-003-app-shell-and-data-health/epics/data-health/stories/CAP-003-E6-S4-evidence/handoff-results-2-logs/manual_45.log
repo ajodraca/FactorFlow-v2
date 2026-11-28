@@ -1,0 +1,96 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w3/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 389ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 5 failed) 569ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 24ms
+     → expected null not to be null
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence 15ms
+     → expected null not to be null
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 17ms
+     → expected null not to be null
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count 10ms
+     → expected null not to be null
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape 13ms
+     → expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected null not to be null
+ ❯ badgeOf src/screens/data-health/recent-downloads.test.tsx:162:21
+    160| function badgeOf(row: HTMLElement): HTMLElement {
+    161|   const badge = row.querySelector<HTMLElement>('[data-variant^="status…
+    162|   expect(badge).not.toBeNull();
+       |                     ^
+    163|   return badge as HTMLElement;
+    164| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:213:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence
+AssertionError: expected null not to be null
+ ❯ badgeOf src/screens/data-health/recent-downloads.test.tsx:162:21
+    160| function badgeOf(row: HTMLElement): HTMLElement {
+    161|   const badge = row.querySelector<HTMLElement>('[data-variant^="status…
+    162|   expect(badge).not.toBeNull();
+       |                     ^
+    163|   return badge as HTMLElement;
+    164| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:220:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected null not to be null
+ ❯ badgeOf src/screens/data-health/recent-downloads.test.tsx:162:21
+    160| function badgeOf(row: HTMLElement): HTMLElement {
+    161|   const badge = row.querySelector<HTMLElement>('[data-variant^="status…
+    162|   expect(badge).not.toBeNull();
+       |                     ^
+    163|   return badge as HTMLElement;
+    164| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:237:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count
+AssertionError: expected null not to be null
+ ❯ badgeOf src/screens/data-health/recent-downloads.test.tsx:162:21
+    160| function badgeOf(row: HTMLElement): HTMLElement {
+    161|   const badge = row.querySelector<HTMLElement>('[data-variant^="status…
+    162|   expect(badge).not.toBeNull();
+       |                     ^
+    163|   return badge as HTMLElement;
+    164| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:444:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape
+AssertionError: expected null not to be null
+ ❯ badgeOf src/screens/data-health/recent-downloads.test.tsx:162:21
+    160| function badgeOf(row: HTMLElement): HTMLElement {
+    161|   const badge = row.querySelector<HTMLElement>('[data-variant^="status…
+    162|   expect(badge).not.toBeNull();
+       |                     ^
+    163|   return badge as HTMLElement;
+    164| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:734:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 61 passed (66)
+   Start at  01:34:51
+   Duration  2.51s (transform 168ms, setup 83ms, collect 1.90s, tests 958ms, environment 524ms, prepare 503ms)
+

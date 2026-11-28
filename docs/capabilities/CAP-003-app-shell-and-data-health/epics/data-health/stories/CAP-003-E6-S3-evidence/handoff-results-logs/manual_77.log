@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (23 tests | 1 failed) 131ms
+   × copy.ts, Needs fixing strings (DEC-0382, -4) > formats the card title with a thousands separator 3ms
+     → expected 'Needs fixing · 1236' to be 'Needs fixing · 1,236' // Object.is equality
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/needs-fixing.test.tsx (51 tests) 1990ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > copy.ts, Needs fixing strings (DEC-0382, -4) > formats the card title with a thousands separator
+AssertionError: expected 'Needs fixing · 1236' to be 'Needs fixing · 1,236' // Object.is equality
+
+Expected: "Needs fixing · 1,236"
+Received: "Needs fixing · 1236"
+
+ ❯ src/screens/data-health/problem-row.test.tsx:332:36
+    330| describe("copy.ts, Needs fixing strings (DEC-0382, -4)", () => {
+    331|   it("formats the card title with a thousands separator", () => {
+    332|     expect(needsFixingTitle(1236)).toBe("Needs fixing · 1,236");
+       |                                    ^
+    333|     expect(needsFixingTitle(0)).toBe("Needs fixing · 0");
+    334|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 73 passed (74)
+   Start at  00:33:21
+   Duration  2.85s (transform 137ms, setup 70ms, collect 721ms, tests 2.12s, environment 376ms, prepare 216ms)
+

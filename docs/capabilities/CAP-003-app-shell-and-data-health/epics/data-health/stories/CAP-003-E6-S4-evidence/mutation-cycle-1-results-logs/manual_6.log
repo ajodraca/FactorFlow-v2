@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wbpe0woz/w3/web
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx (13 tests | 1 failed) 213ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 20ms
+     → expected '1,230 of 1,236 stocks, 1,230 failed' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected '1,230 of 1,236 stocks, 1,230 failed' to be '1,230 of 1,236 stocks, 6 failed' // Object.is equality
+
+Expected: "1,230 of 1,236 stocks, 6 failed"
+Received: "1,230 of 1,236 stocks, 1,230 failed"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:122:42
+    120|     expect(badgeOf(row).getAttribute("data-variant")).toBe("status-war…
+    121|     expect(badgeOf(row).textContent).toBe("Partial");
+    122|     expect(cellsOf(row)[2]?.textContent).toBe("1,230 of 1,236 stocks, …
+       |                                          ^
+    123|   });
+    124| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  01:11:13
+   Duration  1.67s (transform 213ms, setup 42ms, collect 870ms, tests 213ms, environment 182ms, prepare 143ms)
+

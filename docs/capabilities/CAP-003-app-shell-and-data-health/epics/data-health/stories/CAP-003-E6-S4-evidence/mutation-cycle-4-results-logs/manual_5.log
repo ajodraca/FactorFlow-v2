@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-hxewvdkm/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (5 tests | 2 failed) 134ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 71ms
+     → expected '/' to be '/settings' // Object.is equality
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable 12ms
+     → expected '/' to be '/settings' // Object.is equality
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/recent-downloads.test.tsx (41 tests) 748ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected '/' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:118:40
+    116|     expect(definitionOf("Stopped following").textContent).toBe("2 (his…
+    117|     const depth = within(definitionOf("History depth")).getByRole("lin…
+    118|     expect(depth.getAttribute("href")).toBe("/settings");
+       |                                        ^
+    119|     const badge = definitionOf("Market data key").querySelector('[data…
+    120|     expect(badge?.textContent).toBe("Found");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable
+AssertionError: expected '/' to be '/settings' // Object.is equality
+
+Expected: "/settings"
+Received: "/"
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:136:40
+    134|     await renderFollow();
+    135|     const depth = within(definitionOf("History depth")).getByRole("lin…
+    136|     expect(depth.getAttribute("href")).toBe("/settings");
+       |                                        ^
+    137|     const badge = definitionOf("Market data key").querySelector(
+    138|       '[data-variant="coverage-unknown"]',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 44 passed (46)
+   Start at  01:21:57
+   Duration  2.19s (transform 219ms, setup 86ms, collect 1.48s, tests 882ms, environment 420ms, prepare 384ms)
+

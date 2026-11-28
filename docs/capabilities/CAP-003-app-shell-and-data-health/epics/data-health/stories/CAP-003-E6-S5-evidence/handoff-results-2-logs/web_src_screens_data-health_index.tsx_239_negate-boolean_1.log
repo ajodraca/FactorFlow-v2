@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oubjogrb/w0/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 1 failed) 974ms
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (a2) loading on attention alone keeps the check cards as skeletons 19ms
+     → expected <span …(2)>…(1)</span> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (a2) loading on attention alone keeps the check cards as skeletons
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
+  data-variant="status-good"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide h-3 w-3 shrink-0"
+    fill="none"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      fill="currentColor"
+      r="10"
+    />
+  </svg>
+  No missing prices or gaps
+</span>
+
+ ❯ src/screens/data-health/data-health.test.tsx:671:41
+    669|       const card = region(name);
+    670|       expect(card.closest('[aria-busy="true"]')).not.toBeNull();
+    671|       expect(card.querySelector(BADGE)).toBeNull();
+       |                                         ^
+    672|     }
+    673|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 58 passed (59)
+   Start at  02:53:29
+   Duration  3.75s (transform 644ms, setup 145ms, collect 1.63s, tests 974ms, environment 268ms, prepare 424ms)
+

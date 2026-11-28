@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-faxe01st/w4/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (65 tests | 1 failed) 1148ms
+   × Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (b) reads once more after a successful stop following 54ms
+     → expected "spy" to be called 2 times, but got 1 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (b) reads once more after a successful stop following
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/screens/data-health/data-health.test.tsx:599:28
+    597|     await click(within(screen.getByRole("dialog")).getByRole("button",…
+    598|     await flush();
+    599|     expect(healthReadMock).toHaveBeenCalledTimes(2);
+       |                            ^
+    600|     expect(retireMock).toHaveBeenCalledTimes(1);
+    601|     expect(retireMock).toHaveBeenCalledWith("FBXX");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 64 passed (65)
+   Start at  03:33:51
+   Duration  2.41s (transform 212ms, setup 55ms, collect 617ms, tests 1.15s, environment 282ms, prepare 42ms)
+

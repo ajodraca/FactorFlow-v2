@@ -1,0 +1,922 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w2/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 502ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 21 failed) 658ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download 121ms
+     → expected [] to have a length of 5 but got +0
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count 27ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence 13ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (d) neither Partial nor Interrupted reads as complete 16ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form 14ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads Started and Ended cells > shows the request time for a download that has not started, still linking to it 12ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads Started and Ended cells > shows an em dash with hidden words, not a time, for a download that has not ended 17ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads Started and Ended cells > encodes a run id in the link target 13ms
+     → Expected container to be an Element, a Document or a DocumentFragment but got undefined.
+   × Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > keeps the newest read when an older one answers last 18ms
+     → expected [] to deeply equal [ '/data/downloads/r-2' ]
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count 13ms
+     → expected undefined to be '/data/downloads/r-9' // Object.is equality
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (b) the bar is indeterminate while the total is not known, named by the outcome 10ms
+     → Expected container to be an Element, a Document or a DocumentFragment but got undefined.
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download 8ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a running download heads the list, then a queued one, order otherwise kept 18ms
+     → expected [] to deeply equal [ '/data/downloads/r-4', …(4) ]
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a stopping download ranks with the running one 19ms
+     → expected [] to deeply equal [ '/data/downloads/r-2', …(2) ]
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) an already ordered list renders unchanged 8ms
+     → expected [] to deeply equal [ '/data/downloads/r-4', …(2) ]
+   × Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (e) Try again reads once more and shows the table 29ms
+     → expected [] to deeply equal [ '/data/downloads/r-1' ]
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape 7ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) every dash is a hidden-word absence and no cell is empty or null 7ms
+     → Unable to find an element with the text: —. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m":r2e:"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground"[39m
+        [33mdata-variant[39m=[32m"default"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-col space-y-1 p-6"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold"[39m
+            [33mid[39m=[32m":r2e:"[39m
+          [36m>[39m
+            [0mRecent downloads[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-muted-foreground text-xs"[39m
+          [36m>[39m
+            [0mStarts when you press Download now · checked 01:34:32 CST[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-6 pt-0"[39m
+        [36m>[39m
+          [36m<table[39m
+            [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+            [33mdata-variant[39m=[32m"compact"[39m
+          [36m>[39m
+            [36m<thead>[39m
+              [36m<tr[39m
+                [33mclass[39m=[32m"h-row border-b border-border"[39m
+              [36m>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mStarted[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mOutcome[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mEnded[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mResult[0m
+                [36m</th>[39m
+              [36m</tr>[39m
+            [36m</thead>[39m
+            [36m<tbody />[39m
+          [36m</table>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (d) every status badge carries text and a shape, and the bar is named by visible text 16ms
+     → Unable to find an accessible element with the role "progressbar"
+
+Here are the accessible roles:
+
+  region:
+
+  Name "Recent downloads":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m":r2g:"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Recent downloads":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold"[39m
+    [33mid[39m=[32m":r2g:"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-muted-foreground text-xs"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+    [33mdata-variant[39m=[32m"compact"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead />[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Started Outcome Ended Result":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "Started":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Outcome":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Ended":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Result":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m":r2g:"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground"[39m
+        [33mdata-variant[39m=[32m"default"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-col space-y-1 p-6"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold"[39m
+            [33mid[39m=[32m":r2g:"[39m
+          [36m>[39m
+            [0mRecent downloads[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-muted-foreground text-xs"[39m
+          [36m>[39m
+            [0mStarts when you press Download now · checked 01:34:32 CST[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-6 pt-0"[39m
+        [36m>[39m
+          [36m<table[39m
+            [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+            [33mdata-variant[39m=[32m"compact"[39m
+          [36m>[39m
+            [36m<thead>[39m
+              [36m<tr[39m
+                [33mclass[39m=[32m"h-row border-b border-border"[39m
+              [36m>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mStarted[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mOutcome[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mEnded[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mResult[0m
+                [36m</th>[39m
+              [36m</tr>[39m
+            [36m</thead>[39m
+            [36m<tbody />[39m
+          [36m</table>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value 10ms
+     → expected [] to have a length of 1 but got +0
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > ignores an older read's failure once a newer read has answered 7ms
+     → expected [] to deeply equal [ '/data/downloads/r-2' ]
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 21 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+AssertionError: expected [] to have a length of 5 but got +0
+
+- Expected
++ Received
+
+- 5
++ 0
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:203:18
+    201|     ).toEqual(["Started", "Outcome", "Ended", "Result"]);
+    202|     const rows = bodyRows();
+    203|     expect(rows).toHaveLength(5);
+       |                  ^
+    204|     rows.forEach((row, index) => {
+    205|       const link = within(within(row).getByRole("rowheader")).getByRol…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (b) a partial download is a warning Partial with its failed count
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:212:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (c) an abandoned download is a serious Interrupted with its sentence
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:219:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (d) neither Partial nor Interrupted reads as complete
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:229:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (e) the other outcomes use the plain form
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:236:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads Started and Ended cells > shows the request time for a download that has not started, still linking to it
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:264:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads Started and Ended cells > shows an em dash with hidden words, not a time, for a download that has not ended
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:274:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads Started and Ended cells > encodes a run id in the link target
+TypeError: Expected container to be an Element, a Document or a DocumentFragment but got undefined.
+ ❯ checkContainerType ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/helpers.js:61:11
+ ❯ queryAllByRole ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/queries/role.js:34:35
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:74:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/data-health/recent-downloads.test.tsx:283:55
+    281|     renderRecent();
+    282|     await screen.findByRole("table");
+    283|     const link = within(bodyRows()[0] as HTMLElement).getByRole("link"…
+       |                                                       ^
+    284|     expect(link.getAttribute("href")).toBe("/data/downloads/a%20b%2Fc"…
+    285|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads re-read rule (TC-COMP-171, DAC-E6-S4-2, DAC-E6-14, AC-25) > keeps the newest read when an older one answers last
+AssertionError: expected [] to deeply equal [ '/data/downloads/r-2' ]
+
+- Expected
++ Received
+
+- Array [
+-   "/data/downloads/r-2",
+- ]
++ Array []
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:419:21
+    417|     await screen.findByRole("table");
+    418|     await act(async () => answerOld(PAGE([RUN({ runId: "r-1" })])));
+    419|     expect(hrefs()).toEqual(["/data/downloads/r-2"]);
+       |                     ^
+    420|   });
+    421| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (a) a running download shows determinate progress, not its stored count
+AssertionError: expected undefined to be '/data/downloads/r-9' // Object.is equality
+
+- Expected: 
+"/data/downloads/r-9"
+
++ Received: 
+undefined
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:442:24
+    440|     await screen.findByRole("table");
+    441|     const rows = bodyRows();
+    442|     expect(hrefs()[0]).toBe("/data/downloads/r-9");
+       |                        ^
+    443|     const running = rows[0] as HTMLElement;
+    444|     expect(badgeOf(running).getAttribute("data-variant")).toBe("status…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (b) the bar is indeterminate while the total is not known, named by the outcome
+TypeError: Expected container to be an Element, a Document or a DocumentFragment but got undefined.
+ ❯ checkContainerType ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/helpers.js:61:11
+ ❯ queryAllByRole ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/queries/role.js:34:35
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:74:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/data-health/recent-downloads.test.tsx:481:29
+    479|     await screen.findByRole("table");
+    480|     const row = bodyRows()[0] as HTMLElement;
+    481|     const bar = within(row).getByRole("progressbar", { name: "Queued" …
+       |                             ^
+    482|     expect(bar.hasAttribute("aria-valuenow")).toBe(false);
+    483|     expect(row.textContent).not.toContain("0 of 0");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (d) progress belongs only to the matching, unfinished download
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:493:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a running download heads the list, then a queued one, order otherwise kept
+AssertionError: expected [] to deeply equal [ '/data/downloads/r-4', …(4) ]
+
+- Expected
++ Received
+
+- Array [
+-   "/data/downloads/r-4",
+-   "/data/downloads/r-5",
+-   "/data/downloads/r-6",
+-   "/data/downloads/r-3",
+-   "/data/downloads/r-2",
+- ]
++ Array []
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:514:21
+    512|     renderRecent();
+    513|     await screen.findByRole("table");
+    514|     expect(hrefs()).toEqual([
+       |                     ^
+    515|       "/data/downloads/r-4",
+    516|       "/data/downloads/r-5",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a stopping download ranks with the running one
+AssertionError: expected [] to deeply equal [ '/data/downloads/r-2', …(2) ]
+
+- Expected
++ Received
+
+- Array [
+-   "/data/downloads/r-2",
+-   "/data/downloads/r-3",
+-   "/data/downloads/r-1",
+- ]
++ Array []
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:533:21
+    531|     renderRecent();
+    532|     await screen.findByRole("table");
+    533|     expect(hrefs()).toEqual(["/data/downloads/r-2", "/data/downloads/r…
+       |                     ^
+    534|   });
+    535| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) an already ordered list renders unchanged
+AssertionError: expected [] to deeply equal [ '/data/downloads/r-4', …(2) ]
+
+- Expected
++ Received
+
+- Array [
+-   "/data/downloads/r-4",
+-   "/data/downloads/r-3",
+-   "/data/downloads/r-2",
+- ]
++ Array []
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:546:21
+    544|     renderRecent();
+    545|     await screen.findByRole("table");
+    546|     expect(hrefs()).toEqual(["/data/downloads/r-4", "/data/downloads/r…
+       |                     ^
+    547|   });
+    548| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24) > (e) Try again reads once more and shows the table
+AssertionError: expected [] to deeply equal [ '/data/downloads/r-1' ]
+
+- Expected
++ Received
+
+- Array [
+-   "/data/downloads/r-1",
+- ]
++ Array []
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:599:21
+    597|     await screen.findByRole("table");
+    598|     expect(listMock).toHaveBeenCalledTimes(2);
+    599|     expect(hrefs()).toEqual(["/data/downloads/r-1"]);
+       |                     ^
+    600|   });
+    601| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (b) each of the eight states has its own word and a hidden shape
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:734:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (c) every dash is a hidden-word absence and no cell is empty or null
+TestingLibraryElementError: Unable to find an element with the text: —. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m":r2e:"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground"[39m
+        [33mdata-variant[39m=[32m"default"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-col space-y-1 p-6"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold"[39m
+            [33mid[39m=[32m":r2e:"[39m
+          [36m>[39m
+            [0mRecent downloads[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-muted-foreground text-xs"[39m
+          [36m>[39m
+            [0mStarts when you press Download now · checked 01:34:32 CST[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-6 pt-0"[39m
+        [36m>[39m
+          [36m<table[39m
+            [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+            [33mdata-variant[39m=[32m"compact"[39m
+          [36m>[39m
+            [36m<thead>[39m
+              [36m<tr[39m
+                [33mclass[39m=[32m"h-row border-b border-border"[39m
+              [36m>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mStarted[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mOutcome[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mEnded[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mResult[0m
+                [36m</th>[39m
+              [36m</tr>[39m
+            [36m</thead>[39m
+            [36m<tbody />[39m
+          [36m</table>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/screens/data-health/recent-downloads.test.tsx:757:31
+    755|       expect(ended.querySelector(".sr-only")?.textContent).toBe("not e…
+    756|     }
+    757|     for (const dash of screen.getAllByText("—")) {
+       |                               ^
+    758|       expect(dash.getAttribute("aria-hidden")).toBe("true");
+    759|       expect(dash.parentElement?.querySelector(".sr-only")).not.toBeNu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5) > (d) every status badge carries text and a shape, and the bar is named by visible text
+TestingLibraryElementError: Unable to find an accessible element with the role "progressbar"
+
+Here are the accessible roles:
+
+  region:
+
+  Name "Recent downloads":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m":r2g:"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Recent downloads":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold"[39m
+    [33mid[39m=[32m":r2g:"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-muted-foreground text-xs"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  table:
+
+  Name "":
+  [36m<table[39m
+    [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+    [33mdata-variant[39m=[32m"compact"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  [36m<thead />[39m
+
+  Name "":
+  [36m<tbody />[39m
+
+  --------------------------------------------------
+  row:
+
+  Name "Started Outcome Ended Result":
+  [36m<tr[39m
+    [33mclass[39m=[32m"h-row border-b border-border"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "Started":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Outcome":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Ended":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  Name "Result":
+  [36m<th[39m
+    [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+    [33mscope[39m=[32m"col"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m":r2g:"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground"[39m
+        [33mdata-variant[39m=[32m"default"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-col space-y-1 p-6"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold"[39m
+            [33mid[39m=[32m":r2g:"[39m
+          [36m>[39m
+            [0mRecent downloads[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-muted-foreground text-xs"[39m
+          [36m>[39m
+            [0mStarts when you press Download now · checked 01:34:32 CST[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-6 pt-0"[39m
+        [36m>[39m
+          [36m<table[39m
+            [33mclass[39m=[32m"w-full caption-bottom text-sm"[39m
+            [33mdata-variant[39m=[32m"compact"[39m
+          [36m>[39m
+            [36m<thead>[39m
+              [36m<tr[39m
+                [33mclass[39m=[32m"h-row border-b border-border"[39m
+              [36m>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mStarted[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mOutcome[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mEnded[0m
+                [36m</th>[39m
+                [36m<th[39m
+                  [33mclass[39m=[32m"px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-left align-middle font-medium text-muted-foreground"[39m
+                  [33mscope[39m=[32m"col"[39m
+                [36m>[39m
+                  [0mResult[0m
+                [36m</th>[39m
+              [36m</tr>[39m
+            [36m</thead>[39m
+            [36m<tbody />[39m
+          [36m</table>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/data-health/recent-downloads.test.tsx:772:24
+    770|       expect(badge.querySelector("svg")).not.toBeNull();
+    771|     }
+    772|     const bar = screen.getByRole("progressbar");
+       |                        ^
+    773|     const labelledBy = bar.getAttribute("aria-labelledby") ?? "";
+    774|     expect(document.getElementById(labelledBy)?.textContent).toBe("812…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > takes progress only from an answered attention read, never from a failed read's last value
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ rowFor src/screens/data-health/recent-downloads.test.tsx:170:17
+    168|     (row) => within(row).getByRole("link").getAttribute("href") === `/…
+    169|   );
+    170|   expect(found).toHaveLength(1);
+       |                 ^
+    171|   return found[0] as HTMLElement;
+    172| }
+ ❯ src/screens/data-health/recent-downloads.test.tsx:815:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/21]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-17, DAC-E6-S4-2) > ignores an older read's failure once a newer read has answered
+AssertionError: expected [] to deeply equal [ '/data/downloads/r-2' ]
+
+- Expected
++ Received
+
+- Array [
+-   "/data/downloads/r-2",
+- ]
++ Array []
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:846:21
+    844|     await screen.findByRole("table");
+    845|     await act(async () => failOld(INTERNAL));
+    846|     expect(hrefs()).toEqual(["/data/downloads/r-2"]);
+       |                     ^
+    847|     expect(screen.queryByRole("status")).toBeNull();
+    848|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/21]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  21 failed | 45 passed (66)
+   Start at  01:34:29
+   Duration  2.57s (transform 302ms, setup 108ms, collect 1.95s, tests 1.16s, environment 909ms, prepare 544ms)
+

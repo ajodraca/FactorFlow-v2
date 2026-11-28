@@ -1,0 +1,92 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (20 tests) 314ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (46 tests | 3 failed) 660ms
+   × Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download 84ms
+     → expected '/data/downloads/r-2' to be '/data/downloads/r-5' // Object.is equality
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a running download heads the list, then a queued one, order otherwise kept 16ms
+     → expected [ '/data/downloads/r-6', …(4) ] to deeply equal [ '/data/downloads/r-4', …(4) ]
+   × Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a stopping download ranks with the running one 12ms
+     → expected [ '/data/downloads/r-3', …(2) ] to deeply equal [ '/data/downloads/r-2', …(2) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+AssertionError: expected '/data/downloads/r-2' to be '/data/downloads/r-5' // Object.is equality
+
+Expected: "/data/downloads/r-5"
+Received: "/data/downloads/r-2"
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:207:41
+    205|       const link = within(within(row).getByRole("rowheader")).getByRol…
+    206|       expect(link).toHaveAccessibleName("2026-10-30 09:00 CDT");
+    207|       expect(link.getAttribute("href")).toBe(`/data/downloads/r-${5 - …
+       |                                         ^
+    208|     });
+    209|   });
+ ❯ src/screens/data-health/recent-downloads.test.tsx:204:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a running download heads the list, then a queued one, order otherwise kept
+AssertionError: expected [ '/data/downloads/r-6', …(4) ] to deeply equal [ '/data/downloads/r-4', …(4) ]
+
+- Expected
++ Received
+
+  Array [
++   "/data/downloads/r-6",
+    "/data/downloads/r-4",
+    "/data/downloads/r-5",
+-   "/data/downloads/r-6",
+    "/data/downloads/r-3",
+    "/data/downloads/r-2",
+  ]
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:514:21
+    512|     renderRecent();
+    513|     await screen.findByRole("table");
+    514|     expect(hrefs()).toEqual([
+       |                     ^
+    515|       "/data/downloads/r-4",
+    516|       "/data/downloads/r-5",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384) > (e) a stopping download ranks with the running one
+AssertionError: expected [ '/data/downloads/r-3', …(2) ] to deeply equal [ '/data/downloads/r-2', …(2) ]
+
+- Expected
++ Received
+
+  Array [
+-   "/data/downloads/r-2",
+    "/data/downloads/r-3",
++   "/data/downloads/r-2",
+    "/data/downloads/r-1",
+  ]
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:533:21
+    531|     renderRecent();
+    532|     await screen.findByRole("table");
+    533|     expect(hrefs()).toEqual(["/data/downloads/r-2", "/data/downloads/r…
+       |                     ^
+    534|   });
+    535| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 63 passed (66)
+   Start at  01:34:16
+   Duration  1.89s (transform 198ms, setup 92ms, collect 1.00s, tests 974ms, environment 512ms, prepare 390ms)
+

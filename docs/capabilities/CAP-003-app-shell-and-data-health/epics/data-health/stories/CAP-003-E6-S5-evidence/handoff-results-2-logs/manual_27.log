@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-oubjogrb/w0/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 2 failed) 849ms
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > gives each check card its own result line and the follow count 16ms
+     → expected 'Daily pricesNo missing prices or gaps…' to contain 'All 12 stocks have prices to 2026-10-…'
+   × Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails 48ms
+     → expected 'Daily pricesNo missing prices or gaps…' to contain 'All 12 stocks have prices'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > gives each check card its own result line and the follow count
+AssertionError: expected 'Daily pricesNo missing prices or gaps…' to contain 'All 12 stocks have prices to 2026-10-…'
+
+Expected: "All 12 stocks have prices to 2026-10-29"
+Received: "Daily pricesNo missing prices or gapsAll 0 stocks have prices to 2026-10-29Prices to 2026-10-29Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.Full coverage table"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1211:48
+    1209|   it("gives each check card its own result line and the follow count",…
+    1210|     await renderScreen();
+    1211|     expect(region("Daily prices").textContent).toContain("All 12 stock…
+       |                                                ^
+    1212|     expect(region("Company financials").textContent).toContain("All 12…
+    1213|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Hand-off hardening (DAC-E6-S5-1 to -6, DAC-E6-15) > replaces a loaded check card with the failure when the next read fails
+AssertionError: expected 'Daily pricesNo missing prices or gaps…' to contain 'All 12 stocks have prices'
+
+Expected: "All 12 stocks have prices"
+Received: "Daily pricesNo missing prices or gapsAll 0 stocks have prices to 2026-10-29Prices to 2026-10-29Gaps and currency are judged against the days and the newest session other followed stocks hold. FactorFlow has no trading calendar, so a day with no download leaves nothing to detect.Full coverage table"
+
+ ❯ src/screens/data-health/data-health.test.tsx:1235:48
+    1233|     healthReadMock.mockResolvedValueOnce(DH()).mockRejectedValue(INTER…
+    1234|     await renderScreen();
+    1235|     expect(region("Daily prices").textContent).toContain("All 12 stock…
+       |                                                ^
+    1236|     await act(() => vi.advanceTimersByTimeAsync(61_000));
+    1237|     await act(() => vi.advanceTimersByTimeAsync(11_000));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 57 passed (59)
+   Start at  02:53:58
+   Duration  3.15s (transform 264ms, setup 73ms, collect 781ms, tests 849ms, environment 414ms, prepare 406ms)
+

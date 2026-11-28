@@ -1,0 +1,224 @@
+{
+ "schema": 1,
+ "repo_head": "69ebd4b7933df13ab26f58f5016ae1dc28fc14cd",
+ "range": "HEAD..worktree",
+ "source": "69ebd4b7933df13ab26f58f5016ae1dc28fc14cd",
+ "mutants": [
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:41:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 41,
+   "original": "  const latest = useRef(0);",
+   "mutated": "  const latest = useRef(1);"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:44:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 44,
+   "original": "    latest.current += 1;",
+   "mutated": "    latest.current += 2;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:47:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 47,
+   "original": "    listAcquisitionRuns({ state: \"succeeded\", limit: 1 }).then(",
+   "mutated": "    listAcquisitionRuns({ state: \"succeeded\", limit: 2 }).then("
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:52:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 52,
+   "original": "        const run = page.runs[0];",
+   "mutated": "        const run = page.runs[1];"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:67:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 67,
+   "original": "          cause instanceof ApiError || cause instanceof ApiUnreachableError",
+   "mutated": "          cause instanceof ApiError && cause instanceof ApiUnreachableError"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:79:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 79,
+   "original": "      latest.current += 1;",
+   "mutated": "      latest.current += 2;"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:210:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 210,
+   "original": "          {dh.affected_count === 0 ? (",
+   "mutated": "          {dh.affected_count === 1 ? ("
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:219:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 219,
+   "original": "                tabIndex={-1}",
+   "mutated": "                tabIndex={-2}"
+  },
+  {
+   "id": "web/src/screens/data-health/needs-fixing.tsx:238:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 238,
+   "original": "                  aria-busy={pagePending || undefined}",
+   "mutated": "                  aria-busy={pagePending && undefined}"
+  },
+  {
+   "id": "manual:zero-negated",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 210,
+   "original": "          {dh.affected_count === 0 ? (",
+   "mutated": "          {dh.affected_count !== 0 ? ("
+  },
+  {
+   "id": "manual:filter-state-dropped",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 47,
+   "original": "    listAcquisitionRuns({ state: \"succeeded\", limit: 1 }).then(",
+   "mutated": "    listAcquisitionRuns({ limit: 1 }).then("
+  },
+  {
+   "id": "manual:filter-limit",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 47,
+   "original": "    listAcquisitionRuns({ state: \"succeeded\", limit: 1 }).then(",
+   "mutated": "    listAcquisitionRuns({ state: \"succeeded\", limit: 2 }).then("
+  },
+  {
+   "id": "manual:ended-at-used",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 58,
+   "original": "              : lastCompleteDownload(formatInstant(run.startedAt ?? run.requestedAt)),",
+   "mutated": "              : lastCompleteDownload(formatInstant(run.endedAt ?? run.requestedAt)),"
+  },
+  {
+   "id": "manual:requested-only",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 58,
+   "original": "              : lastCompleteDownload(formatInstant(run.startedAt ?? run.requestedAt)),",
+   "mutated": "              : lastCompleteDownload(formatInstant(run.requestedAt)),"
+  },
+  {
+   "id": "manual:empty-negated",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 56,
+   "original": "            run === undefined",
+   "mutated": "            run !== undefined"
+  },
+  {
+   "id": "manual:failure-reason-dropped",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 70,
+   "original": "        setRead({ kind: \"failed\", reason: readFailureReason(known) });",
+   "mutated": "        setRead({ kind: \"failed\", reason: readFailureReason(new ApiError(\"\", \"\")) });"
+  },
+  {
+   "id": "manual:non-api-text",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 179,
+   "original": "        cause instanceof ApiError || cause instanceof ApiUnreachableError",
+   "mutated": "        true"
+  },
+  {
+   "id": "manual:retry-noop",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 90,
+   "original": "        <ReadFailure sentence={readFailed(LAST_COMPLETE_TARGET, read.reason)} onRetry={load} />",
+   "mutated": "        <ReadFailure sentence={readFailed(LAST_COMPLETE_TARGET, read.reason)} onRetry={() => undefined} />"
+  },
+  {
+   "id": "manual:stale-success-applied",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 49,
+   "original": "        if (mine !== latest.current) {",
+   "mutated": "        if (false) {"
+  },
+  {
+   "id": "manual:stale-failure-applied",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 62,
+   "original": "        if (mine !== latest.current) {",
+   "mutated": "        if (false) {"
+  },
+  {
+   "id": "manual:no-reread-on-answer",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 81,
+   "original": "  }, [answer, load]);",
+   "mutated": "  }, [load]);"
+  },
+  {
+   "id": "manual:pending-not-shown",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 46,
+   "original": "    setRead({ kind: \"pending\" });",
+   "mutated": "    setRead(read);"
+  },
+  {
+   "id": "manual:busy-skeleton",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 85,
+   "original": "      return <SkeletonLine />;",
+   "mutated": "      return <p />;"
+  },
+  {
+   "id": "manual:nothing-wording",
+   "cycle": "cycle-3",
+   "operator": "manual",
+   "file": "web/src/screens/data-health/needs-fixing.tsx",
+   "line": 212,
+   "original": "              <p className=\"text-base font-semibold\">{NOTHING_NEEDS_FIXING}</p>",
+   "mutated": "              <p className=\"text-base font-semibold\">{NO_COMPLETE_DOWNLOAD}</p>"
+  }
+ ]
+}

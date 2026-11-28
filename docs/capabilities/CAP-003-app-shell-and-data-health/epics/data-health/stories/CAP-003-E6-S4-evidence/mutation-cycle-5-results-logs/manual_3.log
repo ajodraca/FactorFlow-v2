@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-b6w8589p/w1/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (17 tests | 2 failed) 222ms
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again 8ms
+     → expected 'Couldn\'t read recent downloads: Fact…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+   × What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (c) a failed depth read alone fails the card, naming an interface that is not answering 4ms
+     → expected 'Couldn\'t read recent downloads: Fact…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (b) a failed instrument read keeps the heading and says what happened, with Try again
+AssertionError: expected 'Couldn\'t read recent downloads: Fact…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+Expected: "Couldn't read what you follow: FactorFlow hit an unexpected problem."
+Received: "Couldn't read recent downloads: FactorFlow hit an unexpected problem."
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:212:32
+    210|     const { container } = renderOnly();
+    211|     const status = await screen.findByRole("status");
+    212|     expect(status.textContent).toBe(
+       |                                ^
+    213|       "Couldn't read what you follow: FactorFlow hit an unexpected pro…
+    214|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow read failure (TC-COMP-155, DAC-E6-17, AC-24) > (c) a failed depth read alone fails the card, naming an interface that is not answering
+AssertionError: expected 'Couldn\'t read recent downloads: Fact…' to be 'Couldn\'t read what you follow: Facto…' // Object.is equality
+
+Expected: "Couldn't read what you follow: FactorFlow is not answering."
+Received: "Couldn't read recent downloads: FactorFlow is not answering."
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:226:32
+    224|     renderOnly();
+    225|     const status = await screen.findByRole("status");
+    226|     expect(status.textContent).toBe("Couldn't read what you follow: Fa…
+       |                                ^
+    227|   });
+    228| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 15 passed (17)
+   Start at  01:24:15
+   Duration  970ms (transform 72ms, setup 30ms, collect 332ms, tests 222ms, environment 156ms, prepare 83ms)
+

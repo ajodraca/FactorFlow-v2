@@ -1,0 +1,1564 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log
+new file mode 100644
+index 00000000..2b2c1ed3
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S5-evidence/red-cycle-1.log
+@@ -0,0 +1,71 @@
++
++ ❯ src/screens/data-health/data-health.test.tsx (0 test)
++
++⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/data-health/data-health.test.tsx [ src/screens/data-health/data-health.test.tsx ]
++Error: Failed to resolve import "./index" from "web/src/screens/data-health/data-health.test.tsx". Does the file exist?
++  Plugin: vite:import-analysis
++  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/data-health/data-health.test.tsx:27:39
++  25 |  const __vi_import_8__ = await import('../../app/shell-context')
++  26 |  const __vi_import_9__ = await import('./copy')
++  27 |  const __vi_import_10__ = await import('./index')
++     |                                        ^
++  28 |  
++  29 |  
++ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
++ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
++ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
++ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
++ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
++ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
++ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed (1)
++      Tests  no tests
++   Start at  02:34:42
++   Duration  542ms (transform 13ms, setup 51ms, collect 0ms, tests 0ms, environment 247ms, prepare 95ms)
++
++# red: token-literals.test.ts before the directory is appended
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ❯ src/components/token-literals.test.ts (65 tests | 2 failed) 22ms
++   × data health screen is scanned (TC-COMP-178, DAC-E6-S5-4) > (a) widens the scan to the data health directory 3ms
++     → expected [ 'web/src/components/', …(3) ] to include 'web/src/screens/data-health/'
++   × data health screen is scanned (TC-COMP-178, DAC-E6-S5-4) > (b) scans every data health source and no test file, and finds no literal in any 0ms
++     → expected [] to include 'web/src/screens/data-health/index.tsx'
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/components/token-literals.test.ts > data health screen is scanned (TC-COMP-178, DAC-E6-S5-4) > (a) widens the scan to the data health directory
++AssertionError: expected [ 'web/src/components/', …(3) ] to include 'web/src/screens/data-health/'
++ ❯ src/components/token-literals.test.ts:508:33
++    506| 
++    507|   it("(a) widens the scan to the data health directory", () => {
++    508|     expect(SCANNED_DIRECTORIES).toContain(directory);
++       |                                 ^
++    509|   });
++    510| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
++
++ FAIL  src/components/token-literals.test.ts > data health screen is scanned (TC-COMP-178, DAC-E6-S5-4) > (b) scans every data health source and no test file, and finds no literal in any
++AssertionError: expected [] to include 'web/src/screens/data-health/index.tsx'
++ ❯ src/components/token-literals.test.ts:528:21
++    526|       "copy.ts",
++    527|     ]) {
++    528|       expect(files).toContain(`${directory}${name}`);
++       |                     ^
++    529|     }
++    530|     expect(files.filter((relPath) => /\.test\.tsx?$/.test(relPath))).t…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
++
++ Test Files  1 failed (1)
++      Tests  2 failed | 63 passed (65)
++   Start at  02:37:27
++   Duration  379ms (transform 31ms, setup 28ms, collect 23ms, tests 22ms, environment 138ms, prepare 23ms)
++
+diff --git a/web/src/screens/data-health/copy.ts b/web/src/screens/data-health/copy.ts
+index 3bdac6e0..74738009 100644
+--- a/web/src/screens/data-health/copy.ts
++++ b/web/src/screens/data-health/copy.ts
+@@ -373,3 +373,16 @@ export const MARKET_DATA_KEY = "Market data key";
+ export const KEY_NOT_DETERMINABLE_REASON = "FactorFlow is not answering";
+ 
+ export const MANAGE_FOLLOWED_STOCKS = "Manage followed stocks";
++
++// CAP-003-E6-S5: the never-downloaded empty card (data-health-ui 10; DAC-E6-6)
++
++export const NO_DATA_YET = "No data has been downloaded yet.";
++
++/** `n` arrives already formatted (`formatCount`), as the other strings take it. */
++export function downloadForFollowed(n: string): string {
++  return `Download data for your ${n} followed stocks to see whether it can be trusted.`;
++}
++
++export const START_FIRST_DOWNLOAD = "Start the first download";
++export const FOLLOW_FIRST = "Follow some stocks first.";
++export const OPEN_SETUP = "Open setup";
+diff --git a/web/src/screens/data-health/data-health.test.tsx b/web/src/screens/data-health/data-health.test.tsx
+new file mode 100644
+index 00000000..d6fdff3d
+--- /dev/null
++++ b/web/src/screens/data-health/data-health.test.tsx
+@@ -0,0 +1,1186 @@
++import { act, fireEvent, render, screen, within } from "@testing-library/react";
++import { MemoryRouter } from "react-router-dom";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import {
++  ApiError,
++  ApiUnreachableError,
++  fetchHealth,
++  getHistoryDepth,
++  listAcquisitionRuns,
++  listInstruments,
++  retireInstrument,
++  startAcquisitionRun,
++} from "../../api/client";
++import type { AcquisitionRun, DataType, HealthResponse, RunState } from "../../api/types";
++import { HealthProvider } from "../../app/health";
++import { LAYOUT } from "../../app/layout";
++import {
++  fetchAttention,
++  fetchDataHealth,
++  fetchProblems,
++  fetchScoreSummary,
++} from "../../app/shell-client";
++import { ShellProvider } from "../../app/shell-context";
++import type {
++  Attention,
++  DataHealth,
++  Failure,
++  LatestDownload,
++  LatestTerminalDownload,
++  ProblemRow,
++  ScoreSummary,
++} from "../../app/shell-types";
++import {
++  FOLLOW_FIRST,
++  NO_DATA_YET,
++  OPEN_SETUP,
++  START_FIRST_DOWNLOAD,
++  downloadForFollowed,
++} from "./copy";
++import DataHealthScreen from "./index";
++
++vi.mock("../../app/shell-client", async (importActual) => ({
++  ...(await importActual<typeof import("../../app/shell-client")>()),
++  fetchAttention: vi.fn(),
++  fetchScoreSummary: vi.fn(),
++  fetchDataHealth: vi.fn(),
++  fetchProblems: vi.fn(),
++}));
++
++vi.mock("../../api/client", async (importActual) => ({
++  ...(await importActual<typeof import("../../api/client")>()),
++  fetchHealth: vi.fn(),
++  listAcquisitionRuns: vi.fn(),
++  listInstruments: vi.fn(),
++  getHistoryDepth: vi.fn(),
++  startAcquisitionRun: vi.fn(),
++  retireInstrument: vi.fn(),
++}));
++
++const attentionMock = vi.mocked(fetchAttention);
++const summaryMock = vi.mocked(fetchScoreSummary);
++const healthReadMock = vi.mocked(fetchDataHealth);
++const problemsMock = vi.mocked(fetchProblems);
++const apiHealthMock = vi.mocked(fetchHealth);
++const runsMock = vi.mocked(listAcquisitionRuns);
++const instrumentsMock = vi.mocked(listInstruments);
++const depthMock = vi.mocked(getHistoryDepth);
++const startMock = vi.mocked(startAcquisitionRun);
++const retireMock = vi.mocked(retireInstrument);
++
++/** The display-vocabulary terms DAC-E7-3 forbids in anything the owner reads. */
++const TERMS = /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
++
++const INTERNAL = new ApiError("instrument table said no", "req-9f3", { code: "internal_error" });
++const UNREACHABLE = new ApiUnreachableError("fetch failed");
++
++const fetchSpy = vi.fn();
++
++function HEALTH(present: boolean): HealthResponse {
++  return {
++    status: "ok",
++    database: "reachable",
++    credential_present: present,
++    schema_version: 3,
++    most_recent_run: null,
++  };
++}
++
++function ATT(over: Partial<Attention> = {}): Attention {
++  return {
++    checked_at: "2026-10-30T19:03:00Z",
++    followed_count: 12,
++    prices_as_of: "2026-10-29",
++    credential_present: true,
++    problems: { stock_count: 0, symbols: [], newest_completed_at: null },
++    latest_download: {
++      run_id: "r-9",
++      state: "succeeded",
++      requested_at: "2026-10-30T13:59:00Z",
++      started_at: "2026-10-30T14:00:00Z",
++      ended_at: "2026-10-30T16:30:00Z",
++      progress: { done: 12, total: 12 },
++    },
++    latest_terminal_download: {
++      run_id: "r-9",
++      state: "succeeded",
++      ended_at: "2026-10-30T16:30:00Z",
++      failure_reason: null,
++    },
++    items: [],
++    ...over,
++  };
++}
++
++function FAIL(dataType: DataType): Failure {
++  return {
++    data_type: dataType,
++    outcome: "failed",
++    reason: "[unavailable] gateway timeout",
++    attempts: 2,
++    completed_at: "2026-10-30T18:20:00Z",
++    run_id: "r-7",
++  };
++}
++
++function NF(dataType: DataType): Failure {
++  return {
++    data_type: dataType,
++    outcome: "not_found",
++    reason: "no such ticker",
++    attempts: 1,
++    completed_at: "2026-10-30T18:20:00Z",
++    run_id: "r-7",
++  };
++}
++
++function ROW(symbol: string, failures: Failure[], retryable: boolean): ProblemRow {
++  return { symbol, failures, retryable };
++}
++
++function DH(over: Partial<DataHealth> = {}): DataHealth {
++  return {
++    checked_at: "2026-10-30T19:03:12Z",
++    never_acquired: false,
++    followed_count: 12,
++    affected_count: 0,
++    checks: {
++      daily_prices: {
++        status: "ok",
++        absent_count: 0,
++        gap_stock_count: 0,
++        behind_count: 0,
++        latest_session: "2026-10-29",
++        gap_detection: { available: true, reason: null },
++        exception_count: 0,
++        exception_symbols: [],
++      },
++      company_financials: {
++        status: "ok",
++        absent_count: 0,
++        problem_count: 0,
++        as_of: "2026-10-30T18:00:00Z",
++        exception_count: 0,
++        exception_symbols: [],
++      },
++    },
++    problems: { rows: [], next_cursor: null },
++    ...over,
++  };
++}
++
++const SUMMARY: ScoreSummary = {
++  never_classified: false,
++  set: {
++    set_id: "s-1",
++    classification_date: "2026-10-30",
++    run_id: "r-9",
++    run_started_at: "2026-10-30T14:00:00Z",
++    run_outcome: "succeeded",
++    state: "complete",
++    started_at: "2026-10-30T16:00:00Z",
++    ended_at: "2026-10-30T16:45:00Z",
++    latest_trading_day: "2026-10-29",
++    active_instruments: 12,
++    not_current: false,
++  },
++  later: null,
++  factors: {} as ScoreSummary["factors"],
++  stocks_current: { current_count: 12, followed_count: 12 },
++};
++
++const SUMMARY_SET = SUMMARY.set as NonNullable<ScoreSummary["set"]>;
++const DAILY_PRICES = DH().checks.daily_prices as NonNullable<DataHealth["checks"]["daily_prices"]>;
++
++function RUN(over: Partial<AcquisitionRun> = {}): AcquisitionRun {
++  return {
++    runId: "r-9",
++    state: "succeeded",
++    historyDepthYears: 5,
++    requestedAt: "2026-10-30T13:59:00Z",
++    startedAt: "2026-10-30T14:00:00Z",
++    endedAt: "2026-10-30T16:30:00Z",
++    instrumentsNamed: 12,
++    instrumentsWritten: 12,
++    instrumentsFailed: 0,
++    failureReason: null,
++    ...over,
++  };
++}
++
++function LATEST(state: RunState, over: Partial<LatestDownload> = {}): LatestDownload {
++  return {
++    run_id: "r-1",
++    state,
++    requested_at: "2026-10-30T18:59:00Z",
++    started_at: "2026-10-30T19:00:00Z",
++    ended_at: null,
++    progress: { done: 3, total: 12 },
++    ...over,
++  };
++}
++
++function TERMINAL(
++  state: LatestTerminalDownload["state"],
++  failureReason: string | null = null,
++): LatestTerminalDownload {
++  return { run_id: "r-9", state, ended_at: "2026-10-30T16:30:00Z", failure_reason: failureReason };
++}
++
++function defer<T>() {
++  let resolve!: (value: T) => void;
++  let reject!: (reason: unknown) => void;
++  const promise = new Promise<T>((res, rej) => {
++    resolve = res;
++    reject = rej;
++  });
++  return { promise, resolve, reject };
++}
++
++function standing(
++  over: {
++    attention?: Attention;
++    dh?: DataHealth;
++    active?: number;
++    runs?: AcquisitionRun[];
++  } = {},
++) {
++  attentionMock.mockResolvedValue(over.attention ?? ATT());
++  healthReadMock.mockResolvedValue(over.dh ?? DH());
++  summaryMock.mockResolvedValue(SUMMARY);
++  apiHealthMock.mockResolvedValue(HEALTH(true));
++  runsMock.mockResolvedValue({ runs: over.runs ?? [RUN()], nextCursor: null });
++  instrumentsMock.mockResolvedValue({
++    rows: [],
++    activeCount: over.active ?? 12,
++    retiredCount: 1,
++    nextCursor: null,
++  });
++  depthMock.mockResolvedValue({ years: 5, updatedAt: "2026-10-01T12:00:00Z" });
++  problemsMock.mockResolvedValue({ rows: [], next_cursor: null });
++}
++
++beforeEach(() => {
++  for (const mock of [
++    attentionMock,
++    summaryMock,
++    healthReadMock,
++    problemsMock,
++    apiHealthMock,
++    runsMock,
++    instrumentsMock,
++    depthMock,
++    startMock,
++    retireMock,
++    fetchSpy,
++  ]) {
++    mock.mockReset();
++  }
++  vi.stubGlobal("fetch", fetchSpy);
++  vi.useFakeTimers({
++    toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
++  });
++  vi.setSystemTime(new Date("2026-10-30T19:03:12Z"));
++  standing();
++});
++
++afterEach(() => {
++  expect(fetchSpy).not.toHaveBeenCalled();
++  vi.unstubAllGlobals();
++  vi.useRealTimers();
++});
++
++async function flush() {
++  await act(() => vi.advanceTimersByTimeAsync(0));
++}
++
++async function renderScreen() {
++  const view = render(
++    <MemoryRouter initialEntries={["/data"]}>
++      <HealthProvider>
++        <ShellProvider>
++          <DataHealthScreen />
++        </ShellProvider>
++      </HealthProvider>
++    </MemoryRouter>,
++  );
++  await flush();
++  return view;
++}
++
++/** `user-event` waits on a real timer under vitest's fake clock, so clicks are dispatched directly. */
++async function click(element: Element) {
++  await act(async () => {
++    fireEvent.click(element);
++    await vi.advanceTimersByTimeAsync(0);
++  });
++}
++
++function region(name: string) {
++  return screen.getByRole("region", { name });
++}
++
++function queryRegion(name: string) {
++  return screen.queryByRole("region", { name });
++}
++
++function labelsOf(element: Element): string[] {
++  return Array.from(element.querySelectorAll("[aria-label], [aria-labelledby]")).map(
++    (el) => el.getAttribute("aria-label") ?? "",
++  );
++}
++
++/** Everything the owner can read or hear: text, accessible names, referenced descriptions. */
++function visibleAndAccessibleText(): string {
++  const parts: string[] = [document.body.textContent ?? ""];
++  for (const el of document.body.querySelectorAll("*")) {
++    for (const attr of ["aria-label", "title"]) {
++      const value = el.getAttribute(attr);
++      if (value !== null) parts.push(value);
++    }
++    for (const attr of ["aria-labelledby", "aria-describedby"]) {
++      for (const id of (el.getAttribute(attr) ?? "").split(/\s+/).filter(Boolean)) {
++        parts.push(document.getElementById(id)?.textContent ?? "");
++      }
++    }
++  }
++  return parts.join("\n");
++}
++
++const BADGE = '[data-variant^="status-"]';
++
++// Implements TC-COMP-151
++describe("never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24)", () => {
++  beforeEach(() => {
++    standing({
++      attention: ATT({
++        latest_terminal_download: TERMINAL("failed", "provider_unavailable"),
++        problems: { stock_count: 3, symbols: ["AAA", "BBB", "CCC"], newest_completed_at: null },
++      }),
++      dh: DH({
++        never_acquired: true,
++        affected_count: 3,
++        checks: { daily_prices: null, company_financials: null },
++        problems: {
++          rows: [
++            ROW("AAA", [FAIL("prices")], true),
++            ROW("BBB", [FAIL("prices")], true),
++            ROW("CCC", [FAIL("fundamentals")], true),
++          ],
++          next_cursor: null,
++        },
++      }),
++      runs: [RUN({ state: "failed", instrumentsWritten: 0, instrumentsFailed: 12 })],
++    });
++  });
++
++  it("renders the verdict, Needs fixing and Recent downloads, with the checks null", async () => {
++    await renderScreen();
++    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
++      "Is the data good enough to trust?",
++    );
++    expect(document.querySelector('[data-variant="status-critical"]')?.textContent).toBe("No");
++    expect(screen.getByTestId("verdict-sentence").textContent).toContain(
++      ", and the last download failed.",
++    );
++    expect(within(region("Needs fixing · 3")).getAllByRole("listitem")).toHaveLength(3);
++    expect(within(region("Recent downloads")).getByRole("table")).toBeTruthy();
++    expect(within(region("Recent downloads")).getByText("Failed")).toBeTruthy();
++  });
++
++  it("shows the two check cards' null state, never a passed check, never the empty card", async () => {
++    await renderScreen();
++    for (const name of ["Daily prices", "Company financials"]) {
++      const card = region(name);
++      expect(
++        card.querySelector('[data-variant^="status-"], [data-variant="coverage-unknown"]'),
++      ).toBeNull();
++      const hidden = within(card).getAllByText("no data stored yet");
++      expect(hidden).toHaveLength(2);
++      for (const el of hidden) {
++        expect(el.className).toContain("sr-only");
++      }
++      const dashes = Array.from(card.querySelectorAll('[aria-hidden="true"]')).filter(
++        (el) => el.textContent === "—",
++      );
++      expect(dashes.length).toBeGreaterThanOrEqual(2);
++    }
++    const text = document.body.textContent ?? "";
++    for (const passed of [
++      "No missing prices or gaps",
++      "All financials present",
++      "All 12 stocks have prices",
++      "All 12 stocks have financials",
++    ]) {
++      expect(text).not.toContain(passed);
++    }
++    expect(screen.queryByRole("heading", { name: NO_DATA_YET })).toBeNull();
++    expect(queryRegion("Factor scores")).not.toBeNull();
++    expect(queryRegion("What you follow")).not.toBeNull();
++  });
++});
++
++// Implements TC-COMP-175
++describe("Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21)", () => {
++  it("(a) offers Open setup when no stock is followed, and lets the other regions give way", async () => {
++    standing({
++      attention: ATT({ followed_count: 0, latest_download: null, latest_terminal_download: null }),
++      dh: DH({
++        followed_count: 0,
++        never_acquired: true,
++        checks: { daily_prices: null, company_financials: null },
++      }),
++      active: 0,
++    });
++    await renderScreen();
++    const card = region(NO_DATA_YET);
++    expect(within(card).getByRole("heading", { level: 2 }).textContent).toBe(NO_DATA_YET);
++    expect(within(card).getByText(FOLLOW_FIRST)).toBeTruthy();
++    const link = within(card).getByRole("link", { name: OPEN_SETUP });
++    expect(link.getAttribute("href")).toBe("/setup");
++    expect(link.getAttribute("data-variant")).toBe("default");
++    expect(within(card).queryByRole("button", { name: START_FIRST_DOWNLOAD })).toBeNull();
++    expect(document.querySelector(BADGE)).toBeNull();
++    expect(screen.queryByTestId("verdict-sentence")).toBeNull();
++    expect(document.querySelector("header")?.textContent).not.toContain("checked");
++    for (const name of ["Daily prices", "Company financials", "Factor scores", "What you follow"]) {
++      expect(queryRegion(name)).toBeNull();
++    }
++    // DEC-0405: the lower regions mount while attention loads and read once; nothing
++    // reads after the empty state settles, and neither region is rendered.
++    expect(queryRegion("Recent downloads")).toBeNull();
++    const instrumentReads = instrumentsMock.mock.calls.length;
++    const runReads = runsMock.mock.calls.length;
++    await act(() => vi.advanceTimersByTimeAsync(600_000));
++    expect(instrumentsMock.mock.calls.length).toBe(instrumentReads);
++    expect(runsMock.mock.calls.length).toBe(runReads);
++    expect(document.body.textContent).not.toContain("Needs fixing");
++    expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
++    expect(screen.getByRole("link", { name: "Full coverage table" })).toBeTruthy();
++    expect(screen.getByRole("button", { name: "Download now" })).toBeTruthy();
++  });
++
++  it("(b) offers Start the first download with the count from attention while the aggregate is pending", async () => {
++    standing({
++      attention: ATT({ followed_count: 12, latest_download: null, latest_terminal_download: null }),
++    });
++    healthReadMock.mockReturnValue(defer<DataHealth>().promise);
++    startMock.mockResolvedValue({ runId: "r-10", state: "requested", queuedBehind: null });
++    await renderScreen();
++    const card = region(NO_DATA_YET);
++    expect(within(card).getByText(downloadForFollowed("12")).textContent).toBe(
++      "Download data for your 12 followed stocks to see whether it can be trusted.",
++    );
++    const button = within(card).getByRole("button", { name: START_FIRST_DOWNLOAD });
++    expect(button.getAttribute("data-variant")).toBe("default");
++    expect(within(card).queryByRole("link", { name: OPEN_SETUP })).toBeNull();
++    const before = attentionMock.mock.calls.length;
++    await click(button);
++    await flush();
++    expect(startMock).toHaveBeenCalledTimes(1);
++    expect(startMock).toHaveBeenCalledWith();
++    expect(attentionMock.mock.calls.length).toBe(before + 1);
++  });
++
++  it("(c) formats a large count", async () => {
++    standing({
++      attention: ATT({
++        followed_count: 1236,
++        latest_download: null,
++        latest_terminal_download: null,
++      }),
++    });
++    await renderScreen();
++    expect(within(region(NO_DATA_YET)).getByText(downloadForFollowed("1,236"))).toBeTruthy();
++  });
++
++  it("(c2) offers the first download for a single followed stock", async () => {
++    standing({
++      attention: ATT({ followed_count: 1, latest_download: null, latest_terminal_download: null }),
++      active: 1,
++    });
++    await renderScreen();
++    const card = region(NO_DATA_YET);
++    expect(within(card).getByText(downloadForFollowed("1"))).toBeTruthy();
++    expect(within(card).getByRole("button", { name: START_FIRST_DOWNLOAD })).toBeTruthy();
++    expect(within(card).queryByRole("link", { name: OPEN_SETUP })).toBeNull();
++  });
++
++  it("(d) shows a running first download's progress beneath the card", async () => {
++    standing({
++      attention: ATT({
++        latest_download: LATEST("running"),
++        latest_terminal_download: null,
++      }),
++      runs: [RUN({ runId: "r-1", state: "running", endedAt: null, instrumentsWritten: 3 })],
++    });
++    await renderScreen();
++    const card = region(NO_DATA_YET);
++    const recent = region("Recent downloads");
++    expect(card.compareDocumentPosition(recent) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
++    expect(within(recent).getByRole("progressbar", { name: "3 of 12 stocks" })).toBeTruthy();
++    expect(within(recent).getByText("3 of 12 stocks")).toBeTruthy();
++    expect(queryRegion("What you follow")).toBeNull();
++  });
++
++  it("(e) shows Needs fixing only while the count is above zero", async () => {
++    const running = ATT({ latest_download: LATEST("running"), latest_terminal_download: null });
++    standing({
++      attention: running,
++      dh: DH({
++        affected_count: 1,
++        problems: { rows: [ROW("FBXX", [NF("reference")], false)], next_cursor: null },
++      }),
++    });
++    const { unmount } = await renderScreen();
++    const needs = region("Needs fixing · 1");
++    expect(within(needs).getAllByRole("listitem")).toHaveLength(1);
++    expect(
++      region(NO_DATA_YET).compareDocumentPosition(needs) & Node.DOCUMENT_POSITION_FOLLOWING,
++    ).not.toBe(0);
++    unmount();
++    standing({ attention: running, dh: DH({ affected_count: 0 }) });
++    await renderScreen();
++    expect(document.body.textContent).not.toContain("Needs fixing");
++  });
++
++  it.each([
++    ["followed stocks", ATT({ latest_download: null, latest_terminal_download: null })],
++    [
++      "no followed stocks",
++      ATT({ followed_count: 0, latest_download: null, latest_terminal_download: null }),
++    ],
++    [
++      "a running first download",
++      ATT({ latest_download: LATEST("running"), latest_terminal_download: null }),
++    ],
++  ])("(f) never shows a check as passed with %s", async (_name, attention) => {
++    standing({
++      attention,
++      runs: [RUN({ state: "running", endedAt: null })],
++      dh: DH({
++        affected_count: 1,
++        problems: { rows: [ROW("FBXX", [NF("reference")], false)], next_cursor: null },
++      }),
++    });
++    await renderScreen();
++    expect(document.querySelector('[data-variant="status-good"]')).toBeNull();
++    const text = document.body.textContent ?? "";
++    for (const passed of ["No missing prices or gaps", "All financials present", "Yes."]) {
++      expect(text).not.toContain(passed);
++    }
++  });
++});
++
++// Implements TC-COMP-176
++describe("Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28)", () => {
++  const FBXX = DH({
++    affected_count: 1,
++    problems: { rows: [ROW("FBXX", [NF("reference")], false)], next_cursor: null },
++  });
++
++  it("(a) reads the aggregate once while attention keeps polling", async () => {
++    standing({ dh: FBXX });
++    await renderScreen();
++    expect(healthReadMock).toHaveBeenCalledTimes(1);
++    await act(() => vi.advanceTimersByTimeAsync(600_000));
++    expect(attentionMock.mock.calls.length).toBeGreaterThanOrEqual(10);
++    expect(healthReadMock).toHaveBeenCalledTimes(1);
++  });
++
++  it("(b) reads once more after a successful stop following", async () => {
++    standing({ dh: FBXX });
++    retireMock.mockResolvedValue({ lifecycle: "retired", retiredAt: "2026-10-30T19:10:00Z" });
++    await renderScreen();
++    await click(screen.getByRole("button", { name: "Stop following FBXX" }));
++    await click(within(screen.getByRole("dialog")).getByRole("button", { name: "Stop following" }));
++    await flush();
++    expect(healthReadMock).toHaveBeenCalledTimes(2);
++    expect(retireMock).toHaveBeenCalledTimes(1);
++    expect(retireMock).toHaveBeenCalledWith("FBXX");
++    await act(() => vi.advanceTimersByTimeAsync(600_000));
++    expect(healthReadMock).toHaveBeenCalledTimes(2);
++  });
++
++  it("(c) leaves the terminal transition to the hook: one read for one transition", async () => {
++    standing({ dh: FBXX });
++    attentionMock
++      .mockResolvedValueOnce(ATT())
++      .mockResolvedValueOnce(
++        ATT({
++          latest_download: LATEST("running"),
++          latest_terminal_download: TERMINAL("succeeded"),
++        }),
++      )
++      .mockResolvedValue(ATT());
++    await renderScreen();
++    await act(() => vi.advanceTimersByTimeAsync(61_000));
++    await act(() => vi.advanceTimersByTimeAsync(11_000));
++    // Stepped, so React renders the running answer before the terminal one arrives.
++    expect(healthReadMock).toHaveBeenCalledTimes(2);
++    await act(() => vi.advanceTimersByTimeAsync(600_000));
++    expect(healthReadMock).toHaveBeenCalledTimes(2);
++  });
++
++  it("(d) Try again is a read, and only that", async () => {
++    standing();
++    healthReadMock.mockRejectedValueOnce(INTERNAL).mockResolvedValue(DH());
++    await renderScreen();
++    const before = attentionMock.mock.calls.length;
++    await click(within(region("Daily prices")).getByRole("button", { name: "Try again" }));
++    await flush();
++    expect(healthReadMock).toHaveBeenCalledTimes(2);
++    expect(attentionMock.mock.calls.length).toBe(before);
++  });
++});
++
++// Implements TC-COMP-177
++// Implements TC-COMP-155 (whole screen)
++describe("Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24)", () => {
++  it("(a) loading: every read pending", async () => {
++    for (const mock of [
++      attentionMock,
++      summaryMock,
++      healthReadMock,
++      runsMock,
++      instrumentsMock,
++      depthMock,
++    ]) {
++      mock.mockReturnValue(defer<never>().promise);
++    }
++    await renderScreen();
++    expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
++    expect(screen.getByRole("link", { name: "Full coverage table" })).toBeTruthy();
++    expect(document.querySelector("header [aria-busy='true']")).not.toBeNull();
++    for (const name of ["Needs fixing", "Recent downloads", "What you follow"]) {
++      expect(region(name).querySelector("[aria-busy='true']")).not.toBeNull();
++    }
++    for (const name of ["Daily prices", "Company financials", "Factor scores"]) {
++      expect(region(name).closest('[aria-busy="true"]')).not.toBeNull();
++    }
++    expect(document.querySelector(BADGE)).toBeNull();
++    expect(screen.queryByRole("heading", { name: NO_DATA_YET })).toBeNull();
++  });
++
++  it("(a2) loading on attention alone keeps the check cards as skeletons", async () => {
++    attentionMock.mockReturnValue(defer<never>().promise);
++    await renderScreen();
++    for (const name of ["Daily prices", "Company financials", "Factor scores"]) {
++      const card = region(name);
++      expect(card.closest('[aria-busy="true"]')).not.toBeNull();
++      expect(card.querySelector(BADGE)).toBeNull();
++    }
++  });
++
++  it("(b) empty, never populated: exactly one such region", async () => {
++    standing({ attention: ATT({ latest_download: null, latest_terminal_download: null }) });
++    await renderScreen();
++    expect(screen.getAllByRole("region", { name: NO_DATA_YET })).toHaveLength(1);
++  });
++
++  it("(c) empty, nothing found", async () => {
++    await renderScreen();
++    expect(screen.getByTestId("verdict-sentence").textContent).toContain(
++      "Yes. None of the 12 followed stocks needs attention.",
++    );
++    const needs = region("Needs fixing · 0");
++    expect(within(needs).getByText("Nothing needs fixing.")).toBeTruthy();
++    expect(needs.textContent).toContain("Last complete download 2026-10-30 09:00 CDT");
++    expect(region("Daily prices").querySelector('[data-variant="status-good"]')?.textContent).toBe(
++      "No missing prices or gaps",
++    );
++  });
++
++  it("(d) partial", async () => {
++    standing({
++      attention: ATT({ latest_terminal_download: TERMINAL("partial") }),
++      dh: DH({
++        affected_count: 2,
++        checks: {
++          daily_prices: {
++            status: "exceptions",
++            absent_count: 2,
++            gap_stock_count: 0,
++            behind_count: 0,
++            latest_session: "2026-10-29",
++            gap_detection: { available: true, reason: null },
++            exception_count: 2,
++            exception_symbols: ["AAA", "BBB"],
++          },
++          company_financials: DH().checks.company_financials,
++        },
++        problems: {
++          rows: [ROW("AAA", [FAIL("prices")], true), ROW("BBB", [FAIL("prices")], true)],
++          next_cursor: null,
++        },
++      }),
++      runs: [RUN({ state: "partial", instrumentsWritten: 10, instrumentsFailed: 2 })],
++    });
++    await renderScreen();
++    const verdict = document.querySelector(`header ${BADGE}`);
++    expect(verdict?.textContent).toBe("Mostly yes");
++    expect(verdict?.getAttribute("data-variant")).toBe("status-warning");
++    const prices = region("Daily prices");
++    expect(prices.querySelector('[data-variant="status-warning"]')?.textContent).toBe(
++      "Needs attention",
++    );
++    expect(prices.textContent).toContain("Prices to 2026-10-29");
++    expect(prices.textContent).toContain("AAA, BBB");
++    const recent = region("Recent downloads");
++    expect(recent.querySelector('[data-variant="status-warning"]')?.textContent).toBe("Partial");
++    expect(recent.textContent).toContain("10 of 12 stocks, 2 failed");
++  });
++
++  it("(e) stale: scores render it, the check cards record it as not rendered", async () => {
++    summaryMock.mockResolvedValue({ ...SUMMARY, set: { ...SUMMARY_SET, not_current: true } });
++    standing({
++      dh: DH({
++        checks: {
++          daily_prices: { ...DAILY_PRICES, latest_session: "2026-09-01" },
++          company_financials: DH().checks.company_financials,
++        },
++      }),
++    });
++    summaryMock.mockResolvedValue({ ...SUMMARY, set: { ...SUMMARY_SET, not_current: true } });
++    await renderScreen();
++    expect(
++      region("Factor scores").querySelector('[data-variant="status-warning"]')?.textContent,
++    ).toBe("Not reflecting the latest download");
++    for (const name of ["Daily prices", "Company financials"]) {
++      expect(region(name).textContent).not.toMatch(/stale|out of date|not current/i);
++    }
++    expect(region("Daily prices").querySelector('[data-variant="status-good"]')?.textContent).toBe(
++      "No missing prices or gaps",
++    );
++    expect(region("Daily prices").textContent).toContain("FactorFlow has no trading calendar");
++  });
++
++  it("(f) unavailable: a failed attention read keeps the cards from their own reads", async () => {
++    attentionMock.mockRejectedValue(INTERNAL);
++    apiHealthMock.mockRejectedValue(UNREACHABLE);
++    summaryMock.mockResolvedValue({ kind: "not_served" });
++    healthReadMock.mockResolvedValue(
++      DH({
++        checks: {
++          daily_prices: {
++            ...DAILY_PRICES,
++            status: "exceptions",
++            gap_stock_count: null,
++            gap_detection: { available: false, reason: "fewer_than_two_instruments_with_data" },
++          },
++          company_financials: DH().checks.company_financials,
++        },
++      }),
++    );
++    await renderScreen();
++    expect(document.querySelector("header")?.textContent).toContain(
++      "Couldn't read what needs attention: FactorFlow hit an unexpected problem.",
++    );
++    expect(
++      region("Daily prices").querySelector('[data-variant="coverage-unknown"]')?.textContent,
++    ).toBe("Gaps not determinable");
++    expect(
++      region("Factor scores").querySelector('[data-variant="coverage-unknown"]')?.textContent,
++    ).toBe("Not determinable");
++    expect(region("Factor scores").textContent).toContain("FactorFlow can't read scores yet.");
++    expect(
++      region("What you follow").querySelector('[data-variant="coverage-unknown"]')?.textContent,
++    ).toBe("Not determinable");
++    expect(screen.queryByRole("heading", { name: NO_DATA_YET })).toBeNull();
++    const dhBefore = healthReadMock.mock.calls.length;
++    const attBefore = attentionMock.mock.calls.length;
++    await click(
++      within(document.querySelector("header") as HTMLElement).getByRole("button", {
++        name: "Try again",
++      }),
++    );
++    await flush();
++    expect(attentionMock.mock.calls.length).toBe(attBefore + 1);
++    expect(healthReadMock.mock.calls.length).toBe(dhBefore);
++  });
++
++  it("(g) error: every region keeps its title and says what failed, with no leak", async () => {
++    healthReadMock.mockRejectedValue(INTERNAL);
++    runsMock.mockRejectedValue(INTERNAL);
++    instrumentsMock.mockRejectedValue(INTERNAL);
++    await renderScreen();
++    const sentence = "Couldn't read the data health checks: FactorFlow hit an unexpected problem.";
++    for (const name of ["Daily prices", "Company financials"]) {
++      expect(within(region(name)).getByRole("heading", { level: 2 })).toBeTruthy();
++      expect(region(name).textContent).toContain(sentence);
++      expect(within(region(name)).getByRole("button", { name: "Try again" })).toBeTruthy();
++    }
++    expect(region("Needs fixing").textContent).toContain(sentence);
++    expect(region("Recent downloads").textContent).toContain(
++      "Couldn't read recent downloads: FactorFlow hit an unexpected problem.",
++    );
++    expect(region("What you follow").textContent).toContain(
++      "Couldn't read what you follow: FactorFlow hit an unexpected problem.",
++    );
++    expect(document.querySelector("header")?.textContent).toContain(sentence);
++    const text = document.body.textContent ?? "";
++    expect(text).not.toContain("req-9f3");
++    expect(text).not.toContain("instrument table said no");
++    const before = healthReadMock.mock.calls.length;
++    const attBefore = attentionMock.mock.calls.length;
++    const sumBefore = summaryMock.mock.calls.length;
++    await click(within(region("Company financials")).getByRole("button", { name: "Try again" }));
++    await flush();
++    expect(healthReadMock.mock.calls.length).toBe(before + 1);
++    expect(attentionMock.mock.calls.length).toBe(attBefore);
++    expect(summaryMock.mock.calls.length).toBe(sumBefore);
++  });
++
++  it("(h) unreachable is the shell's: recorded as not applicable by the screen's types", async () => {
++    // The screen's `StateRegion` call names `unreachable` only as `notApplicable`; `tsc` enforces it.
++    await renderScreen();
++    expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
++  });
++});
++
++describe("Layout and wiring (AC-11, AC-26, owner-shell 2.1, data-health-ui 10)", () => {
++  it("(a) caps the width at the layout key", async () => {
++    await renderScreen();
++    const root = (screen.getByRole("heading", { level: 1 }).closest("header") as HTMLElement)
++      .parentElement as HTMLElement;
++    expect(root.style.maxWidth).toBe(LAYOUT.contentMaxWidth);
++    expect(root.style.maxWidth).toBe("1180px");
++  });
++
++  it("(b) holds the three checks in a four-column grid with the fourth column empty", async () => {
++    await renderScreen();
++    const grid = region("Daily prices").parentElement as HTMLElement;
++    expect(grid.className).toContain("grid-cols-4");
++    expect(
++      Array.from(grid.children).map(
++        (c) => within(c as HTMLElement).getByRole("heading").textContent,
++      ),
++    ).toEqual(["Daily prices", "Company financials", "Factor scores"]);
++    expect(region("Company financials").parentElement).toBe(grid);
++    expect(region("Factor scores").parentElement).toBe(grid);
++  });
++
++  it("(c) orders the regions", async () => {
++    await renderScreen();
++    const header = document.querySelector("header") as HTMLElement;
++    const grid = region("Daily prices").parentElement as HTMLElement;
++    const needs = region("Needs fixing · 0");
++    const recent = region("Recent downloads");
++    const follow = region("What you follow");
++    const precedes = (a: Element, b: Element) =>
++      (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
++    expect(precedes(header, grid)).toBe(true);
++    expect(precedes(grid, needs)).toBe(true);
++    expect(precedes(needs, recent)).toBe(true);
++    expect(precedes(recent, follow)).toBe(true);
++    expect(recent.parentElement).toBe(follow.parentElement);
++    expect((recent.parentElement as HTMLElement).className).toContain("grid-cols-2");
++  });
++
++  it("(d) retries the scores read alone", async () => {
++    summaryMock.mockRejectedValueOnce(INTERNAL).mockResolvedValue(SUMMARY);
++    await renderScreen();
++    const att = attentionMock.mock.calls.length;
++    const dh = healthReadMock.mock.calls.length;
++    const sum = summaryMock.mock.calls.length;
++    await click(within(region("Factor scores")).getByRole("button", { name: "Try again" }));
++    await flush();
++    expect(summaryMock.mock.calls.length).toBe(sum + 1);
++    expect(attentionMock.mock.calls.length).toBe(att);
++    expect(healthReadMock.mock.calls.length).toBe(dh);
++  });
++
++  it("(e) shows one set of header actions", async () => {
++    await renderScreen();
++    const header = document.querySelector("header") as HTMLElement;
++    expect(within(header).getAllByRole("link", { name: "Full coverage table" })).toHaveLength(1);
++    expect(screen.getAllByRole("button", { name: "Download now" })).toHaveLength(1);
++  });
++});
++
++// Implements TC-COMP-179
++describe("Display vocabulary in every state (TC-COMP-179, DAC-E6-S5-5, AC-19)", () => {
++  it("(b) the term pattern is not vacuous", () => {
++    for (const term of ["one run", "Retired", "Provider credential"]) {
++      expect(term).toMatch(TERMS);
++    }
++    for (const fine of [
++      "Download",
++      "downloads",
++      "run_id",
++      "fewer_than_two_instruments_with_data",
++    ]) {
++      expect(fine).not.toMatch(TERMS);
++    }
++  });
++
++  const scenarios: [string, () => void][] = [
++    ["the full screen", () => standing()],
++    [
++      "every read pending",
++      () => {
++        for (const mock of [
++          attentionMock,
++          summaryMock,
++          healthReadMock,
++          runsMock,
++          instrumentsMock,
++          depthMock,
++        ]) {
++          mock.mockReturnValue(defer<never>().promise);
++        }
++      },
++    ],
++    [
++      "a partial download",
++      () =>
++        standing({
++          attention: ATT({ latest_terminal_download: TERMINAL("partial") }),
++          dh: DH({
++            affected_count: 1,
++            checks: {
++              daily_prices: {
++                ...DAILY_PRICES,
++                status: "exceptions",
++                exception_count: 1,
++                exception_symbols: ["AAA"],
++              },
++              company_financials: DH().checks.company_financials,
++            },
++            problems: { rows: [ROW("AAA", [FAIL("prices")], true)], next_cursor: null },
++          }),
++          runs: [RUN({ state: "partial", instrumentsWritten: 10, instrumentsFailed: 2 })],
++        }),
++    ],
++    [
++      "scores not reflecting the latest download",
++      () => {
++        standing();
++        summaryMock.mockResolvedValue({ ...SUMMARY, set: { ...SUMMARY_SET, not_current: true } });
++      },
++    ],
++    [
++      "attention and health unavailable",
++      () => {
++        standing();
++        attentionMock.mockRejectedValue(INTERNAL);
++        apiHealthMock.mockRejectedValue(UNREACHABLE);
++        summaryMock.mockResolvedValue({ kind: "not_served" });
++        healthReadMock.mockResolvedValue(
++          DH({
++            checks: {
++              daily_prices: {
++                ...DAILY_PRICES,
++                status: "exceptions",
++                gap_stock_count: null,
++                gap_detection: { available: false, reason: "fewer_than_two_instruments_with_data" },
++              },
++              company_financials: DH().checks.company_financials,
++            },
++          }),
++        );
++      },
++    ],
++    [
++      "the empty card with followed stocks",
++      () => standing({ attention: ATT({ latest_download: null, latest_terminal_download: null }) }),
++    ],
++    [
++      "the empty card with none followed",
++      () =>
++        standing({
++          attention: ATT({
++            followed_count: 0,
++            latest_download: null,
++            latest_terminal_download: null,
++          }),
++          active: 0,
++        }),
++    ],
++    [
++      "a running first download",
++      () =>
++        standing({
++          attention: ATT({ latest_download: LATEST("running"), latest_terminal_download: null }),
++          runs: [RUN({ state: "running", endedAt: null })],
++        }),
++    ],
++    [
++      "a failed first download",
++      () => {
++        standing({
++          attention: ATT({ latest_terminal_download: TERMINAL("failed", "provider_unavailable") }),
++          dh: DH({
++            never_acquired: true,
++            affected_count: 1,
++            checks: { daily_prices: null, company_financials: null },
++            problems: { rows: [ROW("AAA", [FAIL("prices")], true)], next_cursor: null },
++          }),
++          runs: [RUN({ state: "failed", instrumentsWritten: 0, instrumentsFailed: 12 })],
++        });
++      },
++    ],
++    [
++      "every read failing",
++      () => {
++        standing();
++        attentionMock.mockRejectedValue(INTERNAL);
++        healthReadMock.mockRejectedValue(INTERNAL);
++        summaryMock.mockRejectedValue(INTERNAL);
++        runsMock.mockRejectedValue(INTERNAL);
++        instrumentsMock.mockRejectedValue(INTERNAL);
++        apiHealthMock.mockRejectedValue(UNREACHABLE);
++      },
++    ],
++  ];
++
++  it.each(scenarios)("(a) %s never names a forbidden term", async (_name, setup) => {
++    setup();
++    await renderScreen();
++    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
++  });
++
++  it("(a) the stop-following dialog names none either", async () => {
++    standing({
++      dh: DH({
++        affected_count: 1,
++        problems: { rows: [ROW("FBXX", [NF("reference")], false)], next_cursor: null },
++      }),
++    });
++    await renderScreen();
++    await click(screen.getByRole("button", { name: "Stop following FBXX" }));
++    expect(screen.getByRole("dialog")).toBeTruthy();
++    expect(visibleAndAccessibleText()).not.toMatch(TERMS);
++  });
++
++  it("(c) the empty card uses this story's strings", async () => {
++    standing({ attention: ATT({ latest_download: null, latest_terminal_download: null }) });
++    await renderScreen();
++    const card = region(NO_DATA_YET);
++    expect(within(card).getByRole("heading").textContent).toBe(NO_DATA_YET);
++    expect(within(card).getByText(downloadForFollowed("12"))).toBeTruthy();
++    expect(within(card).getByRole("button").textContent).toBe(START_FIRST_DOWNLOAD);
++  });
++
++  it("(c) the setup card uses this story's strings", async () => {
++    standing({
++      attention: ATT({ followed_count: 0, latest_download: null, latest_terminal_download: null }),
++      active: 0,
++    });
++    await renderScreen();
++    const card = region(NO_DATA_YET);
++    expect(within(card).getByText(FOLLOW_FIRST)).toBeTruthy();
++    expect(within(card).getByRole("link").textContent).toBe(OPEN_SETUP);
++  });
++});
++
++// Implements TC-COMP-180
++describe("Statuses carry words and shape (TC-COMP-180, DAC-E6-S5-6, AC-20)", () => {
++  it("(a) every badge has its word and exactly one hidden shape", async () => {
++    standing({
++      attention: ATT({ latest_terminal_download: TERMINAL("partial") }),
++      dh: DH({
++        affected_count: 2,
++        problems: {
++          rows: [ROW("AAA", [FAIL("prices")], true), ROW("FBXX", [NF("reference")], false)],
++          next_cursor: null,
++        },
++      }),
++      runs: [
++        RUN({ runId: "r-4" }),
++        RUN({ runId: "r-3", state: "partial", instrumentsWritten: 10, instrumentsFailed: 2 }),
++        RUN({ runId: "r-2", state: "abandoned" }),
++        RUN({ runId: "r-1", state: "failed", instrumentsWritten: 0, instrumentsFailed: 12 }),
++      ],
++    });
++    await renderScreen();
++    const badges = Array.from(document.querySelectorAll(BADGE));
++    expect(badges.length).toBeGreaterThan(4);
++    const words = badges.map((b) => (b.textContent ?? "").trim());
++    for (const word of ["Complete", "Partial", "Interrupted", "Failed", "Not found"]) {
++      expect(words).toContain(word);
++    }
++    for (const badge of badges) {
++      expect((badge.textContent ?? "").trim()).not.toBe("");
++      expect(badge.querySelectorAll("svg")).toHaveLength(1);
++      expect(badge.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
++      expect(labelsOf(badge).filter((l) => l !== "")).toEqual([]);
++    }
++  });
++
++  it("(b) an undeterminable value has a description", async () => {
++    attentionMock.mockRejectedValue(INTERNAL);
++    apiHealthMock.mockRejectedValue(UNREACHABLE);
++    summaryMock.mockResolvedValue({ kind: "not_served" });
++    await renderScreen();
++    const unknown = Array.from(document.querySelectorAll('[data-variant="coverage-unknown"]'));
++    expect(unknown.length).toBeGreaterThan(0);
++    for (const el of unknown) {
++      expect(el).toHaveAccessibleDescription(expect.stringMatching(/\S/));
++    }
++  });
++
++  it("(c) null check tiers carry no badge", async () => {
++    standing({
++      dh: DH({ never_acquired: true, checks: { daily_prices: null, company_financials: null } }),
++    });
++    await renderScreen();
++    for (const name of ["Daily prices", "Company financials"]) {
++      const card = region(name);
++      expect(card.querySelector(`${BADGE}, [data-variant="coverage-unknown"]`)).toBeNull();
++      const dashes = Array.from(card.querySelectorAll('[aria-hidden="true"]')).filter(
++        (el) => el.textContent === "—",
++      );
++      expect(dashes.length).toBeGreaterThanOrEqual(2);
++      const hidden = within(card).getAllByText("no data stored yet");
++      expect(hidden).toHaveLength(2);
++      for (const el of hidden) {
++        expect(el.className).toContain("sr-only");
++      }
++    }
++  });
++
++  it("(d) colour never stands alone", async () => {
++    standing({ attention: ATT({ latest_terminal_download: TERMINAL("failed") }) });
++    await renderScreen();
++    for (const el of document.querySelectorAll("*")) {
++      if (/\b(text|bg|border)-status-/.test(el.getAttribute("class") ?? "")) {
++        expect(el.matches(BADGE) || el.closest(BADGE) !== null).toBe(true);
++      }
++    }
++  });
++});
++
++describe("copy.ts, empty card strings (DAC-E6-6)", () => {
++  it("holds the exact strings", () => {
++    expect(NO_DATA_YET).toBe("No data has been downloaded yet.");
++    expect(START_FIRST_DOWNLOAD).toBe("Start the first download");
++    expect(FOLLOW_FIRST).toBe("Follow some stocks first.");
++    expect(OPEN_SETUP).toBe("Open setup");
++  });
++
++  it("formats the follow count into the sentence it is given", () => {
++    expect(downloadForFollowed("12")).toBe(
++      "Download data for your 12 followed stocks to see whether it can be trusted.",
++    );
++    expect(downloadForFollowed("1,236")).toBe(
++      "Download data for your 1,236 followed stocks to see whether it can be trusted.",
++    );
++  });
++
++  it("uses no DAC-E7-3 term", () => {
++    for (const value of [
++      NO_DATA_YET,
++      START_FIRST_DOWNLOAD,
++      FOLLOW_FIRST,
++      OPEN_SETUP,
++      downloadForFollowed("12"),
++    ]) {
++      expect(value).not.toMatch(TERMS);
++    }
++  });
++
++  it("does not swap the two headline strings", () => {
++    expect(NO_DATA_YET).not.toBe(FOLLOW_FIRST);
++  });
++});
+diff --git a/web/src/screens/data-health/index.tsx b/web/src/screens/data-health/index.tsx
+new file mode 100644
+index 00000000..a4a0f549
+--- /dev/null
++++ b/web/src/screens/data-health/index.tsx
+@@ -0,0 +1,268 @@
++import { type JSX, useId } from "react";
++import { Link } from "react-router-dom";
++import type { ScreenState } from "../../api/types";
++import { LAYOUT } from "../../app/layout";
++import { useShell } from "../../app/shell-context";
++import type { Attention, ReadState } from "../../app/shell-types";
++import { useDataHealth } from "../../app/use-data-health";
++import { formatCount } from "../../components/patterns/format";
++import { StateRegion } from "../../components/patterns/state-region";
++import { Button } from "../../components/ui/button";
++import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
++import { CheckCard, ReadFailure, SkeletonLine } from "./check-card";
++import {
++  CHECK_TITLES,
++  FOLLOW_FIRST,
++  NO_DATA_YET,
++  OPEN_SETUP,
++  READ_TARGETS,
++  START_FIRST_DOWNLOAD,
++  downloadForFollowed,
++  readFailed,
++  readFailureReason,
++} from "./copy";
++import { DailyPricesCard } from "./daily-prices-card";
++import { DownloadNow } from "./download-now";
++import { FinancialsCard } from "./financials-card";
++import { NeedsFixing } from "./needs-fixing";
++import { RecentDownloads } from "./recent-downloads";
++import { ScoresCard } from "./scores-card";
++import { Verdict } from "./verdict";
++import { WhatYouFollow } from "./what-you-follow";
++
++/**
++ * The Data health screen (data-health-ui 2.1, 2.2, 3, 5 and 10; DAC-E6-6,
++ * DAC-E6-7, DAC-E6-15, DAC-E6-S5-1 to -6; AC-21, AC-24, AC-26, AC-28; DEC-0386).
++ * It composes the regions CAP-003-E6-S1 to S4 built, capped at
++ * `LAYOUT.contentMaxWidth`, and calls `useDataHealth` here and nowhere else
++ * (CAP-003-E3-S3's importer rule), so the aggregate is read on load, on
++ * **Try again**, once when the latest download turns terminal (the hook's own
++ * trigger) and after a successful **Stop following**, never on a timer.
++ * `/data` needs no `setTitleDetail` (DEC-0214).
++ *
++ * One slot under the header renders through `StateRegion`, over attention's
++ * read: skeleton cards while it loads, the never-downloaded empty card while no
++ * download has ended, the check grid otherwise. The empty card follows
++ * attention's latest terminal download, never `never_acquired` (DAC-E6-7).
++ *
++ * The eight states per region. "NA" gives the reason the state does not apply.
++ *
++ * - Header and verdict: loading is a skeleton line; never populated gives the
++ *   answer way to the empty card while the header stays; nothing found is
++ *   *Yes. None of the {m}...*; partial is *Mostly yes*; stale NA (the
++ *   aggregate is read on demand and shows *checked {time}*, AC-25); unavailable
++ *   is attention's failure sentence; error is the aggregate's failure sentence;
++ *   unreachable NA (the shell, AC-23).
++ * - Daily prices and Company financials: loading is a skeleton card; never
++ *   populated gives way to the empty card, and after a download ended with
++ *   nothing stored they render DAC-E6-7's null state; nothing found is the `ok`
++ *   check; partial is `exceptions`; stale is NOT RENDERED under DEC-0201, since
++ *   `latest_session` is the newest session any followed stock holds and
++ *   FactorFlow has no trading calendar (system design open question 9; it
++ *   returns with one); unavailable is the gap part's `coverage-unknown` for
++ *   Daily prices and NA for Company financials (no not-determinable status);
++ *   error is a per-card sentence with **Try again**; unreachable NA (the shell).
++ * - Factor scores: loading is a skeleton; never populated gives way to the
++ *   empty card; nothing found is *No scores yet*; partial counts Incomplete
++ *   stocks; stale is *Not reflecting the latest download*; unavailable is
++ *   `coverage-unknown` while not served; error keeps the last value, else a
++ *   sentence (DEC-0376); unreachable NA (the shell).
++ * - Empty card: loading NA (skeleton cards show until attention answers);
++ *   never populated is the card itself; the other six NA (no filter, no partial
++ *   answer, attention is polled by the shell, a failed attention read renders
++ *   the full layout, the shell owns unreachable).
++ * - Needs fixing (S3): loading is its title and skeleton lines; never populated
++ *   renders only while the count is above zero; nothing found is *Nothing needs
++ *   fixing.* with the last complete download; partial is rows with **Show more**;
++ *   stale NA (rows come from the on-demand aggregate, with *checked {time}*);
++ *   unavailable NA (every row's reason is recorded); error is the aggregate's
++ *   failure sentence, and a failed **Show more** keeps the rows; unreachable NA
++ *   (the shell).
++ * - Recent downloads (S4): loading is skeleton rows; never populated renders only
++ *   once a download exists; nothing found NA (no filter); partial is the Partial
++ *   and Interrupted rows (AC-12); stale NA (re-read on each attention answer
++ *   while running); unavailable is indeterminate progress while the total is
++ *   unknown; error is *Couldn't read recent downloads*; unreachable NA (the shell).
++ * - What you follow (S4): loading is a skeleton; never populated gives way to the
++ *   empty card; nothing found NA (counts are numbers, zero included); partial NA
++ *   (no partial answer); stale NA (read on load only); unavailable is the key's
++ *   `coverage-unknown` while health is not answering; error is *Couldn't read
++ *   what you follow*; unreachable NA (the shell).
++ * The lower regions mount while attention loads and read once (DEC-0405).
++ */
++
++/** Attention's read as the slot's `ScreenState` (DEC-0386). */
++function slotState(attention: ReadState<Attention>): ScreenState<Attention> {
++  if (attention.kind === "loading") {
++    return { kind: "loading" };
++  }
++  if (attention.kind === "error") {
++    return { kind: "unavailable", reason: readFailureReason(attention.error) };
++  }
++  if (attention.data.latest_terminal_download === null) {
++    return { kind: "empty-never-populated" };
++  }
++  return {
++    kind: "populated",
++    data: attention.data,
++    fetchedAt: attention.checkedAt.toISOString(),
++  };
++}
++
++function EmptyCard({ followedCount }: { followedCount: number }): JSX.Element {
++  const id = useId();
++  return (
++    <section aria-labelledby={id}>
++      <Card variant="default">
++        <CardHeader>
++          <CardTitle id={id}>{NO_DATA_YET}</CardTitle>
++        </CardHeader>
++        <CardContent className="flex flex-col items-start gap-4">
++          {followedCount > 0 ? (
++            <>
++              <p className="text-base">{downloadForFollowed(formatCount(followedCount))}</p>
++              <DownloadNow label={START_FIRST_DOWNLOAD} />
++            </>
++          ) : (
++            <>
++              <p className="text-base">{FOLLOW_FIRST}</p>
++              <Button variant="default" asChild>
++                <Link to="/setup">{OPEN_SETUP}</Link>
++              </Button>
++            </>
++          )}
++        </CardContent>
++      </Card>
++    </section>
++  );
++}
++
++function CheckGrid({
++  skeleton,
++  dataHealth,
++  scores,
++  onRetry,
++  onRetryScores,
++}: {
++  skeleton: boolean;
++  dataHealth: ReturnType<typeof useDataHealth>["state"];
++  scores: ReturnType<typeof useShell>["scores"];
++  onRetry: () => void;
++  onRetryScores: () => void;
++}): JSX.Element {
++  const waiting = skeleton || dataHealth.kind === "loading";
++  const titles = [CHECK_TITLES.daily_prices, CHECK_TITLES.company_financials] as const;
++  let first: JSX.Element;
++  let second: JSX.Element;
++  if (waiting) {
++    first = (
++      <CheckCard title={titles[0]}>
++        <SkeletonLine />
++      </CheckCard>
++    );
++    second = (
++      <CheckCard title={titles[1]}>
++        <SkeletonLine />
++      </CheckCard>
++    );
++  } else if (dataHealth.kind === "error") {
++    const sentence = readFailed(READ_TARGETS.checks, readFailureReason(dataHealth.error));
++    first = (
++      <CheckCard title={titles[0]}>
++        <ReadFailure sentence={sentence} onRetry={onRetry} />
++      </CheckCard>
++    );
++    second = (
++      <CheckCard title={titles[1]}>
++        <ReadFailure sentence={sentence} onRetry={onRetry} />
++      </CheckCard>
++    );
++  } else {
++    const dh = dataHealth.data;
++    first = <DailyPricesCard check={dh.checks.daily_prices} followedCount={dh.followed_count} />;
++    second = (
++      <FinancialsCard check={dh.checks.company_financials} followedCount={dh.followed_count} />
++    );
++  }
++  return (
++    <div className="grid grid-cols-4 gap-5">
++      {first}
++      {second}
++      {skeleton ? (
++        <CheckCard title={CHECK_TITLES.scores}>
++          <SkeletonLine />
++        </CheckCard>
++      ) : (
++        <ScoresCard scores={scores} onRetryScores={onRetryScores} />
++      )}
++    </div>
++  );
++}
++
++export default function DataHealthScreen(): JSX.Element {
++  const { attention, scores, refresh } = useShell();
++  const { state: dataHealth, retry } = useDataHealth();
++
++  const empty = attention.kind === "ok" && attention.data.latest_terminal_download === null;
++  const anyDownload = attention.kind !== "ok" || attention.data.latest_download !== null;
++  const showNeedsFixing =
++    !empty || (dataHealth.kind === "ok" && dataHealth.data.affected_count > 0);
++  const showRecent = !empty || anyDownload;
++  const showFollow = !empty;
++
++  const grid = (skeleton: boolean) => (
++    <CheckGrid
++      skeleton={skeleton}
++      dataHealth={dataHealth}
++      scores={scores}
++      onRetry={retry}
++      onRetryScores={() => refresh("scores")}
++    />
++  );
++
++  return (
++    <div
++      className="mx-auto flex w-full flex-col gap-5"
++      style={{ maxWidth: LAYOUT.contentMaxWidth }}
++    >
++      <Verdict
++        attention={attention}
++        dataHealth={dataHealth}
++        onRetryAttention={() => refresh("attention")}
++        onRetryDataHealth={retry}
++        downloadNow={<DownloadNow />}
++      />
++      <StateRegion
++        state={slotState(attention)}
++        onRetry={() => refresh("attention")}
++        renderers={{
++          loading: () => grid(true),
++          "empty-never-populated": () =>
++            attention.kind === "ok" ? (
++              <EmptyCard followedCount={attention.data.followed_count} />
++            ) : null,
++          populated: () => grid(false),
++          unavailable: () => grid(false),
++          "empty-no-match": {
++            notApplicable:
++              "Data health has no filter; nothing found is the Needs fixing card's Nothing needs fixing state (DAC-E6-10).",
++          },
++          partial: {
++            notApplicable:
++              "Partial results render inside the cards: exceptions with counts and the Partial and Interrupted download rows (AC-12).",
++          },
++          error: {
++            notApplicable:
++              "A failed attention read is this slot's unavailable state; each card's own read renders its own error (DAC-E6-2, DAC-E6-17).",
++          },
++          unreachable: { notApplicable: "The shell replaces the main region (AC-23)." },
++        }}
++      />
++      {showNeedsFixing && <NeedsFixing dataHealth={dataHealth} onReread={retry} />}
++      <div className="grid grid-cols-2 items-start gap-5">
++        {showRecent && <RecentDownloads />}
++        {showFollow && <WhatYouFollow />}
++      </div>
++    </div>
++  );
++}

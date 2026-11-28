@@ -1,0 +1,40 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-dfy55_dy/w0/web
+
+stderr | src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/problem-row.test.tsx (23 tests | 1 failed) 137ms
+   × Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row 47ms
+     → expected 'FBXXFailedDownloading daily prices fa…' to contain 'The provider doesn\'t recognise this …'
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/needs-fixing.test.tsx (51 tests) 2273ms
+   ✓ Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) Show more appends each page with the served cursor, keeps focus and announces the count 350ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/problem-row.test.tsx > Problem row (TC-COMP-165, DAC-E6-S3-1, DAC-E6-8, AC-13, AC-14) > renders the symbol, both badges, both fixes and the consequence for a mixed row
+AssertionError: expected 'FBXXFailedDownloading daily prices fa…' to contain 'The provider doesn\'t recognise this …'
+
+Expected: "The provider doesn't recognise this symbol."
+Received: "FBXXFailedDownloading daily prices failed: provider timeout, 3 attemptsNot foundDownloading reference data failed: no such ticker, 1 attemptsIts scores show as Incomplete until this is fixed, and so does every universe holding it.Download again to retry; data already stored is never duplicated or overwritten.Stop followingFollow a different symbolProbably a typo or a delisted ticker. Downloading again won't help."
+
+ ❯ src/screens/data-health/problem-row.test.tsx:132:18
+    130|     const text = rowText(container);
+    131|     expect(text).toContain("Downloading daily prices failed: provider …
+    132|     expect(text).toContain(NOT_RECOGNISED);
+       |                  ^
+    133|     expect(text).not.toContain("no such ticker");
+    134|     expect(text).not.toContain("1 attempts");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 73 passed (74)
+   Start at  00:32:06
+   Duration  3.27s (transform 153ms, setup 70ms, collect 854ms, tests 2.41s, environment 447ms, prepare 136ms)
+

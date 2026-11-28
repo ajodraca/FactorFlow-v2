@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-xgvgnqob/w1/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (51 tests | 2 failed) 912ms
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way 34ms
+     → expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+   × Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (e) shows Needs fixing only while the count is above zero 24ms
+     → expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (a) offers Open setup when no stock is followed, and lets the other regions give way
+AssertionError: expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+
+Expected: "Needs fixing"
+Received: "Is the data good enough to trust?Full coverage tableDownload nowNo data has been downloaded yet.Follow some stocks first.Open setupNeeds fixing · 0From your most recent downloads · checked 14:03:12 CDTNothing needs fixing.Last complete download 2026-10-30 09:00 CDT"
+
+ ❯ src/screens/data-health/data-health.test.tsx:457:43
+    455|     expect(instrumentsMock.mock.calls.length).toBe(instrumentReads);
+    456|     expect(runsMock.mock.calls.length).toBe(runReads);
+    457|     expect(document.body.textContent).not.toContain("Needs fixing");
+       |                                           ^
+    458|     expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
+    459|     expect(screen.getByRole("link", { name: "Full coverage table" })).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Never-downloaded empty card (TC-COMP-175, DAC-E6-S5-1, DAC-E6-6, AC-21) > (e) shows Needs fixing only while the count is above zero
+AssertionError: expected 'Is the data good enough to trust?Full…' not to contain 'Needs fixing'
+
+Expected: "Needs fixing"
+Received: "Is the data good enough to trust?Full coverage tableDownload nowNo data has been downloaded yet.Download data for your 12 followed stocks to see whether it can be trusted.Start the first downloadNeeds fixing · 0From your most recent downloads · checked 14:03:12 CDTNothing needs fixing.Last complete download 2026-10-30 09:00 CDTRecent downloadsStarts when you press Download now · checked 14:03:12 CDTStartedOutcomeEndedResult2026-10-30 09:00 CDTComplete2026-10-30 11:30 CDT12 of 12 stocks"
+
+ ❯ src/screens/data-health/data-health.test.tsx:544:43
+    542|     standing({ attention: running, dh: DH({ affected_count: 0 }) });
+    543|     await renderScreen();
+    544|     expect(document.body.textContent).not.toContain("Needs fixing");
+       |                                           ^
+    545|   });
+    546| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 49 passed (51)
+   Start at  02:51:11
+   Duration  2.30s (transform 282ms, setup 44ms, collect 694ms, tests 912ms, environment 256ms, prepare 167ms)
+

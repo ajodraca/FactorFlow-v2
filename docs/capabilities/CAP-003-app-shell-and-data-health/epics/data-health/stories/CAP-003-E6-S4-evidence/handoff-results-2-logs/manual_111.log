@@ -1,0 +1,62 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-c9ocry32/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > (a) the columns are Started, Outcome, Ended, Result, and each row header links to its download
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx (20 tests | 2 failed) 525ms
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage 210ms
+     → expected [ 'Followed stocks', …(3) ] to deeply equal [ 'Followed stocks', …(3) ]
+   × What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable 15ms
+     → expected undefined to be defined
+ ✓ src/screens/data-health/recent-downloads.test.tsx (46 tests) 995ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+AssertionError: expected [ 'Followed stocks', …(3) ] to deeply equal [ 'Followed stocks', …(3) ]
+
+- Expected
++ Received
+
+  Array [
+    "Followed stocks",
+    "Stopped following",
+-   "History depth",
++   "History",
+    "Market data key",
+  ]
+
+ ❯ src/screens/data-health/what-you-follow.test.tsx:113:46
+    111|     );
+    112|     expect(region().querySelector('[data-variant="summary"]')).not.toB…
+    113|     expect(pairs().map((pair) => pair.term)).toEqual([
+       |                                              ^
+    114|       "Followed stocks",
+    115|       "Stopped following",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (b) an unset depth reads not set and still links to settings; an unreachable key is not determinable
+AssertionError: expected undefined to be defined
+ ❯ definitionOf src/screens/data-health/what-you-follow.test.tsx:99:17
+     97| function definitionOf(term: string): HTMLElement {
+     98|   const found = pairs().find((pair) => pair.term === term);
+     99|   expect(found).toBeDefined();
+       |                 ^
+    100|   return (found as { definition: HTMLElement }).definition;
+    101| }
+ ❯ src/screens/data-health/what-you-follow.test.tsx:139:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 64 passed (66)
+   Start at  01:35:39
+   Duration  2.72s (transform 308ms, setup 141ms, collect 1.70s, tests 1.52s, environment 650ms, prepare 356ms)
+

@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zwd7bwvz/w4/web
+
+stderr | src/screens/data-health/what-you-follow.test.tsx > What you follow (TC-COMP-154, DAC-E6-16, AC-4, AC-17) > (a) states the counts, the depth and whether the key was found, with a way to manage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/data-health/recent-downloads.test.tsx > Recent downloads rows (TC-COMP-170, DAC-E6-14, DAC-E6-S4-1, AC-12) > the Started link and the Ended time are set in the numeric face
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/data-health/what-you-follow.test.tsx (26 tests) 578ms
+ ❯ src/screens/data-health/recent-downloads.test.tsx (60 tests | 1 failed) 1376ms
+   × Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (j) while the first read is pending, three busy lines show 8ms
+     → expected <div aria-busy="true" …(1)></div> to have a length of 3 but got 1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/recent-downloads.test.tsx > Recent downloads hand-off cases (DAC-E6-14, DAC-E6-S4-2, AC-12, AC-25, DEC-0384) > (j) while the first read is pending, three busy lines show
+AssertionError: expected <div aria-busy="true" …(1)></div> to have a length of 3 but got 1
+
+- Expected
++ Received
+
+- 3
++ 1
+
+ ❯ src/screens/data-health/recent-downloads.test.tsx:1110:62
+    1108|     listMock.mockReturnValue(new Promise(() => undefined));
+    1109|     const { container } = renderRecent();
+    1110|     expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLen…
+       |                                                              ^
+    1111|   });
+    1112| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 85 passed (86)
+   Start at  02:09:31
+   Duration  4.85s (transform 275ms, setup 163ms, collect 1.98s, tests 1.95s, environment 1.60s, prepare 1.36s)
+

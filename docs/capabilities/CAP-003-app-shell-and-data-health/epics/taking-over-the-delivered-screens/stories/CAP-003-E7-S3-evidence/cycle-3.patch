@@ -1,0 +1,843 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-mutants.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-mutants.json
+new file mode 100644
+index 00000000..7ddf691f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-mutants.json
+@@ -0,0 +1,485 @@
++{
++  "schema": 1,
++  "repo_head": "acec7e42addfffac24a074c66a9ef5fcc90d7e1c",
++  "range": "9033ec3d3d8c48c164ec04f3d1a4feb24a29fae9..HEAD",
++  "source": "9033ec3d3d8c48c164ec04f3d1a4feb24a29fae9",
++  "mutants": [
++    {
++      "id": "web/src/screens/instruments/add-field.tsx:67:off-by-one:1",
++      "cycle": "handoff",
++      "operator": "off-by-one",
++      "file": "web/src/screens/instruments/add-field.tsx",
++      "line": 67,
++      "original": "        setNotice(`${result.reactivated[0].normalisedSymbol} is followed again.`);",
++      "mutated": "        setNotice(`${result.reactivated[1].normalisedSymbol} is followed again.`);"
++    },
++    {
++      "id": "web/src/screens/instruments/bulk-add.tsx:116:off-by-one:1",
++      "cycle": "handoff",
++      "operator": "off-by-one",
++      "file": "web/src/screens/instruments/bulk-add.tsx",
++      "line": 116,
++      "original": "            Follow {recognised.length} stock{recognised.length === 1 ? \"\" : \"s\"}",
++      "mutated": "            Follow {recognised.length} stock{recognised.length === 2 ? \"\" : \"s\"}"
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:43:negate-boolean:1",
++      "cycle": "handoff",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/index.tsx",
++      "line": 43,
++      "original": "    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === true,",
++      "mutated": "    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === false,"
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:54:drop-field-copy:1",
++      "cycle": "handoff",
++      "operator": "drop-field-copy",
++      "file": "web/src/screens/instruments/index.tsx",
++      "line": 54,
++      "original": "        { pathname: location.pathname, search: location.search },",
++      "mutated": "        { pathname: nil, search: location.search },"
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:55:negate-boolean:1",
++      "cycle": "handoff",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/index.tsx",
++      "line": 55,
++      "original": "        { replace: true, state: null },",
++      "mutated": "        { replace: false, state: null },"
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:104:off-by-one:1",
++      "cycle": "handoff",
++      "operator": "off-by-one",
++      "file": "web/src/screens/instruments/index.tsx",
++      "line": 104,
++      "original": "  const refresh = (): void => setReloadToken((token) => token + 1);",
++      "mutated": "  const refresh = (): void => setReloadToken((token) => token + 2);"
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:122:negate-boolean:1",
++      "cycle": "handoff",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/index.tsx",
++      "line": 122,
++      "original": "          <AddField focusOnMount={neverPopulated || focusAddRequested} onAdded={refresh} />",
++      "mutated": "          <AddField focusOnMount={neverPopulated && focusAddRequested} onAdded={refresh} />"
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:67:off-by-one:1",
++      "cycle": "handoff",
++      "operator": "off-by-one",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "line": 67,
++      "original": "  refreshToken = 0,",
++      "mutated": "  refreshToken = 1,"
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:105:off-by-one:1",
++      "cycle": "handoff",
++      "operator": "off-by-one",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "line": 105,
++      "original": "              page.rows.length === 0",
++      "mutated": "              page.rows.length === 1"
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:305:off-by-one:1",
++      "cycle": "handoff",
++      "operator": "off-by-one",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "line": 305,
++      "original": "        onRetry={() => setReloadToken((t) => t + 1)}",
++      "mutated": "        onRetry={() => setReloadToken((t) => t + 2)}"
++    },
++    {
++      "id": "web/src/screens/instruments/retire-dialog.tsx:30:negate-boolean:1",
++      "cycle": "handoff",
++      "operator": "negate-boolean",
++      "file": "web/src/screens/instruments/retire-dialog.tsx",
++      "line": 30,
++      "original": "        if (!next) {",
++      "mutated": "        if (next) {"
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h1",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "<h1 className=\"text-xl\">Followed stocks</h1>",
++      "new": "<h1 className=\"text-xl\">Instruments</h1>",
++      "description": "The h1 reverts to the delivered *Instruments*; UX design 1.6 / DAC-E7-4 / DAC-E7-S3-4 fix it as *Followed stocks* (task plan T005 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h2",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "const [focusAddRequested] = useState(\n    () => (location.state as { focusAdd?: boolean } | null)?.focusAdd === true,\n  );",
++      "new": "const focusAddRequested =\n    (location.state as { focusAdd?: boolean } | null)?.focusAdd === true;",
++      "description": "The hint is read from the live location on every render instead of captured once on mount, so consuming it (state: null) withdraws the focus before the add field mounts; DAC-E7-6 / DAC-E7-S3-1 and task plan T019(2) (useState initialiser) require the field focused once when opened with focusAdd."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h3",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "if (focusAddRequested) {",
++      "new": "if (true) {",
++      "description": "The guard on consuming the hint is lost: every open, hint or not, replaces its history entry (dropping the hash and any other router state); task plan T019(2) calls navigate only when focusAddRequested."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h4",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "{ pathname: location.pathname, search: location.search },",
++      "new": "{ pathname: location.pathname },",
++      "description": "Consuming the hint drops the URL's query string; task plan T019(2) / Resolved Conflict 3 replace the entry with the same pathname and search, changing only the state."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h5",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "{ replace: true, state: null },",
++      "new": "{ replace: true, state: location.state },",
++      "description": "The replaced history entry keeps the focusAdd hint, so a reload of that entry re-focuses the add field; DAC-E7-6 'a reload MUST NOT re-focus', task plan T019(2) state: null."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h6",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "focusOnMount={neverPopulated || focusAddRequested}",
++      "new": "focusOnMount={focusAddRequested}",
++      "description": "The never-populated autofocus is lost (clause dropped): with nothing followed the add field no longer takes focus; UX design 1.6 States, task plan T011 and Other Notes 'Focus and the never-populated state'."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h7",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "focusAddRequested} onAdded={refresh} />",
++      "new": "focusAddRequested} onAdded={() => undefined} />",
++      "description": "Following a stock through the add field no longer re-reads the screen and table, so the new stock does not appear; AC-17 (same outcome as delivered), task plan T019 'reload-token pattern'."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h8",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "<BulkAdd onAdded={refresh} />",
++      "new": "<BulkAdd onAdded={() => undefined} />",
++      "description": "Following many no longer re-reads the screen and table, so the followed stocks do not appear; AC-5 / AC-17, task plan T019 'reload-token pattern'."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h9",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "<InstrumentTable refreshToken={reloadToken} />",
++      "new": "<InstrumentTable />",
++      "description": "The table no longer receives the reload token, so after a follow the screen re-reads but the table keeps its stale rows and counts; AC-17, task plan T019(3) populated renderer <InstrumentTable refreshToken={reloadToken} />."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h10",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "\"empty-never-populated\": () => <p>No stocks followed yet.</p>,",
++      "new": "\"empty-never-populated\": () => <p>No stock matches this filter.</p>,",
++      "description": "The never-populated state renders the no-match copy; UX design 1.6 / DAC-E7-4 'No stocks followed yet.', distinct from no-match (task plan T011 kills note, TC-COMP-133)."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h11",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "{screenState.kind === \"loading\" || screenState.kind === \"unreachable\" ? null : (",
++      "new": "{screenState.kind === \"unreachable\" ? null : (",
++      "description": "The add region renders while the first read is pending (clause dropped); task plan T019(4) renders it for every kind except loading and unreachable, as delivered."
++    },
++    {
++      "id": "web/src/screens/instruments/index.tsx:manual:h12",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/index.tsx",
++      "old": "<StateRegion state={screenState} renderers={renderers} onRetry={refresh} />",
++      "new": "<StateRegion state={screenState} renderers={renderers} onRetry={() => undefined} />",
++      "description": "Try again on the screen's read error does nothing; task plan T019(3) / T011 onRetry bumps reloadToken and re-reads listInstruments once (AC-24, UX design 1.6 States)."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h13",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "          lifecycle: lifecycleFilter || undefined,\n        })",
++      "new": "        })",
++      "description": "The first-page request drops the lifecycle filter, so choosing Stopped following sends no lifecycle; AC-17 / DAC-E7-S3-6 same query parameters (task plan T007 kills note, case d)."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h14",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "lifecycle: lifecycleFilter || undefined,\n        cursor: nextCursor,",
++      "new": "cursor: nextCursor,",
++      "description": "The next keyset page is requested without the lifecycle filter, so paging a filtered list appends unfiltered stocks; task plan T018 'handleLoadMore keeps the delivered cursor request', DAC-E7-11, AC-17."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h15",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "symbol: symbolFilter || undefined,\n        lifecycle: lifecycleFilter || undefined,\n        cursor",
++      "new": "lifecycle: lifecycleFilter || undefined,\n        cursor",
++      "description": "The next keyset page is requested without the symbol filter, so paging a filtered list appends non-matching stocks; task plan T018 same cursor request, DAC-E7-11, AC-17."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h16",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "data: [...current.data, ...page.rows]",
++      "new": "data: [...page.rows, ...current.data]",
++      "description": "The next page is prepended instead of appended, so the keyset order breaks; task plan T018 'appends with [...current, ...page.rows]', CAP-003-E1-S4 Other Notes."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h17",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "    } catch (cause) {\n      setState({\n        kind: \"error\",\n        message: cause instanceof Error ? cause.message : \"the request could not be completed\",\n        requestId: \"unknown\",\n      });\n    } finally {",
++      "new": "    } catch {\n    } finally {",
++      "description": "A failed next-page read is swallowed: no error state renders and the list looks complete; AC-17 (the delivered paging reported its failure), AC-24 error through StateRegion."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h18",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "hasMore={nextCursor !== null}",
++      "new": "hasMore={nextCursor === null}",
++      "description": "The table asks for more when there is none and never when there is, so the second keyset page is never requested; DAC-E7-11 / task plan T007 kills note (case e)."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h19",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "busy={loadingMore}",
++      "new": "busy={false}",
++      "description": "The table is not marked busy while the next page loads (no aria-busy, onEndReached not held back); task plan T018 busy={loadingMore}, CAP-003-E1-S4 DEC-0306/DEC-0307."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h20",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "variant=\"virtualised\"\n          rowHeader\n",
++      "new": "variant=\"virtualised\"\n",
++      "description": "The symbol cell is no longer the row header, so rows lose their accessible row name; task plan T018 prescribes `DataTable variant=\"virtualised\" rowHeader`."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h21",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "onRetry={() => setReloadToken((t) => t + 1)}",
++      "new": "onRetry={() => undefined}",
++      "description": "Try again on the table's read error does nothing; task plan T007(m) / T018(1) onRetry bumps reloadToken and re-reads once (task plan T007 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h22",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "setSymbolFilter(\"\");\n            setLifecycleFilter(\"\");",
++      "new": "setSymbolFilter(\"\");",
++      "description": "Reset filter clears only the symbol filter, leaving the lifecycle filter applied; task plan T007(l) / T018(1) 'Reset filter clearing both filters'."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h23",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "variant=\"outline\"",
++      "new": "variant=\"default\"",
++      "description": "Reset filter renders as the primary button instead of `Button variant=\"outline\"` (task plan T018(1)), AC-26."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h24",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "variant=\"ghost\"",
++      "new": "variant=\"outline\"",
++      "description": "The row action Stop following renders as an outline button instead of `Button variant=\"ghost\"` (task plan T018(3)), AC-26."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h25",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "{activeCount} followed, {retiredCount} stopped following",
++      "new": "{retiredCount} followed, {activeCount} stopped following",
++      "description": "The count names the followed and stopped-following totals the wrong way round; UX design 1.6 / DAC-E7-4 '{n} followed, {m} stopped following' (task plan T018(2))."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h26",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "{retiredCount} stopped following",
++      "new": "{retiredCount} retired",
++      "description": "The count reverts to the delivered *retired*; DAC-E7-4 / DAC-E7-S3-4 (task plan T005 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/instrument-table.tsx:manual:h27",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/instrument-table.tsx",
++      "old": "value={lifecycleFilter === \"\" ? ALL : lifecycleFilter}",
++      "new": "value={lifecycleFilter}",
++      "description": "With no lifecycle filter (initially and after Reset filter) the Select shows no current value instead of *All*; task plan T018(2) maps 'all' to the delivered empty filter both ways (Other Notes, Radix Select and the empty filter)."
++    },
++    {
++      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h28",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/retire-dialog.tsx",
++      "old": "      <p data-testid=\"retire-dialog-in-flight-notice\">\n        A download is running and will still download {symbol} this time. Stopping takes effect from\n        the next download.\n      </p>\n",
++      "new": "",
++      "description": "The running-download sentence is gone from the dialog; DAC-E7-S3-2 / CAP-001 AC-25, DEC-0390 (task plan T003 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h29",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/retire-dialog.tsx",
++      "old": "confirmLabel=\"Stop following\"",
++      "new": "confirmLabel=\"Stop acquiring\"",
++      "description": "The confirm button reverts to the delivered *Stop acquiring*; DAC-E7-9 **Stop following** (task plan T003 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h30",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/retire-dialog.tsx",
++      "old": "onOpenChange={(next) => {\n        if (!next) {\n          onCancel();\n        }\n      }}",
++      "new": "onOpenChange={() => undefined}",
++      "description": "Escape and Cancel no longer call onCancel, so the dialog cannot be dismissed and focus never returns; AC-25, DAC-E7-9 (task plan T003 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/retire-dialog.tsx:manual:h31",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/retire-dialog.tsx",
++      "old": "{error !== null ? (",
++      "new": "{true ? (",
++      "description": "The dialog shows a 'Stopping following {SYMBOL} failed' alert with no failure; task plan T003 'with no error, no alert', IR-004."
++    },
++    {
++      "id": "web/src/screens/instruments/badges.tsx:manual:h32",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/badges.tsx",
++      "old": "outcome: \"not_found\"",
++      "new": "outcome: \"failed\"",
++      "description": "The recognition marker renders the failed outcome (Failed, status-critical) instead of Not found / status-warning; AC-14, DAC-E7-S3-5, ux-brief 12.2 (task plan T006 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/badges.tsx:manual:h33",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/badges.tsx",
++      "old": "return <span>Followed</span>;",
++      "new": "return <StatusBadge tier=\"good\">Followed</StatusBadge>;",
++      "description": "A followed stock gets a good-tier badge instead of its word alone; DEC-0389 (no badge, no tier), task plan T013."
++    },
++    {
++      "id": "web/src/screens/instruments/add-field.tsx:manual:h34",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/add-field.tsx",
++      "old": "rejection.disposition === \"duplicate_active\"",
++      "new": "rejection.disposition !== \"duplicate_active\"",
++      "description": "The duplicate and malformed field errors swap; task plan T008 kills note ('{SYM} is already a followed stock.' vs '{input} does not match the required symbol shape.')."
++    },
++    {
++      "id": "web/src/screens/instruments/add-field.tsx:manual:h35",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/add-field.tsx",
++      "old": "if (focusOnMount) {",
++      "new": "if (!focusOnMount) {",
++      "description": "The add field focuses on mount when not asked to and not when asked; DAC-E7-S3-1, UX design 1.6 States (task plan T008 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/add-field.tsx:manual:h36",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/add-field.tsx",
++      "old": "disabled={submitting}",
++      "new": "disabled={false}",
++      "description": "Follow a stock stays enabled while the request is in flight; task plan T015 keeps the delivered native disabled={submitting} (IR-003)."
++    },
++    {
++      "id": "web/src/screens/instruments/add-field.tsx:manual:h37",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/add-field.tsx",
++      "old": "<Button type=\"submit\"",
++      "new": "<Button type=\"button\"",
++      "description": "Clicking Follow a stock no longer submits the form (only Enter does); AC-17 same outcome, task plan T015 `Button ... with type=\"submit\"`."
++    },
++    {
++      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h38",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/bulk-add.tsx",
++      "old": "const blocked = parsed !== null && recognised.length === 0;",
++      "new": "const blocked = parsed !== null && recognised.length !== 0;",
++      "description": "Follow many is blocked when symbols are recognised and usable when none are; IR-003 / TC-COMP-130 (task plan T009 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h39",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/bulk-add.tsx",
++      "old": "const recognised = parsed?.filter((entry) => entry.valid) ?? [];",
++      "new": "const recognised = parsed ?? [];",
++      "description": "Rejected entries are counted as recognised and sent; AC-5 (task plan T009 kills note)."
++    },
++    {
++      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h40",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/bulk-add.tsx",
++      "old": "disabled={!blocked && submitting}",
++      "new": "disabled={false}",
++      "description": "The Follow many submit stays enabled while its request is in flight; task plan T016 disabled={!blocked && submitting} (IR-003)."
++    },
++    {
++      "id": "web/src/screens/instruments/bulk-add.tsx:manual:h41",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/bulk-add.tsx",
++      "old": "{submitResult.added.length} followed,",
++      "new": "{submitResult.rejected.length} followed,",
++      "description": "The result line reports the rejected count as followed; task plan T016 '{a} followed, {r} followed again, {j} rejected' (IR-008)."
++    },
++    {
++      "id": "web/src/screens/instruments/start-action.tsx:manual:h42",
++      "cycle": "handoff",
++      "operator": "manual",
++      "file": "web/src/screens/instruments/start-action.tsx",
++      "old": "const blocked = historyDepthYears === null;",
++      "new": "const blocked = historyDepthYears !== null;",
++      "description": "Download now is blocked when history depth is set and usable when it is not; DAC-E2-S4-3, AC-17 (task plan T010 kills note)."
++    }
++  ]
++}
+diff --git a/web/src/screens/instruments/add-field.test.tsx b/web/src/screens/instruments/add-field.test.tsx
+index 96535490..58ac75bb 100644
+--- a/web/src/screens/instruments/add-field.test.tsx
++++ b/web/src/screens/instruments/add-field.test.tsx
+@@ -1,4 +1,4 @@
+-import { render, screen } from "@testing-library/react";
++import { render, screen, waitFor } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { beforeEach, describe, expect, it, vi } from "vitest";
+ import * as client from "../../api/client";
+@@ -46,6 +46,29 @@ describe("AddField — follow a stock (AC-1, AC-17, DAC-E7-4)", () => {
+     expect(field).toHaveValue("");
+   });
+ 
++  it("submits when the button is clicked, and holds it disabled while the request is in flight", async () => {
++    let resolve: (value: Awaited<ReturnType<typeof client.addInstruments>>) => void = () =>
++      undefined;
++    vi.mocked(client.addInstruments).mockReturnValue(
++      new Promise((done) => {
++        resolve = done;
++      }),
++    );
++    const user = userEvent.setup();
++    render(<AddField onAdded={vi.fn()} />);
++
++    await user.type(screen.getByRole("textbox", FIELD), "msft");
++    const button = screen.getByRole("button", { name: "Follow a stock" });
++    expect(button).toHaveAttribute("type", "submit");
++    expect(button).not.toBeDisabled();
++    await user.click(button);
++
++    expect(client.addInstruments).toHaveBeenCalledWith(["MSFT"]);
++    expect(button).toBeDisabled();
++    resolve({ added: [], reactivated: [], rejected: [] });
++    await waitFor(() => expect(button).not.toBeDisabled());
++  });
++
+   it("sends nothing for an empty field", async () => {
+     const user = userEvent.setup();
+     render(<AddField onAdded={vi.fn()} />);
+diff --git a/web/src/screens/instruments/bulk-add.test.tsx b/web/src/screens/instruments/bulk-add.test.tsx
+index d78d4083..060969bc 100644
+--- a/web/src/screens/instruments/bulk-add.test.tsx
++++ b/web/src/screens/instruments/bulk-add.test.tsx
+@@ -140,32 +140,45 @@ describe("BulkAdd — reports outcomes after submission", () => {
+     vi.clearAllMocks();
+   });
+ 
+-  it("reports rejected symbols with their reasons after a mixed-outcome submit", async () => {
++  it("reports every outcome with its own count after a mixed-outcome submit", async () => {
+     vi.mocked(client.addInstruments).mockResolvedValue({
+       added: [
+         { inputSymbol: "AAPL", normalisedSymbol: "AAPL", disposition: "added", reason: null },
++        { inputSymbol: "NVDA", normalisedSymbol: "NVDA", disposition: "added", reason: null },
+       ],
+-      reactivated: [],
+-      rejected: [
+-        {
+-          inputSymbol: "MSFT",
+-          normalisedSymbol: "MSFT",
+-          disposition: "duplicate_active",
+-          reason: "already a followed stock",
+-        },
++      reactivated: [
++        { inputSymbol: "AMD", normalisedSymbol: "AMD", disposition: "reactivated", reason: null },
+       ],
++      rejected: ["MSFT", "TSLA", "IBM"].map((symbol) => ({
++        inputSymbol: symbol,
++        normalisedSymbol: symbol,
++        disposition: "duplicate_active" as const,
++        reason: "already a followed stock",
++      })),
+     });
+     render(<BulkAdd onAdded={vi.fn()} />);
+-    const user = await paste("AAPL,MSFT");
++    const user = await paste("AAPL,NVDA,AMD,MSFT,TSLA,IBM");
+ 
+-    await user.click(screen.getByRole("button", { name: "Follow 2 stocks" }));
++    await user.click(screen.getByRole("button", { name: "Follow 6 stocks" }));
+ 
+-    expect(await screen.findByText("1 followed, 0 followed again, 1 rejected")).toBeInTheDocument();
++    expect(await screen.findByText("2 followed, 1 followed again, 3 rejected")).toBeInTheDocument();
+     expect(screen.getByText("MSFT")).toBeInTheDocument();
+-    expect(screen.getByText(/already a followed stock/)).toBeInTheDocument();
++    expect(screen.getAllByText(/already a followed stock/)).toHaveLength(3);
+     expect(screen.getByRole("textbox", REGION)).toHaveValue("");
+   });
+ 
++  it("holds the submit disabled while the request is in flight", async () => {
++    vi.mocked(client.addInstruments).mockReturnValue(new Promise(() => undefined));
++    render(<BulkAdd onAdded={vi.fn()} />);
++    const user = await paste("AAPL");
++    const button = screen.getByRole("button", { name: "Follow 1 stock" });
++    expect(button).not.toBeDisabled();
++
++    await user.click(button);
++
++    expect(button).toBeDisabled();
++  });
++
+   it("names the operation and reason when the request itself fails", async () => {
+     vi.mocked(client.addInstruments).mockRejectedValue(new Error("service unavailable"));
+     render(<BulkAdd onAdded={vi.fn()} />);
+diff --git a/web/src/screens/instruments/empty-states.test.tsx b/web/src/screens/instruments/empty-states.test.tsx
+index 0ee152e4..cfcecdc2 100644
+--- a/web/src/screens/instruments/empty-states.test.tsx
++++ b/web/src/screens/instruments/empty-states.test.tsx
+@@ -213,3 +213,52 @@ describe("Followed stocks — states", () => {
+     expect(button).toHaveAttribute("data-variant", "blocked");
+   });
+ });
++
++// A follow refreshes both reads: the screen's own and the table's (the table gets
++// the screen's refresh token), so the list never shows stale rows after a follow.
++describe("Followed stocks — a follow refreshes the list", () => {
++  const ADDED = {
++    added: [
++      {
++        inputSymbol: "TSLA",
++        normalisedSymbol: "TSLA",
++        disposition: "added" as const,
++        reason: null,
++      },
++    ],
++    reactivated: [],
++    rejected: [],
++  };
++
++  it("re-reads the screen and the table after the add field follows a stock", async () => {
++    vi.mocked(client.listInstruments).mockResolvedValue(POPULATED);
++    vi.mocked(client.addInstruments).mockResolvedValue(ADDED);
++    renderScreen();
++    await screen.findByRole("table");
++    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(2));
++
++    const user = userEvent.setup();
++    await user.type(
++      screen.getByRole("textbox", { name: "Symbol of the stock to follow" }),
++      "tsla{Enter}",
++    );
++
++    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(4));
++  });
++
++  it("re-reads the screen and the table after Follow many follows stocks", async () => {
++    vi.mocked(client.listInstruments).mockResolvedValue(POPULATED);
++    vi.mocked(client.addInstruments).mockResolvedValue(ADDED);
++    renderScreen();
++    await screen.findByRole("table");
++    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(2));
++
++    const user = userEvent.setup();
++    await user.click(screen.getByRole("textbox", { name: "Follow many" }));
++    await user.paste("TSLA");
++    await user.tab();
++    await user.click(screen.getByRole("button", { name: "Follow 1 stock" }));
++
++    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(4));
++  });
++});
+diff --git a/web/src/screens/instruments/entry-hint.test.tsx b/web/src/screens/instruments/entry-hint.test.tsx
+index 449457d6..2dc1bbff 100644
+--- a/web/src/screens/instruments/entry-hint.test.tsx
++++ b/web/src/screens/instruments/entry-hint.test.tsx
+@@ -90,11 +90,24 @@ describe("Followed stocks — the focusAdd entry hint", () => {
+     expect(document.activeElement).toBe(document.body);
+   });
+ 
+-  it("leaves focus alone when opened with no state", async () => {
+-    render(<RouterProvider router={makeRouter(["/data/followed"])} />);
++  it("leaves focus alone, and the history entry as it is, when opened with no state", async () => {
++    const router = makeRouter(["/data/followed"]);
++    render(<RouterProvider router={router} />);
+     await screen.findByRole("table");
+ 
+     expect(document.activeElement).toBe(document.body);
++    expect(router.state.historyAction).toBe("POP");
++  });
++
++  it("keeps the query string of the entry whose hint it consumes", async () => {
++    const router = makeRouter([
++      { pathname: "/data/followed", search: "?symbol=AAPL", state: { focusAdd: true } },
++    ]);
++    render(<RouterProvider router={router} />);
++
++    await waitFor(() => expect(router.state.location.state).toBeNull());
++    expect(router.state.location.pathname).toBe("/data/followed");
++    expect(router.state.location.search).toBe("?symbol=AAPL");
+   });
+ 
+   it("leaves focus alone when focusAdd is false", async () => {
+@@ -103,5 +116,6 @@ describe("Followed stocks — the focusAdd entry hint", () => {
+     await screen.findByRole("table");
+ 
+     expect(document.activeElement).toBe(document.body);
++    expect(router.state.historyAction).toBe("POP");
+   });
+ });
+diff --git a/web/src/screens/instruments/instrument-table.test.tsx b/web/src/screens/instruments/instrument-table.test.tsx
+index 023ad57e..53843c16 100644
+--- a/web/src/screens/instruments/instrument-table.test.tsx
++++ b/web/src/screens/instruments/instrument-table.test.tsx
+@@ -385,4 +385,149 @@ describe("InstrumentTable — followed stocks", () => {
+     await screen.findByRole("table");
+     expect(screen.queryByText("Not found")).not.toBeInTheDocument();
+   });
++
++  // The hand-off pins: what the table asks for, shows and marks beyond the delivered cases.
++  it("shows each count against its own word", async () => {
++    vi.mocked(client.listInstruments).mockResolvedValue({
++      ...MIXED_PAGE,
++      activeCount: 2,
++      retiredCount: 5,
++    });
++    renderTable();
++
++    expect(await screen.findByText("2 followed, 5 stopped following")).toBeInTheDocument();
++  });
++
++  it("names All in the lifecycle filter while nothing is filtered", async () => {
++    renderTable();
++    await screen.findByRole("table");
++
++    expect(screen.getByRole("combobox", { name: "Lifecycle" })).toHaveTextContent("All");
++  });
++
++  it("makes each symbol the row's header, and the row action a ghost button", async () => {
++    renderTable();
++
++    const table = await screen.findByRole("table");
++    const headers = within(table).getAllByRole("rowheader");
++    expect(headers.map((header) => header.textContent)).toEqual(["AAPL", "MSFT"]);
++    expect(screen.getByRole("button", { name: "Stop following AAPL" })).toHaveAttribute(
++      "data-variant",
++      "ghost",
++    );
++  });
++
++  it("appends the next page after the first, and marks the table busy while it loads", async () => {
++    let resolve: (page: typeof MIXED_PAGE) => void = () => undefined;
++    vi.mocked(client.listInstruments)
++      .mockResolvedValueOnce({
++        rows: [{ instrumentId: 1, symbol: "AAPL", lifecycle: "active" as const }],
++        activeCount: 2,
++        retiredCount: 0,
++        nextCursor: "c1",
++      })
++      .mockReturnValueOnce(
++        new Promise((done) => {
++          resolve = done;
++        }),
++      );
++    renderTable();
++
++    const table = await screen.findByRole("table");
++    await waitFor(() => expect(table).toHaveAttribute("aria-busy", "true"));
++    resolve({
++      rows: [{ instrumentId: 2, symbol: "MSFT", lifecycle: "active" as const }],
++      activeCount: 2,
++      retiredCount: 0,
++      nextCursor: null,
++    });
++
++    await within(table).findByText("MSFT");
++    expect(
++      within(table)
++        .getAllByRole("link")
++        .map((link) => link.textContent),
++    ).toEqual(["AAPL", "MSFT"]);
++    expect(table).not.toHaveAttribute("aria-busy");
++  });
++
++  it("carries both filters on the next page's request", async () => {
++    const user = userEvent.setup();
++    // A filtered first page has its own first row, as a real one does: the table
++    // asks for one page per loaded set, named by its first row and its count.
++    vi.mocked(client.listInstruments).mockImplementation(async (query) => ({
++      rows: [
++        query?.cursor
++          ? { instrumentId: 2, symbol: "AAB", lifecycle: "retired" as const }
++          : { instrumentId: query?.symbol ? 11 : 1, symbol: "AAA", lifecycle: "retired" as const },
++      ],
++      activeCount: 0,
++      retiredCount: 2,
++      nextCursor: query?.cursor ? null : "c1",
++    }));
++    renderTable();
++    await screen.findByText("AAB");
++    vi.mocked(client.listInstruments).mockClear();
++
++    await user.type(screen.getByRole("textbox", { name: "Filter by symbol" }), "AA");
++    await user.click(screen.getByRole("combobox", { name: "Lifecycle" }));
++    await user.click(screen.getByRole("option", { name: "Stopped following" }));
++
++    await waitFor(() =>
++      expect(client.listInstruments).toHaveBeenCalledWith({
++        symbol: "AA",
++        lifecycle: "retired",
++        cursor: "c1",
++      }),
++    );
++  });
++
++  it("reports a failed next page as a read error, not as a quiet end of the list", async () => {
++    vi.mocked(client.listInstruments)
++      .mockResolvedValueOnce({
++        rows: [{ instrumentId: 1, symbol: "AAPL", lifecycle: "active" as const }],
++        activeCount: 2,
++        retiredCount: 0,
++        nextCursor: "c1",
++      })
++      .mockRejectedValueOnce(new Error("service unavailable"));
++    renderTable();
++
++    expect(await screen.findByRole("status")).toHaveTextContent(
++      "Couldn't read followed stocks: service unavailable.",
++    );
++  });
++
++  it("clears both filters on Reset filter, which is an outline button", async () => {
++    const user = userEvent.setup();
++    vi.mocked(client.listInstruments).mockResolvedValue({
++      rows: [],
++      activeCount: 3,
++      retiredCount: 1,
++      nextCursor: null,
++    });
++    renderTable();
++    await screen.findByText("No stock matches this filter.");
++    await user.click(screen.getByRole("combobox", { name: "Lifecycle" }));
++    await user.click(screen.getByRole("option", { name: "Followed" }));
++    await waitFor(() =>
++      expect(client.listInstruments).toHaveBeenLastCalledWith({
++        symbol: undefined,
++        lifecycle: "active",
++      }),
++    );
++    await screen.findByText("No stock matches this filter.");
++    const reset = screen.getByRole("button", { name: "Reset filter" });
++    expect(reset).toHaveAttribute("data-variant", "outline");
++
++    await user.click(reset);
++
++    await waitFor(() =>
++      expect(client.listInstruments).toHaveBeenLastCalledWith({
++        symbol: undefined,
++        lifecycle: undefined,
++      }),
++    );
++    expect(screen.getByRole("combobox", { name: "Lifecycle" })).toHaveTextContent("All");
++  });
+ });

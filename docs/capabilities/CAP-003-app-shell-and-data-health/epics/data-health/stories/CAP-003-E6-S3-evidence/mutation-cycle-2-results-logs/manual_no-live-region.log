@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-7i4gf48b/w1/web
+
+stderr | src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (a) names the region by its heading, counts from affected_count and checks the time
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx (19 tests | 1 failed) 1329ms
+   × Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) Show more appends each page with the served cursor, keeps focus and announces the count 127ms
+     → expected '' to be 'Showing 100 of 120 stocks' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/needs-fixing.test.tsx > Needs fixing rows and Show more (TC-COMP-166, DAC-E6-S3-2, DAC-E6-9, AC-16, AC-25) > (b) Show more appends each page with the served cursor, keeps focus and announces the count
+AssertionError: expected '' to be 'Showing 100 of 120 stocks' // Object.is equality
+
+- Expected
++ Received
+
+- Showing 100 of 120 stocks
+
+ ❯ src/screens/data-health/needs-fixing.test.tsx:189:33
+    187|     expect(problemsMock.mock.calls).toEqual([["S049", 50]]);
+    188|     expect(screen.getByRole("button", { name: "Show more" })).toHaveFo…
+    189|     expect(liveText(container)).toBe("Showing 100 of 120 stocks");
+       |                                 ^
+    190|     const firstAnnouncement = container.querySelector('[aria-live="pol…
+    191|     expect(container.querySelector('[aria-live="polite"]')?.closest("u…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 passed (19)
+   Start at  00:09:59
+   Duration  2.37s (transform 99ms, setup 37ms, collect 453ms, tests 1.33s, environment 194ms, prepare 114ms)
+
