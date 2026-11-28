@@ -1,0 +1,57 @@
+# TDD evidence for CAP-003-E6-S2 - Download Now and the Stop Following Dialog.
+# Base: usr/alvaro-de-jodra/CAP-003-integration-20261128T021153Z (c276899f).
+# Cycles per the plan's T014: (1) Download now, (2) Stop following dialog, (3) vocabulary and badge scans (tests only).
+# Each cycle is committed as it ends with this file's entry beside its code, so commit_hash is stage.
+# Mutation: scripts/mutation-run.py with 'ln -sfn <node_modules> node_modules && npx vitest run web/src/screens/data-health/<file>'
+# as the command; generated mutants plus the plan's hand-written ones (operator manual).
+# Reviews: an independent code-review subagent and an independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T003, T006, T009, T010, T014]
+    description: >
+      Download now. web/src/screens/data-health/download-now.test.tsx (new): TC-COMP-161 (T002 a-f), its 202 edge cases
+      and routine-action rules (T003 a-g) and the Download now copy cases (T006 a-c). Then copy.ts (DOWNLOAD_NOW,
+      QUEUED_NOTICE, START_REFUSALS, startFailed) and download-now.tsx (DownloadNow).
+    deviations: >
+      (1) The OTHER_409 fixture's message is "a refusal nobody has met", not the plan's "x": "x" is a substring of the
+      rendered "unexpected", so the envelope-text assertion could never hold. (2) The refusal and failure sentences are
+      <output> elements (implicit role status), not <p role="status">: biome's useSemanticElements rejects the latter.
+      (3) The initial-state aria-busy assertion was added to T003 (e) after the first mutation scoring left the
+      busy useState(true) mutant alive (18 of 19); that scoring is superseded. (4) A first draft guarded Try again with
+      the pending ref; the spec-drift review read that as beyond T010, so it was removed and the patch re-reviewed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log
+    red_log_sha256: 3cbac73c63c41f49f5ad99a3635f4d894c256c17e8c2baccbf2c22e1a4ab3eb9
+    red_evidence: >
+      With download-now.test.tsx staged and no production file, the module failed to load: 1 file failed, no tests
+      (the import of ./download-now did not resolve).
+    green_evidence: >
+      107 tests passed in web/src/screens/data-health; biome lint and format clean; npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/red-cycle-1.log
+        sha256: 3cbac73c63c41f49f5ad99a3635f4d894c256c17e8c2baccbf2c22e1a4ab3eb9
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        The second spec-drift pass named one item, the red-run log in the patch; that is the evidence file the TDD
+        workflow requires (TEST-TDD-002), not behaviour beyond the plan, and it found none in the code. Follow-ups
+        from the reviews, outside the plan's T010 markup and not adopted here: a persistent live region so the
+        sentences announce on every screen reader, focus after Try again unmounts the focused button, and a re-entrancy
+        guard on Try again.
+    diff_sha256: b7e0d0bebb7140472e30f5dabc3b5dd9a9b489b3580dd54496c79503d7842624
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/cycle-1.patch
+    index_tree: c600ba2fcc02572e6b0355d65f05cf2b4bb45e14
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: ce9be04ba6a6600803fa1eca416c97cd826a42cd126697956019d5d3748e28a9
+      generated: 18
+      killed: 18
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

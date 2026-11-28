@@ -158,3 +158,37 @@ export function showAsIncomplete(k: string): string {
 export const SCORES_AT = "Scores";
 export const FROM_DOWNLOAD_STARTED = "from the download started";
 export const SCORES_NOT_SERVED = "FactorFlow can't read scores yet.";
+
+// CAP-003-E6-S2: Download now and Stop following (data-health-ui 2.7)
+
+export const DOWNLOAD_NOW = "Download now";
+export const QUEUED_NOTICE = "A download is running. This starts when it finishes.";
+
+/**
+ * The two refusals `POST /api/acquisition-runs` can answer, each with its fix.
+ * The keys are wire codes from the delivered route (`runs.py` l.86-97),
+ * selected by `ApiError.code`. The envelope `message`, which carries domain
+ * terms, is never rendered (ux-design 0.7; register C13; AC-19).
+ * `history_depth_not_set` wins when both preconditions fail (`runs.py` l.77-78).
+ */
+export const START_REFUSALS: Readonly<
+  Record<
+    "history_depth_not_set" | "no_active_instruments",
+    { sentence: string; fix: string; to: string }
+  >
+> = {
+  history_depth_not_set: {
+    sentence: "Couldn't start the download: history depth isn't set.",
+    fix: "Set history depth",
+    to: "/settings",
+  },
+  no_active_instruments: {
+    sentence: "Couldn't start the download: no stocks are followed.",
+    fix: "Follow stocks",
+    to: "/data/followed",
+  },
+};
+
+export function startFailed(reason: string): string {
+  return `Couldn't start the download: ${reason}.`;
+}
