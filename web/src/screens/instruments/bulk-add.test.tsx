@@ -140,30 +140,43 @@ describe("BulkAdd — reports outcomes after submission", () => {
     vi.clearAllMocks();
   });
 
-  it("reports rejected symbols with their reasons after a mixed-outcome submit", async () => {
+  it("reports every outcome with its own count after a mixed-outcome submit", async () => {
     vi.mocked(client.addInstruments).mockResolvedValue({
       added: [
         { inputSymbol: "AAPL", normalisedSymbol: "AAPL", disposition: "added", reason: null },
+        { inputSymbol: "NVDA", normalisedSymbol: "NVDA", disposition: "added", reason: null },
       ],
-      reactivated: [],
-      rejected: [
-        {
-          inputSymbol: "MSFT",
-          normalisedSymbol: "MSFT",
-          disposition: "duplicate_active",
-          reason: "already a followed stock",
-        },
+      reactivated: [
+        { inputSymbol: "AMD", normalisedSymbol: "AMD", disposition: "reactivated", reason: null },
       ],
+      rejected: ["MSFT", "TSLA", "IBM"].map((symbol) => ({
+        inputSymbol: symbol,
+        normalisedSymbol: symbol,
+        disposition: "duplicate_active" as const,
+        reason: "already a followed stock",
+      })),
     });
     render(<BulkAdd onAdded={vi.fn()} />);
-    const user = await paste("AAPL,MSFT");
+    const user = await paste("AAPL,NVDA,AMD,MSFT,TSLA,IBM");
 
-    await user.click(screen.getByRole("button", { name: "Follow 2 stocks" }));
+    await user.click(screen.getByRole("button", { name: "Follow 6 stocks" }));
 
-    expect(await screen.findByText("1 followed, 0 followed again, 1 rejected")).toBeInTheDocument();
+    expect(await screen.findByText("2 followed, 1 followed again, 3 rejected")).toBeInTheDocument();
     expect(screen.getByText("MSFT")).toBeInTheDocument();
-    expect(screen.getByText(/already a followed stock/)).toBeInTheDocument();
+    expect(screen.getAllByText(/already a followed stock/)).toHaveLength(3);
     expect(screen.getByRole("textbox", REGION)).toHaveValue("");
+  });
+
+  it("holds the submit disabled while the request is in flight", async () => {
+    vi.mocked(client.addInstruments).mockReturnValue(new Promise(() => undefined));
+    render(<BulkAdd onAdded={vi.fn()} />);
+    const user = await paste("AAPL");
+    const button = screen.getByRole("button", { name: "Follow 1 stock" });
+    expect(button).not.toBeDisabled();
+
+    await user.click(button);
+
+    expect(button).toBeDisabled();
   });
 
   it("names the operation and reason when the request itself fails", async () => {

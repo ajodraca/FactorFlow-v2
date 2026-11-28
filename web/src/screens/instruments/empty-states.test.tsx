@@ -213,3 +213,52 @@ describe("Followed stocks — states", () => {
     expect(button).toHaveAttribute("data-variant", "blocked");
   });
 });
+
+// A follow refreshes both reads: the screen's own and the table's (the table gets
+// the screen's refresh token), so the list never shows stale rows after a follow.
+describe("Followed stocks — a follow refreshes the list", () => {
+  const ADDED = {
+    added: [
+      {
+        inputSymbol: "TSLA",
+        normalisedSymbol: "TSLA",
+        disposition: "added" as const,
+        reason: null,
+      },
+    ],
+    reactivated: [],
+    rejected: [],
+  };
+
+  it("re-reads the screen and the table after the add field follows a stock", async () => {
+    vi.mocked(client.listInstruments).mockResolvedValue(POPULATED);
+    vi.mocked(client.addInstruments).mockResolvedValue(ADDED);
+    renderScreen();
+    await screen.findByRole("table");
+    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(2));
+
+    const user = userEvent.setup();
+    await user.type(
+      screen.getByRole("textbox", { name: "Symbol of the stock to follow" }),
+      "tsla{Enter}",
+    );
+
+    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(4));
+  });
+
+  it("re-reads the screen and the table after Follow many follows stocks", async () => {
+    vi.mocked(client.listInstruments).mockResolvedValue(POPULATED);
+    vi.mocked(client.addInstruments).mockResolvedValue(ADDED);
+    renderScreen();
+    await screen.findByRole("table");
+    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(2));
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("textbox", { name: "Follow many" }));
+    await user.paste("TSLA");
+    await user.tab();
+    await user.click(screen.getByRole("button", { name: "Follow 1 stock" }));
+
+    await waitFor(() => expect(client.listInstruments).toHaveBeenCalledTimes(4));
+  });
+});

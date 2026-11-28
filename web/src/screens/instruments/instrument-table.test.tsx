@@ -385,4 +385,149 @@ describe("InstrumentTable — followed stocks", () => {
     await screen.findByRole("table");
     expect(screen.queryByText("Not found")).not.toBeInTheDocument();
   });
+
+  // The hand-off pins: what the table asks for, shows and marks beyond the delivered cases.
+  it("shows each count against its own word", async () => {
+    vi.mocked(client.listInstruments).mockResolvedValue({
+      ...MIXED_PAGE,
+      activeCount: 2,
+      retiredCount: 5,
+    });
+    renderTable();
+
+    expect(await screen.findByText("2 followed, 5 stopped following")).toBeInTheDocument();
+  });
+
+  it("names All in the lifecycle filter while nothing is filtered", async () => {
+    renderTable();
+    await screen.findByRole("table");
+
+    expect(screen.getByRole("combobox", { name: "Lifecycle" })).toHaveTextContent("All");
+  });
+
+  it("makes each symbol the row's header, and the row action a ghost button", async () => {
+    renderTable();
+
+    const table = await screen.findByRole("table");
+    const headers = within(table).getAllByRole("rowheader");
+    expect(headers.map((header) => header.textContent)).toEqual(["AAPL", "MSFT"]);
+    expect(screen.getByRole("button", { name: "Stop following AAPL" })).toHaveAttribute(
+      "data-variant",
+      "ghost",
+    );
+  });
+
+  it("appends the next page after the first, and marks the table busy while it loads", async () => {
+    let resolve: (page: typeof MIXED_PAGE) => void = () => undefined;
+    vi.mocked(client.listInstruments)
+      .mockResolvedValueOnce({
+        rows: [{ instrumentId: 1, symbol: "AAPL", lifecycle: "active" as const }],
+        activeCount: 2,
+        retiredCount: 0,
+        nextCursor: "c1",
+      })
+      .mockReturnValueOnce(
+        new Promise((done) => {
+          resolve = done;
+        }),
+      );
+    renderTable();
+
+    const table = await screen.findByRole("table");
+    await waitFor(() => expect(table).toHaveAttribute("aria-busy", "true"));
+    resolve({
+      rows: [{ instrumentId: 2, symbol: "MSFT", lifecycle: "active" as const }],
+      activeCount: 2,
+      retiredCount: 0,
+      nextCursor: null,
+    });
+
+    await within(table).findByText("MSFT");
+    expect(
+      within(table)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["AAPL", "MSFT"]);
+    expect(table).not.toHaveAttribute("aria-busy");
+  });
+
+  it("carries both filters on the next page's request", async () => {
+    const user = userEvent.setup();
+    // A filtered first page has its own first row, as a real one does: the table
+    // asks for one page per loaded set, named by its first row and its count.
+    vi.mocked(client.listInstruments).mockImplementation(async (query) => ({
+      rows: [
+        query?.cursor
+          ? { instrumentId: 2, symbol: "AAB", lifecycle: "retired" as const }
+          : { instrumentId: query?.symbol ? 11 : 1, symbol: "AAA", lifecycle: "retired" as const },
+      ],
+      activeCount: 0,
+      retiredCount: 2,
+      nextCursor: query?.cursor ? null : "c1",
+    }));
+    renderTable();
+    await screen.findByText("AAB");
+    vi.mocked(client.listInstruments).mockClear();
+
+    await user.type(screen.getByRole("textbox", { name: "Filter by symbol" }), "AA");
+    await user.click(screen.getByRole("combobox", { name: "Lifecycle" }));
+    await user.click(screen.getByRole("option", { name: "Stopped following" }));
+
+    await waitFor(() =>
+      expect(client.listInstruments).toHaveBeenCalledWith({
+        symbol: "AA",
+        lifecycle: "retired",
+        cursor: "c1",
+      }),
+    );
+  });
+
+  it("reports a failed next page as a read error, not as a quiet end of the list", async () => {
+    vi.mocked(client.listInstruments)
+      .mockResolvedValueOnce({
+        rows: [{ instrumentId: 1, symbol: "AAPL", lifecycle: "active" as const }],
+        activeCount: 2,
+        retiredCount: 0,
+        nextCursor: "c1",
+      })
+      .mockRejectedValueOnce(new Error("service unavailable"));
+    renderTable();
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Couldn't read followed stocks: service unavailable.",
+    );
+  });
+
+  it("clears both filters on Reset filter, which is an outline button", async () => {
+    const user = userEvent.setup();
+    vi.mocked(client.listInstruments).mockResolvedValue({
+      rows: [],
+      activeCount: 3,
+      retiredCount: 1,
+      nextCursor: null,
+    });
+    renderTable();
+    await screen.findByText("No stock matches this filter.");
+    await user.click(screen.getByRole("combobox", { name: "Lifecycle" }));
+    await user.click(screen.getByRole("option", { name: "Followed" }));
+    await waitFor(() =>
+      expect(client.listInstruments).toHaveBeenLastCalledWith({
+        symbol: undefined,
+        lifecycle: "active",
+      }),
+    );
+    await screen.findByText("No stock matches this filter.");
+    const reset = screen.getByRole("button", { name: "Reset filter" });
+    expect(reset).toHaveAttribute("data-variant", "outline");
+
+    await user.click(reset);
+
+    await waitFor(() =>
+      expect(client.listInstruments).toHaveBeenLastCalledWith({
+        symbol: undefined,
+        lifecycle: undefined,
+      }),
+    );
+    expect(screen.getByRole("combobox", { name: "Lifecycle" })).toHaveTextContent("All");
+  });
 });

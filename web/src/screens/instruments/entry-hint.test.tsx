@@ -90,11 +90,24 @@ describe("Followed stocks — the focusAdd entry hint", () => {
     expect(document.activeElement).toBe(document.body);
   });
 
-  it("leaves focus alone when opened with no state", async () => {
-    render(<RouterProvider router={makeRouter(["/data/followed"])} />);
+  it("leaves focus alone, and the history entry as it is, when opened with no state", async () => {
+    const router = makeRouter(["/data/followed"]);
+    render(<RouterProvider router={router} />);
     await screen.findByRole("table");
 
     expect(document.activeElement).toBe(document.body);
+    expect(router.state.historyAction).toBe("POP");
+  });
+
+  it("keeps the query string of the entry whose hint it consumes", async () => {
+    const router = makeRouter([
+      { pathname: "/data/followed", search: "?symbol=AAPL", state: { focusAdd: true } },
+    ]);
+    render(<RouterProvider router={router} />);
+
+    await waitFor(() => expect(router.state.location.state).toBeNull());
+    expect(router.state.location.pathname).toBe("/data/followed");
+    expect(router.state.location.search).toBe("?symbol=AAPL");
   });
 
   it("leaves focus alone when focusAdd is false", async () => {
@@ -103,5 +116,6 @@ describe("Followed stocks — the focusAdd entry hint", () => {
     await screen.findByRole("table");
 
     expect(document.activeElement).toBe(document.body);
+    expect(router.state.historyAction).toBe("POP");
   });
 });

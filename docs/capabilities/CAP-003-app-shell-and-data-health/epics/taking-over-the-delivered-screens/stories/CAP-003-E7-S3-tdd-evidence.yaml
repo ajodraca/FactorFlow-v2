@@ -92,3 +92,36 @@ cycles:
     commit_hash: stage
     mutation:
       not_applicable: the cycle changes only a test file; removing its one appended entry fails the cycle's own (a) and (b), as the RED run shows
+  - id: cycle-3
+    tasks: [T007, T019, T021]
+    description: >
+      Tests for the 20 hand-off survivors that were not equivalent (T021 mutation pass): the entry hint replaces the
+      history entry and keeps the query string, a follow refreshes the screen and the table, the add field and Follow many
+      hold their submit disabled in flight and the add button submits, the counts read against their own words, All is
+      shown, symbols are row headers and the row action a ghost button, the next page carries both filters, is appended
+      and marks the table busy, a failed next page is a read error, and Reset filter clears both filters.
+    deviations: >
+      Test-only; no production line changes. The three counter survivors of the per-cycle run (refresh, refreshToken and
+      onRetry) are equivalent and stay recorded in cycle-1.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-results.json
+    red_log_sha256: 46958206d3aeceeccfb2b12092082863bbb61e19e629dc4e3921b752ae8a0176
+    red_evidence: >
+      The first hand-off run left 23 of 53 mutants alive (handoff-results.json), 3 of them the equivalent counters; each of
+      the other 20 is killed by a case added here.
+    green_evidence: >
+      83 tests pass in web/src/screens/instruments; npx tsc --noEmit, npm run lint and npm run format are clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/handoff-results.json
+        sha256: 46958206d3aeceeccfb2b12092082863bbb61e19e629dc4e3921b752ae8a0176
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: the refresh cases pin exact read counts (two before a follow, four after);
+        the failed-next-page case follows delivered behaviour, which the plan does not state.
+    diff_sha256: 0f8fb25a3b31fcecfee5e47193d5b1100f3d7d2b9f046568a54990da371fc902
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/taking-over-the-delivered-screens/stories/CAP-003-E7-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: the cycle changes no production behaviour; it adds tests over code cycle 1 mutated, and the hand-off run scores it

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as client from "../../api/client";
@@ -44,6 +44,29 @@ describe("AddField — follow a stock (AC-1, AC-17, DAC-E7-4)", () => {
     expect(client.addInstruments).toHaveBeenCalledWith(["AAPL"]);
     expect(onAdded).toHaveBeenCalledTimes(1);
     expect(field).toHaveValue("");
+  });
+
+  it("submits when the button is clicked, and holds it disabled while the request is in flight", async () => {
+    let resolve: (value: Awaited<ReturnType<typeof client.addInstruments>>) => void = () =>
+      undefined;
+    vi.mocked(client.addInstruments).mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const user = userEvent.setup();
+    render(<AddField onAdded={vi.fn()} />);
+
+    await user.type(screen.getByRole("textbox", FIELD), "msft");
+    const button = screen.getByRole("button", { name: "Follow a stock" });
+    expect(button).toHaveAttribute("type", "submit");
+    expect(button).not.toBeDisabled();
+    await user.click(button);
+
+    expect(client.addInstruments).toHaveBeenCalledWith(["MSFT"]);
+    expect(button).toBeDisabled();
+    resolve({ added: [], reactivated: [], rejected: [] });
+    await waitFor(() => expect(button).not.toBeDisabled());
   });
 
   it("sends nothing for an empty field", async () => {
