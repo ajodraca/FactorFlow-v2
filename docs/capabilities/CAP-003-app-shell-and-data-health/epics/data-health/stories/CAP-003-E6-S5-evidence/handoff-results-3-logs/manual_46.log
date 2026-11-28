@@ -1,0 +1,51 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zukt77nf/w3/web
+
+stderr | src/screens/data-health/data-health.test.tsx > never_acquired after a download ended (TC-COMP-151, DAC-E6-7, AC-21, AC-24) > renders the verdict, Needs fixing and Recent downloads, with the checks null
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/data-health/data-health.test.tsx (59 tests | 2 failed) 605ms
+   × Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (d) Try again is a read, and only that 18ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (g) error: every region keeps its title and says what failed, with no leak 19ms
+     → expected 1 to be 2 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Aggregate refresh rule (TC-COMP-176, DAC-E6-S5-2, DAC-E6-15, AC-28) > (d) Try again is a read, and only that
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/screens/data-health/data-health.test.tsx:632:28
+    630|     await click(within(region("Daily prices")).getByRole("button", { n…
+    631|     await flush();
+    632|     expect(healthReadMock).toHaveBeenCalledTimes(2);
+       |                            ^
+    633|     expect(attentionMock.mock.calls.length).toBe(before);
+    634|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/data-health/data-health.test.tsx > Eight states per region (TC-COMP-177, TC-COMP-155, DAC-E6-S5-3, DAC-E6-17, AC-24) > (g) error: every region keeps its title and says what failed, with no leak
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/screens/data-health/data-health.test.tsx:829:46
+    827|     await click(within(region("Company financials")).getByRole("button…
+    828|     await flush();
+    829|     expect(healthReadMock.mock.calls.length).toBe(before + 1);
+       |                                              ^
+    830|     expect(attentionMock.mock.calls.length).toBe(attBefore);
+    831|     expect(summaryMock.mock.calls.length).toBe(sumBefore);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 57 passed (59)
+   Start at  02:55:53
+   Duration  1.82s (transform 195ms, setup 33ms, collect 515ms, tests 605ms, environment 284ms, prepare 139ms)
+
