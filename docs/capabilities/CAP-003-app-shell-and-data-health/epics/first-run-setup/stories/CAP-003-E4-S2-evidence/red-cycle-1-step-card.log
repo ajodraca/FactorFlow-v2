@@ -1,0 +1,98 @@
+
+ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+
+ ❯ src/screens/setup/step-card.test.tsx (0 test)
+ ❯ src/screens/setup/copy.test.ts (146 tests | 3 failed) 12ms
+   × setup copy is complete and verbatim > READ_ERRORS.notAnswering 2ms
+     → expected undefined to be 'FactorFlow is not answering' // Object.is equality
+   × setup copy is complete and verbatim > READ_ERRORS.unexpected 0ms
+     → expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
+   × setup copy is complete and verbatim > STEP2.saveFailed 0ms
+     → expected undefined to be 'Couldn\'t save history depth: FactorF…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx [ src/screens/setup/step-card.test.tsx ]
+Error: Failed to resolve import "./step-card" from "web/src/screens/setup/step-card.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web/src/screens/setup/step-card.test.tsx:12:7
+  11 |    failureReason,
+  12 |    useStepHeadingFocus
+  13 |  } from "./step-card";
+     |          ^
+  14 |  function Host({ step }) {
+  15 |    useStepHeadingFocus(step);
+ ❯ TransformPluginContext._formatError ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+ ❯ TransformPluginContext.error ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+ ❯ normalizeUrl ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+ ❯ ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+ ❯ TransformPluginContext.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+ ❯ PluginContainer.transform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+ ❯ loadAndTransform ../node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > READ_ERRORS.notAnswering
+AssertionError: expected undefined to be 'FactorFlow is not answering' // Object.is equality
+
+- Expected: 
+"FactorFlow is not answering"
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/copy.test.ts:237:34
+    235| describe("setup copy is complete and verbatim", () => {
+    236|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    237|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    238|   });
+    239| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > READ_ERRORS.unexpected
+AssertionError: expected undefined to be 'FactorFlow hit an unexpected problem' // Object.is equality
+
+- Expected: 
+"FactorFlow hit an unexpected problem"
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/copy.test.ts:237:34
+    235| describe("setup copy is complete and verbatim", () => {
+    236|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    237|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    238|   });
+    239| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/setup/copy.test.ts > setup copy is complete and verbatim > STEP2.saveFailed
+AssertionError: expected undefined to be 'Couldn\'t save history depth: FactorF…' // Object.is equality
+
+- Expected: 
+"Couldn't save history depth: FactorFlow is not answering"
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/copy.test.ts:237:34
+    235| describe("setup copy is complete and verbatim", () => {
+    236|   it.each(ROWS)("%s", (dotted, args, expected) => {
+    237|     expect(textAt(dotted, args)).toBe(expected);
+       |                                  ^
+    238|   });
+    239| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 143 passed (146)
+   Start at  12:03:03
+   Duration  668ms (transform 35ms, setup 107ms, collect 25ms, tests 12ms, environment 550ms, prepare 63ms)
+

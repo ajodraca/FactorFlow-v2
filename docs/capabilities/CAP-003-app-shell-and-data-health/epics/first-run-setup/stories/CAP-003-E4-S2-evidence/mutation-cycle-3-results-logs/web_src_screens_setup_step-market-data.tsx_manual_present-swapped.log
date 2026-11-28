@@ -1,0 +1,54 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ywyu6kud/w3/web
+
+ ❯ src/screens/setup/step-market-data.test.tsx (21 tests | 2 failed) 166ms
+   × TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Missing in a critical badge, with the variable in code type and the restart line 7ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Missing$/
+Received:
+  Found
+   × TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > draws missing as a labelled badge with an aria-hidden shape 3ms
+     → expected 'Found' to be 'Missing' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Missing in a critical badge, with the variable in code type and the restart line
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Missing$/
+Received:
+  Found
+ ❯ src/screens/setup/step-market-data.test.tsx:124:19
+    122|     const { container } = renderStep(HEALTH_MISSING);
+    123|     const badge = container.querySelector('[data-variant="status-criti…
+    124|     expect(badge).toHaveTextContent(/^Missing$/);
+       |                   ^
+    125|     const line = screen.getByText(/Set the environment variable/);
+    126|     expect(line.tagName).toBe("P");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-market-data.test.tsx > TC-COMP-112: key presence through StatusBadge, Not determinable through NotDeterminable > draws missing as a labelled badge with an aria-hidden shape
+AssertionError: expected 'Found' to be 'Missing' // Object.is equality
+
+Expected: "Missing"
+Received: "Found"
+
+ ❯ src/screens/setup/step-market-data.test.tsx:211:31
+    209|     const { container } = renderStep(health);
+    210|     const badge = container.querySelector(`[data-variant="${variant}"]…
+    211|     expect(badge.textContent).toBe(label);
+       |                               ^
+    212|     const shape = badge.querySelector('svg[aria-hidden="true"]');
+    213|     expect(shape).not.toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  12:15:10
+   Duration  1.86s (transform 140ms, setup 61ms, collect 522ms, tests 166ms, environment 230ms, prepare 489ms)
+

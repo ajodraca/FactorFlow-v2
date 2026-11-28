@@ -1,0 +1,29 @@
+diff --git a/web/src/screens/setup/step-download.test.tsx b/web/src/screens/setup/step-download.test.tsx
+index a1f5b6ad..6069f47b 100644
+--- a/web/src/screens/setup/step-download.test.tsx
++++ b/web/src/screens/setup/step-download.test.tsx
+@@ -1018,4 +1018,24 @@ describe("CAP-003-E4-S4 review v1 rework (IR-001, IR-003, IR-004)", () => {
+     expect(screen.queryByText("Queued")).toBeNull();
+     expect(screen.queryByText("You can leave; this keeps running.")).toBeNull();
+   });
++
++  it("v2 IR-001: a second start after attention named the first is queued, not shown as the first download", async () => {
++    vi.mocked(startAcquisitionRun).mockResolvedValueOnce(accepted(null));
++    const view = renderStep();
++    await userEvent.click(startButton());
++    await settle();
++    setShell({ attention: ok(download({ run_id: "r-2" })) });
++    view.again();
++    expect(screen.getByRole("progressbar", { name: "812 of 1,236 stocks" })).toBeInTheDocument();
++
++    vi.mocked(startAcquisitionRun).mockResolvedValueOnce({
++      runId: "r-3",
++      state: "requested",
++      queuedBehind: "r-2",
++    });
++    await userEvent.click(startButton());
++    await settle();
++    expect(screen.getByRole("status")).toHaveTextContent(STEP4.queued);
++    expect(screen.queryByRole("progressbar")).toBeNull();
++  });
+ });

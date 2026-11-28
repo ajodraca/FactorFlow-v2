@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-27
+last_reworked_review: CAP-003-E4-S2-implementation-review-v1.md
+docs_synced_review: CAP-003-E4-S2-implementation-review-v2.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -82,7 +84,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: Confirm the upstream modules this story imports exist. No package, configuration or directory change.
 
-- [ ] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
+- [x] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
   - CAP-003-E4-S1: `web/src/screens/setup/draft.tsx`, `use-setup-state.ts` (`SetupState` with `depth`, `activeCount`, `loading`, `reread`, `goTo`, `drafts`, `setDraft`) and `copy.ts`.
   - CAP-003-E1-S1: `web/src/components/ui/badge.tsx`, `button.tsx` (with `blocked`), `card.tsx`, and `web/src/components/token-literals.test.ts` exporting `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn`.
   - CAP-003-E1-S2: `web/src/components/ui/form.tsx` (`Form`, `FormRoot`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`) and `input.tsx` (`variant="numeric"`, `suffix`), with `react-hook-form`, `zod` and `@hookform/resolvers` in `package.json`.
@@ -112,7 +114,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-099 (Step 1 shows Found or Missing with the variable and restart line) in a new `web/src/screens/setup/step-market-data.test.tsx`, with a `// Implements TC-COMP-099` comment. Render `<StepMarketData state={stateWith({ current: 1 })} />` with the shell mocked. Cases, `it.each` over the three health fixtures where the row says so:
+- [x] T002 [P] Implement TC-COMP-099 (Step 1 shows Found or Missing with the variable and restart line) in a new `web/src/screens/setup/step-market-data.test.tsx`, with a `// Implements TC-COMP-099` comment. Render `<StepMarketData state={stateWith({ current: 1 })} />` with the shell mocked. Cases, `it.each` over the three health fixtures where the row says so:
   - (a) `HEALTH_FOUND`: the region `getByRole("region", { name: "Connect market data" })` holds the text *Market data key:* and a badge `[data-variant="status-good"]` whose text is exactly *Found*. Neither *Set the environment variable* nor *Restart FactorFlow after setting it.* is present.
   - (b) `HEALTH_MISSING`: a badge `[data-variant="status-critical"]` with text *Missing*; a paragraph whose `textContent` is exactly *Set the environment variable FACTORFLOW_MASSIVE_API_KEY to your Massive API key.*, holding a `code` element whose text is `FACTORFLOW_MASSIVE_API_KEY`; and a paragraph *Restart FactorFlow after setting it.*
   - (c) `HEALTH_UNREACHABLE_STALE_MISSING`: a badge `[data-variant="coverage-unknown"]` with text *Not determinable* and the reason *FactorFlow isn't answering, so the key can't be checked.* beside it.
@@ -125,7 +127,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that renders **Continue** `blocked` when the key is missing: (d).
   - a hand-written mutant that spreads `health.health` onto an element as `data-*` attributes: (e).
 
-- [ ] T003 [P] Implement TC-COMP-109 (Step 1 unreachable shows Not determinable and never the key) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T002 (one file), with a `// Implements TC-COMP-109` comment. With `HEALTH_UNREACHABLE_STALE_MISSING`, whose retained `health` still says `credential_present: false`:
+- [x] T003 [P] Implement TC-COMP-109 (Step 1 unreachable shows Not determinable and never the key) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T002 (one file), with a `// Implements TC-COMP-109` comment. With `HEALTH_UNREACHABLE_STALE_MISSING`, whose retained `health` still says `credential_present: false`:
   - (a) The badge is `[data-variant="coverage-unknown"]`; `queryByText("Missing")` is `null`; no `[data-variant="status-critical"]` exists; the variable and restart lines are absent.
   - (b) No element's text or attribute contains `SENTINEL-KEY-VALUE`: walk `container.querySelectorAll("*")` and check each element's own text nodes and every `attributes[i].value`.
   - (c) The same with `liveness: "unreachable"` and `health: null` (never answered): the same `coverage-unknown` rendering.
@@ -134,7 +136,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that reads `health.health?.credential_present` before checking `liveness`: (a) renders *Missing* from the stale answer.
   - swap-case `NotDeterminable` → `StatusBadge tier="neutral"`: (a)'s `coverage-unknown`.
 
-- [ ] T004 [P] Implement TC-COMP-112 (Key-presence badge through StatusBadge; Not determinable through NotDeterminable) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T003, with a `// Implements TC-COMP-112` comment.
+- [x] T004 [P] Implement TC-COMP-112 (Key-presence badge through StatusBadge; Not determinable through NotDeterminable) in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T003, with a `// Implements TC-COMP-112` comment.
   - (a) For `HEALTH_FOUND` and `HEALTH_MISSING`: the `status-*` badge's text is exactly the label (*Found*, *Missing*), it contains an `svg[aria-hidden="true"]` (the tier shape), and neither the badge nor its `svg` carries an `aria-label` or `title`.
   - (b) For `HEALTH_UNREACHABLE_STALE_MISSING`: the `coverage-unknown` badge's text is *Not determinable*, it has `aria-describedby` naming an element whose text is the reason (`toHaveAccessibleDescription("FactorFlow isn't answering, so the key can't be checked.")`), and no `[data-variant^="status-"]` element exists.
   - (c) No state by colour alone: every `[data-variant]` badge in every row has non-empty text.
@@ -143,7 +145,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that renders the label in a bare `span` with the status colour classes: (a), no `data-variant` badge and no `svg`.
   - drop-field-copy on the `reason` passed to `NotDeterminable`: (b).
 
-- [ ] T005 Implement TC-COMP-108 (Successful depth save marks step 2 done and focuses step 3) in a new `web/src/screens/setup/step-history-depth.test.tsx`, with a `// Implements TC-COMP-108` comment.
+- [x] T005 Implement TC-COMP-108 (Successful depth save marks step 2 done and focuses step 3) in a new `web/src/screens/setup/step-history-depth.test.tsx`, with a `// Implements TC-COMP-108` comment.
   - **Harness.** A test-local `Screen` stands in for CAP-003-E4-S4's `SetupScreen`: it calls the real `useSetupState()` and `useStepHeadingFocus(state.current)`, renders `<p>loading</p>` while `state.loading`, and otherwise renders `<StepList state={state} />` and the current step: `StepMarketData` for 1, `StepHistoryDepth` for 2, and for 3 and 4 a bare `<StepCard step={n} question={n === 3 ? QUESTIONS[3] : STEP4.downloadFor("12")} onBack={() => state.goTo(n - 1)} />`. It is wrapped in `SetupDraftProvider`. The shell gives `HEALTH_FOUND` and an `ok` attention with `latest_download: null`. `listInstruments` resolves `{ rows: [], activeCount: 0, retiredCount: 0, nextCursor: null }`. `getHistoryDepth` resolves `{ years: null, updatedAt: null }` first and `{ years: 5, updatedAt: "2026-09-06T18:00:00Z" }` second.
   - **Steps (the TC's).** Await the step 2 region (*How far back should history go?*). Assert `document.activeElement` is not its `h2` (no focus on entry; Resolved Conflict 1). Type `5` into `getByRole("spinbutton", { name: "History depth years" })` and click **Continue**.
   - **Expected.** `setHistoryDepth` was called once with exactly the number `5` (`toHaveBeenCalledWith(5)`, not `"5"`). `getHistoryDepth` has 2 calls. The step list's second item holds `getByRole("link", { name: "How far back, done" })` and the text *5 years of history*. The third item has `aria-current="step"`. `document.activeElement` is the `h2` whose text is *Which stocks do you want to follow?*.
@@ -155,7 +157,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - swap-case on the `422` code test (`"validation_error"` → another code): the `422` case renders the save-failure line instead.
   - a hand-written mutant that passes `years` (the string) to `setHistoryDepth`: `toHaveBeenCalledWith(5)`.
 
-- [ ] T006 Implement TC-COMP-111 (Step list, step card, steps 1 and 2 use the display vocabulary) in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T005, with a `// Implements TC-COMP-111` comment, using T005's harness and the vocabulary helper.
+- [x] T006 Implement TC-COMP-111 (Step list, step card, steps 1 and 2 use the display vocabulary) in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T005, with a `// Implements TC-COMP-111` comment, using T005's harness and the vocabulary helper.
   - (a) **Non-vacuity.** `FORBIDDEN` matches the planted `"one run"`, `"Runs"`, `"Retired"`, `"Instrument"`, `"acquire"` and `"Provider credential"`, and does not match `"this keeps running"` or `"Restart FactorFlow after setting it."`.
   - (b) **Every state of this story.** `it.each` over these renders; each asserts `visibleAndAccessibleText(container)` does not match `FORBIDDEN`:
     1. Step 1 current, with `HEALTH_FOUND`, `HEALTH_MISSING`, `HEALTH_UNREACHABLE_STALE_MISSING` and `HEALTH_UNKNOWN` (`StepMarketData` rendered directly with `stateWith`, since the harness shows *loading* while health is unknown).
@@ -168,7 +170,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that renders the save failure's `ApiError.message` (the delivered envelope messages name instruments): row 2.
   - a hand-written mutant that writes a step title as a domain term (*Acquisition*): rows 3 and 4.
 
-- [ ] T007 Implement TC-COMP-110 (Literal scan widened to web/src/screens/setup/) as a new `describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)")` block appended to `web/src/components/token-literals.test.ts` (CAP-003-E1-S1's file, which screen stories widen by design), with a `// Implements TC-COMP-110` comment, using the file's own `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn`. Do not edit any existing case.
+- [x] T007 Implement TC-COMP-110 (Literal scan widened to web/src/screens/setup/) as a new `describe("setup screen is scanned (TC-COMP-110, DAC-E4-S2-3)")` block appended to `web/src/components/token-literals.test.ts` (CAP-003-E1-S1's file, which screen stories widen by design), with a `// Implements TC-COMP-110` comment, using the file's own `SCANNED_DIRECTORIES`, `isScannedSource` and `literalsIn`. Do not edit any existing case.
   - (a) `SCANNED_DIRECTORIES` contains `"web/src/screens/setup/"`.
   - (b) Walking `web/src/screens/setup/` recursively finds every one of `draft.tsx`, `use-setup-state.ts`, `copy.ts`, `step-list.tsx`, `step-card.tsx`, `step-market-data.tsx` and `step-history-depth.tsx` as scanned sources, and no `*.test.ts(x)` file. `literalsIn` over each returns `[]`.
   - (c) TC step 3, planted: `literalsIn("web/src/screens/setup/planted.tsx", 'export const x = "p-[12px]";')` returns exactly `["web/src/screens/setup/planted.tsx: 12px"]`.
@@ -177,7 +179,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 ### Additional Unit Tests
 
-- [ ] T008 [P] Write the step card contract in a new `web/src/screens/setup/step-card.test.tsx` (AC-25, DAC-E4-13; setup-ui §10; UX design §1.2 step card; DEC-0350, DEC-0345). Cases:
+- [x] T008 [P] Write the step card contract in a new `web/src/screens/setup/step-card.test.tsx` (AC-25, DAC-E4-13; setup-ui §10; UX design §1.2 step card; DEC-0350, DEC-0345). Cases:
   - (a) **Section and heading.** `<StepCard step={2} question="How far back should history go?" />` renders `getByRole("region", { name: "How far back should history go?" })`. The `h2` has `id` `STEP_HEADING_ID` (`"setup-step-heading"`) and `tabIndex` `-1`. The text *Step 2 of 4* is present.
   - (b) **Footer.** With `onBack` and `onContinue` spies: `getByRole("button", { name: "← Back: Market data" })` has `data-variant="ghost"` and calls `onBack` once; the text *Next: Stocks to follow* is present; `getByRole("button", { name: "Continue" })` has `data-variant="default"` and calls `onContinue` once. For step 3 the labels are *← Back: How far back* and *Next: Download data*.
   - (c) **Absent controls.** Step 1 with `onBack` given renders no Back button. With no `onContinue`, neither **Continue** nor a *Next:* hint renders (step 4's card).
@@ -194,9 +196,9 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - a hand-written mutant that drops the hook's `previous.current = current` update: (e)'s return to step 1.
   - swap-case of the two reasons in `failureReason`: (f).
 
-- [ ] T009 [P] Add rows for this story's three new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal (DEC-0345, DEC-0346): `["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"]`, `["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"]` and `["STEP2.saveFailed", ["FactorFlow is not answering"], "Couldn't save history depth: FactorFlow is not answering"]`. CAP-003-E4-S1's T006 scan of every export and of the file's text then covers them unchanged. Kills: drop-field-copy on any of the three: its row.
+- [x] T009 [P] Add rows for this story's three new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal (DEC-0345, DEC-0346): `["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"]`, `["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"]` and `["STEP2.saveFailed", ["FactorFlow is not answering"], "Couldn't save history depth: FactorFlow is not answering"]`. CAP-003-E4-S1's T006 scan of every export and of the file's text then covers them unchanged. Kills: drop-field-copy on any of the three: its row.
 
-- [ ] T010 [P] Write the step list contract in a new `web/src/screens/setup/step-list.test.tsx` (AC-25, DAC-E4-1 rendering half, DAC-E4-S2-1; setup-ui §10; UX design §1.2; DEC-0348, DEC-0349, DEC-0350). Render `<StepList state={stateWith(…)} />` with the shell mocked. Cases:
+- [x] T010 [P] Write the step list contract in a new `web/src/screens/setup/step-list.test.tsx` (AC-25, DAC-E4-1 rendering half, DAC-E4-S2-1; setup-ui §10; UX design §1.2; DEC-0348, DEC-0349, DEC-0350). Render `<StepList state={stateWith(…)} />` with the shell mocked. Cases:
   - (a) **Structure.** `getByRole("navigation", { name: "Setup steps" })` holds one `list` of four `listitem`s whose titles are, in order, *Market data*, *How far back*, *Stocks to follow*, *Download data* (DAC-E4-11's four steps).
   - (b) **Current and done.** With `done` `{ 1: true, 2: true, 3: false, 4: false }` and `current` `3`: only the third item has `aria-current="step"`; `getByRole("link", { name: "Market data, done" })` and `getByRole("link", { name: "How far back, done" })` exist, and there are exactly 2 links. With `current` `2` (a done step made current by `goTo`), *How far back* is not a link and its item has `aria-current="step"`.
   - (c) **Activation.** Clicking *How far back, done* calls `goTo` once with `2`. Each link's `href` attribute is `"#setup-step-heading"`.
@@ -218,14 +220,14 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
   - swap-case `sideColumnMin` ↔ `sideColumnMax`: (f).
   - negate-boolean on the step 1 summary's `liveness === "answering"` guard: (e) step 1, third row.
 
-- [ ] T011 [P] Write step 1's further cases in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T004 (DAC-E4-3, DAC-E4-13; DEC-0349):
+- [x] T011 [P] Write step 1's further cases in `web/src/screens/setup/step-market-data.test.tsx`, sequential with T004 (DAC-E4-3, DAC-E4-13; DEC-0349):
   - (a) No **← Back** button renders on step 1.
   - (b) **In that step only.** With `depth` `{ kind: "error", error: new ApiUnreachableError("x"), last: null }` in the state, step 1 renders no *Couldn't read* text.
   - (c) **Not answered yet.** With `HEALTH_UNKNOWN`, the badge is `coverage-unknown` *Not determinable* with the same reason, and no *Found* or *Missing* text renders.
 
   Kills: a hand-written mutant that treats `unknown` as missing (`health === null` → *Missing*): (c).
 
-- [ ] T012 [P] Write step 2's further cases in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T006 (DAC-E4-4, DAC-E4-13, AC-3, AC-17; DEC-0346, DEC-0347). Render `<StepHistoryDepth state={stateWith({ current: 2, … })} />` with the shell and client mocked. Cases:
+- [x] T012 [P] Write step 2's further cases in `web/src/screens/setup/step-history-depth.test.tsx`, sequential with T006 (DAC-E4-4, DAC-E4-13, AC-3, AC-17; DEC-0346, DEC-0347). Render `<StepHistoryDepth state={stateWith({ current: 2, … })} />` with the shell and client mocked. Cases:
   - (a) **The field.** `getByRole("spinbutton", { name: "History depth years" })` with `toHaveAccessibleDescription("Whole years, 1 to 50.")`. The note *Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.* is present. The region is named *How far back should history go?*.
   - (b) **Initial value.** Draft `yearsText` `"12"` with a saved depth of 5: the value is `12`. Draft `""` with a saved depth of 5: `5` (S02 §5 `historyYears`). Draft `""` with `years: null`: empty. Draft `""` with a failed read: empty.
   - (c) **Drafts kept.** Typing `7` into an empty field makes the last `setDraft` call `("yearsText", "7")`.
@@ -253,13 +255,13 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: The three copy strings and the four modules, each in its own TDD cycle. Every module's comments cite AC, DAC and TC in the style of the delivered `status-region.tsx`, and none writes a length, a colour, a layout value or one of the eight DAC-E7-3 terms (write "28 px" with a space where a comment needs it).
 
-- [ ] T013 Add three strings to `web/src/screens/setup/copy.ts` (CAP-003-E4-S1's catalogue; T009 RED first), each with a doc comment saying this story adds it and no design gives its wording, as `copy.ts`'s module comment provides:
+- [x] T013 Add three strings to `web/src/screens/setup/copy.ts` (CAP-003-E4-S1's catalogue; T009 RED first), each with a doc comment saying this story adds it and no design gives its wording, as `copy.ts`'s module comment provides:
   - `READ_ERRORS.notAnswering` *FactorFlow is not answering* and `READ_ERRORS.unexpected` *FactorFlow hit an unexpected problem* (DEC-0345);
   - `STEP2.saveFailed(reason: string)` → `Couldn't save history depth: ${reason}` (DEC-0346).
 
   `copy.ts` keeps importing nothing and exporting no number or boolean. Makes T009 pass.
 
-- [ ] T014 Create `web/src/screens/setup/step-card.tsx` (depends on T013; T008 RED first), to DEC-0350.
+- [x] T014 Create `web/src/screens/setup/step-card.tsx` (depends on T013; T008 RED first), to DEC-0350.
   - **Imports.** `type ReactNode`, `useEffect`, `useRef` from `"react"`; `ApiUnreachableError` and `type ApiError` from `"../../api/client"`; `Button` from `"../../components/ui/button"`; `Card` from `"../../components/ui/card"`; `LAYOUT` from `"../../app/layout"`; `type StepId` from `"./use-setup-state"`; `STEP_TITLES`, `stepPosition`, `backLabel`, `nextHint`, `CONTINUE`, `READ_ERRORS` from `"./copy"`.
   - **`STEP_HEADING_ID`** `= "setup-step-heading"`: one step card renders at a time, so one id serves the heading, its `aria-labelledby` and the done-step links' `href`.
   - **`StepCard(props: StepCardProps): JSX.Element`** with `interface StepCardProps { step: StepId; question: string; explanation?: ReactNode; note?: ReactNode; onBack?: () => void; onContinue?: () => void; children?: ReactNode }`. Renders `<section aria-labelledby={STEP_HEADING_ID}>` around `<Card variant="default" className="flex flex-col gap-5 p-4">` holding, in order:
@@ -275,7 +277,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
   Makes T008 pass.
 
-- [ ] T015 Create `web/src/screens/setup/step-list.tsx` (depends on T014 for `STEP_HEADING_ID`; T010 RED first), to DEC-0348, -5 and -6.
+- [x] T015 Create `web/src/screens/setup/step-list.tsx` (depends on T014 for `STEP_HEADING_ID`; T010 RED first), to DEC-0348, -5 and -6.
   - **Imports.** `type ReactNode` from `"react"`; `Stepper`, `type StepperStep` from `"../../components/ui/stepper"`; `labelOf` from `"../../components/patterns/tiers"`; `formatCount`, `formatInstant` from `"../../components/patterns/format"`; `LAYOUT` from `"../../app/layout"`; `useShell` from `"../../app/shell-context"`; `type SetupState`, `type StepId` from `"./use-setup-state"`; `SCREEN`, `STEP_TITLES`, `SUMMARIES` from `"./copy"`; `STEP_HEADING_ID` from `"./step-card"`.
   - **`StepList({ state, header }: { state: SetupState; header?: ReactNode }): JSX.Element`.** Renders `<div className="flex flex-col gap-4" style={{ minWidth: LAYOUT.sideColumnMin, maxWidth: LAYOUT.sideColumnMax }}>` with `header` first, then `<Stepper label={SCREEN.stepsLabel} markerSize={LAYOUT.markerSize} steps={steps} />`.
   - **Steps.** For each `n` of `1, 2, 3, 4`: `title` `STEP_TITLES[n]`; `state` `"current"` when `n === state.current`, else `"done"` when `state.done[n]`, else `"todo"`; for a done step that is not current, `href` `` `#${STEP_HEADING_ID}` `` and `onSelect` `() => state.goTo(n)` (DEC-0348); `summary` only when `state.done[n]`:
@@ -287,7 +289,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
   Makes T010 pass.
 
-- [ ] T016 Create `web/src/screens/setup/step-market-data.tsx` (depends on T014; T002–T004 and T011 RED first).
+- [x] T016 Create `web/src/screens/setup/step-market-data.tsx` (depends on T014; T002–T004 and T011 RED first).
   - **Imports.** `StatusBadge` from `"../../components/patterns/status-badge"`; `tierOf`, `labelOf` from `"../../components/patterns/tiers"`; `NotDeterminable` from `"../../components/patterns/presence"`; `useShell` from `"../../app/shell-context"`; `type SetupState` from `"./use-setup-state"`; `QUESTIONS`, `STEP1` from `"./copy"`; `StepCard` from `"./step-card"`.
   - **`StepMarketData({ state }: { state: SetupState }): JSX.Element`.** Reads `const { health } = useShell()`. Renders `<StepCard step={1} question={QUESTIONS[1]} onContinue={() => state.goTo(2)}>`, with no `onBack`, holding:
     - `<p className="flex flex-wrap items-center gap-2"><span>{STEP1.keyLabel}</span>{verdict}</p>`. `verdict` is, when `health.liveness === "answering"` and `health.health` is not null, `<StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>` with `status = { of: "credential", present: health.health.credential_present }`; otherwise `<NotDeterminable reason={STEP1.notAnswering} />` (DAC-E4-S2-2; DEC-0349). `liveness` is read first, so a stale `credential_present` retained after a failed poll is never shown.
@@ -296,7 +298,7 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
   Makes T002–T004 and T011 pass.
 
-- [ ] T017 Create `web/src/screens/setup/step-history-depth.tsx` (depends on T013, T014; T005, T006 and T012 RED first), to DEC-0346 and -3.
+- [x] T017 Create `web/src/screens/setup/step-history-depth.tsx` (depends on T013, T014; T005, T006 and T012 RED first), to DEC-0346 and -3.
   - **Imports.** `useForm` from `"react-hook-form"`; `zodResolver` from `"@hookform/resolvers/zod"`; `z` from `"zod"`; `setHistoryDepth`, `ApiError`, `ApiUnreachableError` from `"../../api/client"`; `Form`, `FormRoot`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage` from `"../../components/ui/form"`; `Input` from `"../../components/ui/input"`; `type SetupState` from `"./use-setup-state"`; `QUESTIONS`, `STEP2`, `READ_ERRORS` from `"./copy"`; `StepCard`, `StepReadError`, `failureReason` from `"./step-card"`.
   - **Bounds.** Module constants `MIN_YEARS = 1` and `MAX_YEARS = 50`, commented as mirrors of the delivered `MIN_HISTORY_DEPTH_YEARS` and `MAX_HISTORY_DEPTH_YEARS` (`src/factorflow/api/bounds.py:9,15`), the range the copy states (*Whole years, 1 to 50.*). The server stays the authority: its `422` is still rendered.
   - **Schema.** `z.object({ years: z.string().trim().refine((text) => /^\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS, STEP2.rangeError) })`.
@@ -321,8 +323,8 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: Bring the setup directory under the literal scan and confirm the change set is exactly the story's.
 
-- [ ] T018 Append `"web/src/screens/setup/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts` (DEC-0296's widening rule; T007 RED first). Change nothing else in the file. CAP-003-E1-S1's whole-tree case and CAP-003-E3-S2's layout rule then read every setup source, including CAP-003-E4-S1's. Makes T007 pass.
-- [ ] T019 Confirm scope (depends on T013–T018):
+- [x] T018 Append `"web/src/screens/setup/"` to `SCANNED_DIRECTORIES` in `web/src/components/token-literals.test.ts` (DEC-0296's widening rule; T007 RED first). Change nothing else in the file. CAP-003-E1-S1's whole-tree case and CAP-003-E3-S2's layout rule then read every setup source, including CAP-003-E4-S1's. Makes T007 pass.
+- [x] T019 Confirm scope (depends on T013–T018):
   - `git status --short` lists only `web/src/screens/setup/step-list.tsx`, `step-list.test.tsx`, `step-card.tsx`, `step-card.test.tsx`, `step-market-data.tsx`, `step-market-data.test.tsx`, `step-history-depth.tsx`, `step-history-depth.test.tsx`, `copy.ts`, `copy.test.ts` and `web/src/components/token-literals.test.ts`, plus this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
   - `git diff --exit-code -- web/src/app/ web/src/api/ web/src/components/ui/ web/src/components/patterns/ web/src/screens/settings/ web/src/screens/instruments/ web/src/main.tsx package.json` exits 0.
   - `git diff -- web/src/components/token-literals.test.ts` shows one added array entry and the T007 `describe` block only; `git diff -- web/src/screens/setup/copy.ts` shows only T013's three additions.
@@ -335,8 +337,8 @@ DAC-E4-13's state half is TC-COMP-106 (CAP-003-E4-S1). This story renders it, an
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-25).
-- [ ] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
+- [x] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-25).
+- [x] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E4-S2-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch`.

@@ -1,0 +1,88 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-p8ghsew_/w0/web
+
+ ✓ src/screens/setup/copy.test.ts (163 tests) 26ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 5ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 9ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 385ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 939ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 892ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 711ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 673ms
+stderr | src/screens/setup/setup.test.tsx > TC-COMP-121: going back from step 4 to step 2 and forward keeps every value > holds the years text, the radio choice and the pasted text across every return
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 612ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 5549ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 418ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > renders a refused value as the field error, keeps it and stays on step 2 408ms
+   ✓ TC-COMP-111: the list, the card and steps 1 and 2 use the display vocabulary > step 3 current after a save lists two done links with their summaries 478ms
+   ✓ step 2: the field > keeps what is typed as the draft 318ms
+   ✓ step 2: validation on blur and on Continue > refuses 5.5 with the field error and sends nothing 540ms
+   ✓ step 2: Back > goes to step 1 and sends nothing 574ms
+ ✓ src/screens/setup/step-download.test.tsx (71 tests) 5800ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 422ms
+   ✓ TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2 371ms
+   ✓ step 4's own cases > (a) before attention names this download, the region reads Queued and never an older state 322ms
+   ✓ step 4's own cases > (j) health is refreshed on every 202 and on nothing else 539ms
+ ❯ src/screens/setup/setup.test.tsx (31 tests | 1 failed) 5725ms
+   ✓ TC-COMP-121: going back from step 4 to step 2 and forward keeps every value > holds the years text, the radio choice and the pasted text across every return 2414ms
+   ✓ TC-COMP-122: each step's eight states render or are recorded not applicable > nothing found: step 3 blocks Continue at zero 370ms
+   ✓ TC-COMP-122: each step's eight states render or are recorded not applicable > nothing found: step 4 after Add later blocks Start download with both exits 316ms
+   × TC-COMP-122: each step's eight states render or are recorded not applicable > nothing found: steps 1 and 2 record why it does not apply 118ms
+     → expected { notApplicable: '' } to deeply equal { notApplicable: StringMatching /\S/ }
+   ✓ TC-COMP-122: each step's eight states render or are recorded not applicable > partial: step 3 reports a mixed paste 484ms
+   ✓ the screen's own cases > (b) entering moves no focus, and (c) a step change focuses the step question 334ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 9298ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 605ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30 586ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > parses once on paste and once on blur, never per keystroke 875ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > does not parse a keystroke typed before any paste 350ms
+   ✓ Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > moves to step 4 without a request, leaving step 3 still to do 449ms
+   ✓ pasted symbols go as a JSON array, rejections are announced (TC-COMP-116; DAC-E4-S3-4) > posts the accepted symbols and names the already-followed ones in the live region 302ms
+   ✓ step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a 201 with a duplicate_active r…' 482ms
+   ✓ step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > 'after a failed batch (a server failur…' 509ms
+   ✓ step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > reads its labels from the catalogue 356ms
+   ✓ step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > a failed batch (DEC-0354) > keeps the unposted entries, counts the posted ones and stays on the step 420ms
+   ✓ step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > makes the field read-only, not disabled, while posting, and ignores a second Continue 304ms
+   ✓ rework of review v1 (IR-001, IR-003, IR-004) > announces a malformed rejection as unreadable, without the server reason, and stays (IR-001) 316ms
+   ✓ rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post settles after Back (IR-004) 457ms
+   ✓ rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post fails after Back (IR-004) 570ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/setup.test.tsx > TC-COMP-122: each step's eight states render or are recorded not applicable > nothing found: steps 1 and 2 record why it does not apply
+AssertionError: expected { notApplicable: '' } to deeply equal { notApplicable: StringMatching /\S/ }
+
+- Expected
++ Received
+
+  Object {
+-   "notApplicable": StringMatching /\S/,
++   "notApplicable": "",
+  }
+
+ ❯ src/screens/setup/setup.test.tsx:347:20
+    345|   it("nothing found: steps 1 and 2 record why it does not apply", () =…
+    346|     const record = cardRenderers(anyState())["empty-no-match"];
+    347|     expect(record).toEqual({ notApplicable: expect.stringMatching(/\S/…
+       |                    ^
+    348|   });
+    349| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 479 passed (480)
+   Start at  14:50:37
+   Duration  15.41s (transform 4.24s, setup 3.71s, collect 23.12s, tests 29.73s, environment 17.64s, prepare 2.84s)
+

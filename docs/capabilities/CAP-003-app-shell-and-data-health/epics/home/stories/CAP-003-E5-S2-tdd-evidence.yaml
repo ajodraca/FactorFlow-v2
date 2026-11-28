@@ -1,0 +1,149 @@
+# TDD evidence for CAP-003-E5-S2 - The Data Tile.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T001, T011, T012]
+    description: >
+      The two copy groups the tile adds (DAC-E5-S2-4; DEC-0365, DEC-0366): DATA_TILE.pricesNotDownloaded and READ_FAILURE in copy.ts, with doc comments naming their decisions, and the matching literal assertions in copy.test.ts. Baseline npm run test was green (128 files, 3560 tests) before the change. The generator produced no mutants for a string-only diff, so 6 were hand-written (each string changed, blanked, or the two reasons swapped); all 6 were killed. Both reviews approved with no blocking findings.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-1-copy.log
+    red_log_sha256: 49f57b9d1563389854d7393ef776ff1b19433a7a3ef9d99a19ceb42351ef26d0
+    red_evidence: >
+      copy.test.ts failed 3 tests (READ_FAILURE and the pricesNotDownloaded literal were not defined) before the implementation.
+    green_evidence: >
+      The web/src/screens/home suite, 126 tests, passes in green-cycle-1-copy.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6b56d5b95618e5dab242457d4f365bee8bcb9f5210bd1d08110b3d43d332eb1b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: 5c687c8764770001315af8de06ce574fb7dd2c6da39f5789292c56905e9784ff
+      generated: 6
+      killed: 6
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T007, T010, T013]
+    description: >
+      The skeleton, the absent download and the first-download-running state (TC-COMP-136; DAC-E5-2, DAC-E5-S2-1, AC-21): data-tile.tsx exports DataTile(), which reads useShell().attention and .scores only, renders a busy skeleton while attention loads (and while the summary loads once a download has ended), nothing while latest_download is null, and the first-download sentence from started_at or requested_at with a Downloading badge only while the state is running, inside one link named by the sentence. The full tile and the error state are placeholders that cycles 3 and 4 replace. data-tile.test.tsx holds the shared harness and the TC-COMP-136 cases plus T010 (a) to (c) and the summary-loading half of (d). The generator produced no mutants for a new tsx file, so 12 were hand-written from the plan's kill list; all 12 were killed. Both reviews approved; the code review raised LOW observations only (the plan's kill list names the fallback order the other way round from T013, and the code follows T013).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-2-tile-first-download.log
+    red_log_sha256: 98a5ce6f42ea8428ff20fec46bdc951a4038287be07b99b3f5044bf2b0605f59
+    red_evidence: >
+      data-tile.test.tsx failed to load (./data-tile did not resolve) before the module existed.
+    green_evidence: >
+      data-tile.test.tsx, 10 tests, passes in green-cycle-2-tile-first-download.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 10b79ab548625f138d6f37203ec92057e96835cf00f20f977c935abef801e55f
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: 99c86a0e37757eae3ce8b869fef64b37153450076bd372efe59eaa5ffa2965bf
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T003, T004, T005, T007, T009, T010, T014]
+    description: >
+      The full tile (TC-COMP-137, TC-COMP-128, TC-COMP-129, TC-COMP-138, TC-COMP-140; DAC-E5-3, DAC-E5-4, DAC-E5-5, DAC-E5-S2-2, DAC-E5-S2-3, DAC-E5-S2-5, AC-8, AC-11): data-tile.tsx gains scoreStateOf (the table order of data-health-ui 2.4: never classified, then later building, then later failed, then not current), scoreStatus, the badge from dataTileBadge over the verdict and the score state, the hero from stocks_current with attention's followed count as the fallback, the scores and prices as-of lines through Absent, the scope sentence, the lag badge, and the accessible name of DEC-0364. data-tile.test.tsx adds the verdict table, the score-state and tie tables, the hero and as-of cases, the lag cases, the link name cases, the shape and dash cases, the composition cases and the time-zone cases, and widens the no-aggregate-read test to the full cross product of attention states and score states. The generator produced no mutants for a tsx file, so 26 were hand-written from the plan's kill list; all 26 were killed. The spec-drift review reported drift on the first four passes, each time on a test that asserted less than the plan names (T009 badge set; the states T007 (d) renders); each was fixed and the cycle re-fingerprinted and reviewed afresh, and the fifth pair of reviews approved with no drift. The code reviews raised LOW observations only (T009 (b)'s dash loop has no minimum count and T004 (b) and (c) assert the same structure; a nested ternary in the scores line).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-3-full-tile.log
+    red_log_sha256: e18c836825258f75f1711cea8bfd5f5eec45819aba0799142bfdfb539de863ea
+    red_evidence: >
+      21 of the 49 data-tile tests failed before the full tile existed (the placeholder rendered only the badge).
+    green_evidence: >
+      The web/src/screens/home suite, 175 tests (49 in data-tile.test.tsx), passes in green-cycle-3-full-tile.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8a70fc5d9da55658ce7a31364830b629d7843bfeae63791ac34d080e3775ed26
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: 33df5fd02bd772a2f205d3e23bbb97cb3bdfa445b1719919f928baa13f9e87e8
+      generated: 26
+      killed: 26
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T006, T008, T015, T016, T017]
+    description: >
+      The read failures and the vocabulary scan (TC-COMP-131 tile half, TC-COMP-139; DAC-E5-11, DAC-E5-S2-4, AC-19; DEC-0366): data-tile.tsx gains readFailureReason (one fixed sentence per failure kind, never the server's message or request id) and ErrorTile (the title, Couldn't read the data summary: {reason}. and an outline Try again button, with no badge, figure or link), wired so an attention failure retries attention and a summary failure retries scores, neither showing the last good answer; the first-download state still reads no summary. data-tile.test.tsx adds the T006 cases, the T008 vocabulary scan and one ALL_STATES() cross product of every attention fixture and every score state, which T007 (d) (no aggregate read) and T008 both render. T016 and T017 add no behaviour and join this cycle: npm run test (129 files, 3618 tests), lint, format, tsc --noEmit and build all pass, the plan's greps print nothing, and no producer or delivered file changed (validation-cycle-4.log). The generator produced no mutants for a tsx file, so 10 were hand-written; the first run left the button variant alive (a test now pins data-variant outline) and the second run killed all 10. The spec-drift review reported drift once, on the T008 state list, which was then made exhaustive; the second pair of reviews approved with no drift.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-4-errors.log
+    red_log_sha256: e045d4fe2cb0fd10efc305ece6712692673620266412ebb7457e5384bc4ccfb9
+    red_evidence: >
+      4 of the 57 data-tile tests failed before ErrorTile existed (T006 (a), (b) and both (c) cases).
+    green_evidence: >
+      The web/src/screens/home suite, 183 tests (57 in data-tile.test.tsx), passes in green-cycle-4-errors.log; the full validation passes in validation-cycle-4.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 48d8f91d57d3f1ebfea719c455fdf81e61f5518c2cd9cd94137b10535d2e2650
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: d117c30b9567deabab9c52b26cb9522ff664a21cc1f73bd634ab401972d0b694
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T004, T005, T006, T009, T010, T013, T014]
+    description: >
+      Review v1 rework (IR-001 to IR-008; DAC-E5-4, DAC-E5-5, DAC-E5-S2-3, DAC-E5-S2-5, AC-8, AC-25). Tests: IR-001 a later set building with no set shows the lag badge; IR-002 the hero and name read 1,233 of 1,236 (served) and 1,236 (not served); IR-003 the error card is a metric card and a region named Data; IR-004 the skeleton's pulse classes, aria-hidden, metric variant, title and region; IR-005 the link's block and rounded and the scope sentence's text-xs and text-muted-foreground; IR-007 the dash loop asserts two dashes (not served) or one (never classified). Production: IR-006 the Downloading badge moves to TileLink's badge slot under the title; IR-008 TileLink's doc comment names the two states that share it. The generator produced no mutants for tsx, so 12 were hand-written from the review's mutants; all 12 were killed. IR-006 is pinned by a document-order test that failed on HEAD. Both reviews approved with no drift; the code review's LOW observations (no mutant for IR-006 and IR-007; the skeleton pulse lookup takes the first aria-hidden element) are accepted.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/red-cycle-5-review-rework.log
+    red_log_sha256: 70b41b672e29c2e415a9995552ca58890fde3560d8ae65dd34aaf17a06da0173
+    red_evidence: >
+      IR-006's order test failed on HEAD (1 of 66 data-tile tests, red-cycle-5-review-rework.log). The IR-001 to IR-005 and IR-007 assertions pass on HEAD by design and are RED against the review's named mutants (mutation-cycle-5-results.json, 12 of 12 killed).
+    green_evidence: >
+      The web/src/screens/home suite, 192 tests (66 in data-tile.test.tsx), passes in green-cycle-5-review-rework.log; the full suite (129 files, 3627 tests), tsc --noEmit, biome lint, biome format and build pass in validation-cycle-5.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e79e8154c34a3af825aa16868fbc42e8fb6351cc3039a2bf600d401adca7ef47
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S2-evidence/mutation-cycle-5-results.json
+      results_sha256: 6f89ffda7d6d9ba98cb74d117cf2fc53e864bca6dbfb4d67ffd8ea6d7b106611
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

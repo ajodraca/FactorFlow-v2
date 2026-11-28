@@ -1,0 +1,89 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w0/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 5ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 35ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 25ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 477ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1112ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 1097ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 1168ms
+   ✓ StepCard footer > names the previous and next steps and calls each handler once 393ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 708ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 846ms
+   ✓ StepList structure > is a navigation named Setup steps holding four titled items in order 332ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 1768ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 402ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 5 failed) 2261ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 481ms
+   × step 4's own cases > (b) an existing succeeded download shows its badge and times, no bar 11ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+   × step 4's own cases > (b) an existing partial download shows its badge and times, no bar 8ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+   × step 4's own cases > (b) an existing failed download shows its badge and times, no bar 4ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+   × step 4's own cases > (b) an existing cancelled download shows its badge and times, no bar 40ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+   × step 4's own cases > (b) an existing abandoned download shows its badge and times, no bar 4ms
+     → expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 2521ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 312ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (b) an existing succeeded download shows its badge and times, no bar
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (b) an existing partial download shows its badge and times, no bar
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (b) an existing failed download shows its badge and times, no bar
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (b) an existing cancelled download shows its badge and times, no bar
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (b) an existing abandoned download shows its badge and times, no bar
+AssertionError: expected <div aria-valuemax="1236" …(10)>…(1)</div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-labelledby=":r74:"
+  aria-valuemax="1236"
+  aria-valuemin="0"
+  aria-valuenow="812"
+  aria-valuetext="66%"
+  class="relative h-2 w-full overflow-hidden rounded bg-seq-1"
+  data-max="1236"
+  data-state="loading"
+  data-value="812"
+  data-variant="determinate"
+  role="progressbar"
+>
+  <div
+    class="h-full w-full flex-1 bg-status-active transition-all"
+    data-max="1236"
+    data-state="loading"
+    data-value="812"
+    style="transform: translateX(-34.30420711974111%);"
+  />
+</div>
+
+ ❯ src/screens/setup/step-download.test.tsx:774:47
+    772|     expect(screen.getByText("Started 2026-10-15 09:30 CDT")).toBeInThe…
+    773|     expect(screen.getByText("checked 09:31:12 CDT")).toBeInTheDocument…
+    774|     expect(screen.queryByRole("progressbar")).toBeNull();
+       |                                               ^
+    775|     expect(screen.queryByText("You can leave; this keeps running.")).t…
+    776|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  5 failed | 444 passed (449)
+   Start at  14:42:16
+   Duration  10.57s (transform 3.81s, setup 4.20s, collect 21.47s, tests 10.93s, environment 19.32s, prepare 13.56s)
+

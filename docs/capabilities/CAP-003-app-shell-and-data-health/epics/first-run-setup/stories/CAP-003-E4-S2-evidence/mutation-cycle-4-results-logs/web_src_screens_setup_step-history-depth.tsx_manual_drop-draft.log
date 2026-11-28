@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wzfm9kpg/w1/web
+
+ ❯ src/screens/setup/step-history-depth.test.tsx (39 tests | 1 failed) 1264ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 319ms
+   × step 2: the field > keeps what is typed as the draft 21ms
+     → expected last "spy" call to have been called with [ 'yearsText', '7' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: the field > keeps what is typed as the draft
+AssertionError: expected last "spy" call to have been called with [ 'yearsText', '7' ]
+
+- Expected: 
+Array [
+  "yearsText",
+  "7",
+]
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/step-history-depth.test.tsx:467:22
+    465|     render(<StepHistoryDepth state={stateWith({ setDraft })} />);
+    466|     await user.type(field(), "7");
+    467|     expect(setDraft).toHaveBeenLastCalledWith("yearsText", "7");
+       |                      ^
+    468|   });
+    469| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  12:21:33
+   Duration  4.01s (transform 365ms, setup 103ms, collect 1.55s, tests 1.26s, environment 295ms, prepare 314ms)
+

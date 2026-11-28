@@ -1,0 +1,178 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w2/web
+
+ ✓ src/screens/setup/copy.test.ts (163 tests) 41ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 7ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 65ms
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 490ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 703ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 683ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 905ms
+   ✓ StepCard footer > names the previous and next steps and calls each handler once 311ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 733ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 906ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 2 failed) 3510ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 429ms
+   × TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2 229ms
+     → Unable to find an accessible element with the role "link" and name "Go to step 2"
+
+Here are the accessible roles:
+
+  link:
+
+  Name "Go to step 3":
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"flex flex-wrap items-center gap-3 text-destructive"[39m
+  [33mrole[39m=[32m"alert"[39m
+[36m>[39m
+  [36m<span>[39m
+    [0mCouldn't start the download: history depth isn't set.[0m
+  [36m</span>[39m
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m>[39m
+    [0mGo to step 3[0m
+  [36m</a>[39m
+[36m</div>[39m
+   × TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3 23ms
+     → Unable to find an accessible element with the role "link" and name "Go to step 3"
+
+Here are the accessible roles:
+
+  link:
+
+  Name "Go to step 2":
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"flex flex-wrap items-center gap-3 text-destructive"[39m
+  [33mrole[39m=[32m"alert"[39m
+[36m>[39m
+  [36m<span>[39m
+    [0mCouldn't start the download: no stocks are followed.[0m
+  [36m</span>[39m
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m>[39m
+    [0mGo to step 2[0m
+  [36m</a>[39m
+[36m</div>[39m
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3400ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 831ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 5139ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 646ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol 305ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 333ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30 318ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2
+TestingLibraryElementError: Unable to find an accessible element with the role "link" and name "Go to step 2"
+
+Here are the accessible roles:
+
+  link:
+
+  Name "Go to step 3":
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"flex flex-wrap items-center gap-3 text-destructive"[39m
+  [33mrole[39m=[32m"alert"[39m
+[36m>[39m
+  [36m<span>[39m
+    [0mCouldn't start the download: history depth isn't set.[0m
+  [36m</span>[39m
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m>[39m
+    [0mGo to step 3[0m
+  [36m</a>[39m
+[36m</div>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/setup/step-download.test.tsx:301:32
+    299|     const alert = await screen.findByRole("alert");
+    300|     expect(alert).toHaveTextContent("Couldn't start the download: hist…
+    301|     const link = within(alert).getByRole("link", { name: "Go to step 2…
+       |                                ^
+    302|     expect(link).toHaveAttribute("href", "#setup-step-heading");
+    303|     await userEvent.click(link);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3
+TestingLibraryElementError: Unable to find an accessible element with the role "link" and name "Go to step 3"
+
+Here are the accessible roles:
+
+  link:
+
+  Name "Go to step 2":
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"flex flex-wrap items-center gap-3 text-destructive"[39m
+  [33mrole[39m=[32m"alert"[39m
+[36m>[39m
+  [36m<span>[39m
+    [0mCouldn't start the download: no stocks are followed.[0m
+  [36m</span>[39m
+  [36m<a[39m
+    [33mhref[39m=[32m"#setup-step-heading"[39m
+  [36m>[39m
+    [0mGo to step 2[0m
+  [36m</a>[39m
+[36m</div>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/setup/step-download.test.tsx:317:41
+    315|     const alert = await screen.findByRole("alert");
+    316|     expect(alert).toHaveTextContent("Couldn't start the download: no s…
+    317|     await userEvent.click(within(alert).getByRole("link", { name: "Go …
+       |                                         ^
+    318|     expect(state.goTo).toHaveBeenCalledTimes(1);
+    319|     expect(state.goTo).toHaveBeenCalledWith(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  2 failed | 447 passed (449)
+   Start at  14:41:39
+   Duration  11.48s (transform 2.76s, setup 2.61s, collect 20.11s, tests 15.90s, environment 21.66s, prepare 5.16s)
+

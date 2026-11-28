@@ -1,0 +1,141 @@
+{
+ "schema": 1,
+ "repo_head": "90424db543c623e95613cf1bd44ca7e0db4c48cf",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/setup/index.tsx:37:negate-boolean:1",
+   "cycle": "cycle-3",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/setup/index.tsx",
+   "line": 37,
+   "original": "  if (!flags.some(Boolean)) {",
+   "mutated": "  if (flags.some(Boolean)) {"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:79:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/index.tsx",
+   "line": 79,
+   "original": "    case 1:",
+   "mutated": "    case 2:"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:81:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/index.tsx",
+   "line": 81,
+   "original": "    case 2:",
+   "mutated": "    case 3:"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:83:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/index.tsx",
+   "line": 83,
+   "original": "    case 3:",
+   "mutated": "    case 4:"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:85:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/index.tsx",
+   "line": 85,
+   "original": "    case 4:",
+   "mutated": "    case 5:"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:121:off-by-one:1",
+   "cycle": "cycle-3",
+   "operator": "off-by-one",
+   "file": "web/src/screens/setup/index.tsx",
+   "line": 121,
+   "original": "        <h1 tabIndex={-1} className=\"text-xl font-semibold text-foreground\">",
+   "mutated": "        <h1 tabIndex={-2} className=\"text-xl font-semibold text-foreground\">"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:focus-in-screen",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "  useStepHeadingFocus(state.current);\n  switch",
+   "new": "  switch",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:h1-hidden-while-loading",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "        <h1 tabIndex={-1} className=\"text-xl font-semibold text-foreground\">\n          {SCREEN.title}\n        </h1>",
+   "new": "        {state.loading ? null : (\n          <h1 tabIndex={-1} className=\"text-xl font-semibold text-foreground\">\n            {SCREEN.title}\n          </h1>\n        )}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:some-for-every",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "flags.every(Boolean) ? \"populated\" : \"partial\"",
+   "new": "flags.some(Boolean) ? \"populated\" : \"partial\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:never-populated-as-partial",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "if (!flags.some(Boolean)) {",
+   "new": "if (flags.every(Boolean)) {",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:max-width-side",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "style={{ maxWidth: LAYOUT.contentMaxWidth }}",
+   "new": "style={{ maxWidth: LAYOUT.sideColumnMax }}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:dispatch-step3",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "      return <StepStocks state={state} />;",
+   "new": "      return <StepDownload state={state} />;",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:empty-reason",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "        \"Nothing found is a state inside a step: step 3 at zero accepted blocks Continue, and step 4 with no followed stock blocks Start download with two exits; steps 1 and 2 have nothing to come up empty.\",",
+   "new": "        \"\",",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:loading-skeleton-bare",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "    loading: () => <CardSkeleton />,",
+   "new": "    loading: () => null,",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:list-skeleton-while-loaded",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "{state.loading ? <ListSkeleton /> : <StepList state={state} />}",
+   "new": "{state.loading ? null : <StepList state={state} />}",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/setup/index.tsx:manual:loading-flag",
+   "operator": "manual",
+   "file": "web/src/screens/setup/index.tsx",
+   "old": "  if (state.loading) {\n    return { kind: \"loading\" };\n  }",
+   "new": "  if (!state.loading) {\n    return { kind: \"loading\" };\n  }",
+   "cycle": "cycle-3"
+  }
+ ]
+}

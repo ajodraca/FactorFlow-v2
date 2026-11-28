@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 2 failed) 226ms
+   × DataTile lag badge (TC-COMP-129; DAC-E5-5) > renders when never classified, failed, after the prices line 7ms
+     → expected null to be 'status-warning' // Object.is equality
+   × DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape 13ms
+     → expected undefined to be 'Not reflecting the latest download' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile lag badge (TC-COMP-129; DAC-E5-5) > renders when never classified, failed, after the prices line
+AssertionError: expected null to be 'status-warning' // Object.is equality
+
+- Expected: 
+"status-warning"
+
++ Received: 
+null
+
+ ❯ src/screens/home/data-tile.test.tsx:403:28
+    401|     const c = show(ok(ATTENTION), served(summary));
+    402|     const lag = lagOf(c);
+    403|     expect(variantOf(lag)).toBe("status-warning");
+       |                            ^
+    404|     expect(lag?.textContent?.trim()).toBe("Not reflecting the latest d…
+    405|     const wrapper = c.querySelector('[data-testid="data-tile-lag"]') a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape
+AssertionError: expected undefined to be 'Not reflecting the latest download' // Object.is equality
+
+- Expected: 
+"Not reflecting the latest download"
+
++ Received: 
+undefined
+
+ ❯ src/screens/home/data-tile.test.tsx:544:40
+    542|     for (const summary of [NOT_CURRENT_ONLY, BUILDING, FAILED, NEVER_F…
+    543|       const lag = lagOf(show(ok(ATTENTION), served(summary)));
+    544|       expect(lag?.textContent?.trim()).toBe("Not reflecting the latest…
+       |                                        ^
+    545|       expect(lag?.querySelectorAll("svg").length).toBe(1);
+    546|       expect(lag?.querySelector("svg")?.getAttribute("aria-hidden")).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 47 passed (49)
+   Start at  17:02:17
+   Duration  1.39s (transform 102ms, setup 59ms, collect 426ms, tests 226ms, environment 207ms, prepare 109ms)
+

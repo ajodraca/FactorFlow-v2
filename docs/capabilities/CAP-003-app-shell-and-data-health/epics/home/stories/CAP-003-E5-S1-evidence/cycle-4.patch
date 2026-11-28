@@ -1,0 +1,1992 @@
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/cycle-4.patch b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/cycle-4.patch
+new file mode 100644
+index 00000000..60bde6eb
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/cycle-4.patch
+@@ -0,0 +1,986 @@
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/green-cycle-4-review-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/green-cycle-4-review-rework.log
++new file mode 100644
++index 00000000..2277dbfc
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/green-cycle-4-review-rework.log
++@@ -0,0 +1,16 @@
+++
+++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 5ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 123ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 92ms
+++
+++ Test Files  3 passed (3)
+++      Tests  125 passed (125)
+++   Start at  16:32:24
+++   Duration  1.37s (transform 155ms, setup 177ms, collect 580ms, tests 221ms, environment 969ms, prepare 502ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json
++new file mode 100644
++index 00000000..5a6adf74
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json
++@@ -0,0 +1,47 @@
+++{
+++ "schema": 1,
+++ "repo_head": "b86fb68f71f31a9697a6bc2df94bba2689fd1cf4",
+++ "range": "HEAD..worktree",
+++ "mutants": [
+++  {
+++   "id": "web/src/screens/home/market-state.ts:manual:review-month-numeric",
+++   "operator": "manual",
+++   "file": "web/src/screens/home/market-state.ts",
+++   "old": "  month: \"2-digit\",\n",
+++   "new": "  month: \"numeric\",\n",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/screens/home/market-state.ts:manual:review-day-numeric",
+++   "operator": "manual",
+++   "file": "web/src/screens/home/market-state.ts",
+++   "old": "  day: \"2-digit\",\n",
+++   "new": "  day: \"numeric\",\n",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/screens/home/header.tsx:manual:review-one-shot-timer",
+++   "operator": "manual",
+++   "file": "web/src/screens/home/header.tsx",
+++   "old": "const timer = setInterval(() => setNow(new Date()), MINUTE_MS);\n    return () => clearInterval(timer);",
+++   "new": "const timer = setTimeout(() => setNow(new Date()), MINUTE_MS);\n    return () => clearTimeout(timer);",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/screens/home/header.tsx:manual:review-skeleton-classes",
+++   "operator": "manual",
+++   "file": "web/src/screens/home/header.tsx",
+++   "old": "className=\"min-h-7 w-full animate-pulse rounded bg-secondary\"",
+++   "new": "className=\"w-full rounded bg-secondary\"",
+++   "cycle": "cycle-4"
+++  },
+++  {
+++   "id": "web/src/screens/home/copy.ts:manual:review-done-unformatted",
+++   "operator": "manual",
+++   "file": "web/src/screens/home/copy.ts",
+++   "old": "`${formatCount(done)} of ${formatCount(total)}",
+++   "new": "`${done} of ${formatCount(total)}",
+++   "cycle": "cycle-4"
+++  }
+++ ]
+++}
++\ No newline at end of file
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_now-once.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_now-once.log
++deleted file mode 100644
++index f9751afa..00000000
++--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_now-once.log
+++++ /dev/null
++@@ -1,14 +0,0 @@
++-
++- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ducxsyxx/w3/web
++-
++-stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++-⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++-⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++-
++- ✓ src/screens/home/header.test.tsx (28 tests) 85ms
++-
++- Test Files  1 passed (1)
++-      Tests  28 passed (28)
++-   Start at  16:10:46
++-   Duration  1.02s (transform 84ms, setup 31ms, collect 348ms, tests 85ms, environment 182ms, prepare 158ms)
++-
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_unshifted-date.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_unshifted-date.log
++deleted file mode 100644
++index e6c1cfd6..00000000
++--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_unshifted-date.log
+++++ /dev/null
++@@ -1,15 +0,0 @@
++-
++- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ducxsyxx/w2/web
++-
++-stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++-⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++-⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++-
++- ✓ src/screens/home/header.test.tsx (28 tests) 90ms
++-
++- Test Files  1 passed (1)
++-      Tests  28 passed (28)
++-   Start at  16:10:46
++-   Duration  1.05s (transform 117ms, setup 42ms, collect 416ms, tests 90ms, environment 296ms, prepare 60ms)
++-
++-web/src/screens/home/header.tsx(4,23): error TS6133: 'formatSessionDate' is declared but its value is never read.
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log
++new file mode 100644
++index 00000000..81daacb0
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log
++@@ -0,0 +1,16 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 260ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 93ms
+++
+++ Test Files  3 passed (3)
+++      Tests  125 passed (125)
+++   Start at  16:32:00
+++   Duration  3.16s (transform 289ms, setup 616ms, collect 950ms, tests 357ms, environment 2.27s, prepare 1.18s)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log
++new file mode 100644
++index 00000000..b66e933b
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log
++@@ -0,0 +1,16 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w1/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 6ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 271ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 99ms
+++
+++ Test Files  3 passed (3)
+++      Tests  125 passed (125)
+++   Start at  16:32:00
+++   Duration  3.18s (transform 282ms, setup 618ms, collect 909ms, tests 376ms, environment 2.28s, prepare 240ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log
++new file mode 100644
++index 00000000..948baf3d
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log
++@@ -0,0 +1,16 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w2/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 10ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 233ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 97ms
+++
+++ Test Files  3 passed (3)
+++      Tests  125 passed (125)
+++   Start at  16:32:00
+++   Duration  3.15s (transform 269ms, setup 606ms, collect 935ms, tests 339ms, environment 2.32s, prepare 809ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log
++new file mode 100644
++index 00000000..64c87188
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log
++@@ -0,0 +1,16 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 270ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 97ms
+++
+++ Test Files  3 passed (3)
+++      Tests  125 passed (125)
+++   Start at  16:32:00
+++   Duration  3.15s (transform 217ms, setup 616ms, collect 925ms, tests 371ms, environment 2.26s, prepare 245ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log
++new file mode 100644
++index 00000000..91fe8366
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log
++@@ -0,0 +1,36 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
+++
+++ ❯ src/screens/home/copy.test.ts (22 tests | 1 failed) 7ms
+++   × templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes." 3ms
+++     → expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 99ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 85ms
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/copy.test.ts > templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes."
+++AssertionError: expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
+++
+++Expected: "1,236 of 1,236 stocks so far. Scores appear when it finishes."
+++Received: "1236 of 1,236 stocks so far. Scores appear when it finishes."
+++
+++ ❯ src/screens/home/copy.test.ts:160:52
+++    158|     [5, null, "Scores appear when it finishes."],
+++    159|   ] as const)("first_download.body(%i, %j) is %j", (done, total, expec…
+++    160|     expect(ITEMS.first_download.body(done, total)).toBe(expected);
+++       |                                                    ^
+++    161|   });
+++    162| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed | 2 passed (3)
+++      Tests  1 failed | 124 passed (125)
+++   Start at  16:32:12
+++   Duration  806ms (transform 122ms, setup 107ms, collect 392ms, tests 190ms, environment 500ms, prepare 118ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log
++new file mode 100644
++index 00000000..1270f03f
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log
++@@ -0,0 +1,36 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w2/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 217ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 100ms
+++   × HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once 7ms
+++     → expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once
+++AssertionError: expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+++
+++Expected: "Market closed"
+++Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
+++
+++ ❯ src/screens/home/header.test.tsx:330:24
+++    328|       vi.advanceTimersByTime(60_000);
+++    329|     });
+++    330|     expect(lineText()).toContain("Market closed");
+++       |                        ^
+++    331|     expect(screen.queryByText("Market state not determinable")).toBeNu…
+++    332|   });
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed | 2 passed (3)
+++      Tests  1 failed | 124 passed (125)
+++   Start at  16:32:09
+++   Duration  1.97s (transform 198ms, setup 199ms, collect 628ms, tests 320ms, environment 1.25s, prepare 842ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log
++new file mode 100644
++index 00000000..00a991e8
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log
++@@ -0,0 +1,42 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 245ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 91ms
+++   × HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading 5ms
+++     → expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
+++
+++Expected the element to have class:
+++  min-h-7 w-full animate-pulse rounded bg-secondary
+++Received:
+++  w-full rounded bg-secondary
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading
+++Error: expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
+++
+++Expected the element to have class:
+++  min-h-7 w-full animate-pulse rounded bg-secondary
+++Received:
+++  w-full rounded bg-secondary
+++ ❯ src/screens/home/header.test.tsx:300:22
+++    298|     const skeleton = screen.getByTestId("home-as-of-skeleton");
+++    299|     expect(skeleton).toHaveAttribute("aria-hidden", "true");
+++    300|     expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse",…
+++       |                      ^
+++    301|     expect(screen.queryByTestId("as-of-line")).toBeNull();
+++    302|     expect(container.textContent).not.toContain("checked");
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed | 2 passed (3)
+++      Tests  1 failed | 124 passed (125)
+++   Start at  16:32:09
+++   Duration  1.94s (transform 210ms, setup 185ms, collect 635ms, tests 340ms, environment 1.34s, prepare 788ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log
++new file mode 100644
++index 00000000..e766aa4a
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log
++@@ -0,0 +1,78 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w1/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 5ms
+++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 260ms
+++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 10ms
+++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 2 failed) 93ms
+++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
+++     → expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
+++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z 3ms
+++     → expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
+++AssertionError: expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
+++
+++Expected: "Sunday, 2026-03-08"
+++Received: "Sunday, 2026-03-8"
+++
+++ ❯ src/screens/home/header.test.tsx:94:67
+++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+++     93|     renderAt(instant, OK);
+++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+++       |                                                                   ^
+++     95|   });
+++     96| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z
+++AssertionError: expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
+++
+++Expected: "Sunday, 2026-11-01"
+++Received: "Sunday, 2026-11-1"
+++
+++ ❯ src/screens/home/header.test.tsx:94:67
+++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+++     93|     renderAt(instant, OK);
+++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+++       |                                                                   ^
+++     95|   });
+++     96| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+++
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++AssertionError: expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++
+++Expected: "2026-03-08"
+++Received: "2026-03-8"
+++
+++ ❯ src/screens/home/market-state.test.ts:76:71
+++     74| 
+++     75|     it("pads the month and day to two digits on the DST-change dates",…
+++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
+++       |                                                                       ^
+++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
+++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+++
+++ Test Files  2 failed | 1 passed (3)
+++      Tests  5 failed | 120 passed (125)
+++   Start at  16:32:09
+++   Duration  1.94s (transform 276ms, setup 201ms, collect 700ms, tests 358ms, environment 1.35s, prepare 540ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log
++new file mode 100644
++index 00000000..7f1fb7b7
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log
++@@ -0,0 +1,60 @@
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 263ms
+++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 18ms
+++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 93ms
+++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
+++     → expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
+++AssertionError: expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
+++
+++Expected: "Sunday, 2026-03-08"
+++Received: "Sunday, 2026-3-08"
+++
+++ ❯ src/screens/home/header.test.tsx:94:67
+++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+++     93|     renderAt(instant, OK);
+++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+++       |                                                                   ^
+++     95|   });
+++     96| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+++
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++AssertionError: expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++
+++Expected: "2026-03-08"
+++Received: "2026-3-08"
+++
+++ ❯ src/screens/home/market-state.test.ts:76:71
+++     74| 
+++     75|     it("pads the month and day to two digits on the DST-change dates",…
+++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
+++       |                                                                       ^
+++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
+++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+++
+++ Test Files  2 failed | 1 passed (3)
+++      Tests  4 failed | 121 passed (125)
+++   Start at  16:32:09
+++   Duration  1.94s (transform 204ms, setup 220ms, collect 697ms, tests 360ms, environment 1.36s, prepare 606ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json
++new file mode 100644
++index 00000000..242a6414
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json
++@@ -0,0 +1,114 @@
+++{
+++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules '{workdir}/node_modules' && cd '{workdir}' && npx vitest run web/src/screens/home/ && npx tsc --noEmit",
+++  "repo_head": "b86fb68f71f31a9697a6bc2df94bba2689fd1cf4",
+++  "tree_patch_sha256": "a460ab9eb3c93bf3c957183d03fcd1ffdfb6d7dcf7ce7aebff7e27892254d2f9",
+++  "mutants_sha256": "318b5b1b840193234153ce989be3c33f72796f0c3c5ad75e0bd4a5c6f9a742e4",
+++  "schema": 1,
+++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json",
+++  "jobs": 4,
+++  "planned": 5,
+++  "started": "2026-11-27T22:31:59Z",
+++  "baselines": [
+++    {
+++      "worker": 2,
+++      "exit_code": 0,
+++      "seconds": 9.4,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log",
+++      "log_sha256": "6cc62596172b6425d1b364dbe28f881e0909f72ca26982fe4d939a3013777bcc"
+++    },
+++    {
+++      "worker": 1,
+++      "exit_code": 0,
+++      "seconds": 9.5,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log",
+++      "log_sha256": "ddf15c169275413fb5b37bbccf4aba8b9af0d53a3b278321eb328e2aeba46828"
+++    },
+++    {
+++      "worker": 0,
+++      "exit_code": 0,
+++      "seconds": 9.5,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log",
+++      "log_sha256": "6d3d1d64452f0833629442b99006c81fbed184c1d87d9573b839fc1f55a6d2e6"
+++    },
+++    {
+++      "worker": 3,
+++      "exit_code": 0,
+++      "seconds": 9.5,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log",
+++      "log_sha256": "08b9f53d8e8d71746134428558084bb0c7d1daf81085febe4f3ecb2df8a4557b"
+++    }
+++  ],
+++  "mutants": [
+++    {
+++      "id": "web/src/screens/home/market-state.ts:manual:review-month-numeric",
+++      "operator": "manual",
+++      "file": "web/src/screens/home/market-state.ts",
+++      "old": "  month: \"2-digit\",\n",
+++      "new": "  month: \"numeric\",\n",
+++      "cycle": "cycle-4",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 2.4,
+++      "worker": 0,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log",
+++      "log_sha256": "de19c10c28db5cdece1d0c0246ff6279c092214b4567b6fab9ff25bb5dd2b12e"
+++    },
+++    {
+++      "id": "web/src/screens/home/market-state.ts:manual:review-day-numeric",
+++      "operator": "manual",
+++      "file": "web/src/screens/home/market-state.ts",
+++      "old": "  day: \"2-digit\",\n",
+++      "new": "  day: \"numeric\",\n",
+++      "cycle": "cycle-4",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 2.5,
+++      "worker": 1,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log",
+++      "log_sha256": "67fa9bc9b67c014784f821b4b0555db61d427989133b3595779ab05f29747d69"
+++    },
+++    {
+++      "id": "web/src/screens/home/header.tsx:manual:review-one-shot-timer",
+++      "operator": "manual",
+++      "file": "web/src/screens/home/header.tsx",
+++      "old": "const timer = setInterval(() => setNow(new Date()), MINUTE_MS);\n    return () => clearInterval(timer);",
+++      "new": "const timer = setTimeout(() => setNow(new Date()), MINUTE_MS);\n    return () => clearTimeout(timer);",
+++      "cycle": "cycle-4",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 2.5,
+++      "worker": 2,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log",
+++      "log_sha256": "456a996aea3c48b721644eeb9d126ba889878aa091ad23ee08a6c353946b1d4c"
+++    },
+++    {
+++      "id": "web/src/screens/home/header.tsx:manual:review-skeleton-classes",
+++      "operator": "manual",
+++      "file": "web/src/screens/home/header.tsx",
+++      "old": "className=\"min-h-7 w-full animate-pulse rounded bg-secondary\"",
+++      "new": "className=\"w-full rounded bg-secondary\"",
+++      "cycle": "cycle-4",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 2.4,
+++      "worker": 3,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log",
+++      "log_sha256": "bcab78658b0da6f725b466f0024e65b64b82c234d37b30ee3a63be9e396ee046"
+++    },
+++    {
+++      "id": "web/src/screens/home/copy.ts:manual:review-done-unformatted",
+++      "operator": "manual",
+++      "file": "web/src/screens/home/copy.ts",
+++      "old": "`${formatCount(done)} of ${formatCount(total)}",
+++      "new": "`${done} of ${formatCount(total)}",
+++      "cycle": "cycle-4",
+++      "state": "killed",
+++      "exit_code": 1,
+++      "seconds": 1.2,
+++      "worker": 3,
+++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log",
+++      "log_sha256": "85fa1e3cf1ceb63f902095e6b57b41eacde665102c9c529fb33d2005cc060938"
+++    }
+++  ],
+++  "finished": "2026-11-27T22:32:13Z"
+++}
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log
++new file mode 100644
++index 00000000..0595ddb5
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log
++@@ -0,0 +1,257 @@
+++=== RED: web_src_screens_home_copy.ts_manual_review-done-unformatted.log (the review's mutant against the new tests) ===
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
+++
+++ ❯ src/screens/home/copy.test.ts (22 tests | 1 failed) 7ms
+++   × templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes." 3ms
+++     → expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 99ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ✓ src/screens/home/header.test.tsx (31 tests) 85ms
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/copy.test.ts > templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes."
+++AssertionError: expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
+++
+++Expected: "1,236 of 1,236 stocks so far. Scores appear when it finishes."
+++Received: "1236 of 1,236 stocks so far. Scores appear when it finishes."
+++
+++ ❯ src/screens/home/copy.test.ts:160:52
+++    158|     [5, null, "Scores appear when it finishes."],
+++    159|   ] as const)("first_download.body(%i, %j) is %j", (done, total, expec…
+++    160|     expect(ITEMS.first_download.body(done, total)).toBe(expected);
+++       |                                                    ^
+++    161|   });
+++    162| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed | 2 passed (3)
+++      Tests  1 failed | 124 passed (125)
+++   Start at  16:32:12
+++   Duration  806ms (transform 122ms, setup 107ms, collect 392ms, tests 190ms, environment 500ms, prepare 118ms)
+++
+++=== RED: web_src_screens_home_header.tsx_manual_review-one-shot-timer.log (the review's mutant against the new tests) ===
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w2/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 217ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 100ms
+++   × HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once 7ms
+++     → expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once
+++AssertionError: expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+++
+++Expected: "Market closed"
+++Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
+++
+++ ❯ src/screens/home/header.test.tsx:330:24
+++    328|       vi.advanceTimersByTime(60_000);
+++    329|     });
+++    330|     expect(lineText()).toContain("Market closed");
+++       |                        ^
+++    331|     expect(screen.queryByText("Market state not determinable")).toBeNu…
+++    332|   });
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed | 2 passed (3)
+++      Tests  1 failed | 124 passed (125)
+++   Start at  16:32:09
+++   Duration  1.97s (transform 198ms, setup 199ms, collect 628ms, tests 320ms, environment 1.25s, prepare 842ms)
+++
+++=== RED: web_src_screens_home_header.tsx_manual_review-skeleton-classes.log (the review's mutant against the new tests) ===
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ✓ src/screens/home/market-state.test.ts (72 tests) 245ms
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 91ms
+++   × HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading 5ms
+++     → expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
+++
+++Expected the element to have class:
+++  min-h-7 w-full animate-pulse rounded bg-secondary
+++Received:
+++  w-full rounded bg-secondary
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading
+++Error: expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
+++
+++Expected the element to have class:
+++  min-h-7 w-full animate-pulse rounded bg-secondary
+++Received:
+++  w-full rounded bg-secondary
+++ ❯ src/screens/home/header.test.tsx:300:22
+++    298|     const skeleton = screen.getByTestId("home-as-of-skeleton");
+++    299|     expect(skeleton).toHaveAttribute("aria-hidden", "true");
+++    300|     expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse",…
+++       |                      ^
+++    301|     expect(screen.queryByTestId("as-of-line")).toBeNull();
+++    302|     expect(container.textContent).not.toContain("checked");
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+++
+++ Test Files  1 failed | 2 passed (3)
+++      Tests  1 failed | 124 passed (125)
+++   Start at  16:32:09
+++   Duration  1.94s (transform 210ms, setup 185ms, collect 635ms, tests 340ms, environment 1.34s, prepare 788ms)
+++
+++=== RED: web_src_screens_home_market-state.ts_manual_review-day-numeric.log (the review's mutant against the new tests) ===
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w1/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 5ms
+++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 260ms
+++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 10ms
+++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 2 failed) 93ms
+++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
+++     → expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
+++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z 3ms
+++     → expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
+++AssertionError: expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
+++
+++Expected: "Sunday, 2026-03-08"
+++Received: "Sunday, 2026-03-8"
+++
+++ ❯ src/screens/home/header.test.tsx:94:67
+++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+++     93|     renderAt(instant, OK);
+++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+++       |                                                                   ^
+++     95|   });
+++     96| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z
+++AssertionError: expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
+++
+++Expected: "Sunday, 2026-11-01"
+++Received: "Sunday, 2026-11-1"
+++
+++ ❯ src/screens/home/header.test.tsx:94:67
+++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+++     93|     renderAt(instant, OK);
+++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+++       |                                                                   ^
+++     95|   });
+++     96| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+++
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++AssertionError: expected '2026-03-8' to be '2026-03-08' // Object.is equality
+++
+++Expected: "2026-03-08"
+++Received: "2026-03-8"
+++
+++ ❯ src/screens/home/market-state.test.ts:76:71
+++     74| 
+++     75|     it("pads the month and day to two digits on the DST-change dates",…
+++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
+++       |                                                                       ^
+++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
+++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+++
+++ Test Files  2 failed | 1 passed (3)
+++      Tests  5 failed | 120 passed (125)
+++   Start at  16:32:09
+++   Duration  1.94s (transform 276ms, setup 201ms, collect 700ms, tests 358ms, environment 1.35s, prepare 540ms)
+++
+++=== RED: web_src_screens_home_market-state.ts_manual_review-month-numeric.log (the review's mutant against the new tests) ===
+++
+++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
+++
+++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 263ms
+++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 18ms
+++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+++
+++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 93ms
+++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
+++     → expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
+++
+++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+++
+++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
+++AssertionError: expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
+++
+++Expected: "Sunday, 2026-03-08"
+++Received: "Sunday, 2026-3-08"
+++
+++ ❯ src/screens/home/header.test.tsx:94:67
+++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+++     93|     renderAt(instant, OK);
+++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+++       |                                                                   ^
+++     95|   });
+++     96| 
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+++
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+++AssertionError: expected '2026-3-08' to be '2026-03-08' // Object.is equality
+++
+++Expected: "2026-03-08"
+++Received: "2026-3-08"
+++
+++ ❯ src/screens/home/market-state.test.ts:76:71
+++     74| 
+++     75|     it("pads the month and day to two digits on the DST-change dates",…
+++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
+++       |                                                                       ^
+++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
+++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
+++
+++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+++
+++ Test Files  2 failed | 1 passed (3)
+++      Tests  4 failed | 121 passed (125)
+++   Start at  16:32:09
+++   Duration  1.94s (transform 204ms, setup 220ms, collect 697ms, tests 360ms, environment 1.36s, prepare 606ms)
+++
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/validation-cycle-4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/validation-cycle-4.log
++new file mode 100644
++index 00000000..9c1a9919
++--- /dev/null
+++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/validation-cycle-4.log
++@@ -0,0 +1,16 @@
+++
+++ Test Files  128 passed (128)
+++      Tests  3560 passed (3560)
+++   Start at  16:32:29
+++   Duration  17.81s (transform 4.47s, setup 8.47s, collect 35.62s, tests 91.63s, environment 44.53s, prepare 6.72s)
+++
+++---tsc
+++tsc=0
+++---lint
+++Checked 286 files in 122ms. No fixes applied.
+++---fmt
+++Checked 286 files in 84ms. No fixes applied.
+++---build
+++../src/factorflow/api/static/assets/index-DrblWcSv.js                28.22 kB │ gzip:  8.17 kB
+++../src/factorflow/api/static/assets/index-UlSnzZiv.js               211.21 kB │ gzip: 68.90 kB
+++✓ built in 1.59s
++diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/x b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/x
++deleted file mode 100644
++index b04c6452..00000000
++--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/x
+++++ /dev/null
++@@ -1,8 +0,0 @@
++-
++- ✓ src/screens/home/copy.test.ts (21 tests) 3ms
++-
++- Test Files  1 passed (1)
++-      Tests  21 passed (21)
++-   Start at  16:07:31
++-   Duration  394ms (transform 27ms, setup 29ms, collect 19ms, tests 3ms, environment 153ms, prepare 23ms)
++-
++diff --git a/web/src/screens/home/copy.test.ts b/web/src/screens/home/copy.test.ts
++index 648890ff..1f47a995 100644
++--- a/web/src/screens/home/copy.test.ts
+++++ b/web/src/screens/home/copy.test.ts
++@@ -152,6 +152,7 @@ describe("templates", () => {
++   });
++ 
++   it.each([
+++    [1236, 1236, "1,236 of 1,236 stocks so far. Scores appear when it finishes."],
++     [12, 1236, "12 of 1,236 stocks so far. Scores appear when it finishes."],
++     [0, 1, "0 of 1 stock so far. Scores appear when it finishes."],
++     [5, null, "Scores appear when it finishes."],
++diff --git a/web/src/screens/home/header.test.tsx b/web/src/screens/home/header.test.tsx
++index e28661e4..70b97ad4 100644
++--- a/web/src/screens/home/header.test.tsx
+++++ b/web/src/screens/home/header.test.tsx
++@@ -86,6 +86,14 @@ describe("HomeHeader: date and prices as-of (TC-COMP-133)", () => {
++     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Thursday, 2026-10-15");
++   });
++ 
+++  it.each([
+++    ["2026-03-08T18:00:00Z", "Sunday, 2026-03-08"],
+++    ["2026-11-01T18:00:00Z", "Sunday, 2026-11-01"],
+++  ])("pads the heading date across a DST change: %s", (instant, heading) => {
+++    renderAt(instant, OK);
+++    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(heading);
+++  });
+++
++   describe.each(["Asia/Tokyo", "America/Los_Angeles"])("under TZ=%s", (zone) => {
++     let previous: string | undefined;
++     beforeEach(() => {
++@@ -287,7 +295,9 @@ describe("HomeHeader: freshness, failure, loading, tick and composition", () =>
++   it("(e) renders the heading and a hidden skeleton while loading", () => {
++     const { container } = renderAt(OUTSIDE, LOADING);
++     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
++-    expect(screen.getByTestId("home-as-of-skeleton")).toHaveAttribute("aria-hidden", "true");
+++    const skeleton = screen.getByTestId("home-as-of-skeleton");
+++    expect(skeleton).toHaveAttribute("aria-hidden", "true");
+++    expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse", "rounded", "bg-secondary");
++     expect(screen.queryByTestId("as-of-line")).toBeNull();
++     expect(container.textContent).not.toContain("checked");
++   });
++@@ -307,6 +317,20 @@ describe("HomeHeader: freshness, failure, loading, tick and composition", () =>
++     fetchSpy.mockRestore();
++   });
++ 
+++  it("(f) keeps recomputing on every later minute, not once", () => {
+++    renderAt("2026-10-15T19:58:30Z", OK);
+++    expect(screen.getByText("Market state not determinable")).toBeInTheDocument();
+++    act(() => {
+++      vi.advanceTimersByTime(60_000);
+++    });
+++    expect(screen.getByText("Market state not determinable")).toBeInTheDocument();
+++    act(() => {
+++      vi.advanceTimersByTime(60_000);
+++    });
+++    expect(lineText()).toContain("Market closed");
+++    expect(screen.queryByText("Market state not determinable")).toBeNull();
+++  });
+++
++   it("(f) rolls the date over at midnight in Chicago, with no read", () => {
++     const fetchSpy = vi.spyOn(globalThis, "fetch");
++     renderAt("2026-10-16T04:59:30Z", OK);
++diff --git a/web/src/screens/home/market-state.test.ts b/web/src/screens/home/market-state.test.ts
++index 27064f9c..de2a0d42 100644
++--- a/web/src/screens/home/market-state.test.ts
+++++ b/web/src/screens/home/market-state.test.ts
++@@ -72,6 +72,12 @@ describe.each(["Asia/Tokyo", "UTC", "America/Los_Angeles"])("under TZ=%s", (zone
++       });
++     });
++ 
+++    it("pads the month and day to two digits on the DST-change dates", () => {
+++      expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).toBe("2026-03-08");
+++      expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).toBe("2026-11-01");
+++      expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekday).toBe("Sunday");
+++    });
+++
++     it("reads midnight as 0, never 1440", () => {
++       expect(chicagoWallClock(new Date("2026-10-16T05:00:00Z"))).toEqual({
++         weekday: "Friday",
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/green-cycle-4-review-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/green-cycle-4-review-rework.log
+new file mode 100644
+index 00000000..2277dbfc
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/green-cycle-4-review-rework.log
+@@ -0,0 +1,16 @@
++
++ RUN  v2.1.9 /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 5ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 123ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 92ms
++
++ Test Files  3 passed (3)
++      Tests  125 passed (125)
++   Start at  16:32:24
++   Duration  1.37s (transform 155ms, setup 177ms, collect 580ms, tests 221ms, environment 969ms, prepare 502ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json
+new file mode 100644
+index 00000000..5a6adf74
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json
+@@ -0,0 +1,47 @@
++{
++ "schema": 1,
++ "repo_head": "b86fb68f71f31a9697a6bc2df94bba2689fd1cf4",
++ "range": "HEAD..worktree",
++ "mutants": [
++  {
++   "id": "web/src/screens/home/market-state.ts:manual:review-month-numeric",
++   "operator": "manual",
++   "file": "web/src/screens/home/market-state.ts",
++   "old": "  month: \"2-digit\",\n",
++   "new": "  month: \"numeric\",\n",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/screens/home/market-state.ts:manual:review-day-numeric",
++   "operator": "manual",
++   "file": "web/src/screens/home/market-state.ts",
++   "old": "  day: \"2-digit\",\n",
++   "new": "  day: \"numeric\",\n",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/screens/home/header.tsx:manual:review-one-shot-timer",
++   "operator": "manual",
++   "file": "web/src/screens/home/header.tsx",
++   "old": "const timer = setInterval(() => setNow(new Date()), MINUTE_MS);\n    return () => clearInterval(timer);",
++   "new": "const timer = setTimeout(() => setNow(new Date()), MINUTE_MS);\n    return () => clearTimeout(timer);",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/screens/home/header.tsx:manual:review-skeleton-classes",
++   "operator": "manual",
++   "file": "web/src/screens/home/header.tsx",
++   "old": "className=\"min-h-7 w-full animate-pulse rounded bg-secondary\"",
++   "new": "className=\"w-full rounded bg-secondary\"",
++   "cycle": "cycle-4"
++  },
++  {
++   "id": "web/src/screens/home/copy.ts:manual:review-done-unformatted",
++   "operator": "manual",
++   "file": "web/src/screens/home/copy.ts",
++   "old": "`${formatCount(done)} of ${formatCount(total)}",
++   "new": "`${done} of ${formatCount(total)}",
++   "cycle": "cycle-4"
++  }
++ ]
++}
+\ No newline at end of file
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_now-once.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_now-once.log
+deleted file mode 100644
+index f9751afa..00000000
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_now-once.log
++++ /dev/null
+@@ -1,14 +0,0 @@
+-
+- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ducxsyxx/w3/web
+-
+-stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+-⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+-⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+-
+- ✓ src/screens/home/header.test.tsx (28 tests) 85ms
+-
+- Test Files  1 passed (1)
+-      Tests  28 passed (28)
+-   Start at  16:10:46
+-   Duration  1.02s (transform 84ms, setup 31ms, collect 348ms, tests 85ms, environment 182ms, prepare 158ms)
+-
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_unshifted-date.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_unshifted-date.log
+deleted file mode 100644
+index e6c1cfd6..00000000
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-3-results-logs/web_src_screens_home_header.tsx_manual_unshifted-date.log
++++ /dev/null
+@@ -1,15 +0,0 @@
+-
+- RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ducxsyxx/w2/web
+-
+-stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+-⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+-⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+-
+- ✓ src/screens/home/header.test.tsx (28 tests) 90ms
+-
+- Test Files  1 passed (1)
+-      Tests  28 passed (28)
+-   Start at  16:10:46
+-   Duration  1.05s (transform 117ms, setup 42ms, collect 416ms, tests 90ms, environment 296ms, prepare 60ms)
+-
+-web/src/screens/home/header.tsx(4,23): error TS6133: 'formatSessionDate' is declared but its value is never read.
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log
+new file mode 100644
+index 00000000..81daacb0
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log
+@@ -0,0 +1,16 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 260ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 93ms
++
++ Test Files  3 passed (3)
++      Tests  125 passed (125)
++   Start at  16:32:00
++   Duration  3.16s (transform 289ms, setup 616ms, collect 950ms, tests 357ms, environment 2.27s, prepare 1.18s)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log
+new file mode 100644
+index 00000000..b66e933b
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log
+@@ -0,0 +1,16 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w1/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 6ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 271ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 99ms
++
++ Test Files  3 passed (3)
++      Tests  125 passed (125)
++   Start at  16:32:00
++   Duration  3.18s (transform 282ms, setup 618ms, collect 909ms, tests 376ms, environment 2.28s, prepare 240ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log
+new file mode 100644
+index 00000000..948baf3d
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log
+@@ -0,0 +1,16 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w2/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 10ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 233ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 97ms
++
++ Test Files  3 passed (3)
++      Tests  125 passed (125)
++   Start at  16:32:00
++   Duration  3.15s (transform 269ms, setup 606ms, collect 935ms, tests 339ms, environment 2.32s, prepare 809ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log
+new file mode 100644
+index 00000000..64c87188
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log
+@@ -0,0 +1,16 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 270ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 97ms
++
++ Test Files  3 passed (3)
++      Tests  125 passed (125)
++   Start at  16:32:00
++   Duration  3.15s (transform 217ms, setup 616ms, collect 925ms, tests 371ms, environment 2.26s, prepare 245ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log
+new file mode 100644
+index 00000000..91fe8366
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log
+@@ -0,0 +1,36 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
++
++ ❯ src/screens/home/copy.test.ts (22 tests | 1 failed) 7ms
++   × templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes." 3ms
++     → expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
++ ✓ src/screens/home/market-state.test.ts (72 tests) 99ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 85ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/copy.test.ts > templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes."
++AssertionError: expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
++
++Expected: "1,236 of 1,236 stocks so far. Scores appear when it finishes."
++Received: "1236 of 1,236 stocks so far. Scores appear when it finishes."
++
++ ❯ src/screens/home/copy.test.ts:160:52
++    158|     [5, null, "Scores appear when it finishes."],
++    159|   ] as const)("first_download.body(%i, %j) is %j", (done, total, expec…
++    160|     expect(ITEMS.first_download.body(done, total)).toBe(expected);
++       |                                                    ^
++    161|   });
++    162| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  1 failed | 124 passed (125)
++   Start at  16:32:12
++   Duration  806ms (transform 122ms, setup 107ms, collect 392ms, tests 190ms, environment 500ms, prepare 118ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log
+new file mode 100644
+index 00000000..1270f03f
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log
+@@ -0,0 +1,36 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w2/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 217ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 100ms
++   × HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once 7ms
++     → expected 'Market state not determinableFactorFl…' to contain 'Market closed'
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once
++AssertionError: expected 'Market state not determinableFactorFl…' to contain 'Market closed'
++
++Expected: "Market closed"
++Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
++
++ ❯ src/screens/home/header.test.tsx:330:24
++    328|       vi.advanceTimersByTime(60_000);
++    329|     });
++    330|     expect(lineText()).toContain("Market closed");
++       |                        ^
++    331|     expect(screen.queryByText("Market state not determinable")).toBeNu…
++    332|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  1 failed | 124 passed (125)
++   Start at  16:32:09
++   Duration  1.97s (transform 198ms, setup 199ms, collect 628ms, tests 320ms, environment 1.25s, prepare 842ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log
+new file mode 100644
+index 00000000..00a991e8
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log
+@@ -0,0 +1,42 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 245ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 91ms
++   × HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading 5ms
++     → expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
++
++Expected the element to have class:
++  min-h-7 w-full animate-pulse rounded bg-secondary
++Received:
++  w-full rounded bg-secondary
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading
++Error: expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
++
++Expected the element to have class:
++  min-h-7 w-full animate-pulse rounded bg-secondary
++Received:
++  w-full rounded bg-secondary
++ ❯ src/screens/home/header.test.tsx:300:22
++    298|     const skeleton = screen.getByTestId("home-as-of-skeleton");
++    299|     expect(skeleton).toHaveAttribute("aria-hidden", "true");
++    300|     expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse",…
++       |                      ^
++    301|     expect(screen.queryByTestId("as-of-line")).toBeNull();
++    302|     expect(container.textContent).not.toContain("checked");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  1 failed | 124 passed (125)
++   Start at  16:32:09
++   Duration  1.94s (transform 210ms, setup 185ms, collect 635ms, tests 340ms, environment 1.34s, prepare 788ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log
+new file mode 100644
+index 00000000..e766aa4a
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log
+@@ -0,0 +1,78 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w1/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 5ms
++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 260ms
++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 10ms
++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 2 failed) 93ms
++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
++     → expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z 3ms
++     → expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
++AssertionError: expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
++
++Expected: "Sunday, 2026-03-08"
++Received: "Sunday, 2026-03-8"
++
++ ❯ src/screens/home/header.test.tsx:94:67
++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
++     93|     renderAt(instant, OK);
++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
++       |                                                                   ^
++     95|   });
++     96| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z
++AssertionError: expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
++
++Expected: "Sunday, 2026-11-01"
++Received: "Sunday, 2026-11-1"
++
++ ❯ src/screens/home/header.test.tsx:94:67
++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
++     93|     renderAt(instant, OK);
++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
++       |                                                                   ^
++     95|   });
++     96| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++AssertionError: expected '2026-03-8' to be '2026-03-08' // Object.is equality
++
++Expected: "2026-03-08"
++Received: "2026-03-8"
++
++ ❯ src/screens/home/market-state.test.ts:76:71
++     74| 
++     75|     it("pads the month and day to two digits on the DST-change dates",…
++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
++       |                                                                       ^
++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ Test Files  2 failed | 1 passed (3)
++      Tests  5 failed | 120 passed (125)
++   Start at  16:32:09
++   Duration  1.94s (transform 276ms, setup 201ms, collect 700ms, tests 358ms, environment 1.35s, prepare 540ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log
+new file mode 100644
+index 00000000..7f1fb7b7
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log
+@@ -0,0 +1,60 @@
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 263ms
++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 18ms
++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 93ms
++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
++     → expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
++AssertionError: expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
++
++Expected: "Sunday, 2026-03-08"
++Received: "Sunday, 2026-3-08"
++
++ ❯ src/screens/home/header.test.tsx:94:67
++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
++     93|     renderAt(instant, OK);
++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
++       |                                                                   ^
++     95|   });
++     96| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++AssertionError: expected '2026-3-08' to be '2026-03-08' // Object.is equality
++
++Expected: "2026-03-08"
++Received: "2026-3-08"
++
++ ❯ src/screens/home/market-state.test.ts:76:71
++     74| 
++     75|     it("pads the month and day to two digits on the DST-change dates",…
++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
++       |                                                                       ^
++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ Test Files  2 failed | 1 passed (3)
++      Tests  4 failed | 121 passed (125)
++   Start at  16:32:09
++   Duration  1.94s (transform 204ms, setup 220ms, collect 697ms, tests 360ms, environment 1.36s, prepare 606ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json
+new file mode 100644
+index 00000000..242a6414
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results.json
+@@ -0,0 +1,114 @@
++{
++  "command": "ln -sfn /Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules '{workdir}/node_modules' && cd '{workdir}' && npx vitest run web/src/screens/home/ && npx tsc --noEmit",
++  "repo_head": "b86fb68f71f31a9697a6bc2df94bba2689fd1cf4",
++  "tree_patch_sha256": "a460ab9eb3c93bf3c957183d03fcd1ffdfb6d7dcf7ce7aebff7e27892254d2f9",
++  "mutants_sha256": "318b5b1b840193234153ce989be3c33f72796f0c3c5ad75e0bd4a5c6f9a742e4",
++  "schema": 1,
++  "mutants_file": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutants-cycle-4.json",
++  "jobs": 4,
++  "planned": 5,
++  "started": "2026-11-27T22:31:59Z",
++  "baselines": [
++    {
++      "worker": 2,
++      "exit_code": 0,
++      "seconds": 9.4,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w2.log",
++      "log_sha256": "6cc62596172b6425d1b364dbe28f881e0909f72ca26982fe4d939a3013777bcc"
++    },
++    {
++      "worker": 1,
++      "exit_code": 0,
++      "seconds": 9.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w1.log",
++      "log_sha256": "ddf15c169275413fb5b37bbccf4aba8b9af0d53a3b278321eb328e2aeba46828"
++    },
++    {
++      "worker": 0,
++      "exit_code": 0,
++      "seconds": 9.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w0.log",
++      "log_sha256": "6d3d1d64452f0833629442b99006c81fbed184c1d87d9573b839fc1f55a6d2e6"
++    },
++    {
++      "worker": 3,
++      "exit_code": 0,
++      "seconds": 9.5,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/baseline-w3.log",
++      "log_sha256": "08b9f53d8e8d71746134428558084bb0c7d1daf81085febe4f3ecb2df8a4557b"
++    }
++  ],
++  "mutants": [
++    {
++      "id": "web/src/screens/home/market-state.ts:manual:review-month-numeric",
++      "operator": "manual",
++      "file": "web/src/screens/home/market-state.ts",
++      "old": "  month: \"2-digit\",\n",
++      "new": "  month: \"numeric\",\n",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.4,
++      "worker": 0,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-month-numeric.log",
++      "log_sha256": "de19c10c28db5cdece1d0c0246ff6279c092214b4567b6fab9ff25bb5dd2b12e"
++    },
++    {
++      "id": "web/src/screens/home/market-state.ts:manual:review-day-numeric",
++      "operator": "manual",
++      "file": "web/src/screens/home/market-state.ts",
++      "old": "  day: \"2-digit\",\n",
++      "new": "  day: \"numeric\",\n",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.5,
++      "worker": 1,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_market-state.ts_manual_review-day-numeric.log",
++      "log_sha256": "67fa9bc9b67c014784f821b4b0555db61d427989133b3595779ab05f29747d69"
++    },
++    {
++      "id": "web/src/screens/home/header.tsx:manual:review-one-shot-timer",
++      "operator": "manual",
++      "file": "web/src/screens/home/header.tsx",
++      "old": "const timer = setInterval(() => setNow(new Date()), MINUTE_MS);\n    return () => clearInterval(timer);",
++      "new": "const timer = setTimeout(() => setNow(new Date()), MINUTE_MS);\n    return () => clearTimeout(timer);",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.5,
++      "worker": 2,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-one-shot-timer.log",
++      "log_sha256": "456a996aea3c48b721644eeb9d126ba889878aa091ad23ee08a6c353946b1d4c"
++    },
++    {
++      "id": "web/src/screens/home/header.tsx:manual:review-skeleton-classes",
++      "operator": "manual",
++      "file": "web/src/screens/home/header.tsx",
++      "old": "className=\"min-h-7 w-full animate-pulse rounded bg-secondary\"",
++      "new": "className=\"w-full rounded bg-secondary\"",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 2.4,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_header.tsx_manual_review-skeleton-classes.log",
++      "log_sha256": "bcab78658b0da6f725b466f0024e65b64b82c234d37b30ee3a63be9e396ee046"
++    },
++    {
++      "id": "web/src/screens/home/copy.ts:manual:review-done-unformatted",
++      "operator": "manual",
++      "file": "web/src/screens/home/copy.ts",
++      "old": "`${formatCount(done)} of ${formatCount(total)}",
++      "new": "`${done} of ${formatCount(total)}",
++      "cycle": "cycle-4",
++      "state": "killed",
++      "exit_code": 1,
++      "seconds": 1.2,
++      "worker": 3,
++      "log": "/Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/mutation-cycle-4-results-logs/web_src_screens_home_copy.ts_manual_review-done-unformatted.log",
++      "log_sha256": "85fa1e3cf1ceb63f902095e6b57b41eacde665102c9c529fb33d2005cc060938"
++    }
++  ],
++  "finished": "2026-11-27T22:32:13Z"
++}
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log
+new file mode 100644
+index 00000000..0595ddb5
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/red-cycle-4-review-rework.log
+@@ -0,0 +1,257 @@
++=== RED: web_src_screens_home_copy.ts_manual_review-done-unformatted.log (the review's mutant against the new tests) ===
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
++
++ ❯ src/screens/home/copy.test.ts (22 tests | 1 failed) 7ms
++   × templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes." 3ms
++     → expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
++ ✓ src/screens/home/market-state.test.ts (72 tests) 99ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ✓ src/screens/home/header.test.tsx (31 tests) 85ms
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/copy.test.ts > templates > first_download.body(1236, 1236) is "1,236 of 1,236 stocks so far. Scores appear when it finishes."
++AssertionError: expected '1236 of 1,236 stocks so far. Scores a…' to be '1,236 of 1,236 stocks so far. Scores …' // Object.is equality
++
++Expected: "1,236 of 1,236 stocks so far. Scores appear when it finishes."
++Received: "1236 of 1,236 stocks so far. Scores appear when it finishes."
++
++ ❯ src/screens/home/copy.test.ts:160:52
++    158|     [5, null, "Scores appear when it finishes."],
++    159|   ] as const)("first_download.body(%i, %j) is %j", (done, total, expec…
++    160|     expect(ITEMS.first_download.body(done, total)).toBe(expected);
++       |                                                    ^
++    161|   });
++    162| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  1 failed | 124 passed (125)
++   Start at  16:32:12
++   Duration  806ms (transform 122ms, setup 107ms, collect 392ms, tests 190ms, environment 500ms, prepare 118ms)
++
++=== RED: web_src_screens_home_header.tsx_manual_review-one-shot-timer.log (the review's mutant against the new tests) ===
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w2/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 217ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 100ms
++   × HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once 7ms
++     → expected 'Market state not determinableFactorFl…' to contain 'Market closed'
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) keeps recomputing on every later minute, not once
++AssertionError: expected 'Market state not determinableFactorFl…' to contain 'Market closed'
++
++Expected: "Market closed"
++Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
++
++ ❯ src/screens/home/header.test.tsx:330:24
++    328|       vi.advanceTimersByTime(60_000);
++    329|     });
++    330|     expect(lineText()).toContain("Market closed");
++       |                        ^
++    331|     expect(screen.queryByText("Market state not determinable")).toBeNu…
++    332|   });
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  1 failed | 124 passed (125)
++   Start at  16:32:09
++   Duration  1.97s (transform 198ms, setup 199ms, collect 628ms, tests 320ms, environment 1.25s, prepare 842ms)
++
++=== RED: web_src_screens_home_header.tsx_manual_review-skeleton-classes.log (the review's mutant against the new tests) ===
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ✓ src/screens/home/market-state.test.ts (72 tests) 245ms
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 91ms
++   × HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading 5ms
++     → expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
++
++Expected the element to have class:
++  min-h-7 w-full animate-pulse rounded bg-secondary
++Received:
++  w-full rounded bg-secondary
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading
++Error: expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
++
++Expected the element to have class:
++  min-h-7 w-full animate-pulse rounded bg-secondary
++Received:
++  w-full rounded bg-secondary
++ ❯ src/screens/home/header.test.tsx:300:22
++    298|     const skeleton = screen.getByTestId("home-as-of-skeleton");
++    299|     expect(skeleton).toHaveAttribute("aria-hidden", "true");
++    300|     expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse",…
++       |                      ^
++    301|     expect(screen.queryByTestId("as-of-line")).toBeNull();
++    302|     expect(container.textContent).not.toContain("checked");
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
++
++ Test Files  1 failed | 2 passed (3)
++      Tests  1 failed | 124 passed (125)
++   Start at  16:32:09
++   Duration  1.94s (transform 210ms, setup 185ms, collect 635ms, tests 340ms, environment 1.34s, prepare 788ms)
++
++=== RED: web_src_screens_home_market-state.ts_manual_review-day-numeric.log (the review's mutant against the new tests) ===
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w1/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 5ms
++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 260ms
++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 10ms
++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-03-8' to be '2026-03-08' // Object.is equality
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 2 failed) 93ms
++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
++     → expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z 3ms
++     → expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
++AssertionError: expected 'Sunday, 2026-03-8' to be 'Sunday, 2026-03-08' // Object.is equality
++
++Expected: "Sunday, 2026-03-08"
++Received: "Sunday, 2026-03-8"
++
++ ❯ src/screens/home/header.test.tsx:94:67
++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
++     93|     renderAt(instant, OK);
++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
++       |                                                                   ^
++     95|   });
++     96| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-11-01T18:00:00Z
++AssertionError: expected 'Sunday, 2026-11-1' to be 'Sunday, 2026-11-01' // Object.is equality
++
++Expected: "Sunday, 2026-11-01"
++Received: "Sunday, 2026-11-1"
++
++ ❯ src/screens/home/header.test.tsx:94:67
++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
++     93|     renderAt(instant, OK);
++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
++       |                                                                   ^
++     95|   });
++     96| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
++
++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++AssertionError: expected '2026-03-8' to be '2026-03-08' // Object.is equality
++
++Expected: "2026-03-08"
++Received: "2026-03-8"
++
++ ❯ src/screens/home/market-state.test.ts:76:71
++     74| 
++     75|     it("pads the month and day to two digits on the DST-change dates",…
++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
++       |                                                                       ^
++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
++
++ Test Files  2 failed | 1 passed (3)
++      Tests  5 failed | 120 passed (125)
++   Start at  16:32:09
++   Duration  1.94s (transform 276ms, setup 201ms, collect 700ms, tests 358ms, environment 1.35s, prepare 540ms)
++
++=== RED: web_src_screens_home_market-state.ts_manual_review-month-numeric.log (the review's mutant against the new tests) ===
++
++ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
++
++ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
++ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 263ms
++   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 18ms
++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
++   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
++   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
++     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
++stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
++⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
++⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
++
++ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 93ms
++   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
++     → expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
++
++⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
++
++ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
++AssertionError: expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
++
++Expected: "Sunday, 2026-03-08"
++Received: "Sunday, 2026-3-08"
++
++ ❯ src/screens/home/header.test.tsx:94:67
++     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
++     93|     renderAt(instant, OK);
++     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
++       |                                                                   ^
++     95|   });
++     96| 
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
++
++ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
++AssertionError: expected '2026-3-08' to be '2026-03-08' // Object.is equality
++
++Expected: "2026-03-08"
++Received: "2026-3-08"
++
++ ❯ src/screens/home/market-state.test.ts:76:71
++     74| 
++     75|     it("pads the month and day to two digits on the DST-change dates",…
++     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
++       |                                                                       ^
++     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
++     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
++
++⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
++
++ Test Files  2 failed | 1 passed (3)
++      Tests  4 failed | 121 passed (125)
++   Start at  16:32:09
++   Duration  1.94s (transform 204ms, setup 220ms, collect 697ms, tests 360ms, environment 1.36s, prepare 606ms)
++
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/validation-cycle-4.log b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/validation-cycle-4.log
+new file mode 100644
+index 00000000..9c1a9919
+--- /dev/null
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/validation-cycle-4.log
+@@ -0,0 +1,16 @@
++
++ Test Files  128 passed (128)
++      Tests  3560 passed (3560)
++   Start at  16:32:29
++   Duration  17.81s (transform 4.47s, setup 8.47s, collect 35.62s, tests 91.63s, environment 44.53s, prepare 6.72s)
++
++---tsc
++tsc=0
++---lint
++Checked 286 files in 122ms. No fixes applied.
++---fmt
++Checked 286 files in 84ms. No fixes applied.
++---build
++../src/factorflow/api/static/assets/index-DrblWcSv.js                28.22 kB │ gzip:  8.17 kB
++../src/factorflow/api/static/assets/index-UlSnzZiv.js               211.21 kB │ gzip: 68.90 kB
++✓ built in 1.59s
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/x b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/x
+deleted file mode 100644
+index b04c6452..00000000
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-evidence/x
++++ /dev/null
+@@ -1,8 +0,0 @@
+-
+- ✓ src/screens/home/copy.test.ts (21 tests) 3ms
+-
+- Test Files  1 passed (1)
+-      Tests  21 passed (21)
+-   Start at  16:07:31
+-   Duration  394ms (transform 27ms, setup 29ms, collect 19ms, tests 3ms, environment 153ms, prepare 23ms)
+-
+diff --git a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-tasks.md b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-tasks.md
+index 6ee12233..90b16ef0 100644
+--- a/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-tasks.md
++++ b/docs/capabilities/CAP-003-app-shell-and-data-health/epics/home/stories/CAP-003-E5-S1-tasks.md
+@@ -7,7 +7,8 @@ status: draft
+ owner: Alvaro de Jodra
+ owner_github: ajodraca
+ created: 2026-11-07
+-updated: 2026-11-07
++updated: 2026-11-27
++last_reworked_review: CAP-003-E5-S1-implementation-review-v1.md
+ ai_provenance:
+   agent_id: implementation-planning-agent
+   agent_version: "1.0"
+diff --git a/web/src/screens/home/copy.test.ts b/web/src/screens/home/copy.test.ts
+index 648890ff..1f47a995 100644
+--- a/web/src/screens/home/copy.test.ts
++++ b/web/src/screens/home/copy.test.ts
+@@ -152,6 +152,7 @@ describe("templates", () => {
+   });
+ 
+   it.each([
++    [1236, 1236, "1,236 of 1,236 stocks so far. Scores appear when it finishes."],
+     [12, 1236, "12 of 1,236 stocks so far. Scores appear when it finishes."],
+     [0, 1, "0 of 1 stock so far. Scores appear when it finishes."],
+     [5, null, "Scores appear when it finishes."],
+diff --git a/web/src/screens/home/header.test.tsx b/web/src/screens/home/header.test.tsx
+index e28661e4..70b97ad4 100644
+--- a/web/src/screens/home/header.test.tsx
++++ b/web/src/screens/home/header.test.tsx
+@@ -86,6 +86,14 @@ describe("HomeHeader: date and prices as-of (TC-COMP-133)", () => {
+     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Thursday, 2026-10-15");
+   });
+ 
++  it.each([
++    ["2026-03-08T18:00:00Z", "Sunday, 2026-03-08"],
++    ["2026-11-01T18:00:00Z", "Sunday, 2026-11-01"],
++  ])("pads the heading date across a DST change: %s", (instant, heading) => {
++    renderAt(instant, OK);
++    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(heading);
++  });
++
+   describe.each(["Asia/Tokyo", "America/Los_Angeles"])("under TZ=%s", (zone) => {
+     let previous: string | undefined;
+     beforeEach(() => {
+@@ -287,7 +295,9 @@ describe("HomeHeader: freshness, failure, loading, tick and composition", () =>
+   it("(e) renders the heading and a hidden skeleton while loading", () => {
+     const { container } = renderAt(OUTSIDE, LOADING);
+     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+-    expect(screen.getByTestId("home-as-of-skeleton")).toHaveAttribute("aria-hidden", "true");
++    const skeleton = screen.getByTestId("home-as-of-skeleton");
++    expect(skeleton).toHaveAttribute("aria-hidden", "true");
++    expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse", "rounded", "bg-secondary");
+     expect(screen.queryByTestId("as-of-line")).toBeNull();
+     expect(container.textContent).not.toContain("checked");
+   });
+@@ -307,6 +317,20 @@ describe("HomeHeader: freshness, failure, loading, tick and composition", () =>
+     fetchSpy.mockRestore();
+   });
+ 
++  it("(f) keeps recomputing on every later minute, not once", () => {
++    renderAt("2026-10-15T19:58:30Z", OK);
++    expect(screen.getByText("Market state not determinable")).toBeInTheDocument();
++    act(() => {
++      vi.advanceTimersByTime(60_000);
++    });
++    expect(screen.getByText("Market state not determinable")).toBeInTheDocument();
++    act(() => {
++      vi.advanceTimersByTime(60_000);
++    });
++    expect(lineText()).toContain("Market closed");
++    expect(screen.queryByText("Market state not determinable")).toBeNull();
++  });
++
+   it("(f) rolls the date over at midnight in Chicago, with no read", () => {
+     const fetchSpy = vi.spyOn(globalThis, "fetch");
+     renderAt("2026-10-16T04:59:30Z", OK);
+diff --git a/web/src/screens/home/market-state.test.ts b/web/src/screens/home/market-state.test.ts
+index 27064f9c..de2a0d42 100644
+--- a/web/src/screens/home/market-state.test.ts
++++ b/web/src/screens/home/market-state.test.ts
+@@ -72,6 +72,12 @@ describe.each(["Asia/Tokyo", "UTC", "America/Los_Angeles"])("under TZ=%s", (zone
+       });
+     });
+ 
++    it("pads the month and day to two digits on the DST-change dates", () => {
++      expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).toBe("2026-03-08");
++      expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).toBe("2026-11-01");
++      expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekday).toBe("Sunday");
++    });
++
+     it("reads midnight as 0, never 1440", () => {
+       expect(chicagoWallClock(new Date("2026-10-16T05:00:00Z"))).toEqual({
+         weekday: "Friday",

@@ -1,0 +1,170 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ibgdomkt/w3/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 12ms
+ ✓ src/screens/setup/copy.test.ts (159 tests) 13ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 18ms
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 135ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 373ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 357ms
+ ❯ src/screens/setup/step-card.test.tsx (15 tests | 1 failed) 416ms
+   × blocked Continue (CAP-003-E4-S3, DAC-E4-7) > is blocked, focusable and described by its reason, and swallows activation 9ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 296ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 356ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 1003ms
+ ❯ src/screens/setup/step-stocks.test.tsx (46 tests | 5 failed) 1459ms
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 180ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with an empty field when Paste a list is chosen 35ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+   × Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > moves to step 4 without a request, leaving step 3 still to do 15ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+   × Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > blocks Continue until a source is chosen 9ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+   × step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > blocks Continue with nothing chosen and sends nothing 4ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > blocked Continue (CAP-003-E4-S3, DAC-E4-7) > is blocked, focusable and described by its reason, and swallows activation
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-card.test.tsx:187:18
+    185|     render(<StepCard step={3} question="Q" onContinue={spy} continueBl…
+    186|     const next = screen.getByRole("button", { name: "Continue" });
+    187|     expect(next).toHaveAttribute("data-variant", "blocked");
+       |                  ^
+    188|     expect(next).toHaveAttribute("aria-disabled", "true");
+    189|     expect(next).toHaveAccessibleDescription(REASON);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:223:20
+    221|     await user.tab();
+    222|     const button = continueButton();
+    223|     expect(button).toHaveAttribute("data-variant", "blocked");
+       |                    ^
+    224|     expect(button).toHaveAttribute("aria-disabled", "true");
+    225|     expect(button).not.toBeDisabled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with an empty field when Paste a list is chosen
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:238:30
+    236|   it("blocks Continue with an empty field when Paste a list is chosen"…
+    237|     render(<Harness initial={{ source: "paste" }} />);
+    238|     expect(continueButton()).toHaveAttribute("data-variant", "blocked"…
+       |                              ^
+    239|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+    240|     expect(screen.queryByText(/symbols recognised/)).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > moves to step 4 without a request, leaving step 3 still to do
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:395:30
+    393|     await waitFor(() => expect(screen.getByTestId("current")).toHaveTe…
+    394|     await screen.findByRole("radio", { name: "Add later" });
+    395|     expect(continueButton()).toHaveAttribute("data-variant", "blocked"…
+       |                              ^
+    396|     await user.click(screen.getByRole("radio", { name: "Add later" }));
+    397|     expect(continueButton()).toHaveAttribute("data-variant", "default"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > blocks Continue until a source is chosen
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:409:69
+    407|     renderHost();
+    408|     await waitFor(() => expect(screen.getByTestId("current")).toHaveTe…
+    409|     expect(await screen.findByRole("button", { name: "Continue" })).to…
+       |                                                                     ^
+    410|       "data-variant",
+    411|       "blocked",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > blocks Continue with nothing chosen and sends nothing
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:833:20
+    831|     render(<Harness initial={{ source: null }} />);
+    832|     const button = continueButton();
+    833|     expect(button).toHaveAttribute("data-variant", "blocked");
+       |                    ^
+    834|     expect(button).toHaveAccessibleDescription("Paste at least one sym…
+    835|     await user.click(button);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  2 failed | 8 passed (10)
+      Tests  6 failed | 368 passed (374)
+   Start at  14:06:29
+   Duration  3.67s (transform 873ms, setup 830ms, collect 5.59s, tests 4.08s, environment 5.51s, prepare 1.98s)
+

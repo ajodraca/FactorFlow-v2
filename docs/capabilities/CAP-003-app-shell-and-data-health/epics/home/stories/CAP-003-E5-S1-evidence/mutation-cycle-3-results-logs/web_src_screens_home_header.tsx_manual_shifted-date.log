@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0cwwzpw9/w3/web
+
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (28 tests | 2 failed) 84ms
+   × HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted 37ms
+     → expected 'Market closed · prices current to 202…' to be 'Market closed · prices current to 202…' // Object.is equality
+   × HomeHeader: date and prices as-of (TC-COMP-133) > under TZ=America/Los_Angeles > renders the spring-change date as received and the heading from the Chicago clock 3ms
+     → expected 'Market state not determinableFactorFl…' to contain 'prices current to 2026-03-08'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+AssertionError: expected 'Market closed · prices current to 202…' to be 'Market closed · prices current to 202…' // Object.is equality
+
+Expected: "Market closed · prices current to 2026-10-14 · checked 17:52:10 CDT"
+Received: "Market closed · prices current to 2026-10-13 · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:81:24
+     79|     renderAt(OUTSIDE, OK);
+     80|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+     81|     expect(lineText()).toBe("Market closed · prices current to 2026-10…
+       |                        ^
+     82|   });
+     83| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > under TZ=America/Los_Angeles > renders the spring-change date as received and the heading from the Chicago clock
+AssertionError: expected 'Market state not determinableFactorFl…' to contain 'prices current to 2026-03-08'
+
+Expected: "prices current to 2026-03-08"
+Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-03-07 · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:105:26
+    103|     it("renders the spring-change date as received and the heading fro…
+    104|       renderAt(INSIDE, { ...OK, data: { ...ATTENTION, prices_as_of: "2…
+    105|       expect(lineText()).toContain("prices current to 2026-03-08");
+       |                          ^
+    106|       expect(screen.getByRole("heading", { level: 1 }).textContent).to…
+    107|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 passed (28)
+   Start at  16:11:18
+   Duration  1.15s (transform 144ms, setup 276ms, collect 407ms, tests 84ms, environment 159ms, prepare 57ms)
+

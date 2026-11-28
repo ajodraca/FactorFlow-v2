@@ -3,8 +3,9 @@
 Three modules CAP-003-E4-S1 added for the setup screen (component design
 `setup-ui` sections 2.1, 2.2, 2.3, 3, 5 and 10; DAC-E4-1, DAC-E4-2, DAC-E4-13,
 DAC-E4-S1-1 to DAC-E4-S1-3): `copy.ts`, `draft.tsx` and `use-setup-state.ts`.
-No screen imports them yet; their only importers are their tests and
-`use-setup-state.ts`, which imports `draft.tsx`. State is read through
+The step components CAP-003-E4-S2 added ([`setup-steps.md`](setup-steps.md))
+import `copy.ts` and `use-setup-state.ts`; no screen mounts them yet.
+`use-setup-state.ts` imports `draft.tsx`. State is read through
 `useShell` ([`shell-context.md`](shell-context.md)) and the fetch functions
 `getHistoryDepth` and `listInstruments` in `web/src/api/client`.
 
@@ -104,10 +105,10 @@ components and are not repeated.
 | `stepPosition(n)`, `backLabel(title)`, `nextHint(title)`, `CONTINUE`, `doneLabel(title)` | Position line, footer and screen-reader done text |
 | `SUMMARIES` | `years`, `followed`, `downloadStarted` one-line step-list summaries |
 | `STEP1` | Market data key lines, including `KEY_VARIABLE` (`FACTORFLOW_MASSIVE_API_KEY`) |
-| `STEP2` | History depth label, suffix, description, plan-limit note, `rangeError` (1 to 50 whole years) |
-| `STEP3` | Explanation, source legend, `paste` and `later` options, field text, `counter`, `unreadable`, `didYouMean`, `belowFloor`, `zeroBlocked`, `alreadyFollowed`, `infoNote` |
-| `STEP4` | Download heading, summary labels, `start`, `progress`, `started`, `checked`, `canLeave`, `queued`, the two not-startable messages with `goToStep2` and `goToStep3`, `blockedReason`, `goHome`, `manageFollowed`, `progressUnreadable` |
-| `READ_ERRORS` | `subjects`, `readFailed(subject, reason)`, `tryAgain` for a failed depth or count read |
+| `STEP2` | History depth label, suffix, description, plan-limit note, `rangeError` (1 to 50 whole years), `saveFailed(reason)` (CAP-003-E4-S2, DEC-0346) |
+| `STEP3` | Explanation, source legend, `paste` and `later` options, field text, `counter`, `unreadable`, `didYouMean`, `belowFloor`, `zeroBlocked`, `alreadyFollowed`, `infoNote`, and the S3 additions `duplicateEntry`, `alreadyFollowedEntry`, `saveFailed`, `followedSoFar`, `keptForRetry` |
+| `STEP4` | Download heading, summary labels, `start`, `progress`, `started`, `checked`, `canLeave`, `queued`, the two not-startable messages with `goToStep2` and `goToStep3`, `blockedReason`, `goHome`, `manageFollowed`, `progressUnreadable`, and the S4 additions `startFailed(reason)` (DEC-0357) and `depthAbsent` (DEC-0358) |
+| `READ_ERRORS` | `subjects`, `readFailed(subject, reason)`, `tryAgain` for a failed depth or count read; `notAnswering` and `unexpected`, the two reasons a failure shows (CAP-003-E4-S2, DEC-0345) |
 
 A string a later setup story needs and no design contains is added by that
 story with a doc comment saying so.

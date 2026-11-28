@@ -1,0 +1,417 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ibgdomkt/w1/web
+
+ ✓ src/screens/setup/copy.test.ts (159 tests) 25ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 21ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 22ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 206ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 581ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 558ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 624ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 254ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 314ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 812ms
+ ❯ src/screens/setup/step-stocks.test.tsx (46 tests | 4 failed) 2628ms
+   × parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > posts 2500 symbols as three requests, then re-reads and moves to step 4 1042ms
+     → expected "spy" to be called with arguments: [ 4 ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<section[39m
+        [33maria-labelledby[39m=[32m"setup-step-heading"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
+          [33mdata-variant[39m=[32m"default"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
+          [36m>[39m
+            [0mStep 3 of 4[0m
+          [36m</p>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
+            [33mid[39m=[32m"setup-step-heading"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mWhich stocks do you want to follow?[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mstyle[39m=[32m"max-width: 70ch;"[39m
+          [36m>[39m
+            [0mFactorFlow downloads data and scores value, growth and momentum for these stocks. Scores rank stocks against each other, so a factor needs at least 30 stocks with complete data before it can rank anything. Start with 100 or more if you can.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-medium"[39m
+            [33mid[39m=[32m":r34:"[39m
+          [36m>[39m
+            [0mHow do you want to name them?[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33maria-labelledby[39m=[32m":r34:"[39m
+            [33maria-required[39m=[32m"false"[39m
+            [33mclass[39m=[32m"grid grid-flow-col auto-cols-fr gap-3"[39m
+            [33mdata-variant[39m=[32m"cards"[39m
+            [33mdir[39m=[32m"ltr"[39m
+            [33mrole[39m=[32m"radiogroup"[39m
+            [33mstyle[39m=[32m"outline: none;"[39m
+            [33mtabindex[39m=[32m"0"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-checked[39m=[32m"true"[39m
+              [33maria-describedby[39m=[32m":r37:"[39m
+              [33maria-labelledby[39m=[32m":r36:"[39m
+              [33mclass[39m=[32m"flex items-start gap-2 rounded border border-border bg-background p-4 text-left focus-visible:outline-none focus-visible:ring focus-visible:ring-ring data-[state=checked]:ring-1 data-[state=checked]:ring-foreground"[39m
+              [33mdata-radix-collection-item[39m=[32m""[39m
+              [33mdata-state[39m=[32m"checked"[39m
+              [33mrole[39m=[32m"radio"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+              [33mvalue[39m=[32m"paste"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mdata-state[39m=[32m"checked"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-circle h-2 w-2 fill-current text-primary"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"12"[39m
+                      [33mcy[39m=[32m"12"[39m
+                      [33mr[39m=[32m"10"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block font-semibold"[39m
+                  [33mid[39m=[32m":r36:"[39m
+                [36m>[39m
+                  [0mPaste a list[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block text-xs text-muted-foreground"[39m
+                  [33mid[39m=[32m":r37:"[39m
+                [36m>[39m
+                  [0mPaste symbols separated by commas or one per line.[0m
+                [36m</span>[39m
+              [36m</span>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-checked[39m=[32m"false"[39m
+              [33maria-describedby[39m=[32m":r3a:"[39m
+              [33maria-labelledby[39m=[32m":r39:"[39m
+              [33mclass[39m=[32m"flex items-start gap-2 rounded border border-border bg-background p-4 text-left focus-visible:outline-none focus-visible:ring focus-visible:ring-ring data-[state=checked]:ring-1 data-[state=checked]:ring-foreground"[39m
+              [33mdata-radix-collection-item[39m=[32m""[39m
+              [33mdata-state[39m=[32m"unchecked"[39m
+              [33mrole[39m=[32m"radio"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+              [33mvalue[39m=[32m"later"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input"[39m
+              [36m/>[39m
+              [36m<span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block font-semibold"[39m
+                  [33mid[39m=[32m":r39:"[39m
+                [36m>[39m
+                  [0mAdd later[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block text-xs text-muted-foreground"[39m
+                  [33mid[39m=[32m":r3a:"[39m
+                [36m>[39m
+                  [0mContinue without stocks for now; you can follow them later from Data health.[0m
+                [36m</span>[39m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<form[39m
+            [33maria-label[39m=[32m"Stock symbols"[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [33mdata-variant[39m=[32m"stacked"[39m
+            [33mnovalidate[39m=[32m""[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-2"[39m
+            [36m>[39m
+              [36m<lab...
+   × pasted symbols go as a JSON array, rejections are announced (TC-COMP-116; DAC-E4-S3-4) > posts the accepted symbols and names the already-followed ones in the live region 37ms
+     → expected last "spy" call to have been called with [ 3 ]
+   × step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > a failed batch (DEC-0354) > keeps the unposted entries, counts the posted ones and stays on the step 47ms
+     → expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+   × rework of review v1 (IR-001, IR-003, IR-004) > announces a malformed rejection as unreadable, without the server reason, and stays (IR-001) 50ms
+     → expected last "spy" call to have been called with [ 3 ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > posts 2500 symbols as three requests, then re-reads and moves to step 4
+AssertionError: expected "spy" to be called with arguments: [ 4 ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<section[39m
+        [33maria-labelledby[39m=[32m"setup-step-heading"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"[39m
+          [33mdata-variant[39m=[32m"default"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
+          [36m>[39m
+            [0mStep 3 of 4[0m
+          [36m</p>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-xl font-semibold text-foreground focus-visible:outline-none"[39m
+            [33mid[39m=[32m"setup-step-heading"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mWhich stocks do you want to follow?[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mstyle[39m=[32m"max-width: 70ch;"[39m
+          [36m>[39m
+            [0mFactorFlow downloads data and scores value, growth and momentum for these stocks. Scores rank stocks against each other, so a factor needs at least 30 stocks with complete data before it can rank anything. Start with 100 or more if you can.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-medium"[39m
+            [33mid[39m=[32m":r34:"[39m
+          [36m>[39m
+            [0mHow do you want to name them?[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33maria-labelledby[39m=[32m":r34:"[39m
+            [33maria-required[39m=[32m"false"[39m
+            [33mclass[39m=[32m"grid grid-flow-col auto-cols-fr gap-3"[39m
+            [33mdata-variant[39m=[32m"cards"[39m
+            [33mdir[39m=[32m"ltr"[39m
+            [33mrole[39m=[32m"radiogroup"[39m
+            [33mstyle[39m=[32m"outline: none;"[39m
+            [33mtabindex[39m=[32m"0"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-checked[39m=[32m"true"[39m
+              [33maria-describedby[39m=[32m":r37:"[39m
+              [33maria-labelledby[39m=[32m":r36:"[39m
+              [33mclass[39m=[32m"flex items-start gap-2 rounded border border-border bg-background p-4 text-left focus-visible:outline-none focus-visible:ring focus-visible:ring-ring data-[state=checked]:ring-1 data-[state=checked]:ring-foreground"[39m
+              [33mdata-radix-collection-item[39m=[32m""[39m
+              [33mdata-state[39m=[32m"checked"[39m
+              [33mrole[39m=[32m"radio"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+              [33mvalue[39m=[32m"paste"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mdata-state[39m=[32m"checked"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-circle h-2 w-2 fill-current text-primary"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"12"[39m
+                      [33mcy[39m=[32m"12"[39m
+                      [33mr[39m=[32m"10"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block font-semibold"[39m
+                  [33mid[39m=[32m":r36:"[39m
+                [36m>[39m
+                  [0mPaste a list[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block text-xs text-muted-foreground"[39m
+                  [33mid[39m=[32m":r37:"[39m
+                [36m>[39m
+                  [0mPaste symbols separated by commas or one per line.[0m
+                [36m</span>[39m
+              [36m</span>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-checked[39m=[32m"false"[39m
+              [33maria-describedby[39m=[32m":r3a:"[39m
+              [33maria-labelledby[39m=[32m":r39:"[39m
+              [33mclass[39m=[32m"flex items-start gap-2 rounded border border-border bg-background p-4 text-left focus-visible:outline-none focus-visible:ring focus-visible:ring-ring data-[state=checked]:ring-1 data-[state=checked]:ring-foreground"[39m
+              [33mdata-radix-collection-item[39m=[32m""[39m
+              [33mdata-state[39m=[32m"unchecked"[39m
+              [33mrole[39m=[32m"radio"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+              [33mvalue[39m=[32m"later"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input"[39m
+              [36m/>[39m
+              [36m<span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block font-semibold"[39m
+                  [33mid[39m=[32m":r39:"[39m
+                [36m>[39m
+                  [0mAdd later[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"block text-xs text-muted-foreground"[39m
+                  [33mid[39m=[32m":r3a:"[39m
+                [36m>[39m
+                  [0mContinue without stocks for now; you can follow them later from Data health.[0m
+                [36m</span>[39m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<form[39m
+            [33maria-label[39m=[32m"Stock symbols"[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [33mdata-variant[39m=[32m"stacked"[39m
+            [33mnovalidate[39m=[32m""[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-2"[39m
+            [36m>[39m
+              [36m<lab...
+ ❯ src/screens/setup/step-stocks.test.tsx:342:41
+    340|     ).toBeInTheDocument();
+    341|     await user.click(continueButton());
+    342|     await waitFor(() => expect(goToSpy).toHaveBeenCalledWith(4));
+       |                                         ^
+    343|     const calls = vi.mocked(addInstruments).mock.calls;
+    344|     expect(calls.map(([batch]) => batch.length)).toEqual([1000, 1000, …
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > pasted symbols go as a JSON array, rejections are announced (TC-COMP-116; DAC-E4-S3-4) > posts the accepted symbols and names the already-followed ones in the live region
+AssertionError: expected last "spy" call to have been called with [ 3 ]
+
+- Expected: 
+Array [
+  3,
+]
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/step-stocks.test.tsx:452:21
+    450|     );
+    451| 
+    452|     expect(goToSpy).toHaveBeenLastCalledWith(3);
+       |                     ^
+    453|     expect(rereadSpy).toHaveBeenLastCalledWith("activeCount");
+    454| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > a failed batch (DEC-0354) > keeps the unposted entries, counts the posted ones and stays on the step
+AssertionError: expected "spy" to be called with arguments: [ 3 ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+ ❯ src/screens/setup/step-stocks.test.tsx:745:23
+    743|       );
+    744|       expect(rereadSpy).toHaveBeenCalledWith("activeCount");
+    745|       expect(goToSpy).toHaveBeenCalledWith(3);
+       |                       ^
+    746|       expect(goToSpy).not.toHaveBeenCalledWith(4);
+    747| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > rework of review v1 (IR-001, IR-003, IR-004) > announces a malformed rejection as unreadable, without the server reason, and stays (IR-001)
+AssertionError: expected last "spy" call to have been called with [ 3 ]
+
+- Expected: 
+Array [
+  3,
+]
+
++ Received: 
+undefined
+
+ ❯ src/screens/setup/step-stocks.test.tsx:881:21
+    879|     expect(screen.getByRole("status")).toHaveTextContent("ZZZZ!, not a…
+    880|     expect(document.body.textContent).not.toContain("not a valid symbo…
+    881|     expect(goToSpy).toHaveBeenLastCalledWith(3);
+       |                     ^
+    882|     expect(goToSpy).not.toHaveBeenCalledWith(4);
+    883|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  4 failed | 370 passed (374)
+   Start at  14:06:08
+   Duration  6.47s (transform 1.64s, setup 1.94s, collect 9.20s, tests 5.49s, environment 12.83s, prepare 1.94s)
+

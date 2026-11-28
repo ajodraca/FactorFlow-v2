@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-27
+docs_synced_review: CAP-003-E5-S1-implementation-review-v2.md
+last_reworked_review: CAP-003-E5-S1-implementation-review-v1.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -68,7 +70,7 @@ Mapped test cases (from `tests/component/home-ui-tests.md` lines 142-224, confir
 
 **Purpose**: Confirm the hard dependencies are in the tree and record a green baseline.
 
-- [ ] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix: `web/src/app/shell-context.tsx` exports `useShell` (CAP-003-E3-S3); `web/src/app/shell-types.ts` exports `Attention` and `ReadState` (CAP-003-E3-S1); `web/src/components/patterns/presence.tsx` exports `Absent({ label })` and `NotDeterminable({ reason, label? })`, and `web/src/components/patterns/format.ts` exports `formatClock` and `formatSessionDate` (CAP-003-E1-S6, DEC-0309 and -2); `web/src/components/patterns/as-of-line.tsx` exports `AsOfLine` accepting `{ parts, className? }` (CAP-003-E1-S10, DEC-0315); `web/src/components/ui/badge.tsx` renders `data-variant` (CAP-003-E1-S1). If a producer's merged signature differs from the one named here, use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to AC-26)
+- [x] T001 From the repo root, confirm the producers this story imports exist with the shapes their plans fix: `web/src/app/shell-context.tsx` exports `useShell` (CAP-003-E3-S3); `web/src/app/shell-types.ts` exports `Attention` and `ReadState` (CAP-003-E3-S1); `web/src/components/patterns/presence.tsx` exports `Absent({ label })` and `NotDeterminable({ reason, label? })`, and `web/src/components/patterns/format.ts` exports `formatClock` and `formatSessionDate` (CAP-003-E1-S6, DEC-0309 and -2); `web/src/components/patterns/as-of-line.tsx` exports `AsOfLine` accepting `{ parts, className? }` (CAP-003-E1-S10, DEC-0315); `web/src/components/ui/badge.tsx` renders `data-variant` (CAP-003-E1-S1). If a producer's merged signature differs from the one named here, use the merged one and record the difference in this story's TDD evidence. Then run `npm run test` and record that it passes before any change. No package, configuration or token is added (traces to AC-26)
 
 **Checkpoint**: Every producer is present and the Vitest suite is green.
 
@@ -89,7 +91,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-132 (marketState closed outside session hours, not determinable inside, across DST) in a new `web/src/screens/home/market-state.test.ts`, with a `// Implements TC-COMP-132` comment, as an `it.each` over this literal table of UTC instants and their America/Chicago meaning.
+- [x] T002 [P] Implement TC-COMP-132 (marketState closed outside session hours, not determinable inside, across DST) in a new `web/src/screens/home/market-state.test.ts`, with a `// Implements TC-COMP-132` comment, as an `it.each` over this literal table of UTC instants and their America/Chicago meaning.
   - March change (CST before 2026-03-08, CDT after):
     - Fri 2026-03-06: `14:29Z` 08:29 → `closed`; `14:30Z` 08:30 → `not_determinable`; `20:59Z` 14:59 → `not_determinable`; `21:00Z` 15:00 → `closed`.
     - Sat 2026-03-07 `18:00Z` (12:00 CST) → `closed`.
@@ -109,7 +111,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
     - swap-case `"Saturday"` → `"Friday"` (both Friday 08:30 rows turn `closed`);
     - remove-attribute of `timeZone: "America/Chicago"` (under TZ=Asia/Tokyo, Mon 2026-03-09 13:30Z reads 22:30 and turns `closed`);
     - a fixed `-06:00` offset, which fails the CDT Monday 13:30Z row, and a fixed `-05:00` offset, which fails the CST Friday 14:29Z row.
-- [ ] T004 Implement TC-COMP-133 (Header date heading and unshifted prices as-of) in a new `web/src/screens/home/header.test.tsx`, with a `// Implements TC-COMP-133` comment, using the shared harness and `shell.value.attention = OK`.
+- [x] T004 Implement TC-COMP-133 (Header date heading and unshifted prices as-of) in a new `web/src/screens/home/header.test.tsx`, with a `// Implements TC-COMP-133` comment, using the shared harness and `shell.value.attention = OK`.
   - At system time `2026-10-16T01:00:00Z`, which is Thursday 2026-10-15 20:00 CDT, `getByRole("heading", { level: 1 })` has text `"Thursday, 2026-10-15"`. The line's collapsed text is exactly `"Market closed · prices current to 2026-10-14 · checked 17:52:10 CDT"`.
   - At `2026-10-15T17:00:00Z` (12:00 CDT) the `h1` is again `"Thursday, 2026-10-15"`.
   - Inside a `describe.each(["Asia/Tokyo", "America/Los_Angeles"])` TZ block (same set/restore pattern), with `prices_as_of: "2026-03-08"` (the spring DST change), the line contains `"prices current to 2026-03-08"`. At `2026-10-15T17:00:00Z` the `h1` is `"Thursday, 2026-10-15"`.
@@ -118,7 +120,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
     - a heading built from machine-local parts, which reads Friday under Asia/Tokyo at 17:00Z;
     - swap-case `weekday: "long"` → `"short"`, which reads `"Thu, 2026-10-15"`;
     - a `prices_as_of` routed through `new Date(...)` and an instant formatter, which renders `2026-03-07` under America/Los_Angeles.
-- [ ] T005 Implement TC-COMP-135 (Market-state badge through NotDeterminable with its shape) in `web/src/screens/home/header.test.tsx` (same file as T004, so sequential), with a `// Implements TC-COMP-135` comment, `shell.value.attention = OK`. Inside session hours, at `2026-10-15T17:00:00Z`:
+- [x] T005 Implement TC-COMP-135 (Market-state badge through NotDeterminable with its shape) in `web/src/screens/home/header.test.tsx` (same file as T004, so sequential), with a `// Implements TC-COMP-135` comment, `shell.value.attention = OK`. Inside session hours, at `2026-10-15T17:00:00Z`:
   - `getByText("Market state not determinable")` is the badge element. It has `data-variant="coverage-unknown"` and the class `bg-pattern-indeterminate` (the non-colour cue, a hatch).
   - It `toHaveAccessibleDescription("FactorFlow has no trading calendar, so it can't tell a session from a holiday.")`, and that reason is also present as text in the line.
   - The `as-of-line` element contains no element whose `data-variant` starts with `status-` and no `svg`: not determinable is not a tier, so no tier shape renders (ui-components 2.3; Resolved Conflict 2 sharpens the TC's StatusBadge clause).
@@ -128,7 +130,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
     - swap-case `NotDeterminable` → a `StatusBadge` tier (a `status-*` variant appears);
     - remove-attribute of the `reason` prop (no accessible description);
     - negate-boolean on the `marketState(now) === "closed"` branch (the outside-hours case shows the badge).
-- [ ] T006 Implement TC-COMP-134 (Header, as-of line and copy use the display vocabulary) in `web/src/screens/home/header.test.tsx` (same file, after T005), with a `// Implements TC-COMP-134` comment.
+- [x] T006 Implement TC-COMP-134 (Header, as-of line and copy use the display vocabulary) in `web/src/screens/home/header.test.tsx` (same file, after T005), with a `// Implements TC-COMP-134` comment.
   - Define `const TERMS = /\b(?:instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i`, the eight DAC-E7-3 terms as whole words in any case.
   - Header states: render `HomeHeader` in each of the ten combinations of {`2026-10-15T17:00:00Z` inside hours, `2026-10-16T01:00:00Z` outside} × {`LOADING`, `OK`, `OK` with `prices_as_of: null`, `FAILED_WITH_LAST`, `FAILED_NO_LAST`}. From each, collect the container's `textContent` and every `aria-label`, `title` and `alt` attribute value. Assert that `TERMS` matches none of them.
   - Catalogue: `import * as copy from "./copy"`. Walk every export recursively. Collect each string leaf. Call each function leaf with the arguments listed for its path in a literal `CALLS` map, which covers every branch T008 names. Assert:
@@ -141,7 +143,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 ### Additional Unit Tests
 
-- [ ] T003 [P] Add the wall-clock and second-granularity cases to `web/src/screens/home/market-state.test.ts` (same file as T002, so sequential with it), also inside T002's TZ `describe.each` (traces to DAC-E5-S1-1, DAC-E5-6, AC-24).
+- [x] T003 [P] Add the wall-clock and second-granularity cases to `web/src/screens/home/market-state.test.ts` (same file as T002, so sequential with it), also inside T002's TZ `describe.each` (traces to DAC-E5-S1-1, DAC-E5-6, AC-24).
   - `chicagoWallClock(new Date("2026-10-16T01:00:00Z"))` `toEqual({ weekday: "Thursday", date: "2026-10-15", minutes: 1200 })`.
   - `chicagoWallClock(new Date("2026-10-16T05:00:00Z"))` `toEqual({ weekday: "Friday", date: "2026-10-16", minutes: 0 })`: midnight is `0`, never `1440`.
   - `marketState(new Date("2026-10-15T13:29:59Z"))` (08:29:59) is `"closed"`.
@@ -151,7 +153,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
     - remove-attribute of `hourCycle: "h23"`: en-US falls back to a 12-hour clock, so 20:00 reads `08` and minutes `480`;
     - swap-case `"h23"` → `"h24"`: midnight reads `24`;
     - an implementation rounding seconds up to the next minute, which turns 14:59:59 into 15:00 → `closed`.
-- [ ] T007 Add the freshness, failure, loading, tick and composition cases to `web/src/screens/home/header.test.tsx` (same file, after T006) (traces to AC-25, AC-24, AC-26, DAC-E5-6).
+- [x] T007 Add the freshness, failure, loading, tick and composition cases to `web/src/screens/home/header.test.tsx` (same file, after T006) (traces to AC-25, AC-24, AC-26, DAC-E5-6).
   - (a) *checked* from the read (AC-25): with `OK`, the line contains `"checked 17:52:10 CDT"` and not `"17:53:41"`. Kills drop-field-copy of `data.checked_at` in favour of the client `checkedAt` (the wrong-property trap: the two values differ by design).
   - (b) Aging while the read fails (AC-25; home-ui 2.3): with `FAILED_WITH_LAST`, the line contains `"checked 17:40:05 CDT"`.
     - The prices part reads `"prices current to"` followed by an element with `aria-hidden="true"` and text `"—"`, and an element with class `sr-only` and text `"not determinable"`.
@@ -175,7 +177,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
     - the `h1` has class `text-xl`;
     - `container.querySelectorAll("[style]")` is empty (no inline style, so no literal).
     - Kills: swap-case `AsOfLine` → a hand-joined string (no separator spans); remove-attribute of `text-xl`.
-- [ ] T008 [P] Pin the catalogue's wording in a new `web/src/screens/home/copy.test.ts`. The story's Files list does not name this file. Its precedent is the delivered `web/src/screens/research/copy.test.ts`. Each assertion compares against an independent literal (traces to DAC-E5-S1-3; prerequisite for CAP-003-E5-S2's DAC-E5-2 and DAC-E5-4 and CAP-003-E5-S3's DAC-E5-1 and DAC-E5-7 to DAC-E5-11, which render these strings).
+- [x] T008 [P] Pin the catalogue's wording in a new `web/src/screens/home/copy.test.ts`. The story's Files list does not name this file. Its precedent is the delivered `web/src/screens/research/copy.test.ts`. Each assertion compares against an independent literal (traces to DAC-E5-S1-3; prerequisite for CAP-003-E5-S2's DAC-E5-2 and DAC-E5-4 and CAP-003-E5-S3's DAC-E5-1 and DAC-E5-7 to DAC-E5-11, which render these strings).
   - **Static strings.** Every static string listed in T010 equals its literal. One `toEqual` per group against a literal object.
   - **Templates:**
     - `HEADER.heading("Thursday", "2026-10-15")` is `"Thursday, 2026-10-15"`.
@@ -219,7 +221,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 **Purpose**: Create the three Home modules that make the Phase 2 tests pass.
 
-- [ ] T009 Create `web/src/screens/home/market-state.ts`, per DEC-0362 (Open Gap 1), which makes T002 and T003 pass.
+- [x] T009 Create `web/src/screens/home/market-state.ts`, per DEC-0362 (Open Gap 1), which makes T002 and T003 pass.
   - Export `type MarketState = "closed" | "not_determinable"` and `interface ChicagoWallClock { weekday: string; date: string; minutes: number }`.
   - One module-level `Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "long", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })`.
   - `chicagoWallClock(now: Date): ChicagoWallClock` reads `formatToParts` and returns:
@@ -229,7 +231,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
   - `marketState(now: Date): MarketState` returns `"closed"` when `weekday` is `"Saturday"` or `"Sunday"`. Otherwise it returns `"not_determinable"` when `SESSION_OPENS <= minutes && minutes < SESSION_CLOSES`, with module constants `SESSION_OPENS = 8 * 60 + 30` and `SESSION_CLOSES = 15 * 60`, and `"closed"` otherwise.
   - The module doc comment cites DEC-0206, DAC-E5-6, DAC-E5-S1-1, component design `home-ui` 2.3 and system design open question 9 (no trading calendar). It states that the rule reads the clock only and never the viewer's machine zone.
   - No `toLocale*` call or word appears anywhere in the file, comments included, so the Validation Plan grep cannot contradict this task.
-- [ ] T010 [P] Create `web/src/screens/home/copy.ts`, per DEC-0362, which makes T008 and the catalogue half of T006 pass. It is grouped `as const` objects in the shape of the delivered `web/src/screens/research/copy.ts`. Each member carries a doc comment citing its section. The only import is `formatCount` from `../../components/patterns/format` (CAP-003-E1-S6). A private `listOf(items)` builds `"A"`, `"A and B"`, `"A, B and C"` (the delivered research helper, restated because a screen must not import another screen).
+- [x] T010 [P] Create `web/src/screens/home/copy.ts`, per DEC-0362, which makes T008 and the catalogue half of T006 pass. It is grouped `as const` objects in the shape of the delivered `web/src/screens/research/copy.ts`. Each member carries a doc comment citing its section. The only import is `formatCount` from `../../components/patterns/format` (CAP-003-E1-S6). A private `listOf(items)` builds `"A"`, `"A and B"`, `"A, B and C"` (the delivered research helper, restated because a screen must not import another screen).
   - **Top level:**
     - `NOT_DETERMINABLE = "not determinable"`: the hidden words of every Home em dash (home-ui 2.3, 2.4, §10 Accessibility).
     - `CHECKED = "checked"`.
@@ -297,7 +299,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
       - `action: "See details"`.
   - **Left out on purpose** (Open Gap 1; Other Notes): tier and status labels, which `labelOf` owns (CAP-003-E1-S5: *Downloading*, *Interrupted*, *Failed*, *Not reflecting the latest download*, *Score update failed*, *No scores yet*, *Updating*); the answer words *Yes*, *Mostly yes* and *No*, which `worstDataTier`'s `DataAnswer.word` owns (CAP-003-E1-S7); route targets, which `deriveNeedsYou` and the router own; and the strings no artifact fixes (Open Gap 2).
   - Doc comments name no unit or hex literal: CAP-003-E5-S3 adds this directory to the literal scan, comments included.
-- [ ] T011 Create `web/src/screens/home/header.tsx` (depends on T009, T010), which makes T004–T007 pass. Export `function HomeHeader(): JSX.Element`, which takes no props (DEC-0362).
+- [x] T011 Create `web/src/screens/home/header.tsx` (depends on T009, T010), which makes T004–T007 pass. Export `function HomeHeader(): JSX.Element`, which takes no props (DEC-0362).
   - **Data.** It reads `const { attention } = useShell()` (`../../app/shell-context`) and nothing else from the context.
   - **Clock.** A module-private hook `useMinuteClock(): Date` holds `useState(() => new Date())`. In a `useEffect` it starts `setInterval(() => setNow(new Date()), MINUTE_MS)` and returns `() => clearInterval(timer)`, with `const MINUTE_MS = 60_000`.
   - **Layout.** It renders `<header>`, which contains:
@@ -324,7 +326,7 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 **Purpose**: Prove the new screen modules sit inside the delivered and shared checks, with no delivered file touched.
 
-- [ ] T012 Run `npm run test` and confirm the whole suite is green, including the following, unchanged:
+- [x] T012 Run `npm run test` and confirm the whole suite is green, including the following, unchanged:
   - `web/src/components/token-literals.test.ts`: CAP-003-E1-S1's scan, and CAP-003-E3-S2's layout rule, which already walks all of `web/src/` and so covers `web/src/screens/home/`;
   - `web/src/components/patterns/as-of-line.test.tsx`;
   - `web/src/components/patterns/presence.test.tsx`;
@@ -341,11 +343,11 @@ Fake timers: `vi.useFakeTimers()` and `vi.setSystemTime(<instant>)` in each case
 
 **Purpose**: Validation commands and TDD evidence.
 
-- [ ] T013 Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root.
+- [x] T013 Run `npm run lint`, `npm run format`, `npx tsc --noEmit` and `npm run build` from the repo root.
   - Fix format findings with `npx biome format --write web/src/screens/home`.
   - The test files are type-checked too, which proves the `Attention` fixtures match CAP-003-E3-S1's type.
   - Fix findings in this story's six files only (traces to AC-26)
-- [ ] T014 After each TDD cycle in T002–T013 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E5-S1-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage`; no per-cycle commit is planned. Cycles: (1) T002 + T003 + T009, the market state; (2) T008 + T010, the catalogue; (3) T004–T007 + T011, the header; T012–T013 add no behaviour and join cycle 3's validation evidence (INV-TDD-002, TEST-TDD-008; traces to no AC)
+- [x] T014 After each TDD cycle in T002–T013 — not once at the end — stage only that cycle's diff, dispatch an independent code-review subagent and an independent spec-drift subagent against it, and append the cycle to `CAP-003-E5-S1-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch` — before the next cycle begins; `scripts/check-tdd-evidence.py` must pass before hand-off. Never include a `REJECTED` or `drift_detected: true` cycle in a commit. This story runs under a driver that commits once per stage, so every cycle records `commit_hash: stage`; no per-cycle commit is planned. Cycles: (1) T002 + T003 + T009, the market state; (2) T008 + T010, the catalogue; (3) T004–T007 + T011, the header; T012–T013 add no behaviour and join cycle 3's validation evidence (INV-TDD-002, TEST-TDD-008; traces to no AC)
 
 **Checkpoint**: All acceptance criteria satisfied, all validation passes, and every behaviour-changing commit is named by a TDD-evidence cycle entry.
 

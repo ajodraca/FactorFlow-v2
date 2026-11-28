@@ -1,0 +1,186 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0cwwzpw9/w1/web
+
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (28 tests | 6 failed) 82ms
+   × HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted 36ms
+     → expected 'Market state not determinableFactorFl…' to be 'Market closed · prices current to 202…' // Object.is equality
+   × HomeHeader: market-state badge (TC-COMP-135) > renders not determinable through NotDeterminable, with a hatch and no tier 4ms
+     → Unable to find an element with the text: Market state not determinable. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<header>[39m
+      [36m<h1[39m
+        [33mclass[39m=[32m"text-xl"[39m
+      [36m>[39m
+        [0mThursday, 2026-10-15[0m
+      [36m</h1>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
+        [33mdata-testid[39m=[32m"as-of-line"[39m
+      [36m>[39m
+        [0mMarket closed[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mprices current to 2026-10-14[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mchecked 17:52:10 CDT[0m
+      [36m</p>[39m
+    [36m</header>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × HomeHeader: market-state badge (TC-COMP-135) > renders closed as text with no badge 1ms
+     → expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+   × HomeHeader: market-state badge (TC-COMP-135) > tells the two states apart in words, not colour 1ms
+     → expected 'Market closed · prices current to 202…' not to contain 'Market closed'
+   × HomeHeader: freshness, failure, loading, tick and composition > (d) says prices are not downloaded when there is no price date 1ms
+     → expected 'Market state not determinableFactorFl…' to be 'Market closed · prices not downloaded…' // Object.is equality
+   × HomeHeader: freshness, failure, loading, tick and composition > (f) recomputes the market state each minute, with no read 1ms
+     → expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+AssertionError: expected 'Market state not determinableFactorFl…' to be 'Market closed · prices current to 202…' // Object.is equality
+
+Expected: "Market closed · prices current to 2026-10-14 · checked 17:52:10 CDT"
+Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:81:24
+     79|     renderAt(OUTSIDE, OK);
+     80|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+     81|     expect(lineText()).toBe("Market closed · prices current to 2026-10…
+       |                        ^
+     82|   });
+     83| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: market-state badge (TC-COMP-135) > renders not determinable through NotDeterminable, with a hatch and no tier
+TestingLibraryElementError: Unable to find an element with the text: Market state not determinable. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<header>[39m
+      [36m<h1[39m
+        [33mclass[39m=[32m"text-xl"[39m
+      [36m>[39m
+        [0mThursday, 2026-10-15[0m
+      [36m</h1>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
+        [33mdata-testid[39m=[32m"as-of-line"[39m
+      [36m>[39m
+        [0mMarket closed[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mprices current to 2026-10-14[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mchecked 17:52:10 CDT[0m
+      [36m</p>[39m
+    [36m</header>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/home/header.test.tsx:115:26
+    113|   it("renders not determinable through NotDeterminable, with a hatch a…
+    114|     renderAt(INSIDE, OK);
+    115|     const badge = screen.getByText("Market state not determinable");
+       |                          ^
+    116|     expect(badge).toHaveAttribute("data-variant", "coverage-unknown");
+    117|     expect(badge).toHaveClass("bg-pattern-indeterminate");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: market-state badge (TC-COMP-135) > renders closed as text with no badge
+AssertionError: expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+
+Expected: "Market closed"
+Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:129:30
+    127|     renderAt(OUTSIDE, OK);
+    128|     const line = screen.getByTestId("as-of-line");
+    129|     expect(line.textContent).toContain("Market closed");
+       |                              ^
+    130|     expect(line.querySelector("[data-variant]")).toBeNull();
+    131|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: market-state badge (TC-COMP-135) > tells the two states apart in words, not colour
+AssertionError: expected 'Market closed · prices current to 202…' not to contain 'Market closed'
+
+Expected: "Market closed"
+Received: "Market closed · prices current to 2026-10-14 · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:135:28
+    133|   it("tells the two states apart in words, not colour", () => {
+    134|     renderAt(INSIDE, OK);
+    135|     expect(lineText()).not.toContain("Market closed");
+       |                            ^
+    136|   });
+    137| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (d) says prices are not downloaded when there is no price date
+AssertionError: expected 'Market state not determinableFactorFl…' to be 'Market closed · prices not downloaded…' // Object.is equality
+
+Expected: "Market closed · prices not downloaded yet · checked 17:52:10 CDT"
+Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices not downloaded yet · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:284:24
+    282|   it("(d) says prices are not downloaded when there is no price date",…
+    283|     renderAt(OUTSIDE, OK_NO_PRICES);
+    284|     expect(lineText()).toBe("Market closed · prices not downloaded yet…
+       |                        ^
+    285|   });
+    286| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) recomputes the market state each minute, with no read
+AssertionError: expected 'Market state not determinableFactorFl…' to contain 'Market closed'
+
+Expected: "Market closed"
+Received: "Market state not determinableFactorFlow has no trading calendar, so it can't tell a session from a holiday. · prices current to 2026-10-14 · checked 17:52:10 CDT"
+
+ ❯ src/screens/home/header.test.tsx:298:24
+    296|     const fetchSpy = vi.spyOn(globalThis, "fetch");
+    297|     renderAt("2026-10-15T13:29:30Z", OK);
+    298|     expect(lineText()).toContain("Market closed");
+       |                        ^
+    299|     act(() => {
+    300|       vi.advanceTimersByTime(60_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 22 passed (28)
+   Start at  16:11:18
+   Duration  1.11s (transform 81ms, setup 42ms, collect 372ms, tests 82ms, environment 179ms, prepare 102ms)
+

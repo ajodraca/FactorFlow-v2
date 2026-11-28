@@ -1,0 +1,148 @@
+# TDD evidence for CAP-003-E4-S4 - Setup Step 4 and the Setup Screen.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T014, T015]
+    description: >
+      The two copy strings (DEC-0357, DEC-0358): copy.ts gains STEP4.startFailed(reason) and STEP4.depthAbsent, each with a doc comment saying CAP-003-E4-S4 adds it and which decision gives its wording, importing nothing and exporting no number or boolean; copy.test.ts gains the two verbatim rows against independent literals. The generator produced no mutants (template strings only) and 3 were hand-written (the prefix, the dropped reason, the depthAbsent text); all 3 were killed. Both reviews approved; the code review raised one LOW cosmetic observation on a doc comment's wording.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-1-copy-strings.log
+    red_log_sha256: d826ee342f06248a3e0eae4e7266423943da4385980b457f841aad9d1f2a004d
+    red_evidence: >
+      Two copy.test.ts rows failed (STEP4.startFailed and STEP4.depthAbsent undefined) before the strings existed.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 436 passed, in green-cycle-1-copy-strings.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: cd7abf009776f2fd20f7ffc45f999702727f02c4d442be8250c6f86600ea3a4a
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-1-results.json
+      results_sha256: 407f977bf43c6fd4d6e51f67ff31285e0c0b5287fb184bfadeeb8b7f140d998d
+      generated: 3
+      killed: 3
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T002, T003, T004, T005, T006, T007, T008, T009, T016, T017]
+    description: >
+      The key verdict extraction and step 4 (TC-COMP-101, TC-COMP-102, TC-COMP-104, TC-COMP-119, TC-COMP-120, TC-COMP-123 step half, TC-COMP-124; AC-2, AC-7, AC-15, AC-21, DAC-E4-8 to DAC-E4-10, DAC-E4-12, DAC-E4-S4-1, DAC-E4-S4-2, DAC-E4-S4-5, DAC-E4-S4-6; DEC-0356 to DEC-0358, DEC-0360): step-market-data.tsx exports KeyPresence (the Found, Missing or Not determinable verdict, behaviour-preserving, step 1 renders it and its own tests pass unchanged); step-download.tsx holds StepDownload through the step card with the summary card, Start download (blocked after Add later with both exits as outline links, never native disabled, one request at a time, a 202 refreshing health and, when not queued, attention), the two 409 refusals naming their step, any other failure through failureReason, and the progress region (the pending Queued view before attention names this download, the bar or indeterminate bar, the queued line, the unreadable line while attention fails, Started and checked times from the read's checkedAt, and the leave line for a non-terminal download). step-download.test.tsx holds the cases of T002 to T009 (71 tests). Deviations, both judged acceptable by both reviews: the queued line is an output element, not p role=status (same role; biome's useSemanticElements lint requires it), and the plan's fromRead flag was dropped because the pending view carries no times, so no Started or checked line can render for it (two mutation survivors showed the flag redundant). The generator produced 20 mutants and 16 were hand-written from the plan's kill list; the first run left three survivors, two removed by dropping fromRead and one judged equivalent below; the repeated run: 36 mutants, 35 killed. Both reviews approved; the code review raised LOW observations only (ours is never cleared so a later unrelated download would still read Queued until attention names this one; a rethrown non-API error is an unhandled rejection; the unreadable line mounts already holding its text, so a screen reader may not announce it; the started-time expression is repeated).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-2-step-download.log
+    red_log_sha256: c53370c971fe7e0cd73352003f6ae846624eb99e5146962f4aa141bd7cb61765
+    red_evidence: >
+      step-download.test.tsx failed to load (./step-download did not resolve) before the module existed.
+    green_evidence: >
+      The setup suites and token-literals.test.ts pass in green-cycle-2-step-download.log (step-download.test.tsx 71 tests, step-market-data.test.tsx 21 unchanged); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: f7ce981ad1d211b440155dca8a36f63cc5b112056e7e270a511ed1905a5b93b7
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-2-results.json
+      results_sha256: dd16fb7de61f7841138acb918327d7e7ddd16af5a7111cf9d155e3a114f3ad01
+      generated: 36
+      killed: 35
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.972
+      survivors:
+        - id: web/src/screens/setup/step-download.tsx:34:off-by-one:1
+          disposition: equivalent
+          reason: >
+            The pending view's done count is never read: its total is null, so the label renders empty and the bar is indeterminate, and Progress ignores the value when the maximum is null; no observable behaviour depends on it.
+
+  - id: cycle-3
+    tasks: [T010, T011, T012, T013, T018, T019, T020, T021]
+    description: >
+      The screen (TC-COMP-121, TC-COMP-122, TC-COMP-123 screen half; AC-3, AC-24, AC-25, AC-26, DAC-E4-S4-3, DAC-E4-S4-4, DAC-E4-S4-5; DEC-0359): index.tsx holds SetupScreen (default export for the shell's lazy binding) with the persistent h1 and sub-line outside the loading swap, the two columns inside LAYOUT.contentMaxWidth with the step list column bounded by LAYOUT.sideColumnMin and sideColumnMax, the step list or its skeleton, and the step card region through StateRegion; screenStateOf (loading, never populated, partial, populated and nothing else), cardRenderers (a function, because the never-populated kind carries no data) recording empty-no-match, unavailable, error and unreachable as not applicable with their reasons, the stale record in the module comment, the card and list skeletons, and SetupBody, which calls the step heading focus hook only once the reads have settled. It mounts no provider and opens no timer. setup.test.tsx holds T010 to T013: back and forward from step 4 to step 2 keeping the years text, the radio choice and the pasted text with nothing written to browser storage, every applicable state of every step through the composed screen with the not-applicable records, the vocabulary scan of five screen rows, and the screen's own cases (the h1 persists and takes the shell's focus, no focus moved on entry, focus on a step change, each step's card, the layout values, no provider of its own, re-derivation on every mount). T019 and T020 join this cycle's validation evidence (validation-cycle-3.log): the change set is the story's files and plan artifacts, the delivered directories are unchanged against HEAD, no timer, storage, layout literal or DAC-E7-3 term appears in step-download.tsx or index.tsx, /setup is not registered, and the full suite (125 files, 3430 tests), lint, format, tsc and build pass. The generator produced 20 mutants and 10 were hand-written from the plan's kill list; the first run left four survivors, the numeric keys of the skeleton's rows, which no test could observe, so the rows are now derived from the step titles and a test asserts four of them; the repeated run: 16 mutants, all killed. Both reviews approved; the code review raised LOW observations only (steps 2 to 4 of the never-populated row assert no record, the screenStateOf absence claim is not asserted, one fewer done link than the plan words in the step 2 vocabulary row, the loading row does not check the card skeleton inside the busy element, and one vacuous assertion on parseBulkSymbols), none a plan violation and left as follow-ups.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-3-screen.log
+    red_log_sha256: 977fccf926b022036502755ba48ed167bb8a88a043f37cf6c49bd9b7f4173dc7
+    red_evidence: >
+      setup.test.tsx failed to load (./index did not resolve) before the module existed.
+    green_evidence: >
+      The setup suites and token-literals.test.ts pass in green-cycle-3-screen.log; the full suite (125 files, 3430 tests), build, tsc --noEmit, biome lint and biome format are clean in validation-cycle-3.log.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9932b41121487dbbb42e1f86c5f11f52e0a0f2405d096d6622de67ddcb4f25ef
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 4d4ed2fac725b1a2b194262258b3e1e90e078db508dbe012105c0c231789c444
+      generated: 16
+      killed: 16
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T009, T011, T017]
+    description: >
+      Rework of adversarial review v1 (IR-001 to IR-005, IR-007). IR-001: the progress line puts a space between the Started and checked spans, so its text reads Started {time} checked {time} and carries no trailing boundary when checked is absent; two tests pin the whole line's text. IR-002: the TC-COMP-122 loading row asserts the busy element holds the default card with its three skeleton bars. IR-003: a test accepts a 202 while attention is loading and asserts the pending view and no unreadable line. IR-004: StepDownload latches the pending view with a named flag set when attention first names this visit's download and reset on each start, so a later download is shown as itself (DEC-0356 until); a test pins an ok read naming r-2, then r-3 running, then r-3 ended. IR-005: the vacuous parseBulkSymbols assertion and its import are removed; the other plan assertions it lists are left for the owner. IR-007: latestOf takes ReadState<Attention>. IR-006 is addressed by this cycle's run using --stillborn-pattern 'error TS[0-9]+'; cycles 2 and 3 keep their recorded results, which the review recounted as 51 of 52 killed. The run: the generator produced 10 mutants and 5 were hand-written (the reviewer's two survivors, the dropped boundary, the unlatched view, the latch never set); 14 killed, 1 survived as equivalent. Both reviews approved.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-4-rework.log
+    red_log_sha256: 379aa31e0f37a87075d170982c47e78160b976b70e5dc67c3489cdd0c1caf8fc
+    red_evidence: >
+      The IR-001 whole-line test and the IR-004 latch test failed against the unfixed step-download.tsx; the IR-003 and IR-002 tests pin behaviour the code already had and fail only against the reviewer's mutants, which the mutation run shows.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 542 passed, in green-cycle-4-rework.log; tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e4bb047f741caef8bb39a8e1764ae5d60226ee41add97e1745010c1b6c844725
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/mutation-cycle-4-results.json
+      results_sha256: 88d90ee3563a9036d5779f08f828cfc610647efe227aaa4d9a1dfe9b832593ea
+      generated: 15
+      killed: 14
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.933
+      survivors:
+        - id: web/src/screens/setup/step-download.tsx:56:negate-boolean:1
+          disposition: equivalent
+          reason: >
+            The named flag starts true instead of false, but it is read only while ours is set, and every path that sets ours calls setNamed(false) in the same handler first, so the initial value is never observed.
+
+  - id: cycle-5
+    tasks: [T009]
+    description: >
+      Rework of adversarial review v2 (IR-001): one test makes a second Start download after attention has named the first, the server answers 202 with queued_behind set, and the test asserts the queued status line and no progressbar, so the latch reset (setNamed(false)) is pinned. The cycle changes no production code. IR-002 (plan assertions unmade) and IR-003 (compile-only kills in cycles 2 and 3) are LOW, carried, and left for the owner; the review states IR-003 is evidence quality only and needs no change for the gate. Both reviews approved.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/red-cycle-5-rework.log
+    red_log_sha256: c958e812bd1a10c6754d4d50bf00db06dda780ae0e08c7459a2f36694d6201e2
+    red_evidence: >
+      With the reviewer's mutant review-v2-reset-dropped applied (the setNamed(false) line in step-download.tsx deleted) the new test fails: Unable to find an accessible element with the role "status". The original code passes it, because the test pins behaviour the code already had.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 485 passed, in green-cycle-5-rework.log; biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: c5565bce97c90159246eb7038ffdb9ccedb8ad940acc6ddec71f6ebadcae6f75
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S4-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      not_applicable: The cycle adds one test and changes no production behaviour; the reviewer's surviving mutant is the RED evidence.

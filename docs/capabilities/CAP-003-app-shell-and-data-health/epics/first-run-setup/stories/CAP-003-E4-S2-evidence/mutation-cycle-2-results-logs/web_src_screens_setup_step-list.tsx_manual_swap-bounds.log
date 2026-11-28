@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w3/web
+
+ ❯ src/screens/setup/step-list.test.tsx (13 tests | 1 failed) 193ms
+   × StepList layout values > bounds the column and sizes the dots from the layout values 5ms
+     → expected '300px' to be '260px' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList layout values > bounds the column and sizes the dots from the layout values
+AssertionError: expected '300px' to be '260px' // Object.is equality
+
+Expected: "260px"
+Received: "300px"
+
+ ❯ src/screens/setup/step-list.test.tsx:301:33
+    299|     const { container } = render(<StepList state={stateWith()} />);
+    300|     const root = container.firstElementChild as HTMLElement;
+    301|     expect(root.style.minWidth).toBe("260px");
+       |                                 ^
+    302|     expect(root.style.maxWidth).toBe("300px");
+    303|     const dot = container.querySelector('li [aria-hidden="true"]') as …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  12:11:55
+   Duration  2.24s (transform 129ms, setup 94ms, collect 605ms, tests 193ms, environment 700ms, prepare 156ms)
+

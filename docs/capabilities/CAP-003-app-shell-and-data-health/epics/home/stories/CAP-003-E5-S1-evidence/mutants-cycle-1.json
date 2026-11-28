@@ -1,0 +1,153 @@
+{
+ "schema": 1,
+ "repo_head": "a372042763c3c2991d1323373473e12e123f70a2",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/market-state.ts:20:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 20,
+   "original": "const SESSION_OPENS = 8 * 60 + 30;",
+   "mutated": "const SESSION_OPENS = 9 * 60 + 30;"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:20:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 20,
+   "original": "const SESSION_OPENS = 8 * 60 + 30;",
+   "mutated": "const SESSION_OPENS = 8 * 61 + 30;"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:20:off-by-one:3",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 20,
+   "original": "const SESSION_OPENS = 8 * 60 + 30;",
+   "mutated": "const SESSION_OPENS = 8 * 60 + 31;"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:22:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 22,
+   "original": "const SESSION_CLOSES = 15 * 60;",
+   "mutated": "const SESSION_CLOSES = 16 * 60;"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:22:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 22,
+   "original": "const SESSION_CLOSES = 15 * 60;",
+   "mutated": "const SESSION_CLOSES = 15 * 61;"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:43:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 43,
+   "original": "    minutes: Number(part(\"hour\")) * 60 + Number(part(\"minute\")),",
+   "mutated": "    minutes: Number(part(\"hour\")) * 61 + Number(part(\"minute\")),"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:50:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 50,
+   "original": "  if (weekday === \"Saturday\" || weekday === \"Sunday\") {",
+   "mutated": "  if (weekday === \"Saturday\" && weekday === \"Sunday\") {"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:53:negate-boolean:1",
+   "cycle": "cycle-1",
+   "operator": "negate-boolean",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 53,
+   "original": "  return SESSION_OPENS <= minutes && minutes < SESSION_CLOSES ? \"not_determinable\" : \"closed\";",
+   "mutated": "  return SESSION_OPENS <= minutes || minutes < SESSION_CLOSES ? \"not_determinable\" : \"closed\";"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:53:off-by-one:1",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 53,
+   "original": "  return SESSION_OPENS <= minutes && minutes < SESSION_CLOSES ? \"not_determinable\" : \"closed\";",
+   "mutated": "  return SESSION_OPENS < minutes && minutes < SESSION_CLOSES ? \"not_determinable\" : \"closed\";"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:53:off-by-one:2",
+   "cycle": "cycle-1",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/market-state.ts",
+   "line": 53,
+   "original": "  return SESSION_OPENS <= minutes && minutes < SESSION_CLOSES ? \"not_determinable\" : \"closed\";",
+   "mutated": "  return SESSION_OPENS <= minutes && minutes <= SESSION_CLOSES ? \"not_determinable\" : \"closed\";"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:no-tz",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "  timeZone: \"America/Chicago\",\n",
+   "new": "",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:no-h23",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "  hourCycle: \"h23\",\n",
+   "new": "",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:h24",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "hourCycle: \"h23\"",
+   "new": "hourCycle: \"h24\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:close-le",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "minutes < SESSION_CLOSES",
+   "new": "minutes <= SESSION_CLOSES",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:open-gt",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "SESSION_OPENS <= minutes",
+   "new": "SESSION_OPENS < minutes",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:weekend-and",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "weekday === \"Saturday\" || weekday === \"Sunday\"",
+   "new": "weekday === \"Saturday\" && weekday === \"Sunday\"",
+   "cycle": "cycle-1"
+  },
+  {
+   "id": "web/src/screens/home/market-state.ts:manual:friday",
+   "operator": "manual",
+   "file": "web/src/screens/home/market-state.ts",
+   "old": "\"Saturday\"",
+   "new": "\"Friday\"",
+   "cycle": "cycle-1"
+  }
+ ]
+}

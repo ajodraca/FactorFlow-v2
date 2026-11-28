@@ -1,0 +1,114 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0cwwzpw9/w0/web
+
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (28 tests | 2 failed) 86ms
+   × HomeHeader: freshness, failure, loading, tick and composition > (f) recomputes the market state each minute, with no read 5ms
+     → Unable to find an element with the text: Market state not determinable. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<header>[39m
+      [36m<h1[39m
+        [33mclass[39m=[32m"text-xl"[39m
+      [36m>[39m
+        [0mThursday, 2026-10-15[0m
+      [36m</h1>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
+        [33mdata-testid[39m=[32m"as-of-line"[39m
+      [36m>[39m
+        [0mMarket closed[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mprices current to 2026-10-14[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mchecked 17:52:10 CDT[0m
+      [36m</p>[39m
+    [36m</header>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × HomeHeader: freshness, failure, loading, tick and composition > (f) rolls the date over at midnight in Chicago, with no read 9ms
+     → expected 'Thursday, 2026-10-15' to be 'Friday, 2026-10-16' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) recomputes the market state each minute, with no read
+TestingLibraryElementError: Unable to find an element with the text: Market state not determinable. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<header>[39m
+      [36m<h1[39m
+        [33mclass[39m=[32m"text-xl"[39m
+      [36m>[39m
+        [0mThursday, 2026-10-15[0m
+      [36m</h1>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"text-xs text-muted-foreground"[39m
+        [33mdata-testid[39m=[32m"as-of-line"[39m
+      [36m>[39m
+        [0mMarket closed[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mprices current to 2026-10-14[0m
+        [36m<span[39m
+          [33mclass[39m=[32m"inline-block px-2"[39m
+        [36m>[39m
+          [0m · [0m
+        [36m</span>[39m
+        [0mchecked 17:52:10 CDT[0m
+      [36m</p>[39m
+    [36m</header>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/home/header.test.tsx:302:19
+    300|       vi.advanceTimersByTime(60_000);
+    301|     });
+    302|     expect(screen.getByText("Market state not determinable")).toBeInTh…
+       |                   ^
+    303|     expect(lineText()).not.toContain("Market closed");
+    304|     expect(fetchSpy).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (f) rolls the date over at midnight in Chicago, with no read
+AssertionError: expected 'Thursday, 2026-10-15' to be 'Friday, 2026-10-16' // Object.is equality
+
+Expected: "Friday, 2026-10-16"
+Received: "Thursday, 2026-10-15"
+
+ ❯ src/screens/home/header.test.tsx:317:67
+    315|       vi.advanceTimersByTime(60_000);
+    316|     });
+    317|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+       |                                                                   ^
+    318|     expect(fetchSpy).not.toHaveBeenCalled();
+    319|     expect(refresh).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 passed (28)
+   Start at  16:11:16
+   Duration  1.19s (transform 86ms, setup 35ms, collect 413ms, tests 86ms, environment 173ms, prepare 31ms)
+

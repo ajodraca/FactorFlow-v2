@@ -1,0 +1,84 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-uswrm_qx/w2/web
+
+ ❯ src/screens/setup/step-stocks.test.tsx (41 tests | 3 failed) 923ms
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 87ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with an empty field when Paste a list is chosen 10ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol 34ms
+     → expect(element).toHaveAttribute("data-variant", "default") // element.getAttribute("data-variant") === "default"
+
+Expected the element to have attribute:
+  data-variant="default"
+Received:
+  data-variant="blocked"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:217:20
+    215|     await user.tab();
+    216|     const button = continueButton();
+    217|     expect(button).toHaveAttribute("data-variant", "blocked");
+       |                    ^
+    218|     expect(button).toHaveAttribute("aria-disabled", "true");
+    219|     expect(button).not.toBeDisabled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with an empty field when Paste a list is chosen
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-stocks.test.tsx:232:30
+    230|   it("blocks Continue with an empty field when Paste a list is chosen"…
+    231|     render(<Harness initial={{ source: "paste" }} />);
+    232|     expect(continueButton()).toHaveAttribute("data-variant", "blocked"…
+       |                              ^
+    233|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+    234|     expect(screen.queryByText(/symbols recognised/)).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at a single accepted symbol
+Error: expect(element).toHaveAttribute("data-variant", "default") // element.getAttribute("data-variant") === "default"
+
+Expected the element to have attribute:
+  data-variant="default"
+Received:
+  data-variant="blocked"
+ ❯ src/screens/setup/step-stocks.test.tsx:247:30
+    245|       ),
+    246|     ).toBeInTheDocument();
+    247|     expect(continueButton()).toHaveAttribute("data-variant", "default"…
+       |                              ^
+    248|   });
+    249| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 38 passed (41)
+   Start at  13:37:18
+   Duration  1.86s (transform 118ms, setup 36ms, collect 471ms, tests 923ms, environment 178ms, prepare 40ms)
+

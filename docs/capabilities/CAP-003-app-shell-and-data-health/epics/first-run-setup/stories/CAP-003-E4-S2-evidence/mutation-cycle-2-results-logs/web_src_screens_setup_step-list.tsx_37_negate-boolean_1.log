@@ -1,0 +1,36 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w1/web
+
+ ❯ src/screens/setup/step-list.test.tsx (13 tests | 1 failed) 321ms
+   × StepList summaries > says neither Found nor Missing for step 1 while health is not answering 42ms
+     → expect(element).not.toHaveTextContent()
+
+Expected element not to have text content:
+  Missing
+Received:
+  1Market data, currentMissing
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > says neither Found nor Missing for step 1 while health is not answering
+Error: expect(element).not.toHaveTextContent()
+
+Expected element not to have text content:
+  Missing
+Received:
+  1Market data, currentMissing
+ ❯ src/screens/setup/step-list.test.tsx:226:25
+    224|     render(<StepList state={stateWith({ done: { ...ALL_DONE } })} />);
+    225|     expect(item(1)).not.toHaveTextContent("Found");
+    226|     expect(item(1)).not.toHaveTextContent("Missing");
+       |                         ^
+    227|   });
+    228| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  12:11:44
+   Duration  3.89s (transform 1.09s, setup 126ms, collect 1.41s, tests 321ms, environment 564ms, prepare 963ms)
+

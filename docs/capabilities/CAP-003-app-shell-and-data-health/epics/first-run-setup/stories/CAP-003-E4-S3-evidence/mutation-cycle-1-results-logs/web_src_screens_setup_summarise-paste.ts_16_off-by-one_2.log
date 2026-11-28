@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w1/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 1 failed) 7ms
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > mirrors the delivered parser's shape for ABCDEFGHIJKLMNOPQ 3ms
+     → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > mirrors the delivered parser's shape for ABCDEFGHIJKLMNOPQ
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/screens/setup/summarise-paste.test.ts:95:50
+     93|     "a",
+     94|   ])("mirrors the delivered parser's shape for %s", (raw) => {
+     95|     expect(SYMBOL_SHAPE.test(raw.toUpperCase())).toBe(parseBulkSymbols…
+       |                                                  ^
+     96|   });
+     97| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 31 passed (32)
+   Start at  13:21:24
+   Duration  1.57s (transform 50ms, setup 100ms, collect 41ms, tests 7ms, environment 476ms, prepare 257ms)
+

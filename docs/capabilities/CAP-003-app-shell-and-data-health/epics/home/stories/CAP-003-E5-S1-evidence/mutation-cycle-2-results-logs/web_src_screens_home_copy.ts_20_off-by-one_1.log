@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzw0odpt/w0/web
+
+ ❯ src/screens/home/copy.test.ts (21 tests | 1 failed) 7ms
+   × templates > data_problems.actionName lists the symbols 3ms
+     → expected 'Fix data for  and KO' to be 'Fix data for KO' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.actionName lists the symbols
+AssertionError: expected 'Fix data for  and KO' to be 'Fix data for KO' // Object.is equality
+
+Expected: "Fix data for KO"
+Received: "Fix data for  and KO"
+
+ ❯ src/screens/home/copy.test.ts:138:52
+    136|       "Fix data for KO, TSLA and FBXX",
+    137|     );
+    138|     expect(ITEMS.data_problems.actionName(["KO"])).toBe("Fix data for …
+       |                                                    ^
+    139|     expect(ITEMS.data_problems.actionName(["KO", "TSLA"])).toBe("Fix d…
+    140|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  16:08:10
+   Duration  937ms (transform 37ms, setup 37ms, collect 25ms, tests 7ms, environment 231ms, prepare 176ms)
+

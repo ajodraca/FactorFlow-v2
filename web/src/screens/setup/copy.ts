@@ -84,6 +84,12 @@ export const STEP2 = {
   planLimitNote:
     "Your provider plan holds 5 years. A deeper depth is requested as stated; the provider returns what it holds.",
   rangeError: "History depth must be a whole number of years from 1 to 50.",
+  /**
+   * A failed save other than the refusal of the value. CAP-003-E4-S2 adds it
+   * and no design gives its wording (DEC-0346): it mirrors the read failure's
+   * shape and names the operation, the resource and the reason.
+   */
+  saveFailed: (reason: string): string => `Couldn't save history depth: ${reason}`,
 };
 
 /** Step 3, the followed stocks (setup-ui 2.3, 10; S02 section 8; DAC-E4-5). */
@@ -112,6 +118,27 @@ export const STEP3 = {
   alreadyFollowed: "already followed",
   infoNote:
     "This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.",
+  /**
+   * A repeated symbol, named once. CAP-003-E4-S3 adds it and no design gives
+   * its wording (DEC-0351): the *{entry}, {reason}* shape of UX design 1.2's
+   * unreadable example, in plain words.
+   */
+  duplicateEntry: (entry: string): string => `${entry}, listed more than once`,
+  /**
+   * A symbol the post found already followed. CAP-003-E4-S3 adds the entry
+   * form; the wording is DAC-E4-5's pinned *already followed* (DEC-0351).
+   */
+  alreadyFollowedEntry: (entry: string): string => `${entry}, ${STEP3.alreadyFollowed}`,
+  /**
+   * A failed batch other than the all-followed refusal. CAP-003-E4-S3 adds it
+   * and no design gives its wording (DEC-0354): it mirrors the read failure's
+   * shape and names the operation, the resource and the reason.
+   */
+  saveFailed: (reason: string): string => `Couldn't save the followed list: ${reason}`,
+  /** How many symbols a failed post had followed. CAP-003-E4-S3 adds it (DEC-0354). */
+  followedSoFar: (n: string): string => `${n} followed so far.`,
+  /** The symbols a failed post left in the field for another try. CAP-003-E4-S3 adds it (DEC-0354). */
+  keptForRetry: (n: string): string => `${n} not saved yet; kept in the list to try again.`,
 };
 
 /** Step 4, the download (setup-ui 10; epic DAC-E4-9 for the two progress times). */
@@ -135,6 +162,18 @@ export const STEP4 = {
   goHome: "Go to Home",
   manageFollowed: "Manage followed stocks",
   progressUnreadable: "Progress can't be read right now",
+  /**
+   * A failed start other than the two refusals. CAP-003-E4-S4 adds it and no
+   * design gives its wording (DEC-0357): it mirrors the refusals' shape and
+   * names the operation and the reason.
+   */
+  startFailed: (reason: string): string => `Couldn't start the download: ${reason}`,
+  /**
+   * The words behind the dash when history depth is answered as not set.
+   * CAP-003-E4-S4 adds it (DEC-0358): it follows the refusal's *history depth
+   * isn't set*.
+   */
+  depthAbsent: "History depth isn't set",
 };
 
 /** A failed depth or count read, shown in that step only (setup-ui 10, States; DAC-E4-13). */
@@ -142,4 +181,14 @@ export const READ_ERRORS = {
   subjects: { depth: "history depth", followed: "the followed list" },
   readFailed: (subject: string, reason: string): string => `Couldn't read ${subject}: ${reason}`,
   tryAgain: "Try again",
+  /**
+   * The reason for a read that never got an answer. CAP-003-E4-S2 adds it and
+   * no design gives its wording (DEC-0345).
+   */
+  notAnswering: "FactorFlow is not answering",
+  /**
+   * The reason for a read the server answered with a failure. CAP-003-E4-S2
+   * adds it and no design gives its wording (DEC-0345).
+   */
+  unexpected: "FactorFlow hit an unexpected problem",
 };

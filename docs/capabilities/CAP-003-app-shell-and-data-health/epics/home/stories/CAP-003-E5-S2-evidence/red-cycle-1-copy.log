@@ -1,0 +1,30 @@
++ Received: 
+undefined
+
+ ❯ src/screens/home/copy.test.ts:54:26
+     52| 
+     53|   it("READ_FAILURE", () => {
+     54|     expect(READ_FAILURE).toEqual({
+       |                          ^
+     55|       unreachable: "FactorFlow is not answering",
+     56|       unexpected: "FactorFlow hit an unexpected problem",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > DATA_TILE sentences
+TypeError: Cannot read properties of undefined (reading 'unreachable')
+ ❯ src/screens/home/copy.test.ts:195:45
+    193|       "Couldn't read the data summary: The server answered 500.",
+    194|     );
+    195|     expect(DATA_TILE.readError(READ_FAILURE.unreachable)).toBe(
+       |                                             ^
+    196|       "Couldn't read the data summary: FactorFlow is not answering.",
+    197|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 20 passed (23)
+   Start at  16:49:32
+   Duration  1.76s (transform 52ms, setup 81ms, collect 28ms, tests 8ms, environment 733ms, prepare 523ms)
+

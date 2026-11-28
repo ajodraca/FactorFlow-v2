@@ -1,0 +1,87 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-uswrm_qx/w2/web
+
+ ❯ src/screens/setup/step-stocks.test.tsx (41 tests | 1 failed) 2492ms
+   × Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > moves to step 4 without a request, leaving step 3 still to do 1065ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  4
+Received:
+  5
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<p[39m
+        [33mdata-testid[39m=[32m"current"[39m
+      [36m>[39m
+        [0m5[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mdata-testid[39m=[32m"done-3"[39m
+      [36m>[39m
+        [0mfalse[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mdata-testid[39m=[32m"source"[39m
+      [36m>[39m
+        [0mlater[0m
+      [36m</p>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Add later posts nothing and makes step 4 current (TC-COMP-115; DAC-E4-S3-3) > moves to step 4 without a request, leaving step 3 still to do
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  4
+Received:
+  5
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<p[39m
+        [33mdata-testid[39m=[32m"current"[39m
+      [36m>[39m
+        [0m5[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mdata-testid[39m=[32m"done-3"[39m
+      [36m>[39m
+        [0mfalse[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mdata-testid[39m=[32m"source"[39m
+      [36m>[39m
+        [0mlater[0m
+      [36m</p>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ src/screens/setup/step-stocks.test.tsx:393:63
+    391|     expect(continueButton()).toHaveAttribute("data-variant", "default"…
+    392|     await user.click(continueButton());
+    393|     await waitFor(() => expect(screen.getByTestId("current")).toHaveTe…
+       |                                                               ^
+    394|     expect(screen.getByTestId("done-3")).toHaveTextContent("false");
+    395|     expect(screen.getByTestId("source")).toHaveTextContent("later");
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 40 passed (41)
+   Start at  13:37:51
+   Duration  5.38s (transform 683ms, setup 156ms, collect 1.72s, tests 2.49s, environment 282ms, prepare 296ms)
+

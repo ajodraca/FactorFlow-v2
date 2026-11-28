@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-irhzpaib/w0/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 18ms
+ ❯ src/screens/setup/step-card.test.tsx (9 tests | 1 failed) 118ms
+   × StepCard section and heading > is a region named by its h2, which is focusable and says its position 57ms
+     → expect(element).toHaveAttribute("tabindex", "-1") // element.getAttribute("tabindex") === "-1"
+
+Expected the element to have attribute:
+  tabindex="-1"
+Received:
+  tabindex="-2"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepCard section and heading > is a region named by its h2, which is focusable and says its position
+Error: expect(element).toHaveAttribute("tabindex", "-1") // element.getAttribute("tabindex") === "-1"
+
+Expected the element to have attribute:
+  tabindex="-1"
+Received:
+  tabindex="-2"
+ ❯ src/screens/setup/step-card.test.tsx:32:21
+     30|     expect(heading.id).toBe(STEP_HEADING_ID);
+     31|     expect(STEP_HEADING_ID).toBe("setup-step-heading");
+     32|     expect(heading).toHaveAttribute("tabindex", "-1");
+       |                     ^
+     33|     expect(screen.getByText("Step 2 of 4")).toBeInTheDocument();
+     34|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 157 passed (158)
+   Start at  12:08:09
+   Duration  1.58s (transform 126ms, setup 163ms, collect 278ms, tests 136ms, environment 810ms, prepare 446ms)
+

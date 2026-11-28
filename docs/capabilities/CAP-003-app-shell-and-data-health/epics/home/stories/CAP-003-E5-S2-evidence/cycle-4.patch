@@ -1,0 +1,316 @@
+diff --git a/web/src/screens/home/data-tile.test.tsx b/web/src/screens/home/data-tile.test.tsx
+index 9dc1f297..6571110c 100644
+--- a/web/src/screens/home/data-tile.test.tsx
++++ b/web/src/screens/home/data-tile.test.tsx
+@@ -5,6 +5,7 @@ import { render, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { MemoryRouter } from "react-router-dom";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { ApiError, ApiUnreachableError } from "../../api/client";
+ import type { ShellContextValue } from "../../app/shell-context";
+ import type { Attention, ReadState, ScoreState, ScoreSummary } from "../../app/shell-types";
+ import { DataTile } from "./data-tile";
+@@ -149,6 +150,22 @@ const ok = (data: Attention): ReadState<Attention> => ({
+ });
+ const LOADING: ScoreState = { kind: "loading" };
+ const ATT_LOADING: ReadState<Attention> = { kind: "loading" };
++const ATT_UNREACHABLE: ReadState<Attention> = {
++  kind: "error",
++  error: new ApiUnreachableError("GET /api/attention could not be reached"),
++  last: { data: ATTENTION, checkedAt: new Date("2026-10-15T22:40:06Z") },
++};
++const ATT_500: ReadState<Attention> = {
++  kind: "error",
++  error: new ApiError("Internal error", "req-9f3", { code: "internal_error" }),
++  last: null,
++};
++const SUMMARY_500: ScoreState = {
++  kind: "error",
++  error: new ApiError("Internal error", "req-9f3", { code: "internal_error" }),
++  last: null,
++};
++const SUMMARY_500_LAST: ScoreState = { ...SUMMARY_500, last: SUMMARY() } as ScoreState;
+ 
+ function show(attention: ReadState<Attention>, scores: ScoreState): HTMLElement {
+   shell.value = {
+@@ -171,6 +188,45 @@ const badgeOf = (c: HTMLElement): Element | null =>
+ const statusElements = (c: HTMLElement): NodeListOf<Element> =>
+   c.querySelectorAll('[data-variant^="status-"]');
+ 
++/**
++ * Every attention state crossed with every score state, so no state of the
++ * tile's tests (T002 to T006, T010) can be left out of the whole-tile checks.
++ */
++function ALL_STATES(): [ReadState<Attention>, ScoreState][] {
++  const running = "2026-10-15T21:02:00Z";
++  const attentions: ReadState<Attention>[] = [
++    ATT_LOADING,
++    ATT_UNREACHABLE,
++    ATT_500,
++    ok({ ...ATTENTION, latest_download: null, latest_terminal_download: null }),
++    ok(FIRST("requested", null)),
++    ok(FIRST("running", running)),
++    ok(FIRST("cancelling", running)),
++    ok(ATTENTION),
++    ok({ ...ATTENTION, prices_as_of: null }),
++    ...(
++      [
++        [1, 10, "partial"],
++        [10, 10, "succeeded"],
++        [0, 10, "failed"],
++        [0, 10, "abandoned"],
++        [0, 10, "succeeded"],
++        [0, 10, "cancelled"],
++      ] as const
++    ).map(([stock, followed, state]) => ok(VERDICT(stock, followed, state))),
++  ];
++  const scoreStates: ScoreState[] = [
++    NOT_SERVED,
++    LOADING,
++    SUMMARY_500,
++    SUMMARY_500_LAST,
++    ...[SUMMARY(), NEVER, NEVER_FAILED, BUILDING, FAILED, NOT_CURRENT_ONLY].map(served),
++  ];
++  return attentions.flatMap((attention) =>
++    scoreStates.map((scores): [ReadState<Attention>, ScoreState] => [attention, scores]),
++  );
++}
++
+ beforeEach(() => {
+   shell.value = {} as unknown as ShellContextValue;
+ });
+@@ -466,37 +522,7 @@ describe("DataTile link (TC-COMP-138; DAC-E5-S2-3)", () => {
+   });
+ 
+   it("(d) never reads the aggregate, and imports no reader", () => {
+-    // Every attention state crossed with every score state, so no row of
+-    // T002 to T005 or T010 can be left out of the no-read check.
+-    const running = "2026-10-15T21:02:00Z";
+-    const attentions: ReadState<Attention>[] = [
+-      ATT_LOADING,
+-      ok({ ...ATTENTION, latest_download: null, latest_terminal_download: null }),
+-      ok(FIRST("requested", null)),
+-      ok(FIRST("running", running)),
+-      ok(FIRST("cancelling", running)),
+-      ok(ATTENTION),
+-      ok({ ...ATTENTION, prices_as_of: null }),
+-      ...(
+-        [
+-          [1, 10, "partial"],
+-          [10, 10, "succeeded"],
+-          [0, 10, "failed"],
+-          [0, 10, "abandoned"],
+-          [0, 10, "succeeded"],
+-          [0, 10, "cancelled"],
+-        ] as const
+-      ).map(([stock, followed, state]) => ok(VERDICT(stock, followed, state))),
+-    ];
+-    const scoreStates: ScoreState[] = [
+-      NOT_SERVED,
+-      LOADING,
+-      ...[SUMMARY(), NEVER, NEVER_FAILED, BUILDING, FAILED, NOT_CURRENT_ONLY].map(served),
+-    ];
+-    const states = attentions.flatMap((attention) =>
+-      scoreStates.map((scores): [ReadState<Attention>, ScoreState] => [attention, scores]),
+-    );
+-    expect(states.length).toBe(attentions.length * scoreStates.length);
++    const states = ALL_STATES();
+     for (const [attention, scores] of states) {
+       show(attention, scores);
+     }
+@@ -612,3 +638,91 @@ describe("DataTile composition (T010 f, g)", () => {
+     });
+   });
+ });
++
++const TRY_AGAIN_BUTTON = (c: HTMLElement): HTMLElement =>
++  within(c).getByRole("button", { name: "Try again" });
++
++// Implements TC-COMP-131 (tile half; CAP-003-E5-S3 asserts the Home half)
++describe("DataTile read failures (TC-COMP-131 tile half; DAC-E5-11)", () => {
++  it("(a) attention unreachable: the title, the sentence and Try again re-read attention", async () => {
++    const c = show(ATT_UNREACHABLE, NOT_SERVED);
++    expect(within(c).getByRole("heading", { level: 2, name: "Data" })).toBeTruthy();
++    expect(text(c)).toContain("Couldn't read the data summary: FactorFlow is not answering.");
++    expect(statusElements(c).length).toBe(0);
++    expect(within(c).queryAllByRole("link").length).toBe(0);
++    expect(text(c)).not.toContain("/api/attention");
++    expect(TRY_AGAIN_BUTTON(c).getAttribute("data-variant")).toBe("outline");
++    await userEvent.click(TRY_AGAIN_BUTTON(c));
++    expect(shell.value.refresh).toHaveBeenCalledTimes(1);
++    expect(shell.value.refresh).toHaveBeenCalledWith("attention");
++  });
++
++  it("(b) attention fails with a server error: a fixed sentence, never the server's words", () => {
++    const c = show(ATT_500, NOT_SERVED);
++    expect(text(c)).toContain(
++      "Couldn't read the data summary: FactorFlow hit an unexpected problem.",
++    );
++    expect(text(c)).not.toContain("req-9f3");
++    expect(text(c)).not.toContain("Internal error");
++  });
++
++  it.each([
++    ["no last answer", SUMMARY_500],
++    ["a last answer", SUMMARY_500_LAST],
++  ])(
++    "(c) the summary fails with %s: the error replaces the body and Try again re-reads scores",
++    async (_n, scores) => {
++      const c = show(ok(ATTENTION), scores);
++      expect(text(c)).toContain(
++        "Couldn't read the data summary: FactorFlow hit an unexpected problem.",
++      );
++      expect(statusElements(c).length).toBe(0);
++      expect(c.querySelector(".font-numeric")).toBeNull();
++      expect(within(c).queryAllByRole("link").length).toBe(0);
++      await userEvent.click(TRY_AGAIN_BUTTON(c));
++      expect(shell.value.refresh).toHaveBeenCalledTimes(1);
++      expect(shell.value.refresh).toHaveBeenCalledWith("scores");
++    },
++  );
++
++  it("(d) the first download reads no summary, so a failed summary shows no error", () => {
++    const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), SUMMARY_500);
++    expect(text(c)).toContain("Your first download, started 2026-10-15 16:02 CDT, is running.");
++    expect(text(c)).not.toContain("Couldn't read");
++  });
++
++  it("(e) a 404 on the summary is not an error", () => {
++    const c = show(ok(ATTENTION), NOT_SERVED);
++    expect(text(c)).not.toContain("Couldn't read");
++    expect(within(c).queryByRole("button", { name: "Try again" })).toBeNull();
++  });
++});
++
++// Implements TC-COMP-139
++describe("DataTile display vocabulary (TC-COMP-139; DAC-E5-S2-4, AC-19)", () => {
++  const TERMS =
++    /\b(?:instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
++
++  it("uses none of the eight DAC-E7-3 terms in any state", () => {
++    const states = ALL_STATES();
++    expect(states.length).toBeGreaterThanOrEqual(15);
++    for (const [attention, scores] of states) {
++      const c = show(attention, scores);
++      const values = [
++        c.textContent ?? "",
++        ...[...c.querySelectorAll("[aria-label],[title],[alt]")].flatMap((el) => [
++          el.getAttribute("aria-label") ?? "",
++          el.getAttribute("title") ?? "",
++          el.getAttribute("alt") ?? "",
++        ]),
++      ];
++      for (const value of values) {
++        expect(value).not.toMatch(TERMS);
++      }
++    }
++  });
++
++  it("control: the pattern matches a banned phrase", () => {
++    expect("Next run").toMatch(TERMS);
++  });
++});
+diff --git a/web/src/screens/home/data-tile.tsx b/web/src/screens/home/data-tile.tsx
+index 5aa39b9a..b3a72e55 100644
+--- a/web/src/screens/home/data-tile.tsx
++++ b/web/src/screens/home/data-tile.tsx
+@@ -1,5 +1,6 @@
+ import { type JSX, type ReactNode, useId } from "react";
+ import { Link } from "react-router-dom";
++import { type ApiError, ApiUnreachableError } from "../../api/client";
+ import { useShell } from "../../app/shell-context";
+ import type { ScoreState, ScoreSummary } from "../../app/shell-types";
+ import { formatCount, formatInstant, formatSessionDate } from "../../components/patterns/format";
+@@ -7,6 +8,7 @@ import { Absent } from "../../components/patterns/presence";
+ import { StatusBadge } from "../../components/patterns/status-badge";
+ import { type Status, labelOf, tierOf } from "../../components/patterns/tiers";
+ import { dataTileBadge, worstDataTier } from "../../components/patterns/worst-data-tier";
++import { Button } from "../../components/ui/button";
+ import {
+   Card,
+   CardContent,
+@@ -14,7 +16,7 @@ import {
+   CardMetricValue,
+   CardTitle,
+ } from "../../components/ui/card";
+-import { DATA_TILE, NOT_DETERMINABLE } from "./copy";
++import { DATA_TILE, NOT_DETERMINABLE, READ_FAILURE, TRY_AGAIN } from "./copy";
+ 
+ /**
+  * Home's data tile: how many followed stocks are current and whether the data
+@@ -90,6 +92,45 @@ function TileLink({
+   );
+ }
+ 
++/**
++ * The reason a read failed, as one fixed sentence per kind; never the server's
++ * message or request id (DEC-0366).
++ */
++function readFailureReason(error: ApiError | ApiUnreachableError): string {
++  return error instanceof ApiUnreachableError ? READ_FAILURE.unreachable : READ_FAILURE.unexpected;
++}
++
++/**
++ * A failed read, replacing the tile's body under its title: the sentence and
++ * Try again, no badge and no figure, and no link (home-ui 2.4; epic DAC-E5-11).
++ * It never shows the last good answer (Resolved Conflict 4).
++ */
++function ErrorTile({
++  error,
++  titleId,
++  onRetry,
++}: {
++  error: ApiError | ApiUnreachableError;
++  titleId: string;
++  onRetry: () => void;
++}): JSX.Element {
++  return (
++    <section aria-labelledby={titleId}>
++      <Card variant="metric">
++        <CardHeader>
++          <CardTitle id={titleId}>{DATA_TILE.title}</CardTitle>
++        </CardHeader>
++        <CardContent>
++          <p>{DATA_TILE.readError(readFailureReason(error))}</p>
++          <Button variant="outline" type="button" onClick={onRetry}>
++            {TRY_AGAIN}
++          </Button>
++        </CardContent>
++      </Card>
++    </section>
++  );
++}
++
+ /** The tile's title over one pulsing block, while a read it needs has not answered. */
+ function TileSkeleton({ titleId }: { titleId: string }): JSX.Element {
+   return (
+@@ -107,14 +148,16 @@ function TileSkeleton({ titleId }: { titleId: string }): JSX.Element {
+ }
+ 
+ export function DataTile(): JSX.Element | null {
+-  const { attention, scores } = useShell();
++  const { attention, scores, refresh } = useShell();
+   const titleId = useId();
+ 
+   if (attention.kind === "loading") {
+     return <TileSkeleton titleId={titleId} />;
+   }
+   if (attention.kind === "error") {
+-    return null;
++    return (
++      <ErrorTile error={attention.error} titleId={titleId} onRetry={() => refresh("attention")} />
++    );
+   }
+ 
+   const a = attention.data;
+@@ -150,6 +193,10 @@ export function DataTile(): JSX.Element | null {
+     return <TileSkeleton titleId={titleId} />;
+   }
+ 
++  if (scores.kind === "error") {
++    return <ErrorTile error={scores.error} titleId={titleId} onRetry={() => refresh("scores")} />;
++  }
++
+   const summary = scores.kind === "served" ? scores.data : null;
+   const stocks = summary?.stocks_current ?? null;
+   const current = stocks === null ? null : formatCount(stocks.current_count);

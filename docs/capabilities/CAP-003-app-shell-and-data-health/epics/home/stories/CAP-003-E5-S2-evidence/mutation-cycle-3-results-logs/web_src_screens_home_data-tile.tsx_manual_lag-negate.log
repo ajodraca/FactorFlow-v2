@@ -1,0 +1,105 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w0/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 4 failed) 226ms
+   × DataTile lag badge (TC-COMP-129; DAC-E5-5) > renders when not_current only, after the prices line 5ms
+     → expected null to be 'status-warning' // Object.is equality
+   × DataTile lag badge (TC-COMP-129; DAC-E5-5) > is absent when current 3ms
+     → expected <span …(2)>…(1)</span> to be null
+   × DataTile lag badge (TC-COMP-129; DAC-E5-5) > is absent when never classified 2ms
+     → expected <span …(2)>…(1)</span> to be null
+   × DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape 11ms
+     → expected undefined to be 'Not reflecting the latest download' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile lag badge (TC-COMP-129; DAC-E5-5) > renders when not_current only, after the prices line
+AssertionError: expected null to be 'status-warning' // Object.is equality
+
+- Expected: 
+"status-warning"
+
++ Received: 
+null
+
+ ❯ src/screens/home/data-tile.test.tsx:403:28
+    401|     const c = show(ok(ATTENTION), served(summary));
+    402|     const lag = lagOf(c);
+    403|     expect(variantOf(lag)).toBe("status-warning");
+       |                            ^
+    404|     expect(lag?.textContent?.trim()).toBe("Not reflecting the latest d…
+    405|     const wrapper = c.querySelector('[data-testid="data-tile-lag"]') a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile lag badge (TC-COMP-129; DAC-E5-5) > is absent when current
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile lag badge (TC-COMP-129; DAC-E5-5) > is absent when never classified
+AssertionError: expected <span …(2)>…(1)</span> to be null
+
+- Expected: 
+null
+
++ Received: 
+<span
+  class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-warning-muted text-status-warning"
+  data-variant="status-warning"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide lucide-triangle h-3 w-3 shrink-0"
+    fill="currentColor"
+    focusable="false"
+    height="24"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+    />
+  </svg>
+  Not reflecting the latest download
+</span>
+
+ ❯ src/screens/home/data-tile.test.tsx:417:22
+    415|   ])("is absent when %s", (_n, scores) => {
+    416|     const c = show(ok(ATTENTION), scores);
+    417|     expect(lagOf(c)).toBeNull();
+       |                      ^
+    418|     expect(text(c)).not.toContain("Not reflecting");
+    419|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape
+AssertionError: expected undefined to be 'Not reflecting the latest download' // Object.is equality
+
+- Expected: 
+"Not reflecting the latest download"
+
++ Received: 
+undefined
+
+ ❯ src/screens/home/data-tile.test.tsx:544:40
+    542|     for (const summary of [NOT_CURRENT_ONLY, BUILDING, FAILED, NEVER_F…
+    543|       const lag = lagOf(show(ok(ATTENTION), served(summary)));
+    544|       expect(lag?.textContent?.trim()).toBe("Not reflecting the latest…
+       |                                        ^
+    545|       expect(lag?.querySelectorAll("svg").length).toBe(1);
+    546|       expect(lag?.querySelector("svg")?.getAttribute("aria-hidden")).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 45 passed (49)
+   Start at  17:02:17
+   Duration  1.39s (transform 92ms, setup 64ms, collect 408ms, tests 226ms, environment 196ms, prepare 105ms)
+

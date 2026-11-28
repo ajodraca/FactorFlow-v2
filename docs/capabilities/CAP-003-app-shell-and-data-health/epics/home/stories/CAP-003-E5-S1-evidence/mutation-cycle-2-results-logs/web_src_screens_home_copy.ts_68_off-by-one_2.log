@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzw0odpt/w3/web
+
+ ❯ src/screens/home/copy.test.ts (21 tests | 1 failed) 6ms
+   × templates > DATA_TILE sentences 3ms
+     → expected 'Data: mstly yes. 1,233 of 1,236 stock…' to be 'Data: mostly yes. 1,233 of 1,236 stoc…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > DATA_TILE sentences
+AssertionError: expected 'Data: mstly yes. 1,233 of 1,236 stock…' to be 'Data: mostly yes. 1,233 of 1,236 stoc…' // Object.is equality
+
+Expected: "Data: mostly yes. 1,233 of 1,236 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-15."
+Received: "Data: mstly yes. 1,233 of 1,236 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-15."
+
+ ❯ src/screens/home/copy.test.ts:176:7
+    174|     expect(
+    175|       DATA_TILE.name("Mostly yes", "1,233", "1,236", "2026-10-15 17:46…
+    176|     ).toBe(
+       |       ^
+    177|       "Data: mostly yes. 1,233 of 1,236 stocks current. Scores 2026-10…
+    178|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  16:08:12
+   Duration  953ms (transform 35ms, setup 36ms, collect 31ms, tests 6ms, environment 219ms, prepare 118ms)
+

@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w3/web
+
+ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+ ✓ src/screens/home/market-state.test.ts (72 tests) 245ms
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 91ms
+   × HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading 5ms
+     → expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
+
+Expected the element to have class:
+  min-h-7 w-full animate-pulse rounded bg-secondary
+Received:
+  w-full rounded bg-secondary
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (e) renders the heading and a hidden skeleton while loading
+Error: expect(element).toHaveClass("min-h-7 w-full animate-pulse rounded bg-secondary")
+
+Expected the element to have class:
+  min-h-7 w-full animate-pulse rounded bg-secondary
+Received:
+  w-full rounded bg-secondary
+ ❯ src/screens/home/header.test.tsx:300:22
+    298|     const skeleton = screen.getByTestId("home-as-of-skeleton");
+    299|     expect(skeleton).toHaveAttribute("aria-hidden", "true");
+    300|     expect(skeleton).toHaveClass("min-h-7", "w-full", "animate-pulse",…
+       |                      ^
+    301|     expect(screen.queryByTestId("as-of-line")).toBeNull();
+    302|     expect(container.textContent).not.toContain("checked");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 124 passed (125)
+   Start at  16:32:09
+   Duration  1.94s (transform 210ms, setup 185ms, collect 635ms, tests 340ms, environment 1.34s, prepare 788ms)
+

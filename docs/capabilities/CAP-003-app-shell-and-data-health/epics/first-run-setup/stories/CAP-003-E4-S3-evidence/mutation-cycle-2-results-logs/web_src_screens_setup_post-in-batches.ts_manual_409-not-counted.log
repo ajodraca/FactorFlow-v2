@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-52c7m1x4/w3/web
+
+ ❯ src/screens/setup/post-in-batches.test.ts (13 tests | 1 failed) 28ms
+   × postInBatches (TC-COMP-114) > treats a 409 batch as posted and goes on 10ms
+     → expected { kind: 'done', posted: 1500, …(1) } to deeply equal { kind: 'done', posted: 2500, …(1) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches (TC-COMP-114) > treats a 409 batch as posted and goes on
+AssertionError: expected { kind: 'done', posted: 1500, …(1) } to deeply equal { kind: 'done', posted: 2500, …(1) }
+
+- Expected
++ Received
+
+  Object {
+    "kind": "done",
+-   "posted": 2500,
++   "posted": 1500,
+    "rejected": Array [],
+  }
+
+ ❯ src/screens/setup/post-in-batches.test.ts:78:20
+     76|     const result = await postInBatches(symbols(2500));
+     77|     expect(vi.mocked(addInstruments)).toHaveBeenCalledTimes(3);
+     78|     expect(result).toEqual({ kind: "done", posted: 2500, rejected: [] …
+       |                    ^
+     79|   });
+     80| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  13:24:27
+   Duration  1.58s (transform 99ms, setup 75ms, collect 103ms, tests 28ms, environment 276ms, prepare 177ms)
+

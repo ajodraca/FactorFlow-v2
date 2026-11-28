@@ -1,0 +1,79 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w1/web
+
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 17ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 37ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 8ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 366ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 560ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 537ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 488ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 868ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 1194ms
+   ✓ StepList structure > is a navigation named Setup steps holding four titled items in order 446ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 2709ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 403ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 3 failed) 2789ms
+   × TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3 26ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: no stocks are followed.
+Received:
+  Couldn't start the download: history depth isn't set.Go to step 2
+   × step 4's own cases > (d) an internal error 20ms
+     → expected 'Couldn\'t start the download: history…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+   × step 4's own cases > (d) another code 22ms
+     → expected 'Couldn\'t start the download: history…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 3634ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 568ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: no stocks are followed.
+Received:
+  Couldn't start the download: history depth isn't set.Go to step 2
+ ❯ src/screens/setup/step-download.test.tsx:316:19
+    314|     await userEvent.click(startButton());
+    315|     const alert = await screen.findByRole("alert");
+    316|     expect(alert).toHaveTextContent("Couldn't start the download: no s…
+       |                   ^
+    317|     await userEvent.click(within(alert).getByRole("link", { name: "Go …
+    318|     expect(state.goTo).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) an internal error
+ FAIL  src/screens/setup/step-download.test.tsx > step 4's own cases > (d) another code
+AssertionError: expected 'Couldn\'t start the download: history…' to be 'Couldn\'t start the download: FactorF…' // Object.is equality
+
+Expected: "Couldn't start the download: FactorFlow hit an unexpected problem"
+Received: "Couldn't start the download: history depth isn't set.Go to step 2"
+
+ ❯ src/screens/setup/step-download.test.tsx:820:60
+    818|     const { container } = renderStep();
+    819|     await userEvent.click(startButton());
+    820|     expect((await screen.findByRole("alert")).textContent).toBe(text);
+       |                                                            ^
+    821|     expect(refresh).not.toHaveBeenCalled();
+    822|     expect(startButton()).toHaveAttribute("data-variant", "default");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  3 failed | 446 passed (449)
+   Start at  14:41:05
+   Duration  9.66s (transform 2.43s, setup 2.63s, collect 17.17s, tests 12.67s, environment 20.55s, prepare 5.14s)
+

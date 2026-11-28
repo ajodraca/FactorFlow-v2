@@ -1,0 +1,91 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-irhzpaib/w1/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 33ms
+ ❯ src/screens/setup/step-card.test.tsx (9 tests | 2 failed) 101ms
+   × failureReason > separates an unreachable server from an unexpected answer and never echoes the error 8ms
+     → expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
+   × StepReadError > states the read failure with its reason and offers Try again 3ms
+     → Unable to find an element with the text: Couldn't read history depth: FactorFlow is not answering. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-wrap items-center gap-3"[39m
+    [36m>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"text-destructive"[39m
+      [36m>[39m
+        [0mCouldn't read history depth: FactorFlow hit an unexpected problem[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"[39m
+        [33mdata-variant[39m=[32m"outline"[39m
+      [36m>[39m
+        [0mTry again[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > failureReason > separates an unreachable server from an unexpected answer and never echoes the error
+AssertionError: expected 'FactorFlow hit an unexpected problem' to be 'FactorFlow is not answering' // Object.is equality
+
+Expected: "FactorFlow is not answering"
+Received: "FactorFlow hit an unexpected problem"
+
+ ❯ src/screens/setup/step-card.test.tsx:108:40
+    106|       "GET /api/settings/history-depth could not be reached",
+    107|     );
+    108|     expect(failureReason(unreachable)).toBe("FactorFlow is not answeri…
+       |                                        ^
+    109|     const coded = new ApiError("an active instrument with this symbol …
+    110|       code: "internal_error",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepReadError > states the read failure with its reason and offers Try again
+TestingLibraryElementError: Unable to find an element with the text: Couldn't read history depth: FactorFlow is not answering. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-wrap items-center gap-3"[39m
+    [36m>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"text-destructive"[39m
+      [36m>[39m
+        [0mCouldn't read history depth: FactorFlow hit an unexpected problem[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground"[39m
+        [33mdata-variant[39m=[32m"outline"[39m
+      [36m>[39m
+        [0mTry again[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../Users/alvarodejodra/Projects/ai-agents/.claude/worktrees/factorflow-v2-cap-003-run-85e85a/repos/factorflow-v2/FactorFlow-v2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/screens/setup/step-card.test.tsx:136:14
+    134|     );
+    135|     expect(
+    136|       screen.getByText("Couldn't read history depth: FactorFlow is not…
+       |              ^
+    137|     ).toBeInTheDocument();
+    138|     await user.click(screen.getByRole("button", { name: "Try again" })…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 156 passed (158)
+   Start at  12:08:14
+   Duration  1.10s (transform 127ms, setup 91ms, collect 245ms, tests 134ms, environment 590ms, prepare 420ms)
+

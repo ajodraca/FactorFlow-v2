@@ -1,0 +1,88 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zxo6qq0a/w2/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (10 tests | 4 failed) 112ms
+   × DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (b) running: the sentence from started_at and one Downloading badge 13ms
+     → expected 'DataYour first download, started 2026…' to contain 'started 2026-10-15 16:02 CDT'
+   × DataTile states before the full tile (T010 a-c, T007 b) > (d) summary loading during the first download: the sentence, not the skeleton 2ms
+     → expected 'DataYour first download, started 2026…' to contain 'Your first download, started 2026-10-…'
+   × DataTile states before the full tile (T010 a-c, T007 b) > (c) cancelling: the sentence and no status element 5ms
+     → expected 'DataYour first download, started 2026…' to contain 'Your first download, started 2026-10-…'
+   × DataTile states before the full tile (T010 a-c, T007 b) > the first-download state is one link named by its sentence 23ms
+     → expected 'Data: your first download, started 20…' to be 'Data: your first download, started 20…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (b) running: the sentence from started_at and one Downloading badge
+AssertionError: expected 'DataYour first download, started 2026…' to contain 'started 2026-10-15 16:02 CDT'
+
+Expected: "started 2026-10-15 16:02 CDT"
+Received: "DataYour first download, started 2026-10-15 16:00 CDT, is running.Downloading"
+
+ ❯ src/screens/home/data-tile.test.tsx:154:21
+    152|   it("(b) running: the sentence from started_at and one Downloading ba…
+    153|     const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), NOT_S…
+    154|     expect(text(c)).toContain("started 2026-10-15 16:02 CDT");
+       |                     ^
+    155|     expect(statusElements(c).length).toBe(1);
+    156|     const badge = c.querySelector('[data-variant="status-active"]');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > (d) summary loading during the first download: the sentence, not the skeleton
+AssertionError: expected 'DataYour first download, started 2026…' to contain 'Your first download, started 2026-10-…'
+
+Expected: "Your first download, started 2026-10-15 16:02 CDT, is running."
+Received: "DataYour first download, started 2026-10-15 16:00 CDT, is running.Downloading"
+
+ ❯ src/screens/home/data-tile.test.tsx:210:21
+    208|     const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), LOADI…
+    209|     expect(c.querySelector('[data-testid="data-tile-skeleton"]')).toBe…
+    210|     expect(text(c)).toContain("Your first download, started 2026-10-15…
+       |                     ^
+    211|   });
+    212| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > (c) cancelling: the sentence and no status element
+AssertionError: expected 'DataYour first download, started 2026…' to contain 'Your first download, started 2026-10-…'
+
+Expected: "Your first download, started 2026-10-15 16:02 CDT, is running."
+Received: "DataYour first download, started 2026-10-15 16:00 CDT, is running."
+
+ ❯ src/screens/home/data-tile.test.tsx:223:21
+    221|   it("(c) cancelling: the sentence and no status element", () => {
+    222|     const c = show(ok(FIRST("cancelling", "2026-10-15T21:02:00Z")), NO…
+    223|     expect(text(c)).toContain("Your first download, started 2026-10-15…
+       |                     ^
+    224|     expect(statusElements(c).length).toBe(0);
+    225|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > the first-download state is one link named by its sentence
+AssertionError: expected 'Data: your first download, started 20…' to be 'Data: your first download, started 20…' // Object.is equality
+
+Expected: "Data: your first download, started 2026-10-15 16:02 CDT, is running."
+Received: "Data: your first download, started 2026-10-15 16:00 CDT, is running."
+
+ ❯ src/screens/home/data-tile.test.tsx:232:50
+    230|     expect(links.length).toBe(1);
+    231|     expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    232|     expect(links[0]?.getAttribute("aria-label")).toBe(
+       |                                                  ^
+    233|       "Data: your first download, started 2026-10-15 16:02 CDT, is run…
+    234|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 6 passed (10)
+   Start at  16:53:10
+   Duration  2.11s (transform 193ms, setup 63ms, collect 604ms, tests 112ms, environment 338ms, prepare 188ms)
+

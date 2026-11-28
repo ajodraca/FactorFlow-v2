@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-wzfm9kpg/w3/web
+
+ ❯ src/screens/setup/step-history-depth.test.tsx (39 tests | 2 failed) 1355ms
+   × TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > renders a refused value as the field error, keeps it and stays on step 2 60ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^History depth must be a whole number of years from 1 to 50.$/
+Received:
+  Couldn't save history depth: FactorFlow hit an unexpected problem
+   × step 2: saving > shows a server failure as a field error and keeps the value 40ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Couldn't save history depth: FactorFlow hit an unexpected problem$/
+Received:
+  History depth must be a whole number of years from 1 to 50.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > renders a refused value as the field error, keeps it and stays on step 2
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^History depth must be a whole number of years from 1 to 50.$/
+Received:
+  Couldn't save history depth: FactorFlow hit an unexpected problem
+ ❯ src/screens/setup/step-history-depth.test.tsx:253:19
+    251| 
+    252|     const alert = await screen.findByRole("alert");
+    253|     expect(alert).toHaveTextContent(new RegExp(`^${RANGE_ERROR}$`));
+       |                   ^
+    254|     expect(field()).toHaveValue(7);
+    255|     expect(field()).toHaveAttribute("aria-invalid", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-history-depth.test.tsx > step 2: saving > shows a server failure as a field error and keeps the value
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  /^Couldn't save history depth: FactorFlow hit an unexpected problem$/
+Received:
+  History depth must be a whole number of years from 1 to 50.
+ ❯ src/screens/setup/step-history-depth.test.tsx:553:46
+    551|     await user.type(field(), "7");
+    552|     await user.click(screen.getByRole("button", { name: "Continue" }));
+    553|     expect(await screen.findByRole("alert")).toHaveTextContent(new Reg…
+       |                                              ^
+    554|     expect(field()).toHaveValue(7);
+    555|     expect(field()).toHaveAttribute("aria-invalid", "true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 37 passed (39)
+   Start at  12:21:34
+   Duration  3.87s (transform 571ms, setup 111ms, collect 1.08s, tests 1.35s, environment 684ms, prepare 281ms)
+

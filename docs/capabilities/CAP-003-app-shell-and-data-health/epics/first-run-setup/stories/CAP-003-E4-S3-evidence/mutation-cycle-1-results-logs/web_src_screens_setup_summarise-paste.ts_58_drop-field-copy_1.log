@@ -1,0 +1,126 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-59g67977/w1/web
+
+ ❯ src/screens/setup/summarise-paste.test.ts (32 tests | 14 failed) 9ms
+   × summarisePaste (TC-COMP-113) > suggests BRK.B for BRK/B 3ms
+     → nil is not defined
+   × summarisePaste (TC-COMP-113) > suggests BRK.B for BRK B 0ms
+     → nil is not defined
+   × summarisePaste (TC-COMP-113) > suggests BRK.B for BRK_B 0ms
+     → nil is not defined
+   × summarisePaste (TC-COMP-113) > offers no fix for ZZZZ! 0ms
+     → nil is not defined
+   × summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > does not treat a repeated unreadable entry as a duplicate 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK / B only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for brk/b only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/B! only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for A1/B only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for ABC 1 only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for /BRK only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/ only when a run of separators sits between letters 0ms
+     → nil is not defined
+   × summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > applies the rule as recorded to two symbols joined by a space 0ms
+     → nil is not defined
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > suggests BRK.B for BRK/B
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > suggests BRK.B for BRK B
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > suggests BRK.B for BRK_B
+ReferenceError: nil is not defined
+ ❯ Module.summarisePaste src/screens/setup/summarise-paste.ts:58:32
+     56|   for (const entry of parsed) {
+     57|     if (!entry.valid) {
+     58|       unreadable.push({ input: nil, fix: nearMiss(entry.normalised) });
+       |                                ^
+     59|     } else if (!seen.has(entry.normalised)) {
+     60|       seen.add(entry.normalised);
+ ❯ src/screens/setup/summarise-paste.test.ts:8:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > offers no fix for ZZZZ!
+ReferenceError: nil is not defined
+ ❯ Module.summarisePaste src/screens/setup/summarise-paste.ts:58:32
+     56|   for (const entry of parsed) {
+     57|     if (!entry.valid) {
+     58|       unreadable.push({ input: nil, fix: nearMiss(entry.normalised) });
+       |                                ^
+     59|     } else if (!seen.has(entry.normalised)) {
+     60|       seen.add(entry.normalised);
+ ❯ src/screens/setup/summarise-paste.test.ts:16:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste (TC-COMP-113) > keeps the accepted entries whatever else is rejected
+ReferenceError: nil is not defined
+ ❯ Module.summarisePaste src/screens/setup/summarise-paste.ts:58:32
+     56|   for (const entry of parsed) {
+     57|     if (!entry.valid) {
+     58|       unreadable.push({ input: nil, fix: nearMiss(entry.normalised) });
+       |                                ^
+     59|     } else if (!seen.has(entry.normalised)) {
+     60|       seen.add(entry.normalised);
+ ❯ src/screens/setup/summarise-paste.test.ts:32:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > does not treat a repeated unreadable entry as a duplicate
+ReferenceError: nil is not defined
+ ❯ Module.summarisePaste src/screens/setup/summarise-paste.ts:58:32
+     56|   for (const entry of parsed) {
+     57|     if (!entry.valid) {
+     58|       unreadable.push({ input: nil, fix: nearMiss(entry.normalised) });
+       |                                ^
+     59|     } else if (!seen.has(entry.normalised)) {
+     60|       seen.add(entry.normalised);
+ ❯ src/screens/setup/summarise-paste.test.ts:57:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK / B only when a run of separators sits between letters
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for brk/b only when a run of separators sits between letters
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/B! only when a run of separators sits between letters
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for A1/B only when a run of separators sits between letters
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for ABC 1 only when a run of separators sits between letters
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for /BRK only when a run of separators sits between letters
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > offers the fix for BRK/ only when a run of separators sits between letters
+ReferenceError: nil is not defined
+ ❯ Module.summarisePaste src/screens/setup/summarise-paste.ts:58:32
+     56|   for (const entry of parsed) {
+     57|     if (!entry.valid) {
+     58|       unreadable.push({ input: nil, fix: nearMiss(entry.normalised) });
+       |                                ^
+     59|     } else if (!seen.has(entry.normalised)) {
+     60|       seen.add(entry.normalised);
+ ❯ src/screens/setup/summarise-paste.test.ts:74:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯
+
+ FAIL  src/screens/setup/summarise-paste.test.ts > summarisePaste rules (DAC-E4-5; DEC-0218; DEC-0351, DEC-0352) > applies the rule as recorded to two symbols joined by a space
+ReferenceError: nil is not defined
+ ❯ Module.summarisePaste src/screens/setup/summarise-paste.ts:58:32
+     56|   for (const entry of parsed) {
+     57|     if (!entry.valid) {
+     58|       unreadable.push({ input: nil, fix: nearMiss(entry.normalised) });
+       |                                ^
+     59|     } else if (!seen.has(entry.normalised)) {
+     60|       seen.add(entry.normalised);
+ ❯ src/screens/setup/summarise-paste.test.ts:78:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯
+
+ Test Files  1 failed (1)
+      Tests  14 failed | 18 passed (32)
+   Start at  13:21:26
+   Duration  1.69s (transform 40ms, setup 65ms, collect 30ms, tests 9ms, environment 437ms, prepare 575ms)
+

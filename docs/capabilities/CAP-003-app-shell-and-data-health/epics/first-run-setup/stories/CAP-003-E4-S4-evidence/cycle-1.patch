@@ -1,0 +1,40 @@
+diff --git a/web/src/screens/setup/copy.test.ts b/web/src/screens/setup/copy.test.ts
+index 3bdda0a8..c7c5d17a 100644
+--- a/web/src/screens/setup/copy.test.ts
++++ b/web/src/screens/setup/copy.test.ts
+@@ -239,6 +239,12 @@ const ROWS: [string, string[], string][] = [
+   ],
+   ["STEP3.followedSoFar", ["1,000"], "1,000 followed so far."],
+   ["STEP3.keptForRetry", ["1,500"], "1,500 not saved yet; kept in the list to try again."],
++  [
++    "STEP4.startFailed",
++    ["FactorFlow is not answering"],
++    "Couldn't start the download: FactorFlow is not answering",
++  ],
++  ["STEP4.depthAbsent", [], "History depth isn't set"],
+ ];
+ 
+ describe("setup copy is complete and verbatim", () => {
+diff --git a/web/src/screens/setup/copy.ts b/web/src/screens/setup/copy.ts
+index e9a7d02c..3d78e557 100644
+--- a/web/src/screens/setup/copy.ts
++++ b/web/src/screens/setup/copy.ts
+@@ -162,6 +162,18 @@ export const STEP4 = {
+   goHome: "Go to Home",
+   manageFollowed: "Manage followed stocks",
+   progressUnreadable: "Progress can't be read right now",
++  /**
++   * A failed start other than the two refusals. CAP-003-E4-S4 adds it and no
++   * design gives its wording (DEC-0357): it mirrors the refusals' shape and
++   * names the operation and the reason.
++   */
++  startFailed: (reason: string): string => `Couldn't start the download: ${reason}`,
++  /**
++   * The words behind the dash when history depth is answered as not set.
++   * CAP-003-E4-S4 adds it (DEC-0358): it follows the refusal's *history depth
++   * isn't set*.
++   */
++  depthAbsent: "History depth isn't set",
+ };
+ 
+ /** A failed depth or count read, shown in that step only (setup-ui 10, States; DAC-E4-13). */

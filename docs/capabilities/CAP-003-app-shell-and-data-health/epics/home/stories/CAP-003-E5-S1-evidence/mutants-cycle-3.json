@@ -1,0 +1,119 @@
+{
+ "schema": 1,
+ "repo_head": "87b5998686a8d4694300069a1a32a8cfb3ffd4a6",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/header.tsx:manual:checked-at-client",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "formatClock(answered.checked_at)",
+   "new": "formatClock(attention.kind === \"ok\" ? attention.checkedAt : answered.checked_at)",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:no-clear",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "return () => clearInterval(timer);",
+   "new": "return undefined;",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:badge-plain",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "<NotDeterminable label={HEADER.marketNotDeterminable} reason={HEADER.noTradingCalendar} />",
+   "new": "HEADER.marketNotDeterminable",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:no-reason",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "reason={HEADER.noTradingCalendar}",
+   "new": "",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:interval",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "const MINUTE_MS = 60_000;",
+   "new": "const MINUTE_MS = 60_001;",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:no-text-xl",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "<h1 className=\"text-xl\">",
+   "new": "<h1>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:hand-joined",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "<AsOfLine parts={[market, prices, checked]} />",
+   "new": "<p data-testid=\"as-of-line\">{market} {prices} {checked}</p>",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:prices-plain-dash",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "{HEADER.pricesCurrentTo} <Absent label={NOT_DETERMINABLE} />",
+   "new": "{HEADER.pricesCurrentTo} \u2014",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:shifted-date",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "formatSessionDate(attention.data.prices_as_of)",
+   "new": "formatSessionDate(new Date(attention.data.prices_as_of).toLocaleDateString(\"en-CA\"))",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:now-never-updates",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "setInterval(() => setNow(new Date()), MINUTE_MS)",
+   "new": "setInterval(() => setNow(now), MINUTE_MS)",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:prices-not-acquire",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "pricesNotDownloaded: \"prices not downloaded yet\"",
+   "new": "pricesNotDownloaded: \"prices not acquire yet\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:negate-closed",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "marketState(now) === \"closed\"",
+   "new": "marketState(now) !== \"closed\"",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:negate-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "attention.data.prices_as_of === null",
+   "new": "attention.data.prices_as_of !== null",
+   "cycle": "cycle-3"
+  },
+  {
+   "id": "web/src/screens/home/header.tsx:manual:loading-swap",
+   "operator": "manual",
+   "file": "web/src/screens/home/header.tsx",
+   "old": "attention.kind === \"loading\" ?",
+   "new": "attention.kind === \"ok\" ?",
+   "cycle": "cycle-3"
+  }
+ ]
+}

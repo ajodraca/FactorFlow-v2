@@ -1,0 +1,188 @@
+{
+ "schema": 1,
+ "repo_head": "a6dd3e304aab5a91eae65f7d4ea6f4b371433ddc",
+ "range": "HEAD..worktree",
+ "mutants": [
+  {
+   "id": "web/src/screens/home/copy.ts:20:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 20,
+   "original": "  if (items.length <= 1) {",
+   "mutated": "  if (items.length < 1) {"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:20:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 20,
+   "original": "  if (items.length <= 1) {",
+   "mutated": "  if (items.length <= 2) {"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:23:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 23,
+   "original": "  return `${items.slice(0, -1).join(\", \")} and ${items[items.length - 1]}`;",
+   "mutated": "  return `${items.slice(1, -1).join(\", \")} and ${items[items.length - 1]}`;"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:23:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 23,
+   "original": "  return `${items.slice(0, -1).join(\", \")} and ${items[items.length - 1]}`;",
+   "mutated": "  return `${items.slice(0, -2).join(\", \")} and ${items[items.length - 1]}`;"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:23:off-by-one:3",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 23,
+   "original": "  return `${items.slice(0, -1).join(\", \")} and ${items[items.length - 1]}`;",
+   "mutated": "  return `${items.slice(0, -1).join(\", \")} and ${items[items.length - 2]}`;"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:68:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 68,
+   "original": "    `Data: ${label.charAt(0).toLowerCase()}${label.slice(1)}. ${current} of ${followed} stocks current. Scores ${scores}, prices ${prices}.`,",
+   "mutated": "    `Data: ${label.charAt(1).toLowerCase()}${label.slice(1)}. ${current} of ${followed} stocks current. Scores ${scores}, prices ${prices}.`,"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:68:off-by-one:2",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 68,
+   "original": "    `Data: ${label.charAt(0).toLowerCase()}${label.slice(1)}. ${current} of ${followed} stocks current. Scores ${scores}, prices ${prices}.`,",
+   "mutated": "    `Data: ${label.charAt(0).toLowerCase()}${label.slice(2)}. ${current} of ${followed} stocks current. Scores ${scores}, prices ${prices}.`,"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:98:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 98,
+   "original": "      if (stockCount > symbols.length) {",
+   "mutated": "      if (stockCount >= symbols.length) {"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:100:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 100,
+   "original": "        return `${symbols.join(\", \")} and ${formatCount(more)} more ${more === 1 ? \"stock\" : \"stocks\"} are missing data`;",
+   "mutated": "        return `${symbols.join(\", \")} and ${formatCount(more)} more ${more === 2 ? \"stock\" : \"stocks\"} are missing data`;"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:102:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 102,
+   "original": "      return symbols.length === 1",
+   "mutated": "      return symbols.length === 2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:103:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 103,
+   "original": "        ? `${symbols[0]} is missing data`",
+   "mutated": "        ? `${symbols[1]} is missing data`"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:107:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 107,
+   "original": "      `${stockCount === 1 ? \"Its\" : \"Their\"} scores show as Incomplete until the data is complete.`,",
+   "mutated": "      `${stockCount === 2 ? \"Its\" : \"Their\"} scores show as Incomplete until the data is complete.`,"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:135:off-by-one:1",
+   "cycle": "cycle-2",
+   "operator": "off-by-one",
+   "file": "web/src/screens/home/copy.ts",
+   "line": 135,
+   "original": "        : `${formatCount(done)} of ${formatCount(total)} ${total === 1 ? \"stock\" : \"stocks\"} so far. Scores appear when it finishes.`,",
+   "mutated": "        : `${formatCount(done)} of ${formatCount(total)} ${total === 2 ? \"stock\" : \"stocks\"} so far. Scores appear when it finishes.`,"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:stocks-always",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "more === 1 ? \"stock\" : \"stocks\"",
+   "new": "\"stocks\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:total-singular",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "total === 1 ? \"stock\" : \"stocks\"",
+   "new": "\"stocks\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:its-their",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "stockCount === 1 ? \"Its\" : \"Their\"",
+   "new": "\"Their\"",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:total-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "total === null\n        ?",
+   "new": "total !== null\n        ?",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:set-null",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "setStartedAt === null\n        ?",
+   "new": "setStartedAt !== null\n        ?",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:no-lower",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "${label.charAt(0).toLowerCase()}${label.slice(1)}",
+   "new": "${label}",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:more-guard",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "stockCount > symbols.length",
+   "new": "stockCount >= symbols.length",
+   "cycle": "cycle-2"
+  },
+  {
+   "id": "web/src/screens/home/copy.ts:manual:one-guard",
+   "operator": "manual",
+   "file": "web/src/screens/home/copy.ts",
+   "old": "symbols.length === 1\n",
+   "new": "symbols.length === 2\n",
+   "cycle": "cycle-2"
+  }
+ ]
+}

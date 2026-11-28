@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-irhzpaib/w0/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 14ms
+ ❯ src/screens/setup/step-card.test.tsx (9 tests | 1 failed) 117ms
+   × StepCard explanation and note > caps the explanation's measure and sets the note apart 4ms
+     → expected '' to be '70ch' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepCard explanation and note > caps the explanation's measure and sets the note apart
+AssertionError: expected '' to be '70ch' // Object.is equality
+
+- Expected
++ Received
+
+- 70ch
+
+ ❯ src/screens/setup/step-card.test.tsx:73:50
+     71|   it("caps the explanation's measure and sets the note apart", () => {
+     72|     render(<StepCard step={1} question="Q" explanation="E" note="N" />…
+     73|     expect(screen.getByText("E").style.maxWidth).toBe("70ch");
+       |                                                  ^
+     74|     const note = screen.getByText("N");
+     75|     expect(note).toHaveClass("bg-muted");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 157 passed (158)
+   Start at  12:08:15
+   Duration  876ms (transform 101ms, setup 88ms, collect 164ms, tests 131ms, environment 395ms, prepare 90ms)
+

@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-uswrm_qx/w3/web
+
+ ❯ src/screens/setup/step-stocks.test.tsx (41 tests | 1 failed) 1461ms
+   × step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > makes the field read-only, not disabled, while posting, and ignores a second Continue 59ms
+     → expected "spy" to be called 1 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > makes the field read-only, not disabled, while posting, and ignores a second Continue
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/screens/setup/step-stocks.test.tsx:795:39
+    793|     expect(field()).not.toBeDisabled();
+    794|     await user.click(continueButton());
+    795|     expect(vi.mocked(addInstruments)).toHaveBeenCalledTimes(1);
+       |                                       ^
+    796|     await act(async () => {
+    797|       held.resolve(okResult(["AAPL", "KO"]));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 40 passed (41)
+   Start at  13:37:52
+   Duration  3.89s (transform 313ms, setup 88ms, collect 1.14s, tests 1.46s, environment 649ms, prepare 188ms)
+

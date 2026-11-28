@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zxo6qq0a/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (10 tests | 1 failed) 106ms
+   × DataTile states before the full tile (T010 a-c, T007 b) > (d) summary loading after a download ended: the skeleton, no badge 5ms
+     → expected null not to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > (d) summary loading after a download ended: the skeleton, no badge
+AssertionError: expected null not to be null
+ ❯ src/screens/home/data-tile.test.tsx:203:71
+    201|   it("(d) summary loading after a download ended: the skeleton, no bad…
+    202|     const c = show(ok(ATTENTION), LOADING);
+    203|     expect(c.querySelector('[data-testid="data-tile-skeleton"]')).not.…
+       |                                                                       ^
+    204|     expect(statusElements(c).length).toBe(0);
+    205|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  16:53:12
+   Duration  2.28s (transform 130ms, setup 103ms, collect 711ms, tests 106ms, environment 287ms, prepare 319ms)
+

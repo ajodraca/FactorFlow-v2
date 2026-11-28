@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "repo_head": "07ddfb224e2975bcc5b44905b0d6ad8c00b7bbe3",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/setup/step-list.tsx:20:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 20,
+      "original": "const STEP_IDS: readonly StepId[] = [1, 2, 3, 4];",
+      "mutated": "const STEP_IDS: readonly StepId[] = [2, 2, 3, 4];"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:20:off-by-one:2",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 20,
+      "original": "const STEP_IDS: readonly StepId[] = [1, 2, 3, 4];",
+      "mutated": "const STEP_IDS: readonly StepId[] = [1, 3, 3, 4];"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:20:off-by-one:3",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 20,
+      "original": "const STEP_IDS: readonly StepId[] = [1, 2, 3, 4];",
+      "mutated": "const STEP_IDS: readonly StepId[] = [1, 2, 4, 4];"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:20:off-by-one:4",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 20,
+      "original": "const STEP_IDS: readonly StepId[] = [1, 2, 3, 4];",
+      "mutated": "const STEP_IDS: readonly StepId[] = [1, 2, 3, 5];"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:35:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 35,
+      "original": "      case 1:",
+      "mutated": "      case 2:"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:37:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 37,
+      "original": "        return health.liveness === \"answering\" && health.health !== null",
+      "mutated": "        return health.liveness === \"answering\" || health.health !== null"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:40:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 40,
+      "original": "      case 2:",
+      "mutated": "      case 3:"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:41:negate-boolean:1",
+      "cycle": "cycle-2",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 41,
+      "original": "        return state.depth.kind === \"ok\" && state.depth.data.years !== null",
+      "mutated": "        return state.depth.kind === \"ok\" || state.depth.data.years !== null"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:44:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 44,
+      "original": "      case 3:",
+      "mutated": "      case 4:"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:48:off-by-one:1",
+      "cycle": "cycle-2",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "line": 48,
+      "original": "      case 4:",
+      "mutated": "      case 5:"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:start-or-request",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "download.started_at ?? download.requested_at",
+      "new": "download.requested_at ?? download.started_at",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:string-count",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "formatCount(state.activeCount.data)",
+      "new": "String(state.activeCount.data)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:link-current",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "const link = stepState === \"done\";",
+      "new": "const link = stepState !== \"done\";",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:marker-size",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "markerSize={LAYOUT.markerSize}",
+      "new": "markerSize={LAYOUT.railIconSize}",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:swap-bounds",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "minWidth: LAYOUT.sideColumnMin, maxWidth: LAYOUT.sideColumnMax",
+      "new": "minWidth: LAYOUT.sideColumnMax, maxWidth: LAYOUT.sideColumnMin",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:liveness-guard",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "health.liveness === \"answering\" && health.health !== null",
+      "new": "health.health !== null",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:summary-when-todo",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "summary: isDone ? summaryOf(step) : undefined",
+      "new": "summary: summaryOf(step)",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:ignore-last",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "(attention.last?.data.latest_download ?? null)",
+      "new": "null",
+      "cycle": "cycle-2"
+    },
+    {
+      "id": "web/src/screens/setup/step-list.tsx:manual:header-dropped",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-list.tsx",
+      "old": "      {header}\n",
+      "new": "",
+      "cycle": "cycle-2"
+    }
+  ]
+}

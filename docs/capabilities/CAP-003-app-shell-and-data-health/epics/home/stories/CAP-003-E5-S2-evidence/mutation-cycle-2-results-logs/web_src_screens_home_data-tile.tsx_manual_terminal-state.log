@@ -1,0 +1,133 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-zxo6qq0a/w1/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (10 tests | 5 failed) 69ms
+   × DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge 25ms
+     → expected 'DataYes' to contain 'Your first download, started 2026-10-…'
+   × DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (b) running: the sentence from started_at and one Downloading badge 3ms
+     → expected 'DataYes' to contain 'started 2026-10-15 16:02 CDT'
+   × DataTile states before the full tile (T010 a-c, T007 b) > (d) summary loading during the first download: the sentence, not the skeleton 3ms
+     → expected <div data-variant="metric" …(3)>…(2)</div> to be null
+   × DataTile states before the full tile (T010 a-c, T007 b) > (c) cancelling: the sentence and no status element 3ms
+     → expected 'DataYes' to contain 'Your first download, started 2026-10-…'
+   × DataTile states before the full tile (T010 a-c, T007 b) > the first-download state is one link named by its sentence 20ms
+     → expected 'Data: Yes' to be 'Data: your first download, started 20…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+AssertionError: expected 'DataYes' to contain 'Your first download, started 2026-10-…'
+
+Expected: "Your first download, started 2026-10-15 16:00 CDT, is running."
+Received: "DataYes"
+
+ ❯ src/screens/home/data-tile.test.tsx:147:21
+    145|   it("(a) requested: the sentence from requested_at and no badge", () …
+    146|     const c = show(ok(FIRST("requested", null)), NOT_SERVED);
+    147|     expect(text(c)).toContain("Your first download, started 2026-10-15…
+       |                     ^
+    148|     expect(badgeOf(c)).toBeNull();
+    149|     expect(statusElements(c).length).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (b) running: the sentence from started_at and one Downloading badge
+AssertionError: expected 'DataYes' to contain 'started 2026-10-15 16:02 CDT'
+
+Expected: "started 2026-10-15 16:02 CDT"
+Received: "DataYes"
+
+ ❯ src/screens/home/data-tile.test.tsx:154:21
+    152|   it("(b) running: the sentence from started_at and one Downloading ba…
+    153|     const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), NOT_S…
+    154|     expect(text(c)).toContain("started 2026-10-15 16:02 CDT");
+       |                     ^
+    155|     expect(statusElements(c).length).toBe(1);
+    156|     const badge = c.querySelector('[data-variant="status-active"]');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > (d) summary loading during the first download: the sentence, not the skeleton
+AssertionError: expected <div data-variant="metric" …(3)>…(2)</div> to be null
+
+- Expected: 
+null
+
++ Received: 
+<div
+  aria-busy="true"
+  class="rounded border border-border bg-card text-card-foreground"
+  data-testid="data-tile-skeleton"
+  data-variant="metric"
+>
+  <div
+    class="flex flex-col space-y-1 p-6"
+  >
+    <h2
+      class="text-lg font-semibold"
+      id=":r9:"
+    >
+      Data
+    </h2>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      aria-hidden="true"
+      class="min-h-7 w-full animate-pulse rounded bg-secondary"
+    />
+  </div>
+</div>
+
+ ❯ src/screens/home/data-tile.test.tsx:209:67
+    207|   it("(d) summary loading during the first download: the sentence, not…
+    208|     const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), LOADI…
+    209|     expect(c.querySelector('[data-testid="data-tile-skeleton"]')).toBe…
+       |                                                                   ^
+    210|     expect(text(c)).toContain("Your first download, started 2026-10-15…
+    211|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > (c) cancelling: the sentence and no status element
+AssertionError: expected 'DataYes' to contain 'Your first download, started 2026-10-…'
+
+Expected: "Your first download, started 2026-10-15 16:02 CDT, is running."
+Received: "DataYes"
+
+ ❯ src/screens/home/data-tile.test.tsx:223:21
+    221|   it("(c) cancelling: the sentence and no status element", () => {
+    222|     const c = show(ok(FIRST("cancelling", "2026-10-15T21:02:00Z")), NO…
+    223|     expect(text(c)).toContain("Your first download, started 2026-10-15…
+       |                     ^
+    224|     expect(statusElements(c).length).toBe(0);
+    225|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > the first-download state is one link named by its sentence
+AssertionError: expected 'Data: Yes' to be 'Data: your first download, started 20…' // Object.is equality
+
+Expected: "Data: your first download, started 2026-10-15 16:02 CDT, is running."
+Received: "Data: Yes"
+
+ ❯ src/screens/home/data-tile.test.tsx:232:50
+    230|     expect(links.length).toBe(1);
+    231|     expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    232|     expect(links[0]?.getAttribute("aria-label")).toBe(
+       |                                                  ^
+    233|       "Data: your first download, started 2026-10-15 16:02 CDT, is run…
+    234|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 5 passed (10)
+   Start at  16:53:15
+   Duration  2.61s (transform 111ms, setup 73ms, collect 543ms, tests 69ms, environment 395ms, prepare 344ms)
+

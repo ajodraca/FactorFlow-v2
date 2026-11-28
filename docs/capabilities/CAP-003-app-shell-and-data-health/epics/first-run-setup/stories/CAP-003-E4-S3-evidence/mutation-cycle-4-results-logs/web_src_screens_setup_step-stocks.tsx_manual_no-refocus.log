@@ -1,0 +1,245 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-uswrm_qx/w2/web
+
+ ❯ src/screens/setup/step-stocks.test.tsx (41 tests | 1 failed) 1392ms
+   × step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > offers a near-miss fix that replaces the entry, re-parses and focuses the field 67ms
+     → expected <body><div>…(1)</div></body> to be <textarea rows="4" …(7)></textarea> // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > offers a near-miss fix that replaces the entry, re-parses and focuses the field
+AssertionError: expected <body><div>…(1)</div></body> to be <textarea rows="4" …(7)></textarea> // Object.is equality
+
+- Expected
++ Received
+
++ <body>
++   <div>
++     <section
++       aria-labelledby="setup-step-heading"
++     >
++       <div
++         class="rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"
++         data-variant="default"
++       >
++         <p
++           class="text-xs text-muted-foreground"
++         >
++           Step 3 of 4
++         </p>
++         <h2
++           class="text-xl font-semibold text-foreground focus-visible:outline-none"
++           id="setup-step-heading"
++           tabindex="-1"
++         >
++           Which stocks do you want to follow?
++         </h2>
++         <p
++           style="max-width: 70ch;"
++         >
++           FactorFlow downloads data and scores value, growth and momentum for these stocks. Scores rank stocks against each other, so a factor needs at least 30 stocks with complete data before it can rank anything. Start with 100 or more if you can.
++         </p>
++         <p
++           class="font-medium"
++           id=":r9g:"
++         >
++           How do you want to name them?
++         </p>
++         <div
++           aria-labelledby=":r9g:"
++           aria-required="false"
++           class="grid grid-flow-col auto-cols-fr gap-3"
++           data-variant="cards"
++           dir="ltr"
++           role="radiogroup"
++           style="outline: none;"
++           tabindex="0"
++         >
++           <button
++             aria-checked="true"
++             aria-describedby=":r9j:"
++             aria-labelledby=":r9i:"
++             class="flex items-start gap-2 rounded border border-border bg-background p-4 text-left focus-visible:outline-none focus-visible:ring focus-visible:ring-ring data-[state=checked]:ring-1 data-[state=checked]:ring-foreground"
++             data-radix-collection-item=""
++             data-state="checked"
++             role="radio"
++             tabindex="-1"
++             type="button"
++             value="paste"
++           >
++             <span
++               aria-hidden="true"
++               class="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input"
++             >
++               <span
++                 data-state="checked"
++               >
++                 <svg
++                   aria-hidden="true"
++                   class="lucide lucide-circle h-2 w-2 fill-current text-primary"
++                   fill="none"
++                   height="24"
++                   stroke="currentColor"
++                   stroke-linecap="round"
++                   stroke-linejoin="round"
++                   stroke-width="2"
++                   viewBox="0 0 24 24"
++                   width="24"
++                   xmlns="http://www.w3.org/2000/svg"
++                 >
++                   <circle
++                     cx="12"
++                     cy="12"
++                     r="10"
++                   />
++                 </svg>
++               </span>
++             </span>
++             <span>
++               <span
++                 class="block font-semibold"
++                 id=":r9i:"
++               >
++                 Paste a list
++               </span>
++               <span
++                 class="block text-xs text-muted-foreground"
++                 id=":r9j:"
++               >
++                 Paste symbols separated by commas or one per line.
++               </span>
++             </span>
++           </button>
++           <button
++             aria-checked="false"
++             aria-describedby=":r9m:"
++             aria-labelledby=":r9l:"
++             class="flex items-start gap-2 rounded border border-border bg-background p-4 text-left focus-visible:outline-none focus-visible:ring focus-visible:ring-ring data-[state=checked]:ring-1 data-[state=checked]:ring-foreground"
++             data-radix-collection-item=""
++             data-state="unchecked"
++             role="radio"
++             tabindex="-1"
++             type="button"
++             value="later"
++           >
++             <span
++               aria-hidden="true"
++               class="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input"
++             />
++             <span>
++               <span
++                 class="block font-semibold"
++                 id=":r9l:"
++               >
++                 Add later
++               </span>
++               <span
++                 class="block text-xs text-muted-foreground"
++                 id=":r9m:"
++               >
++                 Continue without stocks for now; you can follow them later from Data health.
++               </span>
++             </span>
++           </button>
++         </div>
++         <form
++           aria-label="Stock symbols"
++           class="flex flex-col gap-4"
++           data-variant="stacked"
++           novalidate=""
++         >
++           <div
++             class="space-y-2"
++           >
++             <label
++               class="text-base font-medium text-foreground"
++               for=":r9o:-form-item"
++               id=":r9o:-form-item-label"
++             >
++               Stock symbols
++             </label>
+              <textarea
+                aria-describedby=":r9o:-form-item-description :r9p:"
+                aria-invalid="false"
+                aria-labelledby=":r9o:-form-item-label"
+                class="flex w-full resize-none rounded border border-input bg-background px-[var(--cell-padding-x)] py-[var(--cell-padding-y)] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive"
+                data-variant="list"
+                id=":r9o:-form-item"
+                placeholder="AAPL, MSFT, NVDA or one symbol per line"
+                rows="4"
+              >
+                AAPL, BRK.B
+              </textarea>
++             <p
++               class="text-sm text-muted-foreground"
++               id=":r9o:-form-item-description"
++             >
++               Whether the provider knows each one is checked during the download.
++             </p>
++             <div
++               class="flex flex-col gap-2 text-sm text-muted-foreground"
++               id=":r9p:"
++               role="status"
++             >
++               <p>
++                 2 symbols recognised, 0 duplicates, 0 not recognised
++               </p>
++               <ul
++                 class="flex flex-col gap-2"
++               />
++             </div>
++           </div>
++         </form>
++         <p>
++           Factor scores need at least 30 stocks with complete data. With 2, no factor can be ranked yet.
++         </p>
++         <p
++           class="rounded bg-muted p-3 text-xs"
++         >
++           This is your followed list. You can add or stop following stocks any time in Data health. Stopping keeps their history; nothing is ever deleted.
++         </p>
++         <div
++           class="flex items-center justify-between gap-4"
++         >
++           <button
++             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground"
++             data-variant="ghost"
++           >
++             ← Back: How far back
++           </button>
++           <div
++             class="flex items-center gap-3"
++           >
++             <span
++               class="text-xs text-muted-foreground"
++             >
++               Next: Download data
++             </span>
++             <button
++               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++               data-variant="default"
++             >
++               Continue
++             </button>
++           </div>
++         </div>
++       </div>
++     </section>
++   </div>
++ </body>
+
+ ❯ src/screens/setup/step-stocks.test.tsx:703:36
+    701|     expect(screen.queryByRole("button", { name: "Did you mean BRK.B?" …
+    702|     expect(vi.mocked(parseBulkSymbols).mock.calls.length).toBe(before …
+    703|     expect(document.activeElement).toBe(field());
+       |                                    ^
+    704|   });
+    705| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 40 passed (41)
+   Start at  13:38:36
+   Duration  3.08s (transform 201ms, setup 38ms, collect 640ms, tests 1.39s, environment 300ms, prepare 267ms)
+

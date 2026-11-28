@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "repo_head": "75fac48b217b591f242e0aeadd40ed093c58c51a",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:29:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 29,
+      "original": "const MIN_YEARS = 1;",
+      "mutated": "const MIN_YEARS = 2;"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:31:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 31,
+      "original": "const MAX_YEARS = 50;",
+      "mutated": "const MAX_YEARS = 51;"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:35:remove-attribute:1",
+      "cycle": "cycle-4",
+      "operator": "remove-attribute",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 35,
+      "original": "    .string()",
+      "mutated": ""
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:36:remove-attribute:1",
+      "cycle": "cycle-4",
+      "operator": "remove-attribute",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 36,
+      "original": "    .trim()",
+      "mutated": ""
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:38:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 38,
+      "original": "      (text) => /^\\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS,",
+      "mutated": "      (text) => /^\\d+$/.test(text) || Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS,"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:38:negate-boolean:2",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 38,
+      "original": "      (text) => /^\\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS,",
+      "mutated": "      (text) => /^\\d+$/.test(text) && Number(text) >= MIN_YEARS || Number(text) <= MAX_YEARS,"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:38:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 38,
+      "original": "      (text) => /^\\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS,",
+      "mutated": "      (text) => /^\\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) < MAX_YEARS,"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:38:off-by-one:2",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 38,
+      "original": "      (text) => /^\\d+$/.test(text) && Number(text) >= MIN_YEARS && Number(text) <= MAX_YEARS,",
+      "mutated": "      (text) => /^\\d+$/.test(text) && Number(text) > MIN_YEARS && Number(text) <= MAX_YEARS,"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:50:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 50,
+      "original": "      : state.depth.kind === \"ok\" && state.depth.data.years !== null",
+      "mutated": "      : state.depth.kind === \"ok\" || state.depth.data.years !== null"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:64:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 64,
+      "original": "      if (error instanceof ApiError && error.code === \"validation_error\") {",
+      "mutated": "      if (error instanceof ApiError || error.code === \"validation_error\") {"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:68:negate-boolean:1",
+      "cycle": "cycle-4",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 68,
+      "original": "      if (error instanceof ApiError || error instanceof ApiUnreachableError) {",
+      "mutated": "      if (error instanceof ApiError && error instanceof ApiUnreachableError) {"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:78:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 78,
+      "original": "    state.goTo(3);",
+      "mutated": "    state.goTo(4);"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:83:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 83,
+      "original": "      step={2}",
+      "mutated": "      step={3}"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:84:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 84,
+      "original": "      question={QUESTIONS[2]}",
+      "mutated": "      question={QUESTIONS[3]}"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:86:off-by-one:1",
+      "cycle": "cycle-4",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "line": 86,
+      "original": "      onBack={() => state.goTo(1)}",
+      "mutated": "      onBack={() => state.goTo(2)}"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:string-years",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "setHistoryDepth(Number(years))",
+      "new": "setHistoryDepth(years as unknown as number)",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:go-before-put",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "      await setHistoryDepth(Number(years));",
+      "new": "      state.goTo(3);\n      await setHistoryDepth(Number(years));",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:message-leak",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "STEP2.saveFailed(failureReason(error))",
+      "new": "STEP2.saveFailed(error.message)",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:precedence-swap",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "state.drafts.yearsText !== \"\"\n      ? state.drafts.yearsText\n      : state.depth.kind === \"ok\" && state.depth.data.years !== null\n        ? String(state.depth.data.years)\n        : \"\"",
+      "new": "state.depth.kind === \"ok\" && state.depth.data.years !== null\n      ? String(state.depth.data.years)\n      : state.drafts.yearsText",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:drop-draft",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "      state.setDraft(\"yearsText\", event.target.value);\n",
+      "new": "",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:negate-code",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "error.code === \"validation_error\"",
+      "new": "error.code !== \"validation_error\"",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:drop-retry",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "onRetry={() => state.reread(\"depth\")}",
+      "new": "onRetry={() => undefined}",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:drop-reread",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "    state.reread(\"depth\");\n",
+      "new": "",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:drop-note",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "note={STEP2.planLimitNote}",
+      "new": "",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:back-to-2",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "onBack={() => state.goTo(1)}",
+      "new": "onBack={() => state.goTo(2)}",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:submit-mode",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "mode: \"onTouched\"",
+      "new": "mode: \"onSubmit\"",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:drop-error-state",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "state.depth.kind === \"error\" ? (",
+      "new": "false ? (",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:trim-dropped",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": ".string()\n    .trim()",
+      "new": ".string()",
+      "cycle": "cycle-4"
+    },
+    {
+      "id": "web/src/screens/setup/step-history-depth.tsx:manual:no-reset-guard",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-history-depth.tsx",
+      "old": "      throw error;\n",
+      "new": "      return;\n",
+      "cycle": "cycle-4"
+    }
+  ]
+}

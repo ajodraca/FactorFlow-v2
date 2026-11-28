@@ -7,7 +7,9 @@ status: draft
 owner: Alvaro de Jodra
 owner_github: ajodraca
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-27
+last_reworked_review: CAP-003-E4-S4-implementation-review-v2.md
+docs_synced_review: CAP-003-E4-S4-implementation-review-v3.md
 ai_provenance:
   agent_id: implementation-planning-agent
   agent_version: "1.0"
@@ -88,7 +90,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: Confirm the upstream modules this story imports exist. No package, configuration or directory change.
 
-- [ ] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
+- [x] T001 From the repo root, confirm these exist in the working tree, then run `npm ci` and `npm run test` and record the suite green before any change (traces to no AC; prerequisite):
   - CAP-003-E4-S1: `web/src/screens/setup/draft.tsx` (`SetupDraftProvider`), `use-setup-state.ts` (`useSetupState`, `SetupState` with `current`, `done`, `step4`, `depth`, `activeCount`, `loading`, `goTo`, `reread`, `drafts`, `setDraft`; `StepId`) and `copy.ts` (`SCREEN`, `STEP_TITLES`, `STEP4`, `READ_ERRORS`).
   - CAP-003-E4-S2: `web/src/screens/setup/step-card.tsx` (`StepCard`, `STEP_HEADING_ID`, `useStepHeadingFocus`, `failureReason`), `step-list.tsx` (`StepList`), `step-market-data.tsx` (`StepMarketData`), `step-history-depth.tsx` (`StepHistoryDepth`); `copy.ts` with `READ_ERRORS.notAnswering` and `READ_ERRORS.unexpected`; `web/src/components/token-literals.test.ts` scanning `web/src/screens/setup/`.
   - CAP-003-E4-S3: `web/src/screens/setup/step-stocks.tsx` (`StepStocks`), `summarise-paste.ts`, `post-in-batches.ts`.
@@ -120,7 +122,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 ### Mandatory Component Tests
 
-- [ ] T002 [P] Implement TC-COMP-101 (Start download outcomes: progress, queued line, each 409) in a new `web/src/screens/setup/step-download.test.tsx`, with a `// Implements TC-COMP-101` comment. `HEALTH_FOUND`, attention `ok(null)`, `stateWith()`. Cases:
+- [x] T002 [P] Implement TC-COMP-101 (Start download outcomes: progress, queued line, each 409) in a new `web/src/screens/setup/step-download.test.tsx`, with a `// Implements TC-COMP-101` comment. `HEALTH_FOUND`, attention `ok(null)`, `stateWith()`. Cases:
   - (a) **`202`, `queued_behind` null (TC step 1).** `accepted(null)`; click **Start download**. `refresh` was called with `"attention"` exactly once and with `"health"` exactly once (DEC-0360). Then `setShell({ attention: ok(download()) })` and `rerender`:
     - `getByRole("progressbar", { name: "812 of 1,236 stocks" })` has `aria-valuenow="812"`, `aria-valuemin="0"`, `aria-valuemax="1236"` and `data-variant="determinate"`;
     - the texts *Started 2026-10-15 09:30 CDT*, *checked 09:31:12 CDT* and *You can leave; this keeps running.* are present (exact `getByText`).
@@ -139,14 +141,14 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - swap-case `started_at ?? requested_at` → `requested_at ?? started_at`: (a) reads *09:29*.
   - a hand-written mutant that renders the bar while this download is still `requested` behind another: (c) second row.
 
-- [ ] T003 [P] Implement TC-COMP-102 (A missing key does not block Start download) in `web/src/screens/setup/step-download.test.tsx`, sequential with T002 (one file), with a `// Implements TC-COMP-102` comment. `HEALTH_MISSING`, `stateWith()` (depth 12, count 1236), `accepted(null)`.
+- [x] T003 [P] Implement TC-COMP-102 (A missing key does not block Start download) in `web/src/screens/setup/step-download.test.tsx`, sequential with T002 (one file), with a `// Implements TC-COMP-102` comment. `HEALTH_MISSING`, `stateWith()` (depth 12, count 1236), `accepted(null)`.
   - **TC step 1.** `getByRole("button", { name: "Start download" })` has `data-variant="default"`, no `aria-disabled` and no `aria-describedby`; the summary card shows *Missing*.
   - **TC step 2.** Clicking it calls `startAcquisitionRun` exactly once, with no argument (`toHaveBeenCalledWith()`).
   - The same with `HEALTH_UNREACHABLE_STALE_MISSING`: still `default` and one call.
 
   Kills: a hand-written mutant that sets `blocked` when `credential_present` is `false` (DEC-0203 reversed): both rows.
 
-- [ ] T004 [P] Implement TC-COMP-104 (Step 4 summary card restates key, depth and count; progress unreadable state) in `web/src/screens/setup/step-download.test.tsx`, sequential with T003, with a `// Implements TC-COMP-104` comment.
+- [x] T004 [P] Implement TC-COMP-104 (Step 4 summary card restates key, depth and count; progress unreadable state) in `web/src/screens/setup/step-download.test.tsx`, sequential with T003, with a `// Implements TC-COMP-104` comment.
   - **TC step 1, the card.** The `card` is `[data-variant="summary"]` holding one `dl`. `getAllByRole("term")` texts are, in order, *Market data key*, *History depth*, *Followed stocks*. The matching `definition`s:
     - with `HEALTH_FOUND`: a `[data-variant="status-good"]` badge with text exactly *Found*; with `HEALTH_MISSING`: `[data-variant="status-critical"]` *Missing*; with `HEALTH_UNREACHABLE_STALE_MISSING`: `[data-variant="coverage-unknown"]` *Not determinable*, no *Missing* anywhere (step 1's rule; CAP-003-E4-S2's DEC-0349);
     - *12 years*;
@@ -160,7 +162,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - swap-case of the depth and count rows: step 1 (*1,236 years*).
   - a hand-written mutant that renders `String(count)` instead of `formatCount(count)`: step 1 (*1236*).
 
-- [ ] T005 [P] Implement TC-COMP-119 (Progress checked time advances per attention answer; no own interval) in `web/src/screens/setup/step-download.test.tsx`, sequential with T004, with a `// Implements TC-COMP-119` comment.
+- [x] T005 [P] Implement TC-COMP-119 (Progress checked time advances per attention answer; no own interval) in `web/src/screens/setup/step-download.test.tsx`, sequential with T004, with a `// Implements TC-COMP-119` comment.
   - **Harness.** Before rendering, `vi.spyOn(window, "setInterval")` and `vi.spyOn(window, "requestAnimationFrame")`. Drive the click with `fireEvent.click` (user-event schedules its own timers). `accepted(null)`; click; `await` the settled promise.
   - **TC step 1, three answers.** For `i` of 1, 2, 3: `setShell({ attention: ok(download({ progress: { done: 812 + i, total: 1236 } }), new Date(Date.parse("2026-10-15T14:31:12Z") + 10_000 * i)) })` and `rerender`. After each: the text *checked 09:31:22 CDT*, *09:31:32 CDT*, *09:31:42 CDT* in turn, and the progressbar's name *813 of 1,236 stocks*, *814 …*, *815 …*.
   - **Announced per answer, never per frame.** The element whose `id` the progressbar's `aria-labelledby` names has `aria-live="polite"`; the progressbar itself has no `aria-live`. A `MutationObserver` (`childList`, `characterData`, `subtree`) attached to that element before the first answer records exactly 3 text changes after the three answers. One more `rerender` with the same attention object adds 0.
@@ -171,7 +173,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - a hand-written mutant that adds a one-second ticker re-rendering the label: the spy and the mutation count.
   - remove-attribute of `aria-live` on the label: the attribute check.
 
-- [ ] T006 [P] Implement TC-COMP-120 (Blocked step 4 sends nothing by keyboard; exits reachable by Tab) in `web/src/screens/setup/step-download.test.tsx`, sequential with T005, with a `// Implements TC-COMP-120` comment. `stateWith({ step4: "blocked", activeCount: { kind: "ok", data: 0, checkedAt }, done: { 1: true, 2: true, 3: false, 4: false } })`.
+- [x] T006 [P] Implement TC-COMP-120 (Blocked step 4 sends nothing by keyboard; exits reachable by Tab) in `web/src/screens/setup/step-download.test.tsx`, sequential with T005, with a `// Implements TC-COMP-120` comment. `stateWith({ step4: "blocked", activeCount: { kind: "ok", data: 0, checkedAt }, done: { 1: true, 2: true, 3: false, 4: false } })`.
   - **TC step 1.** `user.tab()` from `body` focuses `getByRole("button", { name: "Start download" })` (the summary card holds no tab stop). It has `data-variant="blocked"`, `aria-disabled="true"` and is not `toBeDisabled()`. `user.keyboard("{Enter}")`, `user.keyboard(" ")` and a click leave `startAcquisitionRun` uncalled.
   - **TC step 2.** It `toHaveAccessibleDescription("No stocks are followed. Follow stocks before downloading.")`, and that sentence is visible text beside it.
   - **TC step 3.** A second `user.tab()` focuses `getByRole("link", { name: "Go to Home" })` (`href` `"/home"`, `data-variant="outline"`); a third focuses `getByRole("link", { name: "Manage followed stocks" })` (`href` `"/data/followed"`, `data-variant="outline"`). `{Enter}` on **Manage followed stocks** makes `location` read `/data/followed`; in a fresh render, `{Enter}` on **Go to Home** makes it read `/home`.
@@ -184,7 +186,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - a hand-written mutant that renders **Start download** with native `disabled`: step 1 (not focusable, `toBeDisabled`).
   - drop-field-copy on the reason's `id` in `aria-describedby`: step 2.
 
-- [ ] T007 [P] Implement TC-COMP-124 (Summary key badge, download state and progress carry shape) in `web/src/screens/setup/step-download.test.tsx`, sequential with T006, with a `// Implements TC-COMP-124` comment. Attention `ok(download())` with no local start (a download already exists):
+- [x] T007 [P] Implement TC-COMP-124 (Summary key badge, download state and progress carry shape) in `web/src/screens/setup/step-download.test.tsx`, sequential with T006, with a `// Implements TC-COMP-124` comment. Attention `ok(download())` with no local start (a download already exists):
   - (a) **Key badge.** For `HEALTH_FOUND` and `HEALTH_MISSING`, the summary card's `status-*` badge text is exactly the label, it contains an `svg[aria-hidden="true"]`, and neither the badge nor the `svg` carries `aria-label` or `title`.
   - (b) **Download state.** The progress region's `[data-variant="status-active"]` badge reads exactly *Downloading* (`labelOf({ of: "download", state: "running" })`) with an `svg[aria-hidden="true"]`. `it.each` over the eight `RunState` values: the badge's `data-variant` is `` `status-${tierOf({ of: "download", state })}` `` and its text `labelOf(...)`, compared with the independent literal table of CAP-003-E1-S5 (*Queued* neutral, *Downloading* active, *Stopping* warning, *Complete* good, *Partial* warning, *Failed* critical, *Cancelled by you* neutral, *Interrupted* serious).
   - (c) **Not determinable.** With `HEALTH_UNREACHABLE_STALE_MISSING`, the key's `coverage-unknown` badge `toHaveAccessibleDescription("FactorFlow isn't answering, so the key can't be checked.")` and no `[data-variant^="status-"]` badge sits in the summary card.
@@ -195,7 +197,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - a hand-written mutant that renders the download state as a bare `span` with the status colour class: (b), no `data-variant` badge and no `svg`.
   - swap-case of `tierOf`'s argument (`{ of: "download", state: "requested" }` for every state): (b) rows.
 
-- [ ] T008 Implement TC-COMP-123, step 4 half (Step 4, summary card and setup screen use the display vocabulary) in `web/src/screens/setup/step-download.test.tsx`, sequential with T007, with a `// Implements TC-COMP-123` comment. CAP-003-E4-S4's screen half is T012.
+- [x] T008 Implement TC-COMP-123, step 4 half (Step 4, summary card and setup screen use the display vocabulary) in `web/src/screens/setup/step-download.test.tsx`, sequential with T007, with a `// Implements TC-COMP-123` comment. CAP-003-E4-S4's screen half is T012.
   - (a) **Non-vacuity.** `FORBIDDEN` matches the planted `"one run"`, `"Runs"`, `"Retired"`, `"Instrument"`, `"acquire"`, `"Start acquisition"` and `"Provider credential"`, and does not match `"You can leave; this keeps running."` or `"Start download"`.
   - (b) **Every state of step 4** (`it.each`), each asserting `visibleAndAccessibleText(container)` does not match `FORBIDDEN`:
     1. ready, no download; 2. blocked with both exits; 3. after a `202` with each of the eight `RunState` values in attention (badge labels, bar or no bar); 4. indeterminate; 5. queued; 6. each `409`, with the `ApiError` `message` planted as *every instrument run was refused* (never rendered); 7. a start failure with `ApiUnreachableError` and with `ApiError` `internal_error` (DEC-0357); 8. attention failing with and without `last`; 9. the summary card with `HEALTH_UNREACHABLE_STALE_MISSING`, a failed depth read and a failed count read (DEC-0358).
@@ -205,7 +207,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 ### Additional Unit Tests
 
-- [ ] T009 Write step 4's own cases in `web/src/screens/setup/step-download.test.tsx`, sequential with T008 (AC-2, AC-7, AC-15, DAC-E4-9, DAC-E4-12, DAC-E4-S4-6; DEC-0356 to -3 and -5):
+- [x] T009 Write step 4's own cases in `web/src/screens/setup/step-download.test.tsx`, sequential with T008 (AC-2, AC-7, AC-15, DAC-E4-9, DAC-E4-12, DAC-E4-S4-6; DEC-0356 to -3 and -5):
   - (a) **Before attention shows this download** (DEC-0356). After `accepted(null)` with attention still `ok(null)`: a `[data-variant="status-neutral"]` badge *Queued*, an indeterminate progressbar named *Queued*, *You can leave; this keeps running.*, and neither a *Started* nor a *checked* text. The same with attention `ok(download({ run_id: "r-1", state: "succeeded", ended_at: "2026-10-14T20:00:00Z" }))` (an older download): still *Queued*, never *Complete*.
   - (b) **A download already exists** (no local start). `it.each` over the three non-terminal states: a progressbar and *You can leave; this keeps running.* render. `it.each` over the five terminal states (`succeeded`, `partial`, `failed`, `cancelled`, `abandoned`, with `ended_at` set): the state badge, *Started …* and *checked 09:31:12 CDT* render; no progressbar and no *You can leave* line.
   - (c) **Attention failing with no last answer.** After `accepted(null)` with `failing(null)`: badge *Queued* and *Progress can't be read right now*; no progressbar. With `failing(null)` and no local start: no progress region (no download badge, no unreadable line). With attention `{ kind: "loading" }` and no local start: no progress region.
@@ -231,7 +233,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 ### Mandatory Component Tests
 
-- [ ] T010 [P] Implement TC-COMP-121 (Going back from step 4 to step 2 and forward keeps every value) in a new `web/src/screens/setup/setup.test.tsx`, with a `// Implements TC-COMP-121` comment. `HEALTH_OK`, attention `ok(null)`; `depthAnswers(null, 7, 7)`, `countAnswers(0, 2, 2)`; `setHistoryDepth` resolves `{ years: 7, updatedAt: "…" }`; `addInstruments` resolves `{ added: [<AAPL>, <MSFT>], reactivated: [], rejected: [] }` first and rejects with `new ApiError("x", "r", { code: "all_duplicate" })` after.
+- [x] T010 [P] Implement TC-COMP-121 (Going back from step 4 to step 2 and forward keeps every value) in a new `web/src/screens/setup/setup.test.tsx`, with a `// Implements TC-COMP-121` comment. `HEALTH_OK`, attention `ok(null)`; `depthAnswers(null, 7, 7)`, `countAnswers(0, 2, 2)`; `setHistoryDepth` resolves `{ years: 7, updatedAt: "…" }`; `addInstruments` resolves `{ added: [<AAPL>, <MSFT>], reactivated: [], rejected: [] }` first and rejects with `new ApiError("x", "r", { code: "all_duplicate" })` after.
   - **Precondition: values on steps 2 to 4.** Await *How far back should history go?*. Type `7`, **Continue**. On step 3 choose *Paste a list*, paste `"AAPL, MSFT"`, tab, **Continue**. Await *Download data for 2 stocks*.
   - **TC step 1, back to step 2.** **← Back: Stocks to follow**: the radio *Paste a list* is checked and the textarea's value is `"AAPL, MSFT"`. Append `", NVDA"` without continuing. **← Back: How far back**: the spinbutton *History depth years* has value `7`. Change it to `9` without continuing.
   - **TC step 2, forward again.** Activate the step list's link *Stocks to follow, done*: *Paste a list* is checked and the textarea reads `"AAPL, MSFT, NVDA"` (unsaved, kept). Activate *How far back, done*: the field reads `9` (unsaved, kept). **Continue** (saves 9), then on step 3 **Continue** again: `addInstruments` answers `409`, treated as success (CAP-003-E4-S3), and step 4 is current again.
@@ -241,7 +243,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - a hand-written mutant that binds step 3's textarea to component state instead of the `pasted` draft: TC step 2 (the unsaved *NVDA* is lost when step 3 remounts).
   - a hand-written mutant that resets `yearsText` when step 2 mounts: TC step 1.
 
-- [ ] T011 Implement TC-COMP-122 (Each step's eight states render or are recorded not applicable) in `web/src/screens/setup/setup.test.tsx`, sequential with T010, with a `// Implements TC-COMP-122` comment (DEC-0359). One `describe.each` over steps 1 to 4 and one `it` per state, each either asserting the rendering through the composed screen or asserting the record:
+- [x] T011 Implement TC-COMP-122 (Each step's eight states render or are recorded not applicable) in `web/src/screens/setup/setup.test.tsx`, sequential with T010, with a `// Implements TC-COMP-122` comment (DEC-0359). One `describe.each` over steps 1 to 4 and one `it` per state, each either asserting the rendering through the composed screen or asserting the record:
   - **Loading (every step).** `getHistoryDepth` held by a `deferred()`: an element with `aria-busy="true"` holds the card skeleton; no `region` and no `navigation` named *Setup steps* render; the `h1` *Get set up* is present.
   - **Never populated.** `HEALTH_UNREACHABLE_NEVER`, `depthAnswers(null)`, `countAnswers(0)`, attention `ok(null)`: the region *Connect market data* is current and the step list shows no done link. Steps 2 to 4 assert the record: the step 1 card is what renders while nothing is done.
   - **Nothing found.** Step 3: choose *Paste a list* with an empty field; **Continue** has `data-variant="blocked"` described by *Paste at least one symbol, or choose Add later.* Step 4: `HEALTH_OK`, `depthAnswers(5)`, `countAnswers(0)`; choose *Add later*, **Continue**: **Start download** is `blocked` with both exits, and the step list shows *Stocks to follow* to do. Steps 1 and 2: `cardRenderers(state)["empty-no-match"]` is `{ notApplicable: <non-empty string> }`.
@@ -257,13 +259,13 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - negate-boolean on the all-done test (`every` → `some`): the table's partial row.
   - a hand-written mutant that renders `error` through `StateRegion`'s own wrapper: step 2's error row would hold a second **Try again** (`getAllByRole("button", { name: "Try again" })` has length 1).
 
-- [ ] T012 Implement TC-COMP-123, screen half in `web/src/screens/setup/setup.test.tsx`, sequential with T011, with a `// Implements TC-COMP-123` comment, using T008's helper declared again in this file. Rows: loading; never populated; step 2 current with two done links; step 4 current with the blocked exits after *Add later*; all four done with a running download. Each asserts `visibleAndAccessibleText(container)` does not match `FORBIDDEN`, and the `h1` and sub-line equal `SCREEN.title` and `SCREEN.subLine` (*About 10 minutes, then the data download continues on its own. You can leave and come back.*, CAP-003-E4-S1's DEC-0341).
+- [x] T012 Implement TC-COMP-123, screen half in `web/src/screens/setup/setup.test.tsx`, sequential with T011, with a `// Implements TC-COMP-123` comment, using T008's helper declared again in this file. Rows: loading; never populated; step 2 current with two done links; step 4 current with the blocked exits after *Add later*; all four done with a running download. Each asserts `visibleAndAccessibleText(container)` does not match `FORBIDDEN`, and the `h1` and sub-line equal `SCREEN.title` and `SCREEN.subLine` (*About 10 minutes, then the data download continues on its own. You can leave and come back.*, CAP-003-E4-S1's DEC-0341).
 
   Kills: a hand-written mutant that types the S02 §8 sub-line into `index.tsx` instead of reading `SCREEN.subLine`: every row (*runs*).
 
 ### Additional Unit Tests
 
-- [ ] T013 Write the screen's own cases in `web/src/screens/setup/setup.test.tsx`, sequential with T012 (AC-24, AC-25, AC-26; owner-shell §2.7; CAP-003-E3-S6's focus rule; setup-ui §2.1, §10):
+- [x] T013 Write the screen's own cases in `web/src/screens/setup/setup.test.tsx`, sequential with T012 (AC-24, AC-25, AC-26; owner-shell §2.7; CAP-003-E3-S6's focus rule; setup-ui §2.1, §10):
   - (a) **The `h1` persists across loading.** With the reads held by `deferred()`s, capture `const heading = getByRole("heading", { level: 1, name: "Get set up" })`; it has `tabIndex` `-1`. Resolve the reads: the `h1` is the same element (`toBe(heading)`), so the shell's focus on it is not lost.
   - (b) **No focus moved on entry.** Call `heading.focus()` while loading (the shell's move). Resolve the reads to `HEALTH_OK`, `depthAnswers(null)`, `countAnswers(0)`: `document.activeElement` is still `heading`, not the step 2 `h2` (CAP-003-E4-S2 Resolved Conflict 1).
   - (c) **Focus on a step change.** Then activate *Market data, done*: the active element is the `h2` *Connect market data*.
@@ -278,7 +280,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
   - swap-case `LAYOUT.contentMaxWidth` → `LAYOUT.sideColumnMax`: (e).
   - swap-case of the current-step dispatch (step 3 rendering `StepDownload`): (d).
 
-- [ ] T014 [P] Add rows for this story's two new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal: `["STEP4.startFailed", ["FactorFlow is not answering"], "Couldn't start the download: FactorFlow is not answering"]` (DEC-0357) and `["STEP4.depthAbsent", [], "History depth isn't set"]` (DEC-0358). CAP-003-E4-S1's T006 then scans both with every other export and the file's text, unchanged. Kills: drop-field-copy on either: its row.
+- [x] T014 [P] Add rows for this story's two new strings to the completeness table of `web/src/screens/setup/copy.test.ts` (CAP-003-E4-S1's T007), each against an independent literal: `["STEP4.startFailed", ["FactorFlow is not answering"], "Couldn't start the download: FactorFlow is not answering"]` (DEC-0357) and `["STEP4.depthAbsent", [], "History depth isn't set"]` (DEC-0358). CAP-003-E4-S1's T006 then scans both with every other export and the file's text, unchanged. Kills: drop-field-copy on either: its row.
 
 **Checkpoint**: T002–T014 exist and fail for the right reason: `step-download.tsx` and `index.tsx` are missing, `KeyPresence` is not exported, and the two copy strings are missing. Every delivered and upstream test still passes.
 
@@ -288,11 +290,11 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: The copy strings, the shared key verdict, step 4 and the screen, each in its own TDD cycle. Every module's comments cite AC, DAC and TC in the style of the delivered `status-region.tsx`; none writes a length, a colour, a layout value or one of the eight DAC-E7-3 terms (no *run* or *runs* in a comment; identifiers such as `startAcquisitionRun`, `run_id` and `RunState` are single words a whole-word scan does not split).
 
-- [ ] T015 Add two strings to `web/src/screens/setup/copy.ts` (T014 RED first), each with a doc comment saying CAP-003-E4-S4 adds it and which decision gives its wording, as `copy.ts`'s module comment provides: `STEP4.startFailed(reason: string)` → `` `Couldn't start the download: ${reason}` `` (DEC-0357) and `STEP4.depthAbsent` *History depth isn't set* (DEC-0358). `copy.ts` keeps importing nothing and exporting no number or boolean. Makes T014 pass.
+- [x] T015 Add two strings to `web/src/screens/setup/copy.ts` (T014 RED first), each with a doc comment saying CAP-003-E4-S4 adds it and which decision gives its wording, as `copy.ts`'s module comment provides: `STEP4.startFailed(reason: string)` → `` `Couldn't start the download: ${reason}` `` (DEC-0357) and `STEP4.depthAbsent` *History depth isn't set* (DEC-0358). `copy.ts` keeps importing nothing and exporting no number or boolean. Makes T014 pass.
 
-- [ ] T016 Extract step 1's key verdict in `web/src/screens/setup/step-market-data.tsx` (CAP-003-E4-S2's file; T004 and T007 RED first). Export `KeyPresence(): JSX.Element`, which reads `useShell().health` and returns, exactly as `StepMarketData`'s verdict does today, `<StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>` with `status = { of: "credential", present: health.health.credential_present }` when `health.liveness === "answering"` and `health.health` is not null, otherwise `<NotDeterminable reason={STEP1.notAnswering} />` (DAC-E4-S2-2; CAP-003-E4-S2's DEC-0349). `StepMarketData` renders `<KeyPresence />` in place of its inline verdict and keeps every other line. Doc comment: step 4's summary card repeats step 1's badge (setup-ui §10 step 4; UX design §1.2 *step 1's badge repeated*), so the rule lives once. CAP-003-E4-S2's `step-market-data.test.tsx` passes unchanged: a behaviour-preserving extraction.
+- [x] T016 Extract step 1's key verdict in `web/src/screens/setup/step-market-data.tsx` (CAP-003-E4-S2's file; T004 and T007 RED first). Export `KeyPresence(): JSX.Element`, which reads `useShell().health` and returns, exactly as `StepMarketData`'s verdict does today, `<StatusBadge tier={tierOf(status)}>{labelOf(status)}</StatusBadge>` with `status = { of: "credential", present: health.health.credential_present }` when `health.liveness === "answering"` and `health.health` is not null, otherwise `<NotDeterminable reason={STEP1.notAnswering} />` (DAC-E4-S2-2; CAP-003-E4-S2's DEC-0349). `StepMarketData` renders `<KeyPresence />` in place of its inline verdict and keeps every other line. Doc comment: step 4's summary card repeats step 1's badge (setup-ui §10 step 4; UX design §1.2 *step 1's badge repeated*), so the rule lives once. CAP-003-E4-S2's `step-market-data.test.tsx` passes unchanged: a behaviour-preserving extraction.
 
-- [ ] T017 Create `web/src/screens/setup/step-download.tsx` (depends on T015, T016; T002–T009 RED first).
+- [x] T017 Create `web/src/screens/setup/step-download.tsx` (depends on T015, T016; T002–T009 RED first).
   - **Imports.** `useId`, `useRef`, `useState` from `"react"`; `Link` from `"react-router-dom"`; `startAcquisitionRun`, `ApiError`, `ApiUnreachableError` from `"../../api/client"`; `type RunState` from `"../../api/types"`; `useShell` from `"../../app/shell-context"`; `type Attention` from `"../../app/shell-types"`; `Button` from `"../../components/ui/button"`; `Card`, `CardSummaryList` from `"../../components/ui/card"`; `Progress` from `"../../components/ui/progress"`; `StatusBadge` from `"../../components/patterns/status-badge"`; `tierOf`, `labelOf` from `"../../components/patterns/tiers"`; `NotDeterminable`, `Absent` from `"../../components/patterns/presence"`; `formatClock`, `formatCount`, `formatInstant` from `"../../components/patterns/format"`; `type SetupState` from `"./use-setup-state"`; `STEP_TITLES`, `STEP4`, `READ_ERRORS` from `"./copy"`; `StepCard`, `STEP_HEADING_ID`, `failureReason` from `"./step-card"`; `KeyPresence` from `"./step-market-data"`.
   - **Module comment.** Step 4 (setup-ui §2.3 *Step 4* and *Add later*, §10; UX design §1.2; DAC-E4-8 to DAC-E4-10, DAC-E4-12). It opens no interval and no animation frame: the progress follows the shell's attention cadence (setup-ui §5; DAC-E4-S4-1).
   - **`StepDownload({ state }: { state: SetupState }): JSX.Element`.** Reads `const { attention, refresh } = useShell()`. Local state: `ours: { runId: string; queuedBehind: string | null } | null` (this visit's last `202`); `outcome: { kind: "refused"; step: 2 | 3 } | { kind: "failed"; reason: string } | null`; a `starting` `useRef(false)` guard.
@@ -321,7 +323,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
   Makes T002–T009 pass.
 
-- [ ] T018 Create `web/src/screens/setup/index.tsx` (depends on T017; T010–T013 RED first), to DEC-0359.
+- [x] T018 Create `web/src/screens/setup/index.tsx` (depends on T017; T010–T013 RED first), to DEC-0359.
   - **Imports.** `type JSX` from `"react"`; `type ScreenState` from `"../../api/types"`; `LAYOUT` from `"../../app/layout"`; `Card` from `"../../components/ui/card"`; `StateRegion`, `type StateRenderers` from `"../../components/patterns/state-region"`; `useSetupState`, `type SetupState`, `type StepId` from `"./use-setup-state"`; `SCREEN` from `"./copy"`; `StepList` from `"./step-list"`; `useStepHeadingFocus` from `"./step-card"`; `StepMarketData` from `"./step-market-data"`; `StepHistoryDepth` from `"./step-history-depth"`; `StepStocks` from `"./step-stocks"`; `StepDownload` from `"./step-download"`.
   - **Module comment.** `SetupScreen` (setup-ui §2.1, §10; UX design §1.2; AC-3, AC-24, AC-26). It records STD-UI-23's eight states for the step card region: loading, never populated and partial or complete render through `StateRegion`; nothing found, unavailable and error render inside their steps (CAP-003-E4-S2, CAP-003-E4-S3 and step 4); unreachable is the shell's; and one line reading `Stale: not applicable, every step is re-derived on each visit; step 4's polled progress carries checked {time}` (setup-ui §10 States). T011 reads that line.
   - **`screenStateOf(state: SetupState, now: Date): ScreenState<SetupState>`** (exported): `{ kind: "loading" }` while `state.loading`; `{ kind: "empty-never-populated" }` when no `done` flag is true; `{ kind: "populated", data: state, fetchedAt: now.toISOString() }` when all four are; otherwise `partial` with the same fields. `fetchedAt` is never rendered (stale is not applicable).
@@ -350,7 +352,7 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: Confirm the change set is exactly the story's.
 
-- [ ] T019 Confirm scope (depends on T015–T018):
+- [x] T019 Confirm scope (depends on T015–T018):
   - `git status --short` lists only `web/src/screens/setup/step-download.tsx`, `step-download.test.tsx`, `index.tsx`, `setup.test.tsx`, `step-market-data.tsx`, `copy.ts` and `copy.test.ts`, plus this story's `-tasks.md`, its `-tdd-evidence.yaml` and its status line.
   - `git diff --exit-code -- web/src/app/ web/src/api/ web/src/components/ web/src/screens/instruments/ web/src/screens/settings/ web/src/main.tsx package.json src/` exits 0.
   - `git diff -- web/src/screens/setup/copy.ts` shows only T015's two additions; `git diff -- web/src/screens/setup/step-market-data.tsx` shows only the `KeyPresence` extraction and its use.
@@ -365,8 +367,8 @@ DAC-E4-8's *Add later* half (saves nothing, step 4 current with step 3 to do) is
 
 **Purpose**: Validation, formatting and the TDD evidence.
 
-- [ ] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-19).
-- [ ] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
+- [x] T020 Run `npm run format` (a check); fix any report with `npx biome format --write` on this story's files only. Then run `npm run lint`, `npx tsc --noEmit`, `npm run build` and `npm run test`, and the Story-Specific Validation greps. No behaviour change (traces to AC-26, AC-19).
+- [x] T021 After each TDD cycle in T002–T020 — not once at the end — do the following before the next cycle begins:
   - Stage only that cycle's diff.
   - Dispatch an independent code-review subagent and an independent spec-drift subagent against the staged diff.
   - Append the cycle to `CAP-003-E4-S4-tdd-evidence.yaml` beside this story with `code_review_verdict`, `spec_drift.drift_detected`, `tests_executed: true`, its RED/GREEN evidence, the structured `mutation:` block `scripts/mutation-run.py summary` prints (or `mutation: {not_applicable: <reason>}` for a cycle with no production change), and `diff_sha256` — the SHA-256 of the staged diff the reviews judged, computed by `scripts/check-tdd-evidence.py fingerprint --staged` and saved as the cycle's `reviewed_patch`.

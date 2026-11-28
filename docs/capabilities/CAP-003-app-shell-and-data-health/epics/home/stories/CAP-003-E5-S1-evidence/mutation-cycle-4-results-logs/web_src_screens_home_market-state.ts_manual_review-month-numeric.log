@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-9qiet7w8/w0/web
+
+ ✓ src/screens/home/copy.test.ts (22 tests) 4ms
+ ❯ src/screens/home/market-state.test.ts (72 tests | 3 failed) 263ms
+   × under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 18ms
+     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+   × under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+   × under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates 2ms
+     → expected '2026-3-08' to be '2026-03-08' // Object.is equality
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (31 tests | 1 failed) 93ms
+   × HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z 6ms
+     → expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > pads the heading date across a DST change: 2026-03-08T18:00:00Z
+AssertionError: expected 'Sunday, 2026-3-08' to be 'Sunday, 2026-03-08' // Object.is equality
+
+Expected: "Sunday, 2026-03-08"
+Received: "Sunday, 2026-3-08"
+
+ ❯ src/screens/home/header.test.tsx:94:67
+     92|   ])("pads the heading date across a DST change: %s", (instant, headin…
+     93|     renderAt(instant, OK);
+     94|     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe…
+       |                                                                   ^
+     95|   });
+     96| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > chicagoWallClock (DAC-E5-6) > pads the month and day to two digits on the DST-change dates
+AssertionError: expected '2026-3-08' to be '2026-03-08' // Object.is equality
+
+Expected: "2026-03-08"
+Received: "2026-3-08"
+
+ ❯ src/screens/home/market-state.test.ts:76:71
+     74| 
+     75|     it("pads the month and day to two digits on the DST-change dates",…
+     76|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).date).…
+       |                                                                       ^
+     77|       expect(chicagoWallClock(new Date("2026-11-01T18:00:00Z")).date).…
+     78|       expect(chicagoWallClock(new Date("2026-03-08T18:00:00Z")).weekda…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  4 failed | 121 passed (125)
+   Start at  16:32:09
+   Duration  1.94s (transform 204ms, setup 220ms, collect 697ms, tests 360ms, environment 1.36s, prepare 606ms)
+

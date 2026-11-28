@@ -1,0 +1,40 @@
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape
+AssertionError: expected 'Yes' to be 'Score update failed' // Object.is equality
+Expected: "Score update failed"
+Received: "Yes"
+ ❯ src/screens/home/data-tile.test.tsx:495:42
+    493|     for (const [c, word] of rendered) {
+    494|       const badge = c.querySelector('[data-testid="data-tile-badge"] […
+    495|       expect(badge?.textContent?.trim()).toBe(word);
+       |                                          ^
+    496|       expect(badge?.querySelectorAll("svg").length).toBe(1);
+    497|       expect(badge?.querySelector("svg")?.getAttribute("aria-hidden"))…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/21]⎯
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile composition (T010 f, g) > (g) a metric card, a numeric hero, muted lines, a labelled section, no inline style
+Error: no hero
+ ❯ heroOf src/screens/home/data-tile.test.tsx:278:11
+    276|   const hero = c.querySelector<HTMLElement>(".font-numeric");
+    277|   if (hero === null) {
+    278|     throw new Error("no hero");
+       |           ^
+    279|   }
+    280|   return hero;
+ ❯ src/screens/home/data-tile.test.tsx:531:18
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/21]⎯
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile composition (T010 f, g) > under TZ=Asia/Tokyo > (f) reads America/Chicago, not the machine zone
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile composition (T010 f, g) > under TZ=America/Los_Angeles > (f) reads America/Chicago, not the machine zone
+AssertionError: expected 'DataMostly yes' to contain 'Scores 2026-10-15 17:46 CDT'
+Expected: "Scores 2026-10-15 17:46 CDT"
+Received: "DataMostly yes"
+ ❯ src/screens/home/data-tile.test.tsx:560:23
+    558|     it("(f) reads America/Chicago, not the machine zone", () => {
+    559|       const c = show(ok(ATTENTION), served(SUMMARY()));
+    560|       expect(text(c)).toContain("Scores 2026-10-15 17:46 CDT");
+       |                       ^
+    561|       expect(text(c)).toContain("Prices 2026-10-14");
+    562|       const first = show(ok(FIRST("running", "2026-10-15T21:02:00Z")),…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/21]⎯
+ Test Files  1 failed (1)
+      Tests  21 failed | 28 passed (49)
+   Start at  16:54:53
+   Duration  1.52s (transform 88ms, setup 62ms, collect 536ms, tests 156ms, environment 336ms, prepare 33ms)

@@ -1,0 +1,39 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0vw49w1_/w0/web
+
+ ✓ src/screens/setup/copy.test.ts (149 tests) 13ms
+ ❯ src/screens/setup/step-card.test.tsx (10 tests | 1 failed) 104ms
+   × StepCard footer > renders no Continue or Next hint on step 4 even when a handler is passed 6ms
+     → expected <button …(2)></button> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > StepCard footer > renders no Continue or Next hint on step 4 even when a handler is passed
+AssertionError: expected <button …(2)></button> to be null
+
+- Expected: 
+null
+
++ Received: 
+<button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
+  data-variant="default"
+>
+  Continue
+</button>
+
+ ❯ src/screens/setup/step-card.test.tsx:71:64
+     69|   it("renders no Continue or Next hint on step 4 even when a handler i…
+     70|     render(<StepCard step={4} question="Q" onContinue={vi.fn()} />);
+     71|     expect(screen.queryByRole("button", { name: "Continue" })).toBeNul…
+       |                                                                ^
+     72|     expect(screen.queryByText(/^Next:/)).toBeNull();
+     73|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 158 passed (159)
+   Start at  12:06:19
+   Duration  1.40s (transform 116ms, setup 90ms, collect 222ms, tests 117ms, environment 658ms, prepare 510ms)
+

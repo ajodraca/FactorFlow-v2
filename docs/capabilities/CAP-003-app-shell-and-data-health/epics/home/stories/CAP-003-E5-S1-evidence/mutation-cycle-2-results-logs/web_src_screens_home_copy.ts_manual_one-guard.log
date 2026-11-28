@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzw0odpt/w3/web
+
+ ❯ src/screens/home/copy.test.ts (21 tests | 2 failed) 7ms
+   × templates > data_problems.title(["KO"], 1) is "KO is missing data" 3ms
+     → expected 'KO are missing data' to be 'KO is missing data' // Object.is equality
+   × templates > data_problems.title(["KO","TSLA"], 2) is "KO and TSLA are missing data" 1ms
+     → expected 'KO is missing data' to be 'KO and TSLA are missing data' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.title(["KO"], 1) is "KO is missing data"
+AssertionError: expected 'KO are missing data' to be 'KO is missing data' // Object.is equality
+
+Expected: "KO is missing data"
+Received: "KO are missing data"
+
+ ❯ src/screens/home/copy.test.ts:122:55
+    120|     [["FBXX", "KO", "TSLA"], 1239, "FBXX, KO, TSLA and 1,236 more stoc…
+    121|   ] as const)("data_problems.title(%j, %i) is %j", (symbols, count, ex…
+    122|     expect(ITEMS.data_problems.title(symbols, count)).toBe(expected);
+       |                                                       ^
+    123|   });
+    124| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/copy.test.ts > templates > data_problems.title(["KO","TSLA"], 2) is "KO and TSLA are missing data"
+AssertionError: expected 'KO is missing data' to be 'KO and TSLA are missing data' // Object.is equality
+
+Expected: "KO and TSLA are missing data"
+Received: "KO is missing data"
+
+ ❯ src/screens/home/copy.test.ts:122:55
+    120|     [["FBXX", "KO", "TSLA"], 1239, "FBXX, KO, TSLA and 1,236 more stoc…
+    121|   ] as const)("data_problems.title(%j, %i) is %j", (symbols, count, ex…
+    122|     expect(ITEMS.data_problems.title(symbols, count)).toBe(expected);
+       |                                                       ^
+    123|   });
+    124| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  16:08:17
+   Duration  436ms (transform 27ms, setup 30ms, collect 19ms, tests 7ms, environment 152ms, prepare 61ms)
+

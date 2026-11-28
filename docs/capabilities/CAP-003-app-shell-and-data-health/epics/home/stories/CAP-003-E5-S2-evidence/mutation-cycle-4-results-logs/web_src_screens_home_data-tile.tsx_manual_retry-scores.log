@@ -1,0 +1,72 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ybclssdn/w2/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (57 tests | 2 failed) 380ms
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores 13ms
+     → expected "spy" to be called with arguments: [ 'scores' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "scores",
++   "attention",
+  ]
+
+
+Number of calls: 1
+
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores 9ms
+     → expected "spy" to be called with arguments: [ 'scores' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "scores",
++   "attention",
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores
+AssertionError: expected "spy" to be called with arguments: [ 'scores' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "scores",
++   "attention",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/home/data-tile.test.tsx:684:35
+    682|       await userEvent.click(TRY_AGAIN_BUTTON(c));
+    683|       expect(shell.value.refresh).toHaveBeenCalledTimes(1);
+    684|       expect(shell.value.refresh).toHaveBeenCalledWith("scores");
+       |                                   ^
+    685|     },
+    686|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 55 passed (57)
+   Start at  17:06:08
+   Duration  1.67s (transform 94ms, setup 40ms, collect 458ms, tests 380ms, environment 195ms, prepare 151ms)
+

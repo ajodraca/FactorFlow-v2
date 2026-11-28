@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ybclssdn/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (57 tests | 1 failed) 346ms
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (a) attention unreachable: the title, the sentence and Try again re-read attention 9ms
+     → expected 'default' to be 'outline' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (a) attention unreachable: the title, the sentence and Try again re-read attention
+AssertionError: expected 'default' to be 'outline' // Object.is equality
+
+Expected: "outline"
+Received: "default"
+
+ ❯ src/screens/home/data-tile.test.tsx:654:62
+    652|     expect(within(c).queryAllByRole("link").length).toBe(0);
+    653|     expect(text(c)).not.toContain("/api/attention");
+    654|     expect(TRY_AGAIN_BUTTON(c).getAttribute("data-variant")).toBe("out…
+       |                                                              ^
+    655|     await userEvent.click(TRY_AGAIN_BUTTON(c));
+    656|     expect(shell.value.refresh).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 56 passed (57)
+   Start at  17:06:10
+   Duration  1.12s (transform 74ms, setup 30ms, collect 322ms, tests 346ms, environment 225ms, prepare 49ms)
+

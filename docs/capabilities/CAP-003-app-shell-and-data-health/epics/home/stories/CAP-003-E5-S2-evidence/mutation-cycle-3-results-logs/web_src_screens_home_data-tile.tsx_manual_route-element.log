@@ -1,0 +1,124 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w0/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 6 failed) 210ms
+   × DataTile states before the full tile (T010 a-c, T007 b) > the first-download state is one link named by its sentence 21ms
+     → expected null to be 'Data: your first download, started 20…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (a) one link named by title, verdict, figures and as-of 3ms
+     → expected null to be 'Data: mostly yes. 27 of 30 stocks cur…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when not served 2ms
+     → expected null to be 'Data: mostly yes. not determinable of…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when never classified 2ms
+     → expected null to be 'Data: mostly yes. not determinable of…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when score failed 3ms
+     → expected null to be 'Data: score update failed. 27 of 30 s…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) no prices yet ends the name with not downloaded yet 2ms
+     → expected undefined to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile states before the full tile (T010 a-c, T007 b) > the first-download state is one link named by its sentence
+AssertionError: expected null to be 'Data: your first download, started 20…' // Object.is equality
+
+- Expected: 
+"Data: your first download, started 2026-10-15 16:02 CDT, is running."
+
++ Received: 
+null
+
+ ❯ src/screens/home/data-tile.test.tsx:267:50
+    265|     expect(links.length).toBe(1);
+    266|     expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    267|     expect(links[0]?.getAttribute("aria-label")).toBe(
+       |                                                  ^
+    268|       "Data: your first download, started 2026-10-15 16:02 CDT, is run…
+    269|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (a) one link named by title, verdict, figures and as-of
+AssertionError: expected null to be 'Data: mostly yes. 27 of 30 stocks cur…' // Object.is equality
+
+- Expected: 
+"Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+
++ Received: 
+null
+
+ ❯ src/screens/home/data-tile.test.tsx:429:23
+    427|     expect(links.length).toBe(1);
+    428|     expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    429|     expect(nameOf(c)).toBe(
+       |                       ^
+    430|       "Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17…
+    431|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when not served
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when never classified
+AssertionError: expected null to be 'Data: mostly yes. not determinable of…' // Object.is equality
+
+- Expected: 
+"Data: mostly yes. not determinable of 26 stocks current. Scores not determinable, prices 2026-10-14."
+
++ Received: 
+null
+
+ ❯ src/screens/home/data-tile.test.tsx:460:23
+    458|   ])("(c) the name when %s", (_n, scores, attention, expected) => {
+    459|     const c = show(ok(attention), scores);
+    460|     expect(nameOf(c)).toBe(expected);
+       |                       ^
+    461|   });
+    462| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when score failed
+AssertionError: expected null to be 'Data: score update failed. 27 of 30 s…' // Object.is equality
+
+- Expected: 
+"Data: score update failed. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+
++ Received: 
+null
+
+ ❯ src/screens/home/data-tile.test.tsx:460:23
+    458|   ])("(c) the name when %s", (_n, scores, attention, expected) => {
+    459|     const c = show(ok(attention), scores);
+    460|     expect(nameOf(c)).toBe(expected);
+       |                       ^
+    461|   });
+    462| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) no prices yet ends the name with not downloaded yet
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ src/screens/home/data-tile.test.tsx:465:65
+    463|   it("(c) no prices yet ends the name with not downloaded yet", () => {
+    464|     const c = show(ok({ ...ATTENTION, prices_as_of: null }), served(SU…
+    465|     expect(nameOf(c)?.endsWith(", prices not downloaded yet.")).toBe(t…
+       |                                                                 ^
+    466|   });
+    467| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 43 passed (49)
+   Start at  17:02:21
+   Duration  1.37s (transform 84ms, setup 38ms, collect 392ms, tests 210ms, environment 183ms, prepare 75ms)
+

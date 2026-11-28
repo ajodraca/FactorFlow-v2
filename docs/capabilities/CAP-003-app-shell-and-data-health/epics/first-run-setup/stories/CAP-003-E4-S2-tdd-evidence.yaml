@@ -1,0 +1,168 @@
+# TDD evidence for CAP-003-E4-S2 - Setup Steps 1 and 2: the Step List, the Step Card, Market Data Key Presence and History Depth.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T008, T009, T013, T014]
+    description: >
+      The copy strings and the step card (TC-COMP-111 groundwork, AC-25, DAC-E4-13, DEC-0345, DEC-0346, DEC-0350): copy.ts gains READ_ERRORS.notAnswering, READ_ERRORS.unexpected and STEP2.saveFailed, each with a doc comment saying this story adds it; step-card.tsx holds STEP_HEADING_ID, StepCard (a section labelled by its h2, the position line, explanation capped at LAYOUT.explanationMeasure, note, Back and Continue footer naming the neighbouring steps), useStepHeadingFocus (never on first render, on a change only), failureReason (never reads the message or request id) and StepReadError. step-card.test.tsx holds the section and heading, footer, absent controls, explanation and note, focus hook and failureReason and StepReadError cases; copy.test.ts gains the three verbatim rows. The generator produced 6 mutants and 8 were hand-written from the plan's kill list. The first run left nine survivors: cast-union off-by-ones on the Back and Next title index (no test can tell a type-level union member from another) and the step 4 Continue guard; the index casts were replaced by a single StepId cast and a step 4 case with a handler was added. The first spec-drift review then reported drift: that guard is not in the plan's T014, so the guard and its case were removed and the plan's literal footer kept, the mutation run repeated (14 mutants, all killed) and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved; the code review raised one MEDIUM (the h2 carries focus-visible:outline-none with no ring, which T014 prescribes and not-found.tsx does the same) and LOW observations (a step 4 card given a handler would read Next: undefined, which the plan says never happens).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-1-step-card.log
+    red_log_sha256: a318c216f42515b329d6a6d8da8c3f3f3b4e8e74072ba97d1a22a5a72f14574d
+    red_evidence: >
+      step-card.test.tsx failed to load (./step-card did not resolve) and three copy.test.ts rows failed (READ_ERRORS.notAnswering, READ_ERRORS.unexpected, STEP2.saveFailed undefined) before the modules existed.
+    green_evidence: >
+      step-card.test.tsx 9 passed and copy.test.ts 149 passed (the setup suites, 193 passed, in green-cycle-1-step-card.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: d3e9ae93d5bcf008124c57f1ed74f571bfc323424e668834e8e7acdd43566b06
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-1-results.json
+      results_sha256: c5ba01b3d8d35038817e05b5f3501f3182f8e8343876e6f16d234901a61e9630
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T010, T015]
+    description: >
+      The step list (AC-25, DAC-E4-1 rendering half, DAC-E4-S2-1, DEC-0348, DEC-0349, DEC-0350): step-list.tsx holds StepList, the left column with an optional header and the vertical stepper as a navigation named Setup steps, bounded by LAYOUT.sideColumnMin and sideColumnMax with dots of LAYOUT.markerSize; a done step that is not the current one is an in-page link to the step heading that calls goTo, and a done step's one-line summary reads Found or Missing (only while health is answering), the saved years, the followed count through formatCount, or the download's start time, else its request time, from the attention answer or the last good one. step-list.test.tsx holds the structure, current and done, activation, keyboard, summaries, layout values and header cases against independent literals. The generator produced 10 mutants and 9 were hand-written from the plan's kill list. The first run left two survivors, both on the link condition: the stepper only links a step whose state is done, so a guard beside it was redundant and unobservable; the link is now derived from the computed state (stepState === done) and the manual mutant changed to its negation, and the run repeated: 19 mutants, all killed. Both reviews approved; the code review raised LOW observations only (a fixture run_id value that holds a scanned word in a test file, no test for an answering state with a null health, and no check that the link click's default is prevented).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-2-step-list.log
+    red_log_sha256: 80eedc89ee01cc651e6ef010d7853a8f7fe3d9cbfc1c24b9bfa9ff0f15a3ed26
+    red_evidence: >
+      step-list.test.tsx failed to load (./step-list did not resolve) before the module existed.
+    green_evidence: >
+      step-list.test.tsx 13 passed (the setup suites, 206 passed, in green-cycle-2-step-list.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 9fac39627bc0ff5968864a955ab68d1a44573359148d7e4c5203863528136469
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-2-results.json
+      results_sha256: f98d8956c3861c27d2cc2d4f988c14e1862888218108e3f30d378d593c8cfef3
+      generated: 19
+      killed: 19
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T002, T003, T004, T011, T016]
+    description: >
+      Step 1, the market data key (TC-COMP-099, TC-COMP-109, TC-COMP-112, AC-4, DAC-E4-3, DAC-E4-S2-2, DAC-E4-S2-5, DEC-0203, DEC-0349): step-market-data.tsx holds StepMarketData, which reads one answer (the health answer only while liveness is answering, so a stale answer kept after a failed poll is never shown) and renders the key line as a StatusBadge Found or Missing from labelOf and tierOf, or NotDeterminable with its reason whenever health is not answering; a missing key adds the variable line, with the name in code type, and the restart line; Continue always moves to step 2 and is never blocked, and nothing of the answer but the boolean reaches the page. step-market-data.test.tsx holds the three renderings, the always-available Continue, the planted-value checks over innerHTML and over every text node and attribute, the stale and never-answered unreachable cases, the badge and description structure, no colour alone, and the position line, Back and unknown-health cases. The generator produced 5 mutants and 11 were hand-written from the plan's kill list (adapted to the single answer value). The first run left one survivor, the step number passed to the card, which no case pinned; a case for the position line and the Next hint was added and the run repeated: 16 mutants, all killed. Both reviews approved; the code review raised LOW observations only (a test that a failed depth read does not show in step 1 would pass if the depth state were ignored, and the sentence split depends on the copy still containing the variable name, which the copy tests pin).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-3-step-market-data.log
+    red_log_sha256: 450750d45a205ef3fe3981f9f570d0777ed9398a4d66dc86e31f0517263064cb
+    red_evidence: >
+      step-market-data.test.tsx failed to load (./step-market-data did not resolve) before the module existed.
+    green_evidence: >
+      step-market-data.test.tsx 21 passed (the setup suites, 227 passed, in green-cycle-3-step-market-data.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 8bd232f1f31afe7d1e9b31d99d8e75c985a74bf4c1b11b25bec1500454ba0690
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-3-results.json
+      results_sha256: acd87c3c6ff41fa678b9d1ede8211e3c949439776b1369edcb03083477f33dae
+      generated: 16
+      killed: 16
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T005, T006, T012, T017]
+    description: >
+      Step 2, the history depth (TC-COMP-108, TC-COMP-111, AC-3, AC-17, DAC-E4-4, DAC-E4-13, DAC-E4-S2-1, DAC-E4-S2-4, DEC-0346, DEC-0347): step-history-depth.tsx holds StepHistoryDepth, a form with a numeric field and the years suffix, checked on blur and on Continue by a schema (a whole number from 1 to 50, spaces ignored, bounds mirroring the server's) and sent only when valid, as a number, through setHistoryDepth; a success re-reads the depth and moves to step 3; a refused value (the 422 code) and any other failure are field errors (the range sentence, and Couldn't save history depth with a reason that never echoes the server's message) with the value kept; a failure that is not an answer from the server is rethrown; the typed text is kept as a draft; a failed depth read shows Couldn't read history depth with Try again in this step only; the plan limit is the card's note. step-history-depth.test.tsx holds TC-COMP-108's composed save through the real step state, the 422 edge, TC-COMP-111's scan (with planted terms) over every state of the list, the card and steps 1 and 2, and the field, initial value, draft, blur and Continue validation, bounds, save, failure, read-failure and Back cases. The form's submit event stands in for Enter in the number field, since user-event's implicit submission lists text-like input types only. The generator produced 15 mutants and 14 were hand-written from the plan's kill list. The first run left three survivors: the trim of the typed text and the rethrow of a failure that is not an API answer, each prescribed by the plan and unpinned, and the generator's removal of the same trim; a rethrow case (through a surfaced-rejection helper) and a restored-draft-with-spaces case were added and the run repeated: 29 mutants, all killed. Both reviews approved; the code review raised one MEDIUM (nothing guards a second submit while the save is in flight, which the plan's Other Notes records as accepted: the same PUT is idempotent) and LOW observations (the initial value is read once, so a depth that arrives after a failed read leaves the field empty).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-4-step-history-depth.log
+    red_log_sha256: 92aed777c826530c53d31b252a34abd5f919777fc61e131e134baeea58711f28
+    red_evidence: >
+      step-history-depth.test.tsx failed to load (./step-history-depth did not resolve) before the module existed.
+    green_evidence: >
+      step-history-depth.test.tsx 39 passed (the setup suites, 266 passed, in green-cycle-4-step-history-depth.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2fbc38663c656a99b668d1acb2991a2695a96d545c7b4f7fbd578880f403f37b
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-4-results.json
+      results_sha256: d7eda990c33eae2ccc2be9c2e2ad42f277abd5c10a0a6497bd4d62cd43a0b17b
+      generated: 29
+      killed: 29
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-5
+    tasks: [T007, T018, T019, T020]
+    description: >
+      The literal scan widened to the setup directory (TC-COMP-110, DAC-E4-S2-3, AC-26), a test-only cycle: token-literals.test.ts gains one appended SCANNED_DIRECTORIES entry, web/src/screens/setup/, and one appended describe block holding the entry, the seven setup sources found by the real walk with no test file among them and no literal in any, and a literal planted in a setup source. T019 and T020 join this cycle's validation evidence (validation-cycle-5.log): the change set is the story's six modules and four test files, copy.ts and copy.test.ts, and token-literals.test.ts with nothing removed, the delivered directories are unchanged against the review base, the planted 12px file placed in the setup directory failed the scan naming it and was deleted, the story's two greps print nothing, and format, lint, tsc, build and the full suite (120 files, 3216 tests) pass; the first full run failed two tests that no change of this story touches, both under a machine load average of 66, which pass alone and on a rerun of the whole suite, as the log records. The first spec-drift review reported drift against T007's text (the block was placed before the layout section rather than appended, its title added a criterion, and a recursive-walk helper, a directory constant and an assertion beyond the plan were added); the block was rewritten to the plan's literal form, RED was observed again on the final bytes and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved with a LOW observation only (the list of seven sources is closed, so a later setup source is scanned but not named).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-5-literal-scan.log
+    red_log_sha256: 7371eb34533a3a4e258e8c7c028557b8007ef3cfcc01c70cb415851e353991b4
+    red_evidence: >
+      With the directory entry removed, TC-COMP-110 (a) and (b) fail: the scan does not list web/src/screens/setup/ and finds none of its sources.
+    green_evidence: >
+      token-literals.test.ts 58 passed (green-cycle-5-literal-scan.log); validation-cycle-5.log holds format, lint, tsc, build and the full suite (3216 passed on the rerun), all clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 6fcd5047a08a410f3288336bd0f052a5b34f141c0c6bdc166f8462ea0cc117fb
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation: {not_applicable: "test-only cycle: token-literals.test.ts gains a scanned directory and adds no production code"}
+
+  - id: cycle-6
+    tasks: [T008, T014]
+    description: >
+      Review rework of implementation review v1 (IR-001, IR-002), a test-only cycle: step-card.test.tsx gains a design-token describe block and two assertions on the existing StepReadError case, pinning the card's data-variant default, gap-5 and p-4, the position line's text-xs and text-muted-foreground, the h2's text-xl, the footer's justify-between with Back first and the Next hint (text-xs) with Continue in the last group, the read-error line's text-destructive and Try again's outline variant. No production change. The nine IR-001 survivors were taken from the review's mutation file as manual mutants (mutants-cycle-6.json). IR-002: T001's pre-change baseline run (npm ci and the full suite at the review base) was never recorded; it cannot be reconstructed after the fact without switching branches in repos/, so it stays absent, and the later full-suite runs on the final bytes (cycle 5's validation-cycle-5.log and this rework's final run) are the suite evidence. Both per-cycle reviews approved; the code review raised one LOW optional observation (the class checks would stop catching a mutant if Card ever applied p-4 or gap-5 as defaults).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/red-cycle-6-step-card-tokens.log
+    red_log_sha256: d87f2be4b9e8b0ffdcf94f516f7642d4a096c057e7e3d61eacfe80986ff7c598
+    red_evidence: >
+      Run against the step-card tests as committed at HEAD, all nine review mutants survived.
+    green_evidence: >
+      step-card.test.tsx 12 passed and the setup suites 269 passed (green-cycle-6-step-card-tokens.log); all nine mutants killed.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 557fa22be929d36a1f9c50d11d32a36ab3ab0afcf48454f0eaa06bd5ab503752
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/cycle-6.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S2-evidence/mutation-cycle-6-results.json
+      results_sha256: b90ed1aebaf6daf1b903ef02a83b8dca9db0eaad1ff09b4565b03ecfb73bc94e
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

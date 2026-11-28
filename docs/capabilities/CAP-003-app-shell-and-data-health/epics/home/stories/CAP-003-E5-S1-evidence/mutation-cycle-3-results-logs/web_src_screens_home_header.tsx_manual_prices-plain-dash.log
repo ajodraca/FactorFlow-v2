@@ -1,0 +1,58 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-0cwwzpw9/w2/web
+
+stderr | src/screens/home/header.test.tsx > HomeHeader: date and prices as-of (TC-COMP-133) > reads the Chicago date in the evening and renders prices unshifted
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/header.test.tsx (28 tests | 2 failed) 79ms
+   × HomeHeader: freshness, failure, loading, tick and composition > (b) ages while the read fails, and the price date is a dash 4ms
+     → expected undefined to be '—' // Object.is equality
+   × HomeHeader: freshness, failure, loading, tick and composition > (c) renders a dash for checked when the read never answered, and never a zero 2ms
+     → expected <span aria-hidden="true"></span> to have a length of 2 but got 1
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (b) ages while the read fails, and the price date is a dash
+AssertionError: expected undefined to be '—' // Object.is equality
+
+- Expected: 
+"—"
+
++ Received: 
+undefined
+
+ ❯ src/screens/home/header.test.tsx:266:31
+    264|     expect(lineText()).not.toContain("2026-10-14");
+    265|     const dash = line.querySelector('[aria-hidden="true"]');
+    266|     expect(dash?.textContent).toBe("—");
+       |                               ^
+    267|     expect(line.querySelector(".sr-only")?.textContent).toBe("not dete…
+    268|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/home/header.test.tsx > HomeHeader: freshness, failure, loading, tick and composition > (c) renders a dash for checked when the read never answered, and never a zero
+AssertionError: expected <span aria-hidden="true"></span> to have a length of 2 but got 1
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/screens/home/header.test.tsx:274:59
+    272|     const line = screen.getByTestId("as-of-line");
+    273|     expect(lineText()).toContain("checked");
+    274|     expect(line.querySelectorAll('[aria-hidden="true"]')).toHaveLength…
+       |                                                           ^
+    275|     expect(line.querySelectorAll(".sr-only")).toHaveLength(2);
+    276|     for (const hidden of line.querySelectorAll(".sr-only")) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 passed (28)
+   Start at  16:11:16
+   Duration  1.18s (transform 84ms, setup 38ms, collect 411ms, tests 79ms, environment 188ms, prepare 33ms)
+

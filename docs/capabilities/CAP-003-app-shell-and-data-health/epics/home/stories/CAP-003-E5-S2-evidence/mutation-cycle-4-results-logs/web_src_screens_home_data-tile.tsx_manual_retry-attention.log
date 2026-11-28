@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ybclssdn/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (57 tests | 1 failed) 351ms
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (a) attention unreachable: the title, the sentence and Try again re-read attention 20ms
+     → expected "spy" to be called with arguments: [ 'attention' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "attention",
++   "scores",
+  ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (a) attention unreachable: the title, the sentence and Try again re-read attention
+AssertionError: expected "spy" to be called with arguments: [ 'attention' ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   "attention",
++   "scores",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/screens/home/data-tile.test.tsx:657:33
+    655|     await userEvent.click(TRY_AGAIN_BUTTON(c));
+    656|     expect(shell.value.refresh).toHaveBeenCalledTimes(1);
+    657|     expect(shell.value.refresh).toHaveBeenCalledWith("attention");
+       |                                 ^
+    658|   });
+    659| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 56 passed (57)
+   Start at  17:06:06
+   Duration  1.52s (transform 93ms, setup 37ms, collect 420ms, tests 351ms, environment 205ms, prepare 111ms)
+

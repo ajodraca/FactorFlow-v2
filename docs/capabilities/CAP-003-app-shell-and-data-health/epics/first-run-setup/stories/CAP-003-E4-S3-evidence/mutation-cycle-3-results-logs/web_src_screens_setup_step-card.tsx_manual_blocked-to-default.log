@@ -1,0 +1,38 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-3h_tryku/w1/web
+
+ ✓ src/screens/setup/copy.test.ts (159 tests) 15ms
+ ✓ src/components/token-literals.test.ts (58 tests) 106ms
+ ❯ src/screens/setup/step-card.test.tsx (14 tests | 1 failed) 124ms
+   × blocked Continue (CAP-003-E4-S3, DAC-E4-7) > is blocked, focusable and described by its reason, and swallows activation 5ms
+     → expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-card.test.tsx > blocked Continue (CAP-003-E4-S3, DAC-E4-7) > is blocked, focusable and described by its reason, and swallows activation
+Error: expect(element).toHaveAttribute("data-variant", "blocked") // element.getAttribute("data-variant") === "blocked"
+
+Expected the element to have attribute:
+  data-variant="blocked"
+Received:
+  data-variant="default"
+ ❯ src/screens/setup/step-card.test.tsx:187:18
+    185|     render(<StepCard step={3} question="Q" onContinue={spy} continueBl…
+    186|     const next = screen.getByRole("button", { name: "Continue" });
+    187|     expect(next).toHaveAttribute("data-variant", "blocked");
+       |                  ^
+    188|     expect(next).toHaveAttribute("aria-disabled", "true");
+    189|     expect(next).toHaveAccessibleDescription(REASON);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 230 passed (231)
+   Start at  13:27:53
+   Duration  1.98s (transform 161ms, setup 259ms, collect 408ms, tests 245ms, environment 1.63s, prepare 624ms)
+

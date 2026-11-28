@@ -1,0 +1,73 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ybclssdn/w2/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (57 tests | 4 failed) 328ms
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (a) attention unreachable: the title, the sentence and Try again re-read attention 6ms
+     → expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (b) attention fails with a server error: a fixed sentence, never the server's words 1ms
+     → expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores 1ms
+     → expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+   × DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores 6ms
+     → expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (a) attention unreachable: the title, the sentence and Try again re-read attention
+AssertionError: expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+
+Expected: "Couldn't read the data summary: FactorFlow is not answering."
+Received: "DataCouldn't read the data summary: GET /api/attention could not be reached.Try again"
+
+ ❯ src/screens/home/data-tile.test.tsx:650:21
+    648|     const c = show(ATT_UNREACHABLE, NOT_SERVED);
+    649|     expect(within(c).getByRole("heading", { level: 2, name: "Data" }))…
+    650|     expect(text(c)).toContain("Couldn't read the data summary: FactorF…
+       |                     ^
+    651|     expect(statusElements(c).length).toBe(0);
+    652|     expect(within(c).queryAllByRole("link").length).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (b) attention fails with a server error: a fixed sentence, never the server's words
+AssertionError: expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+
+Expected: "Couldn't read the data summary: FactorFlow hit an unexpected problem."
+Received: "DataCouldn't read the data summary: Internal error.Try again"
+
+ ❯ src/screens/home/data-tile.test.tsx:662:21
+    660|   it("(b) attention fails with a server error: a fixed sentence, never…
+    661|     const c = show(ATT_500, NOT_SERVED);
+    662|     expect(text(c)).toContain(
+       |                     ^
+    663|       "Couldn't read the data summary: FactorFlow hit an unexpected pr…
+    664|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with no last answer: the error replaces the body and Try again re-reads scores
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile read failures (TC-COMP-131 tile half; DAC-E5-11) > (c) the summary fails with a last answer: the error replaces the body and Try again re-reads scores
+AssertionError: expected 'DataCouldn\'t read the data summary: …' to contain 'Couldn\'t read the data summary: Fact…'
+
+Expected: "Couldn't read the data summary: FactorFlow hit an unexpected problem."
+Received: "DataCouldn't read the data summary: Internal error.Try again"
+
+ ❯ src/screens/home/data-tile.test.tsx:676:23
+    674|     async (_n, scores) => {
+    675|       const c = show(ok(ATTENTION), scores);
+    676|       expect(text(c)).toContain(
+       |                       ^
+    677|         "Couldn't read the data summary: FactorFlow hit an unexpected …
+    678|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 53 passed (57)
+   Start at  17:06:06
+   Duration  1.53s (transform 92ms, setup 43ms, collect 413ms, tests 328ms, environment 195ms, prepare 35ms)
+

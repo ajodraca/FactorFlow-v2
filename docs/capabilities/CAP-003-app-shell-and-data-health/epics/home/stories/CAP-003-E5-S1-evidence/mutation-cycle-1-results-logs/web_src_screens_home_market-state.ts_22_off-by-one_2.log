@@ -1,0 +1,87 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tv2q2soj/w3/web
+
+ ❯ src/screens/home/market-state.test.ts (69 tests | 15 failed) 86ms
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-06T21:00:00Z is closed 4ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-09T20:00:00Z is closed 2ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-10-30T20:00:00Z is closed 2ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-11-02T21:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-03-06T21:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-03-09T20:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-10-30T20:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-11-02T21:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-06T21:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-09T20:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-10-30T20:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-11-02T21:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-06T21:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-09T20:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-10-30T20:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-11-02T21:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-03-06T21:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-03-09T20:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-10-30T20:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-11-02T21:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-06T21:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-09T20:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-10-30T20:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-11-02T21:00:00Z is closed
+AssertionError: expected 'not_determinable' to be 'closed' // Object.is equality
+
+Expected: "closed"
+Received: "not_determinable"
+
+ ❯ src/screens/home/market-state.test.ts:56:46
+     54|   describe("marketState (TC-COMP-132)", () => {
+     55|     it.each(TABLE)("%s is %s", (instant, expected) => {
+     56|       expect(marketState(new Date(instant))).toBe(expected);
+       |                                              ^
+     57|     });
+     58| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > is closed at 08:29:59 and not determinable at 14:59:59, closed at 15:00:00
+AssertionError: expected 'not_determinable' to be 'closed' // Object.is equality
+
+Expected: "closed"
+Received: "not_determinable"
+
+ ❯ src/screens/home/market-state.test.ts:62:61
+     60|       expect(marketState(new Date("2026-10-15T13:29:59Z"))).toBe("clos…
+     61|       expect(marketState(new Date("2026-10-15T19:59:59Z"))).toBe("not_…
+     62|       expect(marketState(new Date("2026-10-15T20:00:00Z"))).toBe("clos…
+       |                                                             ^
+     63|     });
+     64|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ Test Files  1 failed (1)
+      Tests  15 failed | 54 passed (69)
+   Start at  16:04:51
+   Duration  813ms (transform 46ms, setup 32ms, collect 8ms, tests 86ms, environment 281ms, prepare 181ms)
+

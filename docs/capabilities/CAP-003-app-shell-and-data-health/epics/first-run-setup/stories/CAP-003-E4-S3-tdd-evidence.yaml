@@ -1,0 +1,158 @@
+# TDD evidence for CAP-003-E4-S3 - Setup Step 3: Paste a List, the Paste Summary with Near-Miss Fixes, Batches and Add Later.
+# Each cycle is committed as it ends on the story branch; commit_hash: stage names the commit that added the cycle's entry.
+# Reviews: one independent code-review subagent and one independent spec-drift subagent judged each cycle's patch.
+
+cycles:
+  - id: cycle-1
+    tasks: [T002, T010, T015]
+    description: >
+      The paste summary (TC-COMP-113, AC-5, DAC-E4-5, DAC-E4-S3-1, DEC-0218, DEC-0351, DEC-0352): summarise-paste.ts holds SYMBOL_SHAPE and ENTRY_SEPARATOR (mirrors of the delivered parser, pinned equal by test), summarisePaste (accepted in paste order, each repeated valid symbol named once in duplicates, every invalid entry in unreadable with the near-miss fix when a stretch of slash, space or underscore between letters becomes one dot and yields a valid symbol) and replaceEntry (every whole entry equal to the unreadable one replaced, separators and surrounding whitespace kept). summarise-paste.test.ts holds TC-COMP-113's four cases and T010's rule cases (a) to (g). The generator produced 9 mutants and 5 were hand-written from the plan's kill list. The first run left one survivor: the even-index guard on replaceEntry's split parts, which no input can distinguish because a separator run never equals a non-blank parser entry; the guard was removed and the run repeated (14 mutants, all killed). The first code review rejected one HIGH (the word run in a comment, an AC-19 term), fixed; the first spec-drift review reported that ENTRY_SEPARATOR was not exported as T015 states, fixed and given a mirror assertion. Both reviews repeated on the corrected diff approved; the code review left LOW observations only (a replacement string would read $ patterns, an over-long near-miss and a double separator are not pinned).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-1-summarise-paste.log
+    red_log_sha256: 03d633850b3698e6d2681ab10fa35afd9df1b18ea0040c9e49e9769c7c9786f0
+    red_evidence: >
+      summarise-paste.test.ts failed to load (./summarise-paste did not resolve) before the module existed.
+    green_evidence: >
+      summarise-paste.test.ts 32 passed (the setup suites, 301 passed, in green-cycle-1-summarise-paste.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: e59afabc8317f1c076538c6351a8225e89059cbd839d9ad3cdb2a68161eee0d0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-1.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-1-results.json
+      results_sha256: 4ee844246f644d02fc2f6e306d7516cc2c6f6697b2051adbaf06917d6a3e3ae3
+      generated: 14
+      killed: 14
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-2
+    tasks: [T003, T011, T015]
+    description: >
+      The batches (TC-COMP-114 request half, AC-5, AC-17, DAC-E4-6, DAC-E4-S3-2, DEC-0354): post-in-batches.ts holds MAX_SYMBOLS_PER_REQUEST (the mirror of the server bound, pinned equal by reading bounds.py in a test), the BatchOutcome union and postInBatches, which posts one batch at a time through the delivered addInstruments, counts a 409 all_duplicate batch as posted and goes on, collects each batch's rejected dispositions in order, stops at any other ApiError or an ApiUnreachableError returning the posted count with that batch's and every later symbol unposted, and rethrows anything else. post-in-batches.test.ts holds the 1000/1000/500 split, the sequential posting, the 409 and transport and 500 cases, the boundaries, the accumulation, the other refusal codes, the rethrow and the bound mirror. The generator produced 6 mutants and 6 were hand-written from the plan's kill list (the Promise.all mutant is covered by the sequential case and was not generated). All 12 were killed on the first run. Both reviews approved; the code review raised LOW observations only (a 409 batch adds no per-symbol rows, the sequential case settles on a fixed number of microtask ticks, and the bounds mirror and its comment depend on a line layout).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-2-post-in-batches.log
+    red_log_sha256: dd6cc71fa4f5c7bf43b9d7a500f97cf487c3d1219e1affe935bf1803817f2176
+    red_evidence: >
+      post-in-batches.test.ts failed to load (./post-in-batches did not resolve) before the module existed.
+    green_evidence: >
+      post-in-batches.test.ts 13 passed (the setup suites, 314 passed, in green-cycle-2-post-in-batches.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 4359a7dd4502c2e8a74ff4b4addf7736de6b2a0d9d4411b93175577691d302a0
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-2.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-2-results.json
+      results_sha256: b3bb39f765e634958f8aecb4ce634424a3d157f23bb25bc2c18ff3bef8109cad
+      generated: 12
+      killed: 12
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-3
+    tasks: [T013, T014, T016]
+    description: >
+      The copy strings and the blocked Continue (AC-5, DAC-E4-7, DAC-E4-5, DEC-0351, DEC-0354): copy.ts gains five STEP3 members, each with a doc comment saying CAP-003-E4-S3 adds it and which decision gives its wording (duplicateEntry, alreadyFollowedEntry reusing STEP3.alreadyFollowed, saveFailed, followedSoFar, keptForRetry), importing nothing and exporting no number or boolean; step-card.tsx gains the optional continueBlocked prop, whose reason renders as visible text before a blocked Continue described by it (useId), and leaves the footer unchanged without it. copy.test.ts gains the five verbatim rows against independent literals; step-card.test.tsx gains the blocked Continue describe block (T014 a and b) and changes no existing case. The generator produced no mutants (the changes are template strings and JSX attributes) and 10 were hand-written: five on the card's blocked branch from the plan's kill list and one on each copy string. All 10 were killed. The first spec-drift review reported one exceedance (a module-level const sharing the already-followed text, beyond T016's five additions); it was removed in favour of the plan's literal wording, the mutation run repeated and both reviews repeated on the corrected diff, which this entry records. Both repeated reviews approved; the code review raised LOW observations only (the Tab case depends on no Back button rendering, the reason carries no live-region role, STEP3 is read inside its own initializer, safely).
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-3-copy-and-blocked-continue.log
+    red_log_sha256: 111daff3d6c1d1cbf2fea4eaef67de3ba4b69621dd1003fc2ce7f178a1aa17fd
+    red_evidence: >
+      Five copy.test.ts rows failed (STEP3.duplicateEntry, alreadyFollowedEntry, saveFailed, followedSoFar and keptForRetry undefined) and the blocked Continue case in step-card.test.tsx failed (the footer had no blocked variant) before the changes.
+    green_evidence: >
+      copy.test.ts and step-card.test.tsx pass (the setup suites and token-literals.test.ts, 384 passed, in green-cycle-3-copy-and-blocked-continue.log); tsc --noEmit, biome lint and biome format clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: aa7926892eb61738c248bf136b1ba6c1e26411d1709d145afdc9438cbb661646
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-3-results.json
+      results_sha256: e9760728449c3a91c90bbcde180ee43ab6f73d545c42a4be49945bf2a84656ff
+      generated: 10
+      killed: 10
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []
+
+  - id: cycle-4
+    tasks: [T004, T005, T006, T007, T008, T009, T012, T017, T018, T019]
+    description: >
+      Step 3 (TC-COMP-100, TC-COMP-103, TC-COMP-114 screen half, TC-COMP-115, TC-COMP-116, TC-COMP-117, TC-COMP-118; AC-3, AC-5, AC-6, AC-17, AC-19, DAC-E4-5 to DAC-E4-7, DAC-E4-11, DAC-E4-13, DAC-E4-S3-1 to DAC-E4-S3-6; DEC-0351 to DEC-0355): step-stocks.tsx holds StepStocks through the step card (the radio-group cards Paste a list and Add later with no file control; the textarea list field parsed on paste and on blur only, upper-cased on blur, with a polite live region tied to the field by aria-describedby holding the counter and every duplicate, unreadable and already-followed entry as text; Did you mean {fix}? as an outline button that replaces the entry, re-parses and refocuses the field; the below-30 warning for 1 to 29 accepted with Continue available; Continue blocked with its reason at zero accepted or with nothing chosen; Add later and Continue posting nothing and making step 4 current; Continue posting the accepted symbols in batches and reporting already-followed entries from the duplicate_active dispositions while keeping step 3 current, moving on when there is nothing to report; a failed batch keeping its and later entries in the field, counting the posted ones and staying on the step; a failed count read as Couldn't read the followed list with Try again). Its module comment records DAC-E4-S3-6 (no badge, one-tier rule not applicable, NotDeterminable unused). step-stocks.test.tsx holds the cases of T004 to T009 and T012. The generator produced 36 mutants and 20 were hand-written from the plan's kill list and the step's own behaviour. The first run left nine survivors: seven were strengthened by new cases (a single accepted symbol warns, an empty paste field is blocked, a keystroke typed before any paste or after a blur never parses, exactly one unposted entry is stated, and no kept line shows with none) and two are equivalent, recorded below; the run was repeated (56 mutants, 54 killed, 2 equivalent). Deviations from the plan, all in tests: T008 (c) gives the counter for the row 4 paste as 3 recognised but KO and AAPL are the two accepted symbols (the counter counts unique accepted symbols, as T005 and T012 (e) use it), so the test asserts 2 recognised, 1 duplicates, 2 not recognised; T008 (e) says each summary li text ends with a phrase but an entry with a fix ends with its button, so each li is checked to contain one. Both reviews approved. The code review raised one MEDIUM and LOW observations, none a plan violation and left as follow-ups for the owner: Back stays active while a post is in flight, so the post's goTo can pull the owner forward again; the failure alert stays after switching to Add later; the unposted count in the draft goes stale if the text is edited after a failure; the report keys assume unique lines; an empty list renders inside the live region. Full validation on the final bytes: npm run format, lint, tsc --noEmit and build clean, npm run test 3317 passed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-4-step-stocks.log
+    red_log_sha256: 89a079cfc56d273ac5ad9bcc9b9baaccdc7efa831a5e6b752b8b9eb2fcd508d6
+    red_evidence: >
+      step-stocks.test.tsx failed to load (./step-stocks did not resolve) before the module existed.
+    green_evidence: >
+      step-stocks.test.tsx 41 passed (the setup suites and token-literals.test.ts, 425 passed, in green-cycle-4-step-stocks.log); the full suite 3317 passed; tsc --noEmit, biome lint, biome format and build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 63eb8e56d1f1b328b7019eb0a9623c70c8c398b825ac8024164d4924204518e1
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-4.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-4-results.json
+      results_sha256: a6be0b758079c5bb958cbc9ccb5cfa8c98f56b5660dff2d065761171f5db3d45
+      generated: 56
+      killed: 54
+      survived: 2
+      stillborn: 0
+      timeout: 0
+      score: 0.964
+      survivors:
+        - id: web/src/screens/setup/step-stocks.tsx:205:off-by-one:2
+          disposition: equivalent
+          reason: "posted > 1 against posted > 0 differs only at posted == 1, which cannot happen: batches hold 1000 symbols and a failure stops the requests, so posted is 0 or a multiple of 1000 (the post-in-batches cases pin it)."
+        - id: web/src/screens/setup/step-stocks.tsx:manual:blocked-source-not-later
+          disposition: equivalent
+          reason: "The blocked formula reads source === null || (source === paste && accepted === 0); the plan's kill list says source !== later would differ, but a null source is already blocked by the first disjunct, so the two forms agree for every source."
+
+  - id: cycle-5
+    tasks: [T007, T012, T016, T017]
+    description: >
+      Rework of CAP-003-E4-S3-implementation-review-v1 (IR-001 to IR-005). IR-001: TC-COMP-116 gains a 201 whose rejected entry is malformed; the live region must say "ZZZZ!, not a valid symbol format", the server reason must be absent and step 3 stays current. IR-002: replaceEntry is pinned on a lone tab separator. IR-003: a re-post that is held and then fails must not show the previous post's already-followed line. IR-004 (production): step-stocks.tsx keeps onStepRef, set false by Back and by the unmount cleanup (and true again on mount, for StrictMode), and a post that settles afterwards no longer calls goTo; tests cover success, failure and unmount after Back. IR-005 (production): step-card.tsx renders one Button whose variant and aria-describedby switch, with the reason paragraph conditional beside it, so toggling blocked and default no longer replaces the element; a test pins element identity. IR-001 to IR-003 are test-strength gaps, so their new tests pass on the unchanged production code and are proved by the reviewer's three mutants, rerun here as manual mutants and all killed. RED: IR-004 (two cases) and IR-005 failed before the production change. Both per-cycle reviews approved (code review LOW observations only; spec drift none). Full validation on the final bytes: npm run format, lint, tsc --noEmit and build clean, npm run test 3324 passed.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/red-cycle-5-review-v1-rework.log
+    red_log_sha256: 3d0baa4ae8f765af2847e76d1e83143bcea4647c4d06693f10f0a18d96df746c
+    red_evidence: >
+      Three new cases failed before the production change: the IR-005 element-identity case and the two IR-004 cases (a post settling after Back, and after unmount, called goTo again). The IR-001 to IR-003 cases are test-strength additions and passed on the unchanged code, as the review's findings describe.
+    green_evidence: >
+      The setup suites and token-literals.test.ts, 432 passed, in green-cycle-5-review-v1-rework.log; the full suite 3324 passed; tsc --noEmit, biome lint, biome format and build clean.
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+    diff_sha256: 2c01b3e4a328df2360172204b9ff2fe159062d75c981152af1d2cab2f444b2e8
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/cycle-5.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/first-run-setup/stories/CAP-003-E4-S3-evidence/mutation-cycle-5-results.json
+      results_sha256: a6335f3589105530acaa8da5ed014c860bbce78176f9ed7e745cb1ecba4a6815
+      generated: 19
+      killed: 18
+      survived: 1
+      stillborn: 0
+      timeout: 0
+      score: 0.947
+      survivors:
+        - id: web/src/screens/setup/step-stocks.tsx:149:negate-boolean:1
+          disposition: equivalent
+          reason: "useRef(true) against useRef(false) differs only before the mount effect runs, and that effect sets the ref to true before any event can start a post, so no observable behaviour differs."

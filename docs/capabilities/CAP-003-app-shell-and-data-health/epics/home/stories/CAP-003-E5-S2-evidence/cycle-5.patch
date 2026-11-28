@@ -1,0 +1,130 @@
+diff --git a/web/src/screens/home/data-tile.test.tsx b/web/src/screens/home/data-tile.test.tsx
+index 6571110c..fd55a291 100644
+--- a/web/src/screens/home/data-tile.test.tsx
++++ b/web/src/screens/home/data-tile.test.tsx
+@@ -581,7 +581,9 @@ describe("DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20)", () => {
+   it("(b) every dash is aria-hidden with hidden words after it", () => {
+     for (const scores of [NOT_SERVED, served(NEVER)]) {
+       const c = show(ok(ATTENTION), scores);
+-      for (const dash of [...c.querySelectorAll("span")].filter((el) => el.textContent === "—")) {
++      const dashes = [...c.querySelectorAll("span")].filter((el) => el.textContent === "—");
++      expect(dashes.length).toBe(scores === NOT_SERVED ? 2 : 1);
++      for (const dash of dashes) {
+         expect(dash.getAttribute("aria-hidden")).toBe("true");
+         expect(dash.nextElementSibling?.className).toContain("sr-only");
+         expect(dash.nextElementSibling?.textContent).toBe("not determinable");
+@@ -726,3 +728,76 @@ describe("DataTile display vocabulary (TC-COMP-139; DAC-E5-S2-4, AC-19)", () =>
+     expect("Next run").toMatch(TERMS);
+   });
+ });
++
++// Review v1 rework (CAP-003-E5-S2-implementation-review-v1, IR-001 to IR-007).
++const NEVER_BUILDING = SUMMARY({
++  never_classified: true,
++  set: null,
++  stocks_current: null,
++  later: BUILDING.later,
++});
++const BIG = SUMMARY({ stocks_current: { current_count: 1233, followed_count: 1236 } });
++const classesOf = (el: Element | null | undefined): string[] => [...(el?.classList ?? [])];
++
++describe("DataTile review v1 rework", () => {
++  it("IR-001: a building later set alone, with no set, shows the lag badge", () => {
++    const c = show(ok(ATTENTION), served(NEVER_BUILDING));
++    expect(variantOf(lagOf(c))).toBe("status-warning");
++    expect(lagOf(c)?.textContent?.trim()).toBe("Not reflecting the latest download");
++  });
++
++  it("IR-002: the hero and the name group thousands when served", () => {
++    const c = show(ok({ ...ATTENTION, followed_count: 1236 }), served(BIG));
++    expect(collapsed(heroOf(c))).toBe("1,233 of 1,236 stocks current");
++    expect(nameOf(c)).toContain("1,233 of 1,236 stocks current");
++  });
++
++  it("IR-002: the followed count groups thousands when not served", () => {
++    const c = show(ok({ ...ATTENTION, followed_count: 1236 }), NOT_SERVED);
++    expect(collapsed(heroOf(c))).toBe("—not determinable of 1,236 stocks current");
++    expect(nameOf(c)).toContain("not determinable of 1,236 stocks current");
++  });
++
++  it.each([
++    ["attention fails", ATT_UNREACHABLE, NOT_SERVED],
++    ["the summary fails", ok(ATTENTION), SUMMARY_500],
++  ])("IR-003: when %s the error card is a metric card and a region named Data", (_n, a, s) => {
++    const c = show(a, s);
++    expect(within(c).getByRole("region", { name: "Data" })).toBeTruthy();
++    expect(c.querySelector('[data-variant="metric"]')).not.toBeNull();
++  });
++
++  it.each([
++    ["attention loading", ATT_LOADING, NOT_SERVED],
++    ["summary loading", ok(ATTENTION), LOADING],
++  ])("IR-004: the %s skeleton is a titled region over a pulse block", (_n, a, s) => {
++    const c = show(a, s);
++    const card = c.querySelector('[data-testid="data-tile-skeleton"]');
++    expect(card?.getAttribute("data-variant")).toBe("metric");
++    expect(within(c).getByRole("heading", { level: 2, name: "Data" })).toBeTruthy();
++    expect(within(c).getByRole("region", { name: "Data" })).toBeTruthy();
++    const pulse = card?.querySelector('[aria-hidden="true"]');
++    for (const name of ["min-h-7", "w-full", "animate-pulse", "rounded", "bg-secondary"]) {
++      expect(classesOf(pulse)).toContain(name);
++    }
++  });
++
++  it("IR-005: the link is a block with rounded corners and the scope sentence is muted small text", () => {
++    const c = show(ok(ATTENTION), served(SUMMARY()));
++    const link = within(c).getByRole("link");
++    expect(classesOf(link)).toContain("block");
++    expect(classesOf(link)).toContain("rounded");
++    const scope = lineStarting(c, "Every other number");
++    expect(classesOf(scope)).toContain("text-xs");
++    expect(classesOf(scope)).toContain("text-muted-foreground");
++  });
++
++  it("IR-006: Downloading sits under the title, before the first-download sentence", () => {
++    const c = show(ok(FIRST("running", "2026-10-15T21:02:00Z")), NOT_SERVED);
++    const heading = within(c).getByRole("heading", { level: 2, name: "Data" });
++    const badge = c.querySelector('[data-testid="data-tile-badge"]') as Element;
++    const sentence = within(c).getByText(/Your first download, started/);
++    expect(heading.compareDocumentPosition(badge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    expect(badge.compareDocumentPosition(sentence) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++  });
++});
+diff --git a/web/src/screens/home/data-tile.tsx b/web/src/screens/home/data-tile.tsx
+index b3a72e55..213b2fce 100644
+--- a/web/src/screens/home/data-tile.tsx
++++ b/web/src/screens/home/data-tile.tsx
+@@ -65,7 +65,7 @@ function scoreStatus(scores: ScoreState): ScoresStatus | null {
+   return scores.kind === "served" ? { of: "scores", state: scoreStateOf(scores.data) } : null;
+ }
+ 
+-/** The section, the link and the card every state shares (Resolved Conflict 4). */
++/** The section, link and card the first-download and full states share; the error and skeleton states build their own, without the link (Resolved Conflict 4). */
+ function TileLink({
+   name,
+   titleId,
+@@ -178,13 +178,18 @@ export function DataTile(): JSX.Element | null {
+   if (badge === null) {
+     const time = formatInstant(d.started_at ?? d.requested_at);
+     return (
+-      <TileLink name={DATA_TILE.firstDownloadName(time)} titleId={titleId}>
++      <TileLink
++        name={DATA_TILE.firstDownloadName(time)}
++        titleId={titleId}
++        badge={
++          d.state === "running" ? (
++            <span data-testid="data-tile-badge">
++              <StatusBadge tier={tierOf(RUNNING)}>{labelOf(RUNNING)}</StatusBadge>
++            </span>
++          ) : null
++        }
++      >
+         <p>{DATA_TILE.firstDownloadRunning(time)}</p>
+-        {d.state === "running" ? (
+-          <span data-testid="data-tile-badge">
+-            <StatusBadge tier={tierOf(RUNNING)}>{labelOf(RUNNING)}</StatusBadge>
+-          </span>
+-        ) : null}
+       </TileLink>
+     );
+   }

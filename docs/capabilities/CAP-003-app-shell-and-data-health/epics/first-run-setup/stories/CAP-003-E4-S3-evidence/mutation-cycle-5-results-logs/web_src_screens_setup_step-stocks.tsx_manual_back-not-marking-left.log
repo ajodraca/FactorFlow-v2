@@ -1,0 +1,79 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ibgdomkt/w1/web
+
+ ✓ src/screens/setup/copy.test.ts (159 tests) 26ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 4ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 13ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 118ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 164ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 192ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 185ms
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 248ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 1504ms
+ ❯ src/screens/setup/step-stocks.test.tsx (46 tests | 2 failed) 2865ms
+   × rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post settles after Back (IR-004) 100ms
+     → expected [ [ 2 ], [ 4 ] ] to deeply equal [ [ 2 ] ]
+   × rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post fails after Back (IR-004) 61ms
+     → expected [ [ 2 ], [ 3 ] ] to deeply equal [ [ 2 ] ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post settles after Back (IR-004)
+AssertionError: expected [ [ 2 ], [ 4 ] ] to deeply equal [ [ 2 ] ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      2,
+    ],
++   Array [
++     4,
++   ],
+  ]
+
+ ❯ src/screens/setup/step-stocks.test.tsx:922:32
+    920|     held.resolve(okResult(["AAPL"]));
+    921|     await waitFor(() => expect(field()).not.toHaveAttribute("readonly"…
+    922|     expect(goToSpy.mock.calls).toEqual([[2]]);
+       |                                ^
+    923|   });
+    924| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post fails after Back (IR-004)
+AssertionError: expected [ [ 2 ], [ 3 ] ] to deeply equal [ [ 2 ] ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      2,
+    ],
++   Array [
++     3,
++   ],
+  ]
+
+ ❯ src/screens/setup/step-stocks.test.tsx:937:32
+    935|     held.reject(new ApiUnreachableError("x"));
+    936|     await screen.findByRole("alert");
+    937|     expect(goToSpy.mock.calls).toEqual([[2]]);
+       |                                ^
+    938|   });
+    939| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  2 failed | 372 passed (374)
+   Start at  14:06:27
+   Duration  4.38s (transform 587ms, setup 586ms, collect 3.80s, tests 5.32s, environment 3.49s, prepare 1.42s)
+

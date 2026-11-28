@@ -223,6 +223,28 @@ const ROWS: [string, string[], string][] = [
     "Couldn't read history depth: the server said no",
   ],
   ["READ_ERRORS.tryAgain", [], "Try again"],
+  ["READ_ERRORS.notAnswering", [], "FactorFlow is not answering"],
+  ["READ_ERRORS.unexpected", [], "FactorFlow hit an unexpected problem"],
+  [
+    "STEP2.saveFailed",
+    ["FactorFlow is not answering"],
+    "Couldn't save history depth: FactorFlow is not answering",
+  ],
+  ["STEP3.duplicateEntry", ["KO"], "KO, listed more than once"],
+  ["STEP3.alreadyFollowedEntry", ["KO"], "KO, already followed"],
+  [
+    "STEP3.saveFailed",
+    ["FactorFlow is not answering"],
+    "Couldn't save the followed list: FactorFlow is not answering",
+  ],
+  ["STEP3.followedSoFar", ["1,000"], "1,000 followed so far."],
+  ["STEP3.keptForRetry", ["1,500"], "1,500 not saved yet; kept in the list to try again."],
+  [
+    "STEP4.startFailed",
+    ["FactorFlow is not answering"],
+    "Couldn't start the download: FactorFlow is not answering",
+  ],
+  ["STEP4.depthAbsent", [], "History depth isn't set"],
 ];
 
 describe("setup copy is complete and verbatim", () => {

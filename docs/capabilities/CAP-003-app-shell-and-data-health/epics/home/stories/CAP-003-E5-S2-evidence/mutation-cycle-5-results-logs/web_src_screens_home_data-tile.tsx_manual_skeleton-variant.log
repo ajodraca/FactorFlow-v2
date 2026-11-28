@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-fzodkdja/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (66 tests | 2 failed) 376ms
+   × DataTile review v1 rework > IR-004: the attention loading skeleton is a titled region over a pulse block 7ms
+     → expected 'default' to be 'metric' // Object.is equality
+   × DataTile review v1 rework > IR-004: the summary loading skeleton is a titled region over a pulse block 1ms
+     → expected 'default' to be 'metric' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile review v1 rework > IR-004: the attention loading skeleton is a titled region over a pulse block
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile review v1 rework > IR-004: the summary loading skeleton is a titled region over a pulse block
+AssertionError: expected 'default' to be 'metric' // Object.is equality
+
+Expected: "metric"
+Received: "default"
+
+ ❯ src/screens/home/data-tile.test.tsx:776:48
+    774|     const c = show(a, s);
+    775|     const card = c.querySelector('[data-testid="data-tile-skeleton"]');
+    776|     expect(card?.getAttribute("data-variant")).toBe("metric");
+       |                                                ^
+    777|     expect(within(c).getByRole("heading", { level: 2, name: "Data" }))…
+    778|     expect(within(c).getByRole("region", { name: "Data" })).toBeTruthy…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 64 passed (66)
+   Start at  17:29:53
+   Duration  1.58s (transform 131ms, setup 44ms, collect 483ms, tests 376ms, environment 234ms, prepare 41ms)
+

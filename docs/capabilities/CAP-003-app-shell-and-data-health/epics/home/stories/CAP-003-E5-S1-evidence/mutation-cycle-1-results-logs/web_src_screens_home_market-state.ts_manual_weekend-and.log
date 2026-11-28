@@ -1,0 +1,63 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-tv2q2soj/w1/web
+
+ ❯ src/screens/home/market-state.test.ts (69 tests | 12 failed) 85ms
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-07T18:00:00Z is closed 4ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-08T17:00:00Z is closed 4ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-10-31T17:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-11-01T18:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-03-07T18:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-03-08T17:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-10-31T17:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=UTC > marketState (TC-COMP-132) > 2026-11-01T18:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-07T18:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-08T17:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-10-31T17:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+   × under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-11-01T18:00:00Z is closed 1ms
+     → expected 'not_determinable' to be 'closed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-07T18:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-03-08T17:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-10-31T17:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=Asia/Tokyo > marketState (TC-COMP-132) > 2026-11-01T18:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-03-07T18:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-03-08T17:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-10-31T17:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=UTC > marketState (TC-COMP-132) > 2026-11-01T18:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-07T18:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-03-08T17:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-10-31T17:00:00Z is closed
+ FAIL  src/screens/home/market-state.test.ts > under TZ=America/Los_Angeles > marketState (TC-COMP-132) > 2026-11-01T18:00:00Z is closed
+AssertionError: expected 'not_determinable' to be 'closed' // Object.is equality
+
+Expected: "closed"
+Received: "not_determinable"
+
+ ❯ src/screens/home/market-state.test.ts:56:46
+     54|   describe("marketState (TC-COMP-132)", () => {
+     55|     it.each(TABLE)("%s is %s", (instant, expected) => {
+     56|       expect(marketState(new Date(instant))).toBe(expected);
+       |                                              ^
+     57|     });
+     58| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ Test Files  1 failed (1)
+      Tests  12 failed | 57 passed (69)
+   Start at  16:04:54
+   Duration  804ms (transform 24ms, setup 30ms, collect 9ms, tests 85ms, environment 153ms, prepare 28ms)
+

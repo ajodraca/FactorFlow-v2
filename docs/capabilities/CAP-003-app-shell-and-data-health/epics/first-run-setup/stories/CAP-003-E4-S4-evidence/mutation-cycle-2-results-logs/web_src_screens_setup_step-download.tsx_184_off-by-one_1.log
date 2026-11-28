@@ -1,0 +1,86 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-ck2w3cze/w1/web
+
+ ✓ src/screens/setup/copy.test.ts (163 tests) 59ms
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 9ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 69ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 508ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 881ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 774ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 732ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 931ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 882ms
+   ✓ TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable 347ms
+ ❯ src/screens/setup/step-download.test.tsx (71 tests | 2 failed) 3687ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 473ms
+   × TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2 190ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: history depth isn't set.
+Received:
+  Couldn't start the download: no stocks are followed.Go to step 2
+   × TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3 35ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: no stocks are followed.
+Received:
+  Couldn't start the download: history depth isn't set.Go to step 3
+   ✓ TC-COMP-120: blocked step 4 by keyboard > is focusable, inert and described, with both exits by Tab 389ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 3508ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 665ms
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 5025ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 663ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 355ms
+   ✓ parse on paste and blur only; the requests (TC-COMP-114; DAC-E4-S3-2, DAC-E4-6) > parses once on paste and once on blur, never per keystroke 320ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (d) 409 history_depth_not_set names step 2
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: history depth isn't set.
+Received:
+  Couldn't start the download: no stocks are followed.Go to step 2
+ ❯ src/screens/setup/step-download.test.tsx:300:19
+    298|     await userEvent.click(startButton());
+    299|     const alert = await screen.findByRole("alert");
+    300|     expect(alert).toHaveTextContent("Couldn't start the download: hist…
+       |                   ^
+    301|     const link = within(alert).getByRole("link", { name: "Go to step 2…
+    302|     expect(link).toHaveAttribute("href", "#setup-step-heading");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (e) 409 no_active_instruments names step 3
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Couldn't start the download: no stocks are followed.
+Received:
+  Couldn't start the download: history depth isn't set.Go to step 3
+ ❯ src/screens/setup/step-download.test.tsx:316:19
+    314|     await userEvent.click(startButton());
+    315|     const alert = await screen.findByRole("alert");
+    316|     expect(alert).toHaveTextContent("Couldn't start the download: no s…
+       |                   ^
+    317|     await userEvent.click(within(alert).getByRole("link", { name: "Go …
+    318|     expect(state.goTo).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  2 failed | 447 passed (449)
+   Start at  14:41:39
+   Duration  11.22s (transform 3.02s, setup 4.12s, collect 18.44s, tests 16.29s, environment 19.26s, prepare 3.46s)
+

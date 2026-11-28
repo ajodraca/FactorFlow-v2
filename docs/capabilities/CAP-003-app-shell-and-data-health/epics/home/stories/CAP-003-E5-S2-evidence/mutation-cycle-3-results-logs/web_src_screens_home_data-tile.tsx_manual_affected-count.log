@@ -1,0 +1,163 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-5cxrf048/w3/web
+
+stderr | src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (a) requested: the sentence from requested_at and no badge
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/screens/home/data-tile.test.tsx (49 tests | 9 failed) 294ms
+   × DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (d) settled: with a download ended the verdict badge shows 8ms
+     → expected 'status-good' to be 'status-warning' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (a) 1 of 10, partial -> status-warning Mostly yes 3ms
+     → expected 'status-good' to be 'status-warning' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (a) 10 of 10, succeeded -> status-critical No 2ms
+     → expected 'status-good' to be 'status-critical' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (c) ties and the worse verdict 0 2ms
+     → expected 'Score update failed' to be 'No' // Object.is equality
+   × DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (c) ties and the worse verdict 2 2ms
+     → expected 'status-good' to be 'status-warning' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (a) one link named by title, verdict, figures and as-of 4ms
+     → expected 'Data: yes. 27 of 30 stocks current. S…' to be 'Data: mostly yes. 27 of 30 stocks cur…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when not served 3ms
+     → expected 'Data: yes. not determinable of 26 sto…' to be 'Data: mostly yes. not determinable of…' // Object.is equality
+   × DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when never classified 4ms
+     → expected 'Data: yes. not determinable of 26 sto…' to be 'Data: mostly yes. not determinable of…' // Object.is equality
+   × DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape 7ms
+     → expected 'Yes' to be 'Mostly yes' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile first download (TC-COMP-136; DAC-E5-S2-1, DAC-E5-2, AC-21) > (d) settled: with a download ended the verdict badge shows
+AssertionError: expected 'status-good' to be 'status-warning' // Object.is equality
+
+Expected: "status-warning"
+Received: "status-good"
+
+ ❯ src/screens/home/data-tile.test.tsx:220:49
+    218|     const c = show(ok(ATTENTION), NOT_SERVED);
+    219|     const badge = badgeOf(c);
+    220|     expect(badge?.getAttribute("data-variant")).toBe("status-warning");
+       |                                                 ^
+    221|     expect(badge?.textContent?.trim()).toBe("Mostly yes");
+    222|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (a) 1 of 10, partial -> status-warning Mostly yes
+AssertionError: expected 'status-good' to be 'status-warning' // Object.is equality
+
+Expected: "status-warning"
+Received: "status-good"
+
+ ❯ src/screens/home/data-tile.test.tsx:313:35
+    311|   ] as const)("(a) %s of %s, %s -> %s %s", (stock, followed, state, va…
+    312|     const c = show(ok(VERDICT(stock, followed, state)), NOT_SERVED);
+    313|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    314|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    315|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (a) 10 of 10, succeeded -> status-critical No
+AssertionError: expected 'status-good' to be 'status-critical' // Object.is equality
+
+Expected: "status-critical"
+Received: "status-good"
+
+ ❯ src/screens/home/data-tile.test.tsx:313:35
+    311|   ] as const)("(a) %s of %s, %s -> %s %s", (stock, followed, state, va…
+    312|     const c = show(ok(VERDICT(stock, followed, state)), NOT_SERVED);
+    313|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    314|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    315|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (c) ties and the worse verdict 0
+AssertionError: expected 'Score update failed' to be 'No' // Object.is equality
+
+Expected: "No"
+Received: "Score update failed"
+
+ ❯ src/screens/home/data-tile.test.tsx:352:45
+    350|     const c = show(ok(attention), served(summary));
+    351|     expect(variantOf(badgeOf(c))).toBe(variant);
+    352|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+       |                                             ^
+    353|   });
+    354| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile verdict (TC-COMP-137; DAC-E5-S2-2, DAC-E5-3, AC-11) > (c) ties and the worse verdict 2
+AssertionError: expected 'status-good' to be 'status-warning' // Object.is equality
+
+Expected: "status-warning"
+Received: "status-good"
+
+ ❯ src/screens/home/data-tile.test.tsx:351:35
+    349|   ] as const)("(c) ties and the worse verdict %#", (attention, summary…
+    350|     const c = show(ok(attention), served(summary));
+    351|     expect(variantOf(badgeOf(c))).toBe(variant);
+       |                                   ^
+    352|     expect(badgeOf(c)?.textContent?.trim()).toBe(word);
+    353|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (a) one link named by title, verdict, figures and as-of
+AssertionError: expected 'Data: yes. 27 of 30 stocks current. S…' to be 'Data: mostly yes. 27 of 30 stocks cur…' // Object.is equality
+
+Expected: "Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+Received: "Data: yes. 27 of 30 stocks current. Scores 2026-10-15 17:46 CDT, prices 2026-10-14."
+
+ ❯ src/screens/home/data-tile.test.tsx:429:23
+    427|     expect(links.length).toBe(1);
+    428|     expect(links[0]?.getAttribute("href")).toMatch(/\/data$/);
+    429|     expect(nameOf(c)).toBe(
+       |                       ^
+    430|       "Data: mostly yes. 27 of 30 stocks current. Scores 2026-10-15 17…
+    431|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when not served
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile link (TC-COMP-138; DAC-E5-S2-3) > (c) the name when never classified
+AssertionError: expected 'Data: yes. not determinable of 26 sto…' to be 'Data: mostly yes. not determinable of…' // Object.is equality
+
+Expected: "Data: mostly yes. not determinable of 26 stocks current. Scores not determinable, prices 2026-10-14."
+Received: "Data: yes. not determinable of 26 stocks current. Scores not determinable, prices 2026-10-14."
+
+ ❯ src/screens/home/data-tile.test.tsx:460:23
+    458|   ])("(c) the name when %s", (_n, scores, attention, expected) => {
+    459|     const c = show(ok(attention), scores);
+    460|     expect(nameOf(c)).toBe(expected);
+       |                       ^
+    461|   });
+    462| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  src/screens/home/data-tile.test.tsx > DataTile shape and dashes (TC-COMP-140; DAC-E5-S2-5, AC-20) > (a) every badge carries its label as text and one hidden shape
+AssertionError: expected 'Yes' to be 'Mostly yes' // Object.is equality
+
+Expected: "Mostly yes"
+Received: "Yes"
+
+ ❯ src/screens/home/data-tile.test.tsx:535:42
+    533|     for (const [c, word] of rendered) {
+    534|       const badge = c.querySelector('[data-testid="data-tile-badge"] […
+    535|       expect(badge?.textContent?.trim()).toBe(word);
+       |                                          ^
+    536|       expect(badge?.querySelectorAll("svg").length).toBe(1);
+    537|       expect(badge?.querySelector("svg")?.getAttribute("aria-hidden"))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 40 passed (49)
+   Start at  17:02:13
+   Duration  1.75s (transform 95ms, setup 38ms, collect 580ms, tests 294ms, environment 202ms, prepare 170ms)
+

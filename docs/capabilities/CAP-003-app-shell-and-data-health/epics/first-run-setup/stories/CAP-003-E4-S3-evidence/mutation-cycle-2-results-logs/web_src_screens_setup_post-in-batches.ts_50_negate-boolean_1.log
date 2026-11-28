@@ -1,0 +1,82 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-52c7m1x4/w0/web
+
+ ❯ src/screens/setup/post-in-batches.test.ts (13 tests | 5 failed) 14ms
+   × postInBatches (TC-COMP-114) > stops at a transport failure and keeps that batch and the later ones 2ms
+     → x
+   × postInBatches (TC-COMP-114) > stops at a 500 on the first batch with everything unposted 4ms
+     → x
+   × postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > takes the failure path for a all_malformed refusal 1ms
+     → x
+   × postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > takes the failure path for a validation_error refusal 0ms
+     → x
+   × postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > takes the failure path for a no code refusal 0ms
+     → x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches (TC-COMP-114) > stops at a transport failure and keeps that batch and the later ones
+ApiUnreachableError: x
+ ❯ src/screens/setup/post-in-batches.test.ts:82:19
+     80| 
+     81|   it("stops at a transport failure and keeps that batch and the later …
+     82|     const error = new ApiUnreachableError("x");
+       |                   ^
+     83|     vi.mocked(addInstruments)
+     84|       .mockResolvedValueOnce({ added: [], reactivated: [], rejected: […
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches (TC-COMP-114) > stops at a 500 on the first batch with everything unposted
+ApiError: x
+ ❯ src/screens/setup/post-in-batches.test.ts:99:19
+     97| 
+     98|   it("stops at a 500 on the first batch with everything unposted", asy…
+     99|     const error = new ApiError("x", "req-2", { code: "internal_error" …
+       |                   ^
+    100|     vi.mocked(addInstruments).mockRejectedValueOnce(error);
+    101|     const result = await postInBatches(symbols(2500));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > takes the failure path for a all_malformed refusal
+ApiError: x
+ ❯ src/screens/setup/post-in-batches.test.ts:141:23
+    139| 
+    140|   it.each([
+    141|     ["all_malformed", new ApiError("x", "req-3", { code: "all_malforme…
+       |                       ^
+    142|     ["validation_error", new ApiError("x", "req-3", { code: "validatio…
+    143|     ["no code", new ApiError("x", "req-4", { code: null })],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > takes the failure path for a validation_error refusal
+ApiError: x
+ ❯ src/screens/setup/post-in-batches.test.ts:142:26
+    140|   it.each([
+    141|     ["all_malformed", new ApiError("x", "req-3", { code: "all_malforme…
+    142|     ["validation_error", new ApiError("x", "req-3", { code: "validatio…
+       |                          ^
+    143|     ["no code", new ApiError("x", "req-4", { code: null })],
+    144|   ])("takes the failure path for a %s refusal", async (_name, error) =…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/setup/post-in-batches.test.ts > postInBatches rules (DAC-E4-6, AC-17; DEC-0354) > takes the failure path for a no code refusal
+ApiError: x
+ ❯ src/screens/setup/post-in-batches.test.ts:143:17
+    141|     ["all_malformed", new ApiError("x", "req-3", { code: "all_malforme…
+    142|     ["validation_error", new ApiError("x", "req-3", { code: "validatio…
+    143|     ["no code", new ApiError("x", "req-4", { code: null })],
+       |                 ^
+    144|   ])("takes the failure path for a %s refusal", async (_name, error) =…
+    145|     vi.mocked(addInstruments).mockRejectedValueOnce(error);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 8 passed (13)
+   Start at  13:24:24
+   Duration  1.89s (transform 72ms, setup 98ms, collect 88ms, tests 14ms, environment 386ms, prepare 205ms)
+

@@ -1,0 +1,127 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-uswrm_qx/w0/web
+
+ ❯ src/screens/setup/step-stocks.test.tsx (41 tests | 5 failed) 1437ms
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 172ms
+     → expected <p></p> to be null
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with an empty field when Paste a list is chosen 15ms
+     → expected <p></p> to be null
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 38ms
+     → expected <p></p> to be null
+   × Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30 37ms
+     → expected <p></p> to be null
+   × step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > shows the warning only with Paste a list chosen 6ms
+     → expected <p></p> to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted
+AssertionError: expected <p></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p>
+  Factor scores need at least 30 stocks with complete data. With 0, no factor can be ranked yet.
+</p>
+
+ ❯ src/screens/setup/step-stocks.test.tsx:227:55
+    225|     expect(goToSpy).not.toHaveBeenCalled();
+    226|     expect(rereadSpy).not.toHaveBeenCalled();
+    227|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+       |                                                       ^
+    228|   });
+    229| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with an empty field when Paste a list is chosen
+AssertionError: expected <p></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p>
+  Factor scores need at least 30 stocks with complete data. With 0, no factor can be ranked yet.
+</p>
+
+ ❯ src/screens/setup/step-stocks.test.tsx:233:55
+    231|     render(<Harness initial={{ source: "paste" }} />);
+    232|     expect(continueButton()).toHaveAttribute("data-variant", "blocked"…
+    233|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+       |                                                       ^
+    234|     expect(screen.queryByText(/symbols recognised/)).toBeNull();
+    235|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30
+AssertionError: expected <p></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p>
+  Factor scores need at least 30 stocks with complete data. With 30, no factor can be ranked yet.
+</p>
+
+ ❯ src/screens/setup/step-stocks.test.tsx:270:55
+    268|     await pasteInto(user, symbols(30).join(", "));
+    269|     await user.tab();
+    270|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+       |                                                       ^
+    271|     expect(continueButton()).toHaveAttribute("data-variant", "default"…
+    272|     unmount();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > does not count duplicates towards the 30
+AssertionError: expected <p></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p>
+  Factor scores need at least 30 stocks with complete data. With 30, no factor can be ranked yet.
+</p>
+
+ ❯ src/screens/setup/step-stocks.test.tsx:288:55
+    286|     await pasteInto(user, `KO, KO, ${symbols(29).join(", ")}`);
+    287|     await user.tab();
+    288|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+       |                                                       ^
+    289|     unmount();
+    290|     render(<Harness />);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/screens/setup/step-stocks.test.tsx > step 3's own cases (AC-3, AC-5, AC-6, DAC-E4-5, DAC-E4-6, DAC-E4-13; DEC-0351 to DEC-0355) > shows the warning only with Paste a list chosen
+AssertionError: expected <p></p> to be null
+
+- Expected: 
+null
+
++ Received: 
+<p>
+  Factor scores need at least 30 stocks with complete data. With 12, no factor can be ranked yet.
+</p>
+
+ ❯ src/screens/setup/step-stocks.test.tsx:836:55
+    834|   it("shows the warning only with Paste a list chosen", () => {
+    835|     render(<Harness initial={{ source: "later", pasted: symbols(12).jo…
+    836|     expect(screen.queryByText(/^Factor scores need/)).toBeNull();
+       |                                                       ^
+    837|     expect(continueButton()).toHaveAttribute("data-variant", "default"…
+    838|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 36 passed (41)
+   Start at  13:38:03
+   Duration  5.21s (transform 467ms, setup 157ms, collect 1.39s, tests 1.44s, environment 1.04s, prepare 300ms)
+

@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "repo_head": "538648e161fd92d2010e385cc3e6905c24480fff",
+  "range": "HEAD..worktree",
+  "mutants": [
+    {
+      "id": "web/src/screens/setup/step-card.tsx:50:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "line": 50,
+      "original": "          tabIndex={-1}",
+      "mutated": "          tabIndex={-2}"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:61:negate-boolean:1",
+      "cycle": "cycle-1",
+      "operator": "negate-boolean",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "line": 61,
+      "original": "          {step > 1 && onBack !== undefined ? (",
+      "mutated": "          {step > 1 || onBack !== undefined ? ("
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:61:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "line": 61,
+      "original": "          {step > 1 && onBack !== undefined ? (",
+      "mutated": "          {step >= 1 && onBack !== undefined ? ("
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:61:off-by-one:2",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "line": 61,
+      "original": "          {step > 1 && onBack !== undefined ? (",
+      "mutated": "          {step > 2 && onBack !== undefined ? ("
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:63:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "line": 63,
+      "original": "              {backLabel(STEP_TITLES[(step - 1) as StepId])}",
+      "mutated": "              {backLabel(STEP_TITLES[(step - 2) as StepId])}"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:71:off-by-one:1",
+      "cycle": "cycle-1",
+      "operator": "off-by-one",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "line": 71,
+      "original": "                {nextHint(STEP_TITLES[(step + 1) as StepId])}",
+      "mutated": "                {nextHint(STEP_TITLES[(step + 2) as StepId])}"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:back-index",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "STEP_TITLES[(step - 1) as StepId]",
+      "new": "STEP_TITLES[step as StepId]",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:next-index",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "STEP_TITLES[(step + 1) as StepId]",
+      "new": "STEP_TITLES[step as StepId]",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:back-guard",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "step > 1 && onBack",
+      "new": "!(step > 1) && onBack",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:focus-test",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "previous.current !== current",
+      "new": "previous.current === current",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:drop-previous-update",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "      previous.current = current;\n",
+      "new": "",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:swap-reasons",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "? READ_ERRORS.notAnswering : READ_ERRORS.unexpected",
+      "new": "? READ_ERRORS.unexpected : READ_ERRORS.notAnswering",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:drop-note",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "note !== undefined ?",
+      "new": "false ?",
+      "cycle": "cycle-1"
+    },
+    {
+      "id": "web/src/screens/setup/step-card.tsx:manual:drop-explanation-measure",
+      "operator": "manual",
+      "file": "web/src/screens/setup/step-card.tsx",
+      "old": "style={{ maxWidth: LAYOUT.explanationMeasure }}",
+      "new": "",
+      "cycle": "cycle-1"
+    }
+  ]
+}

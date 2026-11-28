@@ -1,0 +1,94 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w3/web
+
+12:11:50 PM [vite] warning: This case clause will never be evaluated because it duplicates an earlier case clause
+46 |            ? SUMMARIES.followed(formatCount(state.activeCount.data))
+47 |            : undefined;
+48 |        case 4:
+   |        ^
+49 |          return download !== null
+50 |            ? SUMMARIES.downloadStarted(formatInstant(download.started_at ?? download.requested_at))
+
+  Plugin: vite:esbuild
+  File: /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w3/web/src/screens/setup/step-list.tsx
+ ❯ src/screens/setup/step-list.test.tsx (13 tests | 3 failed) 189ms
+   × StepList summaries > says the saved years and the followed count with a thousands separator 15ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  1,236 followed stocks
+Received:
+  Stocks to follow
+   × StepList summaries > names the download by its start time, else its request time 4ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data0 followed stocks
+   × StepList summaries > still reads the download from the last good answer when the attention read failed 5ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data0 followed stocks
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > says the saved years and the followed count with a thousands separator
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  1,236 followed stocks
+Received:
+  Stocks to follow
+ ❯ src/screens/setup/step-list.test.tsx:240:21
+    238|     );
+    239|     expect(item(2)).toHaveTextContent("12 years of history");
+    240|     expect(item(3)).toHaveTextContent("1,236 followed stocks");
+       |                     ^
+    241|   });
+    242| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > names the download by its start time, else its request time
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data0 followed stocks
+ ❯ src/screens/setup/step-list.test.tsx:250:21
+    248|     );
+    249|     const { unmount } = render(<StepList state={stateWith({ done: { ..…
+    250|     expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:…
+       |                     ^
+    251|     unmount();
+    252|     vi.mocked(useShell).mockReturnValue(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > still reads the download from the last good answer when the attention read failed
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  Download data0 followed stocks
+ ❯ src/screens/setup/step-list.test.tsx:276:21
+    274|     );
+    275|     render(<StepList state={stateWith({ done: { ...ALL_DONE } })} />);
+    276|     expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:…
+       |                     ^
+    277|   });
+    278| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 10 passed (13)
+   Start at  12:11:49
+   Duration  2.56s (transform 209ms, setup 58ms, collect 863ms, tests 189ms, environment 551ms, prepare 382ms)
+

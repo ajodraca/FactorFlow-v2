@@ -1,0 +1,94 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w3/web
+
+stderr | src/screens/setup/step-list.test.tsx > StepList structure > is a navigation named Setup steps holding four titled items in order
+Warning: Each child in a list should have a unique "key" prop.
+
+Check the render method of `Stepper`. See https://reactjs.org/link/warning-keys for more information.
+    at li
+    at Stepper (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w3/web/src/components/ui/stepper.tsx:21:3)
+    at div
+    at StepList (/private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-_im9l8di/w3/web/src/screens/setup/step-list.tsx:18:21)
+
+ ❯ src/screens/setup/step-list.test.tsx (13 tests | 3 failed) 412ms
+   × StepList structure > is a navigation named Setup steps holding four titled items in order 171ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download data
+Received:
+  4, to do
+   × StepList summaries > names the download by its start time, else its request time 4ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  4, to do
+   × StepList summaries > still reads the download from the last good answer when the attention read failed 3ms
+     → expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  4, to do
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList structure > is a navigation named Setup steps holding four titled items in order
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download data
+Received:
+  4, to do
+ ❯ src/screens/setup/step-list.test.tsx:126:20
+    124|     const titles = ["Market data", "How far back", "Stocks to follow",…
+    125|     items.forEach((item, index) => {
+    126|       expect(item).toHaveTextContent(titles[index] as string);
+       |                    ^
+    127|     });
+    128|   });
+ ❯ src/screens/setup/step-list.test.tsx:125:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > names the download by its start time, else its request time
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  4, to do
+ ❯ src/screens/setup/step-list.test.tsx:250:21
+    248|     );
+    249|     const { unmount } = render(<StepList state={stateWith({ done: { ..…
+    250|     expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:…
+       |                     ^
+    251|     unmount();
+    252|     vi.mocked(useShell).mockReturnValue(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/screens/setup/step-list.test.tsx > StepList summaries > still reads the download from the last good answer when the attention read failed
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Download started 2026-10-15 09:30 CDT
+Received:
+  4, to do
+ ❯ src/screens/setup/step-list.test.tsx:276:21
+    274|     );
+    275|     render(<StepList state={stateWith({ done: { ...ALL_DONE } })} />);
+    276|     expect(item(4)).toHaveTextContent("Download started 2026-10-15 09:…
+       |                     ^
+    277|   });
+    278| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 10 passed (13)
+   Start at  12:11:38
+   Duration  4.82s (transform 152ms, setup 165ms, collect 1.33s, tests 412ms, environment 727ms, prepare 868ms)
+

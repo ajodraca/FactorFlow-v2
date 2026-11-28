@@ -1,0 +1,301 @@
+
+ RUN  v2.1.9 /private/var/folders/3j/146xfhsn3_l72msqpvfn7hlc0000gn/T/mutation-run-p8ghsew_/w2/web
+
+ ✓ src/screens/setup/summarise-paste.test.ts (33 tests) 6ms
+ ✓ src/screens/setup/copy.test.ts (163 tests) 15ms
+ ✓ src/screens/setup/post-in-batches.test.ts (13 tests) 9ms
+stderr | src/screens/setup/draft.test.tsx > SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/use-setup-state.test.ts (30 tests) 539ms
+ ✓ src/screens/setup/draft.test.tsx (5 tests) 1162ms
+   ✓ SetupDraftProvider above a route change > keeps every draft across /setup -> /home -> /setup and writes nothing to browser storage 997ms
+ ✓ src/screens/setup/step-card.test.tsx (15 tests) 1243ms
+   ✓ StepCard footer > names the previous and next steps and calls each handler once 343ms
+stderr | src/screens/setup/step-download.test.tsx > TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/screens/setup/setup.test.tsx > TC-COMP-121: going back from step 4 to step 2 and forward keeps every value > holds the years text, the radio choice and the pasted text across every return
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/screens/setup/step-list.test.tsx (13 tests) 766ms
+ ✓ src/screens/setup/step-market-data.test.tsx (21 tests) 897ms
+   ✓ TC-COMP-099: step 1 shows Found or Missing with the variable and restart line > says Found in a good badge and nothing about setting the variable 360ms
+ ✓ src/screens/setup/step-history-depth.test.tsx (39 tests) 2773ms
+   ✓ TC-COMP-108: a successful depth save marks step 2 done and focuses step 3 > saves the number, re-reads the depth and moves to step 3 with its heading focused 850ms
+ ✓ src/screens/setup/step-download.test.tsx (71 tests) 3016ms
+   ✓ TC-COMP-101: Start download outcomes > (a) a 202 with no queue refreshes attention and health once and shows the bar 338ms
+ ❯ src/screens/setup/setup.test.tsx (31 tests | 1 failed) 3062ms
+   ✓ TC-COMP-121: going back from step 4 to step 2 and forward keeps every value > holds the years text, the radio choice and the pasted text across every return 1679ms
+   ✓ TC-COMP-123 (screen half): the display vocabulary > step 4 current with the blocked exits 339ms
+   × the screen's own cases > (b) entering moves no focus, and (c) a step change focuses the step question 38ms
+     → expected <body><div>…(1)</div></body> to be <h2 id="setup-step-heading" …(2)></h2> // Object.is equality
+ ✓ src/screens/setup/step-stocks.test.tsx (46 tests) 5400ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > blocks Continue with its reason when nothing usable is pasted 649ms
+   ✓ Continue blocked at zero, warning below 30 (TC-COMP-100; DAC-E4-7) > warns at 29 and not at 30 432ms
+   ✓ step 3 states use the display vocabulary and render no badge (TC-COMP-117, TC-COMP-118) > reads its labels from the catalogue 312ms
+   ✓ rework of review v1 (IR-001, IR-003, IR-004) > does not move the owner again when a post settles after Back (IR-004) 309ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/screens/setup/setup.test.tsx > the screen's own cases > (b) entering moves no focus, and (c) a step change focuses the step question
+AssertionError: expected <body><div>…(1)</div></body> to be <h2 id="setup-step-heading" …(2)></h2> // Object.is equality
+
+- Expected
++ Received
+
++ <body>
++   <div>
++     <div
++       class="flex items-start gap-6"
++       style="max-width: 1180px;"
++     >
++       <div
++         class="flex flex-col gap-4"
++         style="min-width: 260px; max-width: 300px;"
++       >
++         <h1
++           class="text-xl font-semibold text-foreground"
++           tabindex="-1"
++         >
++           Get set up
++         </h1>
++         <p
++           class="text-xs text-muted-foreground"
++         >
++           About 10 minutes, then the data download continues on its own. You can leave and come back.
++         </p>
++         <div
++           class="flex flex-col gap-4"
++           style="min-width: 260px; max-width: 300px;"
++         >
++           <nav
++             aria-label="Setup steps"
++             data-variant="vertical"
++           >
++             <ol
++               class="flex flex-col gap-4"
++             >
++               <li
++                 aria-current="step"
++                 class="flex items-start gap-3"
++                 data-state="current"
++               >
++                 <span
++                   aria-hidden="true"
++                   class="flex shrink-0 items-center justify-center rounded-[50%] font-numeric text-xs border border-status-active ring ring-status-active-muted"
++                   style="width: 28px; height: 28px;"
++                 >
++                   1
++                 </span>
++                 <span
++                   class="flex flex-col gap-1"
++                 >
++                   <span>
++                     <span
++                       class="font-semibold text-foreground"
++                     >
++                       Market data
++                       <span
++                         class="sr-only"
++                       >
++                         , current
++                       </span>
++                     </span>
++                   </span>
++                   <span
++                     class="text-xs text-muted-foreground"
++                   >
++                     Found
++                   </span>
++                 </span>
++               </li>
++               <li
++                 class="flex items-start gap-3"
++                 data-state="todo"
++               >
++                 <span
++                   aria-hidden="true"
++                   class="flex shrink-0 items-center justify-center rounded-[50%] font-numeric text-xs border border-border text-muted-foreground"
++                   style="width: 28px; height: 28px;"
++                 >
++                   2
++                 </span>
++                 <span
++                   class="flex flex-col gap-1"
++                 >
++                   <span>
++                     <span
++                       class="text-muted-foreground"
++                     >
++                       How far back
++                       <span
++                         class="sr-only"
++                       >
++                         , to do
++                       </span>
++                     </span>
++                   </span>
++                 </span>
++               </li>
++               <li
++                 class="flex items-start gap-3"
++                 data-state="todo"
++               >
++                 <span
++                   aria-hidden="true"
++                   class="flex shrink-0 items-center justify-center rounded-[50%] font-numeric text-xs border border-border text-muted-foreground"
++                   style="width: 28px; height: 28px;"
++                 >
++                   3
++                 </span>
++                 <span
++                   class="flex flex-col gap-1"
++                 >
++                   <span>
++                     <span
++                       class="text-muted-foreground"
++                     >
++                       Stocks to follow
++                       <span
++                         class="sr-only"
++                       >
++                         , to do
++                       </span>
++                     </span>
++                   </span>
++                 </span>
++               </li>
++               <li
++                 class="flex items-start gap-3"
++                 data-state="todo"
++               >
++                 <span
++                   aria-hidden="true"
++                   class="flex shrink-0 items-center justify-center rounded-[50%] font-numeric text-xs border border-border text-muted-foreground"
++                   style="width: 28px; height: 28px;"
++                 >
++                   4
++                 </span>
++                 <span
++                   class="flex flex-col gap-1"
++                 >
++                   <span>
++                     <span
++                       class="text-muted-foreground"
++                     >
++                       Download data
++                       <span
++                         class="sr-only"
++                       >
++                         , to do
++                       </span>
++                     </span>
++                   </span>
++                 </span>
++               </li>
++             </ol>
++           </nav>
++         </div>
++       </div>
++       <div
++         class="min-w-0 flex-1"
++       >
++         <section
++           aria-labelledby="setup-step-heading"
++         >
++           <div
++             class="rounded border border-border bg-card text-card-foreground flex flex-col gap-5 p-4"
++             data-variant="default"
++           >
++             <p
++               class="text-xs text-muted-foreground"
++             >
++               Step 1 of 4
++             </p>
+              <h2
+                class="text-xl font-semibold text-foreground focus-visible:outline-none"
+                id="setup-step-heading"
+                tabindex="-1"
+              >
+                Connect market data
+              </h2>
++             <p
++               class="flex flex-wrap items-center gap-2"
++             >
++               <span>
++                 Market data key:
++               </span>
++               <span
++                 class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold bg-status-good-muted text-status-good"
++                 data-variant="status-good"
++               >
++                 <svg
++                   aria-hidden="true"
++                   class="lucide h-3 w-3 shrink-0"
++                   fill="none"
++                   focusable="false"
++                   height="24"
++                   stroke="currentColor"
++                   stroke-linecap="round"
++                   stroke-linejoin="round"
++                   stroke-width="2"
++                   viewBox="0 0 24 24"
++                   width="24"
++                   xmlns="http://www.w3.org/2000/svg"
++                 >
++                   <circle
++                     cx="12"
++                     cy="12"
++                     fill="currentColor"
++                     r="10"
++                   />
++                 </svg>
++                 Found
++               </span>
++             </p>
++             <div
++               class="flex items-center justify-between gap-4"
++             >
++               <span />
++               <div
++                 class="flex items-center gap-3"
++               >
++                 <span
++                   class="text-xs text-muted-foreground"
++                 >
++                   Next: How far back
++                 </span>
++                 <button
++                   class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
++                   data-variant="default"
++                 >
++                   Continue
++                 </button>
++               </div>
++             </div>
++           </div>
++         </section>
++       </div>
++     </div>
++   </div>
++ </body>
+
+ ❯ src/screens/setup/setup.test.tsx:575:36
+    573|     await user.click(screen.getByRole("link", { name: "Market data, do…
+    574|     const question = await heading("Connect market data");
+    575|     expect(document.activeElement).toBe(question);
+       |                                    ^
+    576|   });
+    577| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 479 passed (480)
+   Start at  14:50:14
+   Duration  10.65s (transform 3.22s, setup 1.99s, collect 22.75s, tests 18.89s, environment 11.68s, prepare 4.48s)
+
