@@ -68,6 +68,8 @@ export const READ_TARGETS = {
   attention: "what needs attention",
   checks: "the data health checks",
   scores: "the factor scores",
+  recentDownloads: "recent downloads",
+  whatYouFollow: "what you follow",
 } as const;
 
 /**

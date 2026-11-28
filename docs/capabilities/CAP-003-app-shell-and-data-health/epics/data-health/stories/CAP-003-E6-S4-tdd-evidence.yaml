@@ -103,3 +103,45 @@ cycles:
         - id: manual:16
           disposition: equivalent
           reason: "done is null exactly when runningId is null, so the first comparison already returns; the guard only narrows the type."
+  - id: cycle-3
+    tasks: [T005, T006, T011, T012, T013]
+    description: >
+      The loading and error bodies and the vocabulary scan. recent-downloads.test.tsx: TC-COMP-155 (T005 a-f),
+      TC-COMP-173 and TC-COMP-174 (T006 a-d) and the failed-read sentences of T011 (b). Then the READ_TARGETS additions
+      in copy.ts and the error state, the rejection handler and the failure body in recent-downloads.tsx.
+    deviations: >
+      (1) READ_TARGETS gains both targets here, because T011 (b) pins both sentences; what-you-follow.tsx uses its
+      target in cycle 5. (2) The vocabulary scan also reads title attributes and aria-describedby targets, as the plan
+      says, and runs the loading state last without unmounting.
+    red_log: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-3.log
+    red_log_sha256: c0798dfb0443c59eb3e14e3410afe4377a5d0264f8c1b6c7ecbd119360786857
+    red_evidence: >
+      With the new tests staged and no production change: 7 of 40 tests failed (the error body, its sentences, Try
+      again, the failed re-read, the vocabulary scan over the error states and the READ_TARGETS sentences).
+    green_evidence: >
+      40 tests passed in recent-downloads.test.tsx; biome check and npx tsc --noEmit clean.
+    logs:
+      - path: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/red-cycle-3.log
+        sha256: c0798dfb0443c59eb3e14e3410afe4377a5d0264f8c1b6c7ecbd119360786857
+    tests_executed: true
+    code_review_verdict: APPROVED
+    spec_drift:
+      drift_detected: false
+      notes: >
+        No drift. Follow-ups, not adopted: the scan does not read aria-valuetext or alt; after Try again the error
+        stays on screen until the read answers (the plan is silent); a non-API rejection surfaces as an unhandled
+        rejection, as the plan says.
+    diff_sha256: bf49d8b01f9617dcc0f018ec769c3d2ca964acd3eb14358d31f20a9d44e85990
+    reviewed_patch: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/cycle-3.patch
+    commit_hash: stage
+    mutation:
+      runner: scripts/mutation-run.py
+      results: repos/factorflow-v2/FactorFlow-v2/docs/capabilities/CAP-003-app-shell-and-data-health/epics/data-health/stories/CAP-003-E6-S4-evidence/mutation-cycle-3-results.json
+      results_sha256: 4a296c6060c187b67a9e05328712fabe31a2c7828208fb6ebecc0a87370e57a3
+      generated: 9
+      killed: 9
+      survived: 0
+      stillborn: 0
+      timeout: 0
+      score: 1.0
+      survivors: []

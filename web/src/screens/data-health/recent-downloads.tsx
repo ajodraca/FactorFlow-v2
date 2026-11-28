@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { type JSX, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { listAcquisitionRuns } from "../../api/client";
+import { ApiError, ApiUnreachableError, listAcquisitionRuns } from "../../api/client";
 import type { AcquisitionRun, RunState } from "../../api/types";
 import { useShell } from "../../app/shell-context";
 import { formatClock, formatCount, formatInstant } from "../../components/patterns/format";
@@ -17,19 +17,25 @@ import {
 } from "../../components/ui/card";
 import { DataTable } from "../../components/ui/data-table";
 import { Progress } from "../../components/ui/progress";
-import { SkeletonLine } from "./check-card";
+import { ReadFailure, SkeletonLine } from "./check-card";
 import {
   ABSENT,
   DOWNLOAD_COLUMNS,
+  READ_TARGETS,
   RECENT_DOWNLOADS,
   interruptedResult,
   partialResult,
   progressOf,
+  readFailed,
+  readFailureReason,
   recentDownloadsSubline,
   writtenOf,
 } from "./copy";
 
-type ListState = { kind: "loading" } | { kind: "ok"; runs: AcquisitionRun[] };
+type ListState =
+  | { kind: "loading" }
+  | { kind: "ok"; runs: AcquisitionRun[] }
+  | { kind: "error"; error: ApiError | ApiUnreachableError };
 
 /** The download states that are not outcomes (owner-shell 2.4). */
 const NON_TERMINAL: ReadonlySet<RunState> = new Set<RunState>([
@@ -94,13 +100,25 @@ export function RecentDownloads(): JSX.Element {
   const read = useCallback(() => {
     latestCall.current += 1;
     const mine = latestCall.current;
-    listAcquisitionRuns({ limit: 5 }).then((page) => {
-      if (mine !== latestCall.current) {
-        return;
-      }
-      setList({ kind: "ok", runs: page.runs });
-      setAnsweredAt(new Date());
-    });
+    listAcquisitionRuns({ limit: 5 }).then(
+      (page) => {
+        if (mine !== latestCall.current) {
+          return;
+        }
+        setList({ kind: "ok", runs: page.runs });
+        setAnsweredAt(new Date());
+      },
+      (cause: unknown) => {
+        if (mine !== latestCall.current) {
+          return;
+        }
+        if (!(cause instanceof ApiError || cause instanceof ApiUnreachableError)) {
+          throw cause;
+        }
+        // DAC-E6-17: the body is replaced by the error; the last answered time stays.
+        setList({ kind: "error", error: cause });
+      },
+    );
   }, []);
 
   useEffect(() => {
@@ -201,6 +219,11 @@ export function RecentDownloads(): JSX.Element {
               <SkeletonLine />
               <SkeletonLine />
             </>
+          ) : list.kind === "error" ? (
+            <ReadFailure
+              sentence={readFailed(READ_TARGETS.recentDownloads, readFailureReason(list.error))}
+              onRetry={read}
+            />
           ) : (
             <DataTable
               variant="compact"

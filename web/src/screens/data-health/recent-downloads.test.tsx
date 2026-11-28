@@ -1,14 +1,17 @@
 import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, listAcquisitionRuns } from "../../api/client";
+import { ApiError, ApiUnreachableError, listAcquisitionRuns } from "../../api/client";
 import type { AcquisitionRun, AcquisitionRunPage, RunState } from "../../api/types";
 import type { ShellContextValue } from "../../app/shell-context";
 import type { Attention, LatestDownload, ReadState } from "../../app/shell-types";
 import {
+  READ_TARGETS,
   interruptedResult,
   partialResult,
   progressOf,
+  readFailed,
   recentDownloadsSubline,
   writtenOf,
 } from "./copy";
@@ -66,6 +69,7 @@ function ok(data: Attention, iso: string): ReadState<Attention> {
 }
 
 const INTERNAL = new ApiError("instrument table said no", "req-9f3", { code: "internal_error" });
+const UNREACHABLE = new ApiUnreachableError("fetch failed");
 
 beforeEach(() => {
   listMock.mockReset();
@@ -541,6 +545,234 @@ describe("Recent downloads progress and order (DAC-E6-14, AC-12, AC-17, DEC-0384
   });
 });
 
+describe("Recent downloads read failure (TC-COMP-155, DAC-E6-17, AC-24)", () => {
+  // Implements TC-COMP-155
+  it("(a) while loading, the heading stays, the body is busy and no table renders", () => {
+    listMock.mockReturnValue(new Promise(() => undefined));
+    const { container } = renderRecent();
+    expect(screen.getByRole("heading", { level: 2, name: "Recent downloads" })).toBeInTheDocument();
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+
+  it("(b) a 500 keeps the heading and says what happened, with Try again", async () => {
+    listMock.mockRejectedValue(INTERNAL);
+    renderRecent();
+    const status = await screen.findByRole("status");
+    expect(status.textContent).toBe(
+      "Couldn't read recent downloads: FactorFlow hit an unexpected problem.",
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "Recent downloads" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+
+  it("(c) neither the request id nor the envelope message reaches the page", async () => {
+    listMock.mockRejectedValue(INTERNAL);
+    const { container } = renderRecent();
+    await screen.findByRole("status");
+    expect(container.textContent).not.toContain("req-9f3");
+    expect(container.textContent).not.toContain("instrument table said no");
+    for (const el of container.querySelectorAll("*")) {
+      for (const attr of el.attributes) {
+        expect(attr.value).not.toContain("req-9f3");
+      }
+    }
+  });
+
+  it("(d) an unreachable interface says it is not answering", async () => {
+    listMock.mockRejectedValue(UNREACHABLE);
+    renderRecent();
+    const status = await screen.findByRole("status");
+    expect(status.textContent).toBe("Couldn't read recent downloads: FactorFlow is not answering.");
+  });
+
+  it("(e) Try again reads once more and shows the table", async () => {
+    listMock.mockRejectedValueOnce(INTERNAL);
+    listMock.mockResolvedValueOnce(PAGE([RUN({ runId: "r-1" })]));
+    renderRecent();
+    await userEvent.click(await screen.findByRole("button", { name: "Try again" }));
+    await screen.findByRole("table");
+    expect(listMock).toHaveBeenCalledTimes(2);
+    expect(hrefs()).toEqual(["/data/downloads/r-1"]);
+  });
+
+  it("(f) a failed re-read replaces the table but keeps the last answered time", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-30T19:03:12Z"));
+    listMock.mockResolvedValueOnce(RUNNING_PAGE);
+    listMock.mockRejectedValueOnce(INTERNAL);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    const view = renderRecent();
+    await screen.findByText(`${SUBLINE} · checked 14:03:12 CDT`);
+    vi.setSystemTime(new Date("2026-10-30T19:03:22Z"));
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:20Z") });
+    view.rerender(ui());
+    await screen.findByRole("status");
+    expect(screen.queryByRole("table")).toBeNull();
+    expect(screen.getByRole("heading", { level: 2, name: "Recent downloads" })).toBeInTheDocument();
+    expect(screen.getByText(`${SUBLINE} · checked 14:03:12 CDT`)).toBeInTheDocument();
+  });
+});
+
+/** Visible text plus every accessible name and description source (the DAC-E7-3 scan). */
+function visibleAndAccessibleText(container: HTMLElement): string {
+  const parts = [container.textContent ?? ""];
+  for (const el of container.querySelectorAll("*")) {
+    for (const name of ["aria-label", "title"]) {
+      const value = el.getAttribute(name);
+      if (value !== null) {
+        parts.push(value);
+      }
+    }
+    for (const name of ["aria-describedby", "aria-labelledby"]) {
+      for (const id of (el.getAttribute(name) ?? "").split(" ").filter((x) => x !== "")) {
+        parts.push(container.querySelector(`[id="${id}"]`)?.textContent ?? "");
+      }
+    }
+  }
+  return parts.join(" ");
+}
+
+const FORBIDDEN =
+  /\b(instrument|acquisition|acquire|run|runs|retire|retired|provider credential)\b/i;
+
+const ALL_STATES: RunState[] = [
+  "requested",
+  "running",
+  "cancelling",
+  "succeeded",
+  "partial",
+  "failed",
+  "cancelled",
+  "abandoned",
+];
+
+describe("Recent downloads vocabulary and badges (TC-COMP-173, TC-COMP-174, DAC-E6-S4-4, DAC-E6-S4-5)", () => {
+  // Implements TC-COMP-173
+  // Implements TC-COMP-174
+  it("(a) the scan is not vacuous", () => {
+    expect(FORBIDDEN.test("one run")).toBe(true);
+    expect(FORBIDDEN.test("Retired")).toBe(true);
+    expect(FORBIDDEN.test("downloads")).toBe(false);
+  });
+
+  it("(a) no state shows a domain term in its text or accessible names", async () => {
+    const states: { name: string; arrange: () => void }[] = [
+      {
+        name: "outcomes",
+        arrange: () => listMock.mockResolvedValue(PAGE(FIVE)),
+      },
+      {
+        name: "all eight states",
+        arrange: () =>
+          listMock.mockResolvedValue(
+            PAGE(ALL_STATES.map((state) => RUN({ runId: `r-${state}`, state, endedAt: null }))),
+          ),
+      },
+      {
+        name: "determinate progress",
+        arrange: () => {
+          listMock.mockResolvedValue(RUNNING_THEN_DONE);
+          setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+        },
+      },
+      {
+        name: "indeterminate progress",
+        arrange: () => {
+          listMock.mockResolvedValue(
+            PAGE([RUN({ runId: "r-9", state: "requested", startedAt: null, endedAt: null })]),
+          );
+          setShell({
+            attention: ok(
+              ATT(LATEST("requested", { started_at: null, progress: { done: 0, total: null } })),
+              "2026-10-30T19:03:10Z",
+            ),
+          });
+        },
+      },
+      { name: "internal failure", arrange: () => listMock.mockRejectedValue(INTERNAL) },
+      { name: "unreachable", arrange: () => listMock.mockRejectedValue(UNREACHABLE) },
+    ];
+    for (const { name, arrange } of states) {
+      listMock.mockReset();
+      setShell();
+      arrange();
+      const { container, unmount } = renderRecent();
+      await screen.findByRole(
+        name.startsWith("internal") || name === "unreachable" ? "status" : "table",
+      );
+      expect(visibleAndAccessibleText(container), name).not.toMatch(FORBIDDEN);
+      unmount();
+    }
+    // The loading state.
+    listMock.mockReset();
+    listMock.mockReturnValue(new Promise(() => undefined));
+    const loading = renderRecent();
+    expect(visibleAndAccessibleText(loading.container)).not.toMatch(FORBIDDEN);
+  });
+
+  it("(b) each of the eight states has its own word and a hidden shape", async () => {
+    const words: Record<RunState, string> = {
+      requested: "Queued",
+      running: "Downloading",
+      cancelling: "Stopping",
+      succeeded: "Complete",
+      partial: "Partial",
+      failed: "Failed",
+      cancelled: "Cancelled by you",
+      abandoned: "Interrupted",
+    };
+    listMock.mockResolvedValue(
+      PAGE(ALL_STATES.map((state) => RUN({ runId: `r-${state}`, state, endedAt: null }))),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    for (const state of ALL_STATES) {
+      const badge = badgeOf(rowFor(`r-${state}`));
+      expect(badge.textContent).toBe(words[state]);
+      expect(badge.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+      expect(badge.hasAttribute("aria-label")).toBe(false);
+      expect(badge.querySelector("[aria-label]")).toBeNull();
+    }
+  });
+
+  it("(c) every dash is a hidden-word absence and no cell is empty or null", async () => {
+    listMock.mockResolvedValue(
+      PAGE(ALL_STATES.map((state) => RUN({ runId: `r-${state}`, state, endedAt: null }))),
+    );
+    renderRecent();
+    await screen.findByRole("table");
+    for (const row of bodyRows()) {
+      for (const cell of [...cellsOf(row), within(row).getByRole("rowheader")]) {
+        expect(cell.textContent).not.toBe("");
+        expect(cell.textContent).not.toContain("null");
+      }
+      const ended = cellsOf(row)[1] as HTMLElement;
+      expect(ended.querySelector('[aria-hidden="true"]')?.textContent).toBe("—");
+      expect(ended.querySelector(".sr-only")?.textContent).toBe("not ended yet");
+    }
+    for (const dash of screen.getAllByText("—")) {
+      expect(dash.getAttribute("aria-hidden")).toBe("true");
+      expect(dash.parentElement?.querySelector(".sr-only")).not.toBeNull();
+    }
+  });
+
+  it("(d) every status badge carries text and a shape, and the bar is named by visible text", async () => {
+    listMock.mockResolvedValue(RUNNING_THEN_DONE);
+    setShell({ attention: ok(ATT(LATEST("running")), "2026-10-30T19:03:10Z") });
+    renderRecent();
+    await screen.findByRole("table");
+    for (const badge of document.querySelectorAll('[data-variant^="status-"]')) {
+      expect(badge.textContent).not.toBe("");
+      expect(badge.querySelector("svg")).not.toBeNull();
+    }
+    const bar = screen.getByRole("progressbar");
+    const labelledBy = bar.getAttribute("aria-labelledby") ?? "";
+    expect(document.getElementById(labelledBy)?.textContent).toBe("812 of 1,236 stocks");
+  });
+});
+
 describe("copy.ts recent downloads and what you follow strings", () => {
   it("(a) the result sentences", () => {
     expect(writtenOf("1,230", "1,236")).toBe("1,230 of 1,236 stocks");
@@ -548,6 +780,13 @@ describe("copy.ts recent downloads and what you follow strings", () => {
     expect(interruptedResult("611")).toBe(
       "FactorFlow restarted mid-download; 611 kept, the rest picked up next time",
     );
+  });
+
+  it("(b) the failed-read sentences", () => {
+    expect(readFailed(READ_TARGETS.recentDownloads, "x")).toBe(
+      "Couldn't read recent downloads: x.",
+    );
+    expect(readFailed(READ_TARGETS.whatYouFollow, "x")).toBe("Couldn't read what you follow: x.");
   });
 
   it("(b) the progress sentence", () => {
